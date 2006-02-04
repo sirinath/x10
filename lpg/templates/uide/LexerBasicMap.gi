@@ -17,7 +17,7 @@ $Headers
 
         public int [] getKeywordKinds() { return kwLexer.getKeywordKinds(); }
 
-        public $action_type(String filename) throws java.io.IOException
+        public $action_class(String filename) throws java.io.IOException
         {
             this(filename, ECLIPSE_TAB_VALUE);
             this.kwLexer = new $kw_lexer_class(getInputChars(), $_IDENTIFIER);
@@ -33,21 +33,21 @@ $Headers
         
         final void makeToken(int kind)
         {
-            int startOffset = getLeftSpan(),
-                endOffset = getRightSpan();
+            int startOffset = $getToken(1),
+                endOffset = $getRightSpan();
             makeToken(startOffset, endOffset, kind);
             if (printTokens) printValue(startOffset, endOffset);
         }
 
         final void skipToken()
         {
-            if (printTokens) printValue(getLeftSpan(), getRightSpan());
+            if (printTokens) printValue($getToken(1), $getRightSpan());
         }
         
         final void checkForKeyWord()
         {
-            int startOffset = getLeftSpan(),
-                endOffset = getRightSpan(),
+            int startOffset = $getToken(1),
+                endOffset = $getRightSpan(),
             kwKind = kwLexer.lexer(startOffset, endOffset);
             makeToken(startOffset, endOffset, kwKind);
             if (printTokens) printValue(startOffset, endOffset);

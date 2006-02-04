@@ -90,6 +90,7 @@ public abstract class Activity implements Runnable {
      *
      */
     public /*mySpawningThread*/ void initializeActivity() {
+    	// reg_.registerActivityStart(t, a, i);
     	if (Report.should_report("activity", 5)) {
     		Report.report(5, PoolRunner.logString() + " Activity: initializing " + this);
     	}
@@ -478,10 +479,13 @@ public abstract class Activity implements Runnable {
 
 
     public void pseudoDeSerialize(LocalPlace_c pl) {
+       final boolean trace = false;
+
        Deserializer deserializer = new Deserializer(this,pl);
        deserializer.deserializeClocks(clocks_,new DeserializerBuffer(clocksMappedToGlobalAddresses));
 
        deserializer.deserialize(new DeserializerBuffer(pseudoSerializedLongArray));
+  
     }
 
     String      constructorSignature;

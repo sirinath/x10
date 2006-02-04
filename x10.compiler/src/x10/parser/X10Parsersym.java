@@ -1,11 +1,8 @@
-
 //
 // 12/25/2004
 // This is the basic X10 grammar specification without support for generic types.
 // Intended for the Feb 2005 X10 release.
-//
-
-//
+////
 // This is the grammar specification from the Final Draft of the generic spec.
 // It has been modified by Philippe Charles and Vijay Saraswat for use with 
 // X10. 
@@ -14,7 +11,6 @@
 // (3) Removed Annotations -- cause conflicts with @ used in places.
 // (4) Removed EnumDeclarations.
 // 12/28/2004
-
 package x10.parser;
 
 public interface X10Parsersym {
@@ -158,7 +154,7 @@ public interface X10Parsersym {
       TK_RIGHT_SHIFT_EQUAL = 138,
       TK_UNSIGNED_RIGHT_SHIFT_EQUAL = 139,
       TK_EOF_TOKEN = 117,
-      TK_ERROR_TOKEN = 140;
+      TK_$error = 140;
 
       public final static String orderedTerminalSymbols[] = {
                  "",
@@ -301,7 +297,7 @@ public interface X10Parsersym {
                  "UNSIGNED_RIGHT_SHIFT",
                  "RIGHT_SHIFT_EQUAL",
                  "UNSIGNED_RIGHT_SHIFT_EQUAL",
-                 "ERROR_TOKEN"
+                 "$error"
              };
 
     public final static boolean isValidForParser = true;

@@ -11,7 +11,6 @@ import polyglot.ext.jl.parse.Name;
 import polyglot.parse.VarDeclarator;
 import polyglot.types.Flags;
 import polyglot.util.Position;
-import x10.parser.X10Parser.JPGPosition;
 
 /**
  * @author vj Jan 23, 2005
@@ -19,16 +18,14 @@ import x10.parser.X10Parser.JPGPosition;
  */
 public class X10VarDeclarator extends VarDeclarator {
 	private final AmbExpr[] vars;
-    private JPGPosition position;
 	public Flags flags;
 
-	public X10VarDeclarator(JPGPosition pos, String name) {
+	public X10VarDeclarator(Position pos, String name) {
 		this(pos, name, null);
 	}
 
-	public X10VarDeclarator(JPGPosition pos, String name, List/*<Name>*/ paramList) {
+	public X10VarDeclarator(Position pos, String name, List/*<Name>*/ paramList) {
 		super(pos, name);
-        this.position = pos;
 		if (paramList != null) {
 			this.vars = new AmbExpr[paramList.size()];
 			for (int i = 0; i < this.vars.length; i++)
@@ -43,14 +40,6 @@ public class X10VarDeclarator extends VarDeclarator {
 		this.flags = (false && (allCapitals || hasExplodedVars())) ? flags.set(Flags.FINAL) : flags;
 	}
 
-    public Position position() {
-        return position;
-    }
-    
-    public void position(JPGPosition pos) {
-        this.position = pos;
-    }
-    
 	public boolean hasExplodedVars() {
 		return vars != null;
 	}
