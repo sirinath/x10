@@ -7,7 +7,9 @@ package x10.runtime;
 
 import java.util.Stack;
 
-import x10.lang.place;
+import x10.cluster.ClusterRuntime;
+import x10.cluster.X10RemoteRef;
+import x10.cluster.X10Serializer;
 
 /** The state associated with a finish operation. Records the count of 
  * active activities associated with this finish, and the stack
@@ -20,42 +22,92 @@ import x10.lang.place;
  * 
  * @author vj May 17, 2005
  * 
- * @author Raj Barik, Vivek Sarkar
- * 3/6/2006: use ModCountDownLatch (modified version of JCU CountDownLatch) instead of synchronized updates to finishCount. 
  */
-public class FinishState {
+public class FinishState implements FinishStateOps {
+	/**
+	 * FinishState gets passed between activities. The propagation model needs 
+	 * it to behave like a remote object.
+	 */
+	public X10RemoteRef rref = null;
+	public void notifySubActivityTermination() {
+		//System.out.println("FinishState.notifyActivityTermination ...");
+		if(rref == null || ClusterRuntime.isLocal(rref.getPlace())) {
+			notifySubActivityTermination_();
+		} else { //remote call
+			X10Serializer.serializeCode(rref.getPlace().id, new Runnable() {
+				public void run() {
+					notifySubActivityTermination_();
+				}
+			});
+		}
+	}
+	public void notifySubActivityTermination(final Throwable t) {
+		if(rref == null || ClusterRuntime.isLocal(rref.getPlace())) {
+			notifySubActivityTermination_(t);
+		} else { //remote call
+			X10Serializer.serializeCode(rref.getPlace().id, new Runnable() {
+				public void run() {
+					notifySubActivityTermination_(t);
+				}
+			});
+		}
+	}
+	public void notifySubActivitySpawn() {
+		if(rref == null || ClusterRuntime.isLocal(rref.getPlace())) {
+			notifySubActivitySpawn_();
+		} else { //remote call
+			X10Serializer.serializeCode(rref.getPlace().id, new Runnable() {
+				public void run() {
+					notifySubActivitySpawn_();
+				}
+			});
+		}
+	}
 
-	protected Stack finish_ = new Stack();
+	protected Stack/* <Throwable> */ finish_ = new Stack();
 
+	protected int finishCount = 0;
 	protected Activity parent; // not really needed, used in toString().
-
-	protected ModCountDownLatch mcdl = new ModCountDownLatch(0);
-
+	protected boolean parentWaiting = false; // optimization.
+	
 	/** 
 	 * Create a new finish state for the given activity.
 	 */
-	public FinishState(Activity activity) {
+	public FinishState( Activity activity ) {
 		super();
 		parent = activity;
-	}
-
-	public void waitForFinish() {
-		if (mcdl.getCount() == 0)
-			return;
-
-		Thread t = Thread.currentThread();
-		((PoolRunner) t).addPoolNew();
-
+		
+		//export rmi
+		/*
 		try {
-			mcdl.await();
-		} catch (InterruptedException z) {
+			UnicastRemoteObject.exportObject(this);
+		} catch(Exception ex) {
+			ex.printStackTrace();
 		}
-
-		((PoolRunner) t).getPlace().decNumBlocked();
+		*/
 	}
-
-	public void notifySubActivitySpawn() {
-		mcdl.updateCount();
+	
+	public /*myThread*/ synchronized void waitForFinish() {
+		if (finishCount == 0 ) return;
+		parentWaiting = true;
+		if (finishCount > 0) {			
+			while (finishCount > 0) {
+				try {
+					this.wait();
+				} catch (InterruptedException z) {
+					// What should i do?
+				}
+			}			
+		}
+		parentWaiting = false;
+	}
+	
+	private /*someThread*/ synchronized void notifySubActivitySpawn_() {
+		finishCount++;
+		
+		//System.out.println("FinsihState.notifySubActivitySpawn: new ... "+this+" "+finishCount);
+		
+		// new Error().printStackTrace();
 		if (Report.should_report("activity", 5)) {
 			Report.report(5, " updating " + toString());
 		}
@@ -66,43 +118,46 @@ public class FinishState {
 	 * inline code, not a spawned activity.
 	 * @param t
 	 */
-	public synchronized void pushException(Throwable t) {
-		finish_.push(t);
+    public /*myThread*/ synchronized void pushException( Throwable t) {
+    	finish_.push(t);
+    }
+    
+    /** An activity created under this finish has terminated. Decrement the count
+     * associated with the finish and notify the parent activity if it is waiting.
+     */
+    private /*someThread*/ synchronized void notifySubActivityTermination_() {    	
+		finishCount--;
+		
+		//System.out.println("FinsihState.notifyActivityTermination_: terminating ..."+this+" "+finishCount);
+		
+    	// new Error().printStackTrace();
+		if (parentWaiting && finishCount==0)
+			this.notifyAll();
 	}
-
-	/** An activity created under this finish has terminated. Decrement the count
-	 * associated with the finish and notify the parent activity if it is waiting.
-	 */
-	public void notifySubActivityTermination() {
-		mcdl.countDown();
-	}
-
-	/** An activity created under this finish has terminated abruptly. 
-	 * Record the exception, decrement the count associated with the finish
-	 * and notify the parent activity if it is waiting.
-	 * 
-	 * @param t -- The exception thrown by the activity that terminated abruptly.
-	 */
-	public void notifySubActivityTermination(Throwable t) {
-		synchronized (this) {
-			finish_.push(t);
-		}
-		notifySubActivityTermination();
-	}
-
-	/** Return the stack of exceptions, if any, recorded for this finish.
-	 * 
-	 * @return -- stack of exceptions recorded for this finish.
-	 */
-	public synchronized Stack exceptions() {
-		return finish_;
-	}
-
-	/** Return a string to be used in Report messages.
-	 */
-	public synchronized String toString() {
-		return "<FinishState " + hashCode() + " " + mcdl.getCount() + ","
-				+ parent.shortString() + "," + finish_ + ">";
-	}
+    /** An activity created under this finish has terminated abruptly. 
+     * Record the exception, decrement the count associated with the finish
+     * and notify the parent activity if it is waiting.
+     * 
+     * @param t -- The exception thrown by the activity that terminated abruptly.
+     */
+    private /*someThread*/ synchronized void notifySubActivityTermination_(Throwable t) {
+    	finish_.push(t);
+    	notifySubActivityTermination();
+    }
+   
+    /** Return the stack of exceptions, if any, recorded for this finish.
+     * 
+     * @return -- stack of exceptions recorded for this finish.
+     */
+    public /*myThread*/ synchronized Stack exceptions() {
+    	return finish_;
+    }
+    
+    /** Return a string to be used in Report messages.
+     */
+    public synchronized String toString() {
+    	return "<FinishState " + hashCode() + " " + finishCount + "," 
+		+ (parent == null? "null" : parent.shortString())+"," + finish_ +">";
+    }
 
 }
