@@ -1,7 +1,3 @@
-(c) IBM Corporation
-
-This program is controlled by the Eclipse Public Licence v1.0.
-
 Before running the ant script, make sure that 
 the following environment variables are set correctly:
 

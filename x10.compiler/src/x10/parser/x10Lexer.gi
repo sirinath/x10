@@ -8,15 +8,6 @@
 %options template=uide/LexerTemplate.gi
 %options filter=X10KWLexer.gi
 
-$Notice
-/.
-//
-// Licensed Material 
-// (C) Copyright IBM Corp, 2006
-//
-./
-$End
-
 $Import
     GjavaLexer.gi
 $End

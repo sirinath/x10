@@ -2,8 +2,18 @@ package x10.runtime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Future;
 
+import x10.cluster.ClusterConfig;
+import x10.cluster.ClusterRuntime;
+import x10.cluster.Debug;
+import x10.cluster.HasResult;
+import x10.cluster.X10RemoteRef;
+import x10.cluster.X10Runnable;
+import x10.cluster.comm.RPCHelper;
+import x10.cluster.message.MessageType;
+import x10.cluster.replication.RTReplication;
+import x10.cluster.replication.RTReplication.IDType;
 import x10.lang.ClockUseException;
 import x10.lang.Runtime;
 import x10.lang.clock;
@@ -106,17 +116,13 @@ import x10.lang.clock;
  * </code>
  * @author Christian Grothoff, Christoph von Praun
  * @author vj
- * 
- * @author Raj Barik, Vivek Sarkar
- * 3/6/2006: Add calls to addPoolNew() and decNumBlocked() in method block_() in support of new
- * runtime based on JCU.
  */
 
 /* This really should be a final class.  However, for the time being,
    I allow RemoteClock to extend this class. */
 public /* final */ class Clock extends clock {
 	
-	private static AtomicInteger nextId_ = new AtomicInteger(-1);
+	private static int nextId_ = 0;
 	private int id_;
 	private final String name_;
 
@@ -149,7 +155,6 @@ public /* final */ class Clock extends clock {
 	private final Set nextResumed_ = new HashSet(); // <Activity>
 	private int nextResumedCount_ = 0;
 	
-
 	/**
 	 * The first registered advance listener.  null if none is
 	 * registered.
@@ -168,6 +173,148 @@ public /* final */ class Clock extends clock {
 	 */
 	private int phase_;
 	
+	
+	/**
+	 * tree implementation of distributed clock.
+	 */
+	private long uniqueId_;
+	private int childCnt_ = 0;
+	private int childResumedCnt_ = 0; 
+	private Set<Long> childResumed_ = new HashSet<Long>();
+	private int childNextResumedCnt_ = 0;
+	private Set<Long> childNextResumed_= new HashSet<Long>(); 
+	private int childNextCnt_ = 0;
+	private Set<Long> childNext_= new HashSet<Long>();
+	private int childNextNextCnt_ = 0;
+	private Set<Long> childNextNext_= new HashSet<Long>();
+	
+	private boolean isRoot_ = true;
+	private boolean advancedParent = false;
+	public static final int dbg_level = Debug.clock;
+	
+	public boolean getSplitState() { return splitPhase_; }
+	public int getPhase() { return phase_; }
+	public int setPhase(int ph) { int old = phase_;  phase_ = ph; return old; }
+	
+	/**
+	 * Inform the root clock node of a new child clock node.
+	 * 
+	 * @param child
+	 */
+	public void addChild(Activity child) {
+		assert(rref != null);
+		final X10RemoteRef pclock = rref;
+		RPCHelper.serializeCodeW(pclock.getPlace().id, new HasResult(MessageType.CLK) {
+			public void run() {
+				synchronized(Clock.this) { 
+					((Clock)pclock.getObject()).childCnt_ ++;
+				}
+			}
+			public Object getResult() { return null; }
+		});
+		//child_.add(child.getId());
+	}
+	
+	public synchronized void signalResume(long id) {
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.signalResumet>>> before: "+this+" by "+id);
+		
+		if(splitPhase_) {
+			if(childNextResumed_.add(new Long(id))) //filter duplicates
+				childNextResumedCnt_ ++;
+			//return;
+		} else {
+			if(childResumed_.add(new Long(id))) { //filter duplicates
+				childResumedCnt_++; 
+				tryMoveToSplit_();
+			}
+		}
+		
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.signalResume>>> after: "+this);
+	}
+	
+	public synchronized void signalDrop(long id, int curPh, boolean dropped, boolean isSplit) {
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.signalDrop>>> before: "+this+" by "+isSplit+" "+curPh+" "+dropped);
+		
+		if(dropped) { //regardless of child clock's phase or split state
+			childCnt_ --;
+			boolean test = false;
+			if(childResumed_.remove(new Long(id))) { childResumedCnt_ --; test = true; }
+			if(childNext_.remove(new Long(id))) { childNextCnt_ --;test = true;  }
+			if(childNextResumed_.remove(new Long(id))) { childNextResumedCnt_ --;test = true;} 
+			if(childNextNext_.remove(new Long(id))) { childNextNextCnt_ --;test = true; }
+			assert(childCnt_ >= childResumedCnt_ && childCnt_ >= childNextCnt_);
+		
+			assert(isRoot_);
+			tryChangeSplitState();
+		} else {
+			if(isSplit) 
+				; 
+			else {
+				//if(! childResumed_.contains(new Long(id)))
+					signalResume(id);
+				//if(! childNext_.contains(new Long(id)))
+					signalNext(id, curPh);
+			}
+		}
+	}
+	
+	/**
+	 * Inform root node that a shadow node wants to advance. 
+	 * 
+	 * splitPhase_ = false:  assert(ph == phase_)  childNextCnt_++
+	 * splitPhase_ = true: ph < phase_ ? childNextCnt_++ : childNextNextCnt++
+	 * 
+	 */
+	public synchronized void signalNext(long id, int ph) {
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.signalNext>>> before: "+this+" "+splitPhase_+" "+ph+" "+phase_);
+		
+		assert(splitPhase_ || ph == phase_);
+		assert(ph == phase_ || ph+1 == phase_);
+		
+		if((!splitPhase_) || ph < phase_) {//2): child call resume, and then call next
+			if(childNext_.add(new Long(id)))
+				childNextCnt_ ++;
+			if(splitPhase_) ; //non-block
+			else if((activityCount_ +childCnt_) == (resumedCount_ +childResumedCnt_)) ; //non-block 
+			else block_();
+		} else { //(splitPhase_ && ph == phase_)
+			if(childNextNext_.add(new Long(id)))
+				childNextNextCnt_ ++;
+			block_();
+		}
+		
+		tryMoveToWhole_();
+		
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.signalNext>>> after: "+this);
+	}
+	
+	/**
+	 * This constructor is used to contruct a shadow Clock when a clock is
+	 * distributed.  Shadow clocks has its parent pointer 'rref_p' set, and
+	 * every non-leaf clock node maintain a 'childCount_'.
+	 */
+	private Clock(X10RemoteRef p, int phase) {
+		this.rref = p;
+		this.phase_ = phase;
+		this.name_ = "shadow clock";
+		synchronized (getClass()) {
+			id_ = nextId_++;
+		}
+		this.isRoot_ = false;
+		uniqueId_ = RTReplication.getUniqueID(IDType.CLOCK);
+		//Debug.printStack();
+		
+		//try { throw new Exception(); } catch (Exception e) { e.printStackTrace(); }
+		//To be initialized in the right context: moved to initDistribution()
+		//activities_.add(...)
+		//activityCount++
+	}
+	
     
 	/**
 	 * Create a new Clock.  Registers the current activity with
@@ -176,27 +323,25 @@ public /* final */ class Clock extends clock {
 	public Clock() {
 		this( "");
 	}
-	
 	public Clock( String name) {
 		this.name_ = name;
-		id_ = Clock.nextId_.addAndGet(1);
-               
-        Activity a = Runtime.getCurrentActivity();
+		synchronized (getClass()) {
+			id_ = nextId_++;
+		}
+
+		Activity a = Runtime.getCurrentActivity();
 		a.addClock(this);
 		activities_.add(a);
 		activityCount_++;
-		if (Report.should_report(Report.CLOCK, 3)) {
-			Report.report(3, PoolRunner.logString() + " " + this
-					+ " created by " + a + ".");
-
+		if (Report.should_report("clock",3)) {
+			Report.report(3, PoolRunner.logString() + " " + this + " created by " + a +".");
 		}
+
 	}
 	
 	/**
-	 * An activity a is inactive on a clock if it is not registered with it or
-	 * it is registered with it, but has already resumed it in the current
-	 * phase.
-	 * 
+	 * An activity a is inactive on a clock if it is not registered with it
+	 * or it is registered with it, but has already resumed it in the current phase.
 	 * @param a
 	 * @return
 	 */
@@ -206,28 +351,33 @@ public /* final */ class Clock extends clock {
 	/**
 	 * Register the current activity with this clock.
 	 */
-	public void register(Activity a ) {
-		
-                Activity authorizer = Runtime.getCurrentActivity();
-                
-                if (Report.should_report(Report.CLOCK, 5)) {
-                   Report.report(5, PoolRunner.logString() + " " + this + ".register:" + authorizer + " registering " + a);
-                }
+	public synchronized void register(Activity a ) {
+		/* TODO ... a better authorizer for multi-VM case */
+		Activity authorizer = null; 
+		if(!ClusterConfig.multi) {
+			authorizer = Runtime.getCurrentActivity();
+		}
+		if (authorizer != null)
+			if (Report.should_report("clock", 5)) {
+				Report.report(5, PoolRunner.logString() + " " + this + ".register:" + authorizer + " registering " + a);
+			}
+		if(Report.should_report("cluster", Debug.clock))
+			Report.report(Debug.clock, "Clock.register>>>");
 		synchronized (this) {
-                   if (inactive(authorizer))	
+			if (authorizer != null && inactive(authorizer))	
 				throw new ClockUseException(authorizer + "is not active on " + this + "; cannot transmit.");
-                   
-			if (activities_.contains(a)) 
-				return;
+			if (activities_.contains(a)) return;			
 			activities_.add(a);
 			activityCount_++;
+			if(Report.should_report("cluster", Debug.clock))
+				Report.report(Debug.clock, "Clock.register>>>"+this);
 		}
-		if (Report.should_report(Report.CLOCK, 3)) {
+		if (Report.should_report("clock", 3)) {
 			Report.report(3, PoolRunner.logString() + " " + this + "...done.(activityCount_=" + activityCount_+").");
 		}
 	}
 	
-	    
+	
 	private boolean quiescent( Activity a) {
 		return resumed_.contains(a) || nextResumed_.contains(a);
 		
@@ -237,12 +387,18 @@ public /* final */ class Clock extends clock {
 	 * work in this phase of the clock.
 	 */
 	public void resume() {
-           resume(Runtime.getCurrentActivity());
-        }
-	
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.Resume>>> before: "+this);
+		
+		resume(Runtime.getCurrentActivity());
+		
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.Resume>>> after: "+this);
+		//try { throw new Exception(); } catch (Exception e) {e.printStackTrace(); }
+	}
 	public void resume(Activity a) {
 		// do not lock earlier - see comment in doNext
-		if (Report.should_report(Report.CLOCK, 5)) {
+		if (Report.should_report("clock", 5)) {
 			Report.report(5, PoolRunner.logString() + " " + this + ".resume(" + a  +")");
 		}
 		synchronized (this) {
@@ -250,7 +406,7 @@ public /* final */ class Clock extends clock {
 				throw new ClockUseException(a + "is not registered with " + this +"; cannot execute 'resume'.");
 			
 			if (quiescent(a)) {
-				if (Report.should_report(Report.CLOCK, 5)) {
+				if (Report.should_report("clock", 5)) {
 					Report.report(5, PoolRunner.logString() + " " + this + "...returned (noop).");
 				}
 				return; 
@@ -258,14 +414,14 @@ public /* final */ class Clock extends clock {
 			if (splitPhase_) {
 				nextResumed_.add(a);
 				nextResumedCount_++;
-				if (Report.should_report(Report.CLOCK, 5)) {
+				if (Report.should_report("clock", 5)) {
 					Report.report(5, PoolRunner.logString() + " " + this + "...added to nextResumed.");
 				}
 				return;
 			}
 			resumed_.add(a);
 			resumedCount_++;
-			if (Report.should_report(Report.CLOCK, 3)) {
+			if (Report.should_report("clock", 3)) {
 				Report.report(3, PoolRunner.logString() + " " + this + "...added to resumed.");
 			}
 			tryMoveToSplit_();
@@ -300,9 +456,15 @@ public /* final */ class Clock extends clock {
 	 * 
 	 */
 	public void drop() {
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.drop>>> before: "+this);
+		
 		Activity a = Runtime.getCurrentActivity();
 		if (drop(a))
 			a.dropClock( this );
+		
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.drop>>> after: "+this);
 	}
 	
 	/**
@@ -321,81 +483,154 @@ public /* final */ class Clock extends clock {
 	 *   clock (or if it never was registered).
 	 */
 	public synchronized boolean drop(Activity a) {
-	   
+	    //assert(activities_.contains(a)); //must have a
 		boolean ret = activities_.remove(a);
 		if (ret) activityCount_--;
 		if (resumed_.remove(a)) resumedCount_--;
 		if (nextResumed_.remove(a)) nextResumedCount_--;
-		tryMoveToSplit_();
-		 if (Report.should_report(Report.CLOCK, 3)) {
+		
+		if (ret) 
+			tryChangeSplitState();
+		
+		if (Report.should_report("clock", 3)) {
 			Report.report(3, this + " drops " + a +").");
 		 }
 		return ret;        
 	}
 	
 	/**
-	 * Advance to the next phase.  Increments the phase counter,
-	 * calls all advance listeners and then signals the activities
-	 * that are waiting to get them going again.
+	 * Change the state of this Clock after a 'drop' call.  If this is root, move to
+	 * split or whole accordingly;
+	 * If this is a shadow node, there are a few scenarios: 
+	 * - splitPhase_ = true:  signalNext not sent; some/no others waiting
+	 *                        signalNext sent;  some/no others waiting
+	 * - splitPhase_ = false: signalNext not sent; some/no others waiting
+	 *                        signalNext sent; some/no others waiting  
+	 * XXX revist
+	 */
+	synchronized void tryChangeSplitState() {
+		if(isRoot_) {
+			if(splitPhase_) 
+				tryMoveToWhole_();
+			else
+				if((activityCount_ == resumedCount_ && childCnt_ == childResumedCnt_))
+					moveToSplit_();
+		} else { //shadow node 
+			/* splitPhase = true: assert(phase_ == root.phase_), if(!dropped) do nothing
+			 * splitPhase = false: if(!dropped) { signalResume; signalNext }
+			 */			
+			if ( (activityCount_ == resumedCount_ && childCnt_ == childResumedCnt_)) {
+				//for a shadow node, this only means it's locally quiescent
+				final boolean dropped = (activityCount_ + childCnt_) == 0 ? true : false;
+				final long clockId = uniqueId_;
+				final int curPh = phase_;
+				final boolean isSplit = splitPhase_;
+				final X10RemoteRef pclock = rref;
+				if( (!splitPhase_ && !advancedParent) ||    //everyone else has call doNext before locally quiescent, or 
+						dropped) {  						//drop this child node
+					advancedParent = true;
+					
+					RPCHelper.serializeCodeWP(pclock.getPlace().id, new HasResult(MessageType.CLK) {
+						public void run() {
+							Clock o = ((Clock)pclock.getObject());
+							o.signalDrop(clockId, curPh, dropped, isSplit);
+						}
+						public Object getResult() { return null; }
+					}, this);
+				 
+					moveToSplit_();
+				}
+				
+				//this.notifyAll(); //
+			}
+		}
+	}
+	
+	synchronized boolean moveToSplit_() {
+		if(!splitPhase_) {
+			splitPhase_ = true;
+			this.phase_++;
+
+			// first notify everyone
+			if (this.listener1_ != null) {
+				this.listener1_.notifyAdvance();
+				if (this.listeners_ != null) {
+					int size = listeners_.size();
+					for (int i=0;i<size;i++)
+						((AdvanceListener)listeners_.get(i)).notifyAdvance();
+				}
+			}
+			this.notifyAll();
+			return true;
+		} else {
+			assert(false);
+			//tryMoveToWhole_(); //XXX
+			return false;
+		}
+	}
+	
+	/**
+	 * First check if this clock node is locally quiescent, if no, return false;
+	 * Otherwise, if this is a root node, the clock is globally quiescent, split the phase;
+	 * if this is a shadow node, send an aggregated 'resume' message to root;
+	 * 
+	 * @author xinb
 	 */
 	synchronized boolean tryMoveToSplit_() {
-	    if (Report.should_report(Report.CLOCK, 3)) {
-			Report.report(3, PoolRunner.logString() + " " + this + ".tryMoveToSplit_()");
-			}
-		
-		if (! (activityCount_ == resumedCount_ )) {
-		    if (Report.should_report(Report.CLOCK, 3)) {
-				Report.report(3, "...fails");
-				}
+		if (! (activityCount_ == resumedCount_ && childCnt_ == childResumedCnt_)) {
 			return false;
 		}
-		if (Report.should_report(Report.CLOCK, 3)) {
-			Report.report(3, "...succeeds");
-			}
-		splitPhase_ = true;
-		this.phase_++;
-
-		// first notify everyone
-		if (this.listener1_ != null) {
-			this.listener1_.notifyAdvance();
-			if (this.listeners_ != null) {
-				int size = listeners_.size();
-				for (int i=0;i<size;i++)
-					((AdvanceListener)listeners_.get(i)).notifyAdvance();
-			}
-		}
-		this.notifyAll();
-		return true;
+		//locally quiescent already
 		
+	    if(isRoot_) 
+	    	return moveToSplit_();
+	    else {
+	    	//if(advancedParent) {
+			//child lock node
+			//final int curPhase = phase_;
+			final long clockId = uniqueId_;
+			final X10RemoteRef pclock = rref;
+			//need synchronous call
+			RPCHelper.serializeCodeWP(pclock.getPlace().id, new HasResult(MessageType.CLK) {
+				public void run() {
+					((Clock)pclock.getObject()).signalResume(clockId); //Has to be called on the right Clock object
+				}
+				public Object getResult() { return null; }
+			}, this);
+			return false;
+			//}
+	    }
 	}
+	
 	private synchronized boolean tryMoveToWhole_() {
-	    if (Report.should_report(Report.CLOCK, 3)) {
-			Report.report(3, PoolRunner.logString() + " " + this+".tryMoveToWhole_()");
-			}
-		if (resumedCount_ != 0) {
-		    if (Report.should_report(Report.CLOCK, 3)) {
-				Report.report(3, this+"...fails.");
-				}
+		if (resumedCount_ != 0 || childNextCnt_ != childCnt_) {
 			return false;
 		}
-		if (Report.should_report(Report.CLOCK, 3)) {
-			Report.report(3, this+"...succeeds.");
-			}
+
 		splitPhase_ = false;
 		resumed_.addAll(nextResumed_);
 		nextResumed_.clear();
 		resumedCount_ = nextResumedCount_;
 		nextResumedCount_ = 0;
+		
+		advancedParent = false;
+		childResumed_.clear();
+		childResumed_.addAll(childNextResumed_);
+		childResumedCnt_ = childNextResumedCnt_;
+		childNext_.clear();
+		childNext_.addAll(childNextNext_);
+		childNextCnt_ = childNextNextCnt_;
+		childNextResumed_.clear();
+		childNextNext_.clear();
+		childNextResumedCnt_ = 0;
+		childNextNextCnt_ = 0;
+		
 		return true;
 	}
 	
 	
 	private void block_() {
 		int start = phase_;
-		
-		Thread t = Thread.currentThread();
-		((PoolRunner) t).getPlace().threadBlockedNotification();
-		
 		while (start == phase_) { // signal might be random in Java, check!
 			try {
 				this.wait(); // wait for signal
@@ -403,68 +638,64 @@ public /* final */ class Clock extends clock {
 				throw new Error(ie); // that was unexpected...
 			}
 		}
-		((PoolRunner) t).getPlace().threadUnblockedNotification();
 	}
 	
 	public void doNext() {
-            doNext(Runtime.getCurrentActivity());
-        };
-
-        /* An activity on a remote VM has done a next on this clock */
-       
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.doNext>>> before: "+this);
+		
+		doNext(Runtime.getCurrentActivity());
+		
+		if(Report.should_report("cluster", Clock.dbg_level))
+			Report.report(Clock.dbg_level, "Clock.doNext>>> after: "+this);	
+	};
+	
+	
     
-	private void doNext(Activity a) {
-		// do not acquire lock earlier - otherwise deadlock can happen
-		// because the lock used to protected aip_.getCurrentActivity
-		// is also held when terminating activities drop locks ...
-		if (Report.should_report(Report.CLOCK, 5)) {
-			Report.report(5, PoolRunner.logString() + " " + this+".doNext(" + a + ") called.");
+	public synchronized void doNext(Activity a) {
+		assert activities_.contains(a);
+		assert nextResumed_.contains(a) || resumed_.contains(a);
+		if (!splitPhase_ || nextResumed_.contains(a)) {				
+			if(!isRoot_ && !advancedParent && ((activityCount_ +childCnt_) == (resumedCount_ +childResumedCnt_))) {
+				//child clock node, haven't inform parent, all activity resumed locally
+				final int curPhase = phase_;
+				final long clockId = uniqueId_;
+				final X10RemoteRef pclock = rref;
+				//blocking call
+				advancedParent = true; //remember we have signal the parent
+				/* The following call can block, thus it is important to release the lock on the 
+				 * current Clock object. 
+				 * XXX a better way might be to have RPCHelper spawn another thread to do serialization and wait
+				 */
+				RPCHelper.serializeCodeWP(pclock.getPlace().id, new HasResult(MessageType.CLK) /*Runnable()*/ {
+					public void run() {
+						((Clock)pclock.getObject()).signalNext(clockId, curPhase);
+					}
+					public Object getResult() { return null;}
+				}, this);
+				
+				//advancedParent = true;
+				moveToSplit_(); //split postponed until fist doNext, instead of last resume
+			} else {
+				//root clock node
+				//or child node before locally quiescent, or waiting from parent
+				block_();
+			}
 		}
 		
-		synchronized (this) {
-			assert activities_.contains(a);
-			assert nextResumed_.contains(a) || resumed_.contains(a);
-	    	if ( JITTimeConstants.ABSTRACT_EXECUTION_STATS ) {
-	    		maxCritPathOps(x10.lang.Runtime.getCurrentActivity().getCritPathOps());
-	    		if ( JITTimeConstants.ABSTRACT_EXECUTION_TIMES ) {
-	    			x10.lang.Runtime.getCurrentActivity().updateIdealTime();
-	    			maxIdealTime(x10.lang.Runtime.getCurrentActivity().getCritPathTime());
-	    		}
-	    	}
-			
-			if (!splitPhase_ || nextResumed_.contains(a)){
-				if (Report.should_report(Report.CLOCK, 3)) {
-					Report.report(3, PoolRunner.logString() + " " + this+".doNext(" + a + ") blocks.");
-				}
-				System.out.println("Clock "+this+"is going to be block ");
-				block_();
-				System.out.println("Clock "+this+"is unblocked ");
-			}
-			if (Report.should_report(Report.CLOCK, 3)) {
-				Report.report(3, PoolRunner.logString() + " " + this+".doNext(" + a + ") continues.");
-			}
-			assert resumed_.contains(a);
-			resumed_.remove(a);
-			resumedCount_ --;
-			tryMoveToWhole_();
-			
-			if (JITTimeConstants.ABSTRACT_EXECUTION_STATS) {
-				x10.lang.Runtime.getCurrentActivity().maxCritPathOps(getCritPathOps());
-				if (JITTimeConstants.ABSTRACT_EXECUTION_TIMES) {
-					x10.lang.Runtime.getCurrentActivity().maxCritPathTime(getIdealTime());
-					x10.lang.Runtime.getCurrentActivity().setResumeTime();
-				}
-			}
-			return;
-		}
+		assert resumed_.contains(a);
+		resumed_.remove(a);
+		resumedCount_ --;
+		tryMoveToWhole_();
+		return;
 	}
-
+	
 	/**
 	 * Register a callback that is to be called whenever the clock
 	 * advances into the next phase.
 	 * 
 	 * @param al the listener to notify
-	 
+	 */
 	public synchronized void registerAdvanceListener(AdvanceListener al) {
 		if (this.listener1_ == null) {
 			this.listener1_ = al;
@@ -474,7 +705,7 @@ public /* final */ class Clock extends clock {
 			this.listeners_.add(al);
 		}
 	}
-	*/
+	
 	/**
 	 * Callback method used by the Clock to notify all listeners
 	 * that the Clock is advancing into the next phase.
@@ -490,31 +721,12 @@ public /* final */ class Clock extends clock {
 		+ ":" + activityCount_ 
 		+ "," + resumedCount_
 		+ "," + nextResumedCount_
+		
+		+ "," + childCnt_
+		+ "," + childResumedCnt_
+		+ "," + childNextCnt_
+
 		+ ")";
 	}
 	
-	/*
-	 * critPathOps keeps track of operations defined by user by calls to x10.lang.perf.addLocalOps()
-	 */
-    private long critPathOps = 0; // Current critical path length for this latch (in user-defined operations)
-	
-	synchronized public void maxCritPathOps(long n) {
-		critPathOps = Math.max(critPathOps, n);
-	}
-
-    /**
-     * getCritPathOps() should only be called after a next operation has succeeded
-     * (That's why it need not be a synchronized method.)
-     */
-    public long getCritPathOps() { return critPathOps; }
-    
-    private long curIdealTime = 0; // Current "ideal" execution time for this latch (assuming unbounded resources)
-	
-	synchronized public void maxIdealTime(long t) { curIdealTime = Math.max(curIdealTime, t); }
-
-    /**
-     * getIdealTime() should only be called after a next operation has succeeded
-     * (That's why it need not be a synchronized method.)
-     */
-    public long getIdealTime() { return curIdealTime; }
 } // end of Clock

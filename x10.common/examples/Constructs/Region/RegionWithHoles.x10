@@ -1,168 +1,173 @@
-import harness.x10Test;
-
-public class RegionWithHoles extends x10Test {
-
-	boolean test1D() {
-		// all of those are contiguous
-		region r = [0:10];
-		region r1 = [1:2];
-		region r2 = [5:6];
-
-		// create holes in r
-		r = r - r1;
-		r = r - r2;
-
-		short[.] a = new short[r];
-		chk(!r.isConvex());
-		// check if r is convex - it should not!
-		System.out.println("convex: " + r.isConvex() + " (should be false)");
-
-		System.out.print("indexes: ");
-		for (point[i] : r) {
-			System.out.print(i + " ");
-		}
-
-		try {
-			for (point[i] : r) {
-				if (a[i] != 0)
-					System.out.println("val[" + i + "] = " + a[i]);
-			}
-		}
-		catch (Throwable t) {
-			System.out.println(t);
-			return false;
-		}
-		return true;
+class RegionWithHoles {
+	boolean _success=true;
+	
+	public static void main(String args[]) {
+		RegionWithHoles t = new RegionWithHoles();
+		t.test1D();
+		t.test2D();
+		t.test3D();
+		t.test4D();
+		t.testPoint();
+		
+		System.out.println("++++++ "+(t._success?"Test succeeded.":"Test failed."));
+		x10.lang.Runtime.setExitCode(t._success?0:1);
 	}
-
-	boolean test2D() {
-		System.out.println("testing 2d");
-		// all of those are contiguous
+	
+	void chk(boolean b) {
+		if(!b){
+			_success=false;
+			throw new Error();
+		}
+	}
+	void test2D(){
+		System.out.println("testing 2d");	
+//		 all of those are contiguous
 		region r = [0:10,0:3];
 		region r1 = [1:2,0:3];
 		region r2 = [5:6,0:3];
-
-		// create holes in r
+		
+		//	 create wholes in r
 		r = r - r1;
 		r = r - r2;
-
+		
 		short[.] a = new short[r];
-
-		// check if r is convex - it should not!
+		
+		//	 check if r is convex - it should not!
 		System.out.println("convex: " + r.isConvex() + " (should be false)");
-		chk(!r.isConvex());
-
-		try {
+		chk(!r.isConvex());		
+				
+		try{
 			for (point[i,j] : r) {
-				if (a[i,j] != 0)
-					System.out.println("val[" + i + "] = " + a[i,j]);
+				if(a[i,j] != 0)
+					System.out.println("val[" + i + "]=" + a[i,j]);
 			}
 		}
-		catch (Throwable t) {
+		catch(Throwable t){
 			System.out.println(t);
-			return false;
-		}
-		return true;
+			_success=false;
+		}		
 	}
-
-	boolean test3D() {
-		// all of those are contiguous
+	void test3D(){
+//		 all of those are contiguous
 		region r = [0:10,0:3,0:0];
 		region r1 = [1:2,0:3,0:0];
 		region r2 = [5:6,0:3,0:0];
-
-		// create holes in r
+		
+		//	 create wholes in r
 		r = r - r1;
 		r = r - r2;
-
+		
 		short[.] a = new short[r];
-		chk(!r.isConvex());
-		// check if r is convex - it should not!
+		chk(!r.isConvex());		
+		//	 check if r is convex - it should not!
 		System.out.println("convex: " + r.isConvex() + " (should be false)");
-
-		try {
+		
+	
+		
+		try{
 			for (point[i,j,k] : r) {
-				if (a[i,j,k] != 0)
-					System.out.println("val[" + i + "] = " + a[i,j,k]);
+				if(a[i,j,k] != 0)
+					System.out.println("val[" + i + "]=" + a[i,j,k]);
 			}
 		}
-		catch (Throwable t) {
+		catch(Throwable t){
 			System.out.println(t);
-			return false;
+			_success=false;
 		}
-		return true;
-	}
-
-	boolean test4D() {
-		// all of those are contiguous
+		}
+	
+	void test4D(){
+//		 all of those are contiguous
 		region r = [0:0,0:10,0:3,0:0];
 		region r1 = [0:0,1:2,0:3,0:0];
 		region r2 = [0:0,5:6,0:3,0:0];
-
-		// create holes in r
+		
+		//	 create wholes in r
 		r = r - r1;
 		r = r - r2;
-
+		
 		short[.] a = new short[r];
-		chk(!r.isConvex());
-		// check if r is convex - it should not!
+		chk(!r.isConvex());		
+		//	 check if r is convex - it should not!
 		System.out.println("4d:convex: " + r.isConvex() + " (should be false)");
-
-		if (false) {
+		
+		if(false){
 			System.out.print("indexes: ");
 			for (point[i] : r) {
 				System.out.print(i + " ");
 			}
 		}
-
-		try {
+		
+		try{
 			for (point[i,j,k,l] : r) {
-				if (a[i,j,k,l] != 0)
-					System.out.println("val[" + i + "] = " + a[i,j,k,l]);
+				if(a[i,j,k,l] != 0)
+					System.out.println("val[" + i + "]=" + a[i,j,k,l]);
 			}
 		}
-		catch (x10.lang.Exception e) {
+		catch(x10.lang.Exception e){
 			System.out.println(e);
-			return false;
+			_success=false;
 		}
-		return true;
-	}
-
-	boolean testPoint() {
-		System.out.println("testing point");
-		// all of those are contiguous
+		}
+	void testPoint(){
+		System.out.println("testing point");	
+		//	 all of those are contiguous
 		region r = [0:10];
 		region r1 = [1:2];
 		region r2 = [5:6];
-
-		// create holes in r
+		
+		//	 create wholes in r
 		r = r - r1;
 		r = r - r2;
-
+		
 		short[.] a = new short[r];
-		chk(!r.isConvex());
-		// check if r is convex - it should not!
+		chk(!r.isConvex());		
+		//	 check if r is convex - it should not!
 		System.out.println("convex: " + r.isConvex() + " (should be false)");
-
-		try {
+		
+		
+		try{
 			for (point p : r) {
-				if (a[p] != 0)
-					System.out.println("val[" + p + "] = " + a[p]);
+				if(a[p] != 0)
+					System.out.println("val[" + p + "]=" + a[p]);
 			}
 		}
-		catch (Throwable t) {
+		catch(Throwable t){
 			System.out.println(t);
-			return false;
+			_success=false;
+		}		
+	}
+	
+	
+	void test1D(){
+		//	 all of those are contiguous
+		region r = [0:10];
+		region r1 = [1:2];
+		region r2 = [5:6];
+		
+		//	 create wholes in r
+		r = r - r1;
+		r = r - r2;
+		
+		short[.] a = new short[r];
+		chk(!r.isConvex());		
+		//	 check if r is convex - it should not!
+		System.out.println("convex: " + r.isConvex() + " (should be false)");
+		
+		System.out.print("indexes: ");
+		for (point[i] : r) {
+			System.out.print(i + " ");
 		}
-		return true;
-	}
-
-	public boolean run() {
-		return test1D() && test2D() && test3D() && test4D() && testPoint();
-	}
-
-	public static void main(String args[]) {
-		new RegionWithHoles().execute();
+		
+		try{
+			for (point[i] : r) {
+				if(a[i] != 0)
+					System.out.println("val[" + i + "]=" + a[i]);
+			}
+		}
+		catch(Throwable t){
+			System.out.println(t);
+			_success=false;
+		}		
 	}
 }
-

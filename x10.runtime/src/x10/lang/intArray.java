@@ -1,5 +1,6 @@
 package x10.lang;
 
+import java.io.Serializable;
 
 /** The base class for all (value or reference) multidimensional,
  * distributed int arrays in X10.  Is a subclass-only mutable class
@@ -17,7 +18,7 @@ abstract public class intArray extends x10Array{
 		super(D);
 	}
 	
-	public static interface binaryOp {
+	public static interface binaryOp extends Serializable {
 		int apply(int r, int s);
 	}
 	
@@ -27,11 +28,11 @@ abstract public class intArray extends x10Array{
 	public static final binaryOp div = new binaryOp() { public int apply(int r, int s) { return r/s;}};
 	public static final binaryOp max = new binaryOp() { public int apply(int r, int s) { return Math.max(r,s);}};
 	public static final unaryOp abs = new unaryOp() { public int apply(int r) { return Math.abs(r);}};
-	public static interface pointwiseOp/*(region r)*/ { 
+	public static interface pointwiseOp/*(region r)*/ extends pointwiseOpTag, Serializable { 
 		int apply(point/*(r)*/ p);
 	}
 	
-	public static interface unaryOp {
+	public static interface unaryOp extends Serializable {
 		int apply(int r);
 	}
 	
@@ -128,6 +129,10 @@ abstract public class intArray extends x10Array{
 	abstract /*value*/ public int get(int p, int q, int r, int s);
 	abstract public int get(int[] p);
 	
+	//called from high-level array operations @see DistIntArray#restriction
+	public int get(int d0, boolean chkPl) {return get(d0); }
+	public int get(int d0, int d1, boolean chkPl) {return get(d0, d1); }
+	public int get(point pos, boolean chkPl) {return get(pos); }
 	
 	/** Convenience method for returning the sum of the array.
 	 * @return sum of the array.

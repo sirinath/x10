@@ -12,7 +12,7 @@
 --
 %Options programming_language=java,margin=4
 %Options table
-%options action_block=("*.java", "/.", "./")
+%options action=("*.java", "/.", "./")
 %options ParseTable=lpg.lpgjavaruntime.ParseTable
 %Options prefix=Char_
 
@@ -113,8 +113,10 @@ $Headers
     public class $action_type extends $super_stream_class implements $exp_type, $sym_type, RuleAction$additional_interfaces
     {
         private static ParseTable prs = new $prs_type();
+        private $prs_stream_class prsStream;
         private LexParser lexParser = new LexParser(this, prs, this);
 
+        public $prs_stream_class getPrsStream() { return prsStream; }
         public int getToken(int i) { return lexParser.getToken(i); }
         public int getRhsFirstTokenIndex(int i) { return lexParser.getFirstToken(i); }
         public int getRhsLastTokenIndex(int i) { return lexParser.getLastToken(i); }
@@ -152,7 +154,7 @@ $Headers
             if (getInputChars() == null)
                 throw new NullPointerException("LexStream was not initialized");
 
-            setPrsStream(prsStream);
+            this.prsStream = prsStream;
 
             prsStream.makeToken(0, 0, 0); // Token list must start with a bad token
                 

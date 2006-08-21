@@ -9,6 +9,9 @@ package x10.lang;
  * @author vj 12/24/2004
  */
 
+import java.io.Serializable;
+
+import x10.lang.x10Array.pointwiseOpTag;
 
 abstract public class byteArray extends x10Array{
 
@@ -16,7 +19,7 @@ abstract public class byteArray extends x10Array{
 		super(D);
 	}
 	
-	public static interface binaryOp {
+	public static interface binaryOp extends Serializable {
         int apply(byte r, byte s);
 	}
 	public static final binaryOp sub = new binaryOp() { public int apply(byte r, byte s) { return r-s;}};
@@ -29,9 +32,14 @@ abstract public class byteArray extends x10Array{
 	}
 	public static final unaryOp abs = new unaryOp() { public int apply(byte r) { return Math.abs(r);}};
 	
-	public static interface pointwiseOp/*(region r)*/ {
+	public static interface pointwiseOp/*(region r)*/ extends pointwiseOpTag, Serializable {
 		byte apply(point/*(r)*/ p);
 	}
+	
+	//called from high level array operations
+	public byte get(int d0, boolean chkPl) {return get(d0); }
+	public byte get(int d0, int d1, boolean chkPl) {return get(d0,d1); }
+	public byte get(point pos, boolean chkPl) {return get(pos); }
 	
 	abstract public static /*value*/ class factory {
 		/** Return the unique int value array initialized with 0 

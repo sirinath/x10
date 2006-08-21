@@ -3,4 +3,3 @@ logDetail.*
 *.class
 *.java
 testPackage
-harness

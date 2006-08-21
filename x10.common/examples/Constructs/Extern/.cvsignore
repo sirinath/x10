@@ -2,8 +2,3 @@
 logDetail.*
 *.class
 *.java
-harness
-*_x10stub.c
-*.o
-*.so
-*.dll

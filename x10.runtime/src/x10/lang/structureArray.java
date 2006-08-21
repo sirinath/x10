@@ -4,9 +4,7 @@ package x10.lang;
  */
 
 
-abstract public class structureArray /*( distribution distribution )*/ 
-/*implements Cloneable, Serializable */
-extends x10Array {
+abstract public class structureArray extends x10Array {
 
 	protected int _elementSize;
 	final public int getElementSize(){ return _elementSize;}
@@ -14,7 +12,6 @@ extends x10Array {
 	final protected int getStartingElementIndex(int userIndex){
 		return userIndex * _elementSize;
 	}
-	
 	protected structureArray( dist D,int elSize) {
 		super(D);
 		this._elementSize = elSize;

@@ -1,32 +1,34 @@
 package polyglot.ext.x10.ast;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Node;
 import polyglot.ast.Stmt;
+import polyglot.ast.Expr;
+import polyglot.ast.Node;
 import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
+import polyglot.ext.jl.ast.Call_c;
 import polyglot.ext.jl.ast.Stmt_c;
+import polyglot.ext.x10.types.FutureType_c;
 import polyglot.ext.x10.types.X10TypeSystem;
-import polyglot.main.Report;
-import polyglot.types.Context;
-import polyglot.types.SemanticException;
-import polyglot.types.Type;
-import polyglot.types.TypeSystem;
-import polyglot.util.CodeWriter;
-import polyglot.util.CollectionUtil;
 import polyglot.util.Position;
-import polyglot.visit.AscriptionVisitor;
+import polyglot.util.CodeWriter;
 import polyglot.visit.CFGBuilder;
 import polyglot.visit.FlowGraph;
 import polyglot.visit.NodeVisitor;
-import polyglot.visit.PrettyPrinter;
 import polyglot.visit.TypeChecker;
+import polyglot.visit.AscriptionVisitor;
+import polyglot.visit.PrettyPrinter;
+import polyglot.types.Context;
+import polyglot.types.SemanticException;
+import polyglot.types.TypeSystem;
+import polyglot.types.Type;
+import java.util.LinkedList;
+import polyglot.util.TypedList;
+import java.util.ArrayList;
+import polyglot.main.Report;
+import java.util.Collection;
+import polyglot.util.CollectionUtil;
 
 /**
  * Created on Oct 5, 2004
@@ -88,39 +90,28 @@ public class Async_c extends Stmt_c implements Async, Clocked {
 
 	/** Set the RemoteActivity's place. */
 	public RemoteActivityInvocation place(Expr place) {
-        if (place != this.place) {
-            Async_c n = (Async_c) copy();
-            n.place = place;
-           return n;
-        }
-		
+		this.place = place;
 		return this;
 	}
 
 	/** Reconstruct the statement. */
-	protected Async reconstruct(Expr place, List clocks, Stmt body) {
-		if (place != this.place || body != this.body || clocks != this.clocks) {
+	protected Async reconstruct(Expr place, Stmt body) {
+		if (place != this.place || body != this.body) {
 			Async_c n = (Async_c) copy();
 			n.place = place;
-			n.clocks = clocks;
 			n.body = body;
 			return n;
 		}
 		return this;
 	}
 
-
 	/** Visit the children of the statement. */
 	public Node visitChildren(NodeVisitor v) {
 		Expr place = (Expr) visitChild(this.place, v);
-		List clocks = (List) visitList(this.clocks, v);
 		Stmt body = (Stmt) visitChild(this.body, v);
-		return reconstruct(place, clocks, body);
+		return reconstruct(place, body);
 	}
 
-	/**
-	 * The evaluation of place and list of clocks is not in the scope of the async.
-	 */
 	public Context enterScope(Context c) {
 		if (Report.should_report(TOPICS, 5))
 			Report.report(5, "enter async scope");
@@ -129,6 +120,7 @@ public class Async_c extends Stmt_c implements Async, Clocked {
 		return c;
 	}
 
+	/** Type check the statement. */
 	public Node typeCheck(TypeChecker tc) throws SemanticException {
 		X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 		Type placeType = place.type();
@@ -137,20 +129,10 @@ public class Async_c extends Stmt_c implements Async, Clocked {
 		if (! placeIsPlace) {
 			newPlace = (Expr) new X10Field_c(position(), place, "location").typeCheck(tc);
 		}
-
-        for (Iterator i = clocks().iterator(); i.hasNext(); ) {
-            Expr tn = (Expr) i.next();
-            Type t = tn.type();
-            if (! t.isSubtype(ts.clock())) {
-                throw new SemanticException("Type \"" + t + "\" must be x10.lang.clock.",
-                    tn.position());
-            }
-        }
-
-		return (Node) place(newPlace);
+		return (Async_c) place(newPlace);
 	}
 
-	
+	// not sure how this works.. vj. Copied from Synchronized_c.
 	public Type childExpectedType(Expr child, AscriptionVisitor av) {
 		TypeSystem ts = av.typeSystem();
 		if (child == place) {
@@ -168,24 +150,6 @@ public class Async_c extends Stmt_c implements Async, Clocked {
 		w.write("async (");
 		printBlock(place, w, tr);
 		w.write(") ");
-		if (clocks != null && ! clocks.isEmpty()) {
-			w.write("clocked (");
-			w.begin(0);
-
-			for (Iterator i = clocks.iterator(); i.hasNext(); ) {
-			    Formal f = (Formal) i.next();
-			    print(f, w, tr);
-
-			    if (i.hasNext()) {
-				w.write(",");
-				w.allowBreak(0, " ");
-			    }
-			}
-
-			w.end();
-			w.write(")");
-			
-		}
 		printSubStmt(body, w, tr);
 	}
 
@@ -197,8 +161,6 @@ public class Async_c extends Stmt_c implements Async, Clocked {
 		return (place != null ? place.entry() : this);
 	}
 
-	 
-
 	/**
 	 * Visit this term in evaluation order.
 	 * [IP] Treat this as a conditional to make sure the following
@@ -207,17 +169,9 @@ public class Async_c extends Stmt_c implements Async, Clocked {
 	 * disallow uses of "continue", "break", etc. in asyncs.
 	 */
 	public List acceptCFG(CFGBuilder v, List succs) {
-		
 		v.visitCFG(place, FlowGraph.EDGE_KEY_TRUE, body.entry(), 
 						  FlowGraph.EDGE_KEY_FALSE, this);
-		
-		if (clocks() == null) {
-			v.visitCFG(body, this);
-		} else {
-			v.visitCFGList(clocks, body.entry());
-			v.visitCFG(body, this);
-		}
-		
+		v.visitCFG(body, this);
 		return succs;
 	}
 

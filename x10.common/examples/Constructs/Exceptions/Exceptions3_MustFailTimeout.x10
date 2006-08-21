@@ -1,43 +1,60 @@
-import harness.x10Test;
-
 /**
- * Test multiple exceptions.
+ *@author kemal 5/2005
  *
- * Behavior of conjunctive finish:
+ *Test multiple exceptions.
  *
- * If any child activity does not terminate,
- * parent will not terminate, even if other children threw exceptions.
  *
- * Desired behavior of test: must time out.
+ *Behavior of conjunctive finish:
  *
- * @author kemal 5/2005
+ *If any child activity does not terminate, 
+ *parent will not terminate, even if other children threw exceptions.
+ *
+ *Desired behavior of test: must time out.
+ *
+ *
  */
-public class Exceptions3_MustFailTimeout extends x10Test {
 
-	const int MAXINT = 2147483647;
-	void memoryHog() { byte[] a = new byte[MAXINT]; X.use(a); }
-	public boolean run() {
-		final int M = 4;
-		try {
-			finish {
-				ateach (point [i]: dist.factory.unique()) {
-					foreach (point [j]: [1:M])
-						memoryHog();
-				}
-				async(here) await(!X.t());
-			}
-		} catch (x10.lang.MultipleExceptions me) {
-		}
-		return true;
-	}
-
-	public static void main(String[] args) {
-		new Exceptions3_MustFailTimeout().execute();
-	}
-
-	static class X {
-		static void use (byte[] x) { }
-		static boolean t() { return true; }
-	}
+class X {
+	static void use (byte[] x) {}
+	static boolean t() {return true;}
 }
 
+
+	
+
+public class Exceptions3_MustFailTimeout {
+	const int MAXINT= 2147483647;
+	void memoryHog() {byte[] a=new byte[MAXINT]; X.use(a);}
+	public boolean run() {
+	     final int M=4;
+	     try {
+		finish {
+		 ateach(point [i]:dist.factory.unique()) {
+			foreach(point [j]: [1:M])
+				memoryHog();
+		 }
+		 async(here) await(!X.t());
+	        }
+             } catch (x10.lang.MultipleExceptions me) {
+             }
+	     return true;
+	}
+
+	
+    public static void main(String[] args) {
+        final boxedBoolean b=new boxedBoolean();
+        try {
+                finish async b.val=(new Exceptions3_MustFailTimeout()).run();
+        } catch (Throwable e) {
+                e.printStackTrace();
+                b.val=false;
+        }
+        System.out.println("++++++ "+(b.val?"Test succeeded.":"Test failed."));
+        x10.lang.Runtime.setExitCode(b.val?0:1);
+    }
+    static class boxedBoolean {
+        boolean val=false;
+    }
+
+
+}

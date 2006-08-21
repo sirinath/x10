@@ -3,19 +3,27 @@
  */
 package polyglot.ext.x10.ast;
 
-import polyglot.ast.Node;
-import polyglot.ast.TypeNode;
+import polyglot.ext.jl.ast.TypeNode_c;
 import polyglot.ext.x10.types.X10Type;
 import polyglot.ext.x10.types.X10TypeSystem;
-import polyglot.ext.x10.types.X10TypeSystem_c;
-import polyglot.main.Report;
-import polyglot.types.SemanticException;
-import polyglot.util.CodeWriter;
+
 import polyglot.util.Position;
-import polyglot.visit.AmbiguityRemover;
-import polyglot.visit.NodeVisitor;
-import polyglot.visit.PrettyPrinter;
+import polyglot.util.CodeWriter;
+
+import polyglot.ast.TypeNode;
+import polyglot.ast.Node;
+
+import polyglot.types.SemanticException;
+import polyglot.types.Type;
+//import polyglot.types.ReferenceType;
+
 import polyglot.visit.TypeChecker;
+import polyglot.visit.NodeVisitor;
+import polyglot.visit.AmbiguityRemover;
+import polyglot.visit.TypeBuilder;
+import polyglot.visit.PrettyPrinter;
+
+import polyglot.main.Report;
 
 /**
  * A NullableNode is an TypeNode that has been marked with a nullable
@@ -26,7 +34,7 @@ import polyglot.visit.TypeChecker;
  *
  * @author vj
  */
-public class NullableNode_c extends X10TypeNode_c implements NullableNode {
+public class NullableNode_c extends TypeNode_c implements NullableNode {
 
 	// Recall the field this.type is defined at the supertype.
 	// The Typenode representing the argument type X.
@@ -53,16 +61,17 @@ public class NullableNode_c extends X10TypeNode_c implements NullableNode {
 
 	public Node visitChildren(NodeVisitor v) {
 		TypeNode base = (TypeNode) visitChild(this.base, v);
-		return ((NullableNode_c) super.visitChildren(v)).reconstruct(base);
+		return reconstruct(base);
 	}
 
 	/**
 	 * Disambiguate the base node. Ensure that it is unambiguous.
 	 * Create a NullableType_c and store it in this.type.
 	 */
-	public Node disambiguateBase(AmbiguityRemover sc) throws SemanticException {
+	public Node disambiguate(AmbiguityRemover sc) throws SemanticException {
 		if (Report.should_report("debug", 5)) {
-			Report.report(5,"[NullableNode_c] Disambiguatebase |" + "(#"+ this.hashCode() + ")" + this + " with base=|" + base + "|:");
+			Report.report(5,"[NullableNode_c] Disambiguating |" + this + "|(#"
+					+ this.hashCode() +") with base=|" + base + "|:");
 		}
 
 		TypeNode newType = (TypeNode) base.disambiguate(sc);
@@ -86,15 +95,15 @@ public class NullableNode_c extends X10TypeNode_c implements NullableNode {
 //			throw new SemanticException("Argument to nullable type-constructor must be a reference type",
 //					position());
 
-		X10TypeSystem ts = X10TypeSystem_c.getTypeSystem();
+		X10TypeSystem ts = (X10TypeSystem) baseType.typeSystem();
 		// [IP] FIXME: Why are we modifying this in-place?
 		this.type = ts.createNullableType(position(), baseType);
 
-		NullableNode_c result = (NullableNode_c) reconstruct(newType);
+		Node result = reconstruct(newType);
 
 		if (Report.should_report("debug", 5)) {
-			Report.report(5,"[NullableNode_c] " + "(#"+ this.hashCode() + ")" + " ... returns |" + result +"|(#"
-					+ result.hashCode() +") of type |" + result.type() + "| and base |" + result.base+"|");
+			Report.report(5,"[NullableNode_c] ... returns |" + result +"|(#"
+					+ result.hashCode() +").");
 		}
 
 		return result;
@@ -106,7 +115,7 @@ public class NullableNode_c extends X10TypeNode_c implements NullableNode {
 	 * Otherwise throw a semantic exception.  TODO: Ensure that visibility of
 	 * this node is the same as that of the type argument.
 	 */
-	public Node typeCheckBase(TypeChecker tc) throws SemanticException {
+	public Node typeCheck(TypeChecker tc) throws SemanticException {
 
 		if (Report.should_report("debug", 5)) {
 			Report.report(5,"[NullableNode_c] Type checking |" + this +"|:");

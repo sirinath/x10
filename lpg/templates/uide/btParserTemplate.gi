@@ -8,10 +8,9 @@
 --
 %Options programming_language=java,margin=4,backtrack
 %Options table,error_maps,scopes
-%options prefix=TK_
-%options action_block=("*.java", "/.", "./")
+%options prefix=TK_,
+%options action=("*.java", "/.", "./")
 %options ParseTable=lpg.lpgjavaruntime.ParseTable
-%options nt-check
 
 --
 -- This template requires that the name of the EOF token be set
@@ -184,8 +183,8 @@ $Headers
         //
         public final void reportErrorTokenMessage(int error_token, String msg)
         {
-            int firsttok = super.getFirstRealToken(error_token),
-                lasttok = super.getLastRealToken(error_token);
+            int firsttok = super.getFirstErrorToken(error_token),
+                lasttok = super.getLastErrorToken(error_token);
             String location = super.getFileName() + ':' +
                               (firsttok > lasttok
                                         ? (super.getEndLine(lasttok) + ":" + super.getEndColumn(lasttok))
@@ -199,12 +198,12 @@ $Headers
 
         public $ast_class parser()
         {
-            return parser(null, Integer.MAX_VALUE);
+            return parser(null, 0);
         }
         
         public $ast_class parser(Monitor monitor)
         {
-            return parser(monitor, Integer.MAX_VALUE);
+            return parser(monitor, 0);
         }
         
         public $ast_class parser(int error_repair_count)
@@ -230,7 +229,7 @@ $Headers
 
             try
             {
-                return ($ast_class) btParser.fuzzyParse(error_repair_count);
+                return ($ast_class) btParser.parse(error_repair_count);
             }
             catch (BadParseException e)
             {

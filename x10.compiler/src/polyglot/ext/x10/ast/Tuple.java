@@ -6,6 +6,7 @@
 package polyglot.ext.x10.ast;
 
 import polyglot.ast.Expr;
+import java.util.List;
 
 /**
  * @author vj Jan 19, 2005

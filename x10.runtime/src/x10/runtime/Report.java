@@ -13,11 +13,6 @@ import java.util.Stack;
  * @author vj
  * */
 public class Report {
-	
-	public static final String ACTIVITY = "activity";
-
-	public static final String CLOCK = "clock";
-
   /** A collection of string names of topics which can be used with the
       -report command-line switch */
   public static Collection topics = new HashSet();
@@ -31,6 +26,7 @@ public class Report {
    * they want to report them to.
    */
   protected static Map reportTopics = new HashMap(); // Map[String, Integer]
+  
 
   /**
    * Indicates if there is no reporting at all.
@@ -39,18 +35,20 @@ public class Report {
    * this flag to bypass a lot of the checking. When the options are processed,
    * this flag should be changed.
    */
-   // Replaced by a JITTimeConstants ENABLE_REPORTING
-    protected static boolean noReporting = true;
+  protected static boolean noReporting = true;
   
   /** Report topics understood by the runtime system. */
-
+  
+  public static String clock = "clock";
+  public static String activity = "activity";
+  
   // This topic is the level of detail that should be in messages.
   public static String debug = "debug";  
   public static String verbose="verbose";
   static {
     
-    topics.add(Report.CLOCK);
-    topics.add(Report.ACTIVITY);
+    topics.add(clock);
+    topics.add(activity);
 
     should_report.push(verbose);
   }
@@ -103,6 +101,7 @@ public class Report {
       if (i == null || i.intValue() < level) {
           reportTopics.put(topic, new Integer(level));
       }
+      noReporting = false;
   }
 
   protected static int level(String name) {
@@ -121,5 +120,4 @@ public class Report {
     for (int j = 1; j < level; j++) System.out.print("  ");
     System.out.println(message);
   }
-
 }

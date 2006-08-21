@@ -1,10 +1,8 @@
-import harness.x10Test;
-
 /**
- * Synthetic benchmark to time array accesses.
+ * Synthetic benchmark to time array accesses
  */
-public class ArrayIndexing extends x10Test {
-	String _tests[] = { "testDouble" };
+public class ArrayIndexing {
+	String _tests[] = {"testDouble"};
 
 	static final boolean verbose = false;
 
@@ -101,9 +99,9 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (int i = l1; i <= h1; ++i) {
 			array[i] = array[i];
-			if (verbose) System.out.println("a["+i+"] = "+count);
+			if (verbose) System.out.println("a["+i+"]="+count);
 			if (array[i].value != count) {
-				System.out.println("failed a["+i+"] ("+array[i].value+") != "+count);
+				System.out.println("failed a["+i+"] ("+array[i].value+")!="+count);
 				return false;
 			}
 			++count;
@@ -119,9 +117,9 @@ public class ArrayIndexing extends x10Test {
 		for (int i = l1; i <= h1; ++i)
 			for (int j = l2; j <= h2; ++j) {
 				array[i, j] = array[i, j];
-				if (verbose) System.out.println("a["+i+","+j+"] = "+count);
+				if (verbose) System.out.println("a["+i+","+j+"]="+count);
 				if (array[i, j].value != count) {
-					System.out.println("failed a["+i+","+j+"] ("+array[i, j].value+") != "+count);
+					System.out.println("failed a["+i+","+j+"] ("+array[i, j].value+")!="+count);
 					return false;
 				}
 				++count;
@@ -140,9 +138,9 @@ public class ArrayIndexing extends x10Test {
 			for (int j = l2; j <= h2; ++j)
 				for (int k = l3; k <= h3; ++k) {
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+count);
 					if (array[i, j, k].value != count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k].value+") != "+count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k].value+")!="+count);
 						return false;
 					}
 					++count;
@@ -164,9 +162,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+count);
 						if (array[i, j, k, l].value != count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l].value+") != "+count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l].value+")!="+count);
 							return false;
 						}
 						++count;
@@ -186,9 +184,9 @@ public class ArrayIndexing extends x10Test {
 			for (int j = l2; j <= h2; ++j)
 				for (int k = l3; k <= h3; ++k) {
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+count);
 					if (array[i, j, k] != count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+") != "+count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+")!="+count);
 						return false;
 					}
 					++count;
@@ -210,9 +208,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+count);
 						if (array[i, j, k, l] != count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+") != "+count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+")!="+count);
 							return false;
 						}
 						++count;
@@ -232,9 +230,9 @@ public class ArrayIndexing extends x10Test {
 			for (int j = l2; j <= h2; ++j)
 				for (int k = l3; k <= h3; ++k) {
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+count);
 					if (array[i, j, k] != count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+") != "+count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+")!="+count);
 						return false;
 					}
 					++count;
@@ -256,9 +254,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+count);
 						if (array[i, j, k, l] != count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+") != "+count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+")!="+count);
 							return false;
 						}
 						++count;
@@ -278,9 +276,9 @@ public class ArrayIndexing extends x10Test {
 			for (int j = l2; j <= h2; ++j)
 				for (int k = l3; k <= h3; ++k) {
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+count);
 					if (array[i, j, k] != count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+") != "+count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+")!="+count);
 						return false;
 					}
 					++count;
@@ -302,9 +300,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+count);
 						if (array[i, j, k, l] != count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+") != "+count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+")!="+count);
 							return false;
 						}
 						++count;
@@ -324,9 +322,9 @@ public class ArrayIndexing extends x10Test {
 			for (int j = l2; j <= h2; ++j)
 				for (int k = l3; k <= h3; ++k) {
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+(char)count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+(char)count);
 					if (array[i, j, k] != (char)count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+") != "+(char)count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+")!="+(char)count);
 						return false;
 					}
 					++count;
@@ -348,9 +346,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+(char)count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+(char)count);
 						if (array[i, j, k, l] != (char)count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+") != "+(char)count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+")!="+(char)count);
 							return false;
 						}
 						++count;
@@ -370,9 +368,9 @@ public class ArrayIndexing extends x10Test {
 			for (int j = l2; j <= h2; ++j)
 				for (int k = l3; k <= h3; ++k) {
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+(byte)count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+(byte)count);
 					if (array[i, j, k] != (byte)count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+") != "+(byte)count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+")!="+(byte)count);
 						return false;
 					}
 					++count;
@@ -394,9 +392,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+(byte)count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+(byte)count);
 						if (array[i, j, k, l] != (byte)count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+") != "+(byte)count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+")!="+(byte)count);
 							return false;
 						}
 						++count;
@@ -417,9 +415,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k) {
 					//System.out.println("value is:"+array[i, j, k]);
 					array[i, j, k] = array[i, j, k];
-					if (verbose) System.out.println("a["+i+","+j+","+k+"] = "+count);
+					if (verbose) System.out.println("a["+i+","+j+","+k+"]="+count);
 					if (array[i, j, k] != count) {
-						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+") != "+count);
+						System.out.println("failed a["+i+","+j+","+k+"] ("+array[i, j, k]+")!="+count);
 						return false;
 					}
 					++count;
@@ -441,9 +439,9 @@ public class ArrayIndexing extends x10Test {
 				for (int k = l3; k <= h3; ++k)
 					for (int l = l4; l <= h4; ++l) {
 						array[i, j, k, l] = array[i, j, k, l]; // ensure set works as well
-						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"] = "+count);
+						if (verbose) System.out.println("a["+i+","+j+","+k+","+l+"]="+count);
 						if (array[i, j, k, l] != count) {
-							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+") != "+count);
+							System.out.println("failed a["+i+","+j+","+k+","+l+"] ("+array[i, j, k, l]+")!="+count);
 							return false;
 						}
 						++count;
@@ -456,7 +454,7 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (point p:array.distribution.region) {
 			array[p] = count++;
-			if (verbose) System.out.println("init:"+p+" = "+count);
+			if (verbose) System.out.println("init:"+p+"="+count);
 		}
 	}
 	void initialize(Generic [.] array) {
@@ -465,7 +463,7 @@ public class ArrayIndexing extends x10Test {
 		for (point p:array.distribution.region) {
 			array[p] = new Generic();
 			array[p].value = count++;
-			if (verbose) System.out.println("init:"+p+" = "+count);
+			if (verbose) System.out.println("init:"+p+"="+count);
 		}
 	}
 	void initialize(int [.] array) {
@@ -473,7 +471,7 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (point p:array.distribution.region) {
 			array[p] = count++;
-			if (verbose) System.out.println("init:"+p+" = "+count);
+			if (verbose) System.out.println("init:"+p+"="+count);
 		}
 	}
 	void initialize(long [.] array) {
@@ -481,7 +479,7 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (point p:array.distribution.region) {
 			array[p] = count++;
-			if (verbose) System.out.println("init:"+p+" = "+count);
+			if (verbose) System.out.println("init:"+p+"="+count);
 		}
 	}
 	void initialize(float [.] array) {
@@ -489,7 +487,7 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (point p:array.distribution.region) {
 			array[p] = count++;
-			if (verbose) System.out.println("init:"+p+" = "+count);
+			if (verbose) System.out.println("init:"+p+"="+count);
 		}
 	}
 	void initialize(byte [.] array) {
@@ -497,7 +495,7 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (point p:array.distribution.region) {
 			array[p] = (byte)(count++);
-			if (verbose) System.out.println("init:"+p+" = "+(byte)count);
+			if (verbose) System.out.println("init:"+p+"="+(byte)count);
 		}
 	}
 	void initialize(char [.] array) {
@@ -505,16 +503,31 @@ public class ArrayIndexing extends x10Test {
 		int count = 0;
 		for (point p:array.distribution.region) {
 			array[p] = (char)(count++);
-			if (verbose) System.out.println("init:"+p+" = "+(char)count);
+			if (verbose) System.out.println("init:"+p+"="+(char)count);
 		}
 	}
 	void initialize(boolean [.] array) {
 		dist arrayDist = array.distribution;
 		int count = 0;
 		for (point p:array.distribution.region) {
-			array[p] = 1 == (count++)%2;
-			if (verbose) System.out.println("init:"+p+" = "+(1 == count%2));
+			array[p] = 1==(count++)%2;
+			if (verbose) System.out.println("init:"+p+"="+(1 ==count%2));
 		}
+	}
+
+	public static void main(String[] args) {
+		final boxedBoolean b = new boxedBoolean();
+		try {
+			finish async b.val = (new ArrayIndexing()).run();
+		} catch (Throwable e) {
+			e.printStackTrace();
+			b.val = false;
+		}
+		System.out.println("++++++ "+(b.val?"Test succeeded.":"Test failed."));
+		x10.lang.Runtime.setExitCode(b.val?0:1);
+	}
+	static class boxedBoolean {
+		boolean val = false;
 	}
 
 	boolean runDoubleTests(int repeatCount) {
@@ -531,7 +544,6 @@ public class ArrayIndexing extends x10Test {
 		System.out.println("Testing of double arrays took "+((double)(stop-start)/1000));
 		return true;
 	}
-
 	boolean runFloatTests(int repeatCount) {
 		System.out.println("Testing Floats...");
 		long start = System.currentTimeMillis();
@@ -546,7 +558,6 @@ public class ArrayIndexing extends x10Test {
 		System.out.println("Testing of float arrays took "+((double)(stop-start)/1000));
 		return true;
 	}
-
 	boolean runIntTests(int repeatCount) {
 		System.out.println("Testing Ints...");
 		long start = System.currentTimeMillis();
@@ -561,7 +572,6 @@ public class ArrayIndexing extends x10Test {
 		System.out.println("Testing of int arrays took "+((double)(stop-start)/1000));
 		return true;
 	}
-
 	boolean runLongTests(int repeatCount) {
 		System.out.println("Testing Longs...");
 		long start = System.currentTimeMillis();
@@ -576,7 +586,6 @@ public class ArrayIndexing extends x10Test {
 		System.out.println("Testing of long arrays took "+((double)(stop-start)/1000));
 		return true;
 	}
-
 	boolean runByteTests(int repeatCount) {
 		System.out.println("Testing Bytes...");
 		long start = System.currentTimeMillis();
@@ -591,7 +600,6 @@ public class ArrayIndexing extends x10Test {
 		System.out.println("Testing of byte arrays took "+((double)(stop-start)/1000));
 		return true;
 	}
-
 	boolean runCharTests(int repeatCount) {
 		System.out.println("Testing Chars...");
 		long start = System.currentTimeMillis();
@@ -606,11 +614,9 @@ public class ArrayIndexing extends x10Test {
 		System.out.println("Testing of char arrays took "+((double)(stop-start)/1000));
 		return true;
 	}
-
 	boolean runBooleanTests(int repeatCount) {
 		return true;
 	}
-
 	boolean runGenericTests(int repeatCount) {
 		System.out.println("Testing Longs...");
 		initialize(_genericArray1D);
@@ -633,7 +639,7 @@ public class ArrayIndexing extends x10Test {
 		return true;
 	}
 
-	public boolean run() {
+	boolean run() {
 		int repeatCount = 500;
 		if (!runByteTests(repeatCount)) return false;
 		if (!runCharTests(repeatCount)) return false;
@@ -669,13 +675,9 @@ public class ArrayIndexing extends x10Test {
 		stop = System.currentTimeMillis();
 		if (verbose)System.out.println("testDouble1d("+iterations+") elapsed time:"+((double)(stop-start)/1000));
 	}
+}
 
-	public static void main(String[] args) {
-		new ArrayIndexing().execute();
-	}
-
-	static class Generic {
-		public int value;
-	}
+class Generic {
+	public int value;
 }
 

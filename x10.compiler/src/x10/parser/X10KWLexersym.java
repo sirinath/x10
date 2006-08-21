@@ -1,9 +1,3 @@
-
-//
-// Licensed Material 
-// (C) Copyright IBM Corp, 2006
-//
-
 package x10.parser;
 
 public interface X10KWLexersym {

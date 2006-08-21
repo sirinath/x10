@@ -4,16 +4,7 @@
 %Options list
 %Options fp=X10KWLexer
 %options package=x10.parser
-%options template=uide/KeywordTemplate.gi
-
-$Notice
-/.
-//
-// Licensed Material 
-// (C) Copyright IBM Corp, 2006
-//
-./
-$End
+%options template=uide/KeyWordTemplate.gi
 
 $Import
     GJavaKWLexer.gi

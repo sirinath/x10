@@ -9,15 +9,28 @@ package x10.lang;
  @author vj
  @date 12/24/2004
  */
-import /*x10*/java.util.Set;
 import java.util.Iterator;
-import x10.lang.GlobalIndexMap;
+import java.util.Set;
 
 
 abstract public /*value*/ class dist/*( region region )*/ extends Object 
-implements Indexable, ValueType {
+implements Indexable, ValueType, java.io.Serializable {
+	
+	/* used to create distributions remotely */
+        public final static int UNKNOWN=0;
+	public final static int BLOCK_CYCLIC=1;
+	public final static int BLOCK=2;
+	public final static int CONSTANT=3;
+	public final static int CYCLIC=4;
+	public final static int UNIQUE=5;
+        public final static int ARBITRARY=6; 
+	public int _distributionType=UNKNOWN;
+	public int _cyclicValue;
+        public int getDistributionType() {return _distributionType;}
+        public int getCyclicValue() {return _cyclicValue;}
 	
 	public final region region;
+	public region getRegion() { return region; }
 	/** The parameter dimension may be used in constructing types derived
 	 * from the class distribution. For instance,
 	 * distribution(dimension=k) is the type of all k-dimensional
@@ -28,25 +41,17 @@ implements Indexable, ValueType {
     /* disrtibution is Indexable and as such regarded by the compiler as an X10array.
      * Hence it must have a field 'distrubution' (see ateach construct) */
     public final dist distribution;
-	
-	/** places is the range of the distribution. Guranteed that if a
+
+    /** places is the range of the distribution. Guranteed that if a
 	 * place P is in this set then for some point p in region,
 	 * this.valueAt(p)==P.
 	 */
 	abstract public Set/*<place>*/ places(); // consider making this a parameter?
-	public place[] placesArray() {
-		java.lang.Object[] a = places().toArray();
-		place[] res = new place[a.length];
-		System.arraycopy(a,0,res,0,a.length);
-		return res;
-	}
 
 	protected dist(region R) {
 		this.region = R;
 		this.rank = R.rank;
         this.distribution = this;
-    //    _indexMap = null;
-    	   	
 	}
 	
 	public static class MalformedError extends java.lang.Error {}
@@ -84,7 +89,8 @@ implements Indexable, ValueType {
 		
 		public 
 		/*(region R)*/ dist/*(R)*/block() {
-			dist result = this.block(x10.lang.region.factory.region(0, place.MAX_PLACES-1));
+                        dist result = this.block(x10.lang.region.factory.region(0, place.MAX_PLACES-1));
+                        result._distributionType=BLOCK;
 			return result;
 		}
 		
@@ -94,6 +100,7 @@ implements Indexable, ValueType {
 		public 
 		/*(region R)*/ dist/*(R)*/ block( final region R ) {
 			final dist/*(R)*/ result = this.block/*(R)*/(R, x10.lang.place.places);
+                        result._distributionType = BLOCK;
 			assert result.region.equals(R); 
 			return result;
 		}
@@ -105,13 +112,6 @@ implements Indexable, ValueType {
 		abstract public  
 		/*(region R)*/ dist/*(R)*/ block( region R, Set/*<place>*/ s);
 		
-		public 
-		/*(region R)*/ dist/*(R)*/ block( final region base, final region[] R ) {
-			final dist/*(R)*/ result = this.block/*(R)*/(base, R, x10.lang.place.places);
-			//assert result.region.equals(R); 
-			return result;
-		}
-		abstract public dist block(region base, region[] R, Set/*<places>*/ s);
 		
 		/** Returns the cyclic distribution over the given region, and over
 		 * all places.
@@ -120,7 +120,8 @@ implements Indexable, ValueType {
                       
 			/*final*/ dist result = this.cyclic/*(R)*/(R, x10.lang.place.places);
 			assert result.region.equals(R);
-       		return result;
+                        result._distributionType = CYCLIC;
+			return result;
 		}
 		
 		abstract public /*(region R)*/ dist/*(R)*/ cyclic( region R, Set/*<place>*/ s);

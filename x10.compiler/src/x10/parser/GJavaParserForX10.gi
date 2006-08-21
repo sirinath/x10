@@ -91,10 +91,9 @@ $End
 
 $Rules
 
-    identifier ::= IDENTIFIER$ident
+    identifier ::= IDENTIFIER$id
         /.$BeginJava
-                    ident.setKind($sym_type.TK_IDENTIFIER);
-                    setResult(id(getRhsFirstTokenIndex($ident)));
+                    setResult(id(getRhsFirstTokenIndex($id)));
           $EndJava
         ./
 
@@ -106,12 +105,12 @@ $Rules
 --    Type ::= PrimitiveType
 --           | ReferenceType
 
---   PrimitiveType ::= NumericType
---                    | boolean
---        /.$BeginJava
---                    setResult(nf.CanonicalTypeNode(pos(), ts.Boolean()));
---          $EndJava
---        ./
+    PrimitiveType ::= NumericType
+                    | boolean
+        /.$BeginJava
+                    setResult(nf.CanonicalTypeNode(pos(), ts.Boolean()));
+          $EndJava
+        ./
 
     NumericType ::= IntegralType
                   | FloatingPointType
@@ -168,7 +167,7 @@ $Rules
     --
     --                       | InterfaceType
     --
-    -- ClassType ::= TypeName TypeArgumentsopt
+    ClassType ::= TypeName TypeArgumentsopt
 
     InterfaceType ::= TypeName TypeArgumentsopt
 
@@ -259,7 +258,7 @@ $Rules
     -- TypeName ::= identifier
     --           | PackageOrTypeName . identifier
     --
-    ExpressionName ::=? identifier
+    ExpressionName ::= identifier
         /.$BeginJava
                     setResult(new Name(nf, ts, pos(), identifier.getIdentifier()));
           $EndJava
@@ -274,7 +273,7 @@ $Rules
           $EndJava
         ./
 
-    MethodName ::=? identifier
+    MethodName ::= identifier
         /.$BeginJava
                     setResult(new Name(nf, ts, pos(), identifier.getIdentifier()));
           $EndJava
@@ -304,7 +303,7 @@ $Rules
           $EndJava
         ./
 
-    AmbiguousName ::=? identifier
+    AmbiguousName ::= identifier
         /.$BeginJava
                     setResult(new Name(nf, ts, pos(), identifier.getIdentifier()));
           $EndJava
@@ -326,14 +325,8 @@ $Rules
                     // Add import x10.lang.* by default.
                     Name x10 = new Name(nf, ts, pos(), "x10");
                     Name x10Lang = new Name(nf, ts, pos(), x10, "lang");
-                    int token_pos = (ImportDeclarationsopt.size() == 0
-                                         ? TypeDeclarationsopt.size() == 0
-                                               ? super.getSize() - 1
-                                               : getPrevious(getRhsFirstTokenIndex($TypeDeclarationsopt))
-                                     : getRhsLastTokenIndex($ImportDeclarationsopt)
-                                );
                     Import x10LangImport = 
-                    nf.Import(pos(token_pos), Import.PACKAGE, x10Lang.toString());
+                    nf.Import(pos(getLeftSpan(), getRightSpan()), Import.PACKAGE, x10Lang.toString());
                     ImportDeclarationsopt.add(x10LangImport);
                     setResult(nf.SourceFile(pos(getLeftSpan(), getRightSpan()), PackageDeclarationopt, ImportDeclarationsopt, TypeDeclarationsopt));
           $EndJava
@@ -463,7 +456,7 @@ $Rules
                         | TypeParameterList , TypeParameter
         /.$BadAction./
 
-     Super ::= extends ClassType
+    Super ::= extends ClassType
         /.$BeginJava
                     setResult(ClassType);
           $EndJava
@@ -566,7 +559,24 @@ $Rules
         ./
     
     FieldDeclaration ::= FieldModifiersopt Type VariableDeclarators ;
-
+        /.$BeginJava
+                    List l = new TypedList(new LinkedList(), ClassMember.class, false);
+                    for (Iterator i = VariableDeclarators.iterator(); i.hasNext();)
+                    {
+                        X10VarDeclarator d = (X10VarDeclarator) i.next();
+                        if (d.hasExplodedVars())
+                          // TODO: Report this exception correctly.
+                          throw new Error("Field Declarations may not have exploded variables." + pos());
+                        d.setFlag(FieldModifiersopt);
+                        l.add(nf.FieldDecl(d.position(),
+                                           d.flags,
+                                           nf.array(Type, Type.position(), d.dims),
+                                           d.name,
+                                           d.init));
+                    }
+                    setResult(l);
+          $EndJava
+        ./
     
     VariableDeclarators ::= VariableDeclarator
         /.$BeginJava
@@ -675,9 +685,7 @@ $Rules
                          MethodBody = MethodBody.statements(ss);
                          MethodHeader = MethodHeader.flags(f.clear(X10Flags.ATOMIC));
                     }
-                    JPGPosition old_pos = (JPGPosition) MethodHeader.position();
-                    setResult(MethodHeader.body(MethodBody)
-                              .position(pos(old_pos.getLeftIToken().getTokenIndex(), getRightSpan())));
+                    setResult(MethodHeader.body(MethodBody));
           $EndJava
         ./
     
@@ -690,21 +698,21 @@ $Rules
           $EndJava
         ./
     
-    -- MethodDeclarator ::= identifier ( FormalParameterListopt )
-    --    /.$BeginJava
-    --                 Object[] a = new Object[3];
-    --               a[0] = new Name(nf, ts, pos(), identifier.getIdentifier());
-    --                 a[1] = FormalParameterListopt;
-    --                a[2] = new Integer(0);
-    --                 setResult(a);
-    --      $EndJava
-    --     ./
-    --                  | MethodDeclarator [ ]
-     --    /.$BeginJava
-      --              MethodDeclarator[2] = new Integer(((Integer) MethodDeclarator[2]).intValue() + 1);
-      --               // setResult(MethodDeclarator);
-     --     $EndJava
-     --    ./
+    MethodDeclarator ::= identifier ( FormalParameterListopt )
+        /.$BeginJava
+                    Object[] a = new Object[3];
+                    a[0] = new Name(nf, ts, pos(), identifier.getIdentifier());
+                    a[1] = FormalParameterListopt;
+                    a[2] = new Integer(0);
+                    setResult(a);
+          $EndJava
+        ./
+                       | MethodDeclarator [ ]
+        /.$BeginJava
+                    MethodDeclarator[2] = new Integer(((Integer) MethodDeclarator[2]).intValue() + 1);
+                    // setResult(MethodDeclarator);
+          $EndJava
+        ./
     
     FormalParameterList ::= LastFormalParameter
         /.$BeginJava
@@ -864,16 +872,16 @@ $Rules
           $EndJava
         ./
     
-  -- ConstructorDeclaration ::= ConstructorModifiersopt ConstructorDeclarator Throwsopt ConstructorBody
-   --    /.$BeginJava
-   --                 Name a = (Name) ConstructorDeclarator[1];
-   --                 List b = (List) ConstructorDeclarator[2];
---
-   --                setResult(nf.ConstructorDecl(pos(), ConstructorModifiersopt, a.toString(), b, Throwsopt, ConstructorBody));
-    --     $EndJava
-    --   ./
+    ConstructorDeclaration ::= ConstructorModifiersopt ConstructorDeclarator Throwsopt ConstructorBody
+        /.$BeginJava
+                    Name a = (Name) ConstructorDeclarator[1];
+                    List b = (List) ConstructorDeclarator[2];
+
+                    setResult(nf.ConstructorDecl(pos(), ConstructorModifiersopt, a.toString(), b, Throwsopt, ConstructorBody));
+          $EndJava
+        ./
     
---   ConstructorDeclarator ::= TypeParametersopt SimpleTypeName ( FormalParameterListopt )
+    ConstructorDeclarator ::= TypeParametersopt SimpleTypeName ( FormalParameterListopt )
     
     SimpleTypeName ::= identifier
         /.$BeginJava
@@ -1374,6 +1382,7 @@ $Rules
                     setResult(nf.Labeled(pos(), identifier.getIdentifier(), StatementNoShortIf));
           $EndJava
         ./
+    
     ExpressionStatement ::= StatementExpression ;
         /.$BeginJava
                     setResult(nf.Eval(pos(), StatementExpression));

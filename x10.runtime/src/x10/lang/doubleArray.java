@@ -9,6 +9,7 @@ package x10.lang;
  * @author vj 12/24/2004
  */
 
+import java.io.Serializable;
 
 abstract public class doubleArray extends x10Array{
 
@@ -16,7 +17,7 @@ abstract public class doubleArray extends x10Array{
 		super(D);
 	}
 	
-	public static interface binaryOp {
+	public static interface binaryOp extends Serializable {
 		double apply(double r, double s);
 	}
 	public static final binaryOp sub = new binaryOp() { public double apply(double r, double s) { return r-s;}};
@@ -24,13 +25,13 @@ abstract public class doubleArray extends x10Array{
 	public static final binaryOp mul = new binaryOp() { public double apply(double r, double s) { return r*s;}};
 	public static final binaryOp div = new binaryOp() { public double apply(double r, double s) { return r/s;}};
 	public static final binaryOp max = new binaryOp() { public double apply(double r, double s) { return Math.max(r,s);}};
-	public static interface unaryOp {
+	public static interface unaryOp extends Serializable {
 		double apply(double r);
 	}
 	public static final unaryOp abs = new unaryOp() { public double apply(double r) { return Math.abs(r);}};
 	public static final unaryOp id = new unaryOp() { public double apply(double r) { return r;}};
 	
-	public static interface pointwiseOp/*(region r)*/ {
+	public static interface pointwiseOp/*(region r)*/ extends pointwiseOpTag, Serializable {
 		double apply(point/*(r)*/ p);
 	}
 	
@@ -125,6 +126,11 @@ abstract public class doubleArray extends x10Array{
 	abstract /*value*/ public double get(int p, int q, int r, int s);
     abstract public double get(int[] p);
     
+    //called from high level array operations
+	public double get(int d0, boolean chkPl) {return get(d0); }
+	public double get(int d0, int d1, boolean chkPl) {return get(d0, d1); }
+	public double get(point pos, boolean chkPl) {return get(pos); }
+	
     /** Convenience method for returning the sum of the array.
      * @return sum of the array.
      */

@@ -4,13 +4,16 @@
 package x10.array;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Set;
 
+import x10.cluster.Debug;
+import x10.lang.RankMismatchException;
 import x10.lang.point;
 import x10.lang.region;
-import x10.lang.RankMismatchException;
+import x10.runtime.Report;
+
 
 /**
  * @author Christoph von Praun
@@ -23,6 +26,10 @@ public class ArbitraryRegion extends region {
 		super(rank);
 		rankCache_ = new ArbitraryRegion[rank];
 		points_ = new TreeSet();
+		if(Report.should_report("cluster", Debug.warning)) {
+			Report.report(Debug.warning, "WRNING: ArbitraryRegion created.");
+			//Debug.printStack();
+		}
 	}
 
 	public ArbitraryRegion(region[] dims) {
@@ -37,6 +44,10 @@ public class ArbitraryRegion extends region {
 		rankCache_ = new ArbitraryRegion[dims.length];
 		points_ = new TreeSet();
 		permutations_(points_, new int[] { }, dims);
+		if(Report.should_report("cluster", Debug.warning)) {
+			Report.report(Debug.warning, "WRNING: ArbitraryRegion created.");
+			//Debug.printStack();
+		}
 	}
 
 	/* create all points in the region that is spawned by the dimensions in var */
@@ -228,7 +239,7 @@ public class ArbitraryRegion extends region {
 		return difference(this, r);
 	}
 
-	protected static region difference(region r1, region r2) {
+	public static region difference(region r1, region r2) {
 		if (r1.rank != r2.rank)
 			throw new RankMismatchException(r2, r1.rank);
 
@@ -362,8 +373,6 @@ public class ArbitraryRegion extends region {
 		return sb.toString();
 	}
 
-	
 
-	
 }
 

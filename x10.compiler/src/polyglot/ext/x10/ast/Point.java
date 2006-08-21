@@ -4,9 +4,8 @@
  */
 package polyglot.ext.x10.ast;
 
-import java.util.List;
-
 import polyglot.ast.Expr;
+import java.util.List;
 
 
 /** An immutable representation of a point in a region.

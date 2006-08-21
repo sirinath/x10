@@ -1,5 +1,3 @@
-import harness.x10Test;
-
 /**
  * Using clocks to do simple producer consumer synchronization
  * for this task DAG (arrows point downward)
@@ -18,7 +16,7 @@ import harness.x10Test;
  *
  * @author kemal 4/2005
  */
-public class ClockTest10 extends x10Test {
+public class ClockTest10 {
 	int[] varA = new int[2];
 	int[] varB = new int[2];
 	int[] varC = new int[2];
@@ -27,7 +25,7 @@ public class ClockTest10 extends x10Test {
 	const int N = 10;
 	const int pipeDepth = 2;
 
-	static int ph(int x) { return x % 2; }
+	static int ph(int x) { return x%2; }
 
 	public boolean run() {
 		finish async(here) {
@@ -35,75 +33,89 @@ public class ClockTest10 extends x10Test {
 			final clock b = clock.factory.clock();
 			final clock c = clock.factory.clock();
 			async clocked(a) taskA(a);
-			async clocked(a, b) taskB(a, b);
-			async clocked(a, c) taskC(a, c);
-			async clocked(b, c) taskD(b, c);
+			async clocked(a,b) taskB(a,b);
+			async clocked(a,c) taskC(a,c);
+			async clocked(b,c) taskD(b,c);
 			async clocked(c) taskE(c);
 		}
 		return true;
 	}
 
 	void taskA(final clock a) {
-		for (point [k]: [1:N]) {
-			varA[ph(k)] = k;
+		for(point [k]: [1:N]) {
+			varA[ph(k)]=k;
 			System.out.println(Thread.currentThread() + " " + k + " A producing " + varA[ph(k)]);
 			next;
 		}
 	}
 	void taskB(final clock a, final clock b) {
-		for (point [k]: [1:N]) {
-			final boxedInt tmp = new boxedInt();
-			finish tmp.val = varA[ph(k-1)]+varA[ph(k-1)];
+		for(point [k]: [1:N]) {
+			final boxedInt tmp=new boxedInt();
+			finish tmp.val=varA[ph(k-1)]+varA[ph(k-1)];
 			System.out.println(Thread.currentThread() + " " + k + " B consuming oldA producing " + tmp.val);
 			a.resume();
-			varB[ph(k)] = tmp.val;
+			varB[ph(k)]=tmp.val;
 			System.out.println(Thread.currentThread() + " " + "B before next");
 			next;
 		}
 	}
 	void taskC(final clock a, final clock c) {
-		for (point [k]: [1:N]) {
-			final boxedInt tmp = new boxedInt();
-			finish tmp.val = varA[ph(k-1)]*varA[ph(k-1)];
+		for(point [k]: [1:N]) {
+			final boxedInt tmp=new boxedInt();
+			finish tmp.val=varA[ph(k-1)]*varA[ph(k-1)];
 			System.out.println(Thread.currentThread() + " " + k + " C consuming oldA "+ tmp.val);
 			a.resume();
-			varC[ph(k)] = tmp.val;
+			varC[ph(k)]=tmp.val;
 			System.out.println(Thread.currentThread() + " " + "C before next");
 			next;
 		}
 	}
 	void taskD(final clock b, final clock c) {
-		for (point [k]: [1:N]) {
-			final boxedInt tmp = new boxedInt();
-			finish tmp.val = varB[ph(k-1)]+varC[ph(k-1)]+10;
+		for(point [k]: [1:N]) {
+			final boxedInt tmp=new boxedInt();
+			finish tmp.val=varB[ph(k-1)]+varC[ph(k-1)]+10;
 			System.out.println(Thread.currentThread() + " " + k + " D consuming oldB+oldC producing " + tmp.val);
 			c.resume();
 			b.resume();
-			varD[ph(k)] = tmp.val;
+			varD[ph(k)]=tmp.val;
 			System.out.println(Thread.currentThread() + " " + k + " D before next");
-			int n = k-pipeDepth;
-			chk(!(k>pipeDepth) || varD[ph(k)] == n+n+n*n+10);
+			int n=k-pipeDepth;
+			chk(!(k>pipeDepth) || varD[ph(k)]==n+n+n*n+10);
 			next;
 		}
 	}
 	void taskE(final clock c) {
-		for (point [k]: [1:N]) {
-			final boxedInt tmp = new boxedInt();
-			finish tmp.val = varC[ph(k-1)]*7;
+		for(point [k]: [1:N]) {
+			final boxedInt tmp=new boxedInt();
+			finish tmp.val=varC[ph(k-1)]*7;
 			System.out.println(Thread.currentThread() + " " + k + " E consuming oldC producing " + tmp.val);
 			c.resume();
-			varE[ph(k)] = tmp.val;
+			varE[ph(k)]=tmp.val;
 			System.out.println(Thread.currentThread() + " " + k + " E before next");
-			int n = k-pipeDepth;
-			chk(!(k>pipeDepth) || varE[ph(k)] == n*n*7);
+			int n=k-pipeDepth;
+			chk(!(k>pipeDepth) || varE[ph(k)]==n*n*7);
 			next;
 		}
 	}
 
-	public static void main(String[] args) {
-		new ClockTest10().execute();
+	static void chk(boolean b) {
+		if (!b) throw new Error();
 	}
 
+	public static void main(String[] args) {
+		final boxedBoolean b=new boxedBoolean();
+		try {
+			finish async b.val=(new ClockTest10()).run();
+		} catch (Throwable e) {
+			e.printStackTrace();
+			b.val=false;
+		}
+		System.out.println("++++++ "+(b.val?"Test succeeded.":"Test failed."));
+		x10.lang.Runtime.setExitCode(b.val?0:1);
+	}
+	static class boxedBoolean {
+		boolean val=false;
+	}
 	static class boxedInt {
 		int val;
 	}

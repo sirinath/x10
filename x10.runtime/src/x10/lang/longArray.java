@@ -1,5 +1,9 @@
 package x10.lang;
 
+import java.io.Serializable;
+
+import x10.lang.x10Array.pointwiseOpTag;
+
 
 /** The base class for all (value or reference) multidimensional,
  * distributed long arrays in X10.  Is a subclass-only mutable class
@@ -16,7 +20,7 @@ abstract public class longArray extends x10Array {
 		super(D);
 	}
 	
-	public static interface binaryOp {
+	public static interface binaryOp extends Serializable {
 		long apply(long r, long s);
 	}
 	
@@ -26,7 +30,7 @@ abstract public class longArray extends x10Array {
 	public static final binaryOp div = new binaryOp() { public long apply(long r, long s) { return r/s;}};
 	public static final binaryOp max = new binaryOp() { public long apply(long r, long s) { return Math.max(r,s);}};
 	
-	public static interface pointwiseOp/*(region r)*/ {
+	public static interface pointwiseOp/*(region r)*/  extends pointwiseOpTag, Serializable {
 		long apply(point/*(r)*/ p);
 	}
     
@@ -35,6 +39,11 @@ abstract public class longArray extends x10Array {
     }
 	
     public static final unaryOp abs = new unaryOp() { public long apply(long r) { return Math.abs(r);}};
+	
+    //called from high level array operations
+	public long get(int d0, boolean chkPl) {return get(d0); }
+	public long get(int d0, int d1, boolean chkPl) {return get(d0, d1); }
+	public long get(point pos, boolean chkPl) {return get(pos); }
 	
 	abstract public static /*value*/ class factory {
 		

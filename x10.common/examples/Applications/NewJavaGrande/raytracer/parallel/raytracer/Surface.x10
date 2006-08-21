@@ -20,11 +20,12 @@
 *                         All rights reserved.                            *
 *                                                                         *
 **************************************************************************/
-package raytracer;
+
+
+package raytracer; 
 
 //ok
 public value class Surface {
-
 	final public Vec	color;
 	final public double	kd;
 	final public double	ks;
@@ -40,8 +41,7 @@ public value class Surface {
 		kt = 0.0;
 		ior = 1.0;
 	}
-
-	public Surface(double shine_, double ks_, double kt_, Vec c_) {
+	public Surface( double shine_, double ks_, double kt_, Vec c_) {
 		kd = 1.0;
 		ks = ks_;
 		shine = shine_;
@@ -51,7 +51,8 @@ public value class Surface {
 	}
 
 	public String toString() {
-		return "Surface { color = " + color + " }";
+		return "Surface { color=" + color + "}";
 	}
 }
+
 

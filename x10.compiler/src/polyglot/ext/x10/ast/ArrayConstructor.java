@@ -6,8 +6,8 @@
 package polyglot.ext.x10.ast;
 
 
-import polyglot.ast.Expr;
 import polyglot.ast.TypeNode;
+import polyglot.ast.Expr;
 
 
 /** An immutable representation of an X10 Array constructor, which has

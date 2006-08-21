@@ -5,10 +5,10 @@
  */
 package polyglot.ext.x10.ast;
 
-import java.util.List;
-
+import polyglot.ast.ArrayAccess;
 import polyglot.ast.Expr;
 import polyglot.ast.Variable;
+import java.util.List;
 
 /**
  * @author vj Jan 11, 2005

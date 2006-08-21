@@ -6,8 +6,6 @@ import x10.lang.dist;
 import x10.lang.doubleArray;
 import x10.lang.point;
 import x10.lang.region;
-import x10.lang.doubleArray.binaryOp;
-import x10.lang.doubleArray.unaryOp;
 
 public class DoubleProxyArray extends DoubleReferenceArray {
 
@@ -123,10 +121,5 @@ public class DoubleProxyArray extends DoubleReferenceArray {
 	
 	public DoubleReferenceArray restrictShallow (region r) {
 		return realArray_.restrictShallow(r);
-	}
-
-	public Object toJava() {
-		// TODO Auto-generated method stub
-		return null;
 	}	
 }

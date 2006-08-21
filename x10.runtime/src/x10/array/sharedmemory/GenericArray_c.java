@@ -4,11 +4,12 @@
 package x10.array.sharedmemory;
 
 import java.util.Iterator;
-import x10.array.Helper;
+
+import x10.array.Distribution_c;
 import x10.array.GenericArray;
+import x10.array.Helper;
 import x10.array.Operator;
 import x10.base.Allocator;
-import x10.array.Distribution_c;
 import x10.base.MemoryBlock;
 import x10.base.UnsafeContainer;
 import x10.compilergenerated.Parameter1;
@@ -27,10 +28,10 @@ import x10.runtime.Configuration;
  */
 public class GenericArray_c extends GenericArray implements UnsafeContainer, Cloneable {
 
-    private final boolean safe_;
-    private final MemoryBlock arr_;
-    private final boolean mutable_;
-    private final boolean refsToValues_;
+    protected final boolean safe_;
+    protected final MemoryBlock arr_;
+    protected final boolean mutable_;
+    protected final boolean refsToValues_;
     
     public boolean valueEquals(Indexable other) {
         boolean ret;
@@ -116,7 +117,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
             scan(this, f);
     }
     
-    private GenericArray_c( dist d, Parameter1[] a, boolean safe, boolean mutable, boolean ref_to_values) {
+    protected GenericArray_c( dist d, Parameter1[] a, boolean safe, boolean mutable, boolean ref_to_values) {
     	super(d);
         assert (safe); // just to be GC-safe ;-)
     	this.arr_ = Allocator.allocSafeObjectArray( a);
@@ -124,6 +125,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
         this.mutable_ = mutable;
         this.refsToValues_ = ref_to_values;
     }
+    
     /** Return a safe IntArray_c initialized with the given local 1-d (Java) int array.
      * 
      * @param a
@@ -253,7 +255,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     public Parameter1 set(Parameter1 v, point pos,boolean chkPl,boolean chkAOB) {
         if (Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(pos));        
-        return (Parameter1) arr_.set(v, (int) distribution.region.ordinal(pos));
+        return (Parameter1) arr_.set(v, (int) localDist.region.ordinal(pos));
     }
     
     public Parameter1 setOrdinal(Parameter1 v, int rawIndex) {
@@ -265,7 +267,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     public Parameter1 set(Parameter1 v, int d0,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0));        
-        int	theIndex = Helper.ordinal(distribution,d0,chkAOB);   	  	 
+        int	theIndex = Helper.ordinal(localDist,d0,chkAOB);   	  	 
         return (Parameter1) setOrdinal(v, theIndex);
     }
     
@@ -273,7 +275,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     public Parameter1 set(Parameter1 v, int d0, int d1,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1));        
-        int	theIndex = Helper.ordinal(distribution,d0,d1,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,chkAOB);
         return (Parameter1) setOrdinal(v, theIndex);
     }
     public Parameter1 set(Parameter1 v, int d0,int d1,int d2) {return set(v,d0,d1,d2,true,true);}
@@ -281,7 +283,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2));
         
-        int	theIndex = Helper.ordinal(distribution,d0,d1,d2,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,d2,chkAOB);
         return (Parameter1) setOrdinal(v, theIndex);
     }
     
@@ -291,7 +293,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2, d3));
         
-        int	theIndex = Helper.ordinal(distribution,d0,d1,d2,d3,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,d2,d3,chkAOB);
         return (Parameter1)  setOrdinal(v, theIndex);
         
     }
@@ -301,7 +303,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
      */
     public Parameter1 get(point pos) {return get(pos,true,true);}
     public Parameter1 get(point pos,boolean chkPl,boolean chkAOB) {
-        return (Parameter1)  arr_.get((int) distribution.region.ordinal(pos));
+        return (Parameter1)  arr_.get((int) localDist.region.ordinal(pos));
     }
     
     public Parameter1 getOrdinal(int rawIndex) {    	
@@ -312,7 +314,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     public Parameter1 get(int d0,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0));        
-    	d0 = Helper.ordinal(distribution,d0,chkAOB);
+    	d0 = Helper.ordinal(localDist,d0,chkAOB);
     	return getOrdinal(d0);
     }
     
@@ -320,7 +322,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     public Parameter1 get(int d0, int d1,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1));        
-        int	theIndex = Helper.ordinal(distribution,d0,d1,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,chkAOB);
     	return getOrdinal(theIndex);
     }
     
@@ -330,7 +332,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2));
         
-        int	theIndex = Helper.ordinal(distribution,d0,d1,d2,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,d2,chkAOB);
     	return getOrdinal(theIndex);
     }
     
@@ -339,7 +341,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     public Parameter1 get(int d0, int d1, int d2, int d3,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2, d3));        
-        int	theIndex = Helper.ordinal(distribution,d0, d1, d2, d3,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0, d1, d2, d3,chkAOB);
     	return getOrdinal(theIndex);
     }
     
@@ -423,12 +425,7 @@ public class GenericArray_c extends GenericArray implements UnsafeContainer, Clo
     
     public x10.lang.genericArray toValueArray() {
     	if (! mutable_) return this;
-    	try {
-    		return (x10.lang.genericArray) this.clone();
-    	} catch (CloneNotSupportedException x) {
-    		throw new Error("TODO: <T>ReferenceArray --> <T>ValueArray"); 
-    	}
-    	
+    	throw new Error("TODO: <T>ReferenceArray --> <T>ValueArray");   
     }
     public boolean isValue() {
         return ! this.mutable_;

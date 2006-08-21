@@ -1,31 +1,40 @@
-import harness.x10Test;
-
 /**
- * Test for ateach.
+ * Test for ateach
  *
- * @author kemal, 12/2004
+ * @author: kemal, 12/2004
  */
-public class AtEach extends x10Test {
-    int nplaces = 0;
+public class AtEach {
+    int nplaces=0;
 
-    public boolean run() {
-        final dist d = dist.factory.unique(place.places);
+    public boolean run() {         
+        final dist d=dist.factory.unique(place.places);
         final int[d] disagree = new int[d];
-        finish ateach (final point p: d) {
+        finish ateach(final point p:d) {
             // remember if here and d[p] disagree
             // at any activity at any place
-            disagree[p] |= ((here != d[p]) ? 1 : 0);
-            async(this){atomic {nplaces++;}}
+            disagree[p] |= ((here!=d[p])?1:0); 
+            async(this){atomic {nplaces++;}}             
         }
         // ensure that d[i] agreed with here in
         // all places
         // and that an activity ran in each place
-        return disagree.reduce(intArray.add,0) == 0 &&
-                nplaces == place.MAX_PLACES;
+        return disagree.reduce(intArray.add,0)==0 &&
+                nplaces==place.MAX_PLACES;
     }
-
+        
     public static void main(String[] args) {
-        new AtEach().execute();
+        final boxedBoolean b=new boxedBoolean();
+        try {
+                finish async b.val=(new AtEach()).run();
+        } catch (Throwable e) {
+                e.printStackTrace();
+                b.val=false;
+        }
+        System.out.println("++++++ "+(b.val?"Test succeeded.":"Test failed."));
+        x10.lang.Runtime.setExitCode(b.val?0:1);
     }
-}
+    static class boxedBoolean {
+        boolean val=false;
+    }
 
+}

@@ -3,8 +3,10 @@
  */
 package polyglot.ext.x10.visit;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +15,6 @@ import java.util.List;
 
 import org.ovmj.util.Runabout;
 
-import polyglot.ast.ArrayAccess;
 import polyglot.ast.Expr;
 import polyglot.ast.Formal;
 import polyglot.ast.Node;
@@ -28,6 +29,7 @@ import polyglot.ext.jl.ast.Cast_c;
 import polyglot.ext.jl.ast.Field_c;
 import polyglot.ext.jl.ast.MethodDecl_c;
 import polyglot.ext.x10.Configuration;
+import polyglot.ext.x10.query.QueryEngine;
 import polyglot.ext.x10.ast.ArrayConstructor_c;
 import polyglot.ext.x10.ast.Async_c;
 import polyglot.ext.x10.ast.AtEach_c;
@@ -43,25 +45,21 @@ import polyglot.ext.x10.ast.Now_c;
 import polyglot.ext.x10.ast.PlaceCast_c;
 import polyglot.ext.x10.ast.RemoteCall_c;
 import polyglot.ext.x10.ast.When_c;
-import polyglot.ext.x10.ast.X10ArrayAccess1Unary_c;
 import polyglot.ext.x10.ast.X10ArrayAccess1Assign_c;
 import polyglot.ext.x10.ast.X10ArrayAccess1_c;
-import polyglot.ext.x10.ast.X10ArrayAccessUnary_c;
-import polyglot.ext.x10.ast.X10ArrayAccessAssign_c;
 import polyglot.ext.x10.ast.X10ArrayAccess_c;
 import polyglot.ext.x10.ast.X10ClockedLoop;
-import polyglot.ext.x10.ast.X10NodeFactory_c;
-import polyglot.ext.x10.query.QueryEngine;
+import polyglot.ext.x10.ast.X10Loop;
 import polyglot.ext.x10.types.NullableType;
 import polyglot.ext.x10.types.X10ReferenceType;
 import polyglot.ext.x10.types.X10Type;
-import polyglot.ext.x10.types.X10ArrayType_c;
 import polyglot.types.ReferenceType;
 import polyglot.types.Type;
 import polyglot.util.CodeWriter;
 import polyglot.util.InternalCompilerError;
-import polyglot.util.Position;
 import polyglot.visit.PrettyPrinter;
+
+import polyglot.ext.x10.ast.X10NodeFactory_c;
 
 /**
  * Visitor on the AST nodes that for some X10 nodes triggers the template
@@ -77,7 +75,7 @@ public class X10PrettyPrinterVisitor extends Runabout {
 	private final PrettyPrinter pp;
 
 	private static int nextId_;
-	/* to provide a unique name for local variables introduce in the templates */
+	/* to provide a unique name for local variabales introduce in the templates */
 	private static Integer getUniqueId_() {
 		return new Integer(nextId_++);
 	}
@@ -189,20 +187,9 @@ public class X10PrettyPrinterVisitor extends Runabout {
 
 	public void visit(Async_c a) {
 		assert (null != a.clocks());
-		Object clocks = null;
-		if (a.clocks().isEmpty())
-			clocks = "";
-		else if (a.clocks().size() == 1)
-			clocks = new Template("clock", a.clocks().get(0));
-		else {
-			Integer id = getUniqueId_();
-			clocks = new Template("clocked",
-								  new Loop("clocked-loop", a.clocks(), new CircularList(id)),
-								  id);
-		}
 		new Template("Async",
 					 a.place(),
-					 clocks,
+					 new Template("clocked", new Loop("clocked-loop", a.clocks())),
 					 a.body()).expand();
 	}
 
@@ -240,7 +227,6 @@ public class X10PrettyPrinterVisitor extends Runabout {
 
 	private void processClockedLoop(String template, X10ClockedLoop l) {
 		assert (null != l.clocks());
-		Integer id = getUniqueId_();
 		new Template(template,
 					 new Object[] {
 						 l.formal().flags().translate(),
@@ -251,8 +237,7 @@ public class X10PrettyPrinterVisitor extends Runabout {
 						 new Template("clocked",
 							 new Join("\n",
 								 new Join("\n", l.locals()),
-								 new Loop("clocked-loop", l.clocks(), new CircularList(id))),
-							 id)
+								 new Loop("clocked-loop", l.clocks())))
 					 }).expand();
 	}
 
@@ -301,7 +286,7 @@ public class X10PrettyPrinterVisitor extends Runabout {
 	}
 
 	private Stmt optionalBreak(Stmt s) {
-		X10NodeFactory_c nf = X10NodeFactory_c.getNodeFactory();
+		X10NodeFactory_c nf = X10NodeFactory_c.getFactory();
 		if (s.reachable())
 			return nf.Break(s.position());
 		// [IP] Heh, Empty cannot be unreachable either.  Who knew?
@@ -392,8 +377,7 @@ public class X10PrettyPrinterVisitor extends Runabout {
 			return;
 		}
 		if (! base_type.isPrimitive()) { // this is a User-defined[?] ? array
-			boolean refs_to_values = (base_type instanceof X10Type &&
-									  ((X10Type) base_type).isValueType());
+			boolean refs_to_values = (base_type instanceof X10Type && ((X10Type) base_type).isValueType());
 			if (a.hasLocal1DimDistribution()) {
 				if (a.hasInitializer()) {
 					new Template("generic_array_initializer",
@@ -430,27 +414,14 @@ public class X10PrettyPrinterVisitor extends Runabout {
 		throw new Error("Unknown array type.");
 	}
 
-	private TypeNode getParameterType(X10Type at) {
-		if (at.isParametric()) {
-			X10NodeFactory_c nf = X10NodeFactory_c.getNodeFactory();
-			return nf.CanonicalTypeNode(Position.COMPILER_GENERATED,
-										(Type)at.typeParameters().get(0));
-		}
-		return null;
-	}
-
 	public void visit(X10ArrayAccess1_c a) {
-		Template template = new Template("array_get", a.array(), a.index());
-		TypeNode elt_type = getParameterType((X10Type)a.array().type());
-		if (elt_type != null)
-			template = new Template("parametric", elt_type, template);
-		template.expand();
-		//new Template("array_get", a.array(), a.index()).expand();
+		new Template("array_get", a.array(), a.index()).expand();
+		// [IP] TODO: Remove array_get[1-4]
+//		new Template("array_get1", a.array(), a.index()).expand();
 	}
 
 	// [IP] TODO: is this used?
 	public void visit(PlaceCast_c a) {
-		assert false : "Not used";
 		System.out.println("Visit:" + a + "," + a.expr() + "," + a.placeCastType());
 		new Template("cast_place",
 					 a.expr(),
@@ -458,93 +429,86 @@ public class X10PrettyPrinterVisitor extends Runabout {
 					 new CanonicalTypeNode_c(a.position(), a.expr().type())).expand();
 	}
 
+//	// [IP] TODO: rewrite using a Join
 	public void visit(X10ArrayAccess_c a) {
+		assert false;
 		List index = a.index();
 		assert index.size() > 1;
-		Template template = new Template("array_get", a.array(), new Join(",", index));
-		TypeNode elt_type = getParameterType((X10Type)a.array().type());
-		if (elt_type != null)
-			template = new Template("parametric", elt_type, template);
-		template.expand();
-		//new Template("array_get", a.array(), new Join(",", index)).expand();
+		new Template("array_get", a.array(), new Join(",", index)).expand();
+		// [IP] TODO: Remove array_get[1-4]
+//		int size = index.size();
+//		if (size == 2)
+//			new Template("array_get2",
+//						 a.array(),
+//						 (Node) index.get(0),
+//						 (Node) index.get(1)).expand();
+//		else if (size == 3)
+//			new Template("array_get3",
+//						 new Node[] {
+//							 a.array(),
+//							 (Node) index.get(0),
+//							 (Node) index.get(1),
+//							 (Node) index.get(2)
+//						 }).expand();
+//		else if (size == 4)
+//			new Template("array_get4",
+//						 new Node[] {
+//							 a.array(),
+//							 (Node) index.get(0),
+//							 (Node) index.get(1),
+//							 (Node) index.get(2),
+//							 (Node) index.get(3)
+//						 }).expand();
+//		else
+//			throw new Error("TODO: vj->cvp/cg ... Please implement general case.");
 	}
 
 	public void visit(X10ArrayAccess1Assign_c a) {
+		assert false;
+		// Remember the index is a point or an int.
 		X10ArrayAccess1_c left = (X10ArrayAccess1_c) a.left();
-		Template template = new Template("array_set",
-										 new Object[] {
-											 left.array(), left.index(),
-											 a.right(),
-											 a.opString(a.operator())
-										 });
-		TypeNode elt_type = getParameterType((X10Type)a.type());
-		if (elt_type != null)
-			template = new Template("parametric", elt_type, template);
-		template.expand();
-		//new Template("array_set",
-		//			 new Object[] {
-		//				 left.array(), left.index(), a.right(),
-		//				 a.opString(a.operator())
-		//			 }).expand();
+		// [IP] TODO: Remove array_set[1-4]
+		new Template("array_set", left.array(), a.right(), left.index()).expand();
+//		new Template("array_set1", left.array(), a.right(), left.index()).expand();
 	}
 
+	/*
+//	// [IP] TODO: rewrite using a Join
 	public void visit(X10ArrayAccessAssign_c a) {
 		X10ArrayAccess_c left = (X10ArrayAccess_c) a.left();
 		List index = left.index();
 		assert index.size() > 1;
-		Template template = new Template("array_set",
-										 new Object[] {
-											 left.array(), new Join(",", index),
-											 a.right(),
-											 a.opString(a.operator())
-										 });
-		TypeNode elt_type = getParameterType((X10Type)a.type());
-		if (elt_type != null)
-			template = new Template("parametric", elt_type, template);
-		template.expand();
-		//new Template("array_set",
-		//			 new Object[] {
-		//				 left.array(), new Join(",", index), a.right(),
-		//				 a.opString(a.operator())
-		//			 }).expand();
+		new Template("array_set", a.array(), new Join(",", index)).expand();
+		// [IP] TODO: Remove array_get[1-4]
+//		int size = index.size();
+//		if (size == 2)
+//			new Template("array_set2",
+//						 left.array(), a.right(),
+//						 (Node) index.get(0),
+//						 (Node) index.get(1)).expand();
+//		else if (size == 3)
+//			new Template("array_set3",
+//						 new Node[] {
+//							 left.array(),
+//							 a.right(),
+//							 (Node) index.get(0),
+//							 (Node) index.get(1),
+//							 (Node) index.get(2)
+//						 });
+//		else if (size == 4)
+//			new Template("array_set4",
+//						 new Node[] {
+//							 left.array(),
+//							 a.right(),
+//							 (Node) index.get(0),
+//							 (Node) index.get(1),
+//							 (Node) index.get(2),
+//							 (Node) index.get(3)
+//						 });
+//		else
+//			throw new Error("TODO: vj->cvp/cg ... Please implement general case.");
 	}
-
-	public void visit(X10ArrayAccess1Unary_c a) {
-		if (a.expr() instanceof ArrayAccess) {
-			a.prettyPrint(w, pp);
-			return;
-		}
-		X10ArrayAccess1_c expr = (X10ArrayAccess1_c) a.expr();
-		Template template = new Template("array_unary",
-										 expr.array(), expr.index(),
-										 a.opString(a.operator()));
-		TypeNode elt_type = getParameterType((X10Type)a.type());
-		if (elt_type != null)
-			template = new Template("parametric", elt_type, template);
-		template.expand();
-		//new Template("array_unary", expr.array(), expr.index(),
-		//			 a.opString(a.operator())).expand();
-	}
-
-	public void visit(X10ArrayAccessUnary_c a) {
-		// [IP] This test is probably superfluous
-		if (a.expr() instanceof ArrayAccess) {
-			a.prettyPrint(w, pp);
-			return;
-		}
-		X10ArrayAccess_c expr = (X10ArrayAccess_c) a.expr();
-		List index = expr.index();
-		assert index.size() > 1;
-		Template template = new Template("array_unary",
-										 expr.array(), new Join(",", index),
-										 a.opString(a.operator()));
-		TypeNode elt_type = getParameterType((X10Type)a.type());
-		if (elt_type != null)
-			new Template("parametric", elt_type, template);
-		template.expand();
-		//new Template("array_unary", expr.array(), new Join(",", index),
-		//			 a.opString(a.operator())).expand();
-	}
+	*/
 
 	/**
 	 * Pretty-print a given object.
@@ -638,7 +602,7 @@ public class X10PrettyPrinterVisitor extends Runabout {
 			};
 		}
 		public Object get(int i) { return o; }
-		public int size() { return -1; }
+		public int size() { return 1; }
 	}
 
 	/**
@@ -669,14 +633,10 @@ public class X10PrettyPrinterVisitor extends Runabout {
 			this.lists = components;
 			// Make sure we have at least one parameter
 			assert(lists.length > 0);
-			int n = -1;
-			int i = 0;
-			for (; i < lists.length && n == -1; i++)
-				n = lists[i].size();
-			// Make sure the lists are all of the same size or circular
-			for (; i < lists.length; i++)
-				assert(lists[i].size() == n || lists[i].size() == -1);
-			this.N = n;
+			this.N = lists[0].size();
+			// Make sure the lists are all of the same size
+			for (int i = 1; i < lists.length; i++)
+				assert(lists[i].size() == N);
 		}
 		public void expand() {
 			w.write("/* Loop: { */");
@@ -704,7 +664,6 @@ public class X10PrettyPrinterVisitor extends Runabout {
 	/**
 	 * Join a given list of arguments with a given delimiter.
 	 * Two or three arguments can also be specified separately.
-	 * Do not join a circular list.
 	 */
 	public class Join extends Expander {
 		private final String delimiter;
@@ -738,29 +697,34 @@ public class X10PrettyPrinterVisitor extends Runabout {
 		if (cached != null)
 			return cached;
 		try {
-			String rname = Configuration.COMPILER_FRAGMENT_DATA_DIRECTORY + id + ".xcd"; // xcd = x10 compiler data/definition
-			InputStream is = X10PrettyPrinterVisitor.class.getClassLoader().getResourceAsStream(rname);
-			if (is == null)
-				throw new IOException("Cannot find resource '"+rname+"'");
-			byte[] b = new byte[is.available()];
-			for (int off = 0; off < b.length; ) {
-				int read = is.read(b, off, b.length - off);
-				off += read;
+			// [IP] TODO: make this a classpath-based resource lookup instead
+			// use something like this.getClass().getResourceAsStream()
+			String fname = Configuration.COMPILER_FRAGMENT_DATA_DIRECTORY + id + ".xcd"; // xcd = x10 compiler data/definition
+			fname = fname.replace('\\','/'); // win32 hack
+			// Override definition with any identically named file in DATA_EXT dir
+			if (null != Configuration.COMPILER_FRAGMENT_DATA_EXT_DIRECTORY) {
+				String extfname = Configuration.COMPILER_FRAGMENT_DATA_EXT_DIRECTORY + id + ".xcd";
+				extfname = extfname.replace('\\','/'); // win32 hack
+				File testFile = new File(extfname);
+				if (testFile.exists() && testFile.canRead()) {
+					fname = extfname;
+				}
 			}
+
+			FileInputStream fis = new FileInputStream(fname);
+			DataInputStream dis = new DataInputStream(fis);
+			byte[] b = new byte[dis.available()];
+			dis.read(b);
 			String trans = new String(b, "UTF-8");
 			// Skip initial lines that start with "// SYNOPSIS: "
 			// (spaces matter!)
 			while (trans.indexOf("// SYNOPSIS: ") == 0)
 				trans = trans.substring(trans.indexOf('\n')+1);
-			// Remove one trailing newline (if any)
-			if (trans.lastIndexOf('\n') == trans.length()-1)
-				trans = trans.substring(0, trans.length()-1);
 			trans = "/* template:"+id+" { */" + trans + "/* } */";
 			translationCache_.put(id, trans);
-			is.close();
 			return trans;
 		} catch (IOException io) {
-			throw new Error("No translation for " + id + " found!", io);
+			throw new Error("No translation for " + id + " found!");
 		}
 	}
 } // end of X10PrettyPrinterVisitor

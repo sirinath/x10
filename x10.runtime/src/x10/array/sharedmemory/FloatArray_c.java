@@ -5,10 +5,10 @@ package x10.array.sharedmemory;
 
 import java.util.Iterator;
 
+import x10.array.Distribution_c;
 import x10.array.FloatArray;
 import x10.array.Helper;
 import x10.array.Operator;
-import x10.array.Distribution_c;
 import x10.base.Allocator;
 import x10.base.MemoryBlock;
 import x10.base.UnsafeContainer;
@@ -28,8 +28,8 @@ import x10.runtime.Configuration;
  */
 public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneable {
 
-    private final boolean safe_;
-    private final MemoryBlock arr_;
+    protected final boolean safe_;
+    protected final MemoryBlock arr_;
     public final boolean mutable_;
     
     public boolean valueEquals(Indexable other) {
@@ -121,7 +121,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
             scan(this, f);
     }
     
-    private FloatArray_c( dist d, float[] a, boolean safe, boolean mutable) {
+    protected FloatArray_c( dist d, float[] a, boolean safe, boolean mutable) {
     	super(d);
         int count =  d.region.size();
     	this.safe_ = safe;
@@ -265,7 +265,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float set(float v, point pos,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(pos));        
-        return arr_.setFloat(v, (int) distribution.region.ordinal(pos));
+        return arr_.setFloat(v, (int) localDist.region.ordinal(pos));
     }
     
     public float setOrdinal(float v, int rawIndex) {    	
@@ -276,7 +276,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float set(float v, int d0,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0));        
-        d0 = Helper.ordinal(distribution,d0,chkAOB);
+        d0 = Helper.ordinal(localDist,d0,chkAOB);
     	return arr_.setFloat(v,d0);
     }
      
@@ -285,7 +285,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float set(float v, int d0, int d1,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1));        
-        int	theIndex = Helper.ordinal(distribution,d0,d1,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,chkAOB);
     	return arr_.setFloat(v,theIndex);
     }
     
@@ -293,7 +293,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float set(float v, int d0, int d1, int d2,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2));        
-        int	theIndex = Helper.ordinal(distribution,d0,d1,d2,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,d2,chkAOB);
     	return arr_.setFloat(v,theIndex);
     }
     
@@ -302,7 +302,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float set(float v, int d0, int d1, int d2, int d3,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2, d3));        
-        int	theIndex = Helper.ordinal(distribution,d0,d1,d2,d3,chkAOB);
+        int	theIndex = Helper.ordinal(localDist,d0,d1,d2,d3,chkAOB);
     	return arr_.setFloat(v,theIndex);   	
     }
 
@@ -314,7 +314,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float get(point pos,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(pos));        
-        return arr_.getFloat((int) distribution.region.ordinal(pos));
+        return arr_.getFloat((int) localDist.region.ordinal(pos));
     }    
     
     public float getOrdinal(int rawIndex) {    	
@@ -326,7 +326,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float get(int d0,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0));        
-        d0 = Helper.ordinal(distribution,d0,chkAOB);
+        d0 = Helper.ordinal(localDist,d0,chkAOB);
     	return arr_.getFloat(d0);
     }
     
@@ -334,7 +334,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float get(int d0, int d1,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1));        
-        int theIndex = Helper.ordinal(distribution,d0,d1,chkAOB);
+        int theIndex = Helper.ordinal(localDist,d0,d1,chkAOB);
             
     	//int placeId = Runtime.here().id;
     	//System.out.println("convert "+theIndex+"->"+distribution.getVirtualIndexAdjustment(theIndex));
@@ -347,7 +347,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
     public float get(int d0, int d1, int d2,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2));        
-        int theIndex = Helper.ordinal(distribution,d0,d1,d2,chkAOB);
+        int theIndex = Helper.ordinal(localDist,d0,d1,d2,chkAOB);
     	return arr_.getFloat(theIndex);  	
     } 
     
@@ -355,7 +355,7 @@ public class FloatArray_c extends FloatArray implements UnsafeContainer, Cloneab
      public float get(int d0, int d1, int d2, int d3,boolean chkPl,boolean chkAOB) {
         if (chkPl && Configuration.BAD_PLACE_RUNTIME_CHECK && mutable_)
             Runtime.hereCheckPlace(distribution.get(d0, d1, d2, d3));        
-        int theIndex = Helper.ordinal(distribution,d0, d1, d2, d3,chkAOB);	
+        int theIndex = Helper.ordinal(localDist,d0, d1, d2, d3,chkAOB);	
     	return arr_.getFloat(theIndex);    	
     }
     
