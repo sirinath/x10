@@ -23,10 +23,13 @@ import polyglot.ext.x10.types.ClosureType;
 import polyglot.ext.x10.types.FutureType;
 import polyglot.ext.x10.types.X10ParsedClassType_c;
 import polyglot.types.ClassType;
+import polyglot.types.LocalDef;
 import polyglot.types.LocalInstance;
 import polyglot.types.MethodInstance;
 import polyglot.types.ReferenceType;
+import polyglot.types.StructType;
 import polyglot.types.Type;
+import polyglot.types.TypeSystem;
 
 import com.ibm.wala.cast.x10.translator.X10CAstEntity;
 import com.ibm.wala.cast.x10.translator.X10CastNode;
@@ -43,6 +46,7 @@ import com.ibm.wala.cast.tree.CAstNodeTypeMap;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap;
 import com.ibm.wala.cast.tree.CAstSymbol;
 import com.ibm.wala.cast.tree.CAstType;
+import com.ibm.wala.cast.tree.CAstTypeDictionary;
 import com.ibm.wala.cast.tree.CAstSourcePositionMap.Position;
 import com.ibm.wala.cast.tree.impl.CAstSymbolImpl;
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -58,6 +62,61 @@ import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.strings.Atom;
 
 public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
+    public interface ParametricType extends CAstType.Class {
+        List<CAstType> getParameters();
+    }
+
+    public class PolyglotJavaParametricType extends PolyglotJavaType implements ParametricType {
+        private final List<Type> fPolyglotTypeParameters;
+        private List<CAstType> fTypeParameters = null;
+
+        public PolyglotJavaParametricType(ClassType type, List<Type> typeParams, CAstTypeDictionary dict, TypeSystem system) {
+          super(type, dict, system);
+          fPolyglotTypeParameters= typeParams;
+        }
+
+        public List<CAstType> getParameters() {
+          if (fTypeParameters == null) {
+            buildTypeParameters();
+          }
+          return fTypeParameters;
+        }
+
+        private void buildTypeParameters() {
+          for(Type typeParam: fPolyglotTypeParameters) {
+            fTypeParameters.add(fDict.getCAstTypeFor(typeParam));
+          }
+        }
+
+        @Override
+        public String getName() {
+          StringBuilder sb= new StringBuilder();
+          sb.append(fIdentityMapper.getTypeRef(fType).getName());
+          int idx= 0;
+          sb.append("<");
+          for(Type typeParam: fPolyglotTypeParameters) {
+            if (idx++ > 0) { sb.append(", "); }
+            sb.append(fIdentityMapper.getTypeRef(typeParam).getName());
+          }
+          sb.append(">");
+          return sb.toString();
+        }
+
+        @Override
+        public String toString() {
+          StringBuilder sb= new StringBuilder();
+          sb.append(fType.fullName());
+          sb.append("<");
+          int idx= 0;
+          for(Type typeParam: fPolyglotTypeParameters) {
+            if (idx++ > 0) { sb.append(", "); }
+            sb.append(typeParam.toString());
+          }
+          sb.append(">");
+          return sb.toString();
+        }
+    }
+
     public X10toCAstTranslator(ClassLoaderReference clr, NodeFactory nf, X10ExtensionInfo extInfo) {
 	super(clr, nf, extInfo.typeSystem(), extInfo.getIdentityMapper());
     }
@@ -255,12 +314,12 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 
 	private CAstNode walkRegionIterator(Formal formal, final CAstNode bodyNode, CAstNode domainNode, polyglot.util.Position bodyPos, WalkContext wc) {
 	    X10Formal x10Formal= (X10Formal) formal;
-	    LocalInstance[] vars = x10Formal.localInstances();
+	    LocalDef[] vars = x10Formal.localInstances();
 	    CAstNode[] bodyStmts = new CAstNode[vars.length + 1]; // var decls + bodyNode
 
 	    for (int i = 0; i < vars.length; i++)
 		bodyStmts[i]= makeNode(wc, vars[i].position(), CAstNode.DECL_STMT,
-		  fFactory.makeConstant(new CAstSymbolImpl(vars[i].name(), vars[i].flags().isFinal())),
+		  fFactory.makeConstant(new CAstSymbolImpl(vars[i].name().toString(), vars[i].flags().isFinal())),
 		  makeNode(wc, vars[i].position(), CAstNode.ARRAY_REF, makeNode(wc, vars[i].position(), CAstNode.VAR, fFactory.makeConstant(formal.name())),
 		    fFactory.makeConstant(TypeReference.Int),
 		    fFactory.makeConstant(i)));
@@ -328,7 +387,7 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 
 	public CAstNode visit(Call c, WalkContext wc) {
 	    MethodInstance methodInstance= c.methodInstance();
-	    ReferenceType methodOwner= methodInstance.container();
+	    StructType methodOwner= methodInstance.container();
 
 	    if (methodOwner instanceof FutureType) {
 		FutureType type= (FutureType) methodOwner;
@@ -424,7 +483,7 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 	}
 
 	public CAstNode visit(X10Formal f, WalkContext context) {
-	    return fFactory.makeConstant(new CAstSymbolImpl(f.name(), true));
+	    return fFactory.makeConstant(new CAstSymbolImpl(f.name().id().toString(), true));
 	}
 
 	public CAstNode visit(Clocked c, WalkContext context) {
@@ -452,7 +511,7 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 	private boolean isIndexedByPoint(List<Expr> indices) {
 	    if (indices.size() > 1) return false;
 	    Expr index= indices.get(0);
-	    return index.type().isClass() && ((ClassType) index.type()).fullName().equals("x10.lang.point");
+	    return index.type().isClass() && ((ClassType) index.type()).fullName().toString().equals("x10.lang.point");
 	}
 
 	public CAstNode visit(X10ArrayAccess aa, WalkContext wc) {
@@ -470,7 +529,7 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 	}
 
 	private boolean isIndexedByPoint(Expr index) {
-	    return index.type().isClass() && ((ClassType) index.type()).fullName().equals("x10.lang.point");
+	    return index.type().isClass() && ((ClassType) index.type()).fullName().toString().equals("x10.lang.point");
 	}
 
 	public CAstNode visit(X10ArrayAccess1 aa, WalkContext wc) {
@@ -485,6 +544,8 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 
 	    return makeNode(wc, fFactory, aa, isIndexedByPoint(index) ? X10CastNode.ARRAY_REF_BY_POINT : CAstNode.ARRAY_REF, children);
 	}
+
+        private int tempCtr= 0;
 
 	public CAstNode visit(ArrayConstructor ac, WalkContext wc) {
 	    Expr dist= ac.distribution();
@@ -521,8 +582,8 @@ public class X10toCAstTranslator extends PolyglotJava2CAstTranslator {
 		// ]
 		//
 		CAstNode closureNode= walkNodes(closure, wc);
-		String arrayTempName= "array temp";
-		String distTempName= "dist temp";
+                String arrayTempName= "array temp" + tempCtr;
+                String distTempName= "dist temp" + tempCtr++;
 		CAstSymbol arrayTemp= new AstTranslator.InternalCAstSymbol(arrayTempName, true);
 		CAstSymbol distTemp= new AstTranslator.InternalCAstSymbol(distTempName, true);
 		CAstNode distDeclNode=

@@ -1,13 +1,10 @@
-/*
- * Created on Mar 25, 2006
- */
 package com.ibm.wala.cast.x10.translator.polyglot;
 
 import polyglot.ext.x10.ExtensionInfo;
+import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
 import polyglot.frontend.JobExt;
 import polyglot.frontend.Scheduler;
-import polyglot.frontend.goals.Goal;
 
 import com.ibm.wala.cast.java.translator.polyglot.IRTranslatorExtension;
 import com.ibm.wala.cast.java.translator.polyglot.PolyglotIdentityMapper;
@@ -49,10 +46,10 @@ public abstract class X10ExtensionInfo extends ExtensionInfo implements IRTransl
     }
 
     public void setCAstRewriterFactory(CAstRewriterFactory factory) {
-      rewriterFactory = factory;
+        rewriterFactory = factory;
     }
     
     public CAstRewriterFactory getCAstRewriterFactory() {
-      return rewriterFactory;
+        return rewriterFactory;
     }
 }

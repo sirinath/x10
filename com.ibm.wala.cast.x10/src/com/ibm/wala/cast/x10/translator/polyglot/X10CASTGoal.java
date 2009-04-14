@@ -1,41 +1,35 @@
-/*
- * Created on Feb 23, 2006
- */
 package com.ibm.wala.cast.x10.translator.polyglot;
 
-import polyglot.frontend.CyclicDependencyException;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.frontend.Job;
-import polyglot.frontend.Pass;
 import polyglot.frontend.Scheduler;
-import polyglot.frontend.goals.AbstractGoal;
-import polyglot.util.ErrorInfo;
+import polyglot.frontend.SourceGoal_c;
 
+import com.ibm.wala.cast.x10.analysis.AnalysisJobExt;
 import com.ibm.wala.types.ClassLoaderReference;
 
-public class X10CASTGoal extends AbstractGoal {
+public class X10CASTGoal extends SourceGoal_c {
     private ClassLoaderReference fSourceLoaderRef;
+    private X10toCAstTranslator fTranslator;
 
     public X10CASTGoal(Job job, ClassLoaderReference sourceLoader) {
 	super(job);
 	fSourceLoaderRef= sourceLoader;
 
-	
-	try {
-	    Scheduler scheduler= job.extensionInfo().scheduler();
+	Scheduler scheduler= job.extensionInfo().scheduler();
 
-	    addPrerequisiteGoal(scheduler.TypeChecked(job), scheduler);
-	} catch (CyclicDependencyException e) {
-	    job.compiler().errorQueue().enqueue(ErrorInfo.INTERNAL_ERROR, "Cycle encountered in goal graph?");
-	    throw new IllegalStateException(e.getMessage());
-	}
-	
+	addPrereq(scheduler.TypeChecked(job));
     }
 
-    public Pass createPass(ExtensionInfo extInfo) {
-	return new X10CASTPass(this, job(),
-		new X10toCAstTranslator(fSourceLoaderRef, extInfo.nodeFactory(),
-			(X10ExtensionInfo) extInfo));
+    @Override
+    public boolean runTask() {
+        ExtensionInfo extInfo = job.extensionInfo();
+
+        fTranslator= new X10toCAstTranslator(fSourceLoaderRef, extInfo.nodeFactory(),
+                (X10ExtensionInfo) extInfo);
+        ((AnalysisJobExt) job.ext()).put(AnalysisJobExt.CAST_JOBEXT_KEY,
+                fTranslator.translate(job.ast(), job.source().name()));
+        return true;
     }
 
     public String name() {

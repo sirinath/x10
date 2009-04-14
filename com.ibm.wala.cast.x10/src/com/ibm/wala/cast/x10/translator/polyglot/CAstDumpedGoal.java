@@ -1,31 +1,31 @@
-/*
- * Created on Feb 23, 2006
- */
 package com.ibm.wala.cast.x10.translator.polyglot;
 
-import polyglot.frontend.CyclicDependencyException;
-import polyglot.frontend.ExtensionInfo;
-import polyglot.frontend.Job;
-import polyglot.frontend.Pass;
-import polyglot.frontend.Scheduler;
-import polyglot.frontend.goals.AbstractGoal;
-import polyglot.util.ErrorInfo;
+import java.io.PrintWriter;
 
-public class CAstDumpedGoal extends AbstractGoal {
+import polyglot.frontend.Job;
+import polyglot.frontend.SourceGoal_c;
+
+import com.ibm.wala.cast.tree.CAstEntity;
+import com.ibm.wala.cast.x10.analysis.AnalysisJobExt;
+import com.ibm.wala.cast.x10.translator.X10CAstPrinter;
+
+public class CAstDumpedGoal extends SourceGoal_c {
 
     public CAstDumpedGoal(Job job) {
 	super(job);
-	try {
-	    WALAScheduler scheduler= (WALAScheduler) job.extensionInfo().scheduler();
 
-	    addPrerequisiteGoal(scheduler.CAstGenerated(job), (Scheduler)scheduler);
-	} catch (CyclicDependencyException e) {
-	    job.compiler().errorQueue().enqueue(ErrorInfo.INTERNAL_ERROR, "Cycle encountered in goal graph?");
-	    throw new IllegalStateException(e.getMessage());
-	}
+	WALAScheduler scheduler= (WALAScheduler) job.extensionInfo().scheduler();
+
+	addPrereq(scheduler.CAstGenerated(job));
     }
 
-    public Pass createPass(ExtensionInfo extInfo) {
-	return new CAstDumperPass(this);
+    @Override
+    public boolean runTask() {
+        AnalysisJobExt je= (AnalysisJobExt) job.ext();
+        PrintWriter pw= new PrintWriter(System.out);
+
+        X10CAstPrinter.printTo((CAstEntity) je.get(AnalysisJobExt.CAST_JOBEXT_KEY), pw);
+        pw.close();
+        return true;
     }
 }

@@ -1,12 +1,9 @@
-/*
- * Created on Oct 7, 2005
- */
 package com.ibm.wala.cast.x10.translator.polyglot;
 
 import java.util.ArrayList;
 
+import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
-import polyglot.frontend.goals.Goal;
 
 import com.ibm.wala.cast.x10.analysis.AnalysisJobExt;
 import com.ibm.wala.cast.java.translator.JavaCAst2IRTranslator;
@@ -22,11 +19,12 @@ public class X10IRTranslatorExtension extends X10ExtensionInfo {
      * getCompileGoal grabs all X10 related Jobs in order to look up the
      * associated CAstEntities at a later point.
      */
+    @Override
     public Goal getCompileGoal(Job job) {
     	X10IRGoal g = (X10IRGoal) ((WALAScheduler) this.scheduler).IRGenerated(job);
     	jobList.add(job);
     	if (this.g == null) 
-    		this.g = g;
+    	    this.g = g;
     	
 	return g;
     }

@@ -1,20 +1,13 @@
-/*
- * Created on Oct 7, 2005
- */
 package com.ibm.wala.cast.x10.translator.polyglot;
 
-import polyglot.frontend.CyclicDependencyException;
-import polyglot.frontend.ExtensionInfo;
 import polyglot.frontend.Job;
-import polyglot.frontend.Pass;
-import polyglot.frontend.Scheduler;
-import polyglot.frontend.goals.AbstractGoal;
-import polyglot.frontend.goals.EndGoal;
-import polyglot.util.ErrorInfo;
+import polyglot.frontend.SourceGoal_c;
 
 import com.ibm.wala.cast.java.translator.JavaCAst2IRTranslator;
+import com.ibm.wala.cast.tree.CAstEntity;
+import com.ibm.wala.cast.x10.analysis.AnalysisJobExt;
 
-public class X10IRGoal extends AbstractGoal implements EndGoal {
+public class X10IRGoal extends SourceGoal_c /* PORT1.7 removed 'implements EndGoal' */ {
     private X10SourceLoaderImpl fSourceLoader;
     private X10CAst2IRTranslator fTranslator;
     
@@ -22,25 +15,22 @@ public class X10IRGoal extends AbstractGoal implements EndGoal {
 	super(job);
 	fSourceLoader = sourceLoader;
 
-	try {
-	    WALAScheduler scheduler= (WALAScheduler) job.extensionInfo().scheduler();
+	WALAScheduler scheduler= (WALAScheduler) job.extensionInfo().scheduler();
 	
-	    addPrerequisiteGoal(scheduler.CAstGenerated(job), (Scheduler)scheduler);
-
-	} catch (CyclicDependencyException e) {
-	    job.compiler().errorQueue().enqueue(ErrorInfo.INTERNAL_ERROR, "Cycle encountered in goal graph?");
-	    throw new IllegalStateException(e.getMessage());
-	}
+	addPrereq(scheduler.CAstGenerated(job));
     }
 
-    public Pass createPass(ExtensionInfo extInfo) {
-    	X10IRPass result = new X10IRPass(this, job(), fSourceLoader);
-    	fTranslator = result.getTranslator();
-    	return result;
+    @Override
+    public boolean runTask() {
+        CAstEntity entity= (CAstEntity) ((AnalysisJobExt) job.ext()).get(AnalysisJobExt.CAST_JOBEXT_KEY);
+
+        fTranslator = new X10CAst2IRTranslator(entity, fSourceLoader);
+        fTranslator.translate();
+        return true;
     }
 
     public String name() {
-	return "<WALA IR goal for " + job().source().path() + ">";
+	return "<WALA X10IR goal for " + job().source().path() + ">";
     }
     
     public JavaCAst2IRTranslator getJavaCAst2IRTranslator(){

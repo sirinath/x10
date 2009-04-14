@@ -3,8 +3,8 @@
  */
 package com.ibm.wala.cast.x10.translator.polyglot;
 
+import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
-import polyglot.frontend.goals.Goal;
 
 public interface WALAScheduler {
 

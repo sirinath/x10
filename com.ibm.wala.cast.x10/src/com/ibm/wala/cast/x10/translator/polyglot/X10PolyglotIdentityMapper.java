@@ -30,12 +30,15 @@ class X10PolyglotIdentityMapper extends PolyglotIdentityMapper {
     }
 
     public String typeToTypeID(Type type) {
-	if (type instanceof NullableType) {
-	    return typeToTypeID(((NullableType) type).base());
-	} else if (type.isClass() && typeTranslationMap.containsKey(((ClassType) type).fullName())) {
-	    return typeTranslationMap.get(((ClassType) type).fullName());
-	} else {
-	    return super.typeToTypeID(type);
-	}
+        if (type instanceof NullableType) {
+                return "Lnullable<" + typeToTypeID(((NullableType) type).base()) + ">";
+        } else if (type instanceof FutureType) {
+                return "Lfuture<" + typeToTypeID(((FutureType) type).base()) + ">";
+        } else if (type.isClass()
+                        && typeTranslationMap.containsKey(((ClassType) type).fullName())) {
+                return typeTranslationMap.get(((ClassType) type).fullName());
+        } else {
+                return super.typeToTypeID(type);
+        }
     }
 }
