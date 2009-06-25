@@ -121,8 +121,7 @@ xrx: $(XRX_ARCHIVE) $(PGAS_SANTIY_CHECK)
 
 # A list of all .x10 files (relative to the src-cpp dir) that we should build
 # into the xrx lib.
-# prune .svn dirs (they probably don't contain *.x10 files so this is just an optimisation)
-XRXFILES  = $(shell find ../src-x10 -name .svn -prune -o -name '*.x10' -print)
+XRXFILES  = $(shell find ../src-x10 -name '*.x10')
 
 #enable asserts, do not look in jar for x10 files
 X10CPPFLAGS += -J-ea -rtdev -disable CheckNativeAnnotations -commandlineonly
@@ -138,7 +137,7 @@ gen/all-cpp-generated: $(XRXFILES) $(INSTDIR)/lib/x10cpp.jar
 	@echo "Regenerating XRX cc/h/inc files"
 	mkdir -p gen
 	@#prune .svn dirs (they probably don't contain *.x10 files so this is just an optimisation)
-	cd ../src-x10 && find * -name .svn -prune -o -name '*.x10' -print | \
+	cd ../src-x10 && find * -name .svn -prune -o -name \*.x10 -print | \
 	    xargs "$(INSTDIR)"/bin/x10c++ -c $(X10CPPFLAGS) -sourcepath . -d ../src-cpp/gen
 	touch $@
 
@@ -146,9 +145,6 @@ gen/all-cpp-generated: $(XRXFILES) $(INSTDIR)/lib/x10cpp.jar
 # should be included in the $(XRX_ARCHIVE).
 $(XRX_MANIFEST): gen/all-cpp-generated
 	(cd gen && find * -name \*.cc -print) > $@
-	@#prune .svn dirs (they probably don't contain *.x10 files so this is just an optimisation)
-	(cd ../src-x10 && find * -name .svn -prune -o -name '*.x10' -print) >> $@
-	echo x10.jar >> $@ # FIXME: hard-coded JAR name
 
 
 
@@ -220,12 +216,12 @@ ALL_MANUAL_OBJECTS=$(ALL_XRCPP_OBJECTS) $(ALL_CUDA_OBJECTS)
 
 # This target will build the XRX cc files into object files
 gen/all-o-generated: gen/all-cpp-generated $(XRX_MANIFEST)
-	$(MAKE) $(MAKEFLAGS) $(shell sed -e 's@^\(.*\)\.cc$$@gen/\1.o@' -e '/\.x10$$/d' -e '/\.jar$$/d' $(XRX_MANIFEST))
+	$(MAKE) $(MAKEFLAGS) $(shell sed -e 's@^\(.*\).cc$$@gen/\1.o@' $(XRX_MANIFEST))
 	touch $@
 
 $(XRX_ARCHIVE): gen/all-o-generated $(XRX_MANIFEST) $(ALL_MANUAL_OBJECTS)
 	$(AR) $(ARFLAGS) $@ \
-	    $(shell sed -e 's@^\(.*\)\.cc$$@gen/\1.o@' -e '/\.x10$$/d' -e '/\.jar$$/d' $(XRX_MANIFEST)) \
+	    $(shell sed -e 's@^\(.*\).cc$$@gen/\1.o@' $(XRX_MANIFEST)) \
             $(ALL_MANUAL_OBJECTS)
 
 # The dummy files are needed to avoid rebuilds so must not be removed as
