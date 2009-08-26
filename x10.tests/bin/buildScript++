@@ -129,11 +129,11 @@ export X10CPP_CVSROOT=":ext:sreedhar@localhost:/usr/src/cvs/X10_FLASH"
 
 POLYGLOT_HOME=$X10_HOME/polyglot
 svnUpdate $POLYGLOT_HOME $POLYGLOT_SVNROOT
-X10_COMMON=$X10_HOME/x10.common
+X10_COMMON=$X10_HOME/x10.common.17
 svnUpdate $X10_COMMON $X10_SVNROOT
-X10_COMPILER=$X10_HOME/x10.compiler
+X10_COMPILER=$X10_HOME/x10.compiler.p3
 svnUpdate $X10_COMPILER $X10_SVNROOT
-X10_RUNTIME=$X10_HOME/x10.runtime
+X10_RUNTIME=$X10_HOME/x10.runtime.17
 svnUpdate $X10_RUNTIME $X10_SVNROOT
 X10_CONSTRAINTS=$X10_HOME/x10.constraints
 svnUpdate $X10_CONSTRAINTS $X10_SVNROOT
@@ -141,7 +141,8 @@ X10_DIST=$X10_HOME/x10.dist
 svnUpdate $X10_DIST $X10_SVNROOT
 X10_TESTS=$X10_HOME/x10.tests
 svnUpdate $X10_TESTS $X10_SVNROOT
-svnUpdate $X10_SVNROOT
+X10_CPP=$X10_HOME/x10.cppbackend.17
+svnUpdate $X10_CPP $X10_SVNROOT
 
 
 buildX10Module $POLYGLOT_HOME polyglot
@@ -151,6 +152,7 @@ buildX10Module $X10_COMMON x10
 buildX10Module $X10_DIST x10j
 buildX10Module $X10_COMPILER x10
 buildX10Module $X10_TESTS x10
+buildX10Module $X10_CPP x10
 
 X10LIB=$X10LIB
 if [[ -z "$X10LIB" ]]; then

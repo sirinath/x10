@@ -47,13 +47,6 @@ public class XTerms {
 	public static final XVar makeEQV(String name) {
 		return new XEQV_c(makeName(name));
 	}
-	
-	public static final XLocal makeFreshLocal() {
-		return makeLocal(XTerms.makeFreshName());
-	}
-	public static final XLocal makeFreshLocal(String prefix) {
-		return makeLocal(XTerms.makeFreshName(prefix));
-	}
 	public static final XName makeFreshName(String prefix) {
 	    return new XNameWrapper<Object>(new Object(), prefix + (nextId++));
 	}

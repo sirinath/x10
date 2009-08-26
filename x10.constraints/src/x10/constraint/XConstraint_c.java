@@ -18,50 +18,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A constraint solver for the following constraint system:
- * <verbatim>
- * t ::= x                  -- variable
- *       | t.f              -- field access
- *       | g(t1,..., tn)    -- uninterpreted function symbol
- *       
- * c ::= t == t             -- equality
- *       | t != t           -- dis-equality
- *       | c,c              -- conjunction
- *       | p(t1,..., tn)    -- atomic formula
- * </verbatim>  
- * 
- * The constraint system implements the usual congruence rules for equality. 
- * 
- *  <p> TBD:  Add
- *  <verbatim>
- *  t ::= t == t
- *  </verbatim>
- *  
- *  <p> This is useful in specifying that a Region is zeroBased iff its rank=0.
- *  
- * 
- * <p>A constraint is implemented as a graph whose nodes are XPromises. Additionally, a constraint
- * keeps track of two variables, self and this. 
- * 
- * <p>
- * A promise contains fields: 
- * <olist>
- * <li>XPromise value  -- points to a node it has been equated to
- * <li>Collection<XPromise> disequals -- contains set of other nodes this has been disequated with
- * <li>XTerm var  -- externally visible term labeling this promise
- * <li>Map<XName, XPromise> fields -- hashmap of fields of this promise. 
- * </olist>
- * It maintsins the invariant <tt> value != null implies (disequals==null,fields == null)</tt>
- * 
- * This representation is a bit different from the Nelson-Oppen and Shostak congruence closure 
- * algorithms described, e.g. in Cyrluk, Lincoln and Shankar "On Shostak's Decision Procedure
- * for Combination of Theories", CADE 96.
- * 
- * <p>
- * <bf>TODO:</bf>
- * Use Shostak's congruence procedure. Treat <tt>t.f</tt> as the term <tt>f(t)</tt>, 
- * i.e. each field is regarded as a unary function symbol. This will be helpful in implementing
- * Nelson-Oppen integration of decision procedures.
+ * A representation of constraints of the form X1=t1 && ... Xk == tk.
+ * Note that there is no unification, only checking. So it is possible
+ * to represent such a constraint directly as a mapping from Xi to ti.
+ * The constraint is implemented as a Map from variables to terms.
  * 
  * @author vj
  *
@@ -71,7 +31,6 @@ public class XConstraint_c implements XConstraint, XConstraintImp, Cloneable {
     /** Variable to use for self in the constraint. */
     XRoot self;
 
-    XVar thisVar;
     // Maps XTerms to nodes.
     protected HashMap<XTerm, XPromise> roots;
 
@@ -92,9 +51,6 @@ public class XConstraint_c implements XConstraint, XConstraintImp, Cloneable {
         return self;
     }
 
-    public XVar thisVar() {
-    	return thisVar;
-    }
     boolean consistent = true;
     boolean valid = true;
 
@@ -115,16 +71,10 @@ public XConstraint_c() {
     /**
      * Copy this constraint logically; that is, create a new constraint
      * that contains the same equalities (if any) as the current one.
-     * vj: 08/12/09
-     * Copying also the consistency, and validity status, and thisVar and self.
      */
     public XConstraint_c copy() {
         XConstraint_c c = new XConstraint_c();
         try {
-        	c.thisVar = thisVar();
-        	c.self = self();
-        	c.consistent = consistent;
-        	c.valid = valid;
             return copyInto(c);
         }
         catch (XFailure f) {
@@ -145,7 +95,7 @@ public XConstraint_c() {
         return c;
     }
 
-    /** Add in a constraint, substituting this.self for c.self */
+    /** Add in a constraint, unifying this.self and c.self */
     public XConstraint addIn(XConstraint c)  throws XFailure {
         if (c != null) {
             List<XTerm> result = c.constraints();
@@ -155,20 +105,9 @@ public XConstraint_c() {
                 addTerm(t.subst(self(), c.self()));
             }
         }
-        // vj: What about thisVar for c? Should that be added?
-       // thisVar = getThisVar(this, c);
         return this;
     }
 
-    public static XVar getThisVar(XConstraint t1, XConstraint t2) throws XFailure {
-		XVar thisVar = t1 == null ? null : t1.thisVar();
-		if (thisVar == null)
-			return t2==null ? null : t2.thisVar();
-		if (t2 != null && ! thisVar.equals( t2.thisVar()))
-			throw new XFailure("Inconsistent this vars " + thisVar + " and "
-					+ t2.thisVar());
-		return thisVar;
-	}
     public XVar bindingForVar(XVar v) {
         try {
             XPromise p = lookup(v);
@@ -182,7 +121,7 @@ public XConstraint_c() {
         return null;
     }
 
- /*   public XConstraint removeVarBindings(XVar v) {
+    public XConstraint removeVarBindings(XVar v) {
         try {
             XConstraint c = new XConstraint_c();
             for (XTerm t : constraints()) {
@@ -202,7 +141,7 @@ public XConstraint_c() {
             return this;
         }
     }
-*/
+
     public List<XFormula> atoms() {
     	List<XFormula> r = new LinkedList<XFormula>();
     	for (XTerm t : roots.keySet()) {
@@ -333,9 +272,11 @@ public XConstraint_c() {
         if (term instanceof XPromise)
             // this is the case for literals, for here
             return (XPromise) term;
+        
         // otherwise it must be a XVar.
         if (roots == null)
             return null;
+        
         if (term instanceof XVar) {
             XVar var = (XVar) term;
             XVar[] vars = var.vars();
@@ -355,22 +296,12 @@ public XConstraint_c() {
         return null;
     }
 
-    private XTerm simplify(XTerm t) {
-    	return t;
-    }
     /**
      * Add t1=t2 to the constraint, unless it is inconsistent. 
      * @param var -- t1
      * @param val -- t2
      */
     public void addBinding(XTerm left, XTerm right) throws XFailure {
-    	if (right instanceof XEquals) {
-    		right = simplify(right);
-    	}
-    	if (left instanceof XEquals) {
-    		left = simplify(left);
-    	}
-    	
         assert left != null;
         assert right != null;
 
@@ -513,7 +444,10 @@ public XConstraint_c() {
         }
         return result;
     }
-   
+    static final boolean D = false;
+    static void debug(String s) {
+        		System.out.println(s);
+    }
 
     private boolean entails(List<XTerm> conjuncts, XRoot self, final XConstraint sigma) throws XFailure {
         
@@ -570,25 +504,6 @@ public XConstraint_c() {
             if (entails(left, right)) {
                 return true;
             }
-            if (right instanceof XEquals) {
-            	XEquals r = (XEquals) right;
-            	if (entails(r.left(), r.right())) {
-            		return entails(left, XTerms.TRUE);
-            	}
-            	if (disEntails(r.left(), r.right())) {
-            		return entails(left, XTerms.FALSE);
-            	}
-            }
-            if (right instanceof XDisEquals) {
-            	XDisEquals r = (XDisEquals) right;
-            	if (entails(r.left(), r.right())) {
-            		return entails(left, XTerms.FALSE);
-            	}
-            	if (disEntails(r.left(), r.right())) {
-            		return entails(left, XTerms.TRUE);
-            	}
-            }
-            
         } else if (t instanceof XDisEquals) {
             XDisEquals f = (XDisEquals) t;
             XTerm left = f.left();
@@ -615,13 +530,13 @@ public XConstraint_c() {
         	}
         	return false;
         }
-       
+        List<XTerm> atoms = constraints();
 
         if (t.solver() != null) {
         	if (t.solver().entails(this, t, sigma))
         		return true;
         }
-        List<XTerm> atoms = constraints();
+        
         for (XTerm ta : atoms) {
         	if (ta.solver() != null && ta.solver() != t.solver()) {
         		if (ta.solver().entails(this, t, sigma))
@@ -655,31 +570,22 @@ public XConstraint_c() {
         int r1Count = 0;
         XVar[] vars1 = null;
         if (p1 instanceof XPromise_c) {
-        	if (t1 instanceof XVar) {
-        		r1Count = ((XPromise_c) p1).lookupReturnValue();
-        		vars1 = ((XVar) t1).vars();
-        	}
+            r1Count = ((XPromise_c) p1).lookupReturnValue();
+            vars1 = ((XVar) t1).vars();
         }
-
+        
         XPromise p2 = lookupPartialOk(t2);
         if (p2 == null) // No match, the term t2 is not equated to anything by this.
-        	return false;
+            return false;
 
         int r2Count = 0;
         XVar[] vars2 = null;
         if (p2 instanceof XPromise_c) {
-        	if (t2 instanceof XVar) {
-        		r2Count = ((XPromise_c) p2).lookupReturnValue();
-        		/* if (! (t2 instanceof XVar)) {
-            	assert false: "Internal Error:" + t2 + "expected to be an XVar.";
-            }*/
-        		vars2 = ((XVar) t2).vars();
-        	}
+            r2Count = ((XPromise_c) p2).lookupReturnValue();
+            vars2 = ((XVar) t2).vars();
         }
 
-        if ((!(t1 instanceof XVar) || (r1Count == 0 || r1Count == vars1.length))
-        		&& (! (t1 instanceof XVar) || (r2Count == 0 || r2Count == vars2.length))) {
-        		
+        if ((r1Count == 0 || r1Count == vars1.length) && (r2Count == 0 || r2Count == vars2.length)) {
             // exact lookups
             return p1.equals(p2);
         }
@@ -1038,17 +944,6 @@ public XConstraint_c() {
         addBinding(self(), var);
     }
 
-    public void addThisBinding(XTerm term) throws XFailure {
-    	addBinding(thisVar(), term);
-    }
-    
-    public void setThisVar(XVar var) {
-    	if (var == null) return;
-    	if (thisVar != null && ! thisVar.equals(var))
-    		System.err.println("Thisvar for " + this + " was " + thisVar + " (#"  + thisVar.hashCode() 
-    				+ ") being now set to " + var + " (#" + var.hashCode());
-    	thisVar = var;
-    }
     // FIXME: need to convert f(g(x)) into \exists y. f(y) && g(x) = y when f and g both atoms
     // This is needed for Nelson-Oppen to work correctly.
     // Each atom should be a root.

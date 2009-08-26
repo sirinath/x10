@@ -23,7 +23,7 @@ while [ -n "$1" ]; do
         -classpath|-cp) shift; extra_cp="$1";;
         -profile) profile="-Xrunhprof:cpu=samples";;
         -config) shift; config="$1.cfg";;
-        -extclass) shift; ext=$1;;
+        -ext) shift; ext=$1;;
         -dev) dev="true";;
         -O|-optimize) optimize="true";;
         -rtdev) rtdev="true";;
@@ -55,8 +55,7 @@ EOF
     exit 1
 fi
 
-[ -z "$DEXT" ] && DEXT="x10.ExtensionInfo"
-[ -z "$ext" ] && ext="$DEXT"
+[ -z "$DEXT" ] && DEXT="x10"
 
 CONFIG_DIR="${TOP}${FILE_SEP}etc"
 LIB_DIR="${TOP}${FILE_SEP}lib"
@@ -68,7 +67,13 @@ if [ -n "$extra_cp" ]; then
     extra_cp="${PATH_SEP}${extra_cp}"
 fi
 
-extargs=""
+ext_cp=""
+if [ -z "$ext" ]; then
+    ext="$DEXT"
+else
+    ext_cp="${PATH_SEP}${LIB_DIR}${FILE_SEP}${ext}.jar"
+fi
+extargs="-ext ${ext}"
 # [DC] assert should be off by default
 # extargs="$extargs -assert"
 # FIXME: HACK (at Vijay's request)
@@ -79,7 +84,7 @@ extargs="$extargs -noserial"
 # HACK!!! HACK!!! HACK!!! ^^^
 
 classpath="${CP_OVERRIDE}"
-[ -n "$dev" ] && classpath="${classpath}${TOP}${FILE_SEP}..${FILE_SEP}x10.compiler${FILE_SEP}classes${PATH_SEP}${TOP}${FILE_SEP}..${FILE_SEP}x10.runtime.x10${FILE_SEP}classes${PATH_SEP}${TOP}${FILE_SEP}..${FILE_SEP}polyglot3-dev${FILE_SEP}bin${PATH_SEP}${TOP}${FILE_SEP}classes${PATH_SEP}"
+[ -n "$dev" ] && classpath="${classpath}${TOP}${FILE_SEP}..${FILE_SEP}x10.compiler.p3${FILE_SEP}classes${PATH_SEP}${TOP}${FILE_SEP}..${FILE_SEP}x10.runtime.x10${FILE_SEP}classes${PATH_SEP}${TOP}${FILE_SEP}..${FILE_SEP}polyglot3-dev${FILE_SEP}bin${PATH_SEP}${TOP}${FILE_SEP}classes${PATH_SEP}"
 classpath="${classpath}${LIB_DIR}${FILE_SEP}x10c.jar${PATH_SEP}${LIB_DIR}${FILE_SEP}x10.jar${PATH_SEP}${LIB_DIR}${FILE_SEP}${POLYGLOT_JAR}${PATH_SEP}${LIB_DIR}${FILE_SEP}${LPG_JAR}${ext_cp}${extra_cp}"
 
 # include x10.jar in sourcepath
@@ -92,12 +97,12 @@ if [[ "$optimize" = "true" ]]; then
   args=" -BAD_PLACE_RUNTIME_CHECK=false -OPTIMIZE=true $args"
 fi
 
-if [[ "$ext" = "x10.ExtensionInfo" ]]; then
-  # Java backend
-  command="\"$JAVA\" -Xmx512m $config $profile -classpath \"$classpath\" ${java_args} $MAIN -post 'java -jar \"${LIB_DIR}${FILE_SEP}${ECJ_JAR}\" -1.5 -nowarn' -extclass $ext $extargs $args"
-else
+if [[ "$DEXT" = "x10cpp" ]]; then
   # C++ backend
-  command="\"$JAVA\" -Xmx512m $config $profile -classpath \"$classpath\" ${java_args} $MAIN -extclass $ext $extargs $args"
+  command="\"$JAVA\" -Xmx128m $config $profile -classpath \"$classpath\" ${java_args} $MAIN $extargs $args"
+else
+  # Java backend
+  command="\"$JAVA\" -Xmx128m $config $profile -classpath \"$classpath\" ${java_args} $MAIN -post 'java -jar \"${LIB_DIR}${FILE_SEP}${ECJ_JAR}\" -1.5 -nowarn' $extargs $args"
 fi
 
 [ -n "$verbose" ] && echo "$command"

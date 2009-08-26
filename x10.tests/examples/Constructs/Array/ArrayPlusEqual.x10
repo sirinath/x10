@@ -2,7 +2,7 @@ import harness.x10Test;
 
 public class ArrayPlusEqual extends x10Test {
 
-    val v = Rail.makeVar[int](2, (x:nat)=>0);
+    val v: Rail[int] = Rail.makeVar[int](2, (x:nat)=>0);
 
     public def run() {
         for ((i) in 0..1) v(i) += 5;
@@ -10,7 +10,7 @@ public class ArrayPlusEqual extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(var args: Rail[String]): void = {
         new ArrayPlusEqual().execute();
     }
 }

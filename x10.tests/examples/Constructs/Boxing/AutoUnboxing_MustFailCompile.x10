@@ -18,6 +18,6 @@ public class AutoUnboxing_MustFailCompile extends x10Test {
         }
 
 	public static def main(var args: Rail[String]): void = {
-		new AutoUnboxing_MustFailCompile().execute();
+		new AutoUnboxing().execute();
 	}
 }
