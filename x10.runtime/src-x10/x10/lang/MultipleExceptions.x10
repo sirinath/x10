@@ -16,7 +16,7 @@ import x10.io.Printer;
  * @author Christian Grothoff
  * @author tardieu
  */
-public class MultipleExceptions(exceptions: ValRail[Throwable]) extends RuntimeException {
+public value MultipleExceptions(exceptions: ValRail[Throwable]) extends RuntimeException {
 
     public def this(stack: Stack[Throwable]!) {
         val s = new Stack[Throwable]();
@@ -45,14 +45,14 @@ public class MultipleExceptions(exceptions: ValRail[Throwable]) extends RuntimeE
 
     // workarounds for XTENLANG-283, 284
 
-    public global def printStackTrace(): void {
+    public def printStackTrace(): void {
         //super.printStackTrace();
         for (t: Throwable in exceptions) {
 	        t.printStackTrace();
         }
     }
 
-    public global def printStackTrace(p:Printer): void {
+    public def printStackTrace(p:Printer): void {
         //super.printStackTrace(p);
         //for (t: Throwable in exceptions) t.printStackTrace(p);
     }

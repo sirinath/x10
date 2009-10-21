@@ -184,37 +184,28 @@ ref<String> String::format(ref<String> format, ref<ValRail<ref<Object> > > parms
         nullCheck(parms);
         const ref<Object> p = parms->operator[](i);
         char* buf = NULL;
-        if (p.isNull()) {
+        if (p.isNull())
             ss << (buf = x10aux::alloc_printf(fmt, "null")); // FIXME: Ignore nulls for now
-        } else if (x10aux::instanceof<ref<String> >(p)) {
+        else if (x10aux::instanceof<ref<String> >(p))
             ss << (buf = x10aux::alloc_printf(fmt, class_cast<ref<String> >(p)->c_str()));
-        } else if (x10aux::instanceof<ref<Box<x10_boolean> > >(p)) {
-			ref<Box<x10_boolean> > tmp = class_cast<ref<Box<x10_boolean> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-		} else if (x10aux::instanceof<ref<Box<x10_byte> > >(p)) {
-			ref<Box<x10_byte> > tmp = class_cast<ref<Box<x10_byte> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_char> > >(p)) {
-			ref<Box<x10_char> > tmp = class_cast<ref<Box<x10_char> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, (char)(tmp->FMGL(value).v)));
-        } else if (x10aux::instanceof<ref<Box<x10_short> > >(p)) {
-			ref<Box<x10_short> > tmp = class_cast<ref<Box<x10_short> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_int> > >(p)) {
-			ref<Box<x10_int> > tmp = class_cast<ref<Box<x10_int> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_long> > >(p)) {
-			ref<Box<x10_long> > tmp = class_cast<ref<Box<x10_long> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_float> > >(p)) {
-			ref<Box<x10_float> > tmp = class_cast<ref<Box<x10_float> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_double> > >(p)) {
-			ref<Box<x10_double> > tmp = class_cast<ref<Box<x10_double> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else {
+        else if (x10aux::instanceof<ref<Box<x10_boolean> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_boolean>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_byte> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_byte>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_char> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, (char)class_cast<x10_char>(p).v));
+        else if (x10aux::instanceof<ref<Box<x10_short> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_short>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_int> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_int>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_long> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_long>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_float> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_float>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_double> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_double>(p)));
+        else
             ss << (buf = x10aux::alloc_printf(fmt, p->toString()->c_str()));
-		}
         if (buf != NULL)
             dealloc(buf);
         if (next != NULL)
@@ -242,35 +233,28 @@ ref<String> String::format(ref<String> format, ref<Rail<ref<Object> > > parms) {
         placeCheck(nullCheck(parms));
         const ref<Object> p = parms->operator[](i);
         char* buf = NULL;
-        if (p.isNull()) {
+        if (p.isNull())
             ss << (buf = x10aux::alloc_printf(fmt, "null")); // FIXME: Ignore nulls for now
-        } else if (x10aux::instanceof<ref<String> >(p)) {
+        else if (x10aux::instanceof<ref<String> >(p))
             ss << (buf = x10aux::alloc_printf(fmt, class_cast<ref<String> >(p)->c_str()));
-        } else if (x10aux::instanceof<ref<Box<x10_boolean> > >(p)) {
-			ref<Box<x10_boolean> > tmp = class_cast<ref<Box<x10_boolean> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-		} else if (x10aux::instanceof<ref<Box<x10_byte> > >(p)) {
-			ref<Box<x10_byte> > tmp = class_cast<ref<Box<x10_byte> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_char> > >(p)) {
-			ref<Box<x10_char> > tmp = class_cast<ref<Box<x10_char> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, (char)(tmp->FMGL(value).v)));
-        } else if (x10aux::instanceof<ref<Box<x10_short> > >(p)) {
-			ref<Box<x10_short> > tmp = class_cast<ref<Box<x10_short> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_int> > >(p)) {
-			ref<Box<x10_int> > tmp = class_cast<ref<Box<x10_int> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_long> > >(p)) {
-			ref<Box<x10_long> > tmp = class_cast<ref<Box<x10_long> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_float> > >(p)) {
-			ref<Box<x10_float> > tmp = class_cast<ref<Box<x10_float> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-        } else if (x10aux::instanceof<ref<Box<x10_double> > >(p)) {
-			ref<Box<x10_double> > tmp = class_cast<ref<Box<x10_double> > >(p);
-            ss << (buf = x10aux::alloc_printf(fmt, tmp->FMGL(value)));
-		}
+        else if (x10aux::instanceof<ref<Box<x10_boolean> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_boolean>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_byte> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_byte>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_char> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, (char)class_cast<x10_char>(p).v));
+        else if (x10aux::instanceof<ref<Box<x10_short> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_short>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_int> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_int>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_long> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_long>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_float> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_float>(p)));
+        else if (x10aux::instanceof<ref<Box<x10_double> > >(p))
+            ss << (buf = x10aux::alloc_printf(fmt, class_cast<x10_double>(p)));
+        else
+            ss << (buf = x10aux::alloc_printf(fmt, p->toString()->c_str()));
         if (buf != NULL)
             dealloc(buf);
         if (next != NULL)
@@ -281,7 +265,7 @@ ref<String> String::format(ref<String> format, ref<Rail<ref<Object> > > parms) {
 
 x10_boolean String::_struct_equals(ref<Object> p0) {
     if (p0.operator->() == this) return true; // short-circuit trivial equality
-    if (!this->Ref::_struct_equals(p0))
+    if (!this->Value::_struct_equals(p0))
         return false;
     ref<String> that = (ref<String>) p0;
     nullCheck(that);
@@ -305,7 +289,7 @@ String::_serialize(x10aux::ref<String> this_, x10aux::serialization_buffer &buf,
 
 void
 String::_serialize_body(x10aux::serialization_buffer& buf, x10aux::addr_map &m) {
-    this->Ref::_serialize_body(buf, m);
+    this->Value::_serialize_body(buf, m);
     // only support strings that are shorter than 4billion chars
     x10_int sz = FMGL(content_length);
     buf.write(sz,m);
@@ -314,6 +298,6 @@ String::_serialize_body(x10aux::serialization_buffer& buf, x10aux::addr_map &m) 
     }
 }
 
-RTT_CC_DECLS1(String, "x10.lang.String", Ref)
+RTT_CC_DECLS1(String, "x10.lang.String", Value)
 
 // vim:tabstop=4:shiftwidth=4:expandtab

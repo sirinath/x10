@@ -16,15 +16,15 @@ import x10.io.Console;
 
 @NativeRep("java", "java.lang.Throwable", null, null)
 @NativeRep("c++", "x10aux::ref<x10::lang::Throwable>", "x10::lang::Throwable", null)
-public class Throwable {
-    @Native("java", "#0.getCause()")
+public value Throwable {
+    @Native("java", "new x10.lang.Box<java.lang.Throwable>(new x10.lang.Box.RTT(new x10.types.RuntimeType<java.lang.Throwable>(java.lang.Throwable.class)), #0.getCause())")
     @Native("c++", "(#0)->getCause()")
-
-    global val cause:Throwable;
+    // Box is to make it nullable
+    val cause: Box[Throwable];
 
     @Native("java", "#0.getMessage()")
     @Native("c++", "(#0)->getMessage()")
-    global val message: String;
+    val message: String;
 
     public def this() = this("");
     public def this(message: String) {
@@ -35,29 +35,29 @@ public class Throwable {
     public def this(cause: Throwable) = this("", cause);
     public def this(message: String, cause: Throwable): Throwable {
         super();
-    	this.cause = cause;
+    	this.cause = cause as Box[Throwable]; // BUG: should autobox
         this.message = message;
     }
     
     @Native("java", "#0.getMessage()")
     @Native("c++", "(#0)->getMessage()")
-    public global def getMessage() = message;
+    public def getMessage() = message;
     
-    @Native("java", "#0.getCause()")
+    @Native("java", "new x10.lang.Box<java.lang.Throwable>(new x10.lang.Box.RTT(new x10.types.RuntimeType<java.lang.Throwable>(java.lang.Throwable.class)), #0.getCause())")
     @Native("c++", "(#0)->getCause()")
-    public final global def getCause():Throwable = cause;
+    public final def getCause(): Box[Throwable] = cause;
     
     @Native("java", "#0.toString()")
     @Native("c++", "x10aux::to_string(#0)")
-    public global def toString() = typeName() + ": " + getMessage();
+    public def toString() = typeName() + ": " + getMessage();
    
     @Native("java", "x10.core.ThrowableUtilities.getStackTrace(#0)")
     @Native("c++", "(#0)->getStackTrace()")
-    public global native def getStackTrace() : ValRail[String];
+    public native def getStackTrace() : ValRail[String];
 
     @Native("java", "#0.printStackTrace()")
     @Native("c++", "(#0)->printStackTrace()")
-    public global native def printStackTrace() : Void;
+    public native def printStackTrace() : Void;
     
     @Native("java", "#0.printStackTrace(new java.io.PrintStream((#1).getNativeOutputStream()))")
     @Native("c++", "do {\n"+
@@ -68,7 +68,7 @@ public class Throwable {
                    "        (#1)->println((*trace)[i]);\n"+
                    "    }\n"+
                    "} while (0)")
-    public global native def printStackTrace(p: Printer) : Void;
+    public native def printStackTrace(p: Printer) : Void;
 
     @Native("java", "#0.fillInStackTrace()")
     @Native("c++", "(#0)->fillInStackTrace()")
