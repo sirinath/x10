@@ -10,7 +10,7 @@ import harness.x10Test;
 class XTENLANG_198 extends x10Test {
 
     static class A {
-        proto def foo(): String = "A";
+        def foo(): String = "A";
         val x:String;
         def this() {
             x = foo();
@@ -18,7 +18,7 @@ class XTENLANG_198 extends x10Test {
     }
     
     static class B extends A {
-        proto def foo(): String = "B";
+        def foo(): String = "B";
     }
     
     public def run():boolean {

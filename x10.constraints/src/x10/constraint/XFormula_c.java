@@ -41,8 +41,6 @@ public class XFormula_c extends XTerm_c implements XFormula {
         List<XTerm> newArgs = new ArrayList<XTerm>(this.arguments().size());
         boolean changed = false;
         for (XTerm arg: this.arguments()) {
-        	if (arg == null)
-        		assert arg != null : "Argument to a formula cannot be null.";
             XTerm a = arg.subst(y, x, propagate);
             if (a != arg)
                 changed = true;
@@ -101,11 +99,6 @@ public class XFormula_c extends XTerm_c implements XFormula {
         HashMap<XName, XPromise> fields = new HashMap<XName, XPromise>();
         for (int i = 0; i < arguments.size(); i++) {
             XTerm arg = arguments.get(i);
-            if (arg == null) {
-            	System.err.println("XFormula_c: Golden: null arg in " + this);
-            	continue;
-            }
-            	
             XPromise child = c.intern(arg);
             fields.put(new XNameWrapper<Integer>(i), child);
         }
@@ -136,7 +129,6 @@ public class XFormula_c extends XTerm_c implements XFormula {
     public int hashCode() {
         int hash = 29;
         for (XTerm arg: arguments) {
-        	if (arg != null)
             hash += arg.hashCode();
         }
         return hash;

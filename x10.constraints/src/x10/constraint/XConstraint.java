@@ -20,15 +20,11 @@ import java.util.List;
  * @author vj
  * 
  */
-public interface XConstraint extends java.io.Serializable, ThisVar {
+public interface XConstraint extends java.io.Serializable {
         /**
          * Variable to use for self in the constraint.
          */
         XRoot self();
-        
-        
-        void setThisVar(XVar thisVar);
-        void addThisBinding(XTerm term) throws XFailure;
     
 	/**
 	 * Is the consistent consistent? That is, does it have a solution?
@@ -89,7 +85,6 @@ public interface XConstraint extends java.io.Serializable, ThisVar {
 	XTerm find(XName varName) throws XFailure;
 
 	void addSelfBinding(XTerm var) throws XFailure;
-	void addSelfBinding(XConstrainedTerm var) throws XFailure;
 
 	void setInconsistent();
 
@@ -100,13 +95,10 @@ public interface XConstraint extends java.io.Serializable, ThisVar {
 	 * 
 	 * @param var
 	 * @param t
-	 * @return constraint with t1=t2 added.
+	 * @return new constraint with t1=t2 added.
 	 * @throws XFailure
 	 */
 	void addBinding(XTerm var, XTerm val) throws XFailure;
-	void addBinding(XTerm var, XConstrainedTerm val) throws XFailure;
-	void addBinding(XConstrainedTerm var, XConstrainedTerm val) throws XFailure;
-	void addBinding(XConstrainedTerm var, XTerm val) throws XFailure;
 
 	/**
 	 * Add t1 != t2 to the constraint.
@@ -136,13 +128,11 @@ public interface XConstraint extends java.io.Serializable, ThisVar {
 
 	/**
 	 * Add constraint c into this, and return this.
-	 * No change is made to this if c==null
 	 * 
 	 * @param c
 	 * @return
 	 */
 	XConstraint addIn(XConstraint c) throws XFailure;
-	XConstraint addIn(XTerm newSelf, XConstraint c)  throws XFailure;
 
 	/**
 	 * Add the binding term=true to the constraint.
@@ -163,7 +153,7 @@ public interface XConstraint extends java.io.Serializable, ThisVar {
 	 */
 	void addAtom(XTerm term) throws XFailure;
 
-	/** Return x if this constraint has v==x, else null.*/
+	/** Return x where this constraint has v==x. */
 	XVar bindingForVar(XVar v);
 
 	/**
@@ -231,18 +221,13 @@ public interface XConstraint extends java.io.Serializable, ThisVar {
 
 	/**
 	 * Generate a new existentially quantified variable scoped to this
-	 * constraint.
+	 * constraint, with the given type.
 	 * 
 	 * @return
 	 */
-	//XEQV genEQV();
-	/**
-	 * Return a new variable, not existentially quantified.
-	 * @return
-	 */
-	//XEQV genVar();
-	//XEQV genEQV(boolean hidden);
-	//XEQV genEQV(XName name, boolean hidden);
+	XEQV genEQV();
+	XEQV genEQV(boolean hidden);
+	XEQV genEQV(XName name, boolean hidden);
 
 	/**
 	 * If y equals x, or x does not occur in this, return this, else copy
@@ -307,13 +292,4 @@ public interface XConstraint extends java.io.Serializable, ThisVar {
 	 * @return
 	 */
 	List<XFormula> atoms();
-	
-	/**
-	 * Return a new constraint obtained from the current one by substituting
-	 * newSelf for this.self(). Note, the resulting constraint may be marked inconsistent.
-	 * @param newSelf
-	 * @return
-	 */
-	XConstraint instantiateSelf(XTerm newSelf);
-	
 }

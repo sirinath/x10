@@ -2,9 +2,10 @@
 
 This program is controlled by the Eclipse Public Licence v1.0.
 
-This directory contains the SVN HEAD release of X10.
+This directory contains the 1.7.6 release of X10, including
+the X10 C++ code generation backend.
 
-To build both the C++ and Java backends, run "ant" in x10.dist.
+To build both backends, run "ant" in x10.dist.
 To build just the Java backend, run "ant dist-java" in x10.dist.
 
 Prerequisites:

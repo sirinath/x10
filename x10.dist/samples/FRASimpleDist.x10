@@ -5,12 +5,10 @@ import x10.io.Console;
 
 import x10.util.Timer;
 import x10.runtime.NativeRuntime;
-import x10.runtime.PlaceLocalHandle;
-import x10.runtime.PlaceLocalStorage;
 
-class LocalTable {
+value LocalTable {
     
-    val a: Rail[long]{self.at(this)};
+    val a: Rail[long];
     val mask: int;
     
     def this(size:int) {
@@ -30,6 +28,8 @@ class FRASimpleDist {
 
     const POLY = 0x0000000000000007L;
     const PERIOD = 1317624576693539401L;
+    const NUM_PLACES = NativeRuntime.MAX_PLACES;
+    const PLACE_ID_MASK = NUM_PLACES-1;
 
     // Utility routine to start random number generator at Nth step
     static def HPCC_starts(var n:long): long {
@@ -58,19 +58,20 @@ class FRASimpleDist {
     }
 
     static def randomAccessUpdate(
-	num_updates: long,
+        NUM_UPDATES: long,
         logLocalTableSize: long,
-        tables: PlaceLocalHandle[LocalTable]
+        tables: ValRail[LocalTable]
     ) {
         finish for (var p:int=0; p<Place.MAX_PLACES; p++) {
             val valp = p;
             async (Place.places(p)) {
-                var ran:long = HPCC_starts(valp*(num_updates/Place.MAX_PLACES));
-                for (var i:long=0; i<num_updates/Place.MAX_PLACES; i++) {
-                    val placeId = ((ran>>logLocalTableSize) & (Place.MAX_PLACES-1)) as int;
+                var ran:long = HPCC_starts(valp*(NUM_UPDATES/NUM_PLACES));
+                for (var i:long=0; i<NUM_UPDATES/NUM_PLACES; i++) {
+                    val placeId = ((ran>>logLocalTableSize) & PLACE_ID_MASK) as int;
                     val valran = ran;
+                    val table = tables(placeId);
                     async (Place.places(placeId)) {
-                        tables.get().update(valran);
+                        table.update(valran);
                     }
                     ran = (ran << 1) ^ (ran<0L ? POLY : 0L);
                 }
@@ -79,41 +80,52 @@ class FRASimpleDist {
     }
 
 
-    public static def main(args:Rail[String]!) {
-        if ((Place.MAX_PLACES & (Place.MAX_PLACES-1)) > 0) {
+    public static def main(args:Rail[String]) {
+
+        if ((NUM_PLACES & (NUM_PLACES-1)) > 0) {
             println("The number of places must be a power of 2.");
             return;
         }
 
         // calculate the size of update array (must be a power of 2)
-        val logLocalTableSize = args.length > 1 && args(0).equals("-m")?int.parseInt(args(1)) : 12;
+        val logLocalTableSize = args.length > 1 && args(0).equals("-m")?
+            int.parseInt(args(1)) : 12;
         val localTableSize = 1<<logLocalTableSize;
-        val tableSize = localTableSize*Place.MAX_PLACES;
-        val num_updates = 4*tableSize;
+        val tableSize = localTableSize*NUM_PLACES;
+        val NUM_UPDATES = 4*tableSize;
 
         // create local tables
-	val tables = PlaceLocalStorage.createDistributedObject[LocalTable](Dist.makeUnique(), () => new LocalTable(localTableSize));
+        val varTables = Rail.makeVar[LocalTable](Place.MAX_PLACES);
+        finish for (var p:int=0; p<Place.MAX_PLACES; p++) {
+            val pp = p;
+            async (Place.places(p)) {
+                val t = new LocalTable(localTableSize);
+                async (Place.places(0))
+                    varTables(pp) = t;
+            }
+        }
+        val tables = Rail.makeVal[LocalTable](Place.MAX_PLACES, (x:Int) => varTables(x));
 
         // print some info
-        println("Main table size   = 2^" +logLocalTableSize + "*" + Place.MAX_PLACES+" = " + tableSize+ " words");
-        println("Number of places = " + Place.MAX_PLACES);
-        println("Number of updates = " + num_updates);
+        println("Main table size   = 2^" +logLocalTableSize + "*" + NUM_PLACES+" = " + tableSize+ " words");
+        println("Number of places = " + NUM_PLACES);
+        println("Number of updates = " + NUM_UPDATES);
 
         // time it
         var cpuTime:double = -now();
-        randomAccessUpdate(num_updates, logLocalTableSize, tables);
+        randomAccessUpdate(NUM_UPDATES, logLocalTableSize, tables);
         cpuTime += now();
 
         // print statistics
-        val GUPs = (cpuTime > 0.0 ? 1.0 / cpuTime : -1.0) * num_updates / 1e9;
-        Console.OUT.println("CPU time used  = "+cpuTime+" seconds");
-        Console.OUT.println(GUPs+" Billion(10^9) Updates per second (GUP/s)");
+        val GUPs = (cpuTime > 0.0 ? 1.0 / cpuTime : -1.0) * NUM_UPDATES / 1e9;
+        Console.OUT.printf("CPU time used  = %.2f seconds\n", cpuTime);
+        Console.OUT.printf("%.6f Billion(10^9) Updates per second (GUP/s)\n", GUPs);
 
         // repeat for testing.
-        randomAccessUpdate(num_updates, logLocalTableSize, tables);
+        randomAccessUpdate(NUM_UPDATES, logLocalTableSize, tables);
         for (var i:int=0; i<Place.MAX_PLACES; i++) {
+            val table = tables(i);
             async (Place.places(i)) {
-	        val table = tables.get();
                 var err:int = 0;
                 for (var j:int=0; j<table.a.length; j++)
                     if (table.a(j) != j) err++;
@@ -125,4 +137,8 @@ class FRASimpleDist {
     static def now() = Timer.nanoTime() * 1e-9D;
 
     static def println(s:String) = Console.OUT.println(s);
+
+    @Native("java", "System.out.printf(#1,#2)")
+    @Native("c++", "printf((#1)->c_str(), #2); fflush(stdout)")
+    public static native def printf(x:String, o:Object):void;
 }

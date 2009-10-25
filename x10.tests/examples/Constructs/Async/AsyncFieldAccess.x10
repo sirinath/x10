@@ -19,14 +19,13 @@ public class AsyncFieldAccess extends x10Test {
 		val D: Dist = r->Second;
 		finish ateach (val p: Point in D) {
 			val NewT: T = new T();
-			async at (this) { t = NewT; }
+			async (AsyncFieldAccess.this.location) { t = NewT; }
 		}
-		val tt = this.t;
-		at (tt) { atomic tt.i = 3; }
-		return 3 == (at (tt) tt.i);
+		finish async (t.location) { atomic t.i = 3; }
+		return 3 == (future(t.location) t.i).force();
 	}
 
-	public static def main(Rail[String]){
+	public static def main(var args: Rail[String]): void = {
 		new AsyncFieldAccess().execute();
 	}
 

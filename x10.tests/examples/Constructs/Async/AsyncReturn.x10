@@ -18,13 +18,13 @@ public class AsyncReturn extends x10Test {
 		class T {
 			var t: int;
 		}
-		val f: T! = new T();
+		val f: T = new T();
 		f.t = 1;
 		val v: int = f.t;
 		val body = ()=> {
 			if (v == 1)
 			return;
-		    async at (f) {
+		    async (f.location) {
 			   atomic {
 				  f.t = 2;
 			   }

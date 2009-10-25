@@ -30,6 +30,10 @@ class FRASimple {
     @Native("c++", "printf(\"%s\\n\", (#1)->c_str()); fflush(stdout)")
     public static native def println(x:String):void;
 
+    @Native("java", "x10.io.Console.OUT.printf(#1,#2)")
+    @Native("c++", "printf((#1)->c_str(), #2); fflush(stdout)")
+    public static native def printf(x:String, o:Object):void;
+
     const POLY = 0x0000000000000007L;
     const PERIOD = 1317624576693539401L;
     const NUM_PLACES = NativeRuntime.MAX_PLACES;
@@ -109,8 +113,8 @@ class FRASimple {
 
         // print statistics
         val GUPs = (cpuTime > 0.0 ? 1.0 / cpuTime : -1.0) * NUM_UPDATES / 1e9;
-        println("CPU time used  = "+ cpuTime + " seconds");
-        println(GUPs + " Billion(10^9) Updates per second (GUP/s)\n");
+        printf("CPU time used  = %.2f seconds\n", cpuTime);
+        printf("%.6f Billion(10^9) Updates per second (GUP/s)\n", GUPs);
 
         // repeat for testing.
         randomAccessUpdate(NUM_UPDATES, logLocalTableSize, tables);

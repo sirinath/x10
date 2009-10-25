@@ -61,7 +61,7 @@ public abstract class XTerm_c implements XTerm, Cloneable {
 	}
 
 	public boolean prefersBeingBound() {
-		return toString().startsWith("_self") || hasEQV();
+		return hasEQV();
 	}
 
 	protected boolean isAtomicFormula = false;

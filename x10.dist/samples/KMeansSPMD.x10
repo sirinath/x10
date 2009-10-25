@@ -6,18 +6,18 @@ import x10.util.Random;
 
 public class KMeansSPMD {
 
-    public static def printClusters (clusters:Rail[Float]!, dims:Int) {
+    public static def printClusters (clusters:Rail[Float], dims:Int) {
         for (var d:Int=0 ; d<dims ; ++d) { 
             for (var k:Int=0 ; k<clusters.length/dims ; ++k) { 
                 if (k>0)
                     Console.OUT.print(" ");
-                Console.OUT.print(clusters(k*dims+d).toString());
+                Console.OUT.printf("%.2f",clusters(k*dims+d));
             }
             Console.OUT.println();
         }
     }
 
-    public static def main (args : Rail[String]!) {
+    public static def main (args : Rail[String]) {
 
         var fname_:String = "points.dat";
         var DIM_:Int=3, CLUSTERS_:Int=8, POINTS_:Int=10000, ITERATIONS_:Int=500;
@@ -59,7 +59,7 @@ public class KMeansSPMD {
             }
 
             value ProxyCell[T] {
-                private val cell : Cell[T]{self.at(this.loc)};
+                private val cell : Cell[T];
                 def this(v:Cell[T]) { this.cell = v; }
                 def get() = at (cell.location) cell.get();
                 def set(v:T) { at (cell.location) cell.set(v); };
@@ -153,8 +153,6 @@ public class KMeansSPMD {
                         next;
 
                         if (here == central_clusters.location) {
-                            val finished3 = finished as Cell[Boolean]!;
-
                             for (var k:Int=0 ; k<CLUSTERS ; ++k) { 
                                 for (var d:Int=0 ; d<DIM ; ++d) { 
                                     central_clusters(k*DIM+d) /= central_cluster_counts(k);
@@ -163,10 +161,10 @@ public class KMeansSPMD {
 
                             // TEST FOR CONVERGENCE
                             var b:Boolean = true;
-                            finished3.set(true);
+                            finished.set(true);
                             for (var j:Int=0 ; j<CLUSTERS*DIM ; ++j) { 
                                 if (Math.abs(central_clusters_old(j)-central_clusters(j))>0.0001) {
-                                    finished3.set(false);
+                                    finished.set(false);
                                     break;
                                 }
                             }
@@ -192,7 +190,6 @@ public class KMeansSPMD {
         } catch (e : IOException) {
             Console.ERR.println("We had a little problem:");
             e.printStackTrace(Console.ERR);
-            System.exit(1);
         }
     }
 }

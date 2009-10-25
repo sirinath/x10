@@ -13,19 +13,19 @@ import harness.x10Test;
 public class AtFieldAccess extends x10Test {
 
 	var t: T;
-	public def run() {
-		var Second:Place = Place.FIRST_PLACE.next();
-		var r: Region = 0..0;
-		val D = r->Second;
-		for (p: Point in D.region) {
-			t = at (D(p)) new T();
+	public def run(): boolean = {
+		var Second: Place = Place.FIRST_PLACE.next();
+		var r: Region = [0..0];
+		val D: Dist = r->Second;
+		for (val p: Point in D.region) {
+			val NewT: T = new T();
+			at (D(p)) { t = NewT; }
 		}
-		val tt = this.t;
-		at (tt) tt.i = 3;
-		return 3 == (at(tt) tt.i);
+		at (t.location) { t.i = 3; }
+		return 3 == (future(t.location) t.i).force();
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(var args: Rail[String]): void = {
 		new AtFieldAccess().execute();
 	}
 

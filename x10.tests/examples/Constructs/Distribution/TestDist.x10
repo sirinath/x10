@@ -10,14 +10,13 @@ abstract public class TestDist extends x10Test {
     
     var os: StringWriter;
     var out: Printer;
-    val testName = typeName();
+    val testName = className();
 
     def this() {
         System.setProperty("line.separator", "\n");
         try {
-	    val tmp = new StringWriter();
-            os = tmp;
-            out = new Printer(tmp);
+            os = new StringWriter();
+            out = new Printer(os);
         } catch (e:Exception) {
             //e.printStackTrace();
             x10.io.Console.OUT.println(e.toString());
@@ -43,24 +42,34 @@ abstract public class TestDist extends x10Test {
     //
 
     abstract class R {
-	val testName:String;
-	
-        def this(test: String): R = {
-	    testName = test;
-	}
 
-	def runTest() {
-            var r:String;
+        def this(test: String): R = {
+            var r: String;
             try {
                 r = run();
             } catch (e: Throwable) {
                 r = e.getMessage();
             }
-            pr(testName + " " + r);
+            pr(test + " " + r);
         }
 
         abstract def run(): String;
 
+    }
+            
+    abstract class E {
+
+        def this(test: String): E = {
+            try {
+                run();
+            } catch (e: Throwable) {
+                pr(test + ": " + e.getMessage());
+                return;
+            }
+            pr(test + ": expected exception not thrown");
+        }
+
+        abstract def run(): void;
     }
             
     class Grid {
@@ -150,13 +159,13 @@ abstract public class TestDist extends x10Test {
 
         pr("--- " + testName + ": " + test);
 
-        new R("rank")		{def run(): String = {return "" + r.rank;}}.runTest();
-        new R("rect")		{def run(): String = {return "" + r.rect;}}.runTest();
-        new R("zeroBased")	{def run(): String = {return "" + r.zeroBased;}}.runTest();
-        new R("rail")		{def run(): String = {return "" + r.rail;}}.runTest();
+        new R("rank")		{def run(): String = {return "" + r.rank;}};
+        new R("rect")		{def run(): String = {return "" + r.rect;}};
+        new R("zeroBased")	{def run(): String = {return "" + r.zeroBased;}};
+        new R("rail")		{def run(): String = {return "" + r.rail;}};
 
-        new R("isConvex()")	{def run(): String = {return "" + r.isConvex();}}.runTest();
-        new R("size()")		{def run(): String = {return "" + r.size();}}.runTest();
+        new R("isConvex()")	{def run(): String = {return "" + r.isConvex();}};
+        new R("size()")		{def run(): String = {return "" + r.size();}};
 
         pr("region: " + r);
     }

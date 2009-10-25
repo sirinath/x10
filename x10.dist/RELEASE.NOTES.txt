@@ -1,23 +1,10 @@
-Release 2.0.0
+Release 1.7.7
 
 This release includes both the C++ and Java code generation backends.
 
-There are several major language changes from X10 1.7 to 2.0. 
- - We have added structs to the language.  Structs provide a
-   mechanism for defining headerless inlined aggregates.
-   For an example of a struct, see x10.lang.Complex.
- - We have added the ability to declare val instance fields
-   and instance methods of a class to be global. This means
-   that the fields/methods can be accessed/invoked at any place.
- - We have eliminated Values from the language.  
-   The combination of structs and global fields/methods cover all
-   of the use cases for Values.
- - We have added static place type checking.
- - We have added unsigned integral types.
-For more details on these and other minor language changes, please
-see the language manual or the X10 2.0 tutorial found on x10-lang.org.
+There were no language changes since the 1.7.6 release of X10.
 
-The following features described in the 2.0 language manual do not
+The following features described in the 1.7 language manual do not
 currently work with the Java backend and will be fixed in the subsequent
 releases:
 
@@ -36,13 +23,37 @@ the subsequent releases:
 
 - Garbage collection on Cygwin and AIX
 - Generic virtual methods
-- Exception stack traces on Cygwin and AIX
+- Exception stack traces on Cygwin
 
-Below is a summary of JIRA issues addressed for the X10 2.0 release.
-<LIST HERE>
+Here's a list of known issues with the C++ backend:
+
+- Default values are not assigned to some value types
+- Static initialization is sometimes incorrectly ordered (at the moment
+  it's very brittle, though somewhat controllable by the link order of
+  files)
+- Operator overloading does not work correctly sometimes
+- Hash codes are not computed correctly for some classes
+
+X10 1.7.7 uses polyglot version 3.1.1.
+
+Below is a summary of JIRA issues addressed for the X10 1.7.7 release.
+
+** Bug
+    * [XTENLANG-408] - Cannot create a new X10 run configuration in X10 mode
+    * [XTENLANG-457] - Performance problems due to changes to the Throwable implementation
+    * [XTENLANG-497] - Trouble reading a binary file with readInt method FileReader class
+    * [XTENLANG-507] - x10c & x10cpp broken with polyglot svn head
+    * [XTENLANG-535] - Broken value equality in C++
+    * [XTENLANG-545] - Segmentation fault on remote reference comparison
+    * [XTENLANG-568] - Post-compiler warnings reported as errors
+
+** Improvement
+    * [XTENLANG-566] - Promote method isX10Array() on X10TypeSystem_c to X10TypeSystem interface
 
 For the details of JIRA issues fixed in this release, see
-<URL HERE>
+http://jira.codehaus.org/browse/XTENLANG/fixforversion/15601
+
+Additional bug fixes have been made throughout the system.
 
 Please use the X10 JIRA to report bugs, after ensuring the problem is
 not already reported:

@@ -10,7 +10,7 @@ abstract public class TestArray extends x10Test {
     
     var os: StringWriter;
     var out: Printer;
-    val testName = typeName();
+    val testName = className();
 
     def this() {
         System.setProperty("line.separator", "\n");

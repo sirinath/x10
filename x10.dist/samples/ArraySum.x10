@@ -16,7 +16,7 @@ public class ArraySum {
     public def this(n: Int) {
         size=n;
         R= 0..n-1 as Region{rail};
-        data = Rail.makeVar[Int](n, (x:nat)=>1);
+        data = Rail.makeVar[Int](n, (x:nat)=>0);
         // for ((i) in R) S executes S for each point in R.
         // R must be a 1-d region. (i) decomposes the 1-d point
         // to retrieve the index in the 0th dimension.
@@ -24,10 +24,12 @@ public class ArraySum {
         // the idiom for ((i,j) in R) S
         // The syntax for (p in R) S will also work, but p
         // will be bound to the points in R. 
+        
+        for ((i) in 0..n-1) data(i)=1;
         sum=0;
     }
 
-    def sum(a: Rail[Int]!, start: Int, last: Int): Int = {
+    def sum(a: Rail[Int], start: Int, last: Int): Int = {
         var mySum: Int = 0;
         for ((i) in start..last-1) mySum += a(i);
         return mySum;
@@ -43,7 +45,7 @@ public class ArraySum {
         }
     }
     
-    public static def main(args: Rail[String]!) {
+    public static def main(args: Rail[String]) {
 
         var size:Int = 5*1000*1000;
         if (args.length >=1)
