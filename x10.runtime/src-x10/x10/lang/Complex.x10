@@ -187,6 +187,4 @@ public struct Complex {
     public def toString():String {
         return (re + " + " + im + "i");
     }
-    public def typeName() = "x10.lang.Complex";
-
 }

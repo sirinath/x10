@@ -55,13 +55,13 @@ public class PolyMat(rank: int) extends Mat[PolyRow] {
             return this;
 
         val pmb = new PolyMatBuilder(rank);
-        var last: Box[PolyRow] = null;
+        var last: Box[PolyRow] = null as Box[PolyRow];
         for (next:PolyRow in this) {
             if (last!=null && !next.isParallel(last as PolyRow))
                 pmb.add(last as PolyRow);
-            last = new Box[PolyRow](next);
+            last = next as Box[PolyRow];
         }
-        pmb.add(last.value);
+        pmb.add(last as PolyRow);
 
         return pmb.toSortedPolyMat(false);
     }

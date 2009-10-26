@@ -53,13 +53,13 @@ public abstract class BaseArray[T] extends Array[T] {
 
     public static def makeVar1[T](rail: Rail[T]!): Array[T]{rank==1&&rect&&zeroBased} {
         val r = Region.makeRectangular(0, rail.length-1);
-        return makeVar[T](r, new Box[(Point)=>T]((p:Point)=>rail(p(0))))
+        return makeVar[T](r, ((p:Point)=>rail(p(0))) as Box[(Point)=>T])
             as Array[T]{rank==1 && rect && zeroBased}; // XXXX
     }
 
     public static def makeVar1[T](rail: ValRail[T]): Array[T]{rank==1&&rect&&zeroBased} {
         val r = Region.makeRectangular(0, rail.length-1);
-        return makeVar[T](r, new Box[(Point)=>T]((p:Point)=>rail(p(0))))
+        return makeVar[T](r, ((p:Point)=>rail(p(0))) as Box[(Point)=>T])
             as Array[T]{rank==1 && rect && zeroBased}; // XXXX
     }
 
@@ -178,7 +178,7 @@ public abstract class BaseArray[T] extends Array[T] {
     //
 
     public global def lift(op:(T)=>T): Array[T](dist)
-        = Array.make[T](dist, new Box[(Point)=>T]((p:Point)=>op(this(p as Point(rank)))));
+        = Array.make[T](dist, (p:Point)=>op(this(p as Point(rank))));
 
     //    incomplete public global def reduce(op:(T,T)=>T, unit:T):T;
 
@@ -189,13 +189,11 @@ public abstract class BaseArray[T] extends Array[T] {
     public global def reduce(op:(T,T)=>T, unit:T):T {
 
         // scatter
-        val ps:ValRail[Place] = dist.places();
+        val ps = dist.places();
         val results = Rail.makeVar[T](ps.length, (p:nat) => unit);
         val r = 0..(ps.length-1);
-        
-        
-	finish foreach (p:Point(1)  in r) {
-        	results(p(0)) = at (ps(p(0))) {
+	finish foreach (val (p) in r) {
+        	results(p) = at (ps(p)) {
         	    var result: T = unit;
                 val a = (this | here) as Array[T](rank);
                 for (pt:Point(rank)  in a.region)

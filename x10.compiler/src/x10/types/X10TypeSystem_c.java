@@ -42,7 +42,6 @@ import polyglot.types.FieldDef;
 import polyglot.types.FieldInstance;
 import polyglot.types.Flags;
 import polyglot.types.InitializerDef;
-import polyglot.types.LazyRef;
 import polyglot.types.LocalDef;
 import polyglot.types.LocalInstance;
 import polyglot.types.Matcher;
@@ -366,17 +365,13 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         }
 
         // Instantiate the super type on the new parameters.
-        X10ClassType sup = (X10ClassType) closureBaseInterfaceDef(numTypeParams, 
-        		numValueParams, 
-        		ci.returnType().isVoid(), 
-        		def.formalNames(), 
-        		def.guard())
-        		.asType();
+        X10ClassType sup = (X10ClassType) closureBaseInterfaceDef(numTypeParams, numValueParams, ci.returnType().isVoid(), 
+        		def.formalNames(), def.guard()).asType();
 
         assert sup.x10Def().typeParameters().size() == typeArgs.size() : def + ", " + sup + ", " + typeArgs;
         sup = sup.typeArguments(typeArgs);
 
-     //   cd.superType(Types.ref(Value())); // Closures are values.
+        cd.superType(Types.ref(Value())); // Closures are values.
         cd.addInterface(Types.ref(sup));
 
         return cd;
@@ -387,20 +382,8 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
     	return closureBaseInterfaceDef(numTypeParams, numValueParams, isVoid, null, null);
     }
     		
-    /**
-     * Synthetically generated interface for the function types.
-     * @param numTypeParams
-     * @param numValueParams
-     * @param isVoid
-     * @param formalNames
-     * @param guard
-     * @return
-     */
-    public X10ClassDef closureBaseInterfaceDef(final int numTypeParams, 
-    		final int numValueParams, 
-    		final boolean isVoid, 
-    		List<LocalDef> formalNames, 
-    		final Ref<XConstraint> guard) {
+    public X10ClassDef closureBaseInterfaceDef(final int numTypeParams, final int numValueParams, 
+    		final boolean isVoid, List<LocalDef> formalNames, final Ref<XConstraint> guard) {
         final X10TypeSystem xts = this;
         final Position pos = Position.COMPILER_GENERATED;
 
@@ -420,10 +403,6 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         }
 
         X10ClassDef cd = (X10ClassDef) new X10ClassDef_c(this, null) {
-        	@Override
-        	public boolean isFunction() { 
-        		return true;
-        	}
             @Override
             public ClassType asType() {
                 if (asType == null) {
@@ -445,9 +424,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
 
         cd.kind(ClassDef.TOP_LEVEL);
         cd.superType(null); // interfaces have no superclass
-        // Functions implement the Any interface.
-        //cd.setInterfaces(Collections.<Ref<? extends Type>> singletonList(Types.ref(Any())));
-        cd.flags(X10Flags.toX10Flags(Flags.PUBLIC.Abstract().Interface()));
+        cd.flags(X10Flags.toX10Flags(Flags.PUBLIC.Abstract().Interface()).Value());
 
         final List<Ref<? extends Type>> typeParams = new ArrayList<Ref<? extends Type>>();
         final List<Ref<? extends Type>> argTypes = new ArrayList<Ref<? extends Type>>();
@@ -476,7 +453,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
 
         // NOTE: don't call cd.asType() until after the type parameters are
         // added.
-        FunctionType ct = (FunctionType) cd.asType();
+        ClosureType ct = (ClosureType) cd.asType();
         xts.systemResolver().install(fullName, ct);
 
         String fullNameWithThis = fullName + "#this";
@@ -487,324 +464,13 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         if (formalNames == null) {
         	formalNames = dummyLocalDefs(argTypes);
         }
-        X10MethodDef mi = methodDef(pos, Types.ref(ct), 
-        		Flags.PUBLIC.Abstract(), Types.ref(rt),
-        		Name.make("apply"), 
-        		typeParams, 
-        		argTypes, 
-        		thisVar,
-        		formalNames, 
-        		guard, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
+        X10MethodDef mi = methodDef(pos, Types.ref(ct), Flags.PUBLIC.Abstract(), Types.ref(rt), Name.make("apply"), typeParams, argTypes, thisVar,
+                                    formalNames, guard, null, Collections.EMPTY_LIST, null);
         cd.addMethod(mi);
 
         return cd;
     }
-    
-    X10ClassDef STRUCT_DEF = null;
-    public X10ClassDef StructDef() {
-    	if (STRUCT_DEF == null) {
-    		STRUCT_DEF = makeStructDef();
-    	}
-    	return STRUCT_DEF;
-    }
-    public X10ClassDef makeStructDef() {
-        final X10TypeSystem xts = this;
-        final Position pos = Position.COMPILER_GENERATED;
 
-        String name = "Struct";
-        X10ClassDef cd = (X10ClassDef) new X10ClassDef_c(this, null) {
-        	
-            @Override
-            public ClassType asType() {
-                if (asType == null) {
-                    X10ClassDef cd = this;
-                    asType = new X10ParsedClassType_c(this);
-                }
-                return asType;
-            }
-        };
-
-        cd.position(pos);
-        cd.name(Name.make(name));
-        try {
-            cd.setPackage(Types.ref(xts.packageForName(QName.make("x10.lang"))));
-        }
-        catch (SemanticException e) {
-            assert false;
-        }
-
-        QName fullName = QName.make("x10.lang", name);
-        cd.kind(ClassDef.TOP_LEVEL);
-        cd.superType(null); // base class has no superclass
-        // Functions implement the Any interface.
-        //cd.setInterfaces(Collections.<Ref<? extends Type>> singletonList(Types.ref(Any())));
-        cd.flags(X10Flags.toX10Flags(Flags.PUBLIC.Abstract()));
-
-
-        // NOTE: don't call cd.asType() until after the type parameters are
-        // added.
-        X10ParsedClassType ct = (X10ParsedClassType) cd.asType();
-      //  xts.systemResolver().install(fullName, ct);
-
-        String fullNameWithThis = fullName + "#this";
-        //String fullNameWithThis = "this";
-        XName thisName = new XNameWrapper<Object>(new Object(), fullNameWithThis);
-        XRoot thisVar = XTerms.makeLocal(thisName);
-
-        /*public strct Struct  {
-          public native def toString():String;
-          public native def typeName():String;
-	      property def loc()=here;
-	      property def at(p:Place)=true;
-	      property def at(r:Object)=true;
-          }*/    
-        final LazyRef<X10ParsedClassType> PLACE = Types.lazyRef(null);
-		PLACE.setResolver(new Runnable() {
-			public void run() {
-				PLACE.update((X10ParsedClassType) xts.Place());
-			}
-		});
-		final LazyRef<X10ParsedClassType> STRING = Types.lazyRef(null);
-		STRING.setResolver(new Runnable() {
-			public void run() {
-				STRING.update((X10ParsedClassType) xts.String());
-			}
-		});
-		final LazyRef<X10ParsedClassType> BOOLEAN = Types.lazyRef(null);
-		BOOLEAN.setResolver(new Runnable() {
-			public void run() {
-				BOOLEAN.update((X10ParsedClassType) xts.Boolean());
-			}
-		});
-	
-        X10MethodDef mi = methodDef(pos, Types.ref(ct), 
-        		Flags.PUBLIC.Native(), STRING,
-        		Name.make("toString"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.EMPTY_LIST, 
-        		thisVar,
-        		Collections.EMPTY_LIST, 
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-        mi = methodDef(pos, Types.ref(ct), 
-        		Flags.PUBLIC.Native(), STRING,
-        		Name.make("typeName"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.EMPTY_LIST, 
-        		thisVar,
-        		Collections.EMPTY_LIST, 
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-    
-        mi = methodDef(pos, Types.ref(ct), 
-        		Flags.PUBLIC.Abstract(), PLACE,
-        		Name.make("loc"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.EMPTY_LIST, 
-        		thisVar,
-        		Collections.EMPTY_LIST, 
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-        final LazyRef<X10ParsedClassType> OBJECT = Types.lazyRef(null);
-		OBJECT.setResolver(new Runnable() {
-			public void run() {
-				OBJECT.update((X10ParsedClassType) xts.Object());
-			}
-		});
-	    List<LocalDef> parameters = dummyLocalDefs(Collections.<Ref<? extends Type>> singletonList(OBJECT));
-        mi = methodDef(pos, Types.ref(ct), 
-        		X10Flags.toX10Flags(Flags.PUBLIC.Native()).Property(), BOOLEAN,
-        		Name.make("at"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.<Ref<? extends Type>> singletonList(OBJECT),
-        		thisVar,
-        		parameters,
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-        parameters = dummyLocalDefs(Collections.<Ref<? extends Type>> singletonList(PLACE));
-        mi = methodDef(pos, Types.ref(ct), 
-        		X10Flags.toX10Flags(Flags.PUBLIC.Native()).Property(), BOOLEAN,
-        		Name.make("at"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.<Ref<? extends Type>> singletonList(PLACE),
-        		thisVar,
-        		parameters,
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-      
-        return cd;
-    }
-    X10ClassDef ANY_DEF = null;
-    public X10ClassDef AnyDef() {
-    	if (ANY_DEF == null) {
-    		ANY_DEF = makeAnyDef();
-    	}
-    	return ANY_DEF;
-    }
-
-
-    public X10ClassDef makeAnyDef() {
-        final X10TypeSystem xts = this;
-        final Position pos = Position.COMPILER_GENERATED;
-
-        String name = "Any";
-        X10ClassDef cd = (X10ClassDef) new X10ClassDef_c(this, null) {
-        	
-            @Override
-            public ClassType asType() {
-                if (asType == null) {
-                    X10ClassDef cd = this;
-                    asType = new X10ParsedClassType_c(this);
-                }
-                return asType;
-            }
-        };
-
-        cd.position(pos);
-        cd.name(Name.make(name));
-        try {
-            cd.setPackage(Types.ref(xts.packageForName(QName.make("x10.lang"))));
-        }
-        catch (SemanticException e) {
-            assert false;
-        }
-
-        QName fullName = QName.make("x10.lang", name);
-        cd.kind(ClassDef.TOP_LEVEL);
-        cd.superType(null); // interfaces have no superclass
-        // Functions implement the Any interface.
-        //cd.setInterfaces(Collections.<Ref<? extends Type>> singletonList(Types.ref(Any())));
-        cd.flags(X10Flags.toX10Flags(Flags.PUBLIC.Abstract().Interface()));
-
-
-        // NOTE: don't call cd.asType() until after the type parameters are
-        // added.
-        X10ParsedClassType ct = (X10ParsedClassType) cd.asType();
-        xts.systemResolver().install(fullName, ct);
-
-        String fullNameWithThis = fullName + "#this";
-        //String fullNameWithThis = "this";
-        XName thisName = new XNameWrapper<Object>(new Object(), fullNameWithThis);
-        XRoot thisVar = XTerms.makeLocal(thisName);
-
-        /*public interface Any  {
-	
-    def toString():String;
-    def typeName():String;
-	property def loc():Place;
-	property def at(p:Place):boolean;
-	property def at(r:Object):boolean;
-}*/    
-        final LazyRef<X10ParsedClassType> PLACE = Types.lazyRef(null);
-		PLACE.setResolver(new Runnable() {
-			public void run() {
-				PLACE.update((X10ParsedClassType) xts.Place());
-			}
-		});
-		final LazyRef<X10ParsedClassType> STRING = Types.lazyRef(null);
-		STRING.setResolver(new Runnable() {
-			public void run() {
-				STRING.update((X10ParsedClassType) xts.String());
-			}
-		});
-		final LazyRef<X10ParsedClassType> BOOLEAN = Types.lazyRef(null);
-		BOOLEAN.setResolver(new Runnable() {
-			public void run() {
-				BOOLEAN.update((X10ParsedClassType) xts.Boolean());
-			}
-		});
-	
-        X10MethodDef mi = methodDef(pos, Types.ref(ct), 
-        		Flags.PUBLIC.Abstract(), STRING,
-        		Name.make("toString"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.EMPTY_LIST, 
-        		thisVar,
-        		Collections.EMPTY_LIST, 
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-        mi = methodDef(pos, Types.ref(ct), 
-        		X10Flags.toX10Flags(Flags.PUBLIC.Abstract()).Global(), STRING,
-        		Name.make("typeName"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.EMPTY_LIST, 
-        		thisVar,
-        		Collections.EMPTY_LIST, 
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-    
-        mi = methodDef(pos, Types.ref(ct), 
-        		X10Flags.toX10Flags(Flags.PUBLIC.Abstract()).Property().Global(), PLACE,
-        		Name.make("loc"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.EMPTY_LIST, 
-        		thisVar,
-        		Collections.EMPTY_LIST, 
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-        final LazyRef<X10ParsedClassType> OBJECT = Types.lazyRef(null);
-		OBJECT.setResolver(new Runnable() {
-			public void run() {
-				OBJECT.update((X10ParsedClassType) xts.Object());
-			}
-		});
-	    List<LocalDef> parameters = dummyLocalDefs(Collections.<Ref<? extends Type>> singletonList(OBJECT));
-        mi = methodDef(pos, Types.ref(ct), 
-        		X10Flags.toX10Flags(Flags.PUBLIC.Abstract()).Property(), BOOLEAN,
-        		Name.make("at"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.<Ref<? extends Type>> singletonList(OBJECT),
-        		thisVar,
-        		parameters,
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-      
-        parameters = dummyLocalDefs(Collections.<Ref<? extends Type>> singletonList(PLACE));
-        mi = methodDef(pos, Types.ref(ct), 
-        		X10Flags.toX10Flags(Flags.PUBLIC.Abstract()).Property(), BOOLEAN,
-        		Name.make("at"), 
-        		Collections.EMPTY_LIST, 
-        		Collections.<Ref<? extends Type>> singletonList(PLACE),
-        		thisVar,
-        		parameters,
-        		null, 
-        		null, 
-        		Collections.EMPTY_LIST, 
-        		null);
-        cd.addMethod(mi);
-    
-        return cd;
-    }
     public List<LocalDef> dummyLocalDefs(List<Ref<? extends Type>> types) {
         List<LocalDef> list = new ArrayList<LocalDef>();
         for (int i = 0; i < types.size(); i++) {
@@ -1190,6 +856,13 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return unknownType;
     }
 
+    private X10ParsedClassType refType_;
+
+    public Type Ref() {
+        if (refType_ == null)
+            refType_ = (X10ParsedClassType) load("x10.lang.Ref");
+        return refType_;
+    }
 /*
     private X10ParsedClassType primitiveType_;
 
@@ -1230,20 +903,20 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return ts;
     }
 
-    public List<FunctionType> getFunctionSupertypes(Type t, X10Context context) {
+    public List<ClosureType> getFunctionSupertypes(Type t, X10Context context) {
         if (t == null)
             return Collections.EMPTY_LIST;
 
-        List<FunctionType> l = new ArrayList<FunctionType>();
+        List<ClosureType> l = new ArrayList<ClosureType>();
 
         for (Type bound : env(context).upperBounds(t, false)) {
-            if (bound instanceof FunctionType)
-                l.add((FunctionType) bound);
+            if (bound instanceof ClosureType)
+                l.add((ClosureType) bound);
 
             if (bound instanceof ObjectType) {
                 ObjectType ot = (ObjectType) bound;
                 for (Type ti : superTypes(ot)) {
-                    List<FunctionType> supFunctions = getFunctionSupertypes(ti, context);
+                    List<ClosureType> supFunctions = getFunctionSupertypes(ti, context);
                     l.addAll(supFunctions);
                 }
             }
@@ -1252,12 +925,8 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return l;
     }
 
-    public boolean isFunctionType(Type t) {
-    	if (! (t instanceof X10ClassType)) {
-    		return false;
-    	}
-    	X10ClassType xt = (X10ClassType) t;
-    	return ((X10ClassDef) xt.def()).isFunction();
+    public boolean isFunction(Type t, X10Context context) {
+        return !getFunctionSupertypes(t, context).isEmpty();
     }
 
     public boolean isBox(Type t) {
@@ -1316,8 +985,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
     }
 
     public boolean isValueType(Type t, X10Context c) {
-    	return false;
-        //return kind(t, c) == Kind.VALUE;
+        return kind(t, c) == Kind.VALUE;
     }
     
     public boolean isStructType(Type t) {
@@ -1542,7 +1210,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         		argTypes, thisVar, formalNames, guard, throwTypes);
     }
 
-    public FunctionType closureType(Position p, Ref<? extends Type> returnType, 
+    public ClosureType closureType(Position p, Ref<? extends Type> returnType, 
     		// List<Ref<? extends Type>> typeParams, 
     		List<Ref<? extends Type>> argTypes,
             List<LocalDef> formalNames, Ref<XConstraint> guard, 
@@ -1550,14 +1218,14 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
             List<Ref<? extends Type>> throwTypes) {
         Type rt = Types.get(returnType);
         X10ClassDef def = closureBaseInterfaceDef(0 /*typeParams.size()*/, argTypes.size(), rt.isVoid(), formalNames, guard);
-        FunctionType ct = (FunctionType) def.asType();
+        ClosureType ct = (ClosureType) def.asType();
         List<Type> typeArgs = new ArrayList<Type>();
         for (Ref<? extends Type> ref : argTypes) {
             typeArgs.add(Types.get(ref));
         }
         if (!rt.isVoid())
             typeArgs.add(rt);
-        return (FunctionType) ct.typeArguments(typeArgs);
+        return (ClosureType) ct.typeArguments(typeArgs);
     }
 
     protected NullType createNull() {
@@ -1730,7 +1398,6 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
     // return XOBJECT_;
     // }
 
-    
     public Type Object() {
         if (OBJECT_ == null)
             OBJECT_ = load("x10.lang.Object");
@@ -1742,19 +1409,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
             return CLASS_;
         return CLASS_ = load("x10.lang.Class");
     }
-    
-   
-    public Type Any() {
-    	return AnyDef().asType();
-    }
 
-    Type STRUCT_ = null;
-    public Type Struct() {
-    	if (STRUCT_ == null) {
-    		STRUCT_ = load("x10.lang.Struct");
-    	}
-    	return STRUCT_;
-    }
     public Type String() {
         if (STRING_ != null)
             return STRING_;
@@ -2983,7 +2638,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
    protected XConstraint isHereConstraint(XConstraint pc, XTerm target, X10Context xc) {
 	   try {
 		   XTerm eloc = xtypeTranslator().trans(pc, target, 
-				   ((StructType) Object()).fieldNamed(Name.make("location")));
+				   ((StructType) Ref()).fieldNamed(Name.make("location")));
 		   pc.addBinding(eloc, xc.currentPlaceTerm());
 	   } catch (XFailure z) {
 		   pc.setInconsistent();
@@ -2993,14 +2648,14 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
    public XTerm locVar(XTerm target, X10Context xc)  {
 	   XConstraint pc = new XConstraint_c();
 	   return xtypeTranslator().trans(pc, target, 
-			   ((StructType) Object()).fieldNamed(Name.make("location")));
+			   ((StructType) Ref()).fieldNamed(Name.make("location")));
    }
    public XTerm locVar(Receiver r, X10Context xc)  {
 	   XConstraint pc = new XConstraint_c();
 	   XTerm target = xtypeTranslator().trans(pc, r, xc);
 	   if (target == null) return null;
 	   return xtypeTranslator().trans(pc, target, 
-			   ((StructType) Object()).fieldNamed(Name.make("location")));
+			   ((StructType) Ref()).fieldNamed(Name.make("location")));
    }
    public XConstrainedTerm globalPlace() {
 	   return xtypeTranslator().globalPlace();

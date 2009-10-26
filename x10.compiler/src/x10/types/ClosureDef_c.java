@@ -75,9 +75,9 @@ public class ClosureDef_c extends Def_c implements ClosureDef {
     	return n;
     	
     }
-    FunctionType asType;
+    ClosureType asType;
     
-    public FunctionType asType() {
+    public ClosureType asType() {
 	if (asType == null) {
 	    X10TypeSystem ts = (X10TypeSystem) this.ts;
 	    asType = ts.closureType(position(), returnType, 

@@ -8,11 +8,6 @@
 
 package x10.lang;
 
-/**
- * An interface implemented by any container (struct or class) that wishes
- * to support equality.
- */
-public interface Equals {
-    def equals(Top):boolean;
-    def hashCode():int;
+public interface Equals[-T] /* {T <: Equals[T]} */ {
+    public def equals(T) /* {T <: Equals[T]} */: Boolean;
 }

@@ -24,7 +24,7 @@ import x10.constraint.XTerm;
 public interface ClosureDef extends FunctionDef, X10Def, X10ProcedureDef {
     
     ClosureInstance asInstance();
-    public FunctionType asType();
+    public ClosureType asType();
     /**
      * Return a copy of this with position reset.
      * @param pos
