@@ -14,7 +14,6 @@ package x10.ast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +52,6 @@ import polyglot.types.TypeSystem_c;
 import polyglot.types.Types;
 import polyglot.types.UnknownType;
 import polyglot.types.TypeSystem_c.MethodMatcher;
-import polyglot.util.CodeWriter;
 import polyglot.util.CollectionUtil;
 import polyglot.util.ErrorInfo;
 import polyglot.util.InternalCompilerError;
@@ -62,7 +60,6 @@ import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.ErrorHandlingVisitor;
 import polyglot.visit.NodeVisitor;
-import polyglot.visit.PrettyPrinter;
 import polyglot.visit.TypeBuilder;
 import polyglot.visit.TypeChecker;
 import x10.constraint.XConstraint;
@@ -187,7 +184,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 			catch (SemanticException e) {
 				// Now, try to find the method with implicit conversions, making them explicit.
 				try {
-					Pair<MethodInstance,List<Expr>> p = tryImplicitConversions(this, tc, t, name().id(), typeArgs, argTypes);
+					Pair<MethodInstance,List<Expr>> p = tryImplicitConversions(this, tc, t, typeArgs, argTypes);
 					return p;
 				}
 				catch (SemanticException e2) {
@@ -405,7 +402,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 	        for (Expr a : this.arguments) {
 	            argTypes.add(a.type());
 	        }
-	        X10MethodInstance mi = ts.createFakeMethod(name.id(), typeArgs, argTypes, e);
+	        X10MethodInstance mi = ts.createFakeMethod(name.id(), typeArgs, argTypes);
 	        Type rt = mi.rightType(); // X10Field_c.rightType(mi.rightType(), mi.x10Def(), n.target, c);
 	        n = (X10Call_c) methodInstance(mi).type(rt);
 	        try {
@@ -525,7 +522,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 				List<Expr> args = null;
 				 // Now, try to find the method with implicit conversions, making them explicit.
 				 try {
-					 Pair<MethodInstance,List<Expr>> p = tryImplicitConversions(this, tc, null, name().id(), typeArgs, argTypes);
+					 Pair<MethodInstance,List<Expr>> p = tryImplicitConversions(this, tc, null, typeArgs, argTypes);
 					 mi = (X10MethodInstance) p.fst();
 					 args = p.snd();
 				 } catch (SemanticException e2) {
@@ -603,7 +600,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 		    if (mi == null) {
 		        // Now, try to find the method with implicit conversions, making them explicit.
 		        try {
-		            Pair<MethodInstance,List<Expr>> p = tryImplicitConversions(n, tc, targetType, n.name().id(), typeArgs, argTypes);
+		            Pair<MethodInstance,List<Expr>> p = tryImplicitConversions(n, tc, targetType, typeArgs, argTypes);
 		            mi = (X10MethodInstance) p.fst();
 		            args = p.snd();
 		        }
@@ -669,18 +666,16 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 
 
 
-	public static Pair<MethodInstance,List<Expr>> tryImplicitConversions(X10ProcedureCall n, ContextVisitor tc,
-	        Type targetType, final Name name, List<Type> typeArgs, List<Type> argTypes) throws SemanticException {
+	static Pair<MethodInstance,List<Expr>> tryImplicitConversions(final X10Call_c n, ContextVisitor tc, Type targetType, List<Type> typeArgs, List<Type> argTypes) throws SemanticException {
 	    final X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 	    final Context context = tc.context();
+	    ClassDef currentClassDef = context.currentClassDef();
 
-	    List<MethodInstance> methods = ts.findAcceptableMethods(targetType,
-	            new DumbMethodMatcher(targetType, name, typeArgs, argTypes, context));
+	    List<MethodInstance> methods = ts.findAcceptableMethods(targetType, new DumbMethodMatcher(targetType, n.name().id(), typeArgs, argTypes, context));
 
-	    Pair<MethodInstance,List<Expr>> p = Converter.<MethodDef,MethodInstance>tryImplicitConversions(n, tc,
-	            targetType, methods, new X10New_c.MatcherMaker<MethodInstance>() {
+	    Pair<MethodInstance,List<Expr>> p = Converter.<MethodDef,MethodInstance>tryImplicitConversions(n, tc, targetType, methods, new X10New_c.MatcherMaker<MethodInstance>() {
 	        public Matcher<MethodInstance> matcher(Type ct, List<Type> typeArgs, List<Type> argTypes) {
-	            return ts.MethodMatcher(ct, name, typeArgs, argTypes, context);
+	            return ts.MethodMatcher(ct, n.name().id(), typeArgs, argTypes, context);
 	        }
 	    });
 
@@ -741,60 +736,4 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 		sb.append(")");
 		return sb.toString();
 	}
-
-
-    /** Write the expression to an output file. */
-   @Override
-	  public void prettyPrint(CodeWriter w, PrettyPrinter tr) {
-	    w.begin(0);
-	    if (!targetImplicit) {
-	        if (target instanceof Expr) {
-	          printSubExpr((Expr) target, w, tr);
-	        }
-	        else if (target != null) {
-	          print(target, w, tr);
-	        }
-	    w.write(".");
-	    w.allowBreak(2, 3, "", 0);
-	    }
-
-        w.write(name + "");
-
-	    if (typeArguments.size() > 0) {
-	        w.write("[");
-	        w.allowBreak(2, 2, "", 0); // miser mode
-	        w.begin(0);
-	                
-	        for (Iterator<TypeNode> i = typeArguments.iterator(); i.hasNext(); ) {
-	            TypeNode t = i.next();
-	            t.prettyPrint(w, tr);
-	            if (i.hasNext()) {
-	            w.write(",");
-	            w.allowBreak(0, " ");
-	            }
-	        }
-            w.write("]");
-	        w.end();
-	    }
-	    
-	    w.write("(");
-	    if (arguments.size() > 0) {
-	    w.allowBreak(2, 2, "", 0); // miser mode
-	    w.begin(0);
-	            
-	    for (Iterator<Expr> i = arguments.iterator(); i.hasNext(); ) {
-	        Expr e = i.next();
-	        print(e, w, tr);
-
-	        if (i.hasNext()) {
-	        w.write(",");
-	        w.allowBreak(0, " ");
-	        }
-	    }
-
-	    w.end();
-	    }
-	    w.write(")");
-	    w.end();
-	  }
 }

@@ -60,9 +60,6 @@ public final class Configuration extends x10.config.Configuration {
     public static boolean FLATTEN_EXPRESSIONS = false;
     private static final String FLATTEN_EXPRESSIONS_desc = "Flatten all expressions";
 
-    public static boolean INLINE_SMALL_METHODS = false;
-    private static final String INLINE_SMALL_METHODS_desc = "Inline methods that don't make many calls";
-
     public static String PLUGINS = "";
     private static final String PLUGINS_desc = "Comma-separated list of compiler plugins to run.";
 

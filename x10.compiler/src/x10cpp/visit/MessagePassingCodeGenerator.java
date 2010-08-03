@@ -2376,11 +2376,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    if (unsigned_op)
 	        sw.write(")");
 	    sw.write(" ");
-	    if (asgn.operator() != Assign_c.ASSIGN) {
-	        assert (false);
-	        sw.write("/"+"*"+" op= "+"*"+"/");
-	        sw.write(" ");
-	    }
 	    // [IP] Are all the operators the same?
 	    sw.write(opString);
 	    sw.allowBreak(2, 2, " ", 1);
@@ -4271,7 +4266,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	            Name rn = Name.make(getId());
 	            Type rt = cd.asInstance().returnType();
 	            this.ret = rt.isVoid() ? null : xts.localDef(closure.position(), xts.NoFlags(), Types.ref(rt), rn);
-	            this.label = Name.makeFresh("__ret");
+	            this.label = Name.make("__ret"+getUniqueId_());
 	        }
 	    }
 	    // TODO: use override to short-circuit the traversal

@@ -11,13 +11,14 @@
 
 package x10.core.fun;
 
+import x10.core.Any;
 import x10.rtt.RuntimeType;
 import x10.rtt.RuntimeType.Variance;
 
-public interface Fun_0_4<T1,T2,T3,T4,U> extends Fun {
+public interface Fun_0_4<T1,T2,T3,T4,U> extends Any {
     U apply$G(T1 o1, T2 o2, T3 o3, T4 o4);
     
-    public static final RuntimeType<Fun_0_4<?,?,?,?,?>> _RTT = new RuntimeType<Fun_0_4<?,?,?,?,?>>(
+    public static final RuntimeType _RTT = new RuntimeType(
         Fun_0_4.class,
         Variance.CONTRAVARIANT,
         Variance.CONTRAVARIANT,

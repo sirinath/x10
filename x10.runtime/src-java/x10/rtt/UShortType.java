@@ -17,7 +17,7 @@ import x10.core.fun.Fun_0_2;
 
 public class UShortType extends RuntimeType<Short> {
     public UShortType() {
-        super(x10.lang.UShort.class);
+        super(short.class);
     }
     
     @Override
@@ -27,7 +27,7 @@ public class UShortType extends RuntimeType<Short> {
 
     @Override
     public boolean instanceof$(Object o) {
-        return o instanceof x10.lang.UShort;
+        return o instanceof java.lang.Short;
     }
 
     @Override

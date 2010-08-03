@@ -22,10 +22,8 @@
 namespace x10 {
     namespace lang {
         class VoidFun_0_0 : public x10aux::AnyFun {
-            public:
-            static x10aux::RuntimeType rtt;
-            static const x10aux::RuntimeType* getRTT() { if (!rtt.isInitialized) _initRTT(); return &rtt; }
-            static void _initRTT();
+        public:
+            RTT_H_DECLS_INTERFACE
 
             template <class I> struct itable {
                 itable(void(I::*apply)(),

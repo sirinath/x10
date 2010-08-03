@@ -13,10 +13,8 @@ package x10.core.fun;
 
 import x10.rtt.RuntimeType;
 
-public interface VoidFun_0_0 extends VoidFun {
+public interface VoidFun_0_0 {
     void apply();
     
-    public static final RuntimeType<VoidFun_0_0> _RTT = new RuntimeType<VoidFun_0_0>(
-        VoidFun_0_0.class
-    );
+    public static final RuntimeType _RTT = new RuntimeType(VoidFun_0_0.class); 
 }

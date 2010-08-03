@@ -17,7 +17,7 @@ import x10.core.fun.Fun_0_2;
 
 public class ULongType extends RuntimeType<Long> {
     public ULongType() {
-        super(x10.lang.ULong.class);
+        super(long.class);
     }
     
     @Override
@@ -27,7 +27,7 @@ public class ULongType extends RuntimeType<Long> {
 
     @Override
     public boolean instanceof$(Object o) {
-        return o instanceof x10.lang.ULong;
+        return o instanceof java.lang.Long;
     }
 
     @Override

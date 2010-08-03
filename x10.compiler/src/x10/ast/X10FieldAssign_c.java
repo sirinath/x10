@@ -35,7 +35,6 @@ import x10.types.X10Flags;
 import x10.types.X10TypeMixin;
 import x10.types.checker.Checker;
 import x10.types.checker.PlaceChecker;
-import x10.visit.X10TypeChecker;
 import x10.errors.Errors;
 
 public class X10FieldAssign_c extends FieldAssign_c {
@@ -47,25 +46,11 @@ public class X10FieldAssign_c extends FieldAssign_c {
     @Override
     public Assign typeCheckLeft(ContextVisitor tc) throws SemanticException {
     	X10Context cxt = (X10Context) tc.context();
-    	if (cxt.inDepType()) {
-    	    SemanticException e = new Errors.NoAssignmentInDepType(this, this.position());
-    	    X10TypeChecker xtc = X10TypeChecker.getTypeChecker(tc);
-    	    if (xtc.throwExceptions())
-    	        throw e;
-    	    Errors.issue(tc.job(), e, this);
-    	}
+    	if (cxt.inDepType()) 
+    		throw new Errors.NoAssignmentInDepType(this, this.position());
     	
         tc = tc.context(((X10Context) tc.context()).pushAssignment());
-        Assign res = this;
-        try {
-            res = super.typeCheckLeft(tc);
-        } catch (SemanticException e) {
-            X10TypeChecker xtc = X10TypeChecker.getTypeChecker(tc);
-            if (xtc.throwExceptions())
-                throw e;
-            Errors.issue(tc.job(), e, this);
-        }
-        return res;
+        return super.typeCheckLeft(tc);
     }
 
     /** Type check the expression. */
@@ -74,15 +59,10 @@ public class X10FieldAssign_c extends FieldAssign_c {
     	TypeSystem ts = tc.typeSystem();
         X10FieldAssign_c n = (X10FieldAssign_c) typeCheckLeft(tc);
         Type t =  n.leftType();
-        // Check that the field being assigned to is not a property.
-        // Such fields can only be set in a property() statement.
+     // Check that the field being assigned to is not a property. Such fields 
         X10FieldInstance fd = (X10FieldInstance) n.fieldInstance();
         if (fd.isProperty()) {
-            SemanticException e = new Errors.CannotAssignToProperty(fd, n.position());
-            X10TypeChecker xtc = X10TypeChecker.getTypeChecker(tc);
-            if (xtc.throwExceptions())
-                throw e;
-            Errors.issue(tc.job(), e, n);
+        	throw new Errors.CannotAssignToProperty(fd, n.position());
         }
         Type targetType =  n.target().type();
 
@@ -95,8 +75,8 @@ public class X10FieldAssign_c extends FieldAssign_c {
         Type s =  right.type();
         
     	// Check the proto condition.
+    	
     	if (X10TypeMixin.isProto(s)) {
-    	    try {
     		if (! X10TypeMixin.isProto(targetType)) 
     			throw new Errors.ProtoValuesAssignableOnlyToProtoReceivers(this.right(), this, position());
     		if (op != ASSIGN) 
@@ -104,35 +84,17 @@ public class X10FieldAssign_c extends FieldAssign_c {
     		s = X10TypeMixin.baseOfProto(s);
     		if (! (ts.isSubtype(s, t, tc.context()))) 
     			throw new Errors.CannotAssign(n.right(), n.target().type(), n.position);
-    	    } catch (SemanticException e) {
-    	        X10TypeChecker xtc = X10TypeChecker.getTypeChecker(tc);
-    	        if (xtc.throwExceptions())
-    	            throw e;
-    	        Errors.issue(tc.job(), e, this);
-    	    }
-    	}
 
-    	X10Field_c target = (X10Field_c) n.left(tc.nodeFactory());
-    	try {
-    	    target = PlaceChecker.makeFieldAccessLocalIfNecessary(target, tc);
-    	} catch (SemanticException e) {
-    	    X10TypeChecker xtc = X10TypeChecker.getTypeChecker(tc);
-    	    if (xtc.throwExceptions())
-    	        throw e;
-    	    Errors.issue(tc.job(), e, this);
+    		X10Field_c target = PlaceChecker.makeFieldAccessLocalIfNecessary((X10Field_c) left(tc.nodeFactory()), tc);
+    		n= (X10FieldAssign_c) n.reconstruct(target.target(), n.name());
+    		t = n.leftType();
+    		n = (X10FieldAssign_c) n.type(t);
+    		return n;
     	}
-    	n = (X10FieldAssign_c) n.reconstruct(target.target(), n.name());
-    	t = n.leftType();
-    	n = (X10FieldAssign_c) n.type(t);
-    	try {
-    	    return Checker.typeCheckAssign(n, tc);
-    	} catch (SemanticException e) {
-    	    X10TypeChecker xtc = X10TypeChecker.getTypeChecker(tc);
-    	    if (xtc.throwExceptions())
-    	        throw e;
-    	    Errors.issue(tc.job(), e, this);
-    	    return n;
-    	}
+    	
+    	
+        
+        return Checker.typeCheckAssign(n, tc);
     }
     
 }
