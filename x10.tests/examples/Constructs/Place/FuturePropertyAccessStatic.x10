@@ -12,7 +12,6 @@
 import harness.x10Test;
 
 /**
- * In 2.1 all fields can be accessed from anywhere.
  * @author bdlucas
  */
 

@@ -18,26 +18,25 @@ import harness.x10Test;
  *
  * @author kemal 4/2005
  */
-
 public class AtomicOrdered extends x10Test {
 
 	public const CACHESIZE: int = 32*1024/4;
 	public const LINESIZE: int = 128/4;
 	public const MAX_ASSOC: int = 8;
 
-	val A = new Array[int](0..CACHESIZE*(MAX_ASSOC+2)-1);
+	val A: Array[int](1)! = new Array[int]([0..CACHESIZE*(MAX_ASSOC+2)-1]);
 
 	public def run(): boolean = {
-		val r  = new pair();
+		val r: pair! = new pair();
 		finish {
-			async  {
+			async(here) {
 				finish { } // delay
 				atomic A(0) = 1;
 				var t: int;
 				atomic t = A(LINESIZE);
 				r.v1 = t;
 			}
-			async  {
+			async(here) {
 				finish { } // delay
 				atomic A(LINESIZE) = 1;
 				var t: int;
@@ -51,7 +50,7 @@ public class AtomicOrdered extends x10Test {
 		return true;
 	}
 
-	public static def main(Rail[String])  {
+	public static def main(var args: Rail[String]): void = {
 		new AtomicOrdered().execute();
 	}
 

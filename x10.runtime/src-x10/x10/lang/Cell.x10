@@ -39,8 +39,9 @@ public final class Cell[T] {
      *
      * @return the String object being constructed by the StringBuilder
      */
-    public safe def toString() {
-        return "Cell(" + this.value.toString() + ")";
+    public global safe def toString() {
+        if (!at(here)) throw new UnsupportedOperationException();
+        return "Cell(" + (this as Cell[T]!).value.toString() + ")";
     }
 
 
@@ -50,7 +51,7 @@ public final class Cell[T] {
      *
      * @return the current value stored in the Cell.
      */
-    public def apply() =  value;
+    public global def apply() = at (this) value;
 
     /**
      * Set the value stored in the Cell to the new value.
@@ -58,7 +59,7 @@ public final class Cell[T] {
      *
      * @param x the new value
      */
-    public def apply(x:T) { value = x; }
+    public global def apply(x:T) { at (this) value = x; }
 
     /**
      * Set the value stored in the Cell to the new value.
@@ -67,7 +68,7 @@ public final class Cell[T] {
      * @param x the new value
      * @return the new value stored in the Cell.
      */
-    public def set(x:T) { value = x; return x; }
+    public global def set(x:T) { at (this) value = x; return x; }
 
 
     /**

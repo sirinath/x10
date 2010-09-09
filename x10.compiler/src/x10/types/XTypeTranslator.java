@@ -137,18 +137,6 @@ public class XTypeTranslator {
 	public XTerm trans(XTerm target, FieldInstance fi, Type t) throws SemanticException {
 		return trans(new CConstraint(), target, fi, t);
 	}
-	
-	Object fakeKey = new Object();
-	public XTerm transFakeField(CConstraint c, XTerm target, String name)  {
-		//XName field = XTerms.makeName(fi.def(), Types.get(fi.def().container()) + "#" + fi.name().toString());
-		
-			XName field = XTerms.makeName(fakeKey,  name);
-			XTerm 
-			v = XTerms.makeField((XVar) target, field);
-		return v;
-		
-		
-	}
 	public XTerm trans(CConstraint c, XTerm target, FieldInstance fi, Type t) throws SemanticException {
 		XTerm v;
 		//XName field = XTerms.makeName(fi.def(), Types.get(fi.def().container()) + "#" + fi.name().toString());
@@ -519,8 +507,7 @@ public class XTypeTranslator {
 			if (body == null) {
 				// hardwire s.at(t) for an interface
 				// return s.home = t is Place ? t : t.home
-				// stub out for orthogonal locality
-				// body  = PlaceChecker.rewriteAtClause(c, xmi, t, r, xc);
+				body  = PlaceChecker.rewriteAtClause(c, xmi, t, r, xc);
 			}
 			if (body != null) {
 				if (xmi.x10Def().thisVar() != null && t.target() instanceof Expr) {

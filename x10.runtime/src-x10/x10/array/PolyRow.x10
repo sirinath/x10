@@ -82,7 +82,7 @@ public class PolyRow(rank:Int) extends ValRow {
      * allow for multiplication by positive constant
      */
 
-    def isParallel(that: PolyRow): boolean {
+    global def isParallel(that: PolyRow): boolean {
         for (var i: int = 0; i<cols-1; i++)
             if (this(i)!=that(i))
                 return false;
@@ -95,7 +95,7 @@ public class PolyRow(rank:Int) extends ValRow {
      * non-zero
      */
 
-    def isRect(): boolean {
+    global def isRect(): boolean {
         var nz: boolean = false;
         for (var i: int = 0; i<cols-1; i++) {
             if (this(i)!=0) {
@@ -111,7 +111,7 @@ public class PolyRow(rank:Int) extends ValRow {
      * determine whether point satisfies halfspace
      */
 
-    def contains(p: Point): boolean {
+    global def contains(p: Point): boolean {
         var sum: int = this(rank);
         for (var i: int = 0; i<rank; i++)
             sum += this(i)*p(i);
@@ -129,7 +129,7 @@ public class PolyRow(rank:Int) extends ValRow {
      *   -a0*x0 - ... -ar+1 <=  0
      */
 
-    def complement(): PolyRow {
+    global def complement(): PolyRow {
         val init = (i:Int) => i<rank? -this(i) : -this(rank)+1;
         val as_ = ValRail.make[int](rank+1, init);
         return new PolyRow(as_);
@@ -140,7 +140,7 @@ public class PolyRow(rank:Int) extends ValRow {
      * print a halfspace in equation form
      */
 
-    def printEqn(ps: Printer, spc: String, row: int) {
+    global def printEqn(ps: Printer, spc: String, row: int) {
         var sgn: int = 0;
         var first: boolean = true;
         for (var i: int = 0; i<cols-1; i++) {

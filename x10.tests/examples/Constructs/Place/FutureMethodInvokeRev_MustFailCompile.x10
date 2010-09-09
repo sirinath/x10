@@ -17,15 +17,14 @@ import harness.x10Test;
 
 public class FutureMethodInvokeRev_MustFailCompile extends x10Test {
 
-	class C[S](home:Place) {
+    class C[S] {
         property p:int = 0;
         val x:S;
         var y:S;
-        def foo(){here == this.home} {}
-        def foo(x:S) {}
+        def foo() {}
+        global def foo(x:S) {}
         final def foo[T](x:T) {}
         def this(s:S) {
-        	property(here);
             x = s;
             y = s;
         }

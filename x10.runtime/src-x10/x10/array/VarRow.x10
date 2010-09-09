@@ -13,7 +13,7 @@ package x10.array;
 
 final class VarRow extends Row {
 
-    private val row:Rail[int];
+    private global val row:Rail[int]!;
 
     public def this(cols: Int, init: (Int)=>int) {
         super(cols);
@@ -25,8 +25,8 @@ final class VarRow extends Row {
         row = Rail.make[int](cols);
     }
     
-    def row() = row as Rail[int];
-    public safe def apply(i:Int) = row()(i);
+    global def row() = row as Rail[int]!;
+    public safe global def apply(i:Int) = row()(i);
 
-    public safe def set(v:int, i:Int) = (row()(i) = v);
+    public safe global def set(v:int, i:Int) = (row()(i) = v);
 }

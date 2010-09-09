@@ -22,16 +22,14 @@ public class FileWriter extends OutputStreamWriter {
         public native def this(String) throws IOException;
     }
 
-    // TODO: This is questionable.
-    //       What does it mean to send a File to another node?
-    val file: File;
+    global val file: File;
     
     // @Native("java", "new java.io.BufferedOutputStream(new java.io.FileOutputStream(#1))")
     private static def make(path: String):OutputStream throws IOException {
         return new FileOutputStream(path);       
     }
 
-    public def this(file: File) throws IOException {
+    public def this(file: File!) throws IOException {
         super(make(file.getPath()));
         this.file = file;
     }

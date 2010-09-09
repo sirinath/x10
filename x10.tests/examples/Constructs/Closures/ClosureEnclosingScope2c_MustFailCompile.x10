@@ -29,10 +29,8 @@ public class ClosureEnclosingScope2c_MustFailCompile extends ClosureTest {
         val b = 1;
 
         class C {
-            def foo(): void {
-              var c:int = 1;
-              (()=>a+b+c)();
-            }
+            var c:int = 1;
+            def foo() = (()=>a+b+c)();
         }
 
         check("new C().foo()", new C().foo(), 3);

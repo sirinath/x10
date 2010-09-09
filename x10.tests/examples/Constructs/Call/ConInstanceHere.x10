@@ -13,16 +13,15 @@ import harness.x10Test;
 
 /**
  * Check that a cast is created for an instance call with a simple clause.
-  Changed for 2.1. 
  * @author vj
  */
-public class ConInstanceHere_MustFailCompile extends x10Test {
-	val root = GlobalRef[ConInstanceHere_MustFailCompile](this);
+public class ConInstanceHere extends x10Test {
+	
 	def m() {}
 	def n() {
 		at (here.next()) {
 		  // This call will compile only if -strictCalls is not set.
-		  root().m(); // DYNAMIC_CHECK
+		  m(); // DYNAMIC_CHECK
 		}
 	}
 	
@@ -36,7 +35,7 @@ public class ConInstanceHere_MustFailCompile extends x10Test {
 	}
 
 	public static def main(Rail[String]) {
-		new ConInstanceHere_MustFailCompile().execute();
+		new ConInstanceHere().execute();
 	}
 
 

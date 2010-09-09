@@ -21,10 +21,10 @@ import harness.x10Test;
 
 public class ClosureEnclosingScope3 extends ClosureTest {
 
-    val a = 1;
+    global val a = 1;
 
     class C {
-        val a = 2;
+        global val a = 2;
         class D {
             val a = 4;
             val sum = (()=>(ClosureEnclosingScope3.this.a

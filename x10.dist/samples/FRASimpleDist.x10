@@ -12,12 +12,9 @@
 import x10.io.Console;
 import x10.util.Timer;
 
-/**
- * Converted to 2.1.
- */
 class LocalTable {
 
-    val a: Array[long](1);
+    val a: Array[long](1)!;
     val mask: int;
 
     def this(size:int) {
@@ -65,7 +62,7 @@ class FRASimpleDist {
     }
 
     static def randomAccessUpdate(
-	    num_updates: long,
+	num_updates: long,
         logLocalTableSize: int,
         tables: PlaceLocalHandle[LocalTable]
     ) {
@@ -75,9 +72,9 @@ class FRASimpleDist {
                 var ran:long = HPCC_starts(valp*(num_updates/Place.MAX_PLACES));
                 for (var i:long=0; i<num_updates/Place.MAX_PLACES; i++) {
                     val placeId = ((ran>>logLocalTableSize) & (Place.MAX_PLACES-1)) as int;
-                    val ran2=ran;
+                    val valran = ran;
                     async (Place.places(placeId)) {
-                        tables().update(ran2);
+                        tables().update(valran);
                     }
                     ran = (ran << 1) ^ (ran<0L ? POLY : 0L);
                 }
@@ -86,7 +83,7 @@ class FRASimpleDist {
     }
 
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Rail[String]!) {
         if ((Place.MAX_PLACES & (Place.MAX_PLACES-1)) > 0) {
             println("The number of places must be a power of 2.");
             return;
@@ -99,7 +96,7 @@ class FRASimpleDist {
         val num_updates = 4*tableSize;
 
         // create local tables
-	    val tables = PlaceLocalHandle.make[LocalTable](Dist.makeUnique(), () => new LocalTable(localTableSize));
+	val tables = PlaceLocalHandle.make[LocalTable](Dist.makeUnique(), () => new LocalTable(localTableSize));
 
         // print some info
         println("Main table size   = 2^" +logLocalTableSize + "*" + Place.MAX_PLACES+" = " + tableSize+ " words");

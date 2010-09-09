@@ -12,8 +12,6 @@
 import harness.x10Test;
 
 import x10.util.Box;
-import x10.compiler.Pinned;
-import x10.compiler.Global; 
 
 /**
  * When test using producer-consumer paradigm.
@@ -22,13 +20,13 @@ import x10.compiler.Global;
  * @author kemal, 12/2004
  */
 public class ConditionalAtomicQueue extends x10Test {
-    val root = GlobalRef[ConditionalAtomicQueue](this);
-	transient private val siz: int;
-	transient private val Q: Rail[T]; // The circular buffer
-	transient private var nelems: int; // number of items in buffer Q
-	transient private var tail: int; // next free slot to insert incoming items
+
+	private val siz: int;
+	private val Q: Rail[T]!; // The circular buffer
+	private var nelems: int; // number of items in buffer Q
+	private var tail: int; // next free slot to insert incoming items
 	// at tail of queue
-	transient private var head: int; // pointer to item to remove from the front
+	private var head: int; // pointer to item to remove from the front
 
 	public def this(): ConditionalAtomicQueue = {
                 val sz = 3;
@@ -42,7 +40,7 @@ public class ConditionalAtomicQueue extends x10Test {
 	/**
 	 * insert i at the tail end of fifo queue.
 	 */
-	@Pinned def insert(var i: T): void = {
+	def insert(var i: T): void = {
 		Q(tail) = i;
 		tail = inc(tail, siz);
 		nelems++;
@@ -51,7 +49,7 @@ public class ConditionalAtomicQueue extends x10Test {
 	/**
 	 * remove an item from the queue
 	 */
-	@Pinned def remove(): T = {
+	def remove(): T = {
 		var t: T = Q(head);
 		head = inc(head, siz);
 		nelems--;
@@ -68,7 +66,7 @@ public class ConditionalAtomicQueue extends x10Test {
 	/**
 	 * true iff queue is empty
 	 */
-	@Pinned def empty(): boolean = {
+	def empty(): boolean = {
 		chk(nelems> -1);
 		return nelems <= 0;
 	}
@@ -76,37 +74,36 @@ public class ConditionalAtomicQueue extends x10Test {
 	/**
 	 * true iff queue is full
 	 */
-	@Pinned def full(): boolean = {
+	def full(): boolean = {
 		chk(nelems < siz+1);
 		return nelems >= siz;
 	}
 
-	@Pinned public def run(): boolean = {
+	public def run(): boolean = {
 		val N = T.N;
 		val NP = Place.MAX_PLACES;
 		val D2  = MyDist.val_(N*NP);
 		val received = DistArray.make[int](D2);
-        val root = this.root;
+
 		finish {
 			// spawn producer activities on each place
-			async 
+			async( this )
 				ateach (val (i): Point in MyDist.unique()) {
 					for (val (j): Point in [0..N-1]) {
 						val t = new T(i, j); // produce a T
-						async at(root) {
-							val me = root();
-							when (! me.full()) { me.insert(t); }
+						async(this) {
+							when (!full()) { insert(t); }
 						}
 					}
 				}
 			// spawn a single consumer activity in place P0
-			async {
+			async( this ) {
 				for (val p in D2.region) {
 					var t: Box[T];
 					when (!empty()) { t = remove(); }
 					val t1 = t.value;
-					async   { t1.consume(); } // consume the T
-					val m =  t1.getval();
+					async(t1) { t1.consume(); } // consume the T
+					val m = at (t1) t1.getval();
 					received(m) += 1;
 					// remember how many times
 					// we received this item
@@ -123,7 +120,7 @@ public class ConditionalAtomicQueue extends x10Test {
 		return true;
 	}
 
-	public static def main(Rail[String])  {
+	public static def main(var args: Rail[String]): void = {
 		new ConditionalAtomicQueue().execute();
 	}
 

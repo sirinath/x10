@@ -54,6 +54,6 @@ public final class AtomicReference[T]{T<:Object} {
 
 	@Native("java", "#0.toString()")
 	@Native("c++", "(#0)->toString()")
-	public safe native def toString():String;
+	public global safe native def toString():String;
 }
  

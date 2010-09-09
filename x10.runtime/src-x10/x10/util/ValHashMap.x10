@@ -12,26 +12,26 @@
 package x10.util;
 
 public class ValHashMap[K,V] implements ValMap[K,V] {
-	public static def make[Key,Value](map:Map[Key,Value]):ValHashMap[Key,Value] {
-		var hashMap:HashMap[Key,Value] = new HashMap[Key,Value]();
-		val entries:Iterable[Map.Entry[Key,Value]] = map.entries();
-        for (val entry:Map.Entry[Key,Value] in entries) {
+	public static def make[Key,Value](map:Map[Key,Value]!):ValHashMap[Key,Value] {
+		var hashMap:HashMap[Key,Value]! = new HashMap[Key,Value]();
+		val entries:Iterable[Map.Entry[Key,Value]!]! = map.entries();
+        for (val entry:Map.Entry[Key,Value]! in entries) {
 			if (entry!=null)
 			    hashMap.put(entry.getKey(), entry.getValue());
 		}
 		return make(hashMap);
 	}
-	public static def make[Key,Value](map:HashMap[Key,Value]):ValHashMap[Key,Value] {
+	public static def make[Key,Value](map:HashMap[Key,Value]!):ValHashMap[Key,Value] {
 		return new ValHashMap[Key,Value](map);
 	}
 
     static class HashEntry[Key,Value] implements ValMap.Entry[Key,Value] {
-        public safe def getKey() = key;
-        public safe def getValue() = value;
+        public global safe def getKey() = key;
+        public global safe def getValue() = value;
         
-        val key: Key;
-        val value: Value;
-		val hash:Int;
+        global val key: Key;
+        global val value: Value;
+		global val hash:Int;
         
         def this(key: Key, value: Value) {
             this.key = key;
@@ -40,35 +40,35 @@ public class ValHashMap[K,V] implements ValMap[K,V] {
         }
     }
     
-    val table: ValRail[HashEntry[K,V]];
+    global val table: ValRail[HashEntry[K,V]!]!;
         
-    private def this(map:HashMap[K,V]) {
-		val t:Rail[HashMap.HashEntry[K,V]] = map.table;
-		table = ValRail.make[HashEntry[K,V]](t.length, (index:Int)=> {
-		    val entry:HashMap.HashEntry[K,V] = t(index);
-			var res:HashEntry[K,V] = null;
+    private def this(map:HashMap[K,V]!) {
+		val t:Rail[HashMap.HashEntry[K,V]!]! = map.table;
+		table = ValRail.make[HashEntry[K,V]!](t.length, (index:Int)=> {
+		    val entry:HashMap.HashEntry[K,V]! = t(index);
+			var res:HashEntry[K,V]! = null;
 			if (entry!=null) res = new HashEntry[K,V](entry.getKey(), entry.getValue());
 			return res;
 		});
     }    
     
-    protected static safe def hash[T](k:T): Int {
+    protected static global safe def hash[T](k:T): Int {
         return k.hashCode() * 17;
     }    
-    public safe def apply(k: K): Box[V] = get(k);    
-    public safe def get(k: K): Box[V] {
+    public global safe def apply(k: K): Box[V] = get(k);    
+    public global safe def get(k: K): Box[V] {
         val e = getEntry(k);
         if (e == null) return null;
         return e.value as Box[V];
     }
     
-    public safe def getOrElse(k: K, orelse: V): V {
+    public global safe def getOrElse(k: K, orelse: V): V {
         val e = getEntry(k);
         if (e == null) return orelse;
         return e.value;
     }
     
-    public safe def findMax(var index:K, var max:V, cmp:(V,V)=>Boolean):K {
+    public global safe def findMax(var index:K, var max:V, cmp:(V,V)=>Boolean):K {
 	   for (key in keySet()) {
 	     val count = this(key).apply();
          if (cmp(count, max))  { max = count ; index = key ;}
@@ -76,12 +76,12 @@ public class ValHashMap[K,V] implements ValMap[K,V] {
 	   return index;
     }
     
-    public safe def getOrThrow(k: K): V throws NoSuchElementException {
+    public global safe def getOrThrow(k: K): V throws NoSuchElementException {
         val e = getEntry(k);
         if (e == null) throw new NoSuchElementException("Not found");
         return e.value;
     }    
-    protected safe def getEntry(k: K): HashEntry[K,V] {
+    protected global safe def getEntry(k: K): HashEntry[K,V] {
 		val size = table.length;
 		val mask = size - 1;
 
@@ -112,16 +112,16 @@ public class ValHashMap[K,V] implements ValMap[K,V] {
         }
     }
     
-    public safe def containsKey(k: K): boolean {
+    public global safe def containsKey(k: K): boolean {
         val e = getEntry(k);
         return e != null;
     }
     
-    public safe def keySet(): Set[K] = new KeySet[K,V](this);
-    public safe def entries(): Set[ValMap.Entry[K,V]] = new EntrySet[K,V](this);
-    public safe def size() = table.length;
+    public global safe def keySet(): Set[K]! = new KeySet[K,V](this);
+    public global safe def entries(): Set[ValMap.Entry[K,V]]! = new EntrySet[K,V](this);
+    public global safe def size() = table.length;
     
-    protected safe def entriesIterator(): Iterator[HashEntry[K,V]] {
+    protected global safe def entriesIterator(): Iterator[HashEntry[K,V]]! {
     val iterator = new EntriesIterator[K,V](this);
     iterator.advance();
     return iterator;
@@ -172,7 +172,7 @@ public class ValHashMap[K,V] implements ValMap[K,V] {
         
         public def add(k: Key): Boolean { throw new UnsupportedOperationException(); }
         public def remove(k: Key): Boolean { throw new UnsupportedOperationException(); }
-        public def clone(): KeySet[Key,Value] { throw new UnsupportedOperationException(); }
+        public def clone(): KeySet[Key,Value]! { throw new UnsupportedOperationException(); }
         public def size(): Int = map.size();
     }
 
@@ -188,7 +188,7 @@ public class ValHashMap[K,V] implements ValMap[K,V] {
         public def contains(k: ValMap.Entry[Key,Value]): Boolean { throw new UnsupportedOperationException(); }
         public def add(k: ValMap.Entry[Key,Value]): Boolean { throw new UnsupportedOperationException(); }
         public def remove(k: ValMap.Entry[Key,Value]): Boolean { throw new UnsupportedOperationException(); }
-        public def clone(): EntrySet[Key,Value] { throw new UnsupportedOperationException(); }
+        public def clone(): EntrySet[Key,Value]! { throw new UnsupportedOperationException(); }
         public def size(): Int = map.size();
     }
 }

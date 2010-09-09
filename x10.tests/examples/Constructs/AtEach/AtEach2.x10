@@ -18,18 +18,16 @@ import harness.x10Test;
  * @author vj
  */
 public class AtEach2 extends x10Test {
-	val root = GlobalRef[AtEach2](this);
-    transient var nplaces: int = 0;
+    var nplaces: int = 0;
 
     public def run(): boolean = {
         val d: Dist = Dist.makeUnique(Place.places);
-        val root = this.root;
         finish ateach (p in d) {
             // remember if here and d[i] disagree
             // at any activity at any place
             chk(here == d(p));
-            async at (root) 
-             atomic root().nplaces++;  
+            async (this) 
+             atomic nplaces++;  
         }
         // ensure that an activity ran in each place
         return nplaces == Place.MAX_PLACES;

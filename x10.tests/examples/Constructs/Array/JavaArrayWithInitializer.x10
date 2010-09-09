@@ -37,7 +37,7 @@ public class JavaArrayWithInitializer extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(var args: Rail[String]): void = {
         new JavaArrayWithInitializer().execute();
     }
 }

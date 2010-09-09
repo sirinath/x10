@@ -15,6 +15,6 @@ import x10.util.RailBuilder;
 
 public class ByteRailWriter extends ByteWriter[Rail[Byte]] {
     public def this() { super(new RailBuilder[Byte]()); }
-    public def toRail() = result();
+    public global def toRail() = result();
 }
 

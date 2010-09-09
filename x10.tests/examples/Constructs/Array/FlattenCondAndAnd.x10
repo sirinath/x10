@@ -30,9 +30,9 @@ import harness.x10Test;
  
 public class FlattenCondAndAnd extends x10Test {
 
-    val a: Array[Boolean](2);
+    val a: Array[Boolean](2)!;
 
-    public def this()  {
+    public def this(): FlattenCondAndAnd = {
         a = new Array[Boolean]([1..10, 1..10], ((i,j): Point) => false);
     }
 
@@ -43,7 +43,7 @@ public class FlattenCondAndAnd extends x10Test {
         return !x;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(var args: Rail[String]): void = {
         new FlattenCondAndAnd().execute();
     }
     

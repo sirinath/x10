@@ -39,7 +39,7 @@ using namespace x10::lang;
 using namespace x10aux;
 
 const serialization_id_t Throwable::_serialization_id =
-    DeserializationDispatcher::addDeserializer(Throwable::_deserializer<Reference>);
+    DeserializationDispatcher::addDeserializer(Throwable::_deserializer<Object>);
 
 void
 Throwable::_serialize_body(x10aux::serialization_buffer &buf) {
@@ -94,10 +94,18 @@ x10aux::ref<Throwable> Throwable::_constructor(x10aux::ref<String> message,
 
 ref<String> Throwable::toString() {
     ref<String> message = getMessage();
-    if (message.isNull()) {
-        return String::Lit(_type()->name());
+    if (location == x10aux::here) {
+        if (message.isNull()) {
+            return String::Lit(_type()->name());
+        } else {
+            return String::Steal(alloc_printf("%s: %s",_type()->name(),message->c_str()));
+        }
     } else {
-        return String::Steal(alloc_printf("%s: %s",_type()->name(),message->c_str()));
+        if (message.isNull()) {
+            return String::Steal(alloc_printf("%s (home==%d)",_type()->name(),location));
+        } else {
+            return String::Steal(alloc_printf("%s (home==%d): %s",_type()->name(),location, message->c_str()));
+        }
     }
 }
 

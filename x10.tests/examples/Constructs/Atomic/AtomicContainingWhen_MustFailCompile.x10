@@ -18,8 +18,7 @@ import harness.x10Test;
  */
 public class AtomicContainingWhen_MustFailCompile extends x10Test {
 
-	val fooArray: Rail[foo] = Rail.make([ new f0() as foo, new f1() as foo, 
-	                                      new f2() as foo, new f3()as foo ]);
+	val fooArray: Rail[foo] = [ new f0(), new f1(), new f2(), new f3() ];
 
 	public def run(): boolean = {
 		val x: X = new X();
@@ -71,7 +70,7 @@ public class AtomicContainingWhen_MustFailCompile extends x10Test {
 	 * An interface to use like a simple 'function pointer'
 	 */
 	static interface foo {
-		public def apply(var l: lockStruct): void;
+		public public def apply(var l: lockStruct): void;
 	}
 
 	static class f0 implements foo {
@@ -121,7 +120,7 @@ public class AtomicContainingWhen_MustFailCompile extends x10Test {
 	 * for a typical compiler
 	 */
 	static class X {
-		public var z: Array[int](1) = new Array[Int](0..1, (i:Point(1))=> 1-i(0));
+		public var z: Array[int] = [ 1, 0 ];
 		def zero(): int = { return z(z(z(1))); }
 		def one(): int = { return z(z(z(0))); }
 		def two(): int = { return (zero()-1) * (zero()-1) + one(); }

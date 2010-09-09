@@ -24,14 +24,16 @@ class BangAcrossPlaces2_MustFailCompile  extends x10Test {
 		var x:Int=0;
 		def x() =x;
 	}
-	def m(z:GlobalRef[C]{self.home==here}) {
+	def m(z:C!) {
 		at (here.next()) {
 			// this should generate an error.
 			val y = z.x();
 		}
 	}
-    public def run() = true;
-    
+    public def run() {
+    	m(new C());
+    	return true;
+    }
     public static def main(Rail[String]) {
 	  new 
 	  BangAcrossPlaces2_MustFailCompile().execute();

@@ -11,8 +11,6 @@
 
 package x10.runtime.impl.java;
 
-import x10.lang.Place;
-
 /**
  * @author Christian Grothoff
  * @author vj
@@ -24,7 +22,7 @@ public class Thread extends java.lang.Thread {
 		return (Thread) java.lang.Thread.currentThread();
 	}
 
-	private Place home;    // the current place
+	private int home;    // the current place
 	private Object worker;   // the current worker
 
 	/**
@@ -32,7 +30,7 @@ public class Thread extends java.lang.Thread {
 	 */
 	Thread(int home, Runnable runnable, String name) {
 		super(runnable, name);
-		this.home = Place.place(home);
+		this.home = home;
 	}
 
 	/**
@@ -61,18 +59,18 @@ public class Thread extends java.lang.Thread {
 	 * Update thread place (called by native runtime only)
 	 */
 	void home(int home) {
-		this.home = Place.place(home);
+		this.home = home;
 	}
 
 	/**
 	 * Return current place
 	 */
-	public Place home() {
+	public int home() {
 		return home;
 	}
 
     public int locInt() {
-        return home.id;
+        return home;
     }
 
     public String name() {

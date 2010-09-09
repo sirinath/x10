@@ -22,7 +22,7 @@ public class AsyncTest1 extends x10Test {
 
 	var flag: boolean;
 	public def run(): boolean = {
-		async { atomic { flag = true; } }
+		async at (this) { atomic { flag = true; } }
 		var b: boolean;
 		do {
 			atomic { b = flag; }
@@ -30,7 +30,7 @@ public class AsyncTest1 extends x10Test {
 		return b;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(args: Rail[String]) {
 		new AsyncTest1().execute();
 	}
 }

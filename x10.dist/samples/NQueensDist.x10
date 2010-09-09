@@ -14,28 +14,27 @@ import x10.io.Console;
 /**
  * A distributed version of NQueens. Runs over NUM_PLACES.
  * Identical to NQueensPar, except that it runs over multiple placs.
- * Converted to 2.1 on 9/1/2010
  */
 public class NQueensDist {
     public static val expectedSolutions =
         [0, 1, 0, 0, 2, 10, 4, 40, 92, 352, 724, 2680, 14200, 73712, 365596, 2279184, 14772512];
 
-    val N:Int;
-    val P:Int;
-    val results:DistArray[Int](1);
+    global val N:Int;
+    global val P:Int;
+    global val results:DistArray[Int](1);
 
     def this(N:Int, P:Int) { 
-	   this.N=N; 
-	   this.P=P;
-	   this.results = DistArray.make[Int](Dist.makeUnique(), (Point)=>0);
-    }
+	this.N=N; 
+	this.P=P;
+	this.results = DistArray.make[Int](Dist.makeUnique(), (Point)=>0);
+}
     def start() {
         new Board().search();
     }
     def run():Int {
-	   finish start();
-	   val result = results.reduce(Int.+,0);
-	   return result;
+	finish start();
+	val result = results.reduce(Int.+,0);
+	return result;
     }
 
     /**
@@ -52,15 +51,15 @@ public class NQueensDist {
     }
 
     class Board {
-        val q: Rail[Int];
+        global val q: ValRail[Int];
         def this() {
-            q = Rail.make[Int](0, (int)=>0);
+            q = ValRail.make[Int](0, (int)=>0);
         }
-        def this(old: Rail[Int], newItem:Int) {
+        def this(old: ValRail[Int], newItem:Int) {
             val n = old.length;
-            q = Rail.make[Int](n+1, (i:int)=> (i < n? old(i) : newItem));
+            q = ValRail.make[Int](n+1, (i:int)=> (i < n? old(i) : newItem));
         }
-        def safe(j: int) {
+        global def safe(j: int) {
             val n = q.length;
             for ((k) in 0..n-1) {
                 if (j == q(k) || Math.abs(n-k) == Math.abs(j-q(k)))
@@ -71,13 +70,13 @@ public class NQueensDist {
         /** Search for all solutions in parallel, on finding
          * a solution update nSolutions.
          */
-        def search(R: Region(1){rect}) {
+        global def search(R: Region(1){rect}) {
             for ((k) in R)
                 if (safe(k))
                     new Board(q, k).search();
         }
 
-        def search()  {
+        global def search()  {
             if (q.length == N) {
                 atomic NQueensDist.this.results(here.id)++;
                 return;
@@ -85,27 +84,26 @@ public class NQueensDist {
             if (q.length == 0) {
                 val R = block(0..N-1, P);
                 ateach ((q) in Dist.makeUnique())
-                   // copy of this made across the at divide
                   search(R(q));
             } else search(0..N-1);
         }
     }
 
-    public static def main(args: Rail[String])  {
+    public static def main(args: Rail[String]!)  {
         val n = args.length > 0 ? Int.parse(args(0)) : 8;
         println("N=" + n);
         //warmup
         //finish new NQueensPar(12, 1).start();
         val P = Place.MAX_PLACES;
-	    val nq = new NQueensDist(n,P);
-	    var start:Long = -System.nanoTime();
-	    val answer = nq.run();
-	    val result = answer==expectedSolutions(n);
-	    start += System.nanoTime();
-	    start /= 1000000;
-	    println("NQueensPar " + nq.N + "(P=" + P +
-		   ") has " + answer + " solutions" +
-		   (result? " (ok)." : " (wrong).") + "time=" + start + "ms");
+	val nq = new NQueensDist(n,P);
+	var start:Long = -System.nanoTime();
+	val answer = nq.run();
+	val result = answer==expectedSolutions(n);
+	start += System.nanoTime();
+	start /= 1000000;
+	println("NQueensPar " + nq.N + "(P=" + P +
+		") has " + answer + " solutions" +
+		(result? " (ok)." : " (wrong).") + "time=" + start + "ms");
     }
 
     static def println(s:String) = Console.OUT.println(s);

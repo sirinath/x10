@@ -140,7 +140,6 @@
     this
     throw
     throws
-    transient
     true
     try
     type
@@ -480,11 +479,6 @@
               | t h r o w s
         /.$BeginAction
                 $setResult($_throws);
-          $EndAction
-        ./
-              | t r a n s i e n t
-        /.$BeginAction
-                $setResult($_transient);
           $EndAction
         ./
               | t r u e

@@ -22,12 +22,11 @@ public class AsyncNext extends x10Test {
 	public def run(): boolean = {
 		val Other: Place = here.next();
 		val t = new T();
-		val troot = t.root;
 		finish async (Other) {
 			val t1: T = new T();
-			async at (troot) troot().val_ = t1;
+			async at (t) t.val_ = t1;
 		}
-		return (t.val_ as T).root.home == Other;
+		return t.val_.home == Other;
 	}
 
 	public static def main(Rail[String]) {
@@ -35,7 +34,6 @@ public class AsyncNext extends x10Test {
 	}
 
 	static class T {
-		val root = GlobalRef[T](this);
-		transient var val_:Object;
+		var val_:Object;
 	}
 }

@@ -2,9 +2,9 @@ class ClosureBang {
 	class C {
 		incomplete def n():Void;
 	}
-	def m(x:()=> GlobalRef[C]{self.home==here}) {
+	def m(x:()=> C!) {
 		at (here.next()) {
-			x()(); // shd be ok.
+			x().n(); // shd be ok.
 		}
 	}
 }

@@ -18,15 +18,17 @@ import harness.x10Test;
 
 public class FlattenValForce extends x10Test {
    
-    static def rd(val e: Array[Future[Int]](1), val i: int)  = {
+    static def rd(val e: Array[Future[Int]](1)!, val i: int)  = {
         val fd = future { 3.0 };
         val x  = fd();
         return future { e(i).force() };
     }
    
-    public def run(): boolean = true;
+    public def run(): boolean = {
+        return true;
+    }
 
-    public static def main(Rail[String]){
+    public static def main(var args: Rail[String]): void = {
         new FlattenValForce().execute();
     }
 }

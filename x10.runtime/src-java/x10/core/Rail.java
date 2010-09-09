@@ -167,7 +167,13 @@ public final class Rail<T> extends Ref implements AnyRail<T>, Settable<Integer,T
     }
 
     public void reset(T v) {
-        resetLocal(value, v);
+        if (home == x10.runtime.impl.java.Thread.currentThread().home()) {
+            resetLocal(value, v);
+            return;
+        }
+        for (int i=0; i<length; i++) {
+            set$G(v, i);
+        }
     }
 
     public void reset(Fun_0_1<Integer,T> v) {

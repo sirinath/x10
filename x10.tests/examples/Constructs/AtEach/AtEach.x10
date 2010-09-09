@@ -17,18 +17,16 @@ import harness.x10Test;
  * @author kemal, 12/2004
  */
 public class AtEach extends x10Test {
-	val root = GlobalRef[AtEach](this);
-    transient var nplaces: int = 0;
+    var nplaces: int = 0;
 
     public def run(): boolean = {
         val d: Dist = Dist.makeUnique(Place.places);
         val disagree: DistArray[int]{dist==d} = DistArray.make[int](d);
-        val root = this.root;
-        finish ateach (p in d) {
+        finish ateach (val p in d) {
             // remember if here and d[p] disagree
             // at any activity at any place
             disagree(p) |= ((here != d(p)) ? 1 : 0);
-            async at(root){atomic {root().nplaces++;}}
+            async(this){atomic {nplaces++;}}
         }
         // ensure that d[i] agreed with here in
         // all places
@@ -37,7 +35,7 @@ public class AtEach extends x10Test {
                 nplaces == Place.MAX_PLACES;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(var args: Rail[String]): void = {
         new AtEach().execute();
     }
 }

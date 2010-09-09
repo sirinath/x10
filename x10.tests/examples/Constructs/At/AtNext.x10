@@ -20,13 +20,13 @@ import harness.x10Test;
 public class AtNext extends x10Test {
 
 	public def run(): boolean = {
-		val Other  = here.next();
-		val t = (new T()).root;
-		/*at (Other) {
-			val t1 = new T();
-			at (t) t().val_ = t1;
-		}*/
-		return (t().val_ as T).root.home == Other;
+		val Other: Place = here.next();
+		val t = new T();
+		at (Other) {
+			val t1: T = new T();
+			at (t) t.val_ = t1;
+		}
+		return t.val_.home == Other;
 	}
 
 	public static def main(Rail[String]) {
@@ -34,7 +34,6 @@ public class AtNext extends x10Test {
 	}
 
 	static class T {
-		val root = GlobalRef[T](this);
 		var val_:Object;
 	}
 }

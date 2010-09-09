@@ -10,26 +10,24 @@
  */
 
 import harness.x10Test;
-import x10.compiler.Pinned;
 
 /**
  * Testing an async spawned to a field access.
  */
 public class AsyncFieldAccess extends x10Test {
-    val root = GlobalRef[AsyncFieldAccess](this);
-	transient var t: GlobalRef[T];
+
+	var t: T;
 	public def run(): boolean = {
 		var Second: Place = Place.FIRST_PLACE.next();
 		var r: Region = [0..0];
 		val D: Dist = r->Second;
-		val root = this.root;
 		finish ateach (val p: Point in D) {
-			val NewT = (new T()).root;
-			async at (root) { root().t = NewT; }
+			val NewT: T = new T();
+			async at (this) { t = NewT; }
 		}
 		val tt = this.t;
-		at (tt) { atomic tt().i = 3; }
-		return 3 == (at (tt) tt().i);
+		at (tt) { atomic tt.i = 3; }
+		return 3 == (at (tt) tt.i);
 	}
 
 	public static def main(Rail[String]){
@@ -37,7 +35,6 @@ public class AsyncFieldAccess extends x10Test {
 	}
 
 	static class T {
-		val root = GlobalRef[T](this);
-		transient public var i: int;
+		public var i: int;
 	}
 }

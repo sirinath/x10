@@ -18,7 +18,7 @@ import harness.x10Test;
 
 public class FlattenInitFor extends x10Test {
 
-    val a: DistArray[int](2);
+    global val a: DistArray[int](2);
 
     public def this(): FlattenInitFor = {
         a = DistArray.make[int](([1..10, 1..10] as Region)->here, ((i,j): Point): int => { return i;});
@@ -30,7 +30,7 @@ public class FlattenInitFor extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(var args: Rail[String]): void = {
         new FlattenInitFor().execute();
     }
 }

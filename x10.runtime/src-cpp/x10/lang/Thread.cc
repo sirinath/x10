@@ -87,7 +87,7 @@ Thread::_make(ref<x10::lang::VoidFun_0_0> task, ref<x10::lang::String> name) {
 }
 
 const serialization_id_t Thread::_serialization_id =
-    DeserializationDispatcher::addDeserializer(Thread::_deserializer<Reference>);
+    DeserializationDispatcher::addDeserializer(Thread::_deserializer<Object>);
 
 
 // Helper method to initialize a Thread object.
@@ -444,13 +444,7 @@ Thread::worker(void)
 x10_int
 Thread::locInt(void)
 {
-    return (x10_int) x10aux::here;
-}
-
-x10::lang::Place
-Thread::home(void)
-{
-    return x10::lang::Place_methods::_make(x10aux::here);
+    return (x10_int) location;
 }
 
 // Set the current worker.

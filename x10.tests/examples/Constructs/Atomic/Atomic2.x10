@@ -23,7 +23,7 @@ public class Atomic2 extends x10Test {
 
 
 	public def run(): boolean = {
-		finish async   atomic x++;
+		finish async(this) atomic x++;
 		atomic chk(x == 1);
 
 		var gotException: boolean = false;
@@ -36,7 +36,7 @@ public class Atomic2 extends x10Test {
 		return true;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(var args: Rail[String]): void = {
 		new Atomic2().execute();
 	}
 }
