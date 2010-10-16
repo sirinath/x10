@@ -10,10 +10,13 @@ package polyglot.visit;
 import java.util.HashMap;
 import java.util.Map;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.*;
 import polyglot.util.InternalCompilerError;
+import x10.ast.ConstructorCall;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which ensures that constructor calls are not recursive. */
 public class ConstructorCallChecker extends ContextVisitor

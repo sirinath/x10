@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
 
 /** The node constructed for the X10 place designator here.
  *

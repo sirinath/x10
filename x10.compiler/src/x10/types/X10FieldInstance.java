@@ -11,13 +11,13 @@
 
 package x10.types;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Receiver;
 import polyglot.types.FieldInstance;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 
 import polyglot.types.TypeObject;
+import x10.ast.Expr;
+import x10.ast.Receiver;
 import x10.types.constraints.CConstraint;
 /**
  * Represents information about a Property. A property has the same

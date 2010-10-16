@@ -12,11 +12,8 @@
 package x10.util;
 
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
 
-import polyglot.ast.*;
+
 import polyglot.types.Flags;
 import polyglot.types.LazyRef;
 import polyglot.types.LocalDef;
@@ -69,7 +66,7 @@ public class Struct {
         interfacesList.add(xts.lazyAny());
         cd.setInterfaces(interfacesList);
 
-       final Position pos = X10NodeFactory_c.compilerGenerated(n.body());
+       final Position pos = NodeFactory_c.compilerGenerated(n.body());
 
        String fullNameWithThis = fullName + "#this";
        //String fullNameWithThis = "this";
@@ -166,7 +163,7 @@ public class Struct {
            }
 
         final Flags flags = X10Flags.SAFE.Public().Final();
-        final X10NodeFactory nf = (X10NodeFactory)tb.nodeFactory();
+        final NodeFactory nf = (NodeFactory)tb.nodeFactory();
         final TypeNode intTypeNode = nf.TypeNodeFromQualifiedName(pos,QName.make("x10.lang","Int"));
         final TypeNode boolTypeNode = nf.TypeNodeFromQualifiedName(pos,QName.make("x10.lang","Boolean"));
         final TypeNode placeTypeNode = nf.TypeNodeFromQualifiedName(pos,QName.make("x10.lang","Place"));
@@ -304,7 +301,7 @@ public class Struct {
 
        return n;
     }
-    private static ArrayList<AnnotationNode> createNative(X10NodeFactory nf,Position pos, String java, String cpp) {
+    private static ArrayList<AnnotationNode> createNative(NodeFactory nf,Position pos, String java, String cpp) {
         ArrayList<AnnotationNode> res = new ArrayList<AnnotationNode>(2);
         for (int i=0; i<2; i++) {
             List<Expr> list = new ArrayList<Expr>(2);

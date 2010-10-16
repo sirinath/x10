@@ -16,8 +16,8 @@ import java.io.Reader;
 
 import org.w3c.dom.Element;
 
-import polyglot.ast.Node;
-import x10.ast.X10NodeFactory;
+
+import x10.ast.NodeFactory;
 import x10.types.X10TypeSystem;
 import polyglot.frontend.FileSource;
 import polyglot.frontend.Parser;
@@ -28,11 +28,11 @@ public class DomParser implements Parser {
 
 	protected Reader reader;
 	protected X10TypeSystem ts;
-	protected X10NodeFactory nf;
+	protected NodeFactory nf;
 	protected FileSource source;
 	protected ErrorQueue eq;
 
-	public DomParser(Reader reader, X10TypeSystem ts, X10NodeFactory nf, FileSource source, ErrorQueue eq) {
+	public DomParser(Reader reader, X10TypeSystem ts, NodeFactory nf, FileSource source, ErrorQueue eq) {
 		super();
 		this.reader = reader;
 		this.ts = ts;

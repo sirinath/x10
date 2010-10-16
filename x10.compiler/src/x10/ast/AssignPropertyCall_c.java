@@ -14,14 +14,6 @@ package x10.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Expr;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
-import polyglot.ast.Stmt_c;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.Context;
 import polyglot.types.FieldInstance;
@@ -130,7 +122,7 @@ public class AssignPropertyCall_c extends Stmt_c implements AssignPropertyCall {
 	public Node typeCheck(ContextVisitor tc) {
 		TypeSystem ts = tc.typeSystem();
 		Context ctx = tc.context();
-		X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+		NodeFactory nf = (NodeFactory) tc.nodeFactory();
 		Position pos = position();
 		Job job = tc.job();
 		X10ConstructorDef thisConstructor = null;

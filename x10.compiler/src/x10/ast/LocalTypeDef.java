@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.CompoundStmt;
 import x10.types.TypeDef;
 
 public interface LocalTypeDef extends CompoundStmt {

@@ -16,15 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import polyglot.ast.Block;
-import polyglot.ast.Catch;
-import polyglot.ast.Expr;
-import polyglot.ast.Ext;
-import polyglot.ast.JL;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Precedence;
-import polyglot.ast.Term;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.types.Context;
 import polyglot.types.SemanticException;
@@ -43,6 +34,15 @@ import polyglot.visit.Translator;
 import polyglot.visit.TypeBuilder;
 import polyglot.visit.TypeCheckPreparer;
 import polyglot.visit.TypeChecker;
+import x10.ast.Block;
+import x10.ast.Catch;
+import x10.ast.Expr;
+import x10.ast.Ext;
+import x10.ast.JL;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Precedence;
+import x10.ast.Term;
 import x10.visit.X10PrettyPrinterVisitor;
 
 public class TryCatchExpander extends Expander {

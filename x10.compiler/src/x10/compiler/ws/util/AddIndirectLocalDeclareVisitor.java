@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.Local;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
 import polyglot.visit.NodeVisitor;
-import x10.ast.X10NodeFactory;
+import x10.ast.Block;
+import x10.ast.Expr;
+import x10.ast.Local;
+import x10.ast.Node;
+import x10.ast.Stmt;
+import x10.ast.NodeFactory;
 
 /**
  * @author Haichuan
@@ -25,11 +25,11 @@ import x10.ast.X10NodeFactory;
  *
  */
 public class AddIndirectLocalDeclareVisitor extends NodeVisitor{
-    X10NodeFactory xnf;
+    NodeFactory xnf;
     Block targetBlock;
     Map<Expr, Stmt>refToDeclMap;
     
-    public AddIndirectLocalDeclareVisitor(X10NodeFactory xnf, Map<Expr, Stmt>refToDeclMap){
+    public AddIndirectLocalDeclareVisitor(NodeFactory xnf, Map<Expr, Stmt>refToDeclMap){
         this.xnf = xnf;
         this.refToDeclMap = refToDeclMap;
     }

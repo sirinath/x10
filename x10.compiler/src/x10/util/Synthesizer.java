@@ -15,32 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.FloatLit;
-import polyglot.ast.For;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.IntLit;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.New;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
 import polyglot.frontend.Globals;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
@@ -105,8 +79,8 @@ import x10.visit.X10TypeChecker;
 public class Synthesizer {
 
 	X10TypeSystem xts;
-	X10NodeFactory xnf;
-	public Synthesizer(X10NodeFactory nf, X10TypeSystem ts) {
+	NodeFactory xnf;
+	public Synthesizer(NodeFactory nf, X10TypeSystem ts) {
 		xts = ts;
 		xnf = nf;
 	}
@@ -159,7 +133,7 @@ public class Synthesizer {
 	public MethodDecl makeSyntheticMethod(X10ClassDecl_c ct, Flags flags, List<ParameterType> typeParameters,
 	        Name name, List<LocalDef> fmls, Type returnType, Block block)
 	{
-	    Position CG = X10NodeFactory_c.compilerGenerated(ct.body());
+	    Position CG = NodeFactory_c.compilerGenerated(ct.body());
 
 	    List<TypeParamNode> typeParamNodes = new ArrayList<TypeParamNode>();
 	    for (ParameterType pt : typeParameters) {
@@ -275,7 +249,7 @@ public class Synthesizer {
 	public For makeForLoop(Position pos, 
 			X10Formal formal, Expr low, Expr high, Stmt body, 
 			 X10Context context) {
-		Position CG = X10NodeFactory_c.compilerGenerated(pos);
+		Position CG = NodeFactory_c.compilerGenerated(pos);
 		List<Stmt> inits = new ArrayList<Stmt>();
 		// FIXME: use formal here directly, instead of local
 		Expr local = makeLocalVar(CG, null, low, inits, context);
@@ -1330,7 +1304,7 @@ public class Synthesizer {
      */
     // TODO: This has to be made to work with nested types.
     public X10CanonicalTypeNode makeCanonicalTypeNodeWithDepExpr(Position pos, Type type, ContextVisitor tc) {
-    	X10NodeFactory nf = ((X10NodeFactory) tc.nodeFactory());
+    	NodeFactory nf = ((NodeFactory) tc.nodeFactory());
     	X10TypeSystem ts = ((X10TypeSystem) tc.typeSystem());
     	
     	type = PlaceChecker.ReplacePlaceTermByHere(type, tc.context());

@@ -10,8 +10,8 @@ package polyglot.util;
 
 import polyglot.util.*;
 import polyglot.visit.NodeVisitor;
-import polyglot.ast.Node;
 import polyglot.types.*;
+import x10.ast.Node;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

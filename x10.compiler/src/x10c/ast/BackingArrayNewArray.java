@@ -1,6 +1,6 @@
 package x10c.ast;
 
-import polyglot.ast.NewArray;
+import x10.ast.NewArray;
 
 public interface BackingArrayNewArray extends NewArray {
 }

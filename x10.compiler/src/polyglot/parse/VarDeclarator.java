@@ -7,8 +7,10 @@
 
 package polyglot.parse;
 
-import polyglot.ast.*;
+
 import polyglot.util.*;
+import x10.ast.Expr;
+import x10.ast.Id;
 
 /**
  * Encapsulates some of the data in a variable declaration.  Used only by the parser.

@@ -1,12 +1,12 @@
 package x10.compiler.ws.util;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.Node;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Expr;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.Node;
 import x10.types.X10Context;
 import x10.util.Synthesizer;
 

@@ -11,9 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Node;
-import polyglot.ast.Node_c;
-import polyglot.ast.TypeNode;
 import polyglot.types.Context;
 import polyglot.types.SemanticException;
 import polyglot.util.CodeWriter;

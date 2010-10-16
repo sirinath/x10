@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.AbstractExtFactory_c;
-import polyglot.ast.Ext;
 import x10.extension.X10ClassBodyExt_c;
 import x10.extension.X10Ext_c;
 

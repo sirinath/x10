@@ -13,7 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
 
 /** An immutable representation of the X10 construct [range1,...,rangen] 
  * representing an n-ary region. (We may choose to represent this instead as

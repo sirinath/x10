@@ -11,7 +11,7 @@
 
 package x10c.ast;
 
-import polyglot.ast.ArrayAccess;
+import x10.ast.ArrayAccess;
 
 
 

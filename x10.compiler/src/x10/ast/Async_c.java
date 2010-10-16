@@ -17,12 +17,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
-import polyglot.ast.Stmt_c;
-import polyglot.ast.Term;
 import polyglot.main.Report;
 import polyglot.types.Context;
 import polyglot.types.Ref;
@@ -166,7 +160,7 @@ public class Async_c extends Stmt_c implements Async {
 
 	public Node typeCheck(ContextVisitor tc) {
 		X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-		X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+		NodeFactory nf = (NodeFactory) tc.nodeFactory();
 
 		X10Context c = (X10Context) tc.context();
 		if (clocked() && ! c.inClockedFinishScope())

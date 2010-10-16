@@ -14,11 +14,6 @@ package x10.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Receiver;
-import polyglot.ast.TypeNode;
 import polyglot.types.MethodInstance;
 import x10.types.X10MethodInstance;
 

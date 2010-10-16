@@ -6,13 +6,6 @@ package x10.ast;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Expr_c;
-import polyglot.ast.Node;
-import polyglot.ast.Return;
-import polyglot.ast.Return_c;
-import polyglot.ast.Stmt_c;
-import polyglot.ast.Term;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.CodeWriter;

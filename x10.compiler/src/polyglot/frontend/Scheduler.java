@@ -15,13 +15,13 @@ package polyglot.frontend;
 
 import java.util.*;
 
-import polyglot.ast.Node;
 import polyglot.frontend.Goal.Status;
 import polyglot.main.Report;
 import polyglot.types.*;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Option;
 import polyglot.visit.PostCompiled;
+import x10.ast.Node;
 
 
 /**

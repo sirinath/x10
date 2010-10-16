@@ -10,12 +10,17 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.visit.DataFlow.Item;
 import polyglot.visit.FlowGraph.EdgeKey;
+import x10.ast.CodeNode;
+import x10.ast.MethodDecl;
+import x10.ast.NodeFactory;
+import x10.ast.Return;
+import x10.ast.Term;
 
 /**
  * Visitor which checks that all (terminating) paths through a 

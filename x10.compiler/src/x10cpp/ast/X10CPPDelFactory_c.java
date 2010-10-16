@@ -11,11 +11,11 @@
 
 package x10cpp.ast;
 
-import polyglot.ast.JL;
-import polyglot.ast.Node;
 import polyglot.types.Context;
 import polyglot.util.CodeWriter;
 import polyglot.visit.Translator;
+import x10.ast.JL;
+import x10.ast.Node;
 import x10.ast.X10DelFactory_c;
 import x10.extension.X10Del_c;
 import x10.extension.X10Ext;

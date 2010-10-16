@@ -16,15 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.Expr_c;
-import polyglot.ast.Node;
-import polyglot.ast.Precedence;
-import polyglot.ast.Stmt;
-import polyglot.ast.AbstractBlock_c;
-import polyglot.ast.Block_c;
-import polyglot.ast.Term;
 import polyglot.types.Context;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;

@@ -13,10 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.CodeBlock;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.TypeNode;
 import polyglot.util.Position;
 import x10.types.ClosureDef;
 
@@ -32,7 +28,7 @@ public interface Closure extends Expr, CodeBlock, Guarded {
    // Closure typeParameters(List<TypeParamNode> typeParams);
 
     /** The closure's formal parameters.
-     * @return A list of {@link polyglot.ast.Formal Formal}
+     * @return A list of {@link x10.ast.Formal Formal}
      */
     List<Formal> formals();
 

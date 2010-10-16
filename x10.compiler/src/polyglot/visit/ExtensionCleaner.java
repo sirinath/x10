@@ -7,11 +7,28 @@
 
 package polyglot.visit;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.ExtensionInfo;
 import polyglot.types.*;
 import polyglot.types.Package;
 import polyglot.util.InternalCompilerError;
+import x10.ast.Call;
+import x10.ast.CanonicalTypeNode;
+import x10.ast.ClassDecl;
+import x10.ast.ConstructorCall;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldDecl;
+import x10.ast.Formal;
+import x10.ast.Initializer;
+import x10.ast.Local;
+import x10.ast.LocalDecl;
+import x10.ast.MethodDecl;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.PackageNode;
+import x10.ast.TypeNode;
 
 /**
  * This visitor overwrites all extension object refs with null,

@@ -16,18 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Ambiguous;
-import polyglot.ast.Call_c;
-import polyglot.ast.Disamb;
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Local;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Prefix;
-import polyglot.ast.Receiver;
-import polyglot.ast.Special;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.ConstructorDef;
@@ -130,7 +118,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 
 
 	private Type resolveType(ContextVisitor tc, Position pos, Receiver r, Name name) {
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 
         TypeNode otn;
@@ -245,7 +233,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
      * @throws SemanticException
      */
     protected X10New findStructConstructor(ContextVisitor tc, Receiver r, List<Type> typeArgs, List<Type> argTypes, List<Expr> args) {
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         Type t = resolveType(tc, position(), r, name().id());
         if (t == null)
             return null;
@@ -347,7 +335,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 	    return n;
 	}
 	public Node typeCheck1(ContextVisitor tc) throws SemanticException {
-		X10NodeFactory xnf = (X10NodeFactory) tc.nodeFactory();
+		NodeFactory xnf = (NodeFactory) tc.nodeFactory();
 		X10TypeSystem xts = (X10TypeSystem) tc.typeSystem();
 		X10Context c = (X10Context) tc.context();
 
@@ -361,7 +349,7 @@ public class X10Call_c extends Call_c implements X10Call, X10ProcedureCall {
 		{
 			// Check if target.name is a field or local of function type;
 			// if so, convert to a closure call.
-			X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+			NodeFactory nf = (NodeFactory) tc.nodeFactory();
 			X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 
 			Expr e = null;

@@ -7,11 +7,11 @@
 
 package polyglot.visit;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which performs type checking on the AST. */
 public class ConformanceChecker extends ContextVisitor

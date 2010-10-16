@@ -9,7 +9,7 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.SemanticException;
@@ -17,6 +17,13 @@ import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
 import polyglot.visit.DataFlow.Item;
 import polyglot.visit.FlowGraph.EdgeKey;
+import x10.ast.Block;
+import x10.ast.CompoundStmt;
+import x10.ast.Initializer;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Stmt;
+import x10.ast.Term;
 
 /**
  * Visitor which checks that all statements must be reachable

@@ -11,10 +11,10 @@
 
 package x10c.ast;
 
-import polyglot.ast.ArrayAccess_c;
-import polyglot.ast.Expr;
 import polyglot.types.Type;
 import polyglot.util.Position;
+import x10.ast.ArrayAccess_c;
+import x10.ast.Expr;
 
 public class X10CBackingArrayAccess_c extends ArrayAccess_c implements BackingArrayAccess {
     public X10CBackingArrayAccess_c(Position pos, Expr array, Expr index, Type type) {

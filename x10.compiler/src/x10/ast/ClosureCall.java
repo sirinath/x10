@@ -13,9 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.ProcedureCall;
-import polyglot.ast.TypeNode;
 import polyglot.types.Name;
 import x10.types.X10MethodInstance;
 

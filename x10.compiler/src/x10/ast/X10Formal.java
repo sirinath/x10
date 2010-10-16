@@ -13,12 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.types.LocalDef;
 import polyglot.types.LocalInstance;
 import polyglot.types.SemanticException;

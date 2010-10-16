@@ -7,7 +7,7 @@
 
 package polyglot.frontend;
 
-import polyglot.ast.Node;
+import x10.ast.Node;
 
 /**
  * A parser interface.  It defines one method, <code>parse()</code>,

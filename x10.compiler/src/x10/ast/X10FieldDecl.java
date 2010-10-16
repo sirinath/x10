@@ -11,11 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Id;
-import polyglot.ast.TypeNode;
 import polyglot.types.FieldDef;
 import polyglot.types.Type;
 import x10.types.X10FieldDef;

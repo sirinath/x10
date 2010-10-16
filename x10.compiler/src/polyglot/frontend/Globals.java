@@ -1,8 +1,8 @@
 package polyglot.frontend;
 
-import polyglot.ast.NodeFactory;
 import polyglot.main.Options;
 import polyglot.types.TypeSystem;
+import x10.ast.NodeFactory;
 
 public class Globals {
     /**

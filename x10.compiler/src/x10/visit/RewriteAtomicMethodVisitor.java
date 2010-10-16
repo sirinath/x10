@@ -15,11 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
@@ -27,8 +22,13 @@ import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.Atomic;
+import x10.ast.Block;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Stmt;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.extension.X10ClassBodyExt_c;
 import x10.types.X10Flags;
 import x10.types.X10TypeSystem;
@@ -52,7 +52,7 @@ public class RewriteAtomicMethodVisitor extends ContextVisitor {
 			X10Flags flags = X10Flags.toX10Flags(md.flags().flags());
 			if (flags.isAtomic()) {
 				Block b = md.body();
-				X10NodeFactory nf = (X10NodeFactory) this.nf;
+				NodeFactory nf = (NodeFactory) this.nf;
 				Position pos = b.position();
 
 				Expr here = nf.Here(pos);

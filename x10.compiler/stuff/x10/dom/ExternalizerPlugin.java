@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import polyglot.ast.Node;
-import polyglot.ast.SourceFile;
+
+
 import x10.Configuration;
 import x10.ExtensionInfo;
 import x10.ExtensionInfo.X10Scheduler;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.plugin.CompilerPlugin;
 import x10.types.X10TypeSystem;
 import polyglot.frontend.AbstractPass;
@@ -60,7 +60,7 @@ public class ExternalizerPlugin implements CompilerPlugin {
 		public boolean run() {
 			Job job = this.goal().job();
 			X10TypeSystem ts = (X10TypeSystem) info.typeSystem();
-			X10NodeFactory nf = (X10NodeFactory) info.nodeFactory();
+			NodeFactory nf = (NodeFactory) info.nodeFactory();
 			
 			String xmlFile = getXMLFileName(info, job);
 			ErrorQueue eq = job.compiler().errorQueue();

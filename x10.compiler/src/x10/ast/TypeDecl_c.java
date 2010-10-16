@@ -15,13 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.Term;
-import polyglot.ast.Term_c;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.Context;
@@ -195,7 +188,7 @@ public class TypeDecl_c extends Term_c implements TypeDecl {
 	@Override
 	public Node buildTypesOverride(TypeBuilder tb) {
 		final X10TypeSystem ts = (X10TypeSystem) tb.typeSystem();
-		X10NodeFactory nf = (X10NodeFactory) tb.nodeFactory();
+		NodeFactory nf = (NodeFactory) tb.nodeFactory();
 		
 		X10ClassDef ct = (X10ClassDef) tb.currentClass();
 		Package package_ = tb.currentPackage();

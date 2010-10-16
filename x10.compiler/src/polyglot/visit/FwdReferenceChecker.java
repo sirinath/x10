@@ -10,9 +10,14 @@ package polyglot.visit;
 import java.util.HashSet;
 import java.util.Set;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.*;
+import x10.ast.Field;
+import x10.ast.FieldDecl;
+import x10.ast.Initializer;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which ensures that field intializers and initializers do not
  * make illegal forward references to fields.

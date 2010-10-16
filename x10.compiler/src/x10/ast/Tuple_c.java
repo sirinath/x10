@@ -14,12 +14,6 @@ package x10.ast;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Expr_c;
-import polyglot.ast.Node;
-import polyglot.ast.Precedence;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
 import polyglot.types.FieldInstance;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;

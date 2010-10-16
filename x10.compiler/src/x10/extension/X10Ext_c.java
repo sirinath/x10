@@ -18,15 +18,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.types.ClassType;
 import polyglot.types.QName;
 import polyglot.types.Type;
 import polyglot.types.VarDef;
-import polyglot.ast.Ext_c;
 import x10.ast.AnnotationNode;
+import x10.ast.Ext_c;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.types.X10ClassType;
 import x10.types.X10TypeSystem;
 

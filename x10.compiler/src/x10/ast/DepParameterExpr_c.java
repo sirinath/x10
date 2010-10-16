@@ -15,13 +15,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Node_c;
-import polyglot.ast.TypeCheckFragmentGoal;
 import polyglot.frontend.SetResolverGoal;
 import polyglot.types.Context;
 import polyglot.types.LazyRef;

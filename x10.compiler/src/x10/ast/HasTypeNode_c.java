@@ -4,14 +4,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Ext;
-import polyglot.ast.JL;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
-import polyglot.ast.TypeNode_c;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.types.Context;
 import polyglot.types.Qualifier;

@@ -11,12 +11,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.frontend.TargetFactory;
 import polyglot.types.*;
 import polyglot.types.Package;
 import polyglot.util.*;
+import x10.ast.Import;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceCollection;
+import x10.ast.SourceFile;
+import x10.ast.TopLevelDecl;
 
 /**
  * A Translator generates output code from the processed AST.

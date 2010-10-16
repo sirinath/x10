@@ -14,22 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.FloatLit;
-import polyglot.ast.IntLit;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
 import polyglot.frontend.Job;
 import polyglot.types.Context;
 import polyglot.types.Flags;
@@ -47,12 +31,28 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Assign;
 import x10.ast.AtExpr;
 import x10.ast.AtStmt;
+import x10.ast.Block;
+import x10.ast.Call;
+import x10.ast.ConstructorCall;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.FloatLit;
+import x10.ast.IntLit;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Receiver;
+import x10.ast.Stmt;
 import x10.ast.X10Binary_c;
 import x10.ast.X10CanonicalTypeNode;
 import x10.ast.X10IntLit_c;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Unary_c;
 import x10.types.X10ConstructorInstance;
 import x10.types.X10Context;
@@ -68,13 +68,13 @@ public class VarsBoxer extends ContextVisitor {
     private static final QName GLOBAL_REF = QName.make("x10.lang.GlobalRef");
     
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
     private X10ParsedClassType globalRefType;
     
     public VarsBoxer(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
     
     @Override

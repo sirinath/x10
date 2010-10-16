@@ -2,10 +2,31 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.*;
 import polyglot.util.*;
+import x10.ast.Block;
+import x10.ast.ClassBody;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.CodeNode;
+import x10.ast.ConstructorCall;
+import x10.ast.ConstructorDecl;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.Formal;
+import x10.ast.Id;
+import x10.ast.Local;
+import x10.ast.LocalClassDecl;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.ProcedureCall;
+import x10.ast.Receiver;
+import x10.ast.Special;
+import x10.ast.Stmt;
+import x10.ast.TypeNode;
 
 // TODO:
 //Convert closures to anon

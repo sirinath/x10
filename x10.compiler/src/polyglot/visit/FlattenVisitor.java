@@ -9,8 +9,22 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.types.*;
+import x10.ast.ArrayInit;
+import x10.ast.Assign;
+import x10.ast.Block;
+import x10.ast.ConstructorCall;
+import x10.ast.Expr;
+import x10.ast.FieldDecl;
+import x10.ast.Lit;
+import x10.ast.Local;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Special;
+import x10.ast.Stmt;
+import x10.ast.Switch;
 
 /**
  * The FlattenVisitor flattens the AST,

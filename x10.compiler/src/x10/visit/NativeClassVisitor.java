@@ -15,20 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Call;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.ConstructorInstance;
@@ -68,12 +54,12 @@ public class NativeClassVisitor extends ContextVisitor {
 
     final String theLanguage;
     final X10TypeSystem xts;
-    final X10NodeFactory xnf;
+    final NodeFactory xnf;
 
     public NativeClassVisitor(Job job, TypeSystem ts, NodeFactory nf, String theLanguage) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
         this.theLanguage = theLanguage;
     }
 
@@ -151,7 +137,7 @@ public class NativeClassVisitor extends ContextVisitor {
         ClassBody cbody = cdecl.body();
         List<ClassMember> cmembers = new ArrayList<ClassMember>();
 
-        Position p = X10NodeFactory_c.compilerGenerated(cbody);
+        Position p = NodeFactory_c.compilerGenerated(cbody);
 
         // create fake def for native class
         X10ClassDef fake = (X10ClassDef) xts.createClassDef();

@@ -13,9 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.CompoundStmt;
-import polyglot.ast.Expr;
-import polyglot.ast.Stmt;
 
 /** The node constructed for the X10 construct async (P) {S}.
  * @author Christian Grothoff

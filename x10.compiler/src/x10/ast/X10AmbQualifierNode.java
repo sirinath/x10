@@ -11,11 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.AmbQualifierNode;
-import polyglot.ast.Ambiguous;
-import polyglot.ast.Id;
-import polyglot.ast.Prefix;
-import polyglot.ast.QualifierNode;
 
 /**
  * An <code>AmbTypeNode</code> is an ambiguous AST node composed of

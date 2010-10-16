@@ -13,11 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.AmbTypeNode;
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Prefix;
-import polyglot.ast.TypeNode;
 
 public interface AmbMacroTypeNode extends AmbTypeNode {
     AmbMacroTypeNode name(Id name);

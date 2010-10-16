@@ -11,15 +11,13 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
 import polyglot.types.LazyRef;
 import polyglot.types.Type;
 import polyglot.util.ErrorInfo;
 import polyglot.visit.TypeChecker;
 import x10.types.X10ClassType;
 
-public class TypeCheckExprGoal extends TypeCheckFragmentGoal<Type> {
+public class TypeCheckExprGoal extends X10TypeCheckFragmentGoal<Type> {
 	private static final long serialVersionUID = -6191310441875644253L;
 
 	public TypeCheckExprGoal(Node parent, Expr n, TypeChecker v, LazyRef<Type> r) {

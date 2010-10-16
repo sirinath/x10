@@ -13,12 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.TypeNode;
 import polyglot.types.MethodDef;
 import x10.types.X10MethodDef;
 

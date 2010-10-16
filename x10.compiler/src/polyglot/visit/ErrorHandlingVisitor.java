@@ -7,12 +7,19 @@
 
 package polyglot.visit;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.*;
 import polyglot.main.Report;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.util.*;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.Import;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.Stmt;
 
 /**
  */
@@ -63,7 +70,7 @@ public class ErrorHandlingVisitor extends NodeVisitor
 
     /** Returns the <code>NodeFactory</code> that this Visitor is using.
      *
-     * @see polyglot.ast.NodeFactory
+     * @see x10.ast.NodeFactory
      */
     public NodeFactory nodeFactory() {
         return nf;

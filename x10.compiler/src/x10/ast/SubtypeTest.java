@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
-import polyglot.ast.TypeNode;
 
 public interface SubtypeTest extends Expr {
     

@@ -11,13 +11,13 @@ package polyglot.visit;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.*;
 import polyglot.main.Report;
 import polyglot.types.*;
 import polyglot.types.Package;
 import polyglot.util.*;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which traverses the AST constructing type objects. */
 public class TypeBuilder extends NodeVisitor

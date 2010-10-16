@@ -2,14 +2,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Expr_c;
-import polyglot.ast.If;
-import polyglot.ast.If_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeList;
-import polyglot.ast.Stmt;
-import polyglot.ast.Term;
 import polyglot.types.Context;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;

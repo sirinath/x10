@@ -11,10 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.AbstractDelFactory_c;
-import polyglot.ast.Conditional;
-import polyglot.ast.JL;
-import polyglot.ast.Node;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.Types;

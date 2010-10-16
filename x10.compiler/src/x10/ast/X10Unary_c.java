@@ -17,17 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.IntLit;
-import polyglot.ast.Local;
-import polyglot.ast.Node;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
-import polyglot.ast.Unary_c;
-import polyglot.ast.Variable;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.Flags;
@@ -89,7 +78,7 @@ public class X10Unary_c extends Unary_c {
      */
     public Node typeCheck(ContextVisitor tc) {
         X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         Unary.Operator op = this.operator();
 
         if (op == NEG && expr instanceof IntLit) {
@@ -238,7 +227,7 @@ public class X10Unary_c extends Unary_c {
 
         Type l = left.type();
 
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         Name methodName = unaryMethodName(op);
 
         if (methodName == null) return null;

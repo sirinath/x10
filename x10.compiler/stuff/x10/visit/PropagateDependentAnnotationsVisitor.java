@@ -16,34 +16,34 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Call_c;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassDecl_c;
-import polyglot.ast.ConstructorCall_c;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.ConstructorDecl_c;
-import polyglot.ast.Expr;
-import polyglot.ast.Expr_c;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.FieldDecl_c;
-import polyglot.ast.Field_c;
-import polyglot.ast.Formal;
-import polyglot.ast.Formal_c;
-import polyglot.ast.Import_c;
-import polyglot.ast.Initializer_c;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.LocalDecl_c;
-import polyglot.ast.Local_c;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.MethodDecl_c;
-import polyglot.ast.New_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.PackageNode_c;
-import polyglot.ast.SourceFile;
-import polyglot.ast.TypeNode;
-import polyglot.ast.TypeNode_c;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import x10.ExtensionInfo;
 import x10.ast.DepParameterExpr;
 import x10.extension.X10Ext;

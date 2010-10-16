@@ -16,10 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
 import polyglot.main.Report;
 import polyglot.types.Context;
 import polyglot.types.Ref;

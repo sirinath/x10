@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Conditional;
-import polyglot.ast.Expr;
 
 public interface X10Conditional extends Conditional {
 }

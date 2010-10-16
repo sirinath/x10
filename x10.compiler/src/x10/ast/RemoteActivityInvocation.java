@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
 
 /**
  * @author Christian Grothoff

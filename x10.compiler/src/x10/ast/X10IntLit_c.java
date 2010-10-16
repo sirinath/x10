@@ -11,13 +11,12 @@
 
 package x10.ast;
 
-import polyglot.ast.IntLit_c;
-import polyglot.ast.Node;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
+import x10.ast.IntLit.Kind;
 import x10.constraint.XFailure;
 import x10.constraint.XTerm;
 import x10.types.X10Context;
@@ -27,8 +26,6 @@ import x10.types.X10TypeSystem;
 import x10.types.XTypeTranslator;
 import x10.types.constraints.CConstraint;
 import x10.types.constraints.CConstraint;
-import polyglot.ast.IntLit;
-import polyglot.ast.IntLit.Kind;
 
 /**
  * An immutable representation of an int lit, modified from JL to support a

@@ -17,15 +17,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.CodeBlock;
-import polyglot.ast.Expr_c;
-import polyglot.ast.Formal;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Precedence;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Globals;
 import polyglot.main.Report;
 import polyglot.types.ClassDef;
@@ -99,7 +90,7 @@ public class Closure_c extends Expr_c implements Closure {
 
 	TypeNode hasType;
 	TypeNode offerType;
-	public Closure_c(X10NodeFactory nf, Position pos,  List<Formal> formals, 
+	public Closure_c(NodeFactory nf, Position pos,  List<Formal> formals, 
 			TypeNode returnType, DepParameterExpr guard,  TypeNode offerType, Block body) {
 		super(pos);
 		//	this.typeParameters = TypedList.copyAndCheck(typeParams, TypeParamNode.class, true);

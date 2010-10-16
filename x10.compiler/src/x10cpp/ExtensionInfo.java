@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.AllBarrierGoal;
 import polyglot.frontend.BarrierGoal;
 import polyglot.frontend.Compiler;
@@ -40,7 +39,8 @@ import polyglot.visit.PostCompiled;
 import polyglot.util.InternalCompilerError;
 import x10.Configuration;
 import x10.ExtensionInfo.X10Scheduler.ValidatingVisitorGoal;
-import x10.ast.X10NodeFactory_c;
+import x10.ast.NodeFactory;
+import x10.ast.NodeFactory_c;
 import x10.optimizations.Optimizer;
 import x10.visit.CheckNativeAnnotationsVisitor;
 import x10.visit.NativeClassVisitor;
@@ -70,7 +70,7 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 	}
 
 	protected NodeFactory createNodeFactory() {
-		return new X10NodeFactory_c(this, new X10CPPExtFactory_c(), new X10CPPDelFactory_c()) { };
+		return new NodeFactory_c(this, new X10CPPExtFactory_c(), new X10CPPDelFactory_c()) { };
 	}
 
 	protected TypeSystem createTypeSystem() {

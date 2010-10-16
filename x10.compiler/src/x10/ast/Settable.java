@@ -13,8 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Variable;
 
 /**
  * @author vj Jan 11, 2005

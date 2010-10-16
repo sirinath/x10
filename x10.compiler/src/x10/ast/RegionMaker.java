@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Call;
 
 /** An immutable representation of int:int region constructor.
  * @author vj

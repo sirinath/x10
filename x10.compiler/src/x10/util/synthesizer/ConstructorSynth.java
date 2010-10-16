@@ -13,11 +13,6 @@ package x10.util.synthesizer;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.Flags;
@@ -29,9 +24,14 @@ import polyglot.types.Type;
 import polyglot.types.Types;
 import polyglot.util.Position;
 import x10.ast.AnnotationNode;
+import x10.ast.Block;
+import x10.ast.Expr;
+import x10.ast.FlagsNode;
+import x10.ast.Formal;
+import x10.ast.TypeNode;
 import x10.ast.X10ConstructorDecl;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.extension.X10Del;
 import x10.types.X10ConstructorDef;
 import x10.types.X10Context;
@@ -54,7 +54,7 @@ public class ConstructorSynth extends AbstractStateSynth implements IClassMember
     X10ConstructorDecl conDecl; // only be created once;
     ClassDef classDef;
 
-    public ConstructorSynth(X10NodeFactory xnf, X10Context xct, Position pos, ClassDef classDef, Flags flags,
+    public ConstructorSynth(NodeFactory xnf, X10Context xct, Position pos, ClassDef classDef, Flags flags,
             List<Formal> formals, List<Type> throwTypes) {
         super(xnf, xct, pos);
         this.formals = formals;
@@ -80,11 +80,11 @@ public class ConstructorSynth extends AbstractStateSynth implements IClassMember
 
     }
 
-    public ConstructorSynth(X10NodeFactory xnf, X10Context xct, Position pos, ClassDef classDef) {
+    public ConstructorSynth(NodeFactory xnf, X10Context xct, Position pos, ClassDef classDef) {
         this(xnf, xct, pos, classDef, Flags.NONE, new ArrayList<Formal>(), new ArrayList<Type>());
     }
 
-    public ConstructorSynth(X10NodeFactory xnf, X10Context xct, ClassDef classDef) {
+    public ConstructorSynth(NodeFactory xnf, X10Context xct, ClassDef classDef) {
         this(xnf, xct, compilerPos, classDef);
     }
 

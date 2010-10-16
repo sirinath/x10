@@ -20,27 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import polyglot.ast.AmbAssign;
-import polyglot.ast.AmbExpr;
-import polyglot.ast.AmbTypeNode;
-import polyglot.ast.Assign;
-import polyglot.ast.Block;
-import polyglot.ast.BooleanLit;
-import polyglot.ast.Call;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Formal;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.ProcedureCall;
-import polyglot.ast.Return;
-import polyglot.ast.Special;
-import polyglot.ast.Stmt;
-import polyglot.ast.Throw;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
@@ -71,11 +50,32 @@ import polyglot.visit.AlphaRenamer;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.ErrorHandlingVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.AmbAssign;
+import x10.ast.AmbExpr;
+import x10.ast.AmbTypeNode;
+import x10.ast.Assign;
+import x10.ast.Block;
+import x10.ast.BooleanLit;
+import x10.ast.Call;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
 import x10.ast.DepParameterExpr;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.Formal;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.ast.ParExpr;
+import x10.ast.ProcedureCall;
+import x10.ast.Return;
+import x10.ast.Special;
+import x10.ast.Stmt;
 import x10.ast.StmtExpr;
+import x10.ast.Throw;
+import x10.ast.TypeNode;
 import x10.ast.TypeParamNode;
 import x10.ast.X10Call;
 import x10.ast.X10Call_c;
@@ -84,7 +84,7 @@ import x10.ast.X10ConstructorDecl;
 import x10.ast.X10FieldDecl;
 import x10.ast.X10Formal;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Special;
 import x10.constraint.XFailure;
 import x10.constraint.XLocal;
@@ -201,7 +201,7 @@ public class Inliner extends ContextVisitor {
      * 
      */
     private X10TypeSystem xts;
-    private X10NodeFactory xnf;
+    private NodeFactory xnf;
     // private Synthesizer syn;
     private ForLoopOptimizer syn; // move functionality to Synthesizer
     private InlineCostEstimator ice;
@@ -210,7 +210,7 @@ public class Inliner extends ContextVisitor {
     public Inliner(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
         // syn = new Synthesizer(xnf, xts);
         syn = new ForLoopOptimizer(job, ts, nf);
         ice = new InlineCostEstimator(xts, xnf);
@@ -1375,7 +1375,7 @@ public class Inliner extends ContextVisitor {
                 // A body with no non-exceptional exit
                 return body;
             }
-            X10NodeFactory xnf = (X10NodeFactory) nodeFactory();
+            NodeFactory xnf = (NodeFactory) nodeFactory();
             X10TypeSystem xts = (X10TypeSystem) typeSystem();
             List<Stmt> newBody = new ArrayList<Stmt>();
             if (ret != null) {
@@ -1422,7 +1422,7 @@ public class Inliner extends ContextVisitor {
             if (label == null) return n;
             assert ((ret == null) == (n.expr() == null));
             this.returnCount++;
-            X10NodeFactory xnf = (X10NodeFactory) nf;
+            NodeFactory xnf = (NodeFactory) nf;
             Position pos = n.position();
             List<Stmt> retSeq = new ArrayList<Stmt>();
             if (ret != null) {
@@ -1444,7 +1444,7 @@ public class Inliner extends ContextVisitor {
         }
 
         private Expr getThis(Position pos) {
-            X10NodeFactory xnf = (X10NodeFactory) nf;
+            NodeFactory xnf = (NodeFactory) nf;
             if (null == ths) {
                 // System.err.println("Missing ths at " +pos);
             }
@@ -1462,7 +1462,7 @@ public class Inliner extends ContextVisitor {
                 // System.err.println("Bad field: " +n+ " at " +n.position());
             }
             assert ((ths == null) == (fi.flags().isStatic()));
-            X10NodeFactory xnf = (X10NodeFactory) nf;
+            NodeFactory xnf = (NodeFactory) nf;
             Position pos = n.position();
             if (fi.flags().isStatic()) {
                 return n.target(xnf.CanonicalTypeNode(pos, fi.container())).targetImplicit(false);
@@ -1481,7 +1481,7 @@ public class Inliner extends ContextVisitor {
                 System.out.println();
             }
             assert ((ths == null) == (mi.flags().isStatic()));
-            X10NodeFactory xnf = (X10NodeFactory) nf;
+            NodeFactory xnf = (NodeFactory) nf;
             Position pos = n.position();
             if (mi.flags().isStatic()) {
                 return (X10Call) n.target(xnf.CanonicalTypeNode(pos, mi.container())).targetImplicit(false);
@@ -1512,9 +1512,9 @@ public class Inliner extends ContextVisitor {
         private static final int NATIVE_CODE_COST = 989898;
         int cost;
         X10TypeSystem xts;
-        X10NodeFactory xnf;
+        NodeFactory xnf;
 
-        InlineCostEstimator(X10TypeSystem ts, X10NodeFactory nf) {
+        InlineCostEstimator(X10TypeSystem ts, NodeFactory nf) {
             xts = ts;
             xnf = nf;
         }

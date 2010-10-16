@@ -1,10 +1,10 @@
 package x10.compiler.ws.codegen;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
 import polyglot.types.ClassDef;
 import polyglot.types.Flags;
 import polyglot.types.SemanticException;
+import x10.ast.Block;
+import x10.ast.Expr;
 import x10.ast.Finish;
 import x10.compiler.ws.util.TransCodes;
 import x10.compiler.ws.util.WSCodeGenUtility;

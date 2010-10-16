@@ -1,12 +1,12 @@
 package x10.compiler.ws.codegen;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Expr;
-import polyglot.ast.If;
-import polyglot.ast.Local;
-import polyglot.ast.Stmt;
 import polyglot.types.SemanticException;
+import x10.ast.Assign;
+import x10.ast.Binary;
+import x10.ast.Expr;
+import x10.ast.If;
+import x10.ast.Local;
+import x10.ast.Stmt;
 import x10.ast.When;
 import x10.compiler.ws.util.AddIndirectLocalDeclareVisitor;
 import x10.compiler.ws.util.ClosureDefReinstantiator;

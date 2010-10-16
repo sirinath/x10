@@ -13,8 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Expr;
 import polyglot.types.ClassDef;
 import polyglot.types.Name;
 import polyglot.types.Type;

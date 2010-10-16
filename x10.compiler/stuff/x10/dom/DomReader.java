@@ -16,8 +16,8 @@ import java.util.Map;
 
 import org.w3c.dom.Element;
 
-import polyglot.ast.Node;
-import x10.ast.X10NodeFactory;
+
+import x10.ast.NodeFactory;
 import x10.dom.X10Dom.Lens;
 import x10.dom.X10Dom.NodeLens;
 import x10.dom.X10Dom.TypeObjectLens;
@@ -27,11 +27,11 @@ import polyglot.types.TypeObject;
 
 public class DomReader {
 	X10TypeSystem ts;
-	X10NodeFactory nf;
+	NodeFactory nf;
 	Source source;
 	Map<String,LazyTypeObject> typeMap;
 	
-	public DomReader(X10TypeSystem ts, X10NodeFactory nf, Source source) {
+	public DomReader(X10TypeSystem ts, NodeFactory nf, Source source) {
 		super();
 		this.ts = ts;
 		this.nf = nf;

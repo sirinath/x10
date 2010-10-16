@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeList;
-import polyglot.ast.Stmt_c;
-import polyglot.ast.Term;
 import polyglot.types.Context;
 import polyglot.util.CodeWriter;
 import polyglot.util.Position;

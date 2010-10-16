@@ -23,28 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.For;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.IntLit;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
-import polyglot.ast.Unary;
-import polyglot.ast.VarDecl;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Job;
 import polyglot.types.ClassType;
@@ -65,11 +43,33 @@ import polyglot.types.VarInstance;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Assign;
+import x10.ast.Binary;
+import x10.ast.Block;
+import x10.ast.Call;
+import x10.ast.CanonicalTypeNode;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FlagsNode;
+import x10.ast.For;
+import x10.ast.ForInit;
 import x10.ast.ForLoop;
+import x10.ast.ForUpdate;
+import x10.ast.Formal;
+import x10.ast.Id;
+import x10.ast.IntLit;
+import x10.ast.Local;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Receiver;
 import x10.ast.RegionMaker;
+import x10.ast.Stmt;
 import x10.ast.Tuple;
+import x10.ast.Unary;
+import x10.ast.VarDecl;
 import x10.ast.X10Formal;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 
 import x10.constraint.XEquals;
 import x10.constraint.XFailure;
@@ -190,12 +190,12 @@ public class LoopUnroller extends ContextVisitor {
 
     private final X10TypeSystem xts;
 
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
 
     public LoopUnroller(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
 
     protected Node leaveCall(Node old, Node n, NodeVisitor v) throws SemanticException {

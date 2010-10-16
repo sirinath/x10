@@ -11,12 +11,12 @@
 
 package x10.visit;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Job;
 import polyglot.types.TypeSystem;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /**
  * A visitor that applies the given {@link NodeTransformer}

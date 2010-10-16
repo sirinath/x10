@@ -7,13 +7,13 @@
 
 package polyglot.visit;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.Context;
 import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /**
  * A visitor which maintains a context throughout the visitor's pass.  This is 

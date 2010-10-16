@@ -14,14 +14,6 @@ package x10.visit;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.Expr;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.CodeDef;
@@ -42,9 +34,17 @@ import polyglot.visit.InnerClassRemover;
 import polyglot.visit.LocalClassRemover;
 import polyglot.visit.NodeVisitor;
 import polyglot.visit.TypeBuilder;
+import x10.ast.ClassBody;
+import x10.ast.ClassDecl;
+import x10.ast.ConstructorCall;
+import x10.ast.Expr;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.TypeNode;
 import x10.ast.TypeParamNode;
 import x10.ast.X10ClassDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.types.ParameterType;
 import x10.types.TypeParamSubst;
 import x10.types.X10ClassDef;
@@ -181,7 +181,7 @@ public class X10LocalClassRemover extends LocalClassRemover {
             ParameterType p = typeParameters.get(i);
             ParameterType.Variance v = variances.get(i);
 
-            X10NodeFactory xnf = (X10NodeFactory) nf;
+            NodeFactory xnf = (NodeFactory) nf;
             TypeParamNode pn = xnf.TypeParamNode(n.position(), xnf.Id(n.position(), Name.makeFresh(p.name())), v);
             TypeBuilder tb = new TypeBuilder(job, ts, nf);
             try {

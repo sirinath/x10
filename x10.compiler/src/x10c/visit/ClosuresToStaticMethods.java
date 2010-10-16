@@ -16,16 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.Block;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Local;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.ClassType;
 import polyglot.types.CodeDef;
@@ -39,13 +29,23 @@ import polyglot.types.Types;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Block;
+import x10.ast.ClassBody;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
+import x10.ast.Expr;
+import x10.ast.Formal;
+import x10.ast.Local;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.ast.ParExpr;
+import x10.ast.TypeNode;
 import x10.ast.TypeParamNode;
 import x10.ast.X10Call;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Special;
 import x10.types.ParameterType;
 import x10.types.X10MethodDef;
@@ -57,13 +57,13 @@ public class ClosuresToStaticMethods extends ContextVisitor {
     private static final String STATIC_METHOD_BASE_NAME = "__$closure$apply$__";
 
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
     private final Map<CodeDef,List<ParameterType>> closureDefToTypePrams = new HashMap<CodeDef,List<ParameterType>>();
     
     public ClosuresToStaticMethods(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
     
     @Override

@@ -15,11 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Expr;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
@@ -33,13 +28,18 @@ import polyglot.visit.NodeVisitor;
 import x10.ast.Async;
 import x10.ast.AtEach;
 import x10.ast.Closure;
+import x10.ast.ConstructorDecl;
+import x10.ast.Expr;
 import x10.ast.Here;
+import x10.ast.MethodDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.ast.Offer;
 import x10.ast.PlacedClosure;
 import x10.ast.RemoteActivityInvocation;
 import x10.ast.X10ClassDecl;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.compiler.ws.codegen.AbstractWSClassGen;
 import x10.compiler.ws.codegen.WSMethodFrameClassGen;
 import x10.compiler.ws.util.WSCallGraph;
@@ -88,7 +88,7 @@ public class WSCodeGenerator extends ContextVisitor {
         genClassDecls = new HashSet<X10ClassDecl>();
     }
 
-    public static void buildCallGraph(X10TypeSystem xts, X10NodeFactory xnf, String theLanguage) {
+    public static void buildCallGraph(X10TypeSystem xts, NodeFactory xnf, String theLanguage) {
         wts = new WSTransformState(xts, xnf, theLanguage);
     }
 
@@ -137,7 +137,7 @@ public class WSCodeGenerator extends ContextVisitor {
                 }
                 
                 Job job = ((ClassType) mDef.container().get()).def().job();
-                WSMethodFrameClassGen mFrame = new WSMethodFrameClassGen(job, (X10NodeFactory) nf, (X10Context) context, mDef, mDecl, wts);
+                WSMethodFrameClassGen mFrame = new WSMethodFrameClassGen(job, (NodeFactory) nf, (X10Context) context, mDef, mDecl, wts);
                 n = mFrame.transform();
                 genClassDecls.addAll(mFrame.close()); 
                 genMethodDecls.add(mFrame.getWraperMethod());

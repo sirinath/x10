@@ -7,9 +7,9 @@
 
 package polyglot.frontend;
 
-import polyglot.ast.Node;
 import polyglot.util.InternalCompilerError;
 import polyglot.visit.Translator;
+import x10.ast.Node;
 
 /** An output pass generates output code from the processed AST. */
 public class OutputGoal extends SourceGoal_c

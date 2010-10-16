@@ -15,12 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.NodeList;
-import polyglot.ast.Stmt;
-import polyglot.ast.AbstractBlock_c;
 import polyglot.types.Context;
 import polyglot.util.Position;
 import polyglot.util.TypedList;
@@ -31,14 +25,14 @@ import polyglot.util.TypedList;
  */
 public class StmtSeq_c extends AbstractBlock_c implements StmtSeq {
 
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
 
     /**
      * @param xnf
      * @param pos
      * @param statements
      */
-    public StmtSeq_c(X10NodeFactory xnf, Position pos, List<Stmt> statements) {
+    public StmtSeq_c(NodeFactory xnf, Position pos, List<Stmt> statements) {
         super(pos, statements);
         this.xnf = xnf;
 

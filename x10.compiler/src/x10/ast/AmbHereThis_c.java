@@ -13,10 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr_c;
-import polyglot.ast.Node;
-import polyglot.ast.Receiver;
-import polyglot.ast.Term;
 import polyglot.types.SemanticException;
 import polyglot.util.Position;
 import polyglot.visit.CFGBuilder;
@@ -42,7 +38,7 @@ public class AmbHereThis_c extends Expr_c {
 	
 	/** Disambiguate the receiver. */
     public Node disambiguate(ContextVisitor ar) throws SemanticException {
-    	X10NodeFactory nf = ((X10NodeFactory) ar.nodeFactory());
+    	NodeFactory nf = ((NodeFactory) ar.nodeFactory());
     	
     	return (ar.context().inCode()) 
     	? nf.Here(position()) 

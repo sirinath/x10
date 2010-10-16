@@ -9,9 +9,21 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Compiler;
 import polyglot.util.CodeWriter;
+import x10.ast.Block;
+import x10.ast.Catch;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.Expr;
+import x10.ast.Formal;
+import x10.ast.Import;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.SourceFile;
+import x10.ast.Stmt;
+import x10.ast.TypeNode;
 
 /**
  * The <code>NodeScrambler</code> is test case generator of sorts. Since it

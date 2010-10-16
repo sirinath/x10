@@ -13,9 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Node;
-import polyglot.ast.Term;
-import polyglot.ast.Stmt_c;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.util.Position;

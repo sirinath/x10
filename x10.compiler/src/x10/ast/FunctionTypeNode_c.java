@@ -16,11 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Formal;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.TypeNode;
-import polyglot.ast.TypeNode_c;
 import polyglot.frontend.SetResolverGoal;
 import polyglot.types.ClassType;
 import polyglot.types.CodeDef;
@@ -73,7 +68,7 @@ public class FunctionTypeNode_c extends TypeNode_c implements FunctionTypeNode {
 
 	@Override
 	public Node disambiguate(ContextVisitor ar) throws SemanticException {
-		X10NodeFactory nf = (X10NodeFactory) ar.nodeFactory();
+		NodeFactory nf = (NodeFactory) ar.nodeFactory();
 		X10TypeSystem ts = (X10TypeSystem) ar.typeSystem();
 		FunctionTypeNode_c n = this;
 		List<Ref<? extends Type>> typeParams = new ArrayList<Ref<? extends Type>>(n.typeParameters().size());
@@ -147,7 +142,7 @@ public class FunctionTypeNode_c extends TypeNode_c implements FunctionTypeNode {
 	    		LazyRef<Type> r = (LazyRef<Type>) typeRef();
 	    		TypeChecker tc = new X10TypeChecker(v.job(), v.typeSystem(), v.nodeFactory(), v.getMemo());
 	    		tc = (TypeChecker) tc.context(v.context().freeze());
-	    		r.setResolver(new TypeCheckTypeGoal(parent, this, tc, r));
+	    		r.setResolver(new X10TypeCheckTypeGoal(parent, this, tc, r));
 	    	}
 	    }
 	/* (non-Javadoc)

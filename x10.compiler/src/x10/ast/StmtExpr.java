@@ -13,11 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.Stmt;
 
 /**
  * A StmtExpr is an immutable representation of a statement expression.

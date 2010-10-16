@@ -3,16 +3,16 @@ package x10.compiler.ws.util;
 import java.util.HashSet;
 import java.util.Set;
 
-import polyglot.ast.Expr;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.Formal;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Expr;
+import x10.ast.FieldAssign;
+import x10.ast.Formal;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
 import x10.types.X10Context;
 import x10.util.Synthesizer;
 

@@ -10,9 +10,6 @@
  */
 package x10c.visit;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
@@ -20,21 +17,24 @@ import polyglot.types.TypeSystem;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.AtExpr;
-import x10.ast.X10NodeFactory;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Stmt;
+import x10.ast.NodeFactory;
 import x10.types.X10TypeSystem;
 import x10.visit.ExpressionFlattener;
 
 public class ExpressionFlattenerForAtExpr extends ContextVisitor {
     
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
 
     private Type imc;
 
     public ExpressionFlattenerForAtExpr(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
     
     @Override

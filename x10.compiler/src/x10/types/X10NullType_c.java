@@ -11,12 +11,12 @@
 
 package x10.types;
 
-import polyglot.ast.FlagsNode;
 import polyglot.types.Flags;
 import polyglot.types.Type;
 import polyglot.types.NullType_c;
 import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
+import x10.ast.FlagsNode;
 
 /** Every X10 term must have a type. This is the type of the X10 term null.
  * 

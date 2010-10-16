@@ -13,12 +13,12 @@ package x10.types.constraints;
 
 import java.util.HashMap;
 
-import polyglot.ast.Field;
 import polyglot.types.FieldInstance;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.Types;
 
+import x10.ast.Field;
 import x10.constraint.XConstraint;
 import x10.constraint.XFailure;
 import x10.constraint.XName;
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import polyglot.ast.Field;
 import polyglot.types.FieldInstance;
 import polyglot.types.SemanticException;
 

@@ -9,11 +9,11 @@ package polyglot.frontend;
 
 import java.util.*;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.types.TypeSystem;
 import polyglot.util.CodeWriter;
 import polyglot.visit.TypeBuilder;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /**
  * A <code>Job</code> encapsulates work done by the compiler for a single

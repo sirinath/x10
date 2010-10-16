@@ -17,16 +17,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.SourceFile;
-import polyglot.ast.Stmt;
-import polyglot.ast.TopLevelDecl;
 import polyglot.frontend.Job;
 import polyglot.frontend.TargetFactory;
 import polyglot.types.Package;
@@ -35,6 +25,16 @@ import polyglot.types.TypeSystem;
 import polyglot.util.CodeWriter;
 import polyglot.util.ErrorInfo;
 import polyglot.visit.Translator;
+import x10.ast.Block;
+import x10.ast.ClassDecl;
+import x10.ast.ConstructorDecl;
+import x10.ast.FieldDecl;
+import x10.ast.MethodDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.Stmt;
+import x10.ast.TopLevelDecl;
 
 public class X10Translator extends Translator {
     public X10Translator(Job job, TypeSystem ts, NodeFactory nf, TargetFactory tf) {

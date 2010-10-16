@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 
-import polyglot.ast.Node;
+
 import polyglot.types.Type;
 import polyglot.types.TypeObject;
 import polyglot.util.Copy;

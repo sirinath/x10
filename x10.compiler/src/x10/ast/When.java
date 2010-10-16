@@ -13,8 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Stmt;
 import polyglot.util.Position;
 
 /**

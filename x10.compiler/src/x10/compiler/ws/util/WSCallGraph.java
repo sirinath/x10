@@ -5,17 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.Node;
-import polyglot.ast.Term;
 import polyglot.types.Package;
 import polyglot.types.ProcedureDef;
 import polyglot.types.Ref;
 import polyglot.visit.NodeVisitor;
+import x10.ast.ClassDecl;
 import x10.ast.Closure;
+import x10.ast.ConstructorDecl;
+import x10.ast.MethodDecl;
+import x10.ast.Node;
 import x10.ast.PlacedClosure;
+import x10.ast.Term;
 
 /**
  * A call graph to record WS transformation call graph and do DFS search

@@ -15,16 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Loop;
-import polyglot.ast.Loop_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
-import polyglot.ast.Term;
 import polyglot.types.ClassDef;
 import polyglot.types.Context;
 import polyglot.types.Flags;
@@ -133,7 +123,7 @@ public abstract class X10Loop_c extends Loop_c implements X10Loop {
 	    
 	    Formal formal = (Formal) this.visitChild(this.formal, tc1);
 	    
-	    X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+	    NodeFactory nf = (NodeFactory) tc.nodeFactory();
 	    X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 	    
 //	    if (ts.isPoint(formal.type().type())) {
@@ -368,7 +358,7 @@ public abstract class X10Loop_c extends Loop_c implements X10Loop {
 				final LazyRef<Type> domainTypeRef = this.domainTypeRef;
 				domainTypeRef.setResolver(new TypeCheckExprGoal(loop, domain, tc, domainTypeRef));
 
-				final X10NodeFactory nf = (X10NodeFactory) v.nodeFactory();
+				final NodeFactory nf = (NodeFactory) v.nodeFactory();
 				final X10TypeSystem ts = (X10TypeSystem) v.typeSystem();
 				final ClassDef curr = v.context().currentClassDef();
 

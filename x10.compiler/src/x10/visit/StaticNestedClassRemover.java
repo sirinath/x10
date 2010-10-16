@@ -14,13 +14,6 @@ package x10.visit;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.SourceFile;
-import polyglot.ast.TopLevelDecl;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.Name;
@@ -29,6 +22,13 @@ import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.ClassBody;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.TopLevelDecl;
 
 /** 
  * This method removes static nested classes from the AST and promotes them to top-level classes, adjusting the ClassDef. 

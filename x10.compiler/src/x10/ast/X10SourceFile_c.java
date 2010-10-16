@@ -13,11 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Import;
-import polyglot.ast.Node;
-import polyglot.ast.PackageNode;
-import polyglot.ast.SourceFile_c;
-import polyglot.ast.TopLevelDecl;
 import polyglot.types.SemanticException;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;

@@ -15,13 +15,13 @@ package polyglot.frontend;
 
 import java.util.*;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.main.Version;
 import polyglot.types.*;
 import polyglot.util.ErrorInfo;
 import polyglot.util.ErrorQueue;
 import polyglot.visit.*;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /**
  * Comment for <code>Scheduler</code>

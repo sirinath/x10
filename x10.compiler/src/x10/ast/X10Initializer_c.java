@@ -11,10 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Block;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Initializer_c;
-import polyglot.ast.Node;
 import polyglot.types.ClassDef;
 import polyglot.types.Context;
 import polyglot.types.Flags;

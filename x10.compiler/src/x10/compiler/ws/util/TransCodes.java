@@ -3,8 +3,8 @@ package x10.compiler.ws.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Stmt;
+import x10.ast.Block;
+import x10.ast.Stmt;
 
 /**
  * Utility class to store transformed codes for three paths, fast/slow/back, and new pcValue

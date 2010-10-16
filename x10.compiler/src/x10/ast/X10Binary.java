@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Expr;
 
 /**
  * An immutable representation of a binary operation.

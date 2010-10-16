@@ -16,18 +16,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Cast;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Lit;
-import polyglot.ast.Receiver;
-import polyglot.ast.Special;
-import polyglot.ast.Unary;
-import polyglot.ast.Unary_c;
-import polyglot.ast.Variable;
-import polyglot.ast.FloatLit;
-import polyglot.ast.Binary.Operator;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.ConstructorInstance;
@@ -52,15 +40,27 @@ import polyglot.types.QName;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
+import x10.ast.Binary;
+import x10.ast.Cast;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FloatLit;
 import x10.ast.Here;
+import x10.ast.Lit;
 import x10.ast.ParExpr;
+import x10.ast.Receiver;
 import x10.ast.SemanticError;
+import x10.ast.Special;
 import x10.ast.SubtypeTest;
-import x10.ast.X10NodeFactory;
+import x10.ast.Unary;
+import x10.ast.Unary_c;
+import x10.ast.Variable;
+import x10.ast.NodeFactory;
 import x10.ast.X10IntLit_c;
 import x10.ast.X10StringLit_c;
 import x10.ast.Async;
 import x10.ast.AnnotationNode;
+import x10.ast.Binary.Operator;
 import x10.constraint.XFailure;
 import x10.constraint.XLit;
 import x10.constraint.XName;
@@ -709,7 +709,7 @@ public class X10TypeMixin {
         		promoteClause(ts, op, xclause(t)));
     }
 
-    public static CConstraint promoteClause(X10TypeSystem ts, polyglot.ast.Unary.Operator op, CConstraint c) {
+    public static CConstraint promoteClause(X10TypeSystem ts, x10.ast.Unary.Operator op, CConstraint c) {
         if (c == null)
             return null;
    
@@ -1177,7 +1177,7 @@ public class X10TypeMixin {
     public static Expr getZeroVal(Type t, Position p, ContextVisitor tc) { // see X10FieldDecl_c.typeCheck
         try {
             X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-            X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+            NodeFactory nf = (NodeFactory) tc.nodeFactory();
 	    	X10Context context = (X10Context) tc.context();
             Expr e = null;
             if (t.isBoolean()) {

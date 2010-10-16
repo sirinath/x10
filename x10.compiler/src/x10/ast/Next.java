@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Stmt;
 
 /** The node constructed for the X10 construct next;
  * @author vj

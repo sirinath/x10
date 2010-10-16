@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Node;
 import polyglot.visit.TypeChecker;
 
 /**

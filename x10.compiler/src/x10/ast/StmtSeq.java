@@ -11,10 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Block;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.NodeList;
 import polyglot.visit.NodeVisitor;
 import x10.visit.ExpressionFlattener;
 

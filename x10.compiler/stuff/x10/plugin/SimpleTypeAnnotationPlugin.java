@@ -16,25 +16,25 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.ArrayInit;
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.ProcedureCall;
-import polyglot.ast.Unary;
+
+
+
+
+
+
+
+
+
+
+
+
+
 import x10.ExtensionInfo;
 import x10.ExtensionInfo.X10Scheduler;
 import x10.ast.ParExpr;
 import x10.ast.X10Cast;
 import x10.ast.X10Instanceof;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.types.X10ClassType;
 import x10.types.X10ConstructorInstance;
 import x10.types.X10Context;
@@ -133,7 +133,7 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		public Node leaveCall(Node parent, Node old, Node n, NodeVisitor v) throws SemanticException {
 			X10Context context = (X10Context) this.context;
 			X10TypeSystem ts = (X10TypeSystem) this.ts;
-			X10NodeFactory nf = (X10NodeFactory) this.nf;
+			NodeFactory nf = (NodeFactory) this.nf;
 			
 			if (n instanceof LocalDecl) {
 				LocalDecl ld = (LocalDecl) n;
@@ -225,7 +225,7 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		}
 	}
 	
-	public Expr checkField(Field f, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public Expr checkField(Field f, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		X10FieldInstance fi = (X10FieldInstance) f.fieldInstance();
 		List<X10ClassType> memberAnnotations = ((X10FieldInstance) fi.orig()).annotations();
 		X10Type type = (X10Type) fi.orig().type();
@@ -233,7 +233,7 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		return propagate(f, type, memberAnnotations, typeAnnotations);
 	}
 	
-	public Expr checkLocal(Local l, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public Expr checkLocal(Local l, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		X10LocalInstance li = (X10LocalInstance) l.localInstance();
 		List<X10ClassType> memberAnnotations = ((X10LocalInstance) li.orig()).annotations();
 		X10Type type = (X10Type) li.orig().type();
@@ -241,14 +241,14 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		return propagate(l, type, memberAnnotations, typeAnnotations);
 	}
 	
-	public Expr checkCall(Call c, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public Expr checkCall(Call c, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		X10MethodInstance mi = (X10MethodInstance) c.methodInstance();
 		List<X10ClassType> memberAnnotations = ((X10MethodInstance) mi.orig()).annotations();
 		X10Type type = (X10Type) mi.orig().returnType();
 		List<X10ClassType> typeAnnotations = type.defAnnotations();
 		return propagate(c, type, memberAnnotations, typeAnnotations);
 	}
-	public Expr checkNew(New n, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public Expr checkNew(New n, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		X10ConstructorInstance ci = (X10ConstructorInstance) n.constructorInstance();
 		List<X10ClassType> memberAnnotations = ((X10ConstructorInstance) ci.orig()).annotations();
 		X10Type type = (X10Type) ci.orig().container();
@@ -262,25 +262,25 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		return e.type(t);
 	}
 
-	public X10Type binaryPromote(Binary b, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public X10Type binaryPromote(Binary b, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return (X10Type) b.type();
 	}
 	
-	public X10Type unaryPromote(Unary u, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public X10Type unaryPromote(Unary u, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return (X10Type) u.type();
 	}
 	
-	public Expr checkCast(X10Type castType, Expr e, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public Expr checkCast(X10Type castType, Expr e, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		X10Type etype = (X10Type) e.type();
 		if (ts.isCastValid(etype, castType) && checkCastCoercion(castType, etype, context, ts, nf)) return e;
 		throw new SemanticException("Cannot cast " + e + "(" + etype + ") to " + castType + ".", e.position());
 	}
 
-	public boolean checkCastCoercion(X10Type toType, X10Type fromType, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public boolean checkCastCoercion(X10Type toType, X10Type fromType, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return true;
 	}
 	
-	public Expr checkImplicitCoercion(X10Type toType, Expr e, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public Expr checkImplicitCoercion(X10Type toType, Expr e, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		X10Type etype = (X10Type) e.type();
 		if (ts.isImplicitCastValid(etype, toType) && checkImplicitCoercion(toType, etype, context, ts, nf))
 			return e;
@@ -289,11 +289,11 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		throw new SemanticException("Cannot coerce " + e + " (" + etype + ") to " + toType + ".", e.position());
 	}
 
-	public boolean checkNumericCoercion(X10Type toType, Expr e, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public boolean checkNumericCoercion(X10Type toType, Expr e, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return true;
 	}
 	
-	public boolean checkImplicitCoercion(X10Type toType, X10Type fromType, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	public boolean checkImplicitCoercion(X10Type toType, X10Type fromType, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return true;
 	}
 	
@@ -304,10 +304,10 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		
 		public Node leaveCall(Node parent, Node old, Node n, NodeVisitor v) throws SemanticException {
 			if (n instanceof X10Cast) {
-				return rewriteCast((X10Cast) n, (X10Context) context, (X10TypeSystem) ts, (X10NodeFactory) nf);
+				return rewriteCast((X10Cast) n, (X10Context) context, (X10TypeSystem) ts, (NodeFactory) nf);
 			}
 			if (n instanceof X10Instanceof) {
-				return rewriteInstanceof((X10Instanceof) n, (X10Context) context, (X10TypeSystem) ts, (X10NodeFactory) nf);
+				return rewriteInstanceof((X10Instanceof) n, (X10Context) context, (X10TypeSystem) ts, (NodeFactory) nf);
 			}
 			return n;
 		}
@@ -325,11 +325,11 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		}
 	}
 	
-	protected Expr rewriteCast(X10Cast n, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	protected Expr rewriteCast(X10Cast n, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return n;
 	}
 	
-	protected Expr rewriteInstanceof(X10Instanceof e, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	protected Expr rewriteInstanceof(X10Instanceof e, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return e;
 	}
 	
@@ -353,7 +353,7 @@ public abstract class SimpleTypeAnnotationPlugin implements CompilerPlugin {
 		return cast;
 	}
 
-	protected Expr annotationCast(Expr e, X10Context context, X10TypeSystem ts, X10NodeFactory nf) throws SemanticException {
+	protected Expr annotationCast(Expr e, X10Context context, X10TypeSystem ts, NodeFactory nf) throws SemanticException {
 		return e;
 	}
 }

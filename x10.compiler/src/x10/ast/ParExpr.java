@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
 
 /** The immutable representation of the X10 expression ( Expr ).
  * The parentheses need to be propagated to the output; it is not correct for the parser

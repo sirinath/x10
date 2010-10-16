@@ -14,23 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassMember;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Receiver;
-import polyglot.ast.Special;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
@@ -49,10 +32,27 @@ import polyglot.types.Types;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Block;
+import x10.ast.Call;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.ConstructorDecl;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldAssign;
+import x10.ast.FieldDecl;
+import x10.ast.Formal;
+import x10.ast.Id;
+import x10.ast.MethodDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Receiver;
+import x10.ast.Special;
+import x10.ast.TypeNode;
 import x10.ast.TypeParamNode;
 import x10.ast.X10Call;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.types.ParameterType;
 import x10.types.X10ClassType;
 import x10.types.X10MethodDef;
@@ -67,7 +67,7 @@ public class InlineHelper extends ContextVisitor {
     private static final String BRIDGE_TO_SUPER_SUFFIX = "$S";
 
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
 
     private Type InlineType;
     public static final QName INLINE_ANNOTATION = QName.make("x10.compiler.Inline");
@@ -75,7 +75,7 @@ public class InlineHelper extends ContextVisitor {
     public InlineHelper(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
 
     @Override

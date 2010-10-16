@@ -9,8 +9,8 @@ package polyglot.visit;
 
 import java.io.IOException;
 
-import polyglot.ast.Node;
 import polyglot.util.CodeWriter;
+import x10.ast.Node;
 
 /**
  * A PrettyPrinter generates output code from the processed AST.

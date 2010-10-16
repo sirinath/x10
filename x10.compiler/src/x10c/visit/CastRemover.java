@@ -10,19 +10,19 @@
  */
 package x10c.visit;
 
-import polyglot.ast.Assign_c;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Assign_c;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.TypeNode;
 import x10.ast.X10Cast;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.types.ConstrainedType;
 import x10.types.X10TypeMixin;
 import x10.types.X10TypeSystem;
@@ -30,12 +30,12 @@ import x10.types.X10TypeSystem;
 public class CastRemover extends ContextVisitor {
     
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
     
     public CastRemover(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
     
     @Override

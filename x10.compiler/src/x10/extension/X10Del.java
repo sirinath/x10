@@ -11,7 +11,7 @@
 
 package x10.extension;
 
-import polyglot.ast.JL;
+import x10.ast.JL;
 
 public interface X10Del extends X10Ext, JL {
 

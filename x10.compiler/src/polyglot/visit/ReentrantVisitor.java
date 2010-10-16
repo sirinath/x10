@@ -3,9 +3,9 @@ package polyglot.visit;
 import java.util.HashMap;
 import java.util.Map;
 
-import polyglot.ast.Node;
 import polyglot.frontend.Job;
 import polyglot.util.InternalCompilerError;
+import x10.ast.Node;
 
 public class ReentrantVisitor extends NodeVisitor {
     protected Job job;

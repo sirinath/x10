@@ -11,11 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
-import polyglot.ast.NodeFactory;
 import polyglot.main.Options;
 import polyglot.types.TypeSystem;
 import polyglot.types.reflect.ClassFile;
 import polyglot.util.ErrorQueue;
+import x10.ast.NodeFactory;
 
 /**
  * <code>ExtensionInfo</code> is the main interface for defining language

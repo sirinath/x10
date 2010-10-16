@@ -1,9 +1,9 @@
 package polyglot.frontend;
 
-import polyglot.ast.Node;
 import polyglot.main.Report;
 import polyglot.util.InternalCompilerError;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Node;
 
 /**
  * This goal does not fail when errors were produced.

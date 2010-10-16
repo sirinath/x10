@@ -13,10 +13,10 @@ package x10.types;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
 import polyglot.types.Ref;
 import polyglot.types.Type;
 import polyglot.util.TypedList;
+import x10.ast.Expr;
 
 public interface AnnotatedType extends Type {
     public Type baseType();

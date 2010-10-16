@@ -17,15 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Assign_c;
-import polyglot.ast.Binary;
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Assign.Operator;
-import polyglot.ast.Receiver;
 import polyglot.types.ClassType;
 import polyglot.types.CodeDef;
 import polyglot.types.Context;
@@ -46,8 +37,17 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
+import x10.ast.Assign;
+import x10.ast.Assign_c;
+import x10.ast.Binary;
+import x10.ast.Call;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Receiver;
 import x10.ast.X10Binary_c;
 import x10.ast.X10New_c;
+import x10.ast.Assign.Operator;
 import x10.ast.X10New_c.MatcherMaker;
 import x10.ast.X10ProcedureCall;
 import x10.constraint.XFailure;
@@ -77,7 +77,7 @@ import x10.types.constraints.CConstraint;
 import x10.types.matcher.DumbMethodMatcher;
 import x10.types.matcher.Subst;
 import x10.visit.X10TypeChecker;
-import static polyglot.ast.Assign.*;
+import static x10.ast.Assign.*;
 
 /**
  * A set of static methods used by AST nodes to check types.

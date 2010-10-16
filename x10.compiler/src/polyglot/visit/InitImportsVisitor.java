@@ -8,9 +8,14 @@
 
 package polyglot.visit;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.*;
+import x10.ast.Import;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.PackageNode;
+import x10.ast.SourceFile;
 
 /** Visitor which traverses the AST constructing type objects. */
 public class InitImportsVisitor extends ErrorHandlingVisitor

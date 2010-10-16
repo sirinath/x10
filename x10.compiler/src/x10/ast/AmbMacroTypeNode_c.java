@@ -15,18 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.AmbExpr;
-import polyglot.ast.AmbTypeNode_c;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.Disamb;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Id;
-import polyglot.ast.Local;
-import polyglot.ast.NamedVariable;
-import polyglot.ast.Node;
-import polyglot.ast.Prefix;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
@@ -133,7 +121,7 @@ public class AmbMacroTypeNode_c extends AmbTypeNode_c implements AmbMacroTypeNod
     		LazyRef<Type> r = (LazyRef<Type>) typeRef();
     		TypeChecker tc = new X10TypeChecker(v.job(), v.typeSystem(), v.nodeFactory(), v.getMemo());
     		tc = (TypeChecker) tc.context(v.context().freeze());
-    		r.setResolver(new TypeCheckTypeGoal(parent, this, tc, r));
+    		r.setResolver(new X10TypeCheckTypeGoal(parent, this, tc, r));
     	}
     }
     public Node visitChildren(NodeVisitor v) {
@@ -152,7 +140,7 @@ public class AmbMacroTypeNode_c extends AmbTypeNode_c implements AmbMacroTypeNod
         Position pos = position();
         
         X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         X10Context c = (X10Context) tc.context();
         
         if (! c.inAnnotation())
@@ -219,7 +207,7 @@ public class AmbMacroTypeNode_c extends AmbTypeNode_c implements AmbMacroTypeNod
             MacroType mt = null;
             
             X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-            X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+            NodeFactory nf = (NodeFactory) tc.nodeFactory();
             X10Context c = (X10Context) tc.context();
 
             List<Type> typeArgs = new ArrayList<Type>(this.typeArgs.size());
@@ -285,7 +273,7 @@ public class AmbMacroTypeNode_c extends AmbTypeNode_c implements AmbMacroTypeNod
     
     public Node typeCheckOverride(Node parent, ContextVisitor tc) throws SemanticException {
         X10TypeSystem_c ts = (X10TypeSystem_c) tc.typeSystem();
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         
         AmbMacroTypeNode_c n = this;
         

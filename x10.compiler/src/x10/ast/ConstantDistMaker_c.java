@@ -14,11 +14,6 @@ package x10.ast;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.Receiver;
-import polyglot.ast.TypeNode;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.Position;
@@ -68,7 +63,7 @@ public class ConstantDistMaker_c extends X10Call_c implements ConstantDistMaker 
    /* public void prettyPrint(CodeWriter w, PrettyPrinter tr) {
     	Report.report(1, "ConstantDistMaker outputting " + arguments.get(0)
     			+ " " + name.id() + " " + arguments.get(1));
-		X10NodeFactory_c.getNodeFactory()
+		NodeFactory_c.getNodeFactory()
 		.Call(position(), (Expr) arguments.get(0), name, 
 				(Expr) arguments.get(1)).prettyPrint(w, tr);
     }*/

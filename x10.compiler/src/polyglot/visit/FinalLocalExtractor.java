@@ -16,10 +16,19 @@ package polyglot.visit;
 import java.util.HashSet;
 import java.util.Set;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.LocalDef;
 import polyglot.types.TypeSystem;
+import x10.ast.FlagsNode;
+import x10.ast.Formal;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.Unary;
 
 /**
  * This visitor converts non-final local variables into final local variables.

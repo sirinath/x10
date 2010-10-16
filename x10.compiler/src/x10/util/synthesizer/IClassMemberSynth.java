@@ -10,9 +10,9 @@
  */
 package x10.util.synthesizer;
 
-import polyglot.ast.ClassMember;
 import polyglot.types.MemberDef;
 import polyglot.types.SemanticException;
+import x10.ast.ClassMember;
 
 /**
  * A class member synthesizer could be added into the class.

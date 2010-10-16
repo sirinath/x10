@@ -20,22 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.Block;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassDecl_c;
-import polyglot.ast.ClassMember;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Expr;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.frontend.Source;
 import polyglot.types.ClassDef;
@@ -168,7 +152,7 @@ public class X10ClassDecl_c extends ClassDecl_c implements X10ClassDecl {
 		        return adtn.args(Collections.EMPTY_LIST);
 		    }
 		    // Remove the type args, value args, and constraint.
-		    X10AmbTypeNode atn = ((X10NodeFactory) Globals.NF()).X10AmbTypeNode(n.position(), adtn.prefix(), adtn.name());
+		    X10AmbTypeNode atn = ((NodeFactory) Globals.NF()).X10AmbTypeNode(n.position(), adtn.prefix(), adtn.name());
 		    return atn;
 		}
 		return n;
@@ -386,7 +370,7 @@ public class X10ClassDecl_c extends ClassDecl_c implements X10ClassDecl {
 //        if (def.isMember() && ! def.flags().isStatic()) {
 //            X10ClassDef outer = (X10ClassDef) Types.get(def.outer());
 //            while (outer != null) {
-//                X10NodeFactory nf = (X10NodeFactory) tb.nodeFactory();
+//                NodeFactory nf = (NodeFactory) tb.nodeFactory();
 //                for (int i = 0; i < outer.typeParameters().size(); i++) {
 //                    ParameterType pt = outer.typeParameters().get(i);
 //                    TypeParamNode tpn = nf.TypeParamNode(pt.position(), nf.Id(pt.position(), pt.name()));
@@ -540,9 +524,9 @@ public class X10ClassDecl_c extends ClassDecl_c implements X10ClassDecl {
     	if (! n.flags().flags().isAbstract())
     		return n;
     	
-    	Position CG = X10NodeFactory_c.compilerGenerated(body());
+    	Position CG = NodeFactory_c.compilerGenerated(body());
     	X10TypeSystem_c xts = (X10TypeSystem_c) tc.typeSystem();
-    	X10NodeFactory xnf = (X10NodeFactory) tc.nodeFactory();
+    	NodeFactory xnf = (NodeFactory) tc.nodeFactory();
     	X10ClassType targetType = (X10ClassType) n.classDef().asType();
     	List<X10ClassType> interfaces = xts.allImplementedInterfaces(targetType, false);
     	LinkedList<X10MethodInstance> candidates = new LinkedList<X10MethodInstance>();
@@ -916,8 +900,8 @@ public class X10ClassDecl_c extends ClassDecl_c implements X10ClassDecl {
     		TypeSystem ts, NodeFactory nf) throws SemanticException
     {
           X10ClassDef thisType = (X10ClassDef) _thisType;
-    	  Position pos = X10NodeFactory_c.compilerGenerated(body());
-    	  X10NodeFactory xnf = (X10NodeFactory) nf;
+    	  Position pos = NodeFactory_c.compilerGenerated(body());
+    	  NodeFactory xnf = (NodeFactory) nf;
           Block block = null;
 
           Ref<? extends Type> superType = thisType.superType();

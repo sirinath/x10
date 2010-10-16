@@ -1,9 +1,9 @@
 package polyglot.frontend;
 
-import polyglot.ast.Node;
 import polyglot.main.Report;
 import polyglot.util.*;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Node;
 
 
 public class VisitorGoal extends SourceGoal_c {

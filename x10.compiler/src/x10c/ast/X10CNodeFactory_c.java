@@ -13,16 +13,16 @@ package x10c.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Assign.Operator;
 import polyglot.types.Type;
 import polyglot.util.Position;
 import x10.ExtensionInfo;
-import x10.ast.X10NodeFactory_c;
+import x10.ast.Expr;
+import x10.ast.Id;
+import x10.ast.TypeNode;
+import x10.ast.NodeFactory_c;
+import x10.ast.Assign.Operator;
 
-public class X10CNodeFactory_c extends X10NodeFactory_c {
+public class X10CNodeFactory_c extends NodeFactory_c {
 
     public X10CNodeFactory_c(ExtensionInfo extInfo) {
         super(extInfo);

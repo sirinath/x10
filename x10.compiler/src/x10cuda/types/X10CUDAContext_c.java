@@ -20,11 +20,11 @@ package x10cuda.types;
 
 import java.util.ArrayList;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.LocalDecl;
 import polyglot.frontend.Job;
 import x10.ast.Closure_c;
+import x10.ast.Expr;
+import x10.ast.Formal;
+import x10.ast.LocalDecl;
 import x10cpp.X10CPPCompilerOptions;
 import x10cpp.types.X10CPPContext_c;
 import polyglot.types.Name;

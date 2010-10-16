@@ -13,17 +13,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Collections;
 
-import polyglot.ast.ClassMember;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.SourceFile;
-import polyglot.ast.TopLevelDecl;
-import polyglot.ast.TypeNode;
 import polyglot.main.Report;
 import polyglot.types.Flags;
 import polyglot.util.ErrorInfo;
 import polyglot.util.ErrorQueue;
 import polyglot.util.Position;
+import x10.ast.ClassMember;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.TopLevelDecl;
+import x10.ast.TypeNode;
 
 /**
  * A pass which runs a parser.  After parsing it stores the AST in the Job.

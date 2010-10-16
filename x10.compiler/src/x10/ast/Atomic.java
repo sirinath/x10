@@ -11,9 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.CompoundStmt;
-import polyglot.ast.Expr;
-import polyglot.ast.Stmt;
 
 /** The node constructed for the X10 construct atomic(P) {S}.
  * @author Christian Grothoff

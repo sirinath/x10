@@ -9,7 +9,7 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.*;
@@ -18,6 +18,26 @@ import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.visit.DataFlow.Item;
 import polyglot.visit.FlowGraph.EdgeKey;
+import x10.ast.Assign;
+import x10.ast.Block;
+import x10.ast.CompoundStmt;
+import x10.ast.Do;
+import x10.ast.Empty;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.For;
+import x10.ast.If;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.ProcedureCall;
+import x10.ast.Stmt;
+import x10.ast.Switch;
+import x10.ast.Term;
+import x10.ast.Unary;
+import x10.ast.While;
 
 /**
  * Visitor which performs dead code elimination.  (Note that "dead code" is not

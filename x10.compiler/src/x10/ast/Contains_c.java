@@ -14,10 +14,6 @@ package x10.ast;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Expr_c;
-import polyglot.ast.Node;
-import polyglot.ast.Term;
 import polyglot.types.ClassDef;
 import polyglot.types.Context;
 import polyglot.types.Name;

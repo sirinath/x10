@@ -10,11 +10,18 @@ package polyglot.visit;
 import java.io.IOException;
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.main.Report;
 import polyglot.main.Version;
 import polyglot.types.*;
 import polyglot.util.*;
+import x10.ast.ClassBody;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.FieldDecl;
+import x10.ast.IntLit;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /**
  * Visitor which serializes class objects and adds a field to the class

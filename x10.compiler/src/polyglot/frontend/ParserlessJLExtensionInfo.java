@@ -9,8 +9,6 @@ package polyglot.frontend;
 
 import java.io.Reader;
 
-import polyglot.ast.NodeFactory;
-import polyglot.ast.NodeFactory_c;
 import polyglot.main.Version;
 import polyglot.types.LoadedClassResolver;
 import polyglot.types.MemberClassResolver;
@@ -21,6 +19,8 @@ import polyglot.types.TypeSystem;
 import polyglot.types.TypeSystem_c;
 import polyglot.util.ErrorQueue;
 import polyglot.util.InternalCompilerError;
+import x10.ast.NodeFactory;
+import x10.ast.NodeFactory_c;
 
 /** This class implements most of the <code>ExtensionInfo</code> for the Java language.
  * It does not include a parser, however.  EPL-licensed extensions should extend this class

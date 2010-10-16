@@ -21,10 +21,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import polyglot.ast.SourceFile;
 import polyglot.frontend.Job;
 import polyglot.frontend.TargetFactory;
 import polyglot.util.SimpleCodeWriter;
+import x10.ast.SourceFile;
 import x10cpp.visit.X10CPPTranslator;
 
 /**

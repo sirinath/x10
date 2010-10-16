@@ -19,9 +19,6 @@ package x10.ast;
  * @author vj
  */
 
-import polyglot.ast.Id;
-import polyglot.ast.Local_c;
-import polyglot.ast.Node;
 import polyglot.types.CodeDef;
 import polyglot.types.LocalInstance;
 import polyglot.types.Name;

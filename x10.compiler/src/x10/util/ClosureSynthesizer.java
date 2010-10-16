@@ -15,9 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Formal;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.Flags;
@@ -31,9 +28,12 @@ import polyglot.types.Type;
 import polyglot.types.Types;
 import polyglot.types.MethodInstance;
 import polyglot.util.Position;
+import x10.ast.Block;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
-import x10.ast.X10NodeFactory;
+import x10.ast.Formal;
+import x10.ast.TypeNode;
+import x10.ast.NodeFactory;
 import x10.ast.X10Local_c;
 import x10.constraint.XName;
 import x10.constraint.XNameWrapper;
@@ -73,7 +73,7 @@ public class ClosureSynthesizer {
 	 * @param context
 	 * @return
 	 */
-	public static Closure makeClosure(X10TypeSystem_c xts, X10NodeFactory xnf, Position pos, Type retType, 
+	public static Closure makeClosure(X10TypeSystem_c xts, NodeFactory xnf, Position pos, Type retType, 
 			List<Formal> parms, Block body,
 			 X10Context context, List<X10ClassType> annotations) {
 	        List<Ref<? extends Type>> fTypes = new ArrayList<Ref<? extends Type>>();

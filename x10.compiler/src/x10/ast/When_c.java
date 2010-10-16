@@ -15,12 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import polyglot.ast.CompoundStmt;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
-import polyglot.ast.Term;
-import polyglot.ast.Stmt_c;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.util.CodeWriter;

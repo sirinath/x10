@@ -57,71 +57,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import polyglot.ast.AmbReceiver;
-import polyglot.ast.ArrayAccess_c;
-import polyglot.ast.ArrayInit_c;
-import polyglot.ast.Assert_c;
-import polyglot.ast.Assign_c;
-import polyglot.ast.Binary;
-import polyglot.ast.Binary_c;
-import polyglot.ast.Block;
-import polyglot.ast.Block_c;
-import polyglot.ast.BooleanLit_c;
-import polyglot.ast.Branch_c;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.Case_c;
-import polyglot.ast.Catch;
-import polyglot.ast.Catch_c;
-import polyglot.ast.CharLit_c;
-import polyglot.ast.ClassBody_c;
-import polyglot.ast.ClassDecl_c;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Conditional_c;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorDecl_c;
-import polyglot.ast.Do_c;
-import polyglot.ast.Empty_c;
-import polyglot.ast.Eval_c;
-import polyglot.ast.Expr;
-import polyglot.ast.FieldDecl_c;
-import polyglot.ast.Field_c;
-import polyglot.ast.FloatLit_c;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.For_c;
-import polyglot.ast.Formal;
-import polyglot.ast.Formal_c;
-import polyglot.ast.Id_c;
-import polyglot.ast.If_c;
-import polyglot.ast.Import_c;
-import polyglot.ast.Initializer_c;
-import polyglot.ast.IntLit;
-import polyglot.ast.IntLit_c;
-import polyglot.ast.Labeled_c;
-import polyglot.ast.LocalClassDecl_c;
-import polyglot.ast.LocalDecl_c;
-import polyglot.ast.Local_c;
-import polyglot.ast.MethodDecl_c;
-import polyglot.ast.New_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Node_c;
-import polyglot.ast.NullLit_c;
-import polyglot.ast.PackageNode_c;
-import polyglot.ast.Precedence;
-import polyglot.ast.Receiver;
-import polyglot.ast.Return_c;
-import polyglot.ast.Stmt;
-import polyglot.ast.StringLit_c;
-import polyglot.ast.SwitchBlock_c;
-import polyglot.ast.SwitchElement;
-import polyglot.ast.Switch_c;
-import polyglot.ast.Throw_c;
-import polyglot.ast.Try_c;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
-import polyglot.ast.Unary_c;
-import polyglot.ast.While_c;
 import polyglot.types.ClassType;
 import polyglot.types.CodeInstance;
 import polyglot.types.ConstructorInstance;
@@ -154,49 +89,7 @@ import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import polyglot.visit.Translator;
 import x10.Configuration;
-import x10.ast.AssignPropertyCall_c;
-import x10.ast.Async_c;
-import x10.ast.AtEach_c;
-import x10.ast.AtExpr_c;
-import x10.ast.AtStmt_c;
-import x10.ast.Atomic_c;
-import x10.ast.Closure;
-import x10.ast.ClosureCall;
-import x10.ast.ClosureCall_c;
-import x10.ast.Closure_c;
-import x10.ast.ConstantDistMaker_c;
-import x10.ast.Finish_c;
-import x10.ast.ForLoop_c;
-import x10.ast.Future_c;
-import x10.ast.Here_c;
-import x10.ast.LocalTypeDef_c;
-import x10.ast.Next_c;
-import x10.ast.ParExpr_c;
-import x10.ast.PropertyDecl;
-import x10.ast.PropertyDecl_c;
-import x10.ast.RegionMaker_c;
-import x10.ast.SettableAssign_c;
-import x10.ast.StmtExpr_c;
-import x10.ast.StmtSeq_c;
-import x10.ast.SubtypeTest_c;
-import x10.ast.Tuple_c;
-import x10.ast.TypeDecl_c;
-import x10.ast.When_c;
-import x10.ast.X10Binary_c;
-import x10.ast.X10Call_c;
-import x10.ast.X10CanonicalTypeNode;
-import x10.ast.X10CanonicalTypeNode_c;
-import x10.ast.X10Cast_c;
-import x10.ast.X10ClassDecl_c;
-import x10.ast.X10Field_c;
-import x10.ast.X10Formal;
-import x10.ast.X10Instanceof_c;
-import x10.ast.X10IntLit_c;
-import x10.ast.X10Local_c;
-import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
-import x10.ast.X10Special_c;
-import x10.ast.X10Unary_c;
+import x10.ast.*;
 import x10.extension.X10Ext;
 import x10.types.ClosureDef;
 import x10.types.ClosureInstance;
@@ -1231,7 +1124,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             }
 
             for (ClassMember member : members) {
-                if (! (member instanceof polyglot.ast.MethodDecl)){
+                if (! (member instanceof x10.ast.MethodDecl)){
                     n.printBlock(member, sw, tr);
                 }
             }
@@ -1278,8 +1171,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
             ClassMember prev = null;
             for (ClassMember member : members) {
-                if ((member instanceof polyglot.ast.CodeDecl)
-                        || (prev instanceof polyglot.ast.CodeDecl)) {
+                if ((member instanceof x10.ast.CodeDecl)
+                        || (prev instanceof x10.ast.CodeDecl)) {
                     h.newline(0);
                     sw.newline(0);
                 }
@@ -1342,7 +1235,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
             ClassMember prev = null;
             for (ClassMember member : members) {
-                if ((member instanceof polyglot.ast.CodeDecl) || (prev instanceof polyglot.ast.CodeDecl)) {
+                if ((member instanceof x10.ast.CodeDecl) || (prev instanceof x10.ast.CodeDecl)) {
                     h.newline(0);
                     sw.newline(0);
                 }
@@ -2813,7 +2706,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
 	private Expr cast(Expr a, Type fType) {
 		X10TypeSystem xts = (X10TypeSystem) tr.typeSystem();
-		X10NodeFactory nf = (X10NodeFactory) tr.nodeFactory();
+		NodeFactory nf = (NodeFactory) tr.nodeFactory();
 		Context context = tr.context();
 		if (!xts.typeDeepBaseEquals(fType, a.type(), context)) {
 			Position pos = a.position();
@@ -2875,7 +2768,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		    }
 		}
 
-		X10NodeFactory nf = (X10NodeFactory) tr.nodeFactory();
+		NodeFactory nf = (NodeFactory) tr.nodeFactory();
 		List<Expr> args = new ArrayList<Expr>();
 		int counter = 0;
 		for (Expr a : n.arguments()) {
@@ -3071,7 +2964,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    assert (clsType.flags().isInterface()); // have to dispatch to an interface type.
 	    if (!Configuration.CLOSURE_INLINING && !replicate) {
 	        // If not inlining closures, want to get rid of statement expressions here too.
-	        X10NodeFactory xnf = (X10NodeFactory) tr.nodeFactory();
+	        NodeFactory xnf = (NodeFactory) tr.nodeFactory();
 	        List<Expr> newArgs = new ArrayList<Expr>();
 	        newArgs.add(target);
 	        newArgs.addAll(args);
@@ -3692,7 +3585,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		        (xts.isX10Array(dType) || xts.isX10DistArray(dType) || xts.isDistribution(dType) || xts.isRegion(dType)))
 		{
 		    // TODO: move this to the Desugarer
-		    X10NodeFactory xnf = (X10NodeFactory) tr.nodeFactory();
+		    NodeFactory xnf = (NodeFactory) tr.nodeFactory();
 		    if (xts.isX10DistArray(dType)) {
 		        Position pos = domain.position();
 		        FieldInstance fDist = null;
@@ -4365,7 +4258,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	        // First check that we are within the right closure
 	        if (n.closureDef() != closure)
 	            return n;
-	        X10NodeFactory xnf = (X10NodeFactory) nf;
+	        NodeFactory xnf = (NodeFactory) nf;
 	        X10TypeSystem xts = (X10TypeSystem) tr.typeSystem();
 	        Position pos = n.position().markCompilerGenerated();
 	        List<Stmt> newBody = new ArrayList<Stmt>();
@@ -4391,7 +4284,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	        if (!context.currentCode().equals(closure))
 	            return n;
 	        assert ((ret == null) == (n.expr() == null));
-	        X10NodeFactory xnf = (X10NodeFactory) nf;
+	        NodeFactory xnf = (NodeFactory) nf;
 	        Position pos = n.position().markCompilerGenerated();
 	        List<Stmt> retSeq = new ArrayList<Stmt>();
 	        if (ret != null) {
@@ -4513,7 +4406,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
 		X10MethodInstance mi = c.closureInstance();
 		X10TypeSystem xts = (X10TypeSystem) tr.typeSystem();
-		X10NodeFactory nf = (X10NodeFactory) tr.nodeFactory();
+		NodeFactory nf = (NodeFactory) tr.nodeFactory();
 		List<Expr> args = new ArrayList<Expr>();
 		int counter = 0;
 		for (Expr a : c.arguments()) {

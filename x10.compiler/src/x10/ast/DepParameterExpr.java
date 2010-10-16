@@ -13,10 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Ambiguous;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.TypeNode;
 import polyglot.types.Ref;
 import x10.types.constraints.CConstraint;
 import x10.types.constraints.TypeConstraint;

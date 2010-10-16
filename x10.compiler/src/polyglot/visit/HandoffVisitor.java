@@ -7,9 +7,12 @@
 
 package polyglot.visit;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.ExtensionInfo;
 import polyglot.frontend.Job;
+import x10.ast.Node;
+import x10.ast.SourceCollection;
+import x10.ast.SourceFile;
 
 /**
  * This visitor adds jobs for <code>SourceFile</code>s in the AST to the

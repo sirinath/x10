@@ -14,18 +14,18 @@ package x10.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.AmbExpr;
-import polyglot.ast.CanonicalTypeNode_c;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Formal_c;
-import polyglot.ast.Id;
-import polyglot.ast.NodeFactory;
 import polyglot.parse.ParsedName;
 import polyglot.parse.VarDeclarator;
 import polyglot.types.Flags;
 import polyglot.types.TypeSystem;
 import polyglot.util.Position;
+import x10.ast.AmbExpr;
+import x10.ast.CanonicalTypeNode_c;
+import x10.ast.FlagsNode;
+import x10.ast.Formal;
+import x10.ast.Formal_c;
+import x10.ast.Id;
+import x10.ast.NodeFactory;
 import x10.parser.X10Parser.JPGPosition;
 
 /**

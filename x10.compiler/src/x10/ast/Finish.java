@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.CompoundStmt;
-import polyglot.ast.Stmt;
 
 /**
  * @author vj Dec 20, 2004

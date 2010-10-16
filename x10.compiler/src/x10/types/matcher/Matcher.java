@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import polyglot.ast.Expr;
 import polyglot.frontend.Globals;
 import polyglot.types.Context;
 import polyglot.types.LazyRef_c;
@@ -29,6 +28,7 @@ import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.Position;
 import x10.ast.ClosureCall;
+import x10.ast.Expr;
 import x10.constraint.XEQV;
 import x10.constraint.XFailure;
 import x10.constraint.XVar;

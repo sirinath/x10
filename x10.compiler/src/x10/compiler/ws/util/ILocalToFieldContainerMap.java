@@ -3,11 +3,11 @@ package x10.compiler.ws.util;
 import java.util.HashMap;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Stmt;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
+import x10.ast.Expr;
+import x10.ast.Stmt;
 
 /**
  * Originally, all locals are just locals

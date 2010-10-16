@@ -13,12 +13,6 @@ package x10.util.synthesizer;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.types.Flags;
 import polyglot.types.LocalDef;
 import polyglot.types.Name;
@@ -27,7 +21,13 @@ import polyglot.types.Type;
 import polyglot.types.Types;
 import polyglot.util.Position;
 import x10.ast.AnnotationNode;
-import x10.ast.X10NodeFactory;
+import x10.ast.Expr;
+import x10.ast.Id;
+import x10.ast.Local;
+import x10.ast.LocalDecl;
+import x10.ast.Stmt;
+import x10.ast.TypeNode;
+import x10.ast.NodeFactory;
 import x10.extension.X10Del;
 import x10.types.X10Context;
 
@@ -45,7 +45,7 @@ public class NewLocalVarSynth extends AbstractStateSynth implements IStmtSynth{
     Expr initializer;
     List<AnnotationNode> annotations;
     
-    public NewLocalVarSynth(X10NodeFactory xnf, X10Context xct, Position pos,
+    public NewLocalVarSynth(NodeFactory xnf, X10Context xct, Position pos,
                             Name name, Flags flags, Expr initializer, Type type, List<AnnotationNode> annotations) {
         super(xnf, xct, pos);
         this.name = name;
@@ -60,13 +60,13 @@ public class NewLocalVarSynth extends AbstractStateSynth implements IStmtSynth{
         }
     }
 
-    public NewLocalVarSynth(X10NodeFactory xnf, X10Context xct, Position pos,
+    public NewLocalVarSynth(NodeFactory xnf, X10Context xct, Position pos,
                             Type type) {
         this(xnf, xct, pos, xct.getNewVarName(), 
              Flags.NONE, null, type, new ArrayList<AnnotationNode>());
     }
     
-    public NewLocalVarSynth(X10NodeFactory xnf, X10Context xct, Position pos,
+    public NewLocalVarSynth(NodeFactory xnf, X10Context xct, Position pos,
                             Flags flags, Expr initializer) {
         this(xnf, xct, pos, xct.getNewVarName(), 
              flags, initializer, initializer.type(), new ArrayList<AnnotationNode>());

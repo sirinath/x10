@@ -4,14 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.New;
-import polyglot.ast.Return;
-import polyglot.ast.Special;
-import polyglot.ast.Stmt;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
@@ -21,8 +13,16 @@ import polyglot.types.Name;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.Pair;
+import x10.ast.Block;
+import x10.ast.Expr;
+import x10.ast.Formal;
+import x10.ast.MethodDecl;
+import x10.ast.New;
+import x10.ast.Return;
+import x10.ast.Special;
+import x10.ast.Stmt;
 import x10.ast.X10MethodDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.compiler.ws.WSCodeGenerator;
 import x10.compiler.ws.WSTransformState;
 import x10.compiler.ws.util.TransCodes;
@@ -58,12 +58,12 @@ public class WSMethodFrameClassGen extends WSRegularFrameClassGen {
     protected final boolean isMain;
     
 
-    public WSMethodFrameClassGen(Job job, X10NodeFactory xnf, X10Context xct,
+    public WSMethodFrameClassGen(Job job, NodeFactory xnf, X10Context xct,
                                   MethodDef methodDef, MethodDecl methodDecl, WSTransformState wts) {
         this(job, xnf, xct, methodDef, methodDecl, wts,
                 X10PrettyPrinterVisitor.isMainMethodInstance(methodDef.asInstance(), xct));
     }
-    public WSMethodFrameClassGen(Job job, X10NodeFactory xnf, X10Context xct,
+    public WSMethodFrameClassGen(Job job, NodeFactory xnf, X10Context xct,
                                   MethodDef methodDef, MethodDecl methodDecl, WSTransformState wts,
                                   boolean isMain) {
     

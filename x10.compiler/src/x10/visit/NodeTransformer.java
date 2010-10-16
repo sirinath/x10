@@ -11,22 +11,22 @@
 
 package x10.visit;
 
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.Special;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.visit.ContextVisitor;
 import x10.ast.AssignPropertyCall;
+import x10.ast.Call;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldAssign;
+import x10.ast.Local;
+import x10.ast.LocalDecl;
+import x10.ast.New;
+import x10.ast.Node;
 import x10.ast.SettableAssign;
+import x10.ast.Special;
+import x10.ast.Stmt;
+import x10.ast.TypeNode;
 import x10.ast.TypeParamNode;
 import x10.ast.X10ClassDecl;
 import x10.ast.X10ConstructorCall;

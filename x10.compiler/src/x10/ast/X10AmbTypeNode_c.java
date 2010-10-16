@@ -13,15 +13,6 @@ package x10.ast;
 
 import java.util.Collections;
 
-import polyglot.ast.AmbTypeNode_c;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.Disamb;
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.PackageNode;
-import polyglot.ast.Prefix;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Goal;
 import polyglot.types.Context;
@@ -66,7 +57,7 @@ public class X10AmbTypeNode_c extends AmbTypeNode_c implements X10AmbTypeNode, A
       Position pos = position();
 
       X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-      X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+      NodeFactory nf = (NodeFactory) tc.nodeFactory();
       X10Context c = (X10Context) tc.context();
 
       if (! c.inAnnotation())
@@ -111,7 +102,7 @@ public class X10AmbTypeNode_c extends AmbTypeNode_c implements X10AmbTypeNode, A
       ContextVisitor tc = ar;
     
       X10TypeSystem_c ts = (X10TypeSystem_c) tc.typeSystem();
-      X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+      NodeFactory nf = (NodeFactory) tc.nodeFactory();
     
       try {
 	  TypeNode tn = disambiguateAnnotation(tc);
@@ -214,7 +205,7 @@ public class X10AmbTypeNode_c extends AmbTypeNode_c implements X10AmbTypeNode, A
   		LazyRef<Type> r = (LazyRef<Type>) typeRef();
   		TypeChecker tc = new X10TypeChecker(v.job(), v.typeSystem(), v.nodeFactory(), v.getMemo());
   		tc = (TypeChecker) tc.context(v.context().freeze());
-  		r.setResolver(new TypeCheckTypeGoal(parent, this, tc, r));
+  		r.setResolver(new X10TypeCheckTypeGoal(parent, this, tc, r));
   	}
   }
   static TypeNode postprocess(CanonicalTypeNode result, TypeNode n, ContextVisitor childtc) 

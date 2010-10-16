@@ -10,8 +10,8 @@
  */
 package x10.util.synthesizer;
 
-import polyglot.ast.Stmt;
 import polyglot.types.SemanticException;
+import x10.ast.Stmt;
 
 /**
  * Interface for any synthesizers that can generate a statement

@@ -24,30 +24,30 @@ import java.util.Set;
 
 import org.w3c.dom.Element;
 
-import polyglot.ast.ArrayInit;
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Branch;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.Conditional;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.Empty;
-import polyglot.ast.Expr;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.FloatLit;
-import polyglot.ast.Id;
-import polyglot.ast.Import;
-import polyglot.ast.IntLit;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.NewArray;
-import polyglot.ast.Node;
-import polyglot.ast.PackageNode;
-import polyglot.ast.Precedence;
-import polyglot.ast.SourceFile;
-import polyglot.ast.Special;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import x10.ast.AnnotationNode;
 import x10.ast.AssignPropertyBody;
 import x10.ast.AssignPropertyCall;
@@ -61,7 +61,7 @@ import x10.ast.ForLoop;
 import x10.ast.FutureNode;
 import x10.ast.NullableNode;
 import x10.ast.X10DelFactory_c;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Special;
 import x10.dom.DomReader.LazyTypeObject;
 import x10.extension.X10Del;
@@ -135,10 +135,10 @@ import polyglot.visit.InitImportsVisitor;
 public class X10Dom {
 
 	X10TypeSystem ts;
-	X10NodeFactory nf;
+	NodeFactory nf;
 	Map<String,Lens> tagMap;
 
-	public X10Dom(X10TypeSystem ts, X10NodeFactory nf) {
+	public X10Dom(X10TypeSystem ts, NodeFactory nf) {
 		this.ts = ts;
 		this.nf = nf;
 	}

@@ -11,7 +11,6 @@
 
 package x10cuda;
 
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Compiler;
 import polyglot.frontend.Goal;
 import polyglot.frontend.Scheduler;
@@ -19,7 +18,8 @@ import polyglot.main.Options;
 import polyglot.types.TypeSystem;
 import polyglot.util.ErrorQueue;
 import polyglot.visit.PostCompiled;
-import x10.ast.X10NodeFactory_c;
+import x10.ast.NodeFactory;
+import x10.ast.NodeFactory_c;
 import x10cpp.X10CPPCompilerOptions;
 import x10cpp.ExtensionInfo.X10CPPScheduler;
 import x10cpp.ast.X10CPPExtFactory_c;
@@ -36,7 +36,7 @@ import x10cuda.visit.CUDACodeGenerator;
 public class ExtensionInfo extends x10cpp.ExtensionInfo {
 
 	protected NodeFactory createNodeFactory() {
-		return new X10NodeFactory_c(this, new X10CPPExtFactory_c(), new X10CUDADelFactory_c()) { };
+		return new NodeFactory_c(this, new X10CPPExtFactory_c(), new X10CUDADelFactory_c()) { };
 	}
 
     protected TypeSystem createTypeSystem() {

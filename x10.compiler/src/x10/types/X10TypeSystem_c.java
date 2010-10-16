@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Id;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Goal;
@@ -78,8 +75,11 @@ import polyglot.util.Predicate2;
 import polyglot.util.TransformingList;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.TypeBuilder;
-import x10.ast.X10NodeFactory;
-import x10.ast.X10NodeFactory_c;
+import x10.ast.Binary;
+import x10.ast.Id;
+import x10.ast.TypeNode;
+import x10.ast.NodeFactory;
+import x10.ast.NodeFactory_c;
 import x10.constraint.XEQV;
 import x10.constraint.XFailure;
 import x10.constraint.XField;
@@ -684,7 +684,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return createFakeField(unknownClassDef().asType(), Flags.PUBLIC.Static(), name, error);
     }
     public X10FieldInstance createFakeField(ClassType container, Flags flags, Name name, SemanticException error) {
-        Position pos = X10NodeFactory_c.compilerGenerated(container);
+        Position pos = NodeFactory_c.compilerGenerated(container);
         Type type = unknownType(pos);
         XVar thisVar = XTerms.makeEQV();
         List<Ref<? extends Type>> excTypes = Collections.emptyList();
@@ -700,7 +700,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return createFakeMethod(unknownClassDef().asType(), Flags.PUBLIC.Static(), name, typeArgs, argTypes, error);
     }
     public X10MethodInstance createFakeMethod(ClassType container, Flags flags, Name name, List<Type> typeArgs, List<Type> argTypes, SemanticException error) {
-        Position pos = X10NodeFactory_c.compilerGenerated(container);
+        Position pos = NodeFactory_c.compilerGenerated(container);
         Type returnType = unknownType(pos);
         List<Ref<? extends Type>> args = new ArrayList<Ref<? extends Type>>();
         List<LocalDef> formalNames = new ArrayList<LocalDef>();
@@ -726,7 +726,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return createFakeConstructor(typeForNameSilent(containerName).typeArguments(typeArgs), flags, argTypes, error);
     }
     public X10ConstructorInstance createFakeConstructor(ClassType container, Flags flags, List<Type> argTypes, SemanticException error) {
-        Position pos = X10NodeFactory_c.compilerGenerated(container);
+        Position pos = NodeFactory_c.compilerGenerated(container);
         List<Ref<? extends Type>> args = new ArrayList<Ref<? extends Type>>();
         List<LocalDef> formalNames = new ArrayList<LocalDef>();
         int i = 0;
@@ -1833,7 +1833,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
     }
 
     public VarDef createSelf(Type t) {
-        VarDef v = localDef(X10NodeFactory_c.compilerGenerated(t), Flags.PUBLIC, Types.ref(t), Name.make("self"));
+        VarDef v = localDef(NodeFactory_c.compilerGenerated(t), Flags.PUBLIC, Types.ref(t), Name.make("self"));
         return v;
     }
 
@@ -2249,7 +2249,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return X10TypeMixin.xclause(X10TypeMixin.baseType(t), c);
     }
 
-    public Type performUnaryOperation(Type t, Type a, polyglot.ast.Unary.Operator op) {
+    public Type performUnaryOperation(Type t, Type a, x10.ast.Unary.Operator op) {
         CConstraint ca = X10TypeMixin.realX(a);
         X10TypeSystem xts = (X10TypeSystem) t.typeSystem();
         CConstraint c = xts.xtypeTranslator().unaryOp(op, ca);
@@ -2507,7 +2507,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
 	   
    }
    public void existsStructWithName(Id name, ContextVisitor tc) throws SemanticException {
- 	  X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+ 	  NodeFactory nf = (NodeFactory) tc.nodeFactory();
 			X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 			Context c = tc.context();
  	  TypeBuilder tb = new TypeBuilder(tc.job(),  ts, nf);

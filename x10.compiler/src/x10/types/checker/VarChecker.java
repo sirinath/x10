@@ -3,14 +3,14 @@
  */
 package x10.types.checker;
 
-import polyglot.ast.Field;
-import polyglot.ast.NamedVariable;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.visit.ContextVisitor;
+import x10.ast.Field;
+import x10.ast.NamedVariable;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.errors.Errors;
 import x10.types.X10TypeEnv_c;
 

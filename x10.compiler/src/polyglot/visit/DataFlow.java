@@ -10,13 +10,21 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Globals;
 import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.*;
 import polyglot.util.*;
 import polyglot.visit.FlowGraph.*;
+import x10.ast.Binary;
+import x10.ast.CodeDecl;
+import x10.ast.CodeNode;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Term;
+import x10.ast.Unary;
 
 /**
  * Abstract dataflow Visitor, to allow simple dataflow equations to be easily

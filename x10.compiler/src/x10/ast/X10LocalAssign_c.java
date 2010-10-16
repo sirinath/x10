@@ -13,13 +13,6 @@ package x10.ast;
 
 import java.util.Collections;
 
-import polyglot.ast.Expr;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.LocalAssign_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.types.LocalInstance;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;
@@ -31,7 +24,7 @@ import x10.types.checker.Checker;
 
 public class X10LocalAssign_c extends LocalAssign_c {
 
-    public X10LocalAssign_c(X10NodeFactory nf, Position pos, Local left, Operator op, Expr right) {
+    public X10LocalAssign_c(NodeFactory nf, Position pos, Local left, Operator op, Expr right) {
         super(nf, pos, left, op, right);
     }
 

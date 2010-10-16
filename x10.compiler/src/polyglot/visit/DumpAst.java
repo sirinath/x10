@@ -9,9 +9,9 @@ package polyglot.visit;
 
 import java.io.*;
 
-import polyglot.ast.Node;
 import polyglot.frontend.Compiler;
 import polyglot.util.CodeWriter;
+import x10.ast.Node;
 
 
 /** Visitor which dumps the AST to a file. */

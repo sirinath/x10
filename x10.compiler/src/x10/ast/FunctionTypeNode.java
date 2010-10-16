@@ -13,8 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Formal;
-import polyglot.ast.TypeNode;
 
 public interface FunctionTypeNode extends TypeNode, Guarded {
 

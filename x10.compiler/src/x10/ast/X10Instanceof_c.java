@@ -11,10 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Instanceof_c;
-import polyglot.ast.Node;
-import polyglot.ast.TypeNode;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;

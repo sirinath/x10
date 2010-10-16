@@ -7,9 +7,9 @@
 
 package polyglot.visit;
 
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.*;
 import polyglot.types.TypeSystem;
+import x10.ast.NodeFactory;
 
 /** Visitor which performs type checking on the AST. */
 public class TypeComputer extends ContextVisitor

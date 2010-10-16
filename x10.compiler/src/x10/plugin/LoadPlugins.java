@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.StringTokenizer;
 
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.AbstractGoal_c;
 import polyglot.frontend.FileSource;
 import polyglot.frontend.Globals;
@@ -32,6 +31,7 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.QuotedStringTokenizer;
 import x10.Configuration;
 import x10.ExtensionInfo;
+import x10.ast.NodeFactory;
 
 public class LoadPlugins extends AbstractGoal_c {
 	private static final long serialVersionUID = -7328993239190636933L;

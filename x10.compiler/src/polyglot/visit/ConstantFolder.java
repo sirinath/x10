@@ -7,9 +7,15 @@
 
 package polyglot.visit;
 
-import polyglot.ast.*;
+
 import polyglot.types.TypeSystem;
 import polyglot.util.Position;
+import x10.ast.Binary;
+import x10.ast.Expr;
+import x10.ast.FloatLit;
+import x10.ast.IntLit;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which performs constant folding. */
 public class ConstantFolder extends NodeVisitor

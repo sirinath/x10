@@ -11,15 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Assign_c;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldAssign_c;
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.Receiver;
-import polyglot.ast.Assign.Operator;
 import polyglot.types.FieldInstance;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
@@ -36,11 +27,12 @@ import x10.types.X10TypeMixin;
 import x10.types.checker.Checker;
 import x10.types.checker.PlaceChecker;
 import x10.visit.X10TypeChecker;
+import x10.ast.Assign.Operator;
 import x10.errors.Errors;
 
 public class X10FieldAssign_c extends FieldAssign_c {
     
-    public X10FieldAssign_c(X10NodeFactory nf, Position pos, Receiver target, Id name, Operator op, Expr right) {
+    public X10FieldAssign_c(NodeFactory nf, Position pos, Receiver target, Id name, Operator op, Expr right) {
         super(nf, pos, target, name, op, right);
     }
     

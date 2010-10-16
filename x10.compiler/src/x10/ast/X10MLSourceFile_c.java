@@ -13,10 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Import;
-import polyglot.ast.PackageNode;
-import polyglot.ast.SourceFile_c;
-import polyglot.ast.TopLevelDecl;
 import polyglot.util.Position;
 
 /** Subclass of SourceFile_c that adds the X10MLSourceFile marker interface.

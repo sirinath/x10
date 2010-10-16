@@ -11,10 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.AmbReceiver_c;
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.Prefix;
 import polyglot.types.SemanticException;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;

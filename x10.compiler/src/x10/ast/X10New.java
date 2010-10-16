@@ -13,8 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.New;
-import polyglot.ast.TypeNode;
 
 public interface X10New extends New, X10ProcedureCall {
 	List<TypeNode> typeArguments();

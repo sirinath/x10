@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
 
 /** An immutable representation of the range expression lb .. ub : stride.
  * (1) Stride defaults to 1.

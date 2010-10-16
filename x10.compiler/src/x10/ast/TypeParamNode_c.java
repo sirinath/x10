@@ -13,10 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.Term;
-import polyglot.ast.Term_c;
 import polyglot.types.Context;
 import polyglot.types.Def;
 import polyglot.types.Named;

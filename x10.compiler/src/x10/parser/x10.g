@@ -38,42 +38,42 @@
 
     import polyglot.types.QName;
     import polyglot.types.Name;
-    import polyglot.ast.AmbTypeNode;
-    import polyglot.ast.AmbExpr;
-    import polyglot.ast.Assign;
-    import polyglot.ast.Binary;
-    import polyglot.ast.Block;
-    import polyglot.ast.Case;
-    import polyglot.ast.Catch;
-    import polyglot.ast.ClassBody;
-    import polyglot.ast.ClassDecl;
-    import polyglot.ast.ClassMember;
-    import polyglot.ast.ConstructorCall;
-    import polyglot.ast.ConstructorDecl;
-    import polyglot.ast.Eval;
-    import polyglot.ast.Expr;
-    import polyglot.ast.Field;
-    import polyglot.ast.FloatLit;
-    import polyglot.ast.ForInit;
-    import polyglot.ast.ForUpdate;
-    import polyglot.ast.Formal;
-    import polyglot.ast.Id;
-    import polyglot.ast.Import;
-    import polyglot.ast.IntLit;
-    import polyglot.ast.LocalDecl;
-    import polyglot.ast.MethodDecl;
-    import polyglot.ast.FieldDecl;
-    import polyglot.ast.Node;
-    import polyglot.ast.NodeFactory;
-    import polyglot.ast.PackageNode;
-    import polyglot.ast.ProcedureDecl;
-    import polyglot.ast.SourceFile;
-    import polyglot.ast.Stmt;
-    import polyglot.ast.SwitchElement;
-    import polyglot.ast.TopLevelDecl;
-    import polyglot.ast.TypeNode;
-    import polyglot.ast.Unary;
-    import polyglot.ast.FlagsNode;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     import polyglot.parse.ParsedName;
     import x10.ast.AddFlags;
     import x10.ast.AnnotationNode;
@@ -91,7 +91,7 @@
     import x10.ast.ConstantDistMaker;
     import x10.ast.TypeDecl;
     import x10.ast.TypeParamNode;
-    import x10.ast.X10NodeFactory;
+    import x10.ast.NodeFactory;
     import x10.types.ParameterType;
     import x10.types.X10TypeSystem;
     import x10.types.X10TypeSystem_c;
@@ -100,7 +100,7 @@
     import x10.ast.X10Binary_c;
     import x10.ast.X10Unary_c;
     import x10.ast.X10IntLit_c;
-    import x10.ast.X10NodeFactory_c;
+    import x10.ast.NodeFactory_c;
     import x10.extension.X10Ext;
     import polyglot.frontend.FileSource;
     import polyglot.frontend.Parser;
@@ -314,14 +314,14 @@
         //#line $next_line "$input_file$"
         private ErrorQueue eq;
         private X10TypeSystem ts;
-        private X10NodeFactory nf;
+        private NodeFactory nf;
         private FileSource source;
         private boolean unrecoverableSyntaxError = false;
 
         public void initialize(TypeSystem t, NodeFactory n, FileSource source, ErrorQueue q)
         {
             this.ts = (X10TypeSystem) t;
-            this.nf = (X10NodeFactory) n;
+            this.nf = (NodeFactory) n;
             this.source = source;
             this.eq = q;
         }
@@ -330,7 +330,7 @@
         {
             this(lexStream);
             initialize((X10TypeSystem) t,
-                       (X10NodeFactory) n,
+                       (NodeFactory) n,
                        source,
                        q);
             prsStream.setMessageHandler(new MessageHandler(q));
@@ -1922,13 +1922,13 @@
        ExistentialList ::= FormalParameter
         /.$BeginJava
                     List<Formal> l = new TypedList<Formal>(new LinkedList<Formal>(), Formal.class, false);
-                    l.add(FormalParameter.flags(nf.FlagsNode(X10NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
+                    l.add(FormalParameter.flags(nf.FlagsNode(NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
                     setResult(l);
           $EndJava
         ./
                           | ExistentialList ; FormalParameter
         /.$BeginJava
-                    ExistentialList.add(FormalParameter.flags(nf.FlagsNode(X10NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
+                    ExistentialList.add(FormalParameter.flags(nf.FlagsNode(NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
           $EndJava
         ./
 
@@ -4160,7 +4160,7 @@
     
     Primary ::= here
         /.$BeginJava
-                    setResult(((X10NodeFactory) nf).Here(pos()));
+                    setResult(((NodeFactory) nf).Here(pos()));
           $EndJava
         ./
               | '[' ArgumentListopt ']'

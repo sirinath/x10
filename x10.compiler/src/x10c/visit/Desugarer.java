@@ -14,12 +14,6 @@ package x10c.visit;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.Expr;
-import polyglot.ast.IntLit;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Unary.Operator;
 import polyglot.frontend.Job;
 import polyglot.types.Name;
 import polyglot.types.QName;
@@ -27,11 +21,17 @@ import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.util.Position;
+import x10.ast.Assign;
+import x10.ast.CanonicalTypeNode;
+import x10.ast.Expr;
+import x10.ast.IntLit;
+import x10.ast.NodeFactory;
 import x10.ast.SettableAssign;
 import x10.ast.SettableAssign_c;
 import x10.ast.X10Call;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Unary_c;
+import x10.ast.Unary.Operator;
 import x10.types.X10MethodInstance;
 import x10.types.X10TypeSystem;
 import x10.types.checker.Converter;
@@ -41,11 +41,11 @@ import x10.types.checker.Converter;
  */
 public class Desugarer extends x10.visit.Desugarer {
     private X10TypeSystem xts;
-    private X10NodeFactory xnf;
+    private NodeFactory xnf;
     public Desugarer(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         this.xts = (X10TypeSystem) ts;
-        this.xnf = (X10NodeFactory) nf;
+        this.xnf = (NodeFactory) nf;
     }
 
     @Override

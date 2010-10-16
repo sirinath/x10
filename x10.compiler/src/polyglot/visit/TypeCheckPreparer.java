@@ -9,11 +9,11 @@ package polyglot.visit;
 
 import java.util.Map;
 
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.*;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which performs type checking on the AST. */
 public class TypeCheckPreparer extends ContextVisitor

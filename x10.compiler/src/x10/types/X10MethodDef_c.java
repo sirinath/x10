@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.TypeNode;
 import polyglot.types.Flags;
 import polyglot.types.LocalDef;
 import polyglot.types.MethodDef_c;
@@ -34,6 +33,7 @@ import polyglot.types.UnknownType;
 import polyglot.util.CollectionUtil;
 import polyglot.util.Position;
 import polyglot.util.TypedList;
+import x10.ast.TypeNode;
 import x10.constraint.XConstraint;
 import x10.constraint.XFailure;
 import x10.constraint.XVar;

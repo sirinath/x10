@@ -2,10 +2,6 @@ package x10.types.checker;
 
 import java.util.List;
 
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Receiver;
 import polyglot.types.ClassDef;
 import polyglot.types.Context;
 import polyglot.types.FieldDef;
@@ -22,6 +18,10 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import x10.Configuration;
+import x10.ast.Call;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.Receiver;
 import x10.ast.X10Call;
 import x10.ast.X10Call_c;
 import x10.ast.X10CanonicalTypeNode_c;

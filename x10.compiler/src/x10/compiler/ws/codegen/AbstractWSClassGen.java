@@ -7,28 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.ClassBody;
-import polyglot.ast.Do;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.For;
-import polyglot.ast.Formal;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Loop;
-import polyglot.ast.Node;
-import polyglot.ast.Receiver;
-import polyglot.ast.Return;
-import polyglot.ast.Stmt;
-import polyglot.ast.Switch;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
-import polyglot.ast.While;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
@@ -47,13 +25,35 @@ import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.visit.NodeVisitor;
 import x10.ast.AnnotationNode;
+import x10.ast.Assign;
 import x10.ast.Async;
+import x10.ast.Binary;
+import x10.ast.Block;
+import x10.ast.Call;
+import x10.ast.ClassBody;
 import x10.ast.Closure;
+import x10.ast.Do;
+import x10.ast.Eval;
+import x10.ast.Expr;
 import x10.ast.Finish;
+import x10.ast.For;
+import x10.ast.Formal;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.Loop;
+import x10.ast.Node;
+import x10.ast.Receiver;
+import x10.ast.Return;
+import x10.ast.Stmt;
+import x10.ast.Switch;
+import x10.ast.Term;
+import x10.ast.TypeNode;
 import x10.ast.When;
+import x10.ast.While;
 import x10.ast.X10Call;
 import x10.ast.X10ClassDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.extension.X10Ext_c;
 import x10.compiler.ws.WSCodeGenerator;
 import x10.compiler.ws.WSTransformState;
@@ -112,7 +112,7 @@ public abstract class AbstractWSClassGen implements ILocalToFieldContainerMap{
     static final protected Name REDO = Name.make("redo");
 
     final protected Job job;
-    final protected X10NodeFactory xnf;
+    final protected NodeFactory xnf;
     final protected X10TypeSystem xts;
     final protected X10Context xct;
     final protected WSTransformState wts;
@@ -138,7 +138,7 @@ public abstract class AbstractWSClassGen implements ILocalToFieldContainerMap{
     private AbstractWSClassGen(Job job, X10Context xct, WSTransformState wts, AbstractWSClassGen up,
             String className, ClassType frameType, int frameDepth, Flags flags, ClassDef outer, Stmt stmt) {
         this.job = job;
-        xnf = (X10NodeFactory) job.extensionInfo().nodeFactory();
+        xnf = (NodeFactory) job.extensionInfo().nodeFactory();
         xts = (X10TypeSystem) job.extensionInfo().typeSystem();
         synth = new Synthesizer(xnf, xts);
         this.xct = xct;
@@ -180,7 +180,7 @@ public abstract class AbstractWSClassGen implements ILocalToFieldContainerMap{
     }
 
     // method frames
-    protected AbstractWSClassGen(Job job, X10NodeFactory xnf, X10Context xct, WSTransformState wts,
+    protected AbstractWSClassGen(Job job, NodeFactory xnf, X10Context xct, WSTransformState wts,
             String className, ClassType frameType, Flags flags, ClassDef outer, Stmt stmt) {
         this(job, xct, wts, null, className, frameType, 0, flags, outer, stmt);
     }
@@ -301,7 +301,7 @@ public abstract class AbstractWSClassGen implements ILocalToFieldContainerMap{
         return className;
     }
     
-    public X10NodeFactory getX10NodeFactory() {
+    public NodeFactory getNodeFactory() {
         return xnf;
     }
 

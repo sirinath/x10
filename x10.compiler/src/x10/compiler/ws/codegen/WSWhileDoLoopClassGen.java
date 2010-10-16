@@ -1,14 +1,14 @@
 package x10.compiler.ws.codegen;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Block;
-import polyglot.ast.Do;
-import polyglot.ast.Expr;
-import polyglot.ast.Loop;
-import polyglot.ast.Stmt;
-import polyglot.ast.Unary;
-import polyglot.ast.While;
 import polyglot.types.SemanticException;
+import x10.ast.Assign;
+import x10.ast.Block;
+import x10.ast.Do;
+import x10.ast.Expr;
+import x10.ast.Loop;
+import x10.ast.Stmt;
+import x10.ast.Unary;
+import x10.ast.While;
 import x10.compiler.ws.util.AddIndirectLocalDeclareVisitor;
 import x10.compiler.ws.util.ClosureDefReinstantiator;
 import x10.compiler.ws.util.Triple;

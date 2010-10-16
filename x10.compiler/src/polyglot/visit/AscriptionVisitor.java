@@ -7,9 +7,14 @@
 
 package polyglot.visit;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.Job;
 import polyglot.types.*;
+import x10.ast.Expr;
+import x10.ast.LocalAssign;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Unary;
 
 /** Visitor which allows type information to be utilized to perform AST 
     modifications.  

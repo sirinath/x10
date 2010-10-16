@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.FieldDecl;
 
 public interface PropertyDecl extends FieldDecl {
 }

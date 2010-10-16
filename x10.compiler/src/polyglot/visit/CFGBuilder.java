@@ -10,11 +10,23 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.main.Report;
 import polyglot.types.*;
 import polyglot.util.*;
 import x10.ast.Async;
+import x10.ast.Block;
+import x10.ast.Branch;
+import x10.ast.Catch;
+import x10.ast.CodeNode;
+import x10.ast.CompoundStmt;
+import x10.ast.Labeled;
+import x10.ast.Loop;
+import x10.ast.Return;
+import x10.ast.Stmt;
+import x10.ast.Switch;
+import x10.ast.Term;
+import x10.ast.Try;
 
 /**
  * Class used to construct a CFG.

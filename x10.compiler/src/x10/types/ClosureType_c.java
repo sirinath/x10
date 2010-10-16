@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Expr;
 import polyglot.frontend.Job;
 import polyglot.frontend.Source;
 import polyglot.types.ClassDef;
@@ -46,6 +45,7 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.util.Transformation;
 import polyglot.util.TransformingList;
+import x10.ast.Expr;
 import x10.constraint.XConstraint;
 
 /**

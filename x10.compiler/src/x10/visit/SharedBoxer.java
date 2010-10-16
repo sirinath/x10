@@ -13,13 +13,6 @@ package x10.visit;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Binary.Operator;
 import polyglot.frontend.Job;
 import polyglot.types.Flags;
 import polyglot.types.Name;
@@ -32,10 +25,17 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Call;
+import x10.ast.Expr;
+import x10.ast.Local;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.ast.X10LocalAssign_c;
 import x10.ast.X10LocalDecl_c;
 import x10.ast.X10Local_c;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
+import x10.ast.Binary.Operator;
 import x10.types.X10ClassType;
 import x10.types.X10Flags;
 import x10.types.X10MethodInstance;
@@ -45,12 +45,12 @@ public class SharedBoxer extends ContextVisitor {
     private static final QName SHARED = QName.make("x10.compiler.Shared");
     
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
     
     public SharedBoxer(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
     
     @Override

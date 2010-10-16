@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Expr;
-import polyglot.ast.TypeNode;
 import polyglot.types.Type;
 
 public interface X10CastInfo {

@@ -10,8 +10,6 @@
  */
 package x10.ast;
 
-import polyglot.ast.Cast;
-import polyglot.ast.Expr;
 import polyglot.visit.ContextVisitor;
 import x10.types.checker.Converter;
 

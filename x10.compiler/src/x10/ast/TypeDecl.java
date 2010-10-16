@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.ClassMember;
-import polyglot.ast.TopLevelDecl;
 import x10.types.TypeDef;
 
 public interface TypeDecl extends TopLevelDecl, ClassMember, Guarded {

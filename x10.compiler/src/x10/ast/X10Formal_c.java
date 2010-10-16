@@ -16,19 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Formal_c;
-import polyglot.ast.Id;
-import polyglot.ast.Id_c;
-import polyglot.ast.IntLit;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.Context;
 import polyglot.types.Flags;
@@ -355,7 +342,7 @@ public class X10Formal_c extends Formal_c implements X10Formal {
 	    TypeSystem ts = tc.typeSystem();
 	    NodeFactory nf = tc.nodeFactory();
 		if (vars == null || vars.isEmpty()) return null;
-		X10NodeFactory x10nf = (X10NodeFactory) nf;
+		NodeFactory x10nf = (NodeFactory) nf;
 		List<Stmt> stmts = new TypedList<Stmt>(new ArrayList<Stmt>(vars.size()), Stmt.class, false);
 		Local arrayBase =nf.Local(pos, name);
 		if (bli != null)

@@ -19,18 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Assign_c;
-import polyglot.ast.Binary;
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Precedence;
-import polyglot.ast.Term;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Assign.Operator;
 import polyglot.frontend.Globals;
 import polyglot.types.ClassDef;
 import polyglot.types.Context;
@@ -59,6 +47,7 @@ import polyglot.visit.PrettyPrinter;
 import polyglot.visit.Translator;
 import polyglot.visit.TypeBuilder;
 import polyglot.visit.TypeChecker;
+import x10.ast.Assign.Operator;
 import x10.errors.Errors;
 import x10.types.X10ClassDef;
 import x10.types.X10MethodInstance;
@@ -90,7 +79,7 @@ public class SettableAssign_c extends Assign_c implements SettableAssign {
 	 * @param op
 	 * @param right
 	 */
-    public SettableAssign_c(X10NodeFactory nf, Position pos, Expr array, List<Expr> index, Operator op, Expr right) {
+    public SettableAssign_c(NodeFactory nf, Position pos, Expr array, List<Expr> index, Operator op, Expr right) {
 		super(nf, pos, op, right);
 		if (index.size() < 1)
 		assert index.size() >= 1;
@@ -230,7 +219,7 @@ public class SettableAssign_c extends Assign_c implements SettableAssign {
 	@Override
 	public Assign typeCheckLeft(ContextVisitor tc) throws SemanticException {
 		X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
-		X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+		NodeFactory nf = (NodeFactory) tc.nodeFactory();
 		X10TypeSystem xts = ts;
 
 		X10MethodInstance mi = null;

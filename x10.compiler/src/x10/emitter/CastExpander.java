@@ -10,10 +10,10 @@
  */
 package x10.emitter;
 
-import polyglot.ast.Node;
 import polyglot.types.Type;
 import polyglot.util.CodeWriter;
 import polyglot.visit.Translator;
+import x10.ast.Node;
 
 public class CastExpander extends Expander {
 

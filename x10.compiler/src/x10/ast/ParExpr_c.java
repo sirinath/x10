@@ -13,11 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.Term;
-import polyglot.ast.Expr_c;
-import polyglot.ast.Unary;
 import polyglot.types.SemanticException;
 import polyglot.util.CodeWriter;
 import polyglot.util.Position;

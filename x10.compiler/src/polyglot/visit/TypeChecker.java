@@ -9,12 +9,15 @@ package polyglot.visit;
 
 import java.util.Map;
 
-import polyglot.ast.*;
+
 import polyglot.frontend.*;
 import polyglot.main.Report;
 import polyglot.types.*;
 import polyglot.util.ErrorInfo;
 import polyglot.util.Position;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 
 /** Visitor which performs type checking on the AST. */
 public class TypeChecker extends ContextVisitor

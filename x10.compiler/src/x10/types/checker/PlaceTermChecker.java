@@ -1,10 +1,10 @@
 package x10.types.checker;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Job;
 import polyglot.visit.ContextVisitor;
+import x10.ast.Expr;
+import x10.ast.Node;
 import x10.ast.X10Special;
 
 

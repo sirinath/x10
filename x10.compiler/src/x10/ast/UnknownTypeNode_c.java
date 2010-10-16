@@ -11,13 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.Id;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.QualifierNode;
-import polyglot.ast.TypeCheckTypeGoal;
-import polyglot.ast.TypeNode;
-import polyglot.ast.TypeNode_c;
 import polyglot.frontend.AbstractGoal_c;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Goal;

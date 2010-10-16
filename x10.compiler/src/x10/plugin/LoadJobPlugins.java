@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.ClassDecl;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.StringLit;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
@@ -30,6 +26,10 @@ import polyglot.types.TypeSystem;
 import polyglot.visit.NodeVisitor;
 import x10.ExtensionInfo;
 import x10.ExtensionInfo.X10Scheduler;
+import x10.ast.ClassDecl;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.StringLit;
 import x10.types.X10ClassDef;
 import x10.types.X10ClassType;
 

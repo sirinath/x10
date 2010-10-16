@@ -11,7 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.SourceFile;
 
 /**
  * An X10ML (i.e., X10 XML) source file.  Some passes ignore XML files.

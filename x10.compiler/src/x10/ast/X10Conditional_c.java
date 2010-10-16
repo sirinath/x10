@@ -13,20 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.Conditional;
-import polyglot.ast.Expr;
-import polyglot.ast.Id;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.Conditional_c;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
 import polyglot.types.Context;
 import polyglot.types.Flags;
 import polyglot.types.LocalDef;

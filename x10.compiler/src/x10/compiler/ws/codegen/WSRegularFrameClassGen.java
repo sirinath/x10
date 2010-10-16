@@ -5,20 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.For;
-import polyglot.ast.ForInit;
-import polyglot.ast.If;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Loop;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
-import polyglot.ast.Switch;
-import polyglot.ast.Try;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
@@ -28,12 +14,26 @@ import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.Pair;
 import x10.ast.Async;
+import x10.ast.Binary;
+import x10.ast.Block;
+import x10.ast.Call;
+import x10.ast.Eval;
+import x10.ast.Expr;
 import x10.ast.Finish;
+import x10.ast.For;
+import x10.ast.ForInit;
 import x10.ast.ForLoop;
+import x10.ast.If;
+import x10.ast.LocalDecl;
+import x10.ast.Loop;
+import x10.ast.Node;
+import x10.ast.Stmt;
+import x10.ast.Switch;
+import x10.ast.Try;
 import x10.ast.When;
 import x10.ast.X10Formal;
 import x10.ast.X10Loop;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.compiler.ws.WSCodeGenerator;
 import x10.compiler.ws.WSTransformState;
 import x10.compiler.ws.util.AddIndirectLocalDeclareVisitor;
@@ -70,7 +70,7 @@ public class WSRegularFrameClassGen extends AbstractWSClassGen {
     boolean isReturnPathChanged;
 
     // method frames
-    protected WSRegularFrameClassGen(Job job, X10NodeFactory xnf, X10Context xct, WSTransformState wts,
+    protected WSRegularFrameClassGen(Job job, NodeFactory xnf, X10Context xct, WSTransformState wts,
            String className, Stmt stmt, ClassDef outer, Flags flags, ClassType superType) {
         super(job, xnf, xct, wts, className, superType, flags, outer,
                 WSCodeGenUtility.setSpeicalQualifier(stmt, outer, xnf));

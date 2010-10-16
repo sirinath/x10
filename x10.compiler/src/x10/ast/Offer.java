@@ -3,9 +3,6 @@
  */
 package x10.ast;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Return;
-import polyglot.ast.Stmt;
 
 /**
  * @author vj

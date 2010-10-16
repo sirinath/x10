@@ -17,23 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.AmbExpr;
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Binary_c;
-import polyglot.ast.Call;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Id;
-import polyglot.ast.Local;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Prefix;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.Context;
@@ -140,7 +123,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
     }
 
     /** If the expression was parsed as an ambiguous expression, return a Receiver that would have parsed the same way.  Otherwise, return null. */
-    private static Receiver toReceiver(X10NodeFactory nf, Expr e) {
+    private static Receiver toReceiver(NodeFactory nf, Expr e) {
         if (e instanceof AmbExpr) {
             AmbExpr e1 = (AmbExpr) e;
             return nf.AmbReceiver(e.position(), null, e1.name());
@@ -161,7 +144,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
     }
 
     /** If the expression was parsed as an ambiguous expression, return a Prefix that would have parsed the same way.  Otherwise, return null. */
-    private static Prefix toPrefix(X10NodeFactory nf, Expr e) {
+    private static Prefix toPrefix(NodeFactory nf, Expr e) {
         if (e instanceof AmbExpr) {
             AmbExpr e1 = (AmbExpr) e;
             return nf.AmbPrefix(e.position(), null, e1.name());
@@ -185,7 +168,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
     @Override
     public Node typeCheckOverride(Node parent, ContextVisitor tc) throws SemanticException {
         if (op == EQ) {
-            X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+            NodeFactory nf = (NodeFactory) tc.nodeFactory();
             Receiver t1 = toReceiver(nf, left);
             Receiver t2 = toReceiver(nf, right);
 
@@ -508,7 +491,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
         if ((op == COND_OR || op == COND_AND) && l.isBoolean() && r.isBoolean())
             return null;
 
-        X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+        NodeFactory nf = (NodeFactory) tc.nodeFactory();
         Name methodName = X10Binary_c.binaryMethodName(op);
         Name invMethodName = X10Binary_c.invBinaryMethodName(op);
 
@@ -733,7 +716,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
         TypeSystem ts = tc.typeSystem();
 
         if (!e.type().isSubtype(ts.String(), tc.context())) {
-            X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
+            NodeFactory nf = (NodeFactory) tc.nodeFactory();
             e = nf.X10Call(e.position(), nf.CanonicalTypeNode(e.position(), ts.String()),
                            nf.Id(e.position(), Name.make("valueOf")),
                            Collections.<TypeNode>emptyList(), Collections.singletonList(e));

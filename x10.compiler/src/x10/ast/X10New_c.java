@@ -17,14 +17,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.AmbTypeNode;
-import polyglot.ast.ClassBody;
-import polyglot.ast.Expr;
-import polyglot.ast.New;
-import polyglot.ast.New_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.ConstructorDef;
@@ -236,7 +228,7 @@ public class X10New_c extends New_c implements X10New {
         
         // Create the qualifier.
         Expr q;
-        Position cg = X10NodeFactory_c.compilerGenerated(position());
+        Position cg = NodeFactory_c.compilerGenerated(position());
 
         if (outer.typeEquals(c.currentClass(), ar.context())) {
             q = nf.This(cg);
@@ -251,7 +243,7 @@ public class X10New_c extends New_c implements X10New {
     }
     
     public New_c typeCheckObjectType(TypeChecker childtc) throws SemanticException {
-        X10NodeFactory nf = (X10NodeFactory) childtc.nodeFactory();
+        NodeFactory nf = (NodeFactory) childtc.nodeFactory();
         X10TypeSystem ts = (X10TypeSystem) childtc.typeSystem();
         Context c = childtc.context();
 

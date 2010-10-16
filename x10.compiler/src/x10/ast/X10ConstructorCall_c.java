@@ -15,12 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorCall_c;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.ConstructorDef;
@@ -142,8 +136,8 @@ public class X10ConstructorCall_c extends ConstructorCall_c implements X10Constr
 	        	if (X10TypeMixin.isX10Struct(type)
 	        			|| ts.typeEquals(type, ts.Object(), tc.context())) {
 	        		// the super() call inserted by the parser needs to be thrown out
-	        		X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
-	        		return nf.Empty(X10NodeFactory_c.compilerGenerated(position()));
+	        		NodeFactory nf = (NodeFactory) tc.nodeFactory();
+	        		return nf.Empty(NodeFactory_c.compilerGenerated(position()));
 	        	}
 	        	throw new InternalCompilerError("Unexpected null supertype for " 
 	        			+ this, position());

@@ -9,51 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import polyglot.ast.ArrayAccess;
-import polyglot.ast.Assert;
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.BooleanLit;
-import polyglot.ast.Branch;
-import polyglot.ast.Call;
-import polyglot.ast.Case;
-import polyglot.ast.Cast;
-import polyglot.ast.Catch;
-import polyglot.ast.Conditional;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Do;
-import polyglot.ast.Do_c;
-import polyglot.ast.Empty;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.For;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.If;
-import polyglot.ast.Instanceof;
-import polyglot.ast.Labeled;
-import polyglot.ast.Lit;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Return;
-import polyglot.ast.Special;
-import polyglot.ast.Stmt;
-import polyglot.ast.Switch;
-import polyglot.ast.Throw;
-import polyglot.ast.Try;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
-import polyglot.ast.While;
-import polyglot.ast.While_c;
 import polyglot.frontend.Job;
 import polyglot.types.Flags;
 import polyglot.types.Name;
@@ -62,29 +17,74 @@ import polyglot.types.TypeSystem;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.ArrayAccess;
+import x10.ast.Assert;
+import x10.ast.Assign;
 import x10.ast.AssignPropertyCall;
 import x10.ast.Async;
 import x10.ast.AtEach;
 import x10.ast.AtExpr;
 import x10.ast.AtStmt;
 import x10.ast.Atomic;
+import x10.ast.Binary;
+import x10.ast.Block;
+import x10.ast.BooleanLit;
+import x10.ast.Branch;
+import x10.ast.Call;
+import x10.ast.Case;
+import x10.ast.Cast;
+import x10.ast.Catch;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
+import x10.ast.Conditional;
+import x10.ast.ConstructorCall;
+import x10.ast.ConstructorDecl;
+import x10.ast.Do;
+import x10.ast.Do_c;
+import x10.ast.Empty;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldAssign;
+import x10.ast.FieldDecl;
 import x10.ast.Finish;
+import x10.ast.For;
+import x10.ast.ForInit;
 import x10.ast.ForLoop;
+import x10.ast.ForUpdate;
 import x10.ast.Future;
 import x10.ast.Here;
+import x10.ast.If;
+import x10.ast.Instanceof;
+import x10.ast.Labeled;
+import x10.ast.Lit;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.New;
 import x10.ast.Next;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
 import x10.ast.ParExpr;
 import x10.ast.RemoteActivityInvocation;
+import x10.ast.Return;
 import x10.ast.SettableAssign;
+import x10.ast.Special;
+import x10.ast.Stmt;
 import x10.ast.StmtExpr;
 import x10.ast.StmtSeq;
 import x10.ast.SubtypeTest;
+import x10.ast.Switch;
+import x10.ast.Throw;
+import x10.ast.Try;
 import x10.ast.Tuple;
+import x10.ast.TypeNode;
+import x10.ast.Unary;
 import x10.ast.When;
+import x10.ast.While;
+import x10.ast.While_c;
 import x10.ast.X10ClassDecl;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.optimizations.ForLoopOptimizer;
 import x10.types.X10TypeSystem;
 
@@ -97,7 +97,7 @@ public final class ExpressionFlattener extends ContextVisitor {
     private static final boolean DEBUG = false;
 
     X10TypeSystem xts;
-    X10NodeFactory xnf;
+    NodeFactory xnf;
 //    Synthesizer syn;
     ForLoopOptimizer syn; // move functionality to Synthesizer
     
@@ -112,7 +112,7 @@ public final class ExpressionFlattener extends ContextVisitor {
     public ExpressionFlattener(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
 //        syn = new Synthesizer(xnf, xts);
         syn = new ForLoopOptimizer(job, ts, nf);
     }
@@ -394,7 +394,7 @@ public final class ExpressionFlattener extends ContextVisitor {
      * @param op the unary operator in question
      * @return true, if op updates its argument; false, otherwise
      */
-    private boolean isUpdateOp(polyglot.ast.Unary.Operator op) {
+    private boolean isUpdateOp(x10.ast.Unary.Operator op) {
         return op.equals(Unary.PRE_DEC) || op.equals(Unary.PRE_INC) || op.equals(Unary.POST_DEC) || op.equals(Unary.POST_INC);
     }
 

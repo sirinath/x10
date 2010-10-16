@@ -7,8 +7,8 @@
 
 package polyglot.visit;
 
-import polyglot.ast.Node;
 import polyglot.util.*;
+import x10.ast.Node;
 
 /**
  * The <code>NodeVisitor</code> represents an implementation of the "Visitor"
@@ -23,8 +23,8 @@ import polyglot.util.*;
  * <code>leave</code> informs the visitor that traversal is finishing a
  * particular subtree.
  *
- * @see polyglot.ast.Node#visit
- * @see polyglot.ast.Node
+ * @see x10.ast.Node#visit
+ * @see x10.ast.Node
  */
 public abstract class NodeVisitor implements Copy
 {
@@ -202,8 +202,8 @@ public abstract class NodeVisitor implements Copy
      * 
      * @param parent the parent node of <code>child</code>, <code>null</code> if
      *         <code>child</code> was visited by calling 
-     *         {@link polyglot.ast.Node#visit(NodeVisitor) Node.visit(NodeVisitor)} instead
-     *         of {@link polyglot.ast.Node#visitChild(Node, NodeVisitor) 
+     *         {@link x10.ast.Node#visit(NodeVisitor) Node.visit(NodeVisitor)} instead
+     *         of {@link x10.ast.Node#visitChild(Node, NodeVisitor) 
      *         polyglot.ast.Node.visitChild(Node, NodeVisitor)}.
      * @param child the child node of <code>parent</code> to be visited.
      * @return the (possibly new) version of <code>child</code> after the 

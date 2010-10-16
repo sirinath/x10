@@ -13,23 +13,23 @@ package x10.visit;
 
 import java.util.List;
 
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
-import polyglot.ast.Block;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.Assign;
-import polyglot.ast.ArrayAccess;
-import polyglot.ast.ProcedureCall;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.ArrayAccessAssign;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.New;
-import polyglot.ast.NewArray;
 import polyglot.visit.NodeVisitor;
+import x10.ast.ArrayAccess;
+import x10.ast.ArrayAccessAssign;
+import x10.ast.Assign;
 import x10.ast.Atomic;
+import x10.ast.Block;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldAssign;
+import x10.ast.LocalAssign;
+import x10.ast.New;
+import x10.ast.NewArray;
+import x10.ast.Node;
+import x10.ast.ProcedureCall;
 import x10.ast.SettableAssign;
+import x10.ast.Stmt;
 
 /**
  * The <code>AsyncElimination</code> runs over the AST and 

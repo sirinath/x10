@@ -14,21 +14,6 @@ package x10.visit;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Block;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassMember;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.FieldAssign;
-import polyglot.ast.Formal;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.ClassType;
 import polyglot.types.ConstructorDef;
@@ -45,14 +30,29 @@ import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.InnerClassRemover;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Assign;
+import x10.ast.Block;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
+import x10.ast.ConstructorCall;
+import x10.ast.ConstructorDecl;
 import x10.ast.DepParameterExpr;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.FieldAssign;
+import x10.ast.Formal;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Stmt;
+import x10.ast.TypeNode;
 import x10.ast.TypeParamNode;
 import x10.ast.X10ClassDecl;
 import x10.ast.X10ConstructorDecl;
 import x10.ast.X10FieldDecl;
 import x10.ast.X10MethodDecl;
 import x10.ast.X10New;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.types.ConstrainedType;
 import x10.types.ParameterType;
 import x10.types.X10ClassDef;
@@ -370,7 +370,7 @@ public class X10InnerClassRemover extends InnerClassRemover {
             for (int p = 0; p < typeParameters.size(); p++) {
                 ParameterType tp = typeParameters.get(p);
                 // FIXME: [IP] this is a hack.  We should really rename type parameters.
-                X10NodeFactory xnf = (X10NodeFactory) nf;
+                NodeFactory xnf = (NodeFactory) nf;
                 typeParamNodes.add(xnf.TypeParamNode(tp.position(), xnf.Id(tp.position(), tp.name()), variances.get(p)).type(tp));
             }
             if (!typeParameters.isEmpty()) {

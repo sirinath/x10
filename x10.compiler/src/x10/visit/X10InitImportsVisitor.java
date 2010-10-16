@@ -11,16 +11,16 @@
 
 package x10.visit;
 
-import polyglot.ast.Import;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.SourceFile;
 import polyglot.frontend.Job;
 import polyglot.types.ImportTable;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.visit.InitImportsVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Import;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
 
 public class X10InitImportsVisitor extends InitImportsVisitor {
 

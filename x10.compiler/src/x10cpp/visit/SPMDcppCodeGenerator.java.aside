@@ -29,72 +29,72 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import polyglot.ast.AmbReceiver;
-import polyglot.ast.ArrayAccess_c;
-import polyglot.ast.ArrayInit_c;
-import polyglot.ast.Assert_c;
-import polyglot.ast.Assign_c;
-import polyglot.ast.Binary;
-import polyglot.ast.Binary_c;
-import polyglot.ast.Block_c;
-import polyglot.ast.BooleanLit_c;
-import polyglot.ast.Branch_c;
-import polyglot.ast.Call_c;
-import polyglot.ast.Case_c;
-import polyglot.ast.Catch;
-import polyglot.ast.Catch_c;
-import polyglot.ast.CharLit_c;
-import polyglot.ast.ClassBody_c;
-import polyglot.ast.ClassDecl_c;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Conditional_c;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorCall_c;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.ConstructorDecl_c;
-import polyglot.ast.Do_c;
-import polyglot.ast.Empty_c;
-import polyglot.ast.Eval_c;
-import polyglot.ast.Expr;
-import polyglot.ast.FieldDecl_c;
-import polyglot.ast.Field_c;
-import polyglot.ast.FloatLit_c;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.For_c;
-import polyglot.ast.Formal;
-import polyglot.ast.Formal_c;
-import polyglot.ast.Id_c;
-import polyglot.ast.If_c;
-import polyglot.ast.Import_c;
-import polyglot.ast.Initializer_c;
-import polyglot.ast.IntLit;
-import polyglot.ast.IntLit_c;
-import polyglot.ast.Labeled_c;
-import polyglot.ast.Lit_c;
-import polyglot.ast.LocalClassDecl_c;
-import polyglot.ast.LocalDecl_c;
-import polyglot.ast.Local_c;
-import polyglot.ast.Loop_c;
-import polyglot.ast.MethodDecl_c;
-import polyglot.ast.NewArray_c;
-import polyglot.ast.New_c;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.NullLit_c;
-import polyglot.ast.PackageNode_c;
-import polyglot.ast.Receiver;
-import polyglot.ast.Return_c;
-import polyglot.ast.Stmt;
-import polyglot.ast.StringLit_c;
-import polyglot.ast.SwitchBlock_c;
-import polyglot.ast.Switch_c;
-import polyglot.ast.Term_c;
-import polyglot.ast.Throw_c;
-import polyglot.ast.Try_c;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary_c;
-import polyglot.ast.While_c;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import x10.Configuration;
 import x10.ast.ArrayConstructor_c;
 import x10.ast.AssignPropertyBody_c;
@@ -128,7 +128,7 @@ import x10.ast.X10ClockedLoop_c;
 import x10.ast.X10Formal;
 import x10.ast.X10Instanceof_c;
 import x10.ast.X10MethodDecl_c;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Special_c;
 import x10.extension.X10Ext_c;
 import x10.query.QueryEngine;
@@ -2110,7 +2110,7 @@ public class SPMDCppCodeGenerator extends X10DelegatingVisitor {
 		Type baseType = xts.Double();
 
 		// TODO: Evaluate arguments in the right order
-		X10NodeFactory xnf = (X10NodeFactory)tr.nodeFactory();
+		NodeFactory xnf = (NodeFactory)tr.nodeFactory();
 		Expr src = null;
 		Expr dest = null;
 		try {

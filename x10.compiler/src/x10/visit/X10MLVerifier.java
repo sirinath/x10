@@ -11,19 +11,6 @@
 
 package x10.visit;
 
-import polyglot.ast.Call;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.SourceFile;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
@@ -32,6 +19,19 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Call;
+import x10.ast.ClassDecl;
+import x10.ast.ConstructorCall;
+import x10.ast.ConstructorDecl;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldDecl;
+import x10.ast.MethodDecl;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.TypeNode;
 import x10.ast.X10MLSourceFile;
 
 /**

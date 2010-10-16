@@ -14,19 +14,6 @@ package x10.visit;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Block;
-import polyglot.ast.Conditional;
-import polyglot.ast.Empty;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FloatLit;
-import polyglot.ast.If;
-import polyglot.ast.IntLit;
-import polyglot.ast.Lit;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Stmt;
 import polyglot.frontend.Job;
 import polyglot.types.LocalDef;
 import polyglot.types.SemanticException;
@@ -36,7 +23,20 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
-import x10.ast.X10NodeFactory;
+import x10.ast.Block;
+import x10.ast.Conditional;
+import x10.ast.Empty;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FloatLit;
+import x10.ast.If;
+import x10.ast.IntLit;
+import x10.ast.Lit;
+import x10.ast.LocalDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.Stmt;
+import x10.ast.NodeFactory;
 import x10.constraint.XFailure;
 import x10.constraint.XLit;
 import x10.constraint.XLocal;
@@ -213,7 +213,7 @@ public class ConstantPropagator extends ContextVisitor {
     }
 
     public Expr toExpr(Object o, Position pos) {
-        X10NodeFactory nf = (X10NodeFactory) this.nf;
+        NodeFactory nf = (NodeFactory) this.nf;
 
         Expr e = null;
         if (o == null) {

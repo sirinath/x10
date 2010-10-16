@@ -34,12 +34,6 @@ import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import polyglot.ast.ClassMember;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.SourceFile;
-import polyglot.ast.TopLevelDecl;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.AllBarrierGoal;
 import polyglot.frontend.BarrierGoal;
 import polyglot.frontend.Compiler;
@@ -84,8 +78,14 @@ import polyglot.visit.NodeVisitor;
 import polyglot.visit.PruningVisitor;
 import polyglot.visit.ReachChecker;
 import polyglot.visit.Translator;
-import x10.ast.X10NodeFactory;
-import x10.ast.X10NodeFactory_c;
+import x10.ast.ClassMember;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.SourceFile;
+import x10.ast.TopLevelDecl;
+import x10.ast.TypeNode;
+import x10.ast.NodeFactory;
+import x10.ast.NodeFactory_c;
 import x10.compiler.ws.WSCodeGenerator;
 import x10.errors.Warnings;
 import x10.extension.X10Ext;
@@ -169,7 +169,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
     public Parser parser(Reader reader, FileSource source, ErrorQueue eq) {
     // ###
 //        if (source.path().endsWith(XML_FILE_DOT_EXTENSION)) {
-//        	return new DomParser(reader, (X10TypeSystem) ts, (X10NodeFactory) nf, source, eq);
+//        	return new DomParser(reader, (X10TypeSystem) ts, (NodeFactory) nf, source, eq);
 //        }
 
     	try {
@@ -350,7 +350,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
     }
 
     protected NodeFactory createNodeFactory() {
-        return new X10NodeFactory_c(this);
+        return new NodeFactory_c(this);
     }
 
     protected TypeSystem createTypeSystem() {
@@ -886,7 +886,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
        
        public Goal WSCallGraphBarrier() {
            final X10TypeSystem ts = (X10TypeSystem) extInfo.typeSystem();
-           final X10NodeFactory nf = (X10NodeFactory) extInfo.nodeFactory();
+           final NodeFactory nf = (NodeFactory) extInfo.nodeFactory();
            return new AllBarrierGoal("WSCallGraphBarrier", this) {
                @Override
                public Goal prereqForJob(Job job) {

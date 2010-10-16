@@ -14,12 +14,6 @@ package x10.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Cast;
-import polyglot.ast.Cast_c;
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
-import polyglot.ast.Precedence;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ConstructorDef;
 import polyglot.types.ConstructorInstance;

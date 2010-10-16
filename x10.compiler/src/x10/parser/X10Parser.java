@@ -23,51 +23,51 @@ import java.io.File;
 
 import polyglot.types.QName;
 import polyglot.types.Name;
-import polyglot.ast.AmbTypeNode;
-import polyglot.ast.AmbExpr;
-import polyglot.ast.Assign;
-import polyglot.ast.Binary;
-import polyglot.ast.Block;
-import polyglot.ast.Case;
-import polyglot.ast.Catch;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassDecl;
-import polyglot.ast.ClassMember;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.ConstructorDecl;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FloatLit;
-import polyglot.ast.ForInit;
-import polyglot.ast.ForUpdate;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.Import;
-import polyglot.ast.IntLit;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.PackageNode;
-import polyglot.ast.ProcedureDecl;
-import polyglot.ast.SourceFile;
-import polyglot.ast.Stmt;
-import polyglot.ast.SwitchElement;
-import polyglot.ast.TopLevelDecl;
-import polyglot.ast.TypeNode;
-import polyglot.ast.Unary;
-import polyglot.ast.FlagsNode;
 import polyglot.parse.ParsedName;
 import x10.ast.AddFlags;
+import x10.ast.AmbExpr;
+import x10.ast.AmbTypeNode;
 import x10.ast.AnnotationNode;
+import x10.ast.Assign;
+import x10.ast.Binary;
+import x10.ast.Block;
+import x10.ast.Case;
+import x10.ast.Catch;
+import x10.ast.ClassBody;
+import x10.ast.ClassDecl;
+import x10.ast.ClassMember;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
+import x10.ast.ConstructorCall;
+import x10.ast.ConstructorDecl;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.Field;
+import x10.ast.FieldDecl;
+import x10.ast.FlagsNode;
+import x10.ast.FloatLit;
+import x10.ast.ForInit;
+import x10.ast.ForUpdate;
+import x10.ast.Formal;
+import x10.ast.Id;
+import x10.ast.Import;
+import x10.ast.IntLit;
+import x10.ast.LocalDecl;
+import x10.ast.MethodDecl;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.PackageNode;
+import x10.ast.ProcedureDecl;
 import x10.ast.SettableAssign;
 import x10.ast.Here;
 import x10.ast.DepParameterExpr;
+import x10.ast.SourceFile;
+import x10.ast.Stmt;
+import x10.ast.SwitchElement;
+import x10.ast.TopLevelDecl;
 import x10.ast.Tuple;
+import x10.ast.TypeNode;
+import x10.ast.Unary;
 import x10.ast.When;
 import x10.ast.X10Formal;
 import x10.ast.X10Formal_c;
@@ -76,7 +76,7 @@ import x10.ast.X10Call;
 import x10.ast.ConstantDistMaker;
 import x10.ast.TypeDecl;
 import x10.ast.TypeParamNode;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.types.ParameterType;
 import x10.types.X10TypeSystem;
 import x10.types.X10TypeSystem_c;
@@ -85,7 +85,7 @@ import x10.ast.RegionMaker;
 import x10.ast.X10Binary_c;
 import x10.ast.X10Unary_c;
 import x10.ast.X10IntLit_c;
-import x10.ast.X10NodeFactory_c;
+import x10.ast.NodeFactory_c;
 import x10.extension.X10Ext;
 import polyglot.frontend.FileSource;
 import polyglot.frontend.Parser;
@@ -243,28 +243,28 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
      */
     public PrsStream getParseStream() { return prsStream; }
 
-    public polyglot.ast.Node parser()
+    public x10.ast.Node parser()
     {
         return parser(null, 0);
     }
     
-    public polyglot.ast.Node parser(Monitor monitor)
+    public x10.ast.Node parser(Monitor monitor)
     {
         return parser(monitor, 0);
     }
     
-    public polyglot.ast.Node parser(int error_repair_count)
+    public x10.ast.Node parser(int error_repair_count)
     {
         return parser(null, error_repair_count);
     }
 
-    public polyglot.ast.Node parser(Monitor monitor, int error_repair_count)
+    public x10.ast.Node parser(Monitor monitor, int error_repair_count)
     {
         btParser.setMonitor(monitor);
         
         try
         {
-            return (polyglot.ast.Node) btParser.fuzzyParse(error_repair_count);
+            return (x10.ast.Node) btParser.fuzzyParse(error_repair_count);
         }
         catch (BadParseException e)
         {
@@ -285,14 +285,14 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
     //#line 315 "x10/parser/x10.g"
     private ErrorQueue eq;
     private X10TypeSystem ts;
-    private X10NodeFactory nf;
+    private NodeFactory nf;
     private FileSource source;
     private boolean unrecoverableSyntaxError = false;
 
     public void initialize(TypeSystem t, NodeFactory n, FileSource source, ErrorQueue q)
     {
         this.ts = (X10TypeSystem) t;
-        this.nf = (X10NodeFactory) n;
+        this.nf = (NodeFactory) n;
         this.source = source;
         this.eq = q;
     }
@@ -301,7 +301,7 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
     {
         this(lexStream);
         initialize((X10TypeSystem) t,
-                   (X10NodeFactory) n,
+                   (NodeFactory) n,
                    source,
                    q);
         prsStream.setMessageHandler(new MessageHandler(q));
@@ -739,7 +739,7 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
         eq.enqueue(ErrorInfo.SYNTAX_ERROR, msg, pos);
     }
 
-    public polyglot.ast.Node parse() {
+    public x10.ast.Node parse() {
         try
         {
             SourceFile sf = (SourceFile) parser();
@@ -2827,7 +2827,7 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
                 X10Formal FormalParameter = (X10Formal) getRhsSym(1);
                 //#line 1924 "lpg.generator/templates/java/btParserTemplateF.gi"
                 List<Formal> l = new TypedList<Formal>(new LinkedList<Formal>(), Formal.class, false);
-                l.add(FormalParameter.flags(nf.FlagsNode(X10NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
+                l.add(FormalParameter.flags(nf.FlagsNode(NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
                 setResult(l);
                       break;
             }
@@ -2842,7 +2842,7 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
                 //#line 1929 "x10/parser/x10.g"
                 X10Formal FormalParameter = (X10Formal) getRhsSym(3);
                 //#line 1931 "lpg.generator/templates/java/btParserTemplateF.gi"
-                ExistentialList.add(FormalParameter.flags(nf.FlagsNode(X10NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
+                ExistentialList.add(FormalParameter.flags(nf.FlagsNode(NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
                       break;
             }
     
@@ -5873,7 +5873,7 @@ public class X10Parser implements RuleAction, Parser, ParseErrorCodes
                //#line 4163 "lpg.generator/templates/java/btParserTemplateF.gi"
                 
                 //#line 4163 "lpg.generator/templates/java/btParserTemplateF.gi"
-                setResult(((X10NodeFactory) nf).Here(pos()));
+                setResult(((NodeFactory) nf).Here(pos()));
                       break;
             }
     

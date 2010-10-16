@@ -5,23 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.Local;
-import polyglot.ast.LocalAssign;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.Receiver;
-import polyglot.ast.Return;
-import polyglot.ast.Special;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.MethodDef;
@@ -33,15 +16,32 @@ import polyglot.types.Type;
 import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Assign;
 import x10.ast.Async;
+import x10.ast.Block;
+import x10.ast.Call;
+import x10.ast.ClassBody;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
+import x10.ast.ConstructorCall;
+import x10.ast.Eval;
+import x10.ast.Expr;
 import x10.ast.Finish;
 import x10.ast.Future;
+import x10.ast.Local;
+import x10.ast.LocalAssign;
+import x10.ast.LocalDecl;
+import x10.ast.New;
+import x10.ast.Node;
 import x10.ast.PlacedClosure;
+import x10.ast.Receiver;
+import x10.ast.Return;
+import x10.ast.Special;
+import x10.ast.Stmt;
 import x10.ast.StmtSeq;
+import x10.ast.TypeNode;
 import x10.ast.When;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.compiler.ws.WSTransformState;
 import x10.types.X10Context;
 import x10.types.X10TypeSystem;
@@ -368,7 +368,7 @@ public class WSCodeGenUtility {
      * @param s
      * @return
      */
-    static public Stmt seqStmtsToBlock(X10NodeFactory xnf, Stmt s){
+    static public Stmt seqStmtsToBlock(NodeFactory xnf, Stmt s){
         if(s instanceof StmtSeq){
             return xnf.Block(s.position(),((StmtSeq)s).statements());
         }
@@ -412,7 +412,7 @@ public class WSCodeGenUtility {
      * @param xnf
      * @return
      */
-    static public Stmt setSpeicalQualifier(Stmt s, ClassDef outerDef, X10NodeFactory xnf){
+    static public Stmt setSpeicalQualifier(Stmt s, ClassDef outerDef, NodeFactory xnf){
         SpecialQualifierSetter sqs = new SpecialQualifierSetter(xnf, outerDef);
         
         return (Stmt) s.visit(sqs);
@@ -650,7 +650,7 @@ public class WSCodeGenUtility {
     static class SpecialQualifierSetter extends NodeVisitor{
         //protected ClassDef outerDef;
         TypeNode  tn ;
-        public SpecialQualifierSetter(X10NodeFactory xnf, ClassDef outerDef){
+        public SpecialQualifierSetter(NodeFactory xnf, ClassDef outerDef){
            tn = xnf.CanonicalTypeNode(Position.COMPILER_GENERATED, outerDef.asType());
         }
         

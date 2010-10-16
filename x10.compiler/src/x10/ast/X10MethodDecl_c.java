@@ -22,27 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import polyglot.ast.Block;
-import polyglot.ast.Call;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Expr;
-import polyglot.ast.Field;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.FlagsNode;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.Local;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.MethodDecl_c;
-import polyglot.ast.NamedVariable;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Return;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeCheckFragmentGoal;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Job;
 import polyglot.frontend.SetResolverGoal;
@@ -141,7 +120,7 @@ public class X10MethodDecl_c extends MethodDecl_c implements X10MethodDecl {
 
 	TypeNode offerType;
 	TypeNode hasType;
-	public X10MethodDecl_c(X10NodeFactory nf, Position pos, FlagsNode flags, 
+	public X10MethodDecl_c(NodeFactory nf, Position pos, FlagsNode flags, 
 			TypeNode returnType, Id name,
 			List<TypeParamNode> typeParams, List<Formal> formals, DepParameterExpr guard,  TypeNode offerType, Block body) {
 		super(pos, flags, returnType instanceof HasTypeNode_c ? nf.UnknownTypeNode(returnType.position()) : returnType, 

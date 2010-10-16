@@ -14,11 +14,6 @@ package x10.ast;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Loop;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;
 import polyglot.types.StructType;

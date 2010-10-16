@@ -14,11 +14,11 @@ package x10c;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.NodeFactory;
 import polyglot.frontend.Goal;
 import polyglot.frontend.Job;
 import polyglot.frontend.Scheduler;
 import polyglot.types.TypeSystem;
+import x10.ast.NodeFactory;
 import x10.visit.SharedBoxer;
 import x10c.ast.X10CNodeFactory_c;
 import x10c.types.X10CTypeSystem_c;

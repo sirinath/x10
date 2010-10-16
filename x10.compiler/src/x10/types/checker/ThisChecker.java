@@ -5,15 +5,15 @@ package x10.types.checker;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Node;
 import polyglot.frontend.Globals;
 import polyglot.frontend.Job;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.ErrorHandlingVisitor;
+import x10.ast.Expr;
+import x10.ast.Node;
 import x10.ast.X10CanonicalTypeNode;
 import x10.ast.X10Field_c;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Special;
 import x10.types.X10TypeMixin;
 import x10.types.X10TypeSystem;
@@ -48,7 +48,7 @@ public class ThisChecker extends ErrorHandlingVisitor {
         }
         if (n instanceof X10CanonicalTypeNode) {
             CConstraint rc = X10TypeMixin.xclause(((X10CanonicalTypeNode) n).type());
-            List<Expr> clauses = new Synthesizer((X10NodeFactory) nf, (X10TypeSystem) ts).makeExpr(rc, n.position());
+            List<Expr> clauses = new Synthesizer((NodeFactory) nf, (X10TypeSystem) ts).makeExpr(rc, n.position());
             for (Expr c : clauses) {
                 c.visit(this);
             }

@@ -8,10 +8,18 @@
 
 package polyglot.parse;
 
-import polyglot.ast.*;
+
 import polyglot.types.*;
 import polyglot.types.Package;
 import polyglot.util.*;
+import x10.ast.Expr;
+import x10.ast.Id;
+import x10.ast.NodeFactory;
+import x10.ast.PackageNode;
+import x10.ast.Prefix;
+import x10.ast.QualifierNode;
+import x10.ast.Receiver;
+import x10.ast.TypeNode;
 
 /**
  * Represents an ambiguous, possibly qualified, identifier encountered while parsing.

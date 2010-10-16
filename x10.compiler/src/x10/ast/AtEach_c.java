@@ -14,12 +14,6 @@ package x10.ast;
 import java.util.Iterator;
 import java.util.List;
 
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Id_c;
-import polyglot.ast.Node;
-import polyglot.ast.Stmt;
-import polyglot.ast.Field_c;
 import polyglot.types.Context;
 import polyglot.types.Name;
 import polyglot.util.CodeWriter;

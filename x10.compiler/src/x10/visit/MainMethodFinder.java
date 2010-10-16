@@ -16,20 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Call;
-import polyglot.ast.CanonicalTypeNode;
-import polyglot.ast.ClassBody;
-import polyglot.ast.ClassMember;
-import polyglot.ast.Expr;
-import polyglot.ast.Formal;
-import polyglot.ast.Id;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.ConstructorInstance;
@@ -66,13 +52,13 @@ import x10.types.X10TypeSystem;
  */
 public class MainMethodFinder extends ContextVisitor {
     final X10TypeSystem ts;
-    final X10NodeFactory nf;
+    final NodeFactory nf;
     final Method hasMain;
 
     public MainMethodFinder(Job job, TypeSystem ts, NodeFactory nf, Method hasMain) {
         super(job, ts, nf);
         this.ts = (X10TypeSystem) ts;
-        this.nf = (X10NodeFactory) nf;
+        this.nf = (NodeFactory) nf;
         this.hasMain = hasMain;
     }
 

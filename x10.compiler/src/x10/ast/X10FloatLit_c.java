@@ -11,8 +11,6 @@
 
 package x10.ast;
 
-import polyglot.ast.FloatLit_c;
-import polyglot.ast.Node;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.Position;

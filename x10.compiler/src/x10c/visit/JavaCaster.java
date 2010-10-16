@@ -13,21 +13,6 @@ package x10c.visit;
 import java.util.ArrayList;
 import java.util.List;
 
-import polyglot.ast.Assign;
-import polyglot.ast.Call;
-import polyglot.ast.ConstructorCall;
-import polyglot.ast.Eval;
-import polyglot.ast.Expr;
-import polyglot.ast.FieldDecl;
-import polyglot.ast.LocalDecl;
-import polyglot.ast.MethodDecl;
-import polyglot.ast.New;
-import polyglot.ast.Node;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.NullLit;
-import polyglot.ast.Receiver;
-import polyglot.ast.Stmt;
-import polyglot.ast.TypeNode;
 import polyglot.frontend.Job;
 import polyglot.types.QName;
 import polyglot.types.Ref;
@@ -37,9 +22,24 @@ import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Assign;
+import x10.ast.Call;
 import x10.ast.ClosureCall;
+import x10.ast.ConstructorCall;
+import x10.ast.Eval;
+import x10.ast.Expr;
+import x10.ast.FieldDecl;
+import x10.ast.LocalDecl;
+import x10.ast.MethodDecl;
+import x10.ast.New;
+import x10.ast.Node;
+import x10.ast.NodeFactory;
+import x10.ast.NullLit;
+import x10.ast.Receiver;
+import x10.ast.Stmt;
+import x10.ast.TypeNode;
 import x10.ast.X10Call;
-import x10.ast.X10NodeFactory;
+import x10.ast.NodeFactory;
 import x10.ast.X10Return_c;
 import x10.emitter.Emitter;
 import x10.types.ParameterType;
@@ -54,14 +54,14 @@ import x10.visit.X10PrettyPrinterVisitor;
 public class JavaCaster extends ContextVisitor {
     
     private final X10TypeSystem xts;
-    private final X10NodeFactory xnf;
+    private final NodeFactory xnf;
 
     private Type imc;
 
     public JavaCaster(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (X10TypeSystem) ts;
-        xnf = (X10NodeFactory) nf;
+        xnf = (NodeFactory) nf;
     }
     
     @Override

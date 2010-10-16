@@ -15,9 +15,13 @@ package polyglot.visit;
 
 import java.util.*;
 
-import polyglot.ast.*;
+
 import polyglot.types.Context;
 import polyglot.types.Type;
+import x10.ast.Cast;
+import x10.ast.Expr;
+import x10.ast.Node;
+import x10.ast.ProcedureCall;
 
 /**
  * <code>RedundantCastRemover</code> removes redundant casts.  It's typically

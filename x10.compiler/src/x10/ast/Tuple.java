@@ -13,7 +13,6 @@ package x10.ast;
 
 import java.util.List;
 
-import polyglot.ast.Expr;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.visit.TypeChecker;

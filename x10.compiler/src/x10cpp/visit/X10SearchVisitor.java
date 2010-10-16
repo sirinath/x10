@@ -13,8 +13,8 @@ package x10cpp.visit;
 
 import java.util.ArrayList;
 
-import polyglot.ast.Node;
 import polyglot.visit.NodeVisitor;
+import x10.ast.Node;
 
 /**
  * @author V. Krishna Nandivada
