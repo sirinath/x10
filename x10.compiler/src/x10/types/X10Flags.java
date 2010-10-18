@@ -29,13 +29,23 @@ public class X10Flags extends Flags {
     private static final long serialVersionUID = 9052097680529482894L;
 
     public static final Set<String> X10_FLAGS = new TreeSet<String>();
+    public static final X10Flags EXTERN = createFlag("extern", null);
     public static final X10Flags VALUE = createFlag("value", null);
     public static final X10Flags REFERENCE = createFlag("reference", null);
     public static final X10Flags ATOMIC = createFlag("atomic", null);
     public static final X10Flags PURE = createFlag("pure", null);
     public static final X10Flags MUTABLE = createFlag("mutable", null);
+    public static final X10Flags SAFE = createFlag("safe", null);
+ //   public static final X10Flags LOCAL = createFlag("local", null);
+    public static final X10Flags NON_BLOCKING = createFlag("nonblocking", null);
+    public static final X10Flags SEQUENTIAL = createFlag("sequential", null);
+    public static final X10Flags INCOMPLETE = createFlag("incomplete", null);
     public static final X10Flags PROPERTY = createFlag("property", null);
+    public static final X10Flags SHARED = createFlag("shared", null);
+    public static final X10Flags GLOBAL = createFlag("global", null);
+   // public static final X10Flags ROOTED = createFlag("rooted", null);
     public static final X10Flags STRUCT = createFlag("struct", null);
+    public static final X10Flags PINNED = createFlag("pinned", null);
     public static final X10Flags HASTYPE = createFlag("hastype", null); // can only be created through a <: Type declaration.
     public static final X10Flags CLOCKED = createFlag("clocked", null);  
 
@@ -67,7 +77,11 @@ public class X10Flags extends Flags {
     public static X10Flags toX10Flags(Flags f) {
     	if (f instanceof X10Flags)
     		return (X10Flags) f;
-    	return new X10Flags().set(f);
+    	return new X10Flags().setX(f == null? Flags.NONE : f);
+    }
+
+    public static boolean isX10Flag(Flags f) {
+        return f instanceof X10Flags;
     }
 
     private X10Flags() {
@@ -81,8 +95,7 @@ public class X10Flags extends Flags {
     /**
      * Create new flags with the flags in <code>other</code> also set.
      */
-    @Override
-    public X10Flags set(Flags other) {
+    public X10Flags setX(Flags other) {
         X10Flags f = new X10Flags();
         f.flags.addAll(this.flags);
         f.flags.addAll(other.flags());
@@ -92,8 +105,7 @@ public class X10Flags extends Flags {
     /**
      * Create new flags with the flags in <code>other</code> cleared.
      */
-    @Override
-    public X10Flags clear(Flags other) {
+    public X10Flags clearX(Flags other) {
         X10Flags f = new X10Flags();
         f.flags.addAll(this.flags);
         f.flags.removeAll(other.flags());
@@ -103,8 +115,7 @@ public class X10Flags extends Flags {
     /**
      * Create new flags with only flags in <code>other</code> set.
      */
-    @Override
-    public X10Flags retain(Flags other) {
+    public X10Flags retainX(Flags other) {
         X10Flags f = new X10Flags();
         f.flags.addAll(this.flags);
         f.flags.retainAll(other.flags());
@@ -118,8 +129,44 @@ public class X10Flags extends Flags {
      * @param flags
      *            TODO
      */
+    public X10Flags Extern() {
+        return setX(EXTERN);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>value</code> flag
+     * clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearExtern() {
+        return clearX(EXTERN);
+    }
+
+    /**
+     * Return true if <code>this</code> has the <code>value</code> flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isExtern() {
+        return contains(EXTERN);
+    }
+
+    public static boolean isExtern(Flags flags) {
+        return flags.contains(EXTERN);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>value</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
     public X10Flags Value() {
-        return set(VALUE);
+        return setX(VALUE);
     }
 
     /**
@@ -130,7 +177,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearValue() {
-        return clear(VALUE);
+        return clearX(VALUE);
     }
 
     /**
@@ -155,7 +202,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags Reference() {
-        return set(REFERENCE);
+        return setX(REFERENCE);
     }
 
     /**
@@ -166,7 +213,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearReference() {
-        return clear(REFERENCE);
+        return clearX(REFERENCE);
     }
 
     /**
@@ -187,7 +234,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags Atomic() {
-        return set(ATOMIC);
+        return setX(ATOMIC);
     }
 
     /**
@@ -198,7 +245,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearAtomic() {
-        return clear(ATOMIC);
+        return clearX(ATOMIC);
     }
 
     /**
@@ -212,6 +259,38 @@ public class X10Flags extends Flags {
     }
 
     /**
+     * Return a copy of this <code>this</code> with the <code>global</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+  //  public X10Flags Global() {
+  //      return setX(GLOBAL);
+  //  }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>global</code> flag
+     * clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+  //  public X10Flags clearGlobal() {
+  //      return clearX(GLOBAL);
+  //  }
+
+    /**
+     * Return true if <code>this</code> has the <code>global</code> flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+  //  public boolean isGlobal() {
+  //      return contains(GLOBAL);
+ //  }
+
+    /**
      * Return a copy of this <code>this</code> with the <code>pure</code> flag
      * set.
      * 
@@ -219,7 +298,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags Pure() {
-        return set(PURE);
+        return setX(PURE);
     }
 
     /**
@@ -230,7 +309,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearPure() {
-        return clear(PURE);
+        return clearX(PURE);
     }
 
     /**
@@ -244,11 +323,44 @@ public class X10Flags extends Flags {
     }
 
     /**
+     * Return a copy of this <code>this</code> with the <code>safe</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags Safe() {
+        return setX(SAFE);
+    }
+    
+    /**
+     * Return a copy of this <code>this</code> with the <code>global</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearGlobal() {
+        return clearX(GLOBAL);
+    }
+    
+    public X10Flags Global() {
+        return setX(GLOBAL);
+    }
+    
+    /**
+     * Return true if <code>this</code> has the <code>global</code> flag set.
+     */
+    public boolean isGlobal() {
+        return contains(GLOBAL) || contains(PROPERTY) || contains(STATIC);
+    }
+    
+    /**
      * Return a copy of this <code>this</code> with the <code>struct</code> flag
      * set.
      */
     public X10Flags Struct() {
-        return set(STRUCT);
+        return setX(STRUCT);
     }
 
     /**
@@ -256,7 +368,7 @@ public class X10Flags extends Flags {
      * clear.
      */
     public X10Flags clearStruct() {
-        return clear(STRUCT);
+        return clearX(STRUCT);
     }
 
     /**
@@ -267,6 +379,115 @@ public class X10Flags extends Flags {
     }
     
     /**
+     * Return true if <code>this</code> has the <code>safe</code> flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isSafe() {
+        return contains(SAFE);
+    }
+
+   
+    /**
+     * Return a copy of this <code>this</code> with the <code>nonblocking</code>
+     * flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags NonBlocking() {
+        return setX(NON_BLOCKING);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>nonblocking</code>
+     * flag clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearNonBlocking() {
+        return clearX(NON_BLOCKING);
+    }
+
+    /**
+     * Return true if <code>this</code> has the <code>nonblocking</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isNonBlocking() {
+        return contains(NON_BLOCKING) || contains(SAFE);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>incomplete</code>
+     * flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags Incomplete() {
+        return setX(INCOMPLETE);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>incomplete</code>
+     * flag clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearIncomplete() {
+        return clearX(INCOMPLETE);
+    }
+
+    /**
+     * Return true if <code>this</code> has the <code>incomplete</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isIncomplete() {
+        return contains(INCOMPLETE);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>shared</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags Shared() {
+        return setX(SHARED);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>shared</code> flag
+     * clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearShared() {
+        return clearX(SHARED);
+    }
+
+    /**
+     * Return true if <code>this</code> has the <code>shared</code> flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isShared() {
+        return contains(SHARED);
+    }
+
+    /**
      * Return a copy of this <code>this</code> with the <code>property</code>
      * flag set.
      * 
@@ -274,7 +495,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags Property() {
-        return set(PROPERTY);
+        return setX(PROPERTY);
     }
 
     /**
@@ -285,7 +506,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearProperty() {
-        return clear(PROPERTY);
+        return clearX(PROPERTY);
     }
 
     /**
@@ -299,6 +520,39 @@ public class X10Flags extends Flags {
     }
 
     /**
+     * Return a copy of this <code>this</code> with the <code>sequential</code>
+     * flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags Sequential() {
+        return setX(SEQUENTIAL);
+    }
+
+    /**
+     * Return a copy of this <code>this</code> with the <code>sequential</code>
+     * flag clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearSequential() {
+        return clearX(SEQUENTIAL);
+    }
+
+    /**
+     * Return true if <code>this</code> has the <code>sequential</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isSequential() {
+        return contains(SEQUENTIAL) || contains(SAFE);
+    }
+
+    /**
      * Return a copy of this <code>this</code> with the <code>pinned</code>
      * flag set.
      * 
@@ -306,7 +560,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags Clocked() {
-        return set(CLOCKED);
+        return setX(CLOCKED);
     }
 
     /**
@@ -317,7 +571,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearClocked() {
-        return clear(CLOCKED);
+        return clearX(CLOCKED);
     }
 
     /**
@@ -330,7 +584,38 @@ public class X10Flags extends Flags {
     public boolean isClocked() {
         return contains(CLOCKED);
     }
+    /**
+     * Return a copy of this <code>this</code> with the <code>pinned</code>
+     * flag set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags Pinned() {
+        return setX(PINNED);
+    }
 
+    /**
+     * Return a copy of this <code>this</code> with the <code>pinned</code>
+     * flag clear.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public X10Flags clearPinned() {
+        return clearX(PINNED);
+    }
+
+    /**
+     * Return true if <code>this</code> has the <code>pinned</code> flag
+     * set.
+     * 
+     * @param flags
+     *            TODO
+     */
+    public boolean isPinned() {
+        return contains(PINNED);
+    }
     /**
      * Return a copy of this <code>this</code> with the <code>hasType</code>
      * flag set.
@@ -339,7 +624,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags HasType() {
-        return set(HASTYPE);
+        return setX(HASTYPE);
     }
 
     /**
@@ -350,7 +635,7 @@ public class X10Flags extends Flags {
      *            TODO
      */
     public X10Flags clearHasType() {
-        return clear(HASTYPE);
+        return clearX(HASTYPE);
     }
 
     /**
@@ -363,7 +648,6 @@ public class X10Flags extends Flags {
     public boolean isHasType() {
         return contains(HASTYPE);
     }
-
     /**
      * Return "" if no flags set, or toString() + " " if some flags are set.
      */
@@ -386,7 +670,8 @@ public class X10Flags extends Flags {
     }
 
     public boolean hasAllAnnotationsOf(X10Flags f) {
-        boolean result = true;
+        boolean result = ((!f.isSequential()) || isSequential() || isSafe()) 
+        && ((!f.isNonBlocking()) || isNonBlocking() || isSafe()) && ((!f.isSafe()) || isSafe());
         // Report.report(1, "X10Flags: " + this + ".hasAllAnnotationsOf(" + f +
         // ")? " + result);
         return result;

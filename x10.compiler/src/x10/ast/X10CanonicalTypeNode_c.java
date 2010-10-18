@@ -69,11 +69,12 @@ import x10.visit.X10TypeChecker;
  * @author vj
  *
  */
-public class X10CanonicalTypeNode_c extends CanonicalTypeNode_c implements X10CanonicalTypeNode, AddFlags {
+public class X10CanonicalTypeNode_c extends CanonicalTypeNode_c implements X10CanonicalTypeNode,
+AddFlags {
 	
-    public X10CanonicalTypeNode_c(Position pos, Type type) {
-	this(pos, Types.<Type>ref(type));
-    }
+	  public X10CanonicalTypeNode_c(Position pos, Type type) {
+			this(pos, Types.<Type>ref(type));
+		    }
     public X10CanonicalTypeNode_c(Position pos, Ref<? extends Type> type) {
 	super(pos, type);
     }
@@ -84,7 +85,7 @@ public class X10CanonicalTypeNode_c extends CanonicalTypeNode_c implements X10Ca
     }
   
     @Override
-    public Node typeCheck(ContextVisitor tc) {
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
 	X10Context c = (X10Context) tc.context();
 	X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
 
@@ -98,7 +99,9 @@ public class X10CanonicalTypeNode_c extends CanonicalTypeNode_c implements X10Ca
 		flags = null;
 	}
 	((Ref<Type>) type).update(xt);
-
+	
+	
+	
 	if (t instanceof ParameterType) {
 	    ParameterType pt = (ParameterType) t;
 	    Def def = Types.get(pt.def());
@@ -118,20 +121,17 @@ public class X10CanonicalTypeNode_c extends CanonicalTypeNode_c implements X10Ca
 	        }
 	    }
 	    if (p.inStaticContext() && def instanceof ClassDef && ! inConstructor) {
-	        Errors.issue(tc.job(),
-	                new SemanticException("Cannot refer to type parameter "+ pt.fullName() + " of " + def + " from a static context.", position()));
+	        throw new SemanticException("Cannot refer to type parameter "+ pt.fullName() + " of " + def + " from a static context.", position());
 	    }
 	    if (flags != null && ! flags.equals(Flags.NONE)) {
-	    	Errors.issue(tc.job(),
-	    	        new SemanticException("Cannot qualify type parameter "+ pt.fullName() + " of " + def + " with flags " + flags + ".", position()));
+	    	throw new SemanticException("Cannot qualify type parameter "+ pt.fullName() + " of " + def + " with flags " + flags + ".", position());
 	    }
 	}
-
-	try {
-	    checkType(tc.context(), t, position());
-	} catch (SemanticException e) {
-	    Errors.issue(tc.job(), e, this);
-	}
+	
+	
+	checkType(tc.context(), t, position());
+	
+	
 
 	List<AnnotationNode> as = ((X10Del) this.del()).annotations();
 	if (as != null && !as.isEmpty()) {
@@ -151,13 +151,7 @@ public class X10CanonicalTypeNode_c extends CanonicalTypeNode_c implements X10Ca
 	    tref.update(newType);
 	}
 
-	Node n = this;
-	try {
-	    n = super.typeCheck(tc);
-	} catch (SemanticException e) {
-	    Errors.issue(tc.job(), e, this);
-	}
-	return n;
+	return super.typeCheck(tc);
     }
     
     @Override

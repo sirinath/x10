@@ -340,8 +340,6 @@ public class LineNumberMap extends StringTable {
 			return 206;		
 		if (type.startsWith("x10.lang.ValRail"))
 			return 207;
-		if (type.startsWith("x10.array.Point"))
-			return 208;
 		if (type.startsWith("x10.array.Region"))
 			return 300;
 		return 101; // generic class
@@ -947,10 +945,6 @@ public class LineNumberMap extends StringTable {
         	w.writeln("sizeof(_X10ArrayMapList),");
         else
         	w.writeln("0, // no array mappings");
-        if (!refMap.isEmpty())
-        	w.writeln("sizeof(_X10RefMapList),");
-        else
-        	w.writeln("0, // no reference mappings");
         
         w.writeln("_X10strings,");
         if (!m.isEmpty()) {
@@ -989,13 +983,9 @@ public class LineNumberMap extends StringTable {
         else
         	w.writeln("NULL,");
         if (!arrayMap.isEmpty())
-        	w.writeln("_X10ArrayMapList,");
+        	w.write("_X10ArrayMapList");
         else
-        	w.writeln("NULL,");
-        if (!refMap.isEmpty())
-        	w.write("_X10RefMapList");
-        else
-        	w.write("NULL");
+        	w.write("NULL");        	
         
         w.end(); w.newline();
         w.writeln("};");

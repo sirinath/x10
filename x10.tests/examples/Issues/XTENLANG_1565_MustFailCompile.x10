@@ -13,7 +13,15 @@ import harness.x10Test;
 
 /**
  * @author yoav
- Should produce errors where the ERR markers are.
+ Should produce these errors:
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:45: "n" may not have been initialized
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:53: "k" may not have been initialized
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:54: "n" may not have been initialized
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:55: "j" may not have been initialized
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:63: "j" may not have been initialized
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:64: "q" may not have been initialized
+C:\cygwin\home\Yoav\intellij\sourceforge\x10.tests\examples\Issues\XTENLANG_1565_MustFailCompile.x10:23-68: Final field "q" might not have been initialized
+7 errors.
  */
 
 class XTENLANG_1565_MustFailCompile extends x10Test {
@@ -26,7 +34,7 @@ class XTENLANG_1565_MustFailCompile extends x10Test {
 			async { z = 0; }
 		}
 		
-		var i:Int, j:Int, k:Int;
+		shared var i:Int, j:Int, k:Int;
 
 		i=1;
 		// i:[1,1,1,1]
@@ -67,7 +75,7 @@ class XTENLANG_1565_MustFailCompile extends x10Test {
 		// j:[1,2,1,2]
 		f(j);
 	}
-	private def f(i:Int):Int=i+1;
+	def f(i:Int):Int=i+1;
 
     public def run(): boolean {
         return true;

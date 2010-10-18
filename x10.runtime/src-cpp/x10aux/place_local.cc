@@ -99,8 +99,7 @@ void place_local::unregisterData(x10_int id) {
             cur = cur->_next;
         }
         // hmm, wasn't registered in the first place
-        // probably an error...but not entirely fatal, so we don't
-        // have to about if running with assertions disabled.
+        // probably an error...
         _lock->unlock();
         assert(false);
     }

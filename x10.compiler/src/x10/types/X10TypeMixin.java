@@ -121,15 +121,6 @@ public class X10TypeMixin {
 		FieldInstance rankField = ((X10ClassType) ts.Region()).fieldNamed(Name.make("rank"));
 		if (rankField == null)
 			throw new InternalCompilerError("Could not find rank field of " + ts.Region(), pos);
-
-		FieldInstance rectField = ((X10ClassType) ts.Region()).fieldNamed(Name.make("rect"));
-		if (rectField == null)
-			throw new InternalCompilerError("Could not find rect field of " + ts.Region(), pos);
-
-		FieldInstance zeroBasedField = ((X10ClassType) ts.Region()).fieldNamed(Name.make("zeroBased"));
-		if (zeroBasedField == null)
-			throw new InternalCompilerError("Could not find zeroBased field of " + ts.Region(), pos);
-
 		try {
 
 			XVar selfSize = ts.xtypeTranslator().trans(c, c.self(), sizeField);
@@ -140,15 +131,7 @@ public class X10TypeMixin {
 			XVar selfRegionRank = ts.xtypeTranslator().trans(c, selfRegion, rankField);
 			XLit rankLiteral = XTerms.makeLit(1);
 			c.addBinding(selfRegionRank, rankLiteral);
-
-			XVar selfRegionRect = ts.xtypeTranslator().trans(c, selfRegion, rectField);
-			XLit trueLiteral = XTerms.makeLit(true);
-			c.addBinding(selfRegionRect, trueLiteral);
-
-			XVar selfRegionZeroBased = ts.xtypeTranslator().trans(c, selfRegion, zeroBasedField);
-			c.addBinding(selfRegionZeroBased, trueLiteral);
-
-			//c.toString();
+			c.toString();
 			t = X10TypeMixin.xclause(t, c);
 
 		} catch (XFailure z) {
@@ -1332,23 +1315,16 @@ then we substitute 0/false/null in all the constraints in C and if they all eval
 	    boolean old = oldStyleMoreSpecificMethod(xp1, xp2, (X10Context) context, ts, ct1, t1, t2, descends);
 	    if (java != old) {
 	    	
-	    	System.out.println("(Warning) Please check definitions p1 and p2.  " +
+	    	System.out.println("(Warning) Please check definitions p1 and p2." +
 	    			((java && ! old) ? "p1 is now more specific than p2; it was not in 2.0.6."
 	    					: "p1 is now not more specific than p2; it was in 2.0.6.")
-	    			+ "\n\t: p1: " + getOrigMI(xp1)
+	    			+ "\n\t: p1: " + xp1
 	    			+ "\n\t: at " + xp1.position()
-	    			+ "\n\t: p2: " + getOrigMI(xp2)
+	    			+ "\n\t: p2: " + xp2
 	    			+ "\n\t: at " + xp2.position());
 	    }
 	    // Change this to return old to re-enable 2.0.6 style computation.
 	    return  java; 
-	}
-	static ProcedureInstance<?> getOrigMI(ProcedureInstance<?> xp) {
-		if (xp instanceof MethodInstance)
-			return ((MethodInstance) xp).origMI();
-		if (xp instanceof ConstructorInstance)
-			return ((ConstructorInstance) xp).origMI();
-		return xp;
 	}
 	// This is taken from the 2.0.6 implementation.
 	// This contains logic for pre-generic Java. One determines

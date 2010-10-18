@@ -20,8 +20,8 @@ using namespace x10aux;
 
 const ref<String> x10aux::short_utils::toString(x10_short value, x10_int radix) {
     (void) value; (void) radix;
-    UNIMPLEMENTED("toString");
-    return X10_NULL;
+    assert(false); /* FIXME: STUBBED NATIVE */
+    return null;
 }
 
 const ref<String> x10aux::short_utils::toHexString(x10_short value) {
@@ -42,18 +42,18 @@ const ref<String> x10aux::short_utils::toString(x10_short value) {
 
 x10_short x10aux::short_utils::parseShort(const ref<String>& s, x10_int radix) {
     (void) s;
-    UNIMPLEMENTED("parseShort");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return radix; /* Bogus, but use radix to avoid warning about unused parameter */
 }
 
 x10_short x10aux::short_utils::parseShort(const ref<String>& s) {
     (void) s;
-    UNIMPLEMENTED("parseShort");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return 0; 
 }
 
 x10_short x10aux::short_utils::reverseBytes(x10_short x) {
-    UNIMPLEMENTED("reverseBytes");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 // vim:tabstop=4:shiftwidth=4:expandtab

@@ -227,7 +227,7 @@ namespace x10 {
         template <class T> void ValRail<T>::_serialize(x10aux::ref<ValRail<T> > this_,
                                                        x10aux::serialization_buffer &buf) {
             Object::_serialize_reference(this_, buf);
-            if (!this_.isNull()) {
+            if (this_ != x10aux::null) {
                 this_->_serialize_body(buf);
             }
         }
@@ -264,7 +264,7 @@ namespace x10 {
         template <class T> template<class S> x10aux::ref<S> ValRail<T>::_deserialize(x10aux::deserialization_buffer &buf) {
             Object::_reference_state rr = Object::_deserialize_reference_state(buf);
             if (0 == rr.ref) {
-                return X10_NULL;
+                return x10aux::null;
             } else {
                 x10aux::ref<ValRail<T> > res = ValRail<T>::template _deserializer<ValRail<T> >(buf);
                 _S_("Deserialized a "<<ANSI_SER<<ANSI_BOLD<<"class"<<ANSI_RESET<<

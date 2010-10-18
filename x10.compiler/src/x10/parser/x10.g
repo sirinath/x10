@@ -100,6 +100,7 @@
     import x10.ast.X10Binary_c;
     import x10.ast.X10Unary_c;
     import x10.ast.X10IntLit_c;
+    import x10.ast.X10NodeFactory_c;
     import x10.extension.X10Ext;
     import polyglot.frontend.FileSource;
     import polyglot.frontend.Parser;
@@ -240,6 +241,7 @@
     at
 --    ateach
     atomic
+    await
 --    break
 --    case
 --    catch
@@ -920,7 +922,7 @@
                     pos = pos == null ? fn.position() : new JPGPosition(pos, fn.position());
                     Flags f = fn.flags();
                     if (f instanceof X10Flags) {
-                        xf = xf.set((X10Flags) f);
+                        xf = xf.setX((X10Flags) f);
                     }
                     else {
                         xf = X10Flags.toX10Flags(xf.set(f));
@@ -1921,13 +1923,13 @@
        ExistentialList ::= FormalParameter
         /.$BeginJava
                     List<Formal> l = new TypedList<Formal>(new LinkedList<Formal>(), Formal.class, false);
-                    l.add(FormalParameter.flags(nf.FlagsNode(Position.compilerGenerated(FormalParameter.position()), Flags.FINAL)));
+                    l.add(FormalParameter.flags(nf.FlagsNode(X10NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
                     setResult(l);
           $EndJava
         ./
                           | ExistentialList ; FormalParameter
         /.$BeginJava
-                    ExistentialList.add(FormalParameter.flags(nf.FlagsNode(Position.compilerGenerated(FormalParameter.position()), Flags.FINAL)));
+                    ExistentialList.add(FormalParameter.flags(nf.FlagsNode(X10NodeFactory_c.compilerGenerated(FormalParameter), Flags.FINAL)));
           $EndJava
         ./
 

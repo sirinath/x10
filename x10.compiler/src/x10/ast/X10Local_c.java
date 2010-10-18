@@ -62,16 +62,14 @@ public class X10Local_c extends Local_c {
 	        li = findAppropriateLocal(tc, liName);
 	    }
 
-        if (!li.flags().isFinal()) {
+        if (!li.flags().isFinal() && !X10Flags.toX10Flags(li.flags()).isShared()) {
             // if the local is defined in an outer class, then it must be final
             // shared was removed from the language: you cannot access var in a closure
             // Note that an async is similar to a closure (we create a dummy closure)
-            boolean isInClosure = false;
 	        if (context.isLocal(liName)) {
                 // ok
             } else if (!context.isLocalIncludingAsyncAt(liName)) {
 	            // this local is defined in an outer class
-                isInClosure = true;
 	            Errors.issue(tc.job(), new SemanticException("Local variable \"" + liName +"\" is accessed from an inner class or a closure, and must be declared final.",this.position()));
 	        } else {
                 // if the access is in an async and the local-var is not local, then we must ensure that the scoping looks like this: var ... (no async) ... finish ... async
@@ -82,7 +80,6 @@ public class X10Local_c extends Local_c {
                    Errors.issue(tc.job(), new SemanticException("Local variable \"" + liName +"\" cannot be captured in an async if there is no enclosing finish in the same scoping-level as \"" + liName +"\"; consider changing \"" + liName +"\" from var to val.",this.position()));
             }
 
-            if (!isInClosure) {
             // we check that usages inside an "at" are at the origin place if it is a "var" (for "val" we're fine)
             final X10LocalDef_c localDef_c = (X10LocalDef_c) li.def();
             XTerm origin = localDef_c.placeTerm();
@@ -104,7 +101,6 @@ public class X10Local_c extends Local_c {
                 }
                 if (!isOk)
                     Errors.issue(tc.job(), new SemanticException("Local variable \"" + liName +"\" is accessed at a different place, and must be declared final.",this.position()));
-            }
             }
         }
 

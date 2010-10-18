@@ -22,7 +22,6 @@ import polyglot.types.SemanticException;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.TypeBuilder;
-import x10.errors.Errors;
 
 public class X10SourceFile_c extends SourceFile_c {
 
@@ -31,7 +30,7 @@ public class X10SourceFile_c extends SourceFile_c {
 	}
 
 	/** Type check the source file. */
-	public Node typeCheck(ContextVisitor tc) {
+	public Node typeCheck(ContextVisitor tc) throws SemanticException {
 		boolean hasPublic = false;
 
 		// Override method to not check for duplicate declarations. This will be
@@ -40,10 +39,9 @@ public class X10SourceFile_c extends SourceFile_c {
 		for (TopLevelDecl d : decls) {
 			if (d.flags().flags().isPublic()) {
 				if (hasPublic) {
-					Errors.issue(tc.job(),
-					        new SemanticException("The source contains more than one public declaration.", d.position()),
-					        this);
+					throw new SemanticException("The source contains more than one public declaration.",d.position());
 				}
+
 				hasPublic = true;
 			}
 		}

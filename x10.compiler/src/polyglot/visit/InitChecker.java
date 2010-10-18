@@ -28,7 +28,6 @@ import x10.ast.Finish_c;
 import x10.extension.X10Ext_c;
 import x10.types.X10LocalDef;
 import x10.types.X10TypeSystem;
-import x10.types.X10Flags;
 import x10.visit.Desugarer;
 
 /**
@@ -299,14 +298,8 @@ public class InitChecker extends DataFlow
             return new MinMaxInitCount(minSeq.increment(),maxSeq.increment(),minAsync.increment(),maxAsync.increment());
         }
         InitCount getMin() { return minSeq; }
-        boolean isZero() {
-            return equals(ZERO);
-        }
-        boolean isOne() {
-            return equals(ONE);
-        }
         boolean isIllegalVal() {
-            return !isOne();
+            return maxSeq!=InitCount.ONE || maxAsync!=InitCount.ONE || minSeq!=InitCount.ONE || minAsync!=InitCount.ONE;
         }
         public int hashCode() {
             return minSeq.hashCode() * 64 + maxSeq.hashCode() * 16 + minAsync.hashCode() * 4 + maxAsync.hashCode();
@@ -314,15 +307,13 @@ public class InitChecker extends DataFlow
         public String toString() {
             return "[ min: " + minSeq + "; max: " + maxSeq + "; minAsync: " + minAsync + "; maxAsync: " + maxAsync + " ]";
         }
-        public boolean equals(MinMaxInitCount maxInitCount) {
-            return this.minSeq==maxInitCount.minSeq &&
+        public boolean equals(Object o) {
+            if (o instanceof MinMaxInitCount) {
+                final MinMaxInitCount maxInitCount = (MinMaxInitCount) o;
+                return this.minSeq==maxInitCount.minSeq &&
                        this.maxSeq==maxInitCount.maxSeq &&
                        this.minAsync==maxInitCount.minAsync &&
                        this.maxAsync==maxInitCount.maxAsync;
-        }
-        public boolean equals(Object o) {
-            if (o instanceof MinMaxInitCount) {
-                return equals((MinMaxInitCount) o);
             }
             return false;
         }
@@ -569,7 +560,7 @@ public class InitChecker extends DataFlow
         for (Map.Entry<FieldDef,MinMaxInitCount> e : currCBI.currClassFinalFieldInitCounts.entrySet()) {
             if (e.getKey() instanceof FieldDef) {
                 FieldDef fi = (FieldDef)e.getKey();
-                if (fi.flags().isStatic() && fi.flags().isFinal()) {  // static fields cannot be properties
+                if (fi.flags().isStatic() && fi.flags().isFinal()) {
                     MinMaxInitCount initCount = (MinMaxInitCount)e.getValue();
                     if (initCount.getMin().isZero()) {
                         reportError("Final field \"" + fi.name() +
@@ -591,19 +582,9 @@ public class InitChecker extends DataFlow
     protected void checkNonStaticFinalFieldsInit(ClassBody cb) {
         // for each non-static final field def, check that all
         // constructors intialize it exactly once, taking into account constructor calls.
-        boolean propertyChecked = false;
         for (FieldDef fi : currCBI.currClassFinalFieldInitCounts.keySet()) {
-
-            final X10Flags flags = X10Flags.toX10Flags(fi.flags());
-            final boolean isProperty = flags.isProperty(); // property(...) is checked in CheckEscapingThis, but here we check it is called on every execution path exactly once
-            if (isProperty) {
-                // using one property field as a representative for the property(...) call
-                if (propertyChecked) continue;
-                propertyChecked = true;
-            }
-            boolean check = !flags.isStatic() && flags.isFinal();
-            if (check) {
-                // the field is final and not static  (and not a property)
+            if (fi.flags().isFinal() && !fi.flags().isStatic()) {
+                // the field is final and not static
                 // it must be initialized exactly once.
                 // navigate up through all of the the constructors
                 // that this constructor calls.
@@ -631,9 +612,8 @@ public class InitChecker extends DataFlow
                         Set<FieldDef> s = currCBI.fieldsConstructorInitializes.get(ci);
                         if (s != null && s.contains(fi)) {
                             if (isInitialized) {
-                                reportError(
-                                        isProperty ? "property(...) might have already been called" :
-                                        "Final field \"" + fi.name() +"\" might have already been initialized",
+                                reportError("Final field \"" + fi.name() +
+                                        "\" might have already been initialized",
                                         cd.position());
                             }
                             isInitialized = true;
@@ -641,9 +621,8 @@ public class InitChecker extends DataFlow
                         ci = (ConstructorDef)currCBI.constructorCalls.get(ci);
                     }
                     if (!isInitialized) {
-                        reportError(
-                                isProperty ? "property(...) might not have been called" :
-                                "Final field \"" + fi.name() +"\" might not have been initialized",
+                        reportError("Final field \"" + fi.name() +
+                                "\" might not have been initialized",
                                 ciStart.position());
                     }
                 }
@@ -781,7 +760,7 @@ public class InitChecker extends DataFlow
                 final MinMaxInitCount after = out.initStatus.get(v);
                 if (after==null) continue;
                 final Flags flags = v.flags();
-                if (!before.equals(after) && after.isOne() && flags !=null && flags.isFinal()) {
+                if (!before.equals(after) && after.equals(MinMaxInitCount.ONE) && flags !=null && flags.isFinal()) {
                     if (ext.asyncInitVal ==null) ext.asyncInitVal = new HashSet<VarDef>();
                     ext.asyncInitVal.add(v);
                     break; // optimization, cause we already added "v"
@@ -999,10 +978,8 @@ public class InitChecker extends DataFlow
             assert (fi.flags().isFinal());
             MinMaxInitCount initCount = m.get(fi);
             assert (initCount != null);
-            if (initCount.isZero()) { // if property(...) is called multiple times, we report it in CheckEscapingThis
-                initCount = initCount.increment();
-                m.put(fi, initCount);
-            }
+            initCount = initCount.increment();
+            m.put(fi, initCount);
         }
         return itemToMap(new DataFlowItem(m), succEdgeKeys);
     }
@@ -1401,14 +1378,14 @@ public class InitChecker extends DataFlow
         }
     }
     /**
-     * Check property(...)
+     * Check that the assignment to a field is correct.
      */
     protected void checkAssignPropertyCall(FlowGraph graph,
                                            AssignPropertyCall a,
                                            DataFlowItem dfIn,
                                            DataFlowItem dfOut) {
-        // CheckEscapingThis will check that property(...) is called at most once.  
-        /*if (!(currCBI.currCodeDecl instanceof ConstructorDecl)) return; // if we property(...) in some method
+
+        if (!(currCBI.currCodeDecl instanceof ConstructorDecl)) return; // if we property(...) in some method
         for (FieldInstance p : a.properties()) {
             FieldDef fi = p.def();
             assert (fi.flags().isFinal());
@@ -1426,7 +1403,7 @@ public class InitChecker extends DataFlow
                         "\" might already have been initialized",
                         a.position());
             }
-        } */
+        }
     }
     /**
      * Check that the set of <code>LocalInstance</code>s

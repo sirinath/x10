@@ -41,6 +41,7 @@ import x10.ast.X10ClassDecl;
 import x10.ast.X10MethodDecl;
 import x10.ast.X10NodeFactory;
 import x10.compiler.ws.codegen.AbstractWSClassGen;
+import x10.compiler.ws.codegen.WSMainMethodClassGen;
 import x10.compiler.ws.codegen.WSMethodFrameClassGen;
 import x10.compiler.ws.util.WSCallGraph;
 import x10.compiler.ws.util.WSCallGraphNode;
@@ -112,8 +113,7 @@ public class WSCodeGenerator extends ContextVisitor {
                 throw new SemanticException("Work-Stealing doesn't support at: " + r, n.position());
             }
         }
-        if(n instanceof Closure && !(n instanceof PlacedClosure)){
-            //match with WSCallGraph, not handle PlacedClosure
+        if(n instanceof Closure){
             Closure closure = (Closure)n;           
             ClosureDef cDef = closure.closureDef();
             if(wts.isTargetProcedure(cDef)){
@@ -136,9 +136,19 @@ public class WSCodeGenerator extends ContextVisitor {
                     System.out.println("[WS_INFO] Start transforming target method: " + mDef.name());
                 }
                 
+                WSMethodFrameClassGen mFrame;
                 Job job = ((ClassType) mDef.container().get()).def().job();
-                WSMethodFrameClassGen mFrame = new WSMethodFrameClassGen(job, (X10NodeFactory) nf, (X10Context) context, mDef, mDecl, wts);
-                n = mFrame.transform();
+                if (X10PrettyPrinterVisitor.isMainMethodInstance(mDef.asInstance(), context)) {
+                    WSMainMethodClassGen mainFrame = new WSMainMethodClassGen(job, (X10NodeFactory) nf, (X10Context) context, mDef, mDecl, wts);
+                    mainFrame.genClass();
+                    n = mainFrame.getNewMainMethod();
+                    mFrame = mainFrame;
+                }
+                else {
+                    mFrame = new WSMethodFrameClassGen(job, (X10NodeFactory) nf, (X10Context) context, mDef, mDecl, wts);
+                    mFrame.genClass();
+                    n = null;
+                }
                 genClassDecls.addAll(mFrame.close()); 
                 genMethodDecls.add(mFrame.getWraperMethod());
                 if(debugLevel > 3){

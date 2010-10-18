@@ -130,7 +130,7 @@ public class NativeClassVisitor extends ContextVisitor {
     }
 
     protected static X10Flags clearNative(Flags flags) {
-        return X10Flags.toX10Flags(flags).clear(Flags.NATIVE);
+        return X10Flags.toX10Flags(flags).clearX(Flags.NATIVE);
     }
 
     protected Node leaveCall(Node parent, Node old, Node n, NodeVisitor v) throws SemanticException {
@@ -151,7 +151,7 @@ public class NativeClassVisitor extends ContextVisitor {
         ClassBody cbody = cdecl.body();
         List<ClassMember> cmembers = new ArrayList<ClassMember>();
 
-        Position p = Position.compilerGenerated(cbody.position());
+        Position p = X10NodeFactory_c.compilerGenerated(cbody);
 
         // create fake def for native class
         X10ClassDef fake = (X10ClassDef) xts.createClassDef();

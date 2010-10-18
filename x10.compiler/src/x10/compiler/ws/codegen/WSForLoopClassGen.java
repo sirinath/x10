@@ -31,12 +31,14 @@ import x10.util.synthesizer.SwitchSynth;
  *
  */
 public class WSForLoopClassGen extends WSRegularFrameClassGen {
-    protected final For forStmt;
+
+    For forStmt;
     
-    public WSForLoopClassGen(AbstractWSClassGen parent, For forStmt) {
-        super(parent, forStmt.body(),
+    public WSForLoopClassGen(AbstractWSClassGen parent, For forS) {
+        super(parent, forS.body(), 
               WSCodeGenUtility.getLoopClassName(parent.getClassName()));
-        this.forStmt = forStmt;
+    
+        this.forStmt = forS;
     }
     
     
@@ -45,8 +47,7 @@ public class WSForLoopClassGen extends WSRegularFrameClassGen {
      * since for loop will transform the for into while in slow path
      * @see x10.compiler.ws.codegen.WSRegularFrameClassGen#genThreeMethods()
      */
-    @Override
-    protected void genMethods() throws SemanticException {
+    protected void genThreeMethods() throws SemanticException {
         
         //Firstly process all the initial, update, condition
         List<ForInit> forInits = new ArrayList<ForInit>();

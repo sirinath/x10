@@ -69,7 +69,7 @@ public class StmtExpr_c extends Expr_c implements StmtExpr {
     }
 
     /** Type check the expression. */
-    public Node typeCheck(ContextVisitor tc) {
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
         return type(result == null ? tc.typeSystem().Void() : result.type());
     }
 

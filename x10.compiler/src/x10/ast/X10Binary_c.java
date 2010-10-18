@@ -47,7 +47,6 @@ import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.util.CollectionUtil;
-import polyglot.util.InternalCompilerError;
 import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
@@ -184,7 +183,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
 
     // HACK: T1==T2 can sometimes be parsed as e1==e2.  Correct that.
     @Override
-    public Node typeCheckOverride(Node parent, ContextVisitor tc) {
+    public Node typeCheckOverride(Node parent, ContextVisitor tc) throws SemanticException {
         if (op == EQ) {
             X10NodeFactory nf = (X10NodeFactory) tc.nodeFactory();
             Receiver t1 = toReceiver(nf, left);
@@ -195,12 +194,10 @@ public class X10Binary_c extends Binary_c implements X10Binary {
                 Node n2 = this.visitChild(t2, tc);
 
                 if (n1 instanceof TypeNode && n2 instanceof TypeNode) {
-                    SubtypeTest n = nf.SubtypeTest(position(), (TypeNode) n1, (TypeNode) n2, true);
-                    try {
-                        n = (SubtypeTest) n.typeCheck(tc);
-                    } catch (SemanticException e) {
-                        throw new InternalCompilerError("Unexpected exception while typechecking "+n, position(), e);
-                    }
+                    Node n = nf.SubtypeTest(position(), (TypeNode) n1, (TypeNode) n2, true);
+                    n = n.del().disambiguate(tc);
+                    n = n.del().typeCheck(tc);
+                    n = n.del().checkConstants(tc);
                     return n;
                 }
             }
@@ -308,7 +305,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
         Type lbase = X10TypeMixin.baseType(left.type());
         Type rbase = X10TypeMixin.baseType(right.type());
         if (xts.hasUnknown(lbase) || xts.hasUnknown(rbase))
-        	return this.type(xts.unknownType(position()));
+        	return  this.type(xts.unknownType(position()));
         
         if (op == EQ || op == NE || op == LT || op == GT || op == LE || op == GE) {
             Object lv = left.isConstant() ? left.constantValue() : null;
@@ -323,15 +320,13 @@ public class X10Binary_c extends Binary_c implements X10Binary {
                         Expr e = Converter.attemptCoercion(tc, left, rbase);
                         if (e == left)
                             return this.type(xts.Boolean());
-                        if (e != null)
-                            return Converter.check(left(e), tc);
+                        return Converter.check(left(e), tc);
                     }
                     if (rv != null && xts.numericConversionValid(lbase, rbase, rv, context)) {
                         Expr e = Converter.attemptCoercion(tc, right, lbase);
                         if (e == right)
                             return this.type(xts.Boolean());
-                        if (e != null)
-                            return Converter.check(right(e), tc);
+                        return Converter.check(right(e), tc);
                     }
                 } catch (SemanticException e) { } // FIXME
             }
@@ -353,7 +348,7 @@ public class X10Binary_c extends Binary_c implements X10Binary {
                 try {
                 Expr el = Converter.attemptCoercion(tc, left, promoted);
                 Expr er = Converter.attemptCoercion(tc, right, promoted);
-                if (el != null && er != null && (el != left || er != right))
+                if (el != left || er != right)
                 	return Converter.check(left(el).right(er), tc);
                 } catch (SemanticException e) { } // FIXME
             }

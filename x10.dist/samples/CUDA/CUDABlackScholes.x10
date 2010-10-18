@@ -40,8 +40,8 @@ public class CUDABlackScholes {
         finish async at (p) @CUDA @CUDADirectParams {
             //val blocks = CUDAUtilities.autoBlocks(),
             //    threads = CUDAUtilities.autoThreads();
-            finish for ([block] in 0..blocks-1) async {
-                clocked finish for ([thread] in 0..threads-1) clocked async {
+            for ([block] in 0..blocks-1) {
+                for ([thread] in 0..threads-1) async {
                     val tid = block * threads + thread;
                     val tids = blocks * threads;
                     for (var opt:Int=tid; opt < opt_N; opt+=tids) {
@@ -84,6 +84,7 @@ public class CUDABlackScholes {
 
         // Problem parameters
         val OPT_N = 4000000;
+        val NUM_ITERATIONS = 512;
         val RISKFREE = 0.02f;
         val VOLATILITY = 0.30f;
 
@@ -96,7 +97,6 @@ public class CUDABlackScholes {
         }
 
         val gpu = here.children().size==0 ? here : here.child(0);
-        val NUM_ITERATIONS = gpu==here ? 32 : 512;
         val cpu = here;
         val rand = new Random();
 

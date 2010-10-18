@@ -323,17 +323,9 @@ public class TypeDecl_c extends Term_c implements TypeDecl {
 	}
 	
 	@Override
-	public Node typeCheck(ContextVisitor tc) {
-	    try {
-	        checkCycles(type.type());
-	    } catch (SemanticException z) {
-	        Errors.issue(tc.job(), z, this);
-	    }
-	    try {
-	        X10MethodDecl_c.dupFormalCheck(typeParams, formals);
-	    } catch (SemanticException z) {
-	        Errors.issue(tc.job(), z, this);
-	    }
+	public Node typeCheck(ContextVisitor tc) throws SemanticException {
+	    checkCycles(type.type());
+	    X10MethodDecl_c.dupFormalCheck(typeParams, formals);
 	    return this;
 	}
 

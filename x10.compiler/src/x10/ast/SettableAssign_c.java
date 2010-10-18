@@ -257,9 +257,8 @@ public class SettableAssign_c extends Assign_c implements SettableAssign {
 		        args = p.snd();
 		    }
 		    catch (SemanticException e) {
-		        if (mi.error() instanceof Errors.CannotGenerateCast) {
-		            throw new InternalCompilerError("Unexpected cast error", mi.error());
-		        }
+		        if (mi.error() instanceof Errors.CannotGenerateCast)
+		            throw mi.error();
 		        Type bt = X10TypeMixin.baseType(array.type());
 		        boolean arrayP = xts.isX10Array(bt) || xts.isX10DistArray(bt);
 		        Errors.issue(tc.job(), new Errors.CannotAssignToElement(leftToString(), arrayP, right, X10TypeMixin.arrayElementType(array.type()), position(), mi.error()));

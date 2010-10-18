@@ -289,8 +289,7 @@ public class CheckEscapingThis extends NodeVisitor
                     // report the field that wasn't written to
                     for (FieldDef f : fields)
                         // a VAR marked with @Uninitialized is not tracked
-                        if (!f.flags().isFinal() // final fields are reported already in InitChecker 
-                            && !newInfo.seqWrite.contains(f) && !X10TypeMixin.isUninitializedField((X10FieldDef)f,(X10TypeSystem)ts)) {
+                        if (!newInfo.seqWrite.contains(f) && !X10TypeMixin.isUninitializedField((X10FieldDef)f,(X10TypeSystem)ts)) {
                             final Position pos = currDecl.position();
                             if (pos.isCompilerGenerated()) // auto-generated ctor
                                 reportError("Field '"+f.name()+"' was not definitely assigned.", f.position());
@@ -384,9 +383,8 @@ public class CheckEscapingThis extends NodeVisitor
                 case Start:
                     assert false : "There must be a super call (either explicit or implicit)";
                 case SawCtor:
-                    // InitChecker checks it: property(...) might not have been called 
-                    //if (hasProperties && wasSuperCall)
-                    //    reportError("You must call 'property(...)' at least once",ctor.position());
+                    if (hasProperties && wasSuperCall)
+                        reportError("You must call 'property(...)' at least once",ctor.position());
                     break;
             }
         }
@@ -635,7 +633,7 @@ public class CheckEscapingThis extends NodeVisitor
 
                     if (isNoThisAccess) { // NoThisAccess is stronger than NonEscaping so we check it first (in case someone wrote both annotations)
                         // check "this" is not accessed at all
-                        if (procBody != null) { // native/abstract methods
+                        if (procBody!=null) { // native/abstract methods
                             ThisChecker thisChecker = new ThisChecker(job);
                             procBody.visit(thisChecker);
                             if (thisChecker.error())
