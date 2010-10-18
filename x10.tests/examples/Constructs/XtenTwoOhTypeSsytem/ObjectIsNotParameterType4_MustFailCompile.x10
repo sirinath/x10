@@ -19,9 +19,9 @@ import harness.x10Test;
  */
 public class ObjectIsNotParameterType4_MustFailCompile extends x10Test {
 	class GenericWrapper[T] {
-		  def m(x:T):void {}
+		  incomplete def m(x:T):Void;
 		  public def testAssign(y:Object) {
-			  m(y);  // ERR: Method m(x: T): x10.lang.Void in ObjectIsNotParameterType4_MustFailCompile.GenericWrapper{self==ObjectIsNotParameterType4_MustFailCompile.GenericWrapper#this} cannot be called with arguments (x10.lang.Object{self==y});    Invalid Parameter.
+			  m(y);
 		  }
 	}
 	public def run()=true;

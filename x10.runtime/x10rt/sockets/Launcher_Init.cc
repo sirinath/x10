@@ -32,8 +32,7 @@ void Launcher::Setup(int argc, char ** argv)
 
 	// check to see if we need to launch stuff, or if we need to execute the runtime.
 	// we just skip the launcher and run the program if the user hasn't set X10LAUNCHER_NPROCS
-	if (getenv(X10LAUNCHER_RUNTIME) || !getenv(X10LAUNCHER_NPROCS) ||
-			(strcmp(getenv(X10LAUNCHER_NPROCS), "1")==0 && !getenv(X10LAUNCHER_HOSTFILE)))
+	if (!getenv(X10LAUNCHER_NPROCS) || getenv(X10LAUNCHER_RUNTIME))
 		return;
 
 	_singleton = (Launcher *) malloc(sizeof(Launcher));
@@ -145,7 +144,7 @@ void Launcher::initialize(int argc, char ** argv)
 		}
 	}
 	else if (_myproc == 0xFFFFFFFF)
-		fprintf(stderr, "Warning: %s not defined.  Running %d place%s on localhost.  Setting %s=NONE will suppress this warning.\n", X10LAUNCHER_HOSTFILE, _nplaces, _nplaces==1?"":"s", X10LAUNCHER_HOSTFILE);
+		fprintf(stderr, "Warning: %s not defined.  Running %d places on localhost.  Setting %s=NONE will suppress this warning.\n", X10LAUNCHER_HOSTFILE, _nplaces, X10LAUNCHER_HOSTFILE);
 
 	connectToParentLauncher();
 

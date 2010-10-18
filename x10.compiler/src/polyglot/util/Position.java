@@ -64,10 +64,6 @@ public class Position implements Serializable, Copy
 //        return compilerGenerated(CALLER);
 //    }
 
-    public static Position compilerGenerated(Position pos) {
-        return pos==null ? COMPILER_GENERATED : pos.startOf().markCompilerGenerated();
-    }
-
     public boolean isCompilerGenerated() {
         return compilerGenerated;
     }

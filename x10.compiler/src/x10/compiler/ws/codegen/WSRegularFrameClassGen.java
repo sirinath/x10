@@ -21,7 +21,6 @@ import polyglot.ast.Switch;
 import polyglot.ast.Try;
 import polyglot.frontend.Job;
 import polyglot.types.ClassDef;
-import polyglot.types.ClassType;
 import polyglot.types.Flags;
 import polyglot.types.Name;
 import polyglot.types.SemanticException;
@@ -62,6 +61,10 @@ import x10.util.synthesizer.SwitchSynth;
  * 
  */
 public class WSRegularFrameClassGen extends AbstractWSClassGen {
+    // general regular frame attributes
+    //List<LocalDecl> locals; // original method's all locals
+    Block codeBlock; // store all code block
+
     //this flag is set to true when genReturnCheckStmt() is called.
     //And set to false every time a new statement is processed.
     //In this cause, the original full coverage return was limited.
@@ -69,20 +72,55 @@ public class WSRegularFrameClassGen extends AbstractWSClassGen {
     //we need add an additional return to prevent the java path has no "return x" at the end of the method
     boolean isReturnPathChanged;
 
-    // method frames
-    protected WSRegularFrameClassGen(Job job, X10NodeFactory xnf, X10Context xct, WSTransformState wts,
-           String className, Stmt stmt, ClassDef outer, Flags flags, ClassType superType) {
-        super(job, xnf, xct, wts, className, superType, flags, outer,
-                WSCodeGenUtility.setSpeicalQualifier(stmt, outer, xnf));
+    // constructor for called from all other places, normal regular frame/main
+    // frame/continuation frame
+    protected WSRegularFrameClassGen(Job job, X10NodeFactory xnf, X10Context xct, WSTransformState wsTransformState,
+            AbstractWSClassGen parent, String classNamePrefix) {
+        super(job, xnf, xct, wsTransformState, parent);
+        
+        int classSequenceId = (parent == null) ? -1 : parent.assignChildId();
+        className = (classSequenceId == -1) ? classNamePrefix : (classNamePrefix + classSequenceId);
+        classSynth = new ClassSynth(job, xnf, xct, wts.regularFrameType, className);
+
+        // note the flag should according to the method's type
+        if (parent != null) {
+            ClassDef classDef = parent.classSynth.getClassDef();
+            classSynth.setFlags(classDef.flags());
+            classSynth.setKind(classDef.kind());
+            classSynth.setOuter(parent.classSynth.getOuter());
+            this.frameDepth = parent.frameDepth + 1;
+        }
+        
+        addPCFieldToClass();        
+        //now prepare all kinds of method synthesizer
+        prepareMethodSynths();
     }
 
-    // nested frames
-    protected WSRegularFrameClassGen(AbstractWSClassGen parent, Stmt stmt, String classNamePrefix) {
-        super(parent, parent, classNamePrefix, parent.wts.regularFrameType, stmt);
+    /**
+     * Constructor. All states grabbed from parent. And have code block with it.
+     * 
+     * @param parent
+     * @param codeBlock
+     * @param classNamePrefix
+     */
+    protected WSRegularFrameClassGen(AbstractWSClassGen parent, Stmt codeBody, String classNamePrefix) {
+        this(parent.job, parent.getX10NodeFactory(), parent.getX10Context(), parent.getWSTransformState(), parent, classNamePrefix);
+        this.codeBlock = codeBody == null ? null : synth.toBlock(codeBody); //switch frame will have null codeBody
+        
     }
 
-    @Override
-    protected void genMethods() throws SemanticException {
+
+    protected void genClass() throws SemanticException {
+
+        genThreeMethods(); //fast,resume,back
+        genClassConstructor();
+        if (wts.realloc) genCopyConstructor(compilerPos); // copy constructors used for remap();
+        if (wts.realloc) genRemapMethod();
+        
+
+    }
+
+    protected void genThreeMethods() throws SemanticException {
 
         Triple<CodeBlockSynth, SwitchSynth, SwitchSynth> bodyCodes = transformMethodBody();
 
@@ -412,6 +450,7 @@ public class WSRegularFrameClassGen extends AbstractWSClassGen {
     protected TransCodes transAsync(Stmt a, int prePcValue) throws SemanticException {
 
         TransCodes transCodes = new TransCodes(prePcValue + 1);
+//        classSynth.setSuperType(wts.continuationType); //make sure it is a continuation
 
         AbstractWSClassGen asyncClassGen = genChildFrame(wts.asyncFrameType, a, null);
         
@@ -592,8 +631,10 @@ public class WSRegularFrameClassGen extends AbstractWSClassGen {
         return returnCheck;
     }
 
-    protected void genClassConstructor() throws SemanticException {
+    protected ConstructorSynth genClassConstructor() throws SemanticException {
         // add all constructors
+        ConstructorSynth conSynth = classSynth.createConstructor(compilerPos);
+        conSynth.addAnnotation(genHeaderAnnotation());
         CodeBlockSynth conCodeSynth = conSynth.createConstructorBody(compilerPos);
 
         Expr upRef = conSynth.addFormal(compilerPos, Flags.FINAL, wts.frameType, "up");
@@ -601,5 +642,7 @@ public class WSRegularFrameClassGen extends AbstractWSClassGen {
         SuperCallSynth superCallSynth = conCodeSynth.createSuperCall(compilerPos, classSynth.getDef());
         superCallSynth.addArgument(wts.frameType, upRef);
         superCallSynth.addArgument(wts.finishFrameType, ffRef);
+
+        return conSynth;
     }
 }

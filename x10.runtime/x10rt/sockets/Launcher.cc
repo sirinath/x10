@@ -14,7 +14,6 @@
 #include <alloca.h>
 #include <arpa/inet.h>
 #include <time.h>
-#include <sched.h>
 
 #include "Launcher.h"
 #include "TCP.h"
@@ -229,7 +228,7 @@ void Launcher::startChildren()
 	}
 
 	/* process manager invokes main loop */
-	handleRequestsLoop(false);
+	handleRequestsLoop();
 }
 
 
@@ -237,7 +236,7 @@ void Launcher::startChildren()
 /* this is the infinite loop that the process manager is executing.        */
 /* *********************************************************************** */
 
-void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
+void Launcher::handleRequestsLoop()
 {
 	#ifdef DEBUG
 		fprintf(stderr, "Launcher %u: main loop start\n", _myproc);
@@ -266,8 +265,6 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 			else if (FD_ISSET(_listenSocket, &infds))
 				handleNewChildConnection();
 		}
-		if (onlyCheckForNewConnections)
-			return;
 		/* parent control socket */
 		if (_parentLauncherControlLink >= 0)
 		{
@@ -316,15 +313,15 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 		fprintf(stderr, "Launcher %u: killing sub-processes\n", _myproc);
 	#endif
 
+	int status = 0;
 	for (uint32_t i = 0; i <= _numchildren; i++)
 	{
 		#ifdef DEBUG
 			fprintf(stderr, "Launcher %u: killing pid=%d\n", _myproc, _pidlst[i]);
 		#endif
 		kill(_pidlst[i], SIGTERM);
+		waitpid(_pidlst[i], &status, WNOHANG); // status is the status of the last child (the local runtime)
 	}
-	waitpid(_pidlst[_numchildren], NULL, 0); // wait for the local runtime
-
 	// shut down any connections if they still exist
 	handleDeadParent();
 
@@ -334,7 +331,7 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 	#ifdef DEBUG
 		fprintf(stderr, "Launcher %u: cleanup complete.  Goodbye!\n", _myproc);
 	#endif
-	exit(_returncode);
+	exit(status);
 }
 
 /* *********************************************************************** */
@@ -690,7 +687,7 @@ int Launcher::forwardMessage(struct ctrl_msg* message, char* data)
 	// figure out where to send it, by determining if we are on the chain between place 0 and the dest
 	uint32_t child=message->to, parent;
 
-	int destID = -1;
+	int destFD = -1;
 	if (child > _singleton->_myproc)
 	{
 		do
@@ -699,9 +696,9 @@ int Launcher::forwardMessage(struct ctrl_msg* message, char* data)
 			if (parent == _singleton->_myproc)
 			{
 				if (child == _singleton->_firstchildproc)
-					destID = 0; //_childControlLinks[0];
+					destFD = _childControlLinks[0];
 				else
-					destID = 1; //_childControlLinks[1];
+					destFD = _childControlLinks[1];
 				#ifdef DEBUG
 					fprintf(stderr, "Launcher %u: forwarding %s message to child launcher %u.\n", _myproc, CTRL_MSG_TYPE_STRINGS[message->type], child);
 				#endif
@@ -713,27 +710,13 @@ int Launcher::forwardMessage(struct ctrl_msg* message, char* data)
 		while (parent > _singleton->_myproc);
 	}
 
-	#ifdef DEBUG
-	if (destID == -1)
-		fprintf(stderr, "Launcher %u: forwarding %s message to parent launcher.\n", _myproc, CTRL_MSG_TYPE_STRINGS[message->type]);
-	#endif
-
-	int destFD = -1;
-	do
+	if (destFD == -1)
 	{
-		if (destID == -1) destFD = _parentLauncherControlLink;
-		else if (destID == 0) destFD = _childControlLinks[0];
-		else if (destID == 1) destFD = _childControlLinks[1];
-
-		// verify that the link is valid.  It may not be, if we're just starting up
-		if (destFD == -1)
-		{
-			sched_yield();
-			handleRequestsLoop(true);
-		}
+		destFD = _parentLauncherControlLink;
+		#ifdef DEBUG
+			fprintf(stderr, "Launcher %u: forwarding %s message to parent launcher.\n", _myproc, CTRL_MSG_TYPE_STRINGS[message->type]);
+		#endif
 	}
-	while (destFD == -1);
-
 
 	int ret = TCP::write(destFD, message, sizeof(struct ctrl_msg));
 	if (ret < (int)sizeof(struct ctrl_msg))
@@ -753,15 +736,27 @@ int Launcher::forwardMessage(struct ctrl_msg* message, char* data)
 void Launcher::cb_sighandler_cld(int signo)
 {
 	int status;
-	int pid=wait(&status);
+	wait(&status);
 
-	if (_singleton->_pidlst[_singleton->_numchildren] == pid)
+/*
+	int status, pid=wait(&status);
+
+	for (int i=0; i<_singleton->_numchildren+1; i++)
+	if (_singleton->_pidlst[i] == pid)
 	{
+		_singleton->_actlst[i] = false;
 		#ifdef DEBUG
-			fprintf(stderr, "Launcher %d: SIGCHLD from runtime (pid=%d)\n", _singleton->_myproc, pid);
+			fprintf(stderr, "Launcher %d: SIGCHLD, killing proc=%d\n", _singleton->_myproc, _singleton->_childranks[i]));
 		#endif
-		_singleton->_returncode = WEXITSTATUS(status);
+
+		if (i == _singleton->_numchildren)
+			for (int j=0; j<_singleton->_numchildren+1; j++)
+				_singleton->_actlst[j] = false;
 	}
+
+	for (int j=0; j<_singleton->_numchildren+1; j++)
+		_singleton->_actlst[j] = false;
+*/
 }
 
 
@@ -784,7 +779,7 @@ void Launcher::startSSHclient(uint32_t id, char* masterPort, char* remotehost)
 	"X10RT_MPI_THREAD_MULTIPLE", "X10_DISABLE_DEALLOC", "X10_TRACE_ALLOC", "X10_TRACE_ALL",
 	"X10_TRACE_INIT", "X10_TRACE_X10RT", "X10_TRACE_NET", "X10_TRACE_SER", "X10_NTHREADS",
 	"X10RT_CUDA_DMA_SLICE", "X10RT_EMULATE_REMOTE_OP", "X10RT_EMULATE_COLLECTIVES",
-	"X10RT_MPI_THREAD_MULTIPLE", "X10_STATIC_THREADS", "X10_NO_STEALS", "X10RT_ACCELS", "X10RT_YIELDAFTERPROBE"};
+	"X10RT_MPI_THREAD_MULTIPLE", "X10_STATIC_THREADS", "X10_NO_STEALS", "X10RT_ACCELS"};
 	for (unsigned i=0; i<(sizeof envVariables)/sizeof(char*); i++)
 	{
 		char* ev = getenv(envVariables[i]);

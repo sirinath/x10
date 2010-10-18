@@ -202,13 +202,6 @@ public class WSCallGraph {
     }
     
     public boolean isParallel(ProcedureDef m) {
-        WSCallGraphNode n = def2NodeMap.get(m);
-        if(n == null){
-            System.out.println("[WS_WARNING]ProcedureDef:" + m + " was not added to call graph. Suppose it is not a parallel procedure.");
-            return false;
-        }
-        else{
-            return n.parallel;
-        }
+        return def2NodeMap.get(m).parallel;
     }
 }

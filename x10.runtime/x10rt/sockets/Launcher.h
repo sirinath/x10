@@ -65,7 +65,7 @@ class Launcher
 
 		/* SockProcManager.cc */
 		void startChildren(void);
-		void handleRequestsLoop(bool onlyCheckForNewConnections);
+		void handleRequestsLoop();
 		int makeFDSets(fd_set *, fd_set *, fd_set *);
 		void connectToParentLauncher(void); /* connect to parent */
 		void handleNewChildConnection(void); /* new child */
@@ -90,7 +90,6 @@ class Launcher
 		char _hostfname[512]; /* host file name */
 		uint32_t _nplaces; /* number of processors in job */
 		uint32_t _myproc; /* my processor ID */
-		int _returncode; // the return code from the local runtime
 
 		/* parent child structure */
 		char ** _hostlist; /* child host list */

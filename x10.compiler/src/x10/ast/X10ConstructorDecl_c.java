@@ -495,15 +495,14 @@ public class X10ConstructorDecl_c extends ConstructorDecl_c implements X10Constr
     }
     
     @Override
-    public Node typeCheck(ContextVisitor tc) {
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
         X10ConstructorDecl_c n = this;
         
         ThisChecker thisC = new ThisChecker(tc.job());
         if (formals != null) {
             visitList(formals, thisC);
             if (thisC.error()) {
-                Errors.issue(tc.job(),
-                        new Errors.ThisNotPermittedInConstructorFormals(formals, position()));
+                throw new Errors.ThisNotPermittedInConstructorFormals(formals, position());
             }
         }
         thisC.clearError();
@@ -513,12 +512,12 @@ public class X10ConstructorDecl_c extends ConstructorDecl_c implements X10Constr
                 visitChild(returnType, thisC);
             }
             if (thisC.error()) {
-                Errors.issue(tc.job(),
-                        new Errors.ThisNotPermittedInConstructorReturnType(returnType, position()));
+                throw new Errors.ThisNotPermittedInConstructorReturnType(returnType, position());
             }
         }
+        
 
-        n = (X10ConstructorDecl_c) super.typeCheck(tc);
+        n = (X10ConstructorDecl_c) (super.typeCheck(tc));
         return n;
     }
 

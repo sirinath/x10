@@ -28,15 +28,16 @@ public class SamePropertyAncestor_MustFailCompile extends x10Test {
 	class Test(i: int, j:int) {
 		 
 		def this(i:int, j:int):Test = {
-			property(i,j);
+			this.i=i;
+			this.j=j;
 		}
 	}
 	
-	class Test2(i: int) extends Test {  // ERR
+	class Test2(i: int) {
 		 
 		def this(i:int):Test2 = {
 		    super(i,i);
-			property(i);
+			this.i=i;
 		}
 	}
 		

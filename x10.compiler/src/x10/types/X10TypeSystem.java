@@ -336,6 +336,8 @@ public interface X10TypeSystem extends TypeSystem {
      */
     public boolean isTypeConstrained(Type me);
 
+    VarDef createSelf(Type t);
+
     XTypeTranslator xtypeTranslator();
 
     boolean entailsClause(Type me, Type other, X10Context context);

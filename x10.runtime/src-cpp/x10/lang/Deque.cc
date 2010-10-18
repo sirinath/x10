@@ -48,7 +48,7 @@ void Deque::growQueue() {
     int oldSize = oldQ->capacity;
     int newSize = oldSize << 1;
     if (newSize > MAXIMUM_QUEUE_CAPACITY) {
-        UNIMPLEMENTED("Queue capacity exceeded");
+        assert(false); /* throw new RuntimeException("Queue capacity exceeded"); */
     }
     Slots *newQ = x10aux::alloc<Slots>();
     newQ->capacity = newSize;
@@ -82,7 +82,7 @@ ref<Reference> Deque::steal() {
         base = b + 1;
         return t;
     }
-    return X10_NULL;
+    return null;
 }
 
 void Deque::_serialize_body(serialization_buffer &buf) {

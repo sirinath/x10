@@ -160,6 +160,7 @@ import x10.ast.AtEach_c;
 import x10.ast.AtExpr_c;
 import x10.ast.AtStmt_c;
 import x10.ast.Atomic_c;
+import x10.ast.Await_c;
 import x10.ast.Closure;
 import x10.ast.ClosureCall;
 import x10.ast.ClosureCall_c;
@@ -227,6 +228,7 @@ import x10.util.ClosureSynthesizer;
 import x10.util.StreamWrapper;
 import x10.util.Synthesizer;
 import x10cpp.X10CPPCompilerOptions;
+import x10cpp.extension.X10ClassBodyExt_c;
 import x10cpp.types.X10CPPContext_c;
 
 /**
@@ -571,6 +573,17 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    return sawInit;
 	}
 
+	private boolean hasExternMethods(List<ClassMember> members) {
+		for (ClassMember member : members) {
+			if (member instanceof MethodDecl_c) {
+				MethodDecl_c init = (MethodDecl_c) member;
+				if (X10Flags.isExtern(init.flags().flags()))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	private void extractAllClassTypes(Type t, List<ClassType> types, Set<ClassType> dupes) {
         X10TypeSystem xts = (X10TypeSystem) t.typeSystem();
         t = xts.expandMacros(t);
@@ -702,6 +715,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             sh.writeln("#include <x10aux/ref.h>");
             sh.writeln("#include <x10aux/RTT.h>");
             sh.writeln("#include <x10aux/serialization.h>");
+            sh.writeln("#include <x10aux/struct_equals.h>");
             sh.forceNewline(0);
         }
 
@@ -722,6 +736,11 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
         w.write("#include \""+incfile+"\""); w.newline();
         w.forceNewline(0);
+
+		if (hasExternMethods(n.body().members())) {
+			w.write("#include <" + X10ClassBodyExt_c.wrapperFileName(def.asType().toReference()) + ">");
+			w.newline();
+		}
 
 		ArrayList<Type> allIncludes = new ArrayList<Type>();
 		if (n.superClass() != null) {
@@ -2183,7 +2202,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	        sw.newline();
 	        sw.write(STATIC_INIT_NOTIFY_ALL + "();");
 	        sw.newline();
-	        sw.write("return X10_NULL;");
+	        sw.write("return x10aux::null;");
 	        sw.end(); sw.newline();
 	        sw.write("}");
 	        sw.newline();
@@ -3365,7 +3384,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	}
 
 	public void visit(NullLit_c n) {
-		sw.write("X10_NULL");
+		sw.write("x10aux::null");
 	}
 
 	public void visit(StringLit_c n) {
@@ -3597,6 +3616,10 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
 	public void visit(Atomic_c a) {
         assert (false) : ("Atomic should have been desugared earlier");
+	}
+
+	public void visit(Await_c n) {
+        assert (false) : ("Await should have been desugared earlier");
 	}
 
 	public void visit(Next_c n) {

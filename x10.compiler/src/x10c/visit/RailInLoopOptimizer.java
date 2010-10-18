@@ -216,7 +216,12 @@ public class RailInLoopOptimizer extends ContextVisitor {
                                 index = call.arguments().get(1);
                             }
 
-                            if (target instanceof Field) {
+                            if (target instanceof Local) {
+                                if (X10Flags.toX10Flags(((Local) target).flags()).isShared()) {
+                                    return n;
+                                }
+                            }
+                            else if (target instanceof Field) {
                                 Field field = (Field) target;
                                 if (!field.flags().isFinal()) {
                                     return n;
@@ -268,7 +273,12 @@ public class RailInLoopOptimizer extends ContextVisitor {
                                 return n;
                             }
 
-                            if (array instanceof Field) {
+                            if (array instanceof Local) {
+                                if (X10Flags.toX10Flags(((Local) array).flags()).isShared()) {
+                                    return n;
+                                }
+                            }
+                            else if (array instanceof Field) {
                                 Field field = (Field) array;
                                 if (!field.flags().isFinal()) {
                                     return n;

@@ -37,11 +37,11 @@ import polyglot.ast.Special;
 import polyglot.ast.Stmt;
 import polyglot.ast.TopLevelDecl;
 import polyglot.ast.TypeNode;
+import polyglot.frontend.ExtensionInfo;
 import polyglot.types.FieldInstance;
 import polyglot.types.Ref;
 import polyglot.types.Type;
 import polyglot.util.Position;
-import x10.ExtensionInfo;
 import x10.parser.X10Parser.JPGPosition;
 import x10.types.ParameterType;
 import x10.types.X10ConstructorDef;
@@ -60,6 +60,7 @@ public interface X10NodeFactory extends NodeFactory {
     /** Return the language extension this node factory is for. */
     ExtensionInfo extensionInfo();
     
+    Expr AmbHereThis(Position pos) ;
     AtStmt AtStmt(Position pos, Expr place, Stmt body);
 	AtExpr AtExpr(Position pos, Expr place, TypeNode returnType, Block body);
 
@@ -80,13 +81,13 @@ public interface X10NodeFactory extends NodeFactory {
     TypeParamNode TypeParamNode(Position pos, Id name, ParameterType.Variance variance);
     TypeNode FunctionTypeNode(Position pos, List<TypeParamNode> typeParams, List<Formal> formals, DepParameterExpr guard, 
     		TypeNode returnType,  TypeNode offersType);   
-    SubtypeTest SubtypeTest(Position pos, TypeNode sub, TypeNode sup, boolean equals);
-    Contains Contains(Position pos, Expr item, Expr collection);
+    Expr SubtypeTest(Position pos, TypeNode sub, TypeNode sup, boolean equals);
+    Expr Contains(Position pos, Expr item, Expr collection);
 	TypeDecl TypeDecl(Position pos, FlagsNode flags, Id name, List<TypeParamNode> typeParameters, List<Formal> formals, DepParameterExpr guard, TypeNode type);
 
-    X10Call X10Call(Position pos, Receiver target, Id name, List<TypeNode> typeArgs, List<Expr> args);
+    Call X10Call(Position pos, Receiver target, Id name, List<TypeNode> typeArgs, List<Expr> args);
     
-    X10Instanceof Instanceof(Position pos, Expr expr, TypeNode type);
+    Instanceof Instanceof(Position pos, Expr expr, TypeNode type);
 	Async Async(Position pos, List<Expr> clocks, Stmt body);
 	Async Async(Position pos, Stmt body, boolean clocked);
 	Atomic Atomic(Position pos, Expr place, Stmt body);
@@ -112,6 +113,7 @@ public interface X10NodeFactory extends NodeFactory {
 		    List<PropertyDecl> properties,
               DepParameterExpr ci, TypeNode superClass,
               List<TypeNode> interfaces, ClassBody body);
+	Await Await(Position pos, Expr expr);
 
 	X10Loop ForLoop(Position pos, Formal formal, Expr domain, Stmt body);
 	X10Loop AtEach(Position pos, Formal formal, Expr domain, List<Expr> clocks,
@@ -132,22 +134,23 @@ public interface X10NodeFactory extends NodeFactory {
 
 	Tuple Tuple(Position pos, List<Expr> args);
 	Tuple Tuple(Position pos, TypeNode indexType, List<Expr> args);
-	X10Formal Formal(Position pos, FlagsNode flags, TypeNode type, Id name);
+	Formal Formal(Position pos, FlagsNode flags, TypeNode type, Id name);
 	X10Formal X10Formal(Position pos, FlagsNode flags, TypeNode type, Id name,
 				  List<Formal> vars, boolean unnamed);
 	ParExpr ParExpr(Position pos, Expr e);
+	PlaceCast PlaceCast(Position pos, Expr place, Expr target);
     
-    X10ConstructorDecl X10ConstructorDecl(Position pos, FlagsNode flags, Id name,
+    ConstructorDecl X10ConstructorDecl(Position pos, FlagsNode flags, Id name,
             TypeNode returnType, List<TypeParamNode> typeParams, List<Formal> formals, 
             DepParameterExpr guard,  TypeNode offerType, Block body);
     PropertyDecl PropertyDecl(Position pos, FlagsNode flags, TypeNode type, Id name);
     PropertyDecl PropertyDecl(Position pos, FlagsNode flags, TypeNode type, Id name, Expr init);
-    X10Special Self(Position pos);
+    Special Self(Position pos);
     
     StmtExpr StmtExpr(Position pos, List<Stmt> statements, Expr result);
     StmtSeq StmtSeq(Position pos, List<Stmt> statements);
-    ConstantDistMaker ConstantDistMaker(Position pos, Expr left, Expr right);
-    RegionMaker RegionMaker(Position pos, Expr left, Expr right);
+    Expr ConstantDistMaker(Position pos, Expr left, Expr right);
+    Expr RegionMaker(Position pos, Expr left, Expr right);
     AssignPropertyCall AssignPropertyCall(Position pos, List<TypeNode> typeArgs, List<Expr> argList);
 
     Closure Closure(Position pos,  List<Formal> formals, DepParameterExpr guard, TypeNode returnType, 
@@ -178,5 +181,6 @@ public interface X10NodeFactory extends NodeFactory {
     TypeNode HasType(TypeNode tn);
     Offer Offer(Position pos, Expr e);
     FinishExpr FinishExpr(Position p, Expr e, Stmt s);
+
 
 }

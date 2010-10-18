@@ -19,7 +19,6 @@ import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
-import x10.errors.Errors;
 
 /**
  * @author VijaySaraswat
@@ -38,13 +37,11 @@ public class X10While_c extends While_c {
 	}
 
 	/** Type check the statement. */
-	public Node typeCheck(ContextVisitor tc) {
+	public Node typeCheck(ContextVisitor tc) throws SemanticException {
 		TypeSystem ts = tc.typeSystem();
 
 		if (! ts.isSubtype(cond.type(), ts.Boolean(), tc.context())) {
-		    Errors.issue(tc.job(),
-		            new SemanticException("Condition of while statement must have boolean type, and not " + cond.type() + ".", cond.position()),
-		            this);
+		    throw new SemanticException("Condition of while statement must have boolean type, and not " + cond.type() + ".",cond.position());
 		}
 
 		return this;

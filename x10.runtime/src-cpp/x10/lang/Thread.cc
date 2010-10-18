@@ -45,7 +45,7 @@ using namespace std;
 
 
 // initialize static data members
-ref<Thread> Thread::__current_thread = X10_NULL;
+ref<Thread> Thread::__current_thread = null;
 long x10::lang::Thread::__thread_cnt = 0;
 pthread_key_t Thread::__thread_mapper = 0;
 x10_boolean Thread::__thread_mapper_inited = false;
@@ -105,7 +105,7 @@ Thread::thread_init(ref<VoidFun_0_0> task, const ref<String> name)
     __thread_already_started = false;
     __thread_running = false;
 
-	__current_worker = X10_NULL;
+	__current_worker = null;
     __thread_name = String::_make(name);
     __taskBody = task;
 
@@ -166,7 +166,7 @@ Thread::thread_init(ref<VoidFun_0_0> task, const ref<String> name)
     //pthread_attr_setsuspendstate_np(&__xthread_attr, suspendstate);
 
     // create a new execution thread ??in suspended state??
-    if (!__taskBody.isNull()) {
+    if (__taskBody!=x10aux::null) {
         (void)pthread_create(&__xthread, &__xthread_attr,
                              thread_start_routine, (void *)this);
     } else {

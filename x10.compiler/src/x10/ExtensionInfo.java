@@ -109,6 +109,7 @@ import x10.visit.FieldInitializerMover;
 import x10.visit.MainMethodFinder;
 import x10.visit.NativeClassVisitor;
 import x10.visit.RewriteAtomicMethodVisitor;
+import x10.visit.RewriteExternVisitor;
 import x10.visit.StaticNestedClassRemover;
 import x10.visit.X10Caster;
 import x10.visit.X10ImplicitDeclarationExpander;
@@ -450,6 +451,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
            goals.add(X10Casted(job));
            goals.add(MoveFieldInitializers(job));
            goals.add(X10Expanded(job));
+           goals.add(X10RewriteExtern(job));
            goals.add(X10RewriteAtomicMethods(job));
            
            
@@ -570,7 +572,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
                private static final long serialVersionUID = -3692329571101709400L;
                @Override
                public Goal prereqForJob(Job job) {
-                   if (!super.scheduler.commandLineJobs().contains(job) &&
+                   if (!scheduler.commandLineJobs().contains(job) &&
                            ((ExtensionInfo) extInfo).manifestContains(job.source().path())) {
                        return null;
                    }
@@ -599,7 +601,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
                    private static final long serialVersionUID = 6757229496093951388L;
                    @Override
                    public Goal prereqForJob(Job job) {
-                       if (!super.scheduler.commandLineJobs().contains(job) &&
+                       if (!scheduler.commandLineJobs().contains(job) &&
                                ((ExtensionInfo) extInfo).manifestContains(job.source().path()))
                        {
                            return null;
@@ -630,7 +632,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
                    private static final long serialVersionUID = 4089824072381830523L;
                    @Override
                    public Goal prereqForJob(Job job) {
-                       if (!super.scheduler.commandLineJobs().contains(job) &&
+                       if (!scheduler.commandLineJobs().contains(job) &&
                                ((ExtensionInfo) extInfo).manifestContains(job.source().path()))
                        {
                            return null;
@@ -852,6 +854,12 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
            return new ValidatingVisitorGoal("MoveFieldInitializers", job, new FieldInitializerMover(job, ts, nf)).intern(this);
        }
        
+       public Goal X10RewriteExtern(Job job) {
+           TypeSystem ts = extInfo.typeSystem();
+           NodeFactory nf = extInfo.nodeFactory();
+           return new ValidatingVisitorGoal("X10RewriteExtern", job, new RewriteExternVisitor(job, ts, nf)).intern(this);
+       }
+
        public Goal X10RewriteAtomicMethods(Job job) {
            TypeSystem ts = extInfo.typeSystem();
            NodeFactory nf = extInfo.nodeFactory();
@@ -943,7 +951,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
                @Override
                public Goal prereqForJob(Job job) {
                    //TODO: probably need to also annotation code in "runtime"
-                   if (!super.scheduler.commandLineJobs().contains(job) &&
+                   if (!scheduler.commandLineJobs().contains(job) &&
                            ((ExtensionInfo) extInfo).manifestContains(job.source().path())) {
                        return null;
                    }

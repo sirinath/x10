@@ -79,6 +79,7 @@ import polyglot.util.TransformingList;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.TypeBuilder;
 import x10.ast.X10NodeFactory;
+import x10.ast.X10NodeFactory_c;
 import x10.constraint.XEQV;
 import x10.constraint.XFailure;
 import x10.constraint.XField;
@@ -683,7 +684,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return createFakeField(unknownClassDef().asType(), Flags.PUBLIC.Static(), name, error);
     }
     public X10FieldInstance createFakeField(ClassType container, Flags flags, Name name, SemanticException error) {
-        Position pos = Position.compilerGenerated(container == null ? null : container.position());
+        Position pos = X10NodeFactory_c.compilerGenerated(container);
         Type type = unknownType(pos);
         XVar thisVar = XTerms.makeEQV();
         List<Ref<? extends Type>> excTypes = Collections.emptyList();
@@ -699,7 +700,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return createFakeMethod(unknownClassDef().asType(), Flags.PUBLIC.Static(), name, typeArgs, argTypes, error);
     }
     public X10MethodInstance createFakeMethod(ClassType container, Flags flags, Name name, List<Type> typeArgs, List<Type> argTypes, SemanticException error) {
-        Position pos = Position.compilerGenerated(container == null ? null : container.position());
+        Position pos = X10NodeFactory_c.compilerGenerated(container);
         Type returnType = unknownType(pos);
         List<Ref<? extends Type>> args = new ArrayList<Ref<? extends Type>>();
         List<LocalDef> formalNames = new ArrayList<LocalDef>();
@@ -725,7 +726,7 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return createFakeConstructor(typeForNameSilent(containerName).typeArguments(typeArgs), flags, argTypes, error);
     }
     public X10ConstructorInstance createFakeConstructor(ClassType container, Flags flags, List<Type> argTypes, SemanticException error) {
-        Position pos = Position.compilerGenerated(container == null ? null : container.position());
+        Position pos = X10NodeFactory_c.compilerGenerated(container);
         List<Ref<? extends Type>> args = new ArrayList<Ref<? extends Type>>();
         List<LocalDef> formalNames = new ArrayList<LocalDef>();
         int i = 0;
@@ -959,41 +960,41 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
     /** All flags allowed for a method. */
     public Flags legalMethodFlags() {
         X10Flags x = X10Flags.toX10Flags(legalAccessFlags().Abstract().Static().Final().Native().StrictFP());
-        x = x.Clocked().Property().Pure().Atomic(); 
+        x = x.Clocked().Safe().NonBlocking().Sequential().Property().Pure().Extern().Atomic(); 
         return x;
 
     }
 
     public Flags legalAbstractMethodFlags() {
         X10Flags x = X10Flags.toX10Flags(legalAccessFlags().clear(Private()).Abstract());
-        x = x.Clocked().Property().Pure().Atomic(); 
+        x = x.Clocked().Safe().NonBlocking().Sequential().Property().Pure().Atomic(); 
         return x;
     }
 
     /** All flags allowed for a top-level class. */
     public Flags legalTopLevelClassFlags() {
-        return X10Flags.toX10Flags(super.legalTopLevelClassFlags()).Clocked().Struct();
+        return X10Flags.toX10Flags(super.legalTopLevelClassFlags()).Clocked().Safe().Struct();
     }
 
     protected final X10Flags X10_TOP_LEVEL_CLASS_FLAGS = (X10Flags) legalTopLevelClassFlags();
 
     /** All flags allowed for an interface. */
     public Flags legalInterfaceFlags() {
-        return X10Flags.toX10Flags(super.legalInterfaceFlags()).Clocked();
+        return X10Flags.toX10Flags(super.legalInterfaceFlags()).Clocked().Safe().Value();
     }
 
     protected final X10Flags X10_INTERFACE_FLAGS = (X10Flags) legalInterfaceFlags();
 
     /** All flags allowed for a member class. */
     public Flags legalMemberClassFlags() {
-        return X10Flags.toX10Flags(super.legalMemberClassFlags()).Clocked().Struct();
+        return X10Flags.toX10Flags(super.legalMemberClassFlags()).Clocked().Safe().Struct();
     }
 
     protected final Flags X10_MEMBER_CLASS_FLAGS = (X10Flags) legalMemberClassFlags();
 
     /** All flags allowed for a local class. */
     public Flags legalLocalClassFlags() {
-        return X10Flags.toX10Flags(super.legalLocalClassFlags()).Struct();
+        return X10Flags.toX10Flags(super.legalLocalClassFlags()).Safe().Struct();
     }
 
     protected final X10Flags X10_LOCAL_CLASS_FLAGS = (X10Flags) legalLocalClassFlags();
@@ -1831,6 +1832,12 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
         return isSubtype(me, ContainsAll(), emptyContext());
     }
 
+    public VarDef createSelf(Type t) {
+        VarDef v = localDef(X10NodeFactory_c.compilerGenerated(t), Flags.PUBLIC, Types.ref(t), Name.make("self"));
+        return v;
+    }
+
+ 
     protected XTypeTranslator xtt = new XTypeTranslator(this);
 
     public XTypeTranslator xtypeTranslator() {
@@ -1947,11 +1954,20 @@ public class X10TypeSystem_c extends TypeSystem_c implements X10TypeSystem {
     @Override
     protected void initFlags() {
         super.initFlags();
+  //      flagsForName.put("local", X10Flags.LOCAL);
+        flagsForName.put("nonblocking", X10Flags.NON_BLOCKING);
+        flagsForName.put("safe", X10Flags.SAFE);
+        flagsForName.put("sequential", X10Flags.SEQUENTIAL);
+        flagsForName.put("incomplete", X10Flags.INCOMPLETE);
         flagsForName.put("property", X10Flags.PROPERTY);
         flagsForName.put("pure", X10Flags.PURE);
         flagsForName.put("atomic", X10Flags.ATOMIC);
+        flagsForName.put("global", X10Flags.GLOBAL);
+        flagsForName.put("extern", X10Flags.EXTERN);
         flagsForName.put("value", X10Flags.VALUE);
         flagsForName.put("reference", X10Flags.REFERENCE);
+        flagsForName.put("mutable", X10Flags.MUTABLE);
+        flagsForName.put("shared", X10Flags.SHARED);
         flagsForName.put("struct", X10Flags.STRUCT);
      //   flagsForName.put("rooted", X10Flags.ROOTED);
     }

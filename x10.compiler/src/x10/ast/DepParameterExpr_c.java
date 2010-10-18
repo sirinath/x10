@@ -38,7 +38,6 @@ import polyglot.visit.PrettyPrinter;
 import polyglot.visit.TypeBuilder;
 import polyglot.visit.TypeCheckPreparer;
 import polyglot.visit.TypeChecker;
-import x10.errors.Errors;
 import x10.types.X10Context;
 import x10.types.X10TypeMixin;
 import x10.types.X10TypeSystem;
@@ -193,7 +192,7 @@ public class DepParameterExpr_c extends Node_c implements DepParameterExpr {
     /** Type check the statement. 
      */
     @Override
-    public Node typeCheck(ContextVisitor tc) {
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
         X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
         //Report.report(1, "DepParameterExpr: Typechecking " + this + this.getClass() + " " + condition);
         
@@ -214,8 +213,8 @@ public class DepParameterExpr_c extends Node_c implements DepParameterExpr {
             Type t = e.type();
 
             if (! t.isBoolean())
-                Errors.issue(tc.job(),
-                        new SemanticError("The type of the constraint "+ e + " must be boolean, not " + t + ".", position()));
+                throw new SemanticError("The type of the constraint "+ e 
+                                        + " must be boolean, not " + t + ".", position());
 
             if (e instanceof Binary) {
                 Binary b = (Binary) e;

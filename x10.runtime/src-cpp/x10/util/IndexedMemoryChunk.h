@@ -40,9 +40,9 @@ namespace x10 {
         extern void IMC_uncounted_notifier(x10aux::deserialization_buffer&, x10_int);
 
         extern void IMC_copyToBody(void *srcAddr, void *dstAddr, x10_int numBytes,
-                                   x10::lang::Place dstPlace, bool overlap, x10aux::ref<x10::lang::Reference> notif);
+                                   x10::lang::Place dstPlace, bool overlap);
         extern void IMC_copyFromBody(void *srcAddr, void *dstAddr, x10_int numBytes,
-                                     x10::lang::Place srcPlace, bool overlap, x10aux::ref<x10::lang::Reference> notif);
+                                     x10::lang::Place srcPlace, bool overlap);
         
         template<class T> class IndexedMemoryChunk_ithunk0 : public x10::util::IndexedMemoryChunk<T> {
         public:
@@ -89,20 +89,7 @@ template<class T> void x10::util::IndexedMemoryChunk<T>::copyTo(x10_int srcIndex
     void* srcAddr = (void*)(&raw()[srcIndex]);
     void* dstAddr = (void*)(&dst->raw()[dstIndex]);
     size_t numBytes = numElems * sizeof(T);
-    IMC_copyToBody(srcAddr, dstAddr, numBytes, dstPlace, data == dst->data, X10_NULL);
-}
-
-
-template<class T> void x10::util::IndexedMemoryChunk<T>::copyTo(x10_int srcIndex,
-                                                                x10::lang::Place dstPlace,
-                                                                x10::util::IndexedMemoryChunk<T> dst,
-                                                                x10_int dstIndex,
-                                                                x10_int numElems,
-                                                                x10aux::ref<x10::lang::Reference> notif) {
-    void* srcAddr = (void*)(&raw()[srcIndex]);
-    void* dstAddr = (void*)(&dst->raw()[dstIndex]);
-    size_t numBytes = numElems * sizeof(T);
-    IMC_copyToBody(srcAddr, dstAddr, numBytes, dstPlace, data == dst->data, notif);
+    IMC_copyToBody(srcAddr, dstAddr, numBytes, dstPlace, data == dst->data);
 }
 
 
@@ -112,18 +99,7 @@ template<class T> void x10::util::IndexedMemoryChunk<T>::copyFrom(x10_int dstInd
     void* srcAddr = (void*)(&src->raw()[srcIndex]);
     void* dstAddr = (void*)(&raw()[dstIndex]);
     size_t numBytes = numElems * sizeof(T);
-    IMC_copyFromBody(srcAddr, dstAddr, numBytes, srcPlace, data == src->data, X10_NULL);
-}
-
-
-template<class T> void x10::util::IndexedMemoryChunk<T>::copyFrom(x10_int dstIndex, x10::lang::Place srcPlace,
-                                                                  x10::util::IndexedMemoryChunk<T> src,
-                                                                  x10_int srcIndex, x10_int numElems,
-                                                                  x10aux::ref<x10::lang::Reference> notif) {
-    void* srcAddr = (void*)(&src->raw()[srcIndex]);
-    void* dstAddr = (void*)(&raw()[dstIndex]);
-    size_t numBytes = numElems * sizeof(T);
-    IMC_copyFromBody(srcAddr, dstAddr, numBytes, srcPlace, data == src->data, notif);
+    IMC_copyFromBody(srcAddr, dstAddr, numBytes, srcPlace, data == src->data);
 }
 
 
@@ -145,10 +121,6 @@ template<class T> x10_boolean x10::util::IndexedMemoryChunk<T>::_struct_equals(x
     return _struct_equals(x10aux::class_cast<x10::util::IndexedMemoryChunk<T> >(that));
 }
 
-template<class T> x10_boolean x10::util::IndexedMemoryChunk<T>::_struct_equals(x10::util::IndexedMemoryChunk<T> that) { 
-    return x10aux::struct_equals(data, that->data);
-}
-
 template<class T> x10aux::ref<x10::lang::String> x10::util::IndexedMemoryChunk<T>::toString() {
     char* tmp = x10aux::alloc_printf("x10.util.IndexedMemoryChunk<%s>(%llx)", x10aux::getRTT<T>()->name(), data);
     return x10::lang::String::Steal(tmp);
@@ -161,10 +133,10 @@ template<class T> x10aux::ref<x10::lang::String> x10::util::IndexedMemoryChunk<T
 
 template<class T> x10aux::RuntimeType x10::util::IndexedMemoryChunk<T>::rtt;
 
-template<class T> x10aux::itable_entry x10::util::IndexedMemoryChunk<T>::_itables[2] = {x10aux::itable_entry(&x10aux::getRTT<x10::lang::Any>, &IndexedMemoryChunk_ithunk0<T>::itable),
+template<class T> x10aux::itable_entry x10::util::IndexedMemoryChunk<T>::_itables[2] = {&x10aux::itable_entry(x10aux::getRTT<x10::lang::Any>, &IndexedMemoryChunk_ithunk0<T>::itable),
                                                                                         x10aux::itable_entry(NULL, (void*)x10aux::getRTT<x10::util::IndexedMemoryChunk<T> >())};
 
-template<class T> x10aux::itable_entry x10::util::IndexedMemoryChunk<T>::_iboxitables[2] = {x10aux::itable_entry(&x10aux::getRTT<x10::lang::Any>, &IndexedMemoryChunk_iboxithunk0<T>::itable),
+template<class T> x10aux::itable_entry x10::util::IndexedMemoryChunk<T>::_iboxitables[2] = {&x10aux::itable_entry(x10aux::getRTT<x10::lang::Any>, &IndexedMemoryChunk_iboxithunk0<T>::itable),
                                                                                             x10aux::itable_entry(NULL, (void*)x10aux::getRTT<x10::util::IndexedMemoryChunk<T> >())};
 
 template<class T> void x10::util::IndexedMemoryChunk<T>::_initRTT() {

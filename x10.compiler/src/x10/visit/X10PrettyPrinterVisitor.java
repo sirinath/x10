@@ -111,6 +111,7 @@ import x10.ast.AtEach_c;
 import x10.ast.AtExpr_c;
 import x10.ast.AtStmt_c;
 import x10.ast.Atomic_c;
+import x10.ast.Await_c;
 import x10.ast.ClosureCall;
 import x10.ast.ClosureCall_c;
 import x10.ast.Closure_c;
@@ -254,7 +255,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 	    // already known unhandled node type
 	    if (
 	        n instanceof Async_c || n instanceof AtStmt_c || n instanceof Atomic_c || n instanceof Here_c 
-	        || n instanceof Next_c || n instanceof Future_c || n instanceof AtExpr_c
+	        || n instanceof Await_c || n instanceof Next_c || n instanceof Future_c || n instanceof AtExpr_c
 	        || n instanceof AtEach_c || n instanceof When_c
 	        || n instanceof Finish_c || n instanceof Contains_c
 	    ) {
@@ -1504,9 +1505,9 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 		}
         else if (
                 !isSelfDispatch
-                && ((!(expr instanceof Closure_c) && !mi.returnType().isVoid())
-                || (expr instanceof Closure_c && X10TypeMixin.baseType(mi.returnType()) instanceof ParameterType))) {
-            w.write(RETURN_PARAMETER_TYPE_SUFFIX);
+                && (!(expr instanceof Closure_c) && !mi.returnType().isVoid())
+                || (expr instanceof Closure_c && X10TypeMixin.baseType(mi.returnType()) instanceof ParameterType)) {
+                w.write(RETURN_PARAMETER_TYPE_SUFFIX);
         }
 
 		w.write("(");
@@ -1525,7 +1526,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 		for (int i = 0; i < l.size(); i++) {
 			Expr e = l.get(i);
 			c.print(e, w, tr);
-			if (isSelfDispatch && (!newClosure || !needBridge((Closure_c) expr))) {
+			if (isSelfDispatch && !newClosure) {
 			    w.write(",");
 			    new RuntimeTypeExpander(er, mi.formalTypes().get(i)).expand();
 			}
@@ -1781,7 +1782,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
                                             public void expand(Translator tr2) {
                                                 for (Stmt stmt : statements) {
                                                     if (stmt instanceof X10Return_c) {
-                                                        w.write("array$");
+                                                        w.write("array");
                                                         w.write("[");
                                                         w.write(id.toString());
                                                         w.write("] = ");
@@ -1800,9 +1801,9 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
                                             public void expand(Translator tr2) {
                                                 ex.expand();
                                                 w.write("[] ");
-                                                w.write("array$ = new ");
+                                                w.write("array = new ");
                                                 ex.expand();
-                                                w.write("[length$];");
+                                                w.write("[length];");
                                             }
                                         };
                                         
@@ -1817,13 +1818,13 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 	                                };
 	                                er.dumpRegex("rail-make", components, tr2, 
 	                                        "(new " + JAVA_LANG_OBJECT + "() {" +
-	                                    	    "final #0<#1> apply(int length$) {" +
+	                                    	    "final #0<#1> apply(int length) {" +
 	                                    	        "#6" + 
-	                                    	        "for (int #5$ = 0; #5$ < length$; #5$++) {" +
+	                                    	        "for (int #5$ = 0; #5$ < length; #5$++) {" +
 	                                    		    "final int #5 = #5$;" +
 	                                    		    "#4" +
 	                                    		"}" +
-	                                    		"return new #0<#1>(#2, length$, array$);" +
+	                                    		"return new #0<#1>(#2, #3, array);" +
 	                                             "}" +
 	                                         "}.apply(#3))");
 	                                
@@ -2145,7 +2146,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 		
 		List<Formal> formals = n.formals();
 		// bridge
-		boolean bridge = needBridge(n);
+		boolean bridge = containsPrimitive(n) || !n.returnType().type().isVoid() && !(X10TypeMixin.baseType(n.returnType().type()) instanceof ParameterType);
         if (bridge) {
 		    w.write("public final ");
 		    if (isSelfDispatch && n.returnType().type().isVoid() && n.formals().size() != 0) {
@@ -2367,10 +2368,6 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 
                 w.write("}");
         }
-
-    private boolean needBridge(final Closure_c n) {
-        return containsPrimitive(n) || !n.returnType().type().isVoid() && !(X10TypeMixin.baseType(n.returnType().type()) instanceof ParameterType);
-    }
 
         private boolean throwException(List<Stmt> statements) {
             for (Stmt stmt : statements) {

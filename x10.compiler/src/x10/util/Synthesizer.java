@@ -159,7 +159,7 @@ public class Synthesizer {
 	public MethodDecl makeSyntheticMethod(X10ClassDecl_c ct, Flags flags, List<ParameterType> typeParameters,
 	        Name name, List<LocalDef> fmls, Type returnType, Block block)
 	{
-	    Position CG = Position.compilerGenerated(ct.body().position());
+	    Position CG = X10NodeFactory_c.compilerGenerated(ct.body());
 
 	    List<TypeParamNode> typeParamNodes = new ArrayList<TypeParamNode>();
 	    for (ParameterType pt : typeParameters) {
@@ -275,7 +275,7 @@ public class Synthesizer {
 	public For makeForLoop(Position pos, 
 			X10Formal formal, Expr low, Expr high, Stmt body, 
 			 X10Context context) {
-		Position CG = Position.compilerGenerated(pos);
+		Position CG = X10NodeFactory_c.compilerGenerated(pos);
 		List<Stmt> inits = new ArrayList<Stmt>();
 		// FIXME: use formal here directly, instead of local
 		Expr local = makeLocalVar(CG, null, low, inits, context);

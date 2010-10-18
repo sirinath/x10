@@ -18,11 +18,12 @@ public class CUDAKernelTest {
 
     static def doWork (init:Array[Float]{rail}, recv:Array[Float]{rail}, p:Place, len:Int) {
 
+
         val remote = CUDAUtilities.makeRemoteArray[Float](p,len,(Int)=>0.0 as Float); // allocate 
 
         finish async at (p) @CUDA {
-            finish for ([block] in 0..7) async {
-                clocked finish for ([thread] in 0..63) clocked async {
+            for ([block] in 0..7) {
+                for ([thread] in 0..63) async {
                     val tid = block*64 + thread;
                     val tids = 8*64;
                     for (var i:Int=tid ; i<len ; i+=tids) {
@@ -37,8 +38,7 @@ public class CUDAKernelTest {
         // validate
         var success:Boolean = true;
         for ([i] in remote.region) {
-            val oracle = i as Float;
-            if (Math.abs(1 - (recv(i)*recv(i))/oracle) > 1E-6f) {
+            if (Math.abs(1 - (recv(i)*recv(i))/(i as Float)) > 1E-6f) {
                 Console.ERR.println("recv("+i+"): "+recv(i)+" * "+recv(i)+" = "+(recv(i)*recv(i)));
                 success = false;
             }
@@ -72,3 +72,4 @@ public class CUDAKernelTest {
 }
 
 // vim: shiftwidth=4:tabstop=4:expandtab
+

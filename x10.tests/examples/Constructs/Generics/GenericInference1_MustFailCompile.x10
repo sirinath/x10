@@ -1,4 +1,3 @@
-// Yoav added: IGNORE_FILE
 /*
  *  This file is part of the X10 project (http://x10-lang.org).
  *
@@ -30,16 +29,12 @@ public class GenericInference1_MustFailCompile extends GenericTest {
     class Y extends X {static name = "Y";};
     class Z extends X {static name = "Z";};
 
-    def m[T](){T<:X} =
-        T.name; // ERR: Cannot access static field of a type parameter
+    def m[T](){T<:X} = T.name;
 
     public def run(): boolean = {
 
         // must fail compile
-        val a =
-            m(); // Err or not an Err:
-                    // used to be: Method m[T](){}[T <: GenericInference1_MustFailCompile.X]: x10.lang.String{self=="X"} in GenericInference1_MustFailCompile{self==GenericInference1_MustFailCompile#this} cannot be called with arguments (); Could not infer type for type parameter T.
-                    // now: (Diagnostic) No constraint on type parameters. Returning Any instead of throwing an exception.
+        val a = m();
         check("a", a, "hi");
 
         return result;

@@ -25,8 +25,8 @@ using namespace x10aux;
 
 const ref<String> x10aux::long_utils::toString(x10_long value, x10_int radix) {
     (void) value; (void) radix;
-    UNIMPLEMENTED("toString");
-    return X10_NULL;
+    assert(false); /* FIXME: STUBBED NATIVE */
+    return null;
 }
 
 const ref<String> x10aux::long_utils::toHexString(x10_long value) {
@@ -47,7 +47,7 @@ const ref<String> x10aux::long_utils::toString(x10_long value) {
 
 x10_long x10aux::long_utils::parseLong(const ref<String>& s, x10_int radix) {
     (void) s;
-    UNIMPLEMENTED("parseLong");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return radix; /* Bogus, but use radix to avoid warning about unused parameter */
 }
 
@@ -58,52 +58,52 @@ x10_long x10aux::long_utils::parseLong(const ref<String>& s) {
 }
 
 x10_long x10aux::long_utils::highestOneBit(x10_long x) {
-    UNIMPLEMENTED("highestOneBit");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_long x10aux::long_utils::lowestOneBit(x10_long x) {
-    UNIMPLEMENTED("lowestOneBit");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_int x10aux::long_utils::numberOfLeadingZeros(x10_long x) {
-    UNIMPLEMENTED("numberOfLeadingZeros");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_int x10aux::long_utils::numberOfTrailingZeros(x10_long x) {
-    UNIMPLEMENTED("numberOfTrailingZeros");    
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_int x10aux::long_utils::bitCount(x10_long x) {
-    UNIMPLEMENTED("bitCount");    
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_long x10aux::long_utils::rotateLeft(x10_long x) {
-    UNIMPLEMENTED("rotateLeft");    
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_long x10aux::long_utils::rotateRight(x10_long x) {
-    UNIMPLEMENTED("rotateRight");    
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_long x10aux::long_utils::reverse(x10_long x) {
-    UNIMPLEMENTED("reverse");
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_int x10aux::long_utils::signum(x10_long x) {
-    UNIMPLEMENTED("signum");    
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 
 x10_long x10aux::long_utils::reverseBytes(x10_long x) {
-    UNIMPLEMENTED("reverseBytes");    
+    assert(false); /* FIXME: STUBBED NATIVE */
     return x; /* Bogus, but use x to avoid warning about unused parameter */
 }
 // vim:tabstop=4:shiftwidth=4:expandtab

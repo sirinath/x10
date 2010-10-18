@@ -69,7 +69,7 @@ public class Struct {
         interfacesList.add(xts.lazyAny());
         cd.setInterfaces(interfacesList);
 
-       final Position pos = Position.compilerGenerated(n.body().position());
+       final Position pos = X10NodeFactory_c.compilerGenerated(n.body());
 
        String fullNameWithThis = fullName + "#this";
        //String fullNameWithThis = "this";
@@ -165,7 +165,7 @@ public class Struct {
                 fields.add(field);
            }
 
-        final Flags flags = X10Flags.PUBLIC.Final();
+        final Flags flags = X10Flags.SAFE.Public().Final();
         final X10NodeFactory nf = (X10NodeFactory)tb.nodeFactory();
         final TypeNode intTypeNode = nf.TypeNodeFromQualifiedName(pos,QName.make("x10.lang","Int"));
         final TypeNode boolTypeNode = nf.TypeNodeFromQualifiedName(pos,QName.make("x10.lang","Boolean"));
@@ -199,11 +199,11 @@ public class Struct {
         */
 
         {
-            X10Flags nativeFlags = X10Flags.toX10Flags(Flags.PUBLIC.Native().Final());
+            X10Flags nativeFlags = X10Flags.toX10Flags(Flags.PUBLIC.Native().Final()).Safe();
             ArrayList<AnnotationNode> natives;
             Formal formal;
-            // In the Java backend, some structs (like Int) are mapped to primitives (like int)
-            // So I must add a native annotation on this method.
+           // In the Java backend, some structs (like Int) are mapped to primitives (like int)
+           // So I must add a native annotation on this method.
 
             //@Native("java", "x10.rtt.Types.typeName(#0)")
             //@Native("c++", "x10aux::type_name(#0)")

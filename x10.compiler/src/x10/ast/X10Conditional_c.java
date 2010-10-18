@@ -61,14 +61,12 @@ public class X10Conditional_c extends Conditional_c implements X10Conditional {
         super(pos, cond, consequent, alternative);
     }
 
-    public Node typeCheck(ContextVisitor tc) {
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
         X10TypeSystem ts = (X10TypeSystem) tc.typeSystem();
         Context context = tc.context();
 
         if (! cond.type().isBoolean()) {
-            Errors.issue(tc.job(),
-                    new SemanticException("Condition of ternary expression must be of type boolean.", cond.position()),
-                    this);
+            throw new SemanticException("Condition of ternary expression must be of type boolean.",cond.position());
         }
 
         Expr e1 = consequent;
@@ -132,12 +130,7 @@ public class X10Conditional_c extends Conditional_c implements X10Conditional {
             // operand types, and the type of the conditional expression is the
             // promoted type of the second and third operands. Note that binary
             // numeric promotion performs value set conversion (Sec. 5.1.8).
-            try {
-                return type(ts.promote(t1, t2));
-            } catch (SemanticException e) {
-                Errors.issue(tc.job(), e, this);
-                return type(ts.unknownType(position()));
-            }
+            return type(ts.promote(t1, t2));
         }
 
         // If one of the second and third operands is of the null type and the
@@ -163,15 +156,13 @@ public class X10Conditional_c extends Conditional_c implements X10Conditional {
 
         try {
             Type t = ts.leastCommonAncestor(t1, t2, context);
-            Expr n1 = Converter.attemptCoercion(tc, e1, t);
-            Expr n2 = Converter.attemptCoercion(tc, e2, t);
-            if (n1 != null && n2 != null)
-                return consequent(n1).alternative(n2).type(t);
+            Expr n1 =  Converter.attemptCoercion(tc, e1, t);
+            Expr n2 =  Converter.attemptCoercion(tc, e2, t);
+            return consequent(n1).alternative(n2).type(t);
         }
         catch (SemanticException e) {
         }
 
-        Errors.issue(tc.job(), new Errors.TernaryConditionalTypeUndetermined(t1, t2, position()));
-        return this;
+        throw new Errors.TernaryConditionalTypeUndetermined(t1, t2, position());
     }
 }
