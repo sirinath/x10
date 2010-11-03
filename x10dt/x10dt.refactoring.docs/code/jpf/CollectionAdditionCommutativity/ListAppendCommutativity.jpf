@@ -1,3 +1,5 @@
+@using=jpf-symbc
+
 target=CollectionAdditionCommutativityChecker
 
 classpath=bin
