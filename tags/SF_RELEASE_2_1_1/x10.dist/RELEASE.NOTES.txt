@@ -1,0 +1,60 @@
+Release 2.1.0
+
+This release includes both the C++ and Java backends and runtimes.
+
+Items to highlight for 2.1.1 release:
+  (a) change in rail for Array/Region to be a standalone property 
+     -- supports more effective optimization, but code that used to say
+        Array[T]{rail} in 2.1.0 now needs to say Array[T](1){rail} because
+        rail no longer implies rank==1 in a way that is understood by the 
+        constraint system.
+
+Please consult the language specification for the details of
+these changes and for a list of additional changes.
+
+The following features described in the 2.1.0 language manual do not
+currently work and will be fixed in the subsequent releases:
+  - Non-static type definitions as class or interface members
+    (static type defs do work)
+  - Type definitions as package members (i.e., in the outermost scope of
+    a compilation unit)
+
+There is one known limitation of the 2.1.0 release that represents
+a regression with respect to 2.0.6.
+  - String concatenation via the '+' operator is asymmetric. 
+    If the first argument to '+' is not a String, it will be necessary
+    to explicitly add a ""+ first.  For example:
+        val x = 3;
+        val s = x + " hi ";
+    would need to be written
+        val x = 3;
+        val s = ""+ x + " hi ";
+    or 
+        val x = 3;
+        val s = x.toString() + " hi ";
+
+Additionally, the following features described in the language
+manual do not currently work with the C++ backend and will be fixed in
+the subsequent releases:
+  - Garbage collection on AIX and BG/P
+  - Non-final generic instance methods
+  - Exception stack traces on Cygwin
+  - Finally blocks and atomic sections that exit via non-exceptional
+    control flow before the end of the block (eg with return, break, 
+    or continue statements).
+
+The generated C++ code requires g++ 4.2 or better to be compiled; 
+we do almost all of our testing against g++ 4.3.2.  On AIX, you
+may either use g++ 4.2 or better or xlC 10.01.0000.0004 or better.
+
+Below is a summary of JIRA issues addressed for the X10 2.1.1
+
+ISSUES HERE
+
+For the details of JIRA issues fixed in this release, see
+http://jira.codehaus.org/browse/XTENLANG/fixforversion/NUMBER HERE
+
+Please use the X10 JIRA to report bugs, after ensuring the problem is
+not already reported:
+http://jira.codehaus.org/secure/IssueNavigator.jspa?reset=true&&pid=11812&resolution=-1
+
