@@ -20,8 +20,7 @@ import polyglot.types.Named;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem_c;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
-import x10.errors.Warnings;
+import polyglot.util.CollectionUtil;
 
 public class TypeDefMatcher extends TypeSystem_c.BaseMatcher<Named> {
     Type container;

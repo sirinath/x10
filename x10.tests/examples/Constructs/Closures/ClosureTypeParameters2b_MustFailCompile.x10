@@ -29,7 +29,7 @@ public class ClosureTypeParameters2b_MustFailCompile extends ClosureTest {
     public def run(): boolean = {
         
         class C[T] {val f = (){T<:Y} => "hi";}
-        check("new C[X]().f()", new C[X]().f(), "hi");  // ShouldBeErr
+        check("new C[X]().f()", new C[X]().f(), "hi");
 
         return result;
     }

@@ -20,7 +20,7 @@ import polyglot.visit.*;
  * The class of the <code>Expr</code> returned by
  * <code>LocalAssign_c.left()</code>is guaranteed to be an <code>Local</code>.
  */
-public abstract class LocalAssign_c extends Assign_c implements LocalAssign
+public class LocalAssign_c extends Assign_c implements LocalAssign
 {
     Local local;
 
@@ -48,7 +48,9 @@ public abstract class LocalAssign_c extends Assign_c implements LocalAssign
 	return local;
     }
 
-    public abstract Type leftType();
+    public Type leftType() {
+	return local.type();
+    }
 
     public Local local() {
 	return local;

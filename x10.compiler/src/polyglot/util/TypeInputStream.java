@@ -15,8 +15,6 @@ import polyglot.types.*;
 import java.util.*;
 import java.io.*;
 
-import x10.util.CollectionFactory;
-
 /** Input stream for reading type objects. */
 public class TypeInputStream extends ObjectInputStream {
     protected TypeSystem ts;
@@ -36,7 +34,7 @@ public class TypeInputStream extends ObjectInputStream {
         this.cache = cache;
         this.failed = false;
         this.enableReplace = true;
-        this.placeHoldersUsed = CollectionFactory.newHashSet();
+        this.placeHoldersUsed = new HashSet<Object>();
     }
     
     public Set<Object> placeHoldersUsed() {

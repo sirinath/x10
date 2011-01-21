@@ -12,7 +12,6 @@ import java.util.*;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.main.Report;
 import polyglot.util.*;
-import x10.util.CollectionFactory;
 
 /**
  * The <code>SystemResolver</code> is the main resolver for
@@ -29,12 +28,12 @@ public class SystemResolver extends CachingResolver implements TopLevelResolver 
     public SystemResolver(TopLevelResolver inner, ExtensionInfo extInfo) {
         super(inner);
         this.extInfo = extInfo;
-        this.packageCache = CollectionFactory.newHashMap();
+        this.packageCache = new HashMap<QName, Boolean>();
     }
 
     public Object copy() {
         SystemResolver r = (SystemResolver) super.copy();
-        r.packageCache = CollectionFactory.newHashMap(this.packageCache);
+        r.packageCache = new HashMap<QName, Boolean>(this.packageCache);
         return r;
     }
     

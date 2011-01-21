@@ -11,8 +11,6 @@
 
 package x10.constraint;
 
-import x10.util.CollectionFactory;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,7 +124,7 @@ public class XConstraint implements Cloneable {
     }
     public Set<XVar> vars() {
         List<XTerm> terms = constraints();
-        Set <XVar> result = CollectionFactory.newHashSet();
+        Set <XVar> result = new HashSet<XVar>();
         for (XTerm term : terms) {
            addTerm(term, result);
         }
@@ -238,6 +236,7 @@ public class XConstraint implements Cloneable {
 
         if (!consistent)
             return;
+        
         if (roots == null)
             roots = new LinkedHashMap<XTerm, XPromise>();
 
@@ -284,6 +283,7 @@ public class XConstraint implements Cloneable {
         
         if (roots == null)
             roots = new LinkedHashMap<XTerm, XPromise>();
+
         XPromise p = lookup(t);
         
         if (p != null)

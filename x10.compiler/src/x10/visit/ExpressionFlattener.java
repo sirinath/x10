@@ -5,6 +5,7 @@ package x10.visit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +61,7 @@ import polyglot.frontend.Source;
 import polyglot.types.Context;
 import polyglot.types.Flags;
 import polyglot.types.Name;
+import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
@@ -88,9 +90,9 @@ import x10.ast.Tuple;
 import x10.ast.When;
 import x10.ast.X10ClassDecl;
 import x10.errors.Warnings;
+import x10.optimizations.ForLoopOptimizer;
 import x10.types.X10FieldInstance;
 import x10.util.AltSynthesizer;
-import x10.util.CollectionFactory;
 
 /**
  * @author Bowen Alpern
@@ -100,16 +102,15 @@ public final class ExpressionFlattener extends ContextVisitor {
 
     private static final boolean DEBUG = false;
 
-    private static final boolean XTENLANG_2055 = true; // bug work around: don't flatten Marshall.x10
-    private static final boolean XTENLANG_2336 = true; // bug work around: don't flatten Runtime.x10
-    private static final boolean XTENLANG_2337 = true; // bug work around: don't flatten PolyScanner.x10
+//  private static final boolean XTENLANG_2055 = false; // bug work around
+    private static final boolean XTENLANG_2055 = true; // bug work around
 
     private final TypeSystem xts;
     private AltSynthesizer syn; // move functionality to Synthesizer
     private final SideEffectDetector sed;
     
     List<Labeled> labels = new ArrayList<Labeled>();
-    Map<Node, List<Labeled>> labelMap = CollectionFactory.newHashMap();
+    Map<Node, List<Labeled>> labelMap = new HashMap<Node, List<Labeled>>();
 
     /**
      * @param job the job to run
@@ -119,23 +120,42 @@ public final class ExpressionFlattener extends ContextVisitor {
     public ExpressionFlattener(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = ts;
-        syn = new AltSynthesizer(ts, nf);
+        syn = new AltSynthesizer(job, ts, nf);
         sed = new SideEffectDetector(job, ts, nf);
     }
 
     @Override
     public NodeVisitor begin() {
         sed.begin();
+        syn.begin();
         return super.begin();
     }
 
+    @Override
+    public ContextVisitor context(Context c) {
+        ExpressionFlattener res = (ExpressionFlattener) super.context(c);
+        if (res != this)
+            res.syn = (AltSynthesizer) syn.context(c);
+        return res;
+    }
+
+    @Override
+    public NodeVisitor superEnter(Node parent, Node n) {
+        ExpressionFlattener res = (ExpressionFlattener) super.superEnter(parent, n);
+        if (res != this)
+            res.syn = (AltSynthesizer) syn.enter(parent, n);
+        return res;
+    }
+
+    /* (non-Javadoc)
+     * @see polyglot.visit.NodeVisitor#override(polyglot.ast.Node)
+     */
     /**
      * Don't visit nodes that cannot be flattened.
      * 
      * @param n the node to be visited (or not)
      * @return n if the node is NOT to be visited, otherwise null
      */
-    @Override
     public Node override(Node n) {
         if (n instanceof X10ClassDecl) {
             if (DEBUG) System.out.println("DEBUG: flattening: " +((X10ClassDecl) n).classDef()+ " (@" +((X10ClassDecl) n).position()+ ")");
@@ -161,13 +181,7 @@ public final class ExpressionFlattener extends ContextVisitor {
     public static boolean cannotFlatten(Node n) {
         if (n instanceof SourceFile){
             Source s = ((SourceFile) n).source();
-            if (XTENLANG_2336 && s.name().equals("Runtime.x10")) { // BUG: cannot flatten Runtime
-                return true;
-            }
-            if (XTENLANG_2337 && s.name().equals("PolyScanner.x10")) { // BUG: cannot flatten PolyScanner
-                return true;
-            }
-            if (XTENLANG_2055 && s.name().equals("Marshal.x10")) { // BUG: can't flatten Marshal
+            if (XTENLANG_2055 && s.name().equals("Marshal.x10")) { // DEBUG: can't flatten Marshal
                 return true; 
             }
         }
@@ -192,8 +206,8 @@ public final class ExpressionFlattener extends ContextVisitor {
         return false;
     }
     
-    @Override
-    protected NodeVisitor enterCall(Node parent, Node child) {
+    
+    protected NodeVisitor enterCall(Node parent, Node child) throws SemanticException {
         if (parent instanceof Labeled && child instanceof Stmt) {
             labels.add((Labeled) parent);
             if (!(child instanceof Labeled)) {
@@ -202,17 +216,17 @@ public final class ExpressionFlattener extends ContextVisitor {
                 labels.clear();
             }
         }
-        return this;
+        return super.enterCall(parent, child);
         
     }
+
 
     /* (non-Javadoc)
      * @see polyglot.visit.ErrorHandlingVisitor#leaveCall(polyglot.ast.Node, polyglot.ast.Node, polyglot.visit.NodeVisitor)
      * 
      * Flatten statements (Stmt) and expressions (Expr).
      */
-    @Override
-    public Node leaveCall(Node parent, Node old, Node n, NodeVisitor v) {
+    public Node leaveCall(Node parent, Node old, Node n, NodeVisitor v) throws SemanticException {
         if (n instanceof Labeled) 
             return flattenLabeled((Labeled) n);
         if (parent instanceof Labeled && n instanceof Stmt) {
@@ -605,8 +619,7 @@ public final class ExpressionFlattener extends ContextVisitor {
             andStmts.add(syn.createAssignment( pos,
                                                syn.createLocal(pos, tmpLDecl), 
                                                Assign.ASSIGN, 
-                                               right,
-                                               this ));
+                                               right ));
             stmts.add(syn.createIf( pos, 
                                     syn.createLocal(pos, tmpLDecl), 
                                     syn.createBlock(pos, andStmts),
@@ -633,10 +646,9 @@ public final class ExpressionFlattener extends ContextVisitor {
             orStmts.add(syn.createAssignment( pos,
                                               syn.createLocal(pos, tmpLDecl), 
                                               Assign.ASSIGN, 
-                                              right,
-                                              this ));
+                                              right ));
             stmts.add(syn.createIf( pos,  
-                                    syn.createNot(syn.createLocal(pos, tmpLDecl), this),
+                                    syn.createNot(syn.createLocal(pos, tmpLDecl)),
                                     syn.createBlock(pos, orStmts),
                                     null ));
             return toFlatExpr(pos, stmts, syn.createLocal(pos, tmpLDecl));
@@ -729,15 +741,13 @@ public final class ExpressionFlattener extends ContextVisitor {
         thenStmts.add(syn.createAssignment( expr.position(), 
                                             syn.createLocal(expr.position(), tmpLDecl), 
                                             Assign.ASSIGN, 
-                                            getResult(expr.consequent()),
-                                            this ));
+                                            getResult(expr.consequent()) ));
         List<Stmt> elseStmts = new ArrayList<Stmt>();
         elseStmts.addAll(getStatements(expr.alternative()));
         elseStmts.add(syn.createAssignment( expr.position(), 
                                             syn.createLocal(expr.position(), tmpLDecl), 
                                             Assign.ASSIGN, 
-                                            getResult(expr.alternative()),
-                                            this ));
+                                            getResult(expr.alternative()) ));
         stmts.add(syn.createIf( expr.position(), 
                                 primary, 
                                 syn.createBlock(expr.consequent().position(), thenStmts), 
@@ -772,9 +782,9 @@ public final class ExpressionFlattener extends ContextVisitor {
         else if (stmt instanceof AtEach)    return flattenAtEach((AtEach) stmt);
         else if (stmt instanceof AssignPropertyCall) return flattenAssignPropertyCall((AssignPropertyCall) stmt);
         else if (stmt instanceof ConstructorCall)    return flattenConstructorCall((ConstructorCall) stmt);
-        else if (stmt instanceof Branch)             return syn.createStmtSeq(stmt);
-        else if (stmt instanceof Finish)             return syn.createStmtSeq(stmt);
-        else if (stmt instanceof Next)               return syn.createStmtSeq(stmt);
+        else if (stmt instanceof Branch)             return syn.toStmtSeq(stmt);
+        else if (stmt instanceof Finish)             return syn.toStmtSeq(stmt);
+        else if (stmt instanceof Next)               return syn.toStmtSeq(stmt);
         else if (stmt instanceof Try) {
             if (((Try) stmt).tryBlock() instanceof StmtSeq) {
                 List<Stmt> stmts = ((StmtSeq)((Try) stmt).tryBlock()).statements();
@@ -820,7 +830,7 @@ public final class ExpressionFlattener extends ContextVisitor {
      */
     private StmtSeq flattenAssert(Assert stmt) {
         assert false;
-        return syn.createStmtSeq(stmt);
+        return syn.toStmtSeq(stmt);
     }
 
     /**
@@ -837,7 +847,7 @@ public final class ExpressionFlattener extends ContextVisitor {
      */
     private StmtSeq flattenWhen(When stmt) {
         assert false;
-        return syn.createStmtSeq(stmt);
+        return syn.toStmtSeq(stmt);
     }
 
     /**
@@ -853,7 +863,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         Expr domain = getPrimaryAndStatements(stmt.domain(), stmts);
         stmts.add(stmt.domain(domain));
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
     /**
@@ -869,7 +879,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         Expr place = getPrimaryAndStatements(stmt.place(), stmts);
         stmts.add((Stmt) stmt.place(place));
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
     /**
@@ -885,7 +895,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         stmts.addAll(getStatements(stmt.init()));
         stmts.add(stmt.init(getResult(stmt.init())));
-        return syn.createStmtSeq(syn.createStmtSeq(stmt.position(), stmts));
+        return syn.toStmtSeq(syn.toStmtSeq(stmt.position(), stmts));
     }
 
     /**
@@ -901,7 +911,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         Expr cond = getPrimaryAndStatements(stmt.cond(), stmts);
         stmts.add(stmt.cond(cond));
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
     /**
@@ -934,7 +944,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         Expr primary = getPrimaryAndStatements(stmt.expr(), stmts);
         stmts.add(stmt.expr(primary));
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
 
@@ -951,7 +961,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         Expr primary = getPrimaryAndStatements(stmt.expr(), stmts);
         stmts.add(stmt.expr(primary));
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
     /**
@@ -967,7 +977,7 @@ public final class ExpressionFlattener extends ContextVisitor {
     private StmtSeq flattenAsync(Async stmt) {
         List<Stmt> stmts = new ArrayList<Stmt>();
         stmts.add((Async) stmt);
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
     /**
@@ -981,11 +991,11 @@ public final class ExpressionFlattener extends ContextVisitor {
      * @return a flat statement with the same semantics as stmt
      */
     private StmtSeq flattenReturn(Return stmt) {
-        if (null == stmt.expr()) return syn.createStmtSeq(stmt);
+        if (null == stmt.expr()) return syn.toStmtSeq(stmt);
         List<Stmt> stmts = new ArrayList<Stmt>();
         Expr expr = getPrimaryAndStatements(stmt.expr(), stmts);
         stmts.add(stmt.expr(expr));
-        return syn.createStmtSeq(stmt.position(), stmts);
+        return syn.toStmtSeq(stmt.position(), stmts);
     }
 
 
@@ -1016,7 +1026,7 @@ public final class ExpressionFlattener extends ContextVisitor {
                 throw new InternalCompilerError("Cannot flatten " +result+ " at " +result.position()+ " (was " +stmt+ ")");
             }
         }
-        return syn.createStmtSeq(syn.createStmtSeq(stmt.position(), stmts));
+        return syn.toStmtSeq(syn.toStmtSeq(stmt.position(), stmts));
     }
 
 
@@ -1036,7 +1046,7 @@ public final class ExpressionFlattener extends ContextVisitor {
      */
     private StmtSeq flattenAssignPropertyCall(AssignPropertyCall stmt) {
         assert false;
-        if (JAVA_CONSTRUCTOR_RULES) return syn.createStmtSeq(stmt);
+        if (JAVA_CONSTRUCTOR_RULES) return syn.toStmtSeq(stmt);
         List<Stmt> stmts = new ArrayList<Stmt>();
         List<Expr> args  = new ArrayList<Expr>();
         for (Expr arg : stmt.arguments()) {
@@ -1044,7 +1054,7 @@ public final class ExpressionFlattener extends ContextVisitor {
             args.add(primary);
         }
         stmts.add(stmt.arguments(args));
-        return syn.createStmtSeq(syn.createBlock(stmt.position(), stmts));
+        return syn.toStmtSeq(syn.createBlock(stmt.position(), stmts));
     }
 
     /**
@@ -1060,7 +1070,7 @@ public final class ExpressionFlattener extends ContextVisitor {
      * @return a flat statement with the same semantics as stmt
      */
     private StmtSeq flattenConstructorCall(ConstructorCall stmt) {
-        if (JAVA_CONSTRUCTOR_RULES) return syn.createStmtSeq(stmt);
+        if (JAVA_CONSTRUCTOR_RULES) return syn.toStmtSeq(stmt);
         List<Stmt> stmts = new ArrayList<Stmt>();
         if (null != stmt.qualifier()) {
             Expr qualifier = getPrimaryAndStatements(stmt.qualifier(), stmts);
@@ -1072,7 +1082,7 @@ public final class ExpressionFlattener extends ContextVisitor {
             args.add(primary);
         }
         stmts.add((ConstructorCall) stmt.arguments(args));
-        return syn.createStmtSeq(syn.createBlock(stmt.position(), stmts));
+        return syn.toStmtSeq(syn.createBlock(stmt.position(), stmts));
     }
 
     /**
@@ -1091,7 +1101,7 @@ public final class ExpressionFlattener extends ContextVisitor {
             List<Stmt> stmts = new ArrayList<Stmt>();
             Expr primary = getPrimaryAndStatements(stmt.cond(), stmts);
             stmts.add(syn.createIf( stmt.cond().position(), 
-                                    syn.createNot(stmt.cond().position(), primary, this), 
+                                    syn.createNot(stmt.cond().position(), primary), 
                                     syn.createBreak(stmt.cond().position()), 
                                     null) );
             stmt = (While_c) stmt.cond(syn.createTrue(stmt.cond().position()));
@@ -1127,7 +1137,7 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> bodyStmts = new ArrayList<Stmt>();
         bodyStmts.add(stmt.body());
         Expr primary = getPrimaryAndStatements(stmt.cond(), bodyStmts);
-        bodyStmts.add(syn.createAssignment(pos, syn.createLocal(pos, tmpLDecl), Assign.ASSIGN, primary, this));
+        bodyStmts.add(syn.createAssignment(pos, syn.createLocal(pos, tmpLDecl), Assign.ASSIGN, primary));
         stmt = (Do_c) stmt.cond(syn.createLocal(pos, tmpLDecl));
         stmt = (Do_c) stmt.body(syn.createBlock(pos, bodyStmts));
         stmts.add(label(stmt, labels));
@@ -1158,16 +1168,12 @@ public final class ExpressionFlattener extends ContextVisitor {
         List<Stmt> bodyStmts = new ArrayList<Stmt>();
         bodyStmts.add(syn.createIf( pos, 
                                     syn.createLocal(pos, firstLDecl), 
-                                    syn.createAssignment( pos, 
-                                                          syn.createLocal(pos, firstLDecl), 
-                                                          Assign.ASSIGN, 
-                                                          syn.createFalse(pos), 
-                                                          this ),
+                                    syn.createAssignment(pos, syn.createLocal(pos, firstLDecl), Assign.ASSIGN, syn.createFalse(pos)),
                                     syn.createBlock(pos, new ArrayList<Stmt>(stmt.iters())) ));
         if ((null!=stmt.cond()) && !((stmt.cond() instanceof BooleanLit) && ((BooleanLit) stmt.cond()).value()) ) {
             Expr primary = getPrimaryAndStatements(stmt.cond(), bodyStmts);
             bodyStmts.add(syn.createIf( stmt.cond().position(), 
-                                        syn.createNot(stmt.cond().position(), primary, this), 
+                                        syn.createNot(stmt.cond().position(), primary), 
                                         syn.createBreak(stmt.cond().position()), 
                                         null) );
             stmt = stmt.cond(syn.createTrue(pos));

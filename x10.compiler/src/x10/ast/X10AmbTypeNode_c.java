@@ -13,7 +13,6 @@ package x10.ast;
 
 import java.util.Collections;
 
-import polyglot.ast.AmbTypeNode;
 import polyglot.ast.AmbTypeNode_c;
 import polyglot.ast.CanonicalTypeNode;
 import polyglot.ast.Disamb;
@@ -38,7 +37,6 @@ import polyglot.util.CodeWriter;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
-import polyglot.visit.NodeVisitor;
 import polyglot.visit.PrettyPrinter;
 import polyglot.visit.TypeCheckPreparer;
 import polyglot.visit.TypeChecker;
@@ -58,16 +56,10 @@ import x10.visit.X10TypeChecker;
  * dot-separated list of identifiers that must resolve to a type.
  */
 public class X10AmbTypeNode_c extends AmbTypeNode_c implements X10AmbTypeNode, AddFlags {
-	
-	protected Prefix prefix;
-	protected Id name;
-	
-	public X10AmbTypeNode_c(Position pos, Prefix qual, Id name) {
-		super(pos, qual, name);
-		assert(name != null); // qual may be null
-		this.prefix = qual;
-		this.name = name;
-	}
+  public X10AmbTypeNode_c(Position pos, Prefix qual, Id name) {
+    super(pos, qual, name);
+    assert(name != null); // qual may be null
+  }
   
   protected TypeNode disambiguateAnnotation(ContextVisitor tc) throws SemanticException {
       Position pos = position();
@@ -255,42 +247,4 @@ public class X10AmbTypeNode_c extends AmbTypeNode_c implements X10AmbTypeNode, A
 	  this.flags = f;
   }
  
-
-  public Id name() {
-      return this.name;
-  }
-  
-  public AmbTypeNode name(Id name) {
-      X10AmbTypeNode_c n = (X10AmbTypeNode_c) copy();
-      n.name = name;
-      return n;
-  }
-  
-  public Prefix prefix() {
-    return this.prefix;
-  }
-
-  public AmbTypeNode prefix(Prefix prefix) {
-    X10AmbTypeNode_c n = (X10AmbTypeNode_c) copy();
-    n.prefix = prefix;
-    return n;
-  }
-
-  protected AmbTypeNode_c reconstruct(Prefix qual, Id name) {
-    if (qual != this.prefix || name != this.name) {
-      X10AmbTypeNode_c n = (X10AmbTypeNode_c) copy();
-      n.prefix = qual;
-      n.name = name;
-      return n;
-    }
-
-    return this;
-  }
-
-  public Node visitChildren(NodeVisitor v) {
-      Prefix prefix = (Prefix) visitChild(this.prefix, v);
-      Id name = (Id) visitChild(this.name, v);
-      return reconstruct(prefix, name);
-  }
-
 }

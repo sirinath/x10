@@ -7,18 +7,11 @@
 
 package polyglot.ast;
 
-import polyglot.types.Context;
 import polyglot.types.SemanticException;
-import polyglot.types.Type;
-import polyglot.types.TypeSystem;
-import polyglot.types.Types;
 import polyglot.util.CodeWriter;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.PrettyPrinter;
-import x10.constraint.XFailure;
-import x10.constraint.XTerm;
-import x10.types.constraints.CConstraint;
 
 /**
  * A <code>BooleanLit</code> represents a boolean literal expression.
@@ -45,20 +38,8 @@ public class BooleanLit_c extends Lit_c implements BooleanLit
   }
 
   /** Type check the expression. */
-  public Node typeCheck(ContextVisitor tc) {
-      TypeSystem xts = (TypeSystem) tc.typeSystem();
-	  Type Boolean =  xts.Boolean();
-	 
-	  CConstraint c = new CConstraint();
-	  XTerm term = xts.xtypeTranslator().translate(c, this.type(Boolean), (Context) tc.context());
-	  try {
-		  c.addSelfBinding(term);
-	  }
-	  catch (XFailure e) {
-	  }
-
-	  Type newType = Types.xclause(Boolean, c);
-	  return type(newType);
+  public Node typeCheck(ContextVisitor tc) throws SemanticException {
+    return type(tc.typeSystem().Boolean());
   }
 
   public String toString() {

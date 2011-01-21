@@ -34,7 +34,8 @@ public abstract class AbstractErrorQueue implements ErrorQueue
     }
 
     public final void enqueue(ErrorInfo e) {
-	if (ErrorInfo.isErrorKind(e.getErrorKind())) {
+	if (e.getErrorKind() != ErrorInfo.WARNING &&
+            e.getErrorKind() != ErrorInfo.DEBUG) {
 	    errorCount++;
 	}
 

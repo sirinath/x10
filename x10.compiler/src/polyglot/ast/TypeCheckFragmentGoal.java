@@ -9,7 +9,7 @@ import java.util.List;
 
 import polyglot.frontend.*;
 import polyglot.types.LazyRef;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 import polyglot.visit.TypeChecker;
 
 public class TypeCheckFragmentGoal<T> extends AbstractGoal_c implements SourceGoal{
@@ -59,7 +59,7 @@ public class TypeCheckFragmentGoal<T> extends AbstractGoal_c implements SourceGo
     
     protected Node processPrereq(Node parent, Node n, TypeChecker v) {
         if (n != null) {
-            v = (TypeChecker) v.enter(parent, n); // uses v.context
+            v = (TypeChecker) v.enter(parent, n);
         }
         return parent.visitChild(n, v);
     }

@@ -9,10 +9,8 @@ package polyglot.types;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import polyglot.util.Copy;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import x10.constraint.XFailure;
 import x10.constraint.XVar;
 import x10.types.X10ClassDef;
@@ -124,7 +122,7 @@ public interface Context extends Resolver, Copy
 
     /** Context name table */
     String MAGIC_NAME_PREFIX = "X10$";
-    Map<String,Name> contextNameTable = CollectionFactory.newHashMap();
+    HashMap<String,Name> contextNameTable = new HashMap<String,Name>();
     /** Return the same mangled name if has been created using the same string. */ 
     Name makeFreshName(String name);
     

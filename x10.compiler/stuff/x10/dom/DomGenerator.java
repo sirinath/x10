@@ -66,7 +66,7 @@ public class DomGenerator implements Copy {
 			throw new InternalCompilerError(e);
 		}
 		
-		typesMap = CollectionFactory.newHashMap();
+		typesMap = new HashMap<IdentityKey,String>();
 	}
 	
 	public Element gen(X10Dom dom, Node n) {

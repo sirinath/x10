@@ -7,8 +7,6 @@
 
 package polyglot.util;
 
-import x10.util.CollectionFactory;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +29,7 @@ public class WorkList {
    **/
   public WorkList() {
     pending = new LinkedList<Object>();
-    results = CollectionFactory.newHashMap();
+    results = new HashMap<Object, Object>();
     size = 0;
   }
 
@@ -116,7 +114,7 @@ public class WorkList {
   protected LinkedList<Object> pending;
   // A map from all objects to their results.  Any object with no result
   // maps to NOT_CALCULATED.
-  protected Map<Object, Object> results;
+  protected HashMap<Object, Object> results;
   // The number of elements in pending.
   protected int size;
 

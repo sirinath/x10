@@ -62,7 +62,6 @@ import polyglot.types.Types;
 import polyglot.types.VarDef;
 import polyglot.types.VarInstance;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.ForLoop;
@@ -105,7 +104,7 @@ public class LoopUnroller extends ContextVisitor {
     private class LoopParams {
         final VarDecl fLoopVar;
         final Expr fLoopDomain;
-        Set<Expr> fLoopDomainValues= CollectionFactory.newHashSet();
+        Set<Expr> fLoopDomainValues= new HashSet<Expr>();
         boolean fExtentUnknown;
         int fMin;
         Expr fMinSymbolic;
@@ -722,7 +721,7 @@ public class LoopUnroller extends ContextVisitor {
 
         for(int i= 0; i < fUnrollFactor; i++) {
             if (loopVar.vars().size() > 0) {
-                final Map<VarInstance<? extends VarDef>, Expr> subs= CollectionFactory.newHashMap(1);
+                final Map<VarInstance<? extends VarDef>, Expr> subs= new HashMap<VarInstance<? extends VarDef>, Expr>(1);
                 Expr varValue= intLit(i);
                 subs.put((VarInstance<? extends VarDef>) firstDimVar.localDef().asInstance(), plus(local(newLoopVarInit.localDef()), varValue));
                 final Context outer = context();

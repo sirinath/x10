@@ -21,7 +21,7 @@ import x10.errors.Errors;
  * It may or may not return a value.  If not <code>expr()</code> should return
  * null.
  */
-public abstract class Return_c extends Stmt_c implements Return
+public class Return_c extends Stmt_c implements Return
 {
     protected Expr expr;
 
@@ -61,7 +61,62 @@ public abstract class Return_c extends Stmt_c implements Return
     }
 
     /** Type check the statement. */
-    public abstract Node typeCheck(ContextVisitor tc) throws SemanticException;
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
+	TypeSystem ts = tc.typeSystem();
+	Context c = tc.context();
+
+	CodeDef ci = c.currentCode();
+
+	if (ci instanceof InitializerDef) {
+	    throw new SemanticException("Cannot return from an initializer block.", position());
+	}
+
+	if (ci instanceof ConstructorDef) {
+	    if (expr != null) {
+		throw new SemanticException("Cannot return a value from " + ci + ".",position());
+	    }
+
+	    return this;
+	}
+
+	if (ci instanceof FunctionDef) {
+	    FunctionDef fi = (FunctionDef) ci;
+	    Type returnType = Types.get(fi.returnType());
+	    
+	    if (returnType == null) {
+	        throw new InternalCompilerError("Null return type for " + fi);
+	    }
+	    
+	    if (returnType instanceof UnknownType) {
+	        throw new SemanticException();
+	    }
+
+	    if (returnType.isVoid()) {
+                if (expr != null) {
+                    throw new SemanticException("Cannot return a value from " + fi + ".", position());
+                }
+                else {
+                    return this;
+                }
+	    }
+            else if (expr == null) {
+                throw new SemanticException("Must return a value from " + fi + ".", position());
+            }
+
+	    if (ts.isImplicitCastValid(expr.type(), returnType, c)) {
+	        return this;
+	    }
+
+            if (ts.numericConversionValid(returnType, expr.constantValue(), c)) {
+                return this;
+            }
+
+	    throw new Errors.CannotReturnExpr(expr.type(), returnType, expr.position());
+	    	
+	}
+
+	throw new SemanticException("Cannot return from this context.", position());
+    }
   
     public Type childExpectedType(Expr child, AscriptionVisitor av) {
         if (child == expr) {

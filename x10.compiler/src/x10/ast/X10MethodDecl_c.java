@@ -73,7 +73,7 @@ import polyglot.types.TypeObject;
 import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.util.CodeWriter;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 import polyglot.util.ErrorInfo;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
@@ -299,7 +299,7 @@ public class X10MethodDecl_c extends MethodDecl_c implements X10MethodDecl {
 	public void setResolver(Node parent, final TypeCheckPreparer v) {
 		X10MethodDef mi = (X10MethodDef) this.mi;
 		if (mi.body() instanceof LazyRef<?>) {
-            LazyRef<XTerm> r = (LazyRef<XTerm>) mi.body();
+			LazyRef<XTerm> r = (LazyRef<XTerm>) mi.body();
 			TypeChecker tc = new X10TypeChecker(v.job(), v.typeSystem(), v.nodeFactory(), v.getMemo());
 			tc = (TypeChecker) tc.context(v.context().freeze());
 			r.setResolver(new TypeCheckFragmentGoal<XTerm>(parent, this, tc, r, false));
@@ -476,7 +476,6 @@ public class X10MethodDecl_c extends MethodDecl_c implements X10MethodDecl {
 				final LazyRef<Type> r = (LazyRef<Type>) tn.typeRef();
 				TypeChecker tc = new X10TypeChecker(v.job(), v.typeSystem(), v.nodeFactory(), v.getMemo(), true);
 				tc = (TypeChecker) tc.context(tcp.context().freeze());
-                // todo: if the return type is void, let's skip this whole resolver stuff.
 				r.setResolver(new TypeCheckReturnTypeGoal(this, new Node[] { guard(), offerType() }, body(), tc, r));
 			}
 		}
@@ -597,7 +596,7 @@ public class X10MethodDecl_c extends MethodDecl_c implements X10MethodDecl {
 
 
 	public static void dupFormalCheck(List<TypeParamNode> typeParams, List<Formal> formals) throws SemanticException {
-		Set<Name> pnames = CollectionFactory.newHashSet();
+		Set<Name> pnames = new HashSet<Name>();
 		for (TypeParamNode p : typeParams) {
 			Name name = p.name().id();
 			if (pnames.contains(name))
@@ -609,7 +608,7 @@ public class X10MethodDecl_c extends MethodDecl_c implements X10MethodDecl {
 		// because we add all the formals into the scope before visiting a
 		// formal, so the lookup of a duplicate formal returns itself rather
 		// than the previous formal.
-		Set<Name> names = CollectionFactory.newHashSet();
+		Set<Name> names = new HashSet<Name>();
 		LinkedList<Formal> q = new LinkedList<Formal>();
 		q.addAll(formals);
 		while (! q.isEmpty()) {
@@ -851,7 +850,7 @@ public class X10MethodDecl_c extends MethodDecl_c implements X10MethodDecl {
 			return;
 
 		X10ClassDef cd = (X10ClassDef) tc.context().currentClassDef();
-		final Map<Name,ParameterType.Variance> vars = CollectionFactory.newHashMap();
+		final Map<Name,ParameterType.Variance> vars = new HashMap<Name, ParameterType.Variance>();
 		for (int i = 0; i < cd.typeParameters().size(); i++) {
 			ParameterType pt = cd.typeParameters().get(i);
 			ParameterType.Variance v = cd.variances().get(i);

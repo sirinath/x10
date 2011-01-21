@@ -15,7 +15,6 @@ import polyglot.util.InternalCompilerError;
 import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.util.UniqueID;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 // TODO:
 //Convert closures to anon
@@ -33,7 +32,7 @@ public class InnerClassRemover extends ContextVisitor {
         super(job, ts, nf);
     }
 
-    protected Map<ClassDef, FieldDef> outerFieldInstance = CollectionFactory.newHashMap();
+    protected Map<ClassDef, FieldDef> outerFieldInstance = new HashMap<ClassDef, FieldDef>();
     
     /** Get a reference to the enclosing instance of the current class that is of type containerClass */
     Expr getContainer(Position pos, Expr this_, ClassType currentClass, ClassType containerClass) {

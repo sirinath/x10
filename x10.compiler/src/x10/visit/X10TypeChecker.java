@@ -24,7 +24,6 @@ import polyglot.types.TypeSystem;
 import polyglot.types.UnknownType;
 import polyglot.util.ErrorInfo;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import polyglot.visit.TypeChecker;
@@ -42,7 +41,7 @@ public class X10TypeChecker extends TypeChecker {
 	 * @param nf
 	 */
 	private X10TypeChecker(Job job, TypeSystem ts, NodeFactory nf) {
-	    this(job, ts, nf, CollectionFactory.<Node, Node>newHashMap());
+	    this(job, ts, nf, new HashMap<Node, Node>());
 	}
 	/**
 	 * @param job

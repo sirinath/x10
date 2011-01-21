@@ -64,7 +64,6 @@ import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.util.SilentErrorQueue;
 import polyglot.util.SubtypeSet;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.AlphaRenamer;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
@@ -138,7 +137,7 @@ public class Inliner extends ContextVisitor {
 //  private static final boolean DEBUG = true;
 
     private static final boolean VERBOSE = false;
-//  private static final boolean VERBOSE = true;
+//  private static final boolean VERBOSE = INLINE_METHODS;
 //  private static final boolean VERY_VERBOSE = VERBOSE && false;
     private static final boolean VERY_VERBOSE = VERBOSE && true;
 
@@ -147,8 +146,8 @@ public class Inliner extends ContextVisitor {
      * are to be inlined.
      */
 //  private static final int SMALL_METHOD_MAX_SIZE = -1;
-    private static final int SMALL_METHOD_MAX_SIZE = 0;
-//  private static final int SMALL_METHOD_MAX_SIZE = 1;
+//  private static final int SMALL_METHOD_MAX_SIZE = 0;
+    private static final int SMALL_METHOD_MAX_SIZE = 1;
 //  private static final int SMALL_METHOD_MAX_SIZE = 2;
 //  private static final int SMALL_METHOD_MAX_SIZE = 3;
 
@@ -157,22 +156,23 @@ public class Inliner extends ContextVisitor {
      */
     private TypeSystem xts;
     private NodeFactory xnf;
-    private AltSynthesizer syn;
+    // private Synthesizer syn;
+    private AltSynthesizer syn; // move functionality to Synthesizer
     private InlineCostEstimator ice;
     private SoftReference<InlinerCache> inlinerCacheRef[] = (SoftReference<InlinerCache>[]) new SoftReference<?>[1];
 
     public Inliner(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = ts;
-        xnf = nf;;
-        syn = new AltSynthesizer(ts, nf);
-        ice = new InlineCostEstimator(ts, nf);
+        xnf = nf;
+        // syn = new Synthesizer(xnf, xts);
+        syn = new AltSynthesizer(job, ts, nf);
+        ice = new InlineCostEstimator(xts, xnf);
         X10CompilerOptions opts = (X10CompilerOptions) job.extensionInfo().getOptions();
         INLINE_CONSTANTS = opts.x10_config.INLINE_CONSTANTS;
         INLINE_METHODS   = opts.x10_config.INLINE_METHODS;
         INLINE_CLOSURES  = opts.x10_config.INLINE_CLOSURES && opts.x10_config.ALLOW_STATEMENT_EXPRESSIONS;
-//      INLINE_IMPLICIT  = opts.x10_config.INLINE_METHODS_IMPLICIT;
-        INLINE_IMPLICIT  = opts.x10_config.EXPERIMENTAL;
+        INLINE_IMPLICIT  = opts.x10_config.INLINE_METHODS_IMPLICIT;
     }
 
     /**
@@ -609,7 +609,7 @@ public class Inliner extends ContextVisitor {
         }
 
         protected TypeRewriter rewriter = new TypeRewriter();
-        protected Map<Name, LocalDef> localDefMap = CollectionFactory.newHashMap();
+        protected Map<Name, LocalDef> localDefMap = new HashMap<Name, LocalDef>();
 
         @Override
         public NodeVisitor enter(Node n) {
@@ -1090,7 +1090,7 @@ public class Inliner extends ContextVisitor {
 
         // TODO: move this up to TypeTransformer
         private Pair<XLocal[], XLocal[]> getLocalSubstitution() {
-            Map<X10LocalDef, X10LocalDef> map = vars;
+            HashMap<X10LocalDef, X10LocalDef> map = vars;
             XLocal[] X = new XLocal[map.keySet().size()];
             XLocal[] Y = new XLocal[X.length];
             int i = 0;
@@ -1343,7 +1343,7 @@ public class Inliner extends ContextVisitor {
             LocalDecl temp = temps[i];
             X10Formal formal = (X10Formal) formals.get(i);
             Expr value = createCast(temp.position(), syn.createLocal(temp.position(), temp), formal.type().type());
-            LocalDecl local = syn.createLocalDecl(formal, value);
+            LocalDecl local = syn.transformFormalToLocalDecl(formal, value);
             tieLocalDefToItself(local.localDef());
             tieLocalDef(local.localDef(), temp.localDef());
             declarations.add(local);
@@ -1402,7 +1402,8 @@ public class Inliner extends ContextVisitor {
             this.ths = ths;
       //    this.returnCount = 0;
       //    this.throwCount = 0;
-            this.syn = new AltSynthesizer(ts, nf);
+            this.syn = new AltSynthesizer(j, ts, nf);
+            this.syn.begin();
             if (body.size() == 1 && body.get(0) instanceof Return) {
                 // Closure already has the right properties; make return rewriting a no-op
                 this.ret = null;
@@ -1689,11 +1690,11 @@ public class Inliner extends ContextVisitor {
     }
 
     private class InlinerCache {
-        private final Set<X10MethodDef> dontInline              = CollectionFactory.newHashSet();
-        private final Map<X10MethodDef, X10MethodDecl> def2decl = CollectionFactory.newHashMap();
-        private final Set<Job> badJobs                          = CollectionFactory.newHashSet();
-        private final Set<String> badSources                    = CollectionFactory.newHashSet();
-        private final Map<String, Node> astMap                  = CollectionFactory.newHashMap();
+        private final Set<X10MethodDef> dontInline              = new HashSet<X10MethodDef>();
+        private final Map<X10MethodDef, X10MethodDecl> def2decl = new HashMap<X10MethodDef, X10MethodDecl>();
+        private final Set<Job> badJobs                          = new HashSet<Job>();
+        private final Set<String> badSources                    = new HashSet<String>();
+        private final Map<String, Node> astMap                  = new HashMap<String, Node>();
 
         boolean uninlineable(X10MethodDef candidate) {
             return dontInline.contains(candidate);

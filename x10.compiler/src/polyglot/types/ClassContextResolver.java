@@ -11,7 +11,6 @@ import java.util.*;
 
 import polyglot.main.Report;
 import polyglot.util.*;
-import x10.util.CollectionFactory;
 
 /**
  * A <code>ClassContextResolver</code> looks up type names qualified with a class name.
@@ -151,7 +150,7 @@ public class ClassContextResolver extends AbstractAccessControlResolver {
         
         // Collect all members of the super types.
         // Use a Set to eliminate duplicates.
-        Set<Named> acceptable = CollectionFactory.newHashSet();
+        Set<Named> acceptable = new HashSet<Named>();
         
         if (type.superClass() != null) {
             Type sup = type.superClass();
@@ -183,7 +182,7 @@ public class ClassContextResolver extends AbstractAccessControlResolver {
             throw new NoClassException(name.toString(), type);
         }
         else if (acceptable.size() > 1) {
-            Set<Type> containers = CollectionFactory.newHashSet(acceptable.size());
+            Set<Type> containers = new HashSet<Type>(acceptable.size());
             for (Named n : acceptable) {
                 if (n instanceof MemberInstance<?>) {
                     MemberInstance<?> mi = (MemberInstance<?>) n;

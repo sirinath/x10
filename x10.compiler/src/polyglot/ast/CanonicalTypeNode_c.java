@@ -16,7 +16,7 @@ import polyglot.visit.*;
 /**
  * A <code>CanonicalTypeNode</code> is a type node for a canonical type.
  */
-public abstract class CanonicalTypeNode_c extends TypeNode_c implements CanonicalTypeNode
+public class CanonicalTypeNode_c extends TypeNode_c implements CanonicalTypeNode
 {
   public CanonicalTypeNode_c(Position pos, Ref<? extends Type> type) {
     super(pos);
@@ -44,7 +44,13 @@ public abstract class CanonicalTypeNode_c extends TypeNode_c implements Canonica
       return this;
   }
   
-  public abstract void prettyPrint(CodeWriter w, PrettyPrinter tr);
+  public void prettyPrint(CodeWriter w, PrettyPrinter tr) {
+    if (type == null) {
+        w.write("<unknown-type>");
+    } else {
+        type.get().print(w);
+    }
+  }
   
   /**
    * Translate the type.

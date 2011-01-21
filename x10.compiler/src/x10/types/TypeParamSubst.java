@@ -167,7 +167,7 @@ public class TypeParamSubst {
 	    return true;
 	}
 
-	//private Map<Object,Object> cache = CollectionFactory.newHashMap();
+	//private Map<Object,Object> cache = new HashMap<Object, Object>();
 
 	//@SuppressWarnings("unchecked") // Casting to a generic type parameter
 	public <T> T reinstantiate(T t) {

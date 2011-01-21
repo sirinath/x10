@@ -21,7 +21,6 @@ import java.util.Set;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.main.Main;
 import polyglot.main.UsageError;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import x10.config.ConfigurationError;
 import x10.config.OptionError;
 
@@ -82,7 +81,7 @@ public class X10CPPCompilerOptions extends x10.X10CompilerOptions {
 	    super.usageForFlag(out, flag, description);
 	}
 	
-	private Set<String> compilationUnits = CollectionFactory.newHashSet();
+	private Set<String> compilationUnits = new HashSet<String>();
     
 	public Set<String> compilationUnits() { return compilationUnits; }	
 }

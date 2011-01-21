@@ -31,7 +31,6 @@ import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.X10Cast;
@@ -51,7 +50,7 @@ public class SideEffectDetector extends ContextVisitor {
     }
 
     private final boolean sideEffectDetected[] = new boolean[1];
-    private final Set<LocalDef> captiveLocals = CollectionFactory.newHashSet();
+    private final Set<LocalDef> captiveLocals = new HashSet<LocalDef>();
     /**
      * @param expr
      * @return

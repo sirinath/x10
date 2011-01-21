@@ -11,8 +11,6 @@
 
 package x10.constraint;
 
-import x10.util.CollectionFactory;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -117,7 +115,7 @@ class XPromise_c implements XPromise, Serializable {
     }
 
     public void setTerm(XTerm term) {
-        Set<XPromise> visited = CollectionFactory.newHashSet();
+        Set<XPromise> visited = new HashSet<XPromise>();
         visited.add(this);
         setTerm(term, visited);
     }
@@ -336,7 +334,7 @@ class XPromise_c implements XPromise, Serializable {
     public boolean disBind(/* @nonnull */XPromise target) throws XFailure {
         assert target.value() == null;
         assert forwarded() == false;
-        if (disEquals == null) disEquals = CollectionFactory.newHashSet();
+        if (disEquals == null) disEquals = new HashSet<XPromise>();
         boolean result = disEquals.add(target);
         return result;
         //if (!target.equals(value) && !target.equals(var)) {
@@ -474,7 +472,7 @@ class XPromise_c implements XPromise, Serializable {
     }
     public void addDisEquals(XPromise other) {
     	if (disEquals == null) 
-    		disEquals = CollectionFactory.newHashSet();
+    		disEquals = new HashSet<XPromise>();
     	disEquals.add(other);
     }
     public boolean hasDisBindings() { 

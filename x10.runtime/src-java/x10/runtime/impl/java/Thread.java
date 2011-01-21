@@ -14,7 +14,6 @@ package x10.runtime.impl.java;
 import x10.lang.Place;
 import x10.rtt.RuntimeType;
 import x10.rtt.Type;
-import x10.x10rt.X10RT;
 
 /**
  * @author Christian Grothoff
@@ -30,14 +29,14 @@ public class Thread extends java.lang.Thread {
 		return (Thread) java.lang.Thread.currentThread();
 	}
 
-	private final Place home;    // the current place
+	private Place home;    // the current place
 	
 	public x10.core.fun.VoidFun_0_0 body;
 
     public Thread(String name) {
         super(name);
         if (!(java.lang.Thread.currentThread() instanceof Thread)) {
-            home = Place.place(X10RT.here());
+            home = Place.place(0);
         } else {
             home = currentThread().home();
         }
@@ -54,6 +53,13 @@ public class Thread extends java.lang.Thread {
     public void $apply() {}
 
     /**
+	 * Update thread place (called by native runtime only)
+	 */
+	void home(int home) {
+		this.home = Place.place(home);
+	}
+
+	/**
 	 * Return current place
 	 */
 	public Place home() {

@@ -11,7 +11,6 @@ import java.util.*;
 
 import polyglot.ast.*;
 import polyglot.types.Name;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /**
  * The <code>CodeCleaner</code> runs over the AST and performs some trivial
@@ -115,7 +114,7 @@ public class CodeCleaner extends NodeVisitor {
    * Traverses a Block and determines the set of label references.
    **/
   protected Set<Name> labelRefs( Block b ) {
-    final Set<Name> result = CollectionFactory.newHashSet();
+    final Set<Name> result = new HashSet<Name>();
     b.visit( new NodeVisitor() {
 	public Node leave( Node old, Node n, NodeVisitor v ) {
 	  if ( n instanceof Branch ) {

@@ -38,7 +38,6 @@ import x10.types.X10ClassType;
 import x10.types.X10Def;
 import x10.types.X10MethodDef;
 import polyglot.types.TypeSystem;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /**
  * Visitor that checks @Native and @NativeRep annotations.
@@ -52,7 +51,7 @@ public class CheckNativeAnnotationsVisitor extends ContextVisitor {
     }
 
     public Map<String, String> getNativeRepParam(X10ClassDef def, int i) {
-        Map<String,String> map = CollectionFactory.newHashMap();
+        Map<String,String> map = new HashMap<String, String>();
         try {
             TypeSystem xts = (TypeSystem) this.typeSystem();
             Type rep = (Type) xts.systemResolver().find(QName.make("x10.compiler.NativeRep"));
@@ -108,7 +107,7 @@ public class CheckNativeAnnotationsVisitor extends ContextVisitor {
     }
 
     Map<String,String> getNativeImplForDef(X10Def o) {
-        Map<String,String> map = CollectionFactory.newHashMap();
+        Map<String,String> map = new HashMap<String, String>();
         TypeSystem xts = (TypeSystem) o.typeSystem();
         try {
             Type java = (Type) xts.systemResolver().find(QName.make("x10.compiler.Native"));

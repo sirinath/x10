@@ -20,8 +20,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import x10.util.CollectionFactory;
-
 public class ObjectDumper {
     CodeWriter w;
     int modifiersMask;
@@ -36,7 +34,7 @@ public class ObjectDumper {
     }
     
     public void dump(Object o) {
-	Set<Object> cache = CollectionFactory.newHashSet();
+	Set<Object> cache = new java.util.HashSet<Object>();
 	w.write("(");
         dumpObject(o, cache);
 	w.write(")");

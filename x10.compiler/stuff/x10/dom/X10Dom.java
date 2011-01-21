@@ -149,7 +149,7 @@ public class X10Dom {
 			return tagMap;
 		}
 		
-		tagMap = CollectionFactory.newHashMap();
+		tagMap = new HashMap<String,Lens>();
 
 		tagMap.put("Boolean", new BooleanLens());
 		tagMap.put("Byte", new ByteLens());
@@ -375,7 +375,7 @@ public class X10Dom {
 		public Map<K,V> fromXML(DomReader v, Element e) {
 			if (e == null)
 				return Collections.<K,V>emptyMap();
-			Map<K,V> r = CollectionFactory.newHashMap();
+			Map<K,V> r = new HashMap<K,V>();
 			for (org.w3c.dom.Node child = e.getFirstChild(); child != null; child = child.getNextSibling()) {
 				if (child instanceof Element) {
 					Entry<K,V> x = new EntryLens<K,V>(klens, vlens).fromXML(v, (Element) child);
@@ -686,7 +686,7 @@ public class X10Dom {
 	
 	public class FlagsLens implements Lens<Flags> {
 		public Flags fromXML(DomReader v, Element e) {
-			Set fs = CollectionFactory.newHashSet;
+			Set fs = new HashSet();
 			fs.add(Flags.PUBLIC);
 			fs.add(Flags.PRIVATE);
 			fs.add(Flags.PROTECTED);
@@ -2065,7 +2065,7 @@ public class X10Dom {
 		
 		public Object fromXML(DomReader v, Element e) {
 			String tag = e.getTagName();
-			Map<String,Object> m = CollectionFactory.newHashMap();
+			Map<String,Object> m = new HashMap<String,Object>();
 			
 			for (org.w3c.dom.Node x = e.getFirstChild(); x != null; x = x.getNextSibling()) {
 				if (x instanceof Element) {

@@ -14,7 +14,6 @@ import polyglot.frontend.Job;
 import polyglot.main.Report;
 import polyglot.types.*;
 import polyglot.util.InternalCompilerError;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.DataFlow.FlowGraphSource;
 import polyglot.visit.DataFlow.Item;
 import polyglot.visit.FlowGraph.EdgeKey;
@@ -38,14 +37,14 @@ public class CopyPropagator extends DataFlow {
 	 * Constructor for creating an empty set.
 	 */
 	protected DataFlowItem() {
-	    this.map = CollectionFactory.newHashMap();
+	    this.map = new HashMap<LocalDef, CopyInfo>();
 	}
 
 	/**
 	 * Deep copy constructor.
 	 */
 	protected DataFlowItem(DataFlowItem dfi) {
-	    map = CollectionFactory.newHashMap(dfi.map.size());
+	    map = new HashMap<LocalDef, CopyInfo>(dfi.map.size());
 	    for (Map.Entry<LocalDef, CopyInfo> e : dfi.map.entrySet()) {
 		LocalDef li = (LocalDef)e.getKey();
 		CopyInfo ci = (CopyInfo)e.getValue();
@@ -67,7 +66,7 @@ public class CopyPropagator extends DataFlow {
 
 		this.li = li;
 		this.from = null;
-		this.to = CollectionFactory.newHashSet();
+		this.to = new HashSet<CopyInfo>();
 		this.root = this;
 	    }
 

@@ -33,7 +33,6 @@ import polyglot.types.Types;
 import polyglot.types.VarDef;
 import polyglot.types.VarInstance;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.Closure;
@@ -62,7 +61,7 @@ public class AsyncInitializer extends ContextVisitor {
     private final X10CNodeFactory_c xnf;
 
     // mapping corresponding box var id for init val
-    private Map<VarDef, Id> initValToId = CollectionFactory.newHashMap();
+    private Map<VarDef, Id> initValToId = new HashMap<VarDef, Id>();
     private int nestLevel = 0;
     private int pcnt;
 
@@ -163,7 +162,7 @@ public class AsyncInitializer extends ContextVisitor {
         Set<LocalDef> asyncInitVal = null;
         for (LocalDef initVal : ext.initVals) {
             if (((X10LocalDef) initVal).isAsyncInit()) {
-                if (asyncInitVal == null) asyncInitVal = CollectionFactory.newHashSet();
+                if (asyncInitVal == null) asyncInitVal = new HashSet<LocalDef>();
                 asyncInitVal.add(initVal);
             }
         }
@@ -172,7 +171,7 @@ public class AsyncInitializer extends ContextVisitor {
 
     private Set<LocalDef> collectLocalVarsToBox(Try tcfBlock) {
         // one pass scan of async blocks within finish and collect accesses of vars declared outside
-        final Set<LocalDef> asyncVar = CollectionFactory.newHashSet();
+        final Set<LocalDef> asyncVar = new HashSet<LocalDef>();
         final List<LocalDef> localDeclList = new ArrayList<LocalDef>();
         tcfBlock.visit(new NodeVisitor() {
             @Override
@@ -247,7 +246,7 @@ public class AsyncInitializer extends ContextVisitor {
     private Try replaceVariables(Try tcfBlock, final Set<LocalDef> asyncInitVal) {
         // box async init vals
         tcfBlock = (Try)tcfBlock.visit(new NodeVisitor() {
-            private final Map<Name, X10LocalDef> nameToBoxDef = CollectionFactory.newHashMap();
+            private final Map<Name, X10LocalDef> nameToBoxDef = new HashMap<Name, X10LocalDef>();
             @Override
             public Node leave(Node parent, Node old, Node n, NodeVisitor v) {
                 if (n instanceof X10LocalAssign_c) {

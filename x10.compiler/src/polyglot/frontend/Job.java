@@ -13,7 +13,6 @@ import polyglot.ast.Node;
 import polyglot.ast.NodeFactory;
 import polyglot.types.TypeSystem;
 import polyglot.util.CodeWriter;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.TypeBuilder;
 
 /**
@@ -63,7 +62,7 @@ public class Job
     
     public Map<Node,Node> nodeMemo() {
         if (nodeMemo == null) {
-            nodeMemo = CollectionFactory.newHashMap();
+            nodeMemo = new HashMap<Node,Node>();
         }
         return nodeMemo;
     }

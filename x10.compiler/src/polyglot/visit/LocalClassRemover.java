@@ -6,7 +6,6 @@ import polyglot.ast.*;
 import polyglot.frontend.Job;
 import polyglot.types.*;
 import polyglot.util.*;
-import x10.util.CollectionFactory;
 
 // TODO:
 //Convert closures to anon
@@ -90,9 +89,9 @@ public class LocalClassRemover extends ContextVisitor {
 	this.icrv = icrv;
     }
 
-    Map<Pair<LocalDef, ClassDef>, FieldDef> fieldForLocal = CollectionFactory.newHashMap();
-    Map<ClassDef, List<ClassMember>> orphans = CollectionFactory.newHashMap();
-    Map<ClassDef,List<FieldDef>> newFields = CollectionFactory.newHashMap();
+    Map<Pair<LocalDef, ClassDef>, FieldDef> fieldForLocal = new HashMap<Pair<LocalDef, ClassDef>, FieldDef>();
+    Map<ClassDef, List<ClassMember>> orphans = new HashMap<ClassDef, List<ClassMember>>();
+    Map<ClassDef,List<FieldDef>> newFields = new HashMap<ClassDef, List<FieldDef>>();
 
     public Node override(Node parent, Node n) {
 	// Find local classes in a block and remove them.
@@ -504,7 +503,7 @@ public class LocalClassRemover extends ContextVisitor {
 	return args;
     }
 
-    Map<FieldDef, LocalDef> localOfField = CollectionFactory.newHashMap();
+    Map<FieldDef, LocalDef> localOfField = new HashMap<FieldDef, LocalDef>();
 
     protected Receiver makeMissingFieldTarget(FieldInstance fi, Position pos) {
 	Receiver r;

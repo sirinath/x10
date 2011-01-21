@@ -12,7 +12,6 @@ import java.util.*;
 import polyglot.main.Report;
 import polyglot.util.*;
 import x10.types.MethodInstance;
-import x10.util.CollectionFactory;
 
 /**
  * This class maintains a context for looking up named variables, types,
@@ -78,8 +77,8 @@ public abstract class Context_c implements Context
     
     public Context freeze() {
         Context_c c = (Context_c) this.copy();
-        c.types = types != null ? CollectionFactory.newHashMap(types) : null;
-        c.vars = vars != null ? CollectionFactory.newHashMap(vars) : null;
+        c.types = types != null ? new HashMap<Name, Named>(types) : null;
+        c.vars = vars != null ? new HashMap<Name, VarInstance<?>>(vars) : null;
         c.outer = outer != null ? outer.freeze() : null;
         return c;
     }
@@ -478,10 +477,6 @@ public abstract class Context_c implements Context
         	    t = matcher.instantiate(t);
         	}
         	catch (SemanticException e) {
-                // todo: we might have this exception:
-                // SemanticException: Call invalid; calling environment does not entail the method guard.
-                // therefore we should report the error or store it.
-                // Because we ignore it, the error message for TypedefConstraint3c_MustFailCompile is horrible!
         	    t = null;
         	}
             }
@@ -509,7 +504,7 @@ public abstract class Context_c implements Context
     }
 
     public void addNamedToThisScope(Named type) {
-        if (types == null) types = CollectionFactory.newHashMap();
+        if (types == null) types = new HashMap<Name, Named>();
         types.put(type.name(), type);
     }
 
@@ -539,7 +534,7 @@ public abstract class Context_c implements Context
     }
 
     public void addVariableToThisScope(VarInstance<?> var) {
-        if (vars == null) vars = CollectionFactory.newHashMap();
+        if (vars == null) vars = new HashMap<Name,VarInstance<?>>();
         vars.put(var.name(), var);
     }
 

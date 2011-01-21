@@ -1228,6 +1228,6 @@ public interface TypeSystem {
     X10ClassType AtomicInteger();
     boolean isRemoteArray(Type t);
     Boolean structHaszero(X10ClassDef z);
-    Map<X10ClassDef_c, Boolean> structHaszero();
+    HashMap<X10ClassDef_c, Boolean> structHaszero();
     X10ClassType AtomicBoolean();
 }

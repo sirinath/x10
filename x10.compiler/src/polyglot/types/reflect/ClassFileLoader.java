@@ -10,7 +10,6 @@ package polyglot.types.reflect;
 import polyglot.main.Report;
 import polyglot.util.FileUtil;
 import polyglot.util.InternalCompilerError;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.frontend.ExtensionInfo;
 import polyglot.frontend.Resource;
 
@@ -88,7 +87,7 @@ public class ClassFileLoader
     protected static Collection<String> verbose;
 
     static {
-        verbose = CollectionFactory.newHashSet();
+        verbose = new HashSet<String>();
         verbose.add("loader");
     }
 }

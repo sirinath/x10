@@ -12,10 +12,6 @@
 #ifndef X10AUX_CONFIG_H
 #define X10AUX_CONFIG_H
 
-#ifdef __CYGWIN__
-#undef __STRICT_ANSI__ // Strict ANSI mode is too strict in Cygwin
-#endif
-
 /*
  * The following performance macros are supported:
  *   NO_EXCEPTIONS     - remove all exception-related code

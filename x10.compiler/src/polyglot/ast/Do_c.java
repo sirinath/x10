@@ -20,7 +20,7 @@ import polyglot.visit.*;
  * It contains a statement to be executed and an expression to be tested 
  * indicating whether to reexecute the statement.
  */ 
-public abstract class Do_c extends Loop_c implements Do
+public class Do_c extends Loop_c implements Do
 {
     protected Stmt body;
     protected Expr cond;
@@ -77,7 +77,16 @@ public abstract class Do_c extends Loop_c implements Do
     }
 
     /** Type check the statement. */
-    public abstract Node typeCheck(ContextVisitor tc) throws SemanticException;
+    public Node typeCheck(ContextVisitor tc) throws SemanticException
+    {
+        TypeSystem ts = tc.typeSystem();
+
+        if (! ts.typeEquals(cond.type(), ts.Boolean(), tc.context())) {
+	    throw new SemanticException("Condition of do statement must have boolean type.",cond.position());
+	}
+
+	return this;
+    }
 
     public Type childExpectedType(Expr child, AscriptionVisitor av) {
         TypeSystem ts = av.typeSystem();

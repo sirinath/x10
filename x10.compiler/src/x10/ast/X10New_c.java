@@ -26,7 +26,6 @@ import polyglot.ast.New_c;
 import polyglot.ast.Node;
 import polyglot.ast.NodeFactory;
 import polyglot.ast.TypeNode;
-import polyglot.ast.ProcedureCall;
 import polyglot.types.ClassDef;
 import polyglot.types.ClassType;
 import polyglot.types.CodeDef;
@@ -43,7 +42,7 @@ import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.util.CodeWriter;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Pair;
 import polyglot.util.Position;
@@ -55,7 +54,6 @@ import polyglot.visit.TypeBuilder;
 import polyglot.visit.TypeChecker;
 import x10.constraint.XTerms;
 import x10.errors.Errors;
-import x10.errors.Warnings;
 import x10.extension.X10Del;
 import x10.extension.X10Del_c;
 import x10.extension.X10Ext;
@@ -70,8 +68,6 @@ import polyglot.types.Context;
 
 import x10.types.X10ParsedClassType;
 import polyglot.types.TypeSystem;
-import polyglot.types.ProcedureDef;
-import polyglot.types.ProcedureInstance;
 
 import x10.types.checker.Converter;
 import x10.types.checker.PlaceChecker;
@@ -115,7 +111,15 @@ public class X10New_c extends New_c implements X10New {
         return result;
     }
 
+    @Override
+    public X10ClassDef anonType() {
+        return (X10ClassDef) super.anonType();
+    }
 
+    @Override
+    public X10ConstructorInstance constructorInstance() {
+        return (X10ConstructorInstance) super.constructorInstance();
+    }
 
     @Override
     public X10New anonType(ClassDef anonType) {
@@ -552,9 +556,6 @@ public class X10New_c extends New_c implements X10New {
         }
 
         result = (X10New_c) result.type(type);
-
-        Warnings.wasGuardChecked(tc, ci, this);
-
         return result;
     }
 

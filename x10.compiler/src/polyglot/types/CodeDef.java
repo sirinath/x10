@@ -8,20 +8,12 @@
 
 package polyglot.types;
 
-import x10.types.ParameterType;
-import x10.types.X10Def;
-
-import java.util.List;
-
 /**
  * A <code>CodeInstance</code> contains the type information for a Java
  * code-chunk (method, constructor, initializer, closure).
  */
-public interface CodeDef extends X10Def
+public interface CodeDef extends Def
 {
     CodeInstance<?> asInstance();
     boolean staticContext();
-
-    List<ParameterType> typeParameters();
-    void setTypeParameters(List<ParameterType> typeParameters);
 }

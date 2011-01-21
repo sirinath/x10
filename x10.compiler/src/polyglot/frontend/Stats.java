@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import polyglot.main.Report;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /**
  * Statistics collection and reporting object.
@@ -31,7 +30,7 @@ public class Stats
     protected ExtensionInfo ext;
 
     /** Map from Objects to pair of inclusive and exclusive times. */
-    protected Map<Object,Counts> counts = CollectionFactory.newHashMap();
+    protected Map<Object,Counts> counts = new HashMap<Object,Counts>();
 
     /**
      * List of Objects used as keys to passTimes.  We have an explicit
@@ -60,7 +59,6 @@ public class Stats
 
     /** Accumulate inclusive and exclusive times for a pass. */
     public void accumulate(Object key, long count) {
-        if (Report.should_report(Report.time, 1)) {
         Counts t = counts.get(key);
         if (t == null) {
             keys.add(key);
@@ -68,7 +66,6 @@ public class Stats
             counts.put(key, t);
         }
         t.count += count;
-        }
     }
 
     /** Report the stats. */

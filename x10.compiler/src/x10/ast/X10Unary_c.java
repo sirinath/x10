@@ -38,12 +38,9 @@ import polyglot.types.Type;
 import polyglot.types.Types;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import x10.errors.Errors;
-import x10.errors.Warnings;
 import x10.types.MethodInstance;
-import x10.types.X10Use;
 import polyglot.types.TypeSystem;
 
 import x10.types.checker.Checker;
@@ -159,8 +156,9 @@ public class X10Unary_c extends Unary_c {
                         actualTypes.add(a.type());
                     }
                     MethodInstance mi = Checker.findAppropriateMethod(tc, target.type(), SettableAssign.SET, tArgs, actualTypes);
-                    Warnings.checkErrorAndGuard(tc, mi, this);
-
+                    if (mi.error() != null) {
+                        Errors.issue(tc.job(), new SemanticException("Unable to perform operation", mi.error()), this);
+                    }
                     // Make sure we don't coerce here.
                     List<Type> fTypes = mi.formalTypes();
                     for (int i = 0; i < actualTypes.size(); i++) {
@@ -188,7 +186,9 @@ public class X10Unary_c extends Unary_c {
                             new SemanticException("No binary operator " + binaryOp + " found in type " + t, expr.position()));
                 } else {
                     MethodInstance mi = (MethodInstance) c.methodInstance();
-                    Warnings.checkErrorAndGuard(tc, mi, this);
+                    if (mi.error() != null) {
+                        Errors.issue(tc.job(), new SemanticException("Unable to perform operation", mi.error()), this);
+                    }
                     Type resultType = mi.returnType();
                     if (!ts.isSubtype(resultType, et, tc.context())) {
                         Errors.issue(tc.job(),
@@ -203,7 +203,9 @@ public class X10Unary_c extends Unary_c {
         Call c = desugarUnaryOp(this, tc);
         if (c != null) {
             MethodInstance mi = (MethodInstance) c.methodInstance();
-            Warnings.checkErrorAndGuard(tc, mi, this);
+            if (mi.error() != null) {
+                Errors.issue(tc.job(), mi.error(), this);
+            }
             // rebuild the unary using the call's arguments.  We'll actually use the call node after desugaring.
             Type resultType = c.type();
             resultType = ts.performUnaryOperation(resultType, t, op);
@@ -385,7 +387,7 @@ public class X10Unary_c extends Unary_c {
     }
 
     public static Name unaryMethodName(Unary.Operator op) {
-        Map<Unary.Operator,String> methodNameMap = CollectionFactory.newHashMap();
+        Map<Unary.Operator,String> methodNameMap = new HashMap<Unary.Operator, String>();
         methodNameMap.put(NEG, "operator-");
         methodNameMap.put(POS, "operator+");
         methodNameMap.put(NOT, "operator!");

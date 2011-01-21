@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import polyglot.ast.Assign;
 import polyglot.ast.Block;
@@ -48,7 +47,6 @@ import polyglot.types.Type;
 import polyglot.types.Types;
 import polyglot.util.Pair;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.NodeVisitor;
 import x10.ast.Async;
 import x10.ast.Closure;
@@ -78,19 +76,19 @@ public class WSCodeGenUtility {
         return methodDef.name().toString();
     }
 
-    static Map<ClassType, Map<String, Integer>> container2MethodNameMap;
+    static HashMap<ClassType, HashMap<String, Integer>> container2MethodNameMap;
     //              classType         methodName, number
     
     public static String getMethodBodyClassName(MethodDef methodDef){
         if(container2MethodNameMap == null){
-            container2MethodNameMap = CollectionFactory.newHashMap();
+            container2MethodNameMap = new HashMap<ClassType, HashMap<String, Integer>>();
         }
         String tempName = "_$" + getMethodName(methodDef);
         ClassType classType = (ClassType) methodDef.container().get();
        
-        Map<String, Integer> nameNumberMap = container2MethodNameMap.get(classType);
+        HashMap<String, Integer> nameNumberMap = container2MethodNameMap.get(classType);
         if(nameNumberMap == null){
-            nameNumberMap = CollectionFactory.newHashMap();
+            nameNumberMap = new HashMap<String, Integer>();
             nameNumberMap.put(tempName, 1);
             container2MethodNameMap.put(classType, nameNumberMap);
             return tempName;

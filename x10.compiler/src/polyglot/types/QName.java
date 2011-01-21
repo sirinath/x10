@@ -2,10 +2,8 @@ package polyglot.types;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 
 import polyglot.util.StringUtil;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 public class QName implements Serializable {
     private static final long serialVersionUID = 4114000967641601437L;
@@ -28,7 +26,7 @@ public class QName implements Serializable {
 	return qualifier;
     }
     
-    static Map<String,QName> internCache = CollectionFactory.newHashMap();
+    static HashMap<String,QName> internCache = new HashMap<String,QName>();
 
     public static QName make(QName qualifier, Name name) {
 	String shortName = name.toString();

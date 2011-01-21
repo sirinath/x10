@@ -21,7 +21,7 @@ import polyglot.visit.*;
  * <code>Type</code> or an <code>Expr</code> containing the field being 
  * accessed.
  */
-public abstract class Field_c extends Expr_c implements Field
+public class Field_c extends Expr_c implements Field
 {
   protected Receiver target;
   protected Id name;
@@ -133,7 +133,22 @@ e = new Exception();
   }
   
   /** Type check the field. */
-  public abstract Node typeCheck(ContextVisitor tc) throws SemanticException;
+  public Node typeCheck(ContextVisitor tc) throws SemanticException {
+      Context c = tc.context();
+      TypeSystem ts = tc.typeSystem();
+      
+      FieldInstance fi = ts.findField(target.type(), ts.FieldMatcher(target.type(), name.id(), c));
+
+      if (fi == null) {
+	  throw new InternalCompilerError("Cannot access field on node of type " +
+	                                  target.getClass().getName() + ".");
+      }
+
+      Field_c f = (Field_c) fieldInstance(fi).type(fi.type());  
+      f.checkConsistency(c);
+
+      return f; 
+  }
   
   public Node checkConstants(ContextVisitor tc) throws SemanticException {
       // Just check if the field is constant to force a dependency to be

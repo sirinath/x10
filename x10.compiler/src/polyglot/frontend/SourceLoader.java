@@ -13,7 +13,6 @@ import java.util.*;
 import polyglot.main.Report;
 import polyglot.types.QName;
 import polyglot.util.FileUtil;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /** A <code>SourceLoader</code> is responsible for loading source files. */
 public class SourceLoader
@@ -32,7 +31,7 @@ public class SourceLoader
 	this.sourcePath = sourcePath;
 	this.sourceExt = sourceExt;
         this.caseInsensitive = 0;
-        this.loadedSources = CollectionFactory.newHashMap();
+        this.loadedSources = new HashMap<Object, Source>();
     }
 
     /** Load a source from a specific file. */

@@ -12,7 +12,6 @@ import java.util.*;
 
 import polyglot.main.Report;
 import polyglot.util.*;
-import x10.util.CollectionFactory;
 
 
 /**
@@ -71,7 +70,7 @@ public class ImportTable implements Resolver
         this.sourcePos = src != null ? new Position(null, src) : null;
         this.pkg = pkg;
 
-	this.map = CollectionFactory.newHashMap();
+	this.map = new HashMap<Object, Option<Named>>();
 	this.onDemandImports = new ArrayList<QName>();
 	this.onDemandImportPositions = new ArrayList<Position>();
 	this.explicitImports = new ArrayList<QName>();
@@ -250,7 +249,7 @@ public class ImportTable implements Resolver
 
 	Named resolved = null;
 
-	Set<QName> tried = CollectionFactory.newHashSet();
+	Set<QName> tried = new HashSet<QName>();
 
 	for (int i = 0; i < imports.size(); i++) {
 	    QName containerName = imports.get(i);
@@ -382,7 +381,7 @@ public class ImportTable implements Resolver
     }
 
     protected Named lookupExplicit(Matcher<Named> matcher) throws SemanticException {
-	Set<QName> tried = CollectionFactory.newHashSet();
+	Set<QName> tried = new HashSet<QName>();
 
 	for (int i = 0; i < explicitImports.size(); i++) {
 	    QName longName = explicitImports.get(i);

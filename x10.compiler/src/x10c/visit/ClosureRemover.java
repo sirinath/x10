@@ -56,7 +56,6 @@ import polyglot.types.VarInstance;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.util.UniqueID;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.Closure;
@@ -142,7 +141,7 @@ public class ClosureRemover extends ContextVisitor {
 //                        System.out.println(capturedEnv);
                         
                         final List<NamedVariable> capturedVarsExThis = new ArrayList<NamedVariable>();
-                        Map<String, X10LocalDef> nameToLocalDef = CollectionFactory.newHashMap();
+                        Map<String, X10LocalDef> nameToLocalDef = new HashMap<String, X10LocalDef>();
                         
                         Block body = rewriteClosureBody(cl.body(), capturedEnv, capturedVarsExThis, nameToLocalDef, cl.formals());
 
@@ -374,7 +373,7 @@ public class ClosureRemover extends ContextVisitor {
                     staticInnerClassDecl = staticInnerClassDecl.typeParameters(tpns);
                     
                     final List<NamedVariable> capturedVarsExThis = new ArrayList<NamedVariable>();
-                    Map<String, X10LocalDef> nameToLocalDef = CollectionFactory.newHashMap();
+                    Map<String, X10LocalDef> nameToLocalDef = new HashMap<String, X10LocalDef>();
                     
                     // rewrite closure method body
                     closureBody = rewriteClosureBody(closureBody, staticInnerClassDef, capturedEnv, capturedVarsExThis, nameToLocalDef, cl.formals());

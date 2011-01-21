@@ -32,7 +32,7 @@ import polyglot.types.ProcedureInstance;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.util.CodeWriter;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 import polyglot.util.Pair;
 import polyglot.util.Position;
 import polyglot.util.TypedList;
@@ -43,7 +43,6 @@ import polyglot.visit.NodeVisitor;
 import polyglot.visit.PrettyPrinter;
 import polyglot.visit.TypeBuilder;
 import x10.errors.Errors;
-import x10.errors.Warnings;
 import x10.types.FunctionType;
 import x10.types.MethodInstance;
 import polyglot.types.TypeSystem;
@@ -214,12 +213,11 @@ public class ClosureCall_c extends Expr_c implements ClosureCall {
 				args = p.snd();
 			}
 			catch (SemanticException e) {
-			    // mi.error() will be reported in checkErrorAndGuard
+			    Errors.issue(tc.job(), mi.error(), this);
 			}
 		}
 
 		// Find the most-specific closure type.
-        Warnings.checkErrorAndGuard(tc,mi,this);
 
 		if (mi.container() instanceof FunctionType) {
 			ClosureCall_c n = this;

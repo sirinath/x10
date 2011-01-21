@@ -11,7 +11,6 @@ import java.util.*;
 
 import polyglot.ast.*;
 import polyglot.types.*;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /**
  * The FlattenVisitor flattens the AST,
@@ -69,8 +68,8 @@ public class FlattenVisitor extends NodeVisitor
 	return Name.makeFresh("tmp");
     }
 
-    protected Set<Node> noFlatten = CollectionFactory.newHashSet();
-    protected Set<Node> neverFlatten = CollectionFactory.newHashSet();
+    protected Set<Node> noFlatten = new HashSet<Node>();
+    protected Set<Node> neverFlatten = new HashSet<Node>();
 
     /** 
      * When entering a BlockStatement, place a new StatementList

@@ -60,7 +60,7 @@ import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.types.VarDef;
 import polyglot.types.VarInstance;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
@@ -281,8 +281,7 @@ public class Lowerer extends ContextVisitor {
     }
 
     //Collecting Finish Use : store reducer when enter finishR
-    @Override
-    protected NodeVisitor enterCall(Node parent, Node n) {
+    public NodeVisitor superEnter(Node parent, Node n) {
         if (n instanceof LocalDecl){
             LocalDecl f = (LocalDecl) n;
             if (f.init() instanceof FinishExpr) {
@@ -305,7 +304,7 @@ public class Lowerer extends ContextVisitor {
             }
         }
 
-        return this;
+        return super.superEnter(parent, n);
     }
 
     public Node leaveCall(Node old, Node n, NodeVisitor v) throws SemanticException {

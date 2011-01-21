@@ -10,11 +10,6 @@
  *
  *  This file was written by Ben Herta for IBM: bherta@us.ibm.com
  */
-
-#ifdef __CYGWIN__
-#undef __STRICT_ANSI__ // Strict ANSI mode is too strict in Cygwin
-#endif
-
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -47,7 +42,7 @@ void Launcher::Setup(int argc, char ** argv)
 	// check to see if we need to launch stuff, or if we need to execute the runtime.
 	// we just skip the launcher and run the program if the user hasn't set X10LAUNCHER_NPROCS
 	if (getenv(X10LAUNCHER_RUNTIME) || !getenv(X10_NPLACES) ||
-			(strcmp(getenv(X10_NPLACES), "1")==0 && !getenv(X10_HOSTFILE) && !getenv(X10_HOSTLIST)))
+			(strcmp(getenv(X10_NPLACES), "1")==0 && !getenv(X10_HOSTFILE)))
 		return;
 
 	_singleton = (Launcher *) malloc(sizeof(Launcher));
@@ -74,7 +69,7 @@ Launcher::Launcher()
 	_hostlist = NULL;
 	_runtimePort = NULL;
 	_myproc = 0xFFFFFFFF;
-	_returncode = 0xFEEDC0DE;
+	_returncode = 0xDEADBEEF;
 	_dieAt = 0;
 	_firstchildproc = 0;
 	_numchildren = 0;
@@ -322,6 +317,6 @@ void Launcher::DIE(const char * msg, ...)
 	fprintf(stderr, "%s\n", buffer);
 	if (errno != 0)
 		fprintf(stderr, "%s\n", strerror(errno));
-	exit(9);
+	exit(1);
 }
 

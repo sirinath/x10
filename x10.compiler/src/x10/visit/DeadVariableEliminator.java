@@ -37,7 +37,6 @@ import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 
@@ -156,10 +155,10 @@ public class DeadVariableEliminator extends ContextVisitor {
     }
 
     private final class VariableState {
-        private final Set<LocalDef>                   formals  = CollectionFactory.newHashSet();                   // defs that are formal params
-        private final Map<LocalDef, LocalDecl>        declMap  = CollectionFactory.newHashMap();        // the declaration of a def
-        private final Map<LocalDef, Set<Local>>       useMap   = CollectionFactory.newHashMap();       // the uses of a def
- //     private final Map<LocalDef, Set<LocalAssign>> storeMap = CollectionFactory.newHashMap(); // the pure stores of a def
+        private final Set<LocalDef>                   formals  = new HashSet<LocalDef>();                   // defs that are formal params
+        private final Map<LocalDef, LocalDecl>        declMap  = new HashMap<LocalDef, LocalDecl>();        // the declaration of a def
+        private final Map<LocalDef, Set<Local>>       useMap   = new HashMap<LocalDef, Set<Local>>();       // the uses of a def
+ //     private final Map<LocalDef, Set<LocalAssign>> storeMap = new HashMap<LocalDef, Set<LocalAssign>>(); // the pure stores of a def
 
         /**
          * 
@@ -178,10 +177,10 @@ public class DeadVariableEliminator extends ContextVisitor {
             LocalDef def = decl.localDef();
             declMap.put(def, decl);
             if (null == useMap.get(def)) {
-                useMap.put(def, CollectionFactory.<Local>newHashSet());
+                useMap.put(def, new HashSet<Local>());
             }/*
             if (null == storeMap.get(def)) {
-                storeMap.put(def, CollectionFactory.<LocalAssign>newHashSet());
+                storeMap.put(def, new HashSet<LocalAssign>());
             }*/
         }
 
@@ -200,7 +199,7 @@ public class DeadVariableEliminator extends ContextVisitor {
             if (formals.contains(def)) return;
             Set<Local> uses = useMap.get(def);
             if (null == uses) {
-                uses = CollectionFactory.newHashSet();
+                uses = new HashSet<Local>();
                 useMap.put(def, uses);
             }
             uses.add(local);
@@ -213,19 +212,19 @@ public class DeadVariableEliminator extends ContextVisitor {
             LocalDef def = assign.local().localInstance().def();
             Set<LocalAssign> stores = storeMap.get(def);
             if (null == stores) {
-                stores = CollectionFactory.newHashSet();
+                stores = new HashSet<LocalAssign>();
                 storeMap.put(def, stores);
             }
             stores.add(assign);
         }*/
 
         public Map<Node, Node> makeReplacementMap() {
-            Set<LocalDecl> dead = CollectionFactory.newHashSet();
+            Set<LocalDecl> dead = new HashSet<LocalDecl>();
             for (LocalDef def : useMap.keySet()) {
                 if (isDead(def))
                     dead.add(declMap.get(def));
             }
-            Map<Node, Node> map = CollectionFactory.newHashMap();
+            Map<Node, Node> map = new HashMap<Node, Node>();
             while (!dead.isEmpty()) {
                 LocalDecl decl = removeDecl(dead);
                 Expr init = decl.init();
@@ -274,7 +273,7 @@ public class DeadVariableEliminator extends ContextVisitor {
          * @return
          */
         private Set<LocalDecl> ignoreUses(Expr init) {
-            Set<LocalDecl> dead = CollectionFactory.newHashSet();
+            Set<LocalDecl> dead = new HashSet<LocalDecl>();
             for (Local use : uses(init)) {
                 LocalDef def = use.localInstance().def();
                 Set<Local> uses = useMap.get(def);
@@ -293,7 +292,7 @@ public class DeadVariableEliminator extends ContextVisitor {
          * @return
          */
         private Set<Local> uses(Expr expr) {
-            final Set<Local> result = CollectionFactory.newHashSet();
+            final Set<Local> result = new HashSet<Local>();
             if (null == expr)
                 return result;
             expr.visit(new NodeVisitor() {

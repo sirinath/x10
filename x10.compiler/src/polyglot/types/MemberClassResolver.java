@@ -10,7 +10,7 @@ package polyglot.types;
 import java.util.*;
 
 import polyglot.main.Report;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 
 /**
  * Loads member classes using a TopLevelResolver that can only handle
@@ -35,7 +35,7 @@ public class MemberClassResolver implements TopLevelResolver
     this.ts = ts;
     this.inner = inner;
     this.allowRawClasses = allowRawClasses;
-    this.nocache = CollectionFactory.newHashSet();
+    this.nocache = new HashSet<QName>();
   }
 
   public boolean packageExists(QName name) {

@@ -20,7 +20,7 @@ import x10.types.MethodInstance;
 /**
  * A method declaration.
  */
-public abstract class MethodDecl_c extends Term_c implements MethodDecl
+public class MethodDecl_c extends Term_c implements MethodDecl
 {
     protected FlagsNode flags;
     protected TypeNode returnType;
@@ -156,9 +156,54 @@ public abstract class MethodDecl_c extends Term_c implements MethodDecl
 	return body == n.body ? n : n.body(body);
     }
 
-    public abstract Node buildTypesOverride(TypeBuilder tb);
+    public Node buildTypesOverride(TypeBuilder tb) {
+        TypeSystem ts = tb.typeSystem();
 
-    protected abstract MethodDef createMethodDef(TypeSystem ts, ClassDef ct, Flags flags);
+        ClassDef ct = tb.currentClass();
+        assert ct != null;
+
+	Flags flags = this.flags.flags();
+
+	if (ct.flags().isInterface()) {
+	    flags = flags.Public().Abstract();
+	}
+
+    MethodDecl_c n = this;
+
+	MethodDef mi = createMethodDef(ts, ct, flags);
+        ct.addMethod(mi);
+	
+	TypeBuilder tbChk = tb.pushCode(mi);
+
+	final TypeBuilder tbx = tb;
+	final MethodDef mix = mi;
+	
+	n = (MethodDecl_c) n.visitSignature(new NodeVisitor() {
+            public Node override(Node n) {
+                return MethodDecl_c.this.visitChild(n, tbx.pushCode(mix));
+            }
+        });
+
+	List<Ref<? extends Type>> formalTypes = new ArrayList<Ref<? extends Type>>(n.formals().size());
+        for (Formal f : n.formals()) {
+             formalTypes.add(f.type().typeRef());
+        }
+
+
+        mi.setReturnType(n.returnType().typeRef());
+        mi.setFormalTypes(formalTypes);
+    
+        Block body = (Block) n.visitChild(n.body, tbChk);
+        
+        n = (MethodDecl_c) n.body(body);
+        return n.methodDef(mi);
+    }
+
+    protected MethodDef createMethodDef(TypeSystem ts, ClassDef ct, Flags flags) {
+	MethodDef mi = ts.methodDef(position(), Types.ref(ct.asType()), flags, returnType.typeRef(), name.id(),
+	                                 Collections.<Ref<? extends Type>>emptyList());
+	return mi;
+    }
 
     public Context enterScope(Context c) {
         if (Report.should_report(TOPICS, 5))
@@ -167,7 +212,13 @@ public abstract class MethodDecl_c extends Term_c implements MethodDecl
         return c;
     }
     
-    public abstract Node visitSignature(NodeVisitor v);
+    public Node visitSignature(NodeVisitor v) {
+        TypeNode returnType = (TypeNode) this.visitChild(this.returnType, v);
+        FlagsNode flags = (FlagsNode) this.visitChild(this.flags, v);
+        Id name = (Id) this.visitChild(this.name, v);
+        List<Formal> formals = this.visitList(this.formals, v);
+        return reconstruct(flags, returnType, name, formals,  this.body);
+    }
     
     /** Type check the declaration. */
     public Node typeCheckBody(Node parent, TypeChecker tc, TypeChecker childtc) throws SemanticException {
@@ -274,7 +325,9 @@ public abstract class MethodDecl_c extends Term_c implements MethodDecl
         return ec.push(new ExceptionChecker.CodeTypeReporter("Method " + mi.signature())).push(methodDef().asInstance().throwTypes());
     }
 */
-    public abstract String toString();
+    public String toString() {
+	return flags.flags().translate() + returnType + " " + name + "(...)";
+    }
 
     /** Write the method to an output file. */
     public void prettyPrintHeader(CodeWriter w, PrettyPrinter tr) {
@@ -322,12 +375,12 @@ public abstract class MethodDecl_c extends Term_c implements MethodDecl
     public void prettyPrint(CodeWriter w, PrettyPrinter tr) {
         prettyPrintHeader(w, tr);
 
-        if (body != null) {
-        	printSubStmt(body, w, tr);
-        }
-        else {
-        	w.write(";");
-        }
+	if (body != null) {
+	    printSubStmt(body, w, tr);
+	}
+	else {
+	    w.write(";");
+	}
     }
 
     public void dump(CodeWriter w) {

@@ -27,7 +27,6 @@ import polyglot.types.TypeObject;
 import polyglot.types.TypeSystem;
 import polyglot.util.*;
 import x10.types.MethodInstance;
-import x10.util.CollectionFactory;
 
 /**
  * Loads class information from class files, or serialized class infomation
@@ -67,7 +66,7 @@ public class LoadedClassResolver implements TopLevelResolver
     this.loader = loader;
     this.pathloader = new ClassPathResourceLoader(classpath);
     this.version = version;
-    this.nocache = CollectionFactory.newHashSet();
+    this.nocache = new HashSet<QName>();
     this.allowRawClasses = allowRawClasses;
   }
 

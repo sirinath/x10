@@ -6,12 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import polyglot.types.Flags;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 import com.sun.javadoc.Doc;
 import com.sun.javadoc.ProgramElementDoc;
@@ -475,7 +473,7 @@ public class X10Doc implements Doc {
 		return result.trim();
 	}
 
-	private static final Map<String, Integer> flagsToHex = CollectionFactory.newHashMap();
+	private static final HashMap<String, Integer> flagsToHex = new HashMap<String, Integer>();
 	static {
 		flagsToHex.put(Flags.PUBLIC.toString(),    0x0001);
 		flagsToHex.put(Flags.PRIVATE.toString(),   0x0002);

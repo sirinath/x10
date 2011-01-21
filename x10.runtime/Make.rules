@@ -47,9 +47,6 @@ ifdef NO_CHECKS
   CXXFLAGS += -DNO_CHECKS
   X10CPPFLAGS += -NO_CHECKS
 endif
-ifdef EXPERIMENTAL
-  X10CPPFLAGS += -EXPERIMENTAL
-endif
 
 ifdef USE_BFD
   CXXFLAGS += -DUSE_BFD
@@ -63,9 +60,8 @@ ifdef JAVA_HOME
     JNI_INCLUDES = -I"$(JAVA_HOME)"/include -I"$(JAVA_HOME)"/include/linux
   else
   ifeq ($(firstword $(subst _, ,$(shell uname -s))),CYGWIN)
-#    TODO: Dave G. Disabled build of JNI libs on cygwin 
-#    JAVA_CYGPATH = $(shell cygpath "$(JAVA_HOME)")
-#    JNI_INCLUDES = -I"$(JAVA_CYGPATH)"/include -I"$(JAVA_CYGPATH)"/include/win32
+    JAVA_CYGPATH = $(shell cygpath "$(JAVA_HOME)")
+    JNI_INCLUDES = -I"$(JAVA_CYGPATH)"/include -I"$(JAVA_CYGPATH)"/include/win32
   else
   ifeq ($(shell uname -s),Darwin)
     # TODO!!
@@ -88,6 +84,8 @@ ifdef ENABLE_CROSS_COMPILE_BGP
   export X10_STATIC_LIB=1
   override CC =/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc
   export X10RT_PLATFORM=bgp
+  # needed for gcc 4.1
+  X10CPPFLAGS += -ALLOW_STATEMENT_EXPRESSIONS=false
   ifdef OPTIMIZE
     override CXXFLAGS += -O2 -finline-functions
   endif

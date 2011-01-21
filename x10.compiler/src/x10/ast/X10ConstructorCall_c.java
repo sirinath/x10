@@ -41,10 +41,8 @@ import polyglot.visit.NodeVisitor;
 import polyglot.visit.TypeBuilder;
 import x10.ast.X10New_c.MatcherMaker;
 import x10.errors.Errors;
-import x10.errors.Warnings;
 import x10.types.X10ConstructorDef;
 import x10.types.X10ConstructorInstance;
-import x10.types.X10Use;
 
 import polyglot.types.TypeSystem;
 import x10.types.checker.Converter;
@@ -262,7 +260,9 @@ public class X10ConstructorCall_c extends ConstructorCall_c implements X10Constr
 	        }
 	    }
 
-        Warnings.checkErrorAndGuard(tc, ci, n);
+	    if (ci.error() != null) {
+	        Errors.issue(tc.job(), ci.error(), n);
+	    }
 
 	    n = (X10ConstructorCall_c) n.constructorInstance(ci);
 	    n = (X10ConstructorCall_c) n.arguments(args);

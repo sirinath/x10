@@ -21,4 +21,8 @@ import x10.types.MethodInstance;
  * @author vj
  */
 public interface X10Binary extends Binary {
+    boolean invert();
+    X10Binary invert(boolean invert);
+    MethodInstance methodInstance();
+    X10Binary methodInstance(MethodInstance mi);
 }

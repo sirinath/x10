@@ -24,7 +24,6 @@ package x10cpp.types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import polyglot.ast.ClassMember;
 import polyglot.ast.Stmt;
@@ -35,7 +34,6 @@ import x10.ast.PropertyDecl;
 import x10.types.X10ClassDef;
 import x10.types.X10ClassType;
 import polyglot.types.Context;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import x10.types.X10MethodDef;
 import x10.util.ClassifiedStream;
 import x10cpp.visit.ITable;
@@ -62,7 +60,7 @@ public class X10CPPContext_c extends x10.types.X10Context_c implements Context {
      * To find the data in the current or ancestor context, use {@link #findData(String)}.
      * To add data to the current context, use {@link #addData(String, Object)}.
      */
-    protected Map<String, Object> data = CollectionFactory.newHashMap(1, 1.0f);
+    protected HashMap<String, Object> data = new HashMap<String, Object>(1, 1.0f);
 
     /** @see #data. */
     public <T> void addData(String key, T value) { data.put(key, value); }
@@ -168,7 +166,7 @@ public class X10CPPContext_c extends x10.types.X10Context_c implements Context {
     }
 
     
-    private final Map<X10ClassType, ITable> cachedITables = CollectionFactory.newHashMap();
+    private final HashMap<X10ClassType, ITable> cachedITables = new HashMap<X10ClassType, ITable>();
     /**
      * Find or construct the ITable instance for the argument X10 interface type.
      */
@@ -261,7 +259,7 @@ public class X10CPPContext_c extends x10.types.X10Context_c implements Context {
 		res.inClosure = false;
 		res.stackAllocateClosure = false;
 		res.closureOuter = null;
-		res.data = CollectionFactory.newHashMap(1, 1.0f);
+		res.data = new HashMap<String, Object>(1, 1.0f);
 		return res;
 	}
 

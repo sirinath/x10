@@ -157,8 +157,7 @@ TESTS += $(patsubst test/%,test/%.pgas_sockets,$(BASE_TESTS))
 PGAS_DYNLIB_SOCKETS = lib/$(LIBPREFIX)x10rt_pgas_sockets$(LIBSUFFIX)
 LIBS += $(PGAS_DYNLIB_SOCKETS)
 PROPERTIES += etc/x10rt_pgas_sockets.properties
-PGAS_EXECUTABLES = bin/launcher bin/manager bin/daemon
-EXECUTABLES += $(PGAS_EXECUTABLES)
+EXECUTABLES += bin/launcher bin/manager bin/daemon
 
 %.pgas_sockets: %.cc $(PGAS_DYNLIB_SOCKETS)
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LDFLAGS) $(SOCKETS_LDFLAGS) $(SOCKETS_LDLIBS) $(X10RT_TEST_LDFLAGS)
@@ -167,7 +166,7 @@ ifdef CUSTOM_PGAS
 lib/libxlpgas_sockets.a: $(COMMON_OBJS) $(CUSTOM_PGAS)/lib/libxlpgas_sockets.a include/pgasrt.h
 	$(CP) $(CUSTOM_PGAS)/lib/libxlpgas_sockets.a lib/libxlpgas_sockets.a
 
-$(PGAS_EXECUTABLES): $(PGAS_EXECUTABLES:%=$(CUSTOM_PGAS)/%)
+$(EXECUTABLES): $(EXECUTABLES:%=$(CUSTOM_PGAS)/%)
 	-$(CP) $^ bin/
 else
 $(SOCKETS_TGZ).phony:

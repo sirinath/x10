@@ -153,11 +153,11 @@ FileSystem operations
      = openRead().chars();
     public def bytes(): ReaderIterator[Byte] //throws IOException 
     = openRead().bytes();
-    public def openRead():FileReader //throws IOException 
+    public def openRead() //throws IOException 
     = new FileReader(this);
-    public def openWrite():FileWriter //throws IOException 
+    public def openWrite() //throws IOException 
     = new FileWriter(this);
-    public def printer():Printer //throws IOException 
+    public def printer() //throws IOException 
     = new Printer(openWrite());
 
     public def getName(): String = name;

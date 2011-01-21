@@ -126,7 +126,7 @@ public class ContextVisitor extends ErrorHandlingVisitor
 
     protected boolean prune;
 
-    public final NodeVisitor superEnter(Node parent, Node n) {
+    public NodeVisitor superEnter(Node parent, Node n) {
         return super.enter(parent, n);
     }
 

@@ -343,7 +343,6 @@
             depends="bin-deps"
             unless="bin.up-to-date">
         <antcall target="setupX10"/>
-        <antcall target="apgas"/>
         <antcall target="x10"/>
         <antcall target="x10c"/>
         <antcall target="precommit"/>
@@ -369,10 +368,6 @@
             <srcfiles file="${ant.file}"/>
             <srcfiles file="${bin}/setupX10.in"/>
         </uptodate>
-        <uptodate property="apgas.up-to-date" targetfile="${bin}/apgas">
-            <srcfiles file="${ant.file}"/>
-            <srcfiles file="${bin}/apgas.in"/>
-        </uptodate>
         <uptodate property="x10.up-to-date" targetfile="${bin}/x10">
             <srcfiles file="${ant.file}"/>
             <srcfiles file="${bin}/x10.in"/>
@@ -392,7 +387,6 @@
         <condition property="bin.up-to-date">
             <and>
                 <isset property="setupX10.up-to-date"/>
-                <isset property="apgas.up-to-date"/>
                 <isset property="precommit.up-to-date"/>
                 <isset property="x10.up-to-date"/>
                 <isset property="x10c.up-to-date"/>
@@ -574,22 +568,6 @@ WALA4_URL='${wala4.jar.url}'
         <delete file="${bin}/defs"/>
     </target>
 
-    <target name="apgas" unless="apgas.up-to-date"
-            depends="executable-defs"
-            description="creates the executable script apgas">
-        <echo message="Creating ${bin}/apgas"/>
-        <concat destfile="${bin}/apgas" append="no">
-            <filelist dir="${bin}" files="defs"/>
-        </concat>
-        <concat destfile="${bin}/apgas" append="yes">
-            <filelist dir="${bin}" files="apgas.in"/>
-        </concat>
-
-        <chmod perm="+x" file="${bin}/apgas"/>
-
-        <delete file="${bin}/defs"/>
-    </target>
-
     <target name="java_x10rt" unless="java_x10rt.up-to-date"
             depends="executable-defs"
             description="creates the executable script java_x10rt">
@@ -685,24 +663,7 @@ WALA4_URL='${wala4.jar.url}'
     <target name="tars" depends="tar,srctar,testtar"/>
 
     <target name="update-host-fragment" description="Updates the x10.dist platform-specific fragment in this workspace">
-        <condition property="platform" value="win32"><os family="windows"/></condition>
-        <condition property="platform" value="linux"><os name="Linux"/></condition>
-        <condition property="platform" value="macosx"><os name="Mac OS X"/></condition>
-        <condition property="arch" value="x86" else="${os.arch}">
-            <or>
-                <!-- Work around Mac OS's Java reporting x86 as i386 -->
-                <equals arg1="${os.arch}" arg2="i386"/>
-                <!-- Treat amd64 as x86 -->
-                <equals arg1="${os.arch}" arg2="amd64"/>
-            	<and>
-            		<os name="Mac OS X"/>
-            		<os arch="x86_64"/>
-            	</and>
-            </or>
-        </condition>
-    	<property name="targetDir" value="../x10.dist.${platform}.${arch}.fragment"/>
-    	<echo message="Copying include and lib files to ${targetDir}..."/>
-        <copy todir="${targetDir}">
+        <copy todir="../x10.dist.${env.X10_PLATFORM}.fragment">
             <fileset dir="." includes="include/**,lib/**"/>
         </copy>
     </target>

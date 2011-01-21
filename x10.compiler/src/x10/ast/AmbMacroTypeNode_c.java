@@ -44,7 +44,7 @@ import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.util.CodeWriter;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.util.TypedList;
@@ -57,7 +57,6 @@ import polyglot.visit.TypeChecker;
 import x10.constraint.XTerms;
 import x10.constraint.XVar;
 import x10.errors.Errors;
-import x10.errors.Warnings;
 import x10.extension.X10Del;
 import x10.extension.X10Del_c;
 import x10.types.MacroType;
@@ -75,7 +74,7 @@ import x10.visit.ChangePositionVisitor;
 import x10.types.checker.VarChecker;
 
 
-public class AmbMacroTypeNode_c extends X10AmbTypeNode_c implements AmbMacroTypeNode, AddFlags {
+public class AmbMacroTypeNode_c extends AmbTypeNode_c implements AmbMacroTypeNode, AddFlags {
    
     protected List<TypeNode> typeArgs;
     protected List<Expr> args;
@@ -251,8 +250,6 @@ public class AmbMacroTypeNode_c extends X10AmbTypeNode_c implements AmbMacroType
             }
             
             if (mt != null) {
-                Warnings.wasGuardChecked(tc,mt,this);
-
                 LazyRef<Type> sym = (LazyRef<Type>) type;
                 sym.update(mt);
                 
@@ -346,7 +343,9 @@ public class AmbMacroTypeNode_c extends X10AmbTypeNode_c implements AmbMacroType
             n = (AmbMacroTypeNode_c) n.args(Collections.<Expr>emptyList());
         }
         
-        if (t instanceof X10Use<?>) Warnings.checkErrorAndGuard(tc,((X10Use<?>) t), n);
+        if (t instanceof X10Use<?> && ((X10Use<?>) t).error() != null) {
+            Errors.issue(tc.job(), ((X10Use<?>) t).error(), n);
+        }
 
         if (! typeArgs.isEmpty()) {
             if (t instanceof X10ParsedClassType) {

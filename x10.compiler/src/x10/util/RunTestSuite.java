@@ -2,10 +2,11 @@ package x10.util;
 
 import polyglot.frontend.Compiler;
 import polyglot.types.Types;
+import polyglot.util.ErrorQueue;
 import polyglot.util.SilentErrorQueue;
 import polyglot.util.Position;
 import polyglot.util.ErrorInfo;
-import x10.util.CollectionFactory;
+import polyglot.main.Report;
 import polyglot.main.Main;
 
 import java.io.File;
@@ -13,12 +14,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.lang.*;
-import java.lang.StringBuilder;
 
 import x10.parser.AutoGenSentences;
+import x10.Configuration;
 import x10.X10CompilerOptions;
 
 /**
@@ -66,27 +68,22 @@ import x10.X10CompilerOptions;
  * provided as the first argument.  From these directories it collects
  * all <code>*.x10</code> files.
  *
- * Property flags are passed with:
- * java -DFLAG=SOMETHING
- *
- * <p>The property flag <code>SEPARATE_COMPILER</code> can be set
+ * <p>The environment flag <code>SEPARATE_COMPILER</code> can be set
  * to <code>false<code> to force <code>RunTestSuite</code> to use the same
  * compiler object for multiple tests. In general this runs the tests
  * much faster, but is still a bit brittle (may yield errors when
  * compiling each test with a separate compiler object would not).
  *
- * <p> The property flag <code>QUIET</code> can be set to
+ * <p> The environment flag <code>QUIET</code> can be set to
  * <code>true</code> to run in quiet mode. In this mode various
  * warnings and helpful messages are not printed out.
  *
- * <p> The property flag <code>SHOW_EXPECTED_ERRORS</code> prints all
+ * <p> The environment flag <code>SHOW_EXPECTED_ERRORS</code> prints all
  * the errors (even the expected errors).
  * This is useful if we want to diff the output of the compiler to make
  * sure the error messages are exactly the same.
  *
- * <p> The property flag <code>SHOW_RUNTIMES</code> prints runtime for the entire suite and for each file.
- *
- * 
+
  * <p> Five kinds of error markers can be inserted in <code>*.x10</code> files:
  * <ul>
  *  <li><code>ERR</code>  - marks an error or warning
@@ -134,31 +131,17 @@ import x10.X10CompilerOptions;
 </ul>
  */
 public class RunTestSuite {
-    public static String getProp(String name, String defVal) {
-        final String val = System.getProperty(name); // I prefer System.getProperty over getenv because you see the properties on the command line for the java (it's not something you set on the outside)
-        System.out.println("getProperty("+name+")="+val);
-        return val==null ? defVal : val;
-    }
-    public static boolean getBoolProp(String name) {
-        final String val = getProp(name,null);
-        return val!=null && (val.equalsIgnoreCase("t") || val.equalsIgnoreCase("true"));
-    }
-    public static boolean SEPARATE_COMPILER = getBoolProp("SEPARATE_COMPILER");
-    public static boolean SHOW_EXPECTED_ERRORS = getBoolProp("SHOW_EXPECTED_ERRORS");
-    public static boolean SHOW_RUNTIMES = getBoolProp("SHOW_RUNTIMES");
-    public static boolean QUIET = !SHOW_EXPECTED_ERRORS && getBoolProp("QUIET");
-
-    public static String SOURCE_PATH_SEP = File.pathSeparator; // on MAC the separator is ":" and on windows it is ";"
+    public static boolean SEPARATE_COMPILER = System.getenv("SEPARATE_COMPILER")==null || System.getenv("SEPARATE_COMPILER").equals("true");
+    public static boolean SHOW_EXPECTED_ERRORS = System.getenv("SHOW_EXPECTED_ERRORS")!=null;
+    public static boolean QUIET = !SHOW_EXPECTED_ERRORS && System.getenv("QUIET")!=null;
 
     private static void println(String s) {
         if (!QUIET) System.out.println(s);
     }
     private static int EXIT_CODE = 0;
-    private static java.lang.StringBuilder ALL_ERRORS = new StringBuilder();
     private static void err(String s) {
         EXIT_CODE = 1;
         System.err.println(s);
-        ALL_ERRORS.append(s).append("\n");
     }
 
     //_MustFailCompile means the compilation should fail.
@@ -171,14 +154,7 @@ public class RunTestSuite {
             "NOT_WORKING", // to exclude some benchmarks: https://x10.svn.sourceforge.net/svnroot/x10/benchmarks/trunk
     };
     private static final String[] EXCLUDE_FILES = {
-            // difference on MAC and PC (on PC the compiler crashes, on MAC it outputs this error: Semantic Error: Type definition type static TypedefOverloading06_MustFailCompile.A = x10.lang.String has the same name as member class TypedefOverloading06_MustFailCompile.A.
-            "TypedefOverloading04_MustFailCompile.x10",
-            "TypedefOverloading06_MustFailCompile.x10",
-            "TypedefOverloading08_MustFailCompile.x10",
-            "TypedefOverloading10_MustFailCompile.x10",
-
             // LangSpec is auto-generated, so I can't fix those files to make a clean test suite
-            "Classes250.x10","Classes160.x10","Classes170.x10",
             "InnerClasses5p9v.x10","Packages5t5g.x10","Stimulus.x10","Statements51.x10", "ClassCtor30_MustFailCompile.x10", "ThisEscapingViaAt_MustFailCompile.x10",
     };
     private static final String[] EXCLUDE_FILES_WITH = {
@@ -214,9 +190,6 @@ public class RunTestSuite {
     }
     private static final int MAX_FILES_NUM = Integer.MAX_VALUE; // Change it if you want to process only a small number of files
 
-    public static void Assert(boolean val, String msg) {
-        if (!val) throw new RuntimeException(msg);
-    }
     /**
      * Finds all *.x10 files in all sub-directories, and compiles them.
      * @param args
@@ -227,9 +200,9 @@ public class RunTestSuite {
      * @throws Throwable Can be a failed assertion or missing file.
      */
     public static void main(String[] args) throws Throwable {
-        Assert(args.length>0, "The first command line argument must be an x10 filename or a comma separated list of the directories.\n"+
+        assert args.length>0 : "The first command line argument must be an x10 filename or a comma separated list of the directories.\n"+
                     "E.g.,\n"+
-                    "C:\\cygwin\\home\\Yoav\\intellij\\sourceforge\\x10.tests,C:\\cygwin\\home\\Yoav\\intellij\\sourceforge\\x10.dist\\samples,C:\\cygwin\\home\\Yoav\\intellij\\sourceforge\\x10.runtime\\src-x10");
+                    "C:\\cygwin\\home\\Yoav\\intellij\\sourceforge\\x10.tests,C:\\cygwin\\home\\Yoav\\intellij\\sourceforge\\x10.dist\\samples,C:\\cygwin\\home\\Yoav\\intellij\\sourceforge\\x10.runtime\\src-x10";
 
         List<String> remainingArgs = new ArrayList<String>(Arrays.asList(args));
         remainingArgs.remove(0);
@@ -246,19 +219,19 @@ public class RunTestSuite {
         ArrayList<File> files = new ArrayList<File>(10);
         if (dirName.endsWith(".x10")) {
             final File dir = new File(dirName);
-            Assert(dir.isFile(), "File doesn't not exists: "+dirName);
+            assert dir.isFile() : "File doesn't not exists: "+dirName;
             files.add(getCanonicalFile(dir));
         } else {
             for (String dirStr : dirName.split(",")) {
                 File dir = new File(dirStr);
-                Assert(dir.isDirectory(), "The first command line argument must be the directory of x10.tests, and you passed: "+dir);
+                assert dir.isDirectory() : "The first command line argument must be the directory of x10.tests, and you passed: "+dir;
                 int before = files.size();
                 recurse(dir,files);
                 if (before==files.size()) println("Warning: Didn't find any .x10 files to compile in any subdirectory of "+dir);
             }
         }
         ArrayList<FileSummary> summaries = new ArrayList<FileSummary>();
-        java.util.Map<String,File> fileName2File = CollectionFactory.newHashMap();
+        HashMap<String,File> fileName2File = new HashMap<String, File>();
         for (File f : files) {
             FileSummary fileSummary = analyzeFile(f);
             summaries.add(fileSummary);
@@ -282,7 +255,7 @@ public class RunTestSuite {
         }
         String dirs = "";
         for (String dir : directories)
-            dirs += SOURCE_PATH_SEP+dir;
+            dirs += ";"+dir;
         int argsNum = remainingArgs.size();
         boolean foundSourcePath = false;
         for (int i=1; i<argsNum; i++) {
@@ -295,16 +268,13 @@ public class RunTestSuite {
                 break;
             }
         }
-        Assert(foundSourcePath, "You must use an argument -sourcepath that includes '/x10.runtime/src-x10'");
+        assert foundSourcePath : "You must use an argument -sourcepath that includes '/x10.runtime/src-x10'";
 
         long start = System.currentTimeMillis();
         for (FileSummary f : summaries) {
             compileFile(f,remainingArgs);
         }
-        if (SHOW_RUNTIMES) println("Total running time to compile all files="+(System.currentTimeMillis()-start));
-        
-        if (EXIT_CODE!=0) System.out.println("Summary of all errors:\n\n"+ALL_ERRORS);
-        System.out.println("\n\n\n\n\n"+ (EXIT_CODE==0 ? "SUCCESS" : "FAILED") + "\n\n\n");
+        println("Total running time to compile all files="+(System.currentTimeMillis()-start));
         System.exit(EXIT_CODE);
     }
     private static int count(String s, String sub) {
@@ -345,9 +315,9 @@ public class RunTestSuite {
             }
         }
 
-        if (SHOW_RUNTIMES) println("Compiler running time="+(System.currentTimeMillis()-start));
+        println("Compiler running time="+(System.currentTimeMillis()-start));
         final ArrayList<ErrorInfo> res = (ArrayList<ErrorInfo>) errQueue.getErrors();
-        Assert(res.size()<MAX_ERR_QUEUE, "We passed the maximum number of errors!");
+        assert res.size()<MAX_ERR_QUEUE : "We passed the maximum number of errors!";
         return res;
     }
 
@@ -416,12 +386,9 @@ public class RunTestSuite {
         // remove SHOULD_BE_ERR_MARKER and
         // parsing errors (if SHOULD_NOT_PARSE)
         // treating @ERR and @ShouldNotBeERR as if it were a comment (adding a LineSummary)
-        boolean didFailCompile = false;
         for (Iterator<ErrorInfo> it = errors.iterator(); it.hasNext(); ) {
             ErrorInfo info = it.next();
             final int kind = info.getErrorKind();
-            if (ErrorInfo.isErrorKind(kind)) didFailCompile = true;
-
             if ((kind==ErrorInfo.SHOULD_BE_ERR_MARKER) ||
                 (summary.SHOULD_NOT_PARSE && (kind==ErrorInfo.LEXICAL_ERROR || kind==ErrorInfo.SYNTAX_ERROR)))
                 it.remove();
@@ -443,10 +410,6 @@ public class RunTestSuite {
                 }
                 foundLine.errCount++;
             }
-        }
-
-        if (didFailCompile!=summary.fileName.endsWith("_MustFailCompile.x10")) {
-            println("WARNING: "+ summary.fileName+" "+(didFailCompile ? "FAILED":"SUCCESSFULLY")+" compiled, therefore it should "+(didFailCompile?"":"NOT ")+"end with _MustFailCompile.x10. "+(summary.lines.isEmpty()?"":"It did have @ERR markers but they might match warnings."));
         }
 
         // Now checking the errors reported are correct and match ERR markers

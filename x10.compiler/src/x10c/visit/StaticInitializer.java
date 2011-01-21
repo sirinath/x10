@@ -76,7 +76,6 @@ import polyglot.types.Types;
 import polyglot.types.VarDef;
 import polyglot.util.Pair;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.X10CompilerOptions;
@@ -131,7 +130,7 @@ public class StaticInitializer extends ContextVisitor {
 
     // mapping static field and corresponding initializer method
     private Map<Pair<Type,Name>, StaticFieldInfo> staticFinalFields = 
-            CollectionFactory.newHashMap();
+            new HashMap<Pair<Type,Name>, StaticFieldInfo>();
 
     public StaticInitializer(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
@@ -787,8 +786,7 @@ public class StaticInitializer extends ContextVisitor {
         List<Stmt> stmts = new ArrayList<Stmt>();
         stmts.add(xnf.Eval(pos, xnf.FieldAssign(pos, receiver, xnf.Id(pos, name), Assign.ASSIGN, 
                                                 right).fieldInstance(fi).type(right.type())));
-        FieldInstance fdidi = fdId.asInstance();
-        Expr fieldId = xnf.Field(pos, receiver, xnf.Id(pos, fdId.name())).fieldInstance(fdidi).type(fdidi.type());
+        Expr fieldId = xnf.Field(pos, receiver, xnf.Id(pos, fdId.name())).fieldInstance(fdId.asInstance());
         Expr bcastCall = genBroadcastField(pos, left, fieldId, fdPLH);
         if (fdPLH == null) {
             // no return value
@@ -865,13 +863,12 @@ public class StaticInitializer extends ContextVisitor {
         Expr here = xnf.X10Call(pos, xnf.X10CanonicalTypeNode(pos, type), name, 
                                 Collections.<TypeNode>emptyList(), 
                                 Collections.<Expr>emptyList()).methodInstance(mi).type(xts.Int());
-        Expr placeCheck = xnf.Binary(pos, here, Binary.EQ, xnf.IntLit(pos, IntLit.INT, 0).type(xts.Int())).type(xts.Boolean());
+        Expr placeCheck = xnf.Binary(pos, here, Binary.EQ, xnf.IntLit(pos, IntLit.INT, 0).type(xts.Int()));
         return placeCheck;
     }
 
     private Expr genAtomicGuard(Position pos, TypeNode receiver, FieldDef fdCond) {
-        FieldInstance fi = fdCond.asInstance();
-        Expr ai = xnf.Field(pos, receiver, xnf.Id(pos, fdCond.name())).fieldInstance(fi).type(fi.type());
+        Expr ai = xnf.Field(pos, receiver, xnf.Id(pos, fdCond.name())).fieldInstance(fdCond.asInstance());
         Id cs = xnf.Id(pos, Name.make("compareAndSet"));
 
         List<Ref<? extends Type>> argTypes = new ArrayList<Ref<? extends Type>>();
@@ -892,8 +889,7 @@ public class StaticInitializer extends ContextVisitor {
     }
 
     private Expr genStatusSet(Position pos, TypeNode receiver, FieldDef fdCond) {
-        FieldInstance fi = fdCond.asInstance();
-        Expr ai = xnf.Field(pos, receiver, xnf.Id(pos, fdCond.name())).fieldInstance(fi).type(fi.type());
+        Expr ai = xnf.Field(pos, receiver, xnf.Id(pos, fdCond.name())).fieldInstance(fdCond.asInstance());
         Id name = xnf.Id(pos, Name.make("set")); // Intentionally not SettableAssign.SET because AtomicInteger is a NativeRep class
 
         List<Ref<? extends Type>> argTypes = new ArrayList<Ref<? extends Type>>();
@@ -937,8 +933,7 @@ public class StaticInitializer extends ContextVisitor {
     }
 
     private Expr genCheckInitialized(Position pos, TypeNode receiver, FieldDef fdCond) {
-        FieldInstance fi = fdCond.asInstance();
-        Expr ai = xnf.Field(pos, receiver, xnf.Id(pos, fdCond.name())).fieldInstance(fi).type(fi.type());
+        Expr ai = xnf.Field(pos, receiver, xnf.Id(pos, fdCond.name())).fieldInstance(fdCond.asInstance());
         Id name = xnf.Id(pos, Name.make("get"));
 
         List<Ref<? extends Type>> argTypes = Collections.<Ref<? extends Type>>emptyList();
@@ -950,7 +945,7 @@ public class StaticInitializer extends ContextVisitor {
         List<TypeNode> typeParamNodes = Collections.<TypeNode>emptyList();
         Expr call = xnf.X10Call(pos, ai, name, typeParamNodes, args).methodInstance(mi).type(xts.Int());
 
-        return xnf.Binary(pos, call, Binary.NE, getInitDispatcherConstant(pos, "INITIALIZED").type(xts.Int())).type(xts.Boolean());
+        return xnf.Binary(pos, call, Binary.NE, getInitDispatcherConstant(pos, "INITIALIZED").type(xts.Int()));
     }
 
     private Expr genLock(Position pos) {

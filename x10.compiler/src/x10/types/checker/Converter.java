@@ -50,7 +50,6 @@ import polyglot.types.Types;
 import polyglot.util.ErrorInfo;
 import polyglot.util.Pair;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.ContextVisitor;
 import x10.Configuration;
 import x10.ExtensionInfo;
@@ -149,9 +148,14 @@ public class Converter {
 				result = typeCheckCast(nf.X10Cast(e.position(), tn, e, ct), tc);
 			}
 			if (dynamicCallp) {
-				if (!Warnings.dynamicCall(tc.job(),Warnings.CastingExprToType(e, tn.type(), e.position()))) {
+				X10CompilerOptions opts = (X10CompilerOptions) tc.job().extensionInfo().getOptions();
+				if (opts.x10_config.STATIC_CALLS) {
 					//throw new SemanticException("Expression " + e + " cannot be cast to type " + tn.type() + ".", e.position());
 					return null;
+				} else if (opts.x10_config.VERBOSE_CALLS) {
+					Warnings.issue(tc.job(), Warnings.CastingExprToType(e, tn.type(), e.position()));
+				} else {
+					((ExtensionInfo) tc.job().extensionInfo()).incrWeakCallsCount();
 				}
 			}
 		}
@@ -202,7 +206,7 @@ public class Converter {
 		ClassDef currentClassDef = xc.currentClassDef();
 
 		List<PI> acceptable = new ArrayList<PI>();
-		Map<Def, List<Expr>> newArgs = CollectionFactory.newHashMap();
+		Map<Def, List<Expr>> newArgs = new HashMap<Def, List<Expr>>();
 
 		List<Type> typeArgs = new ArrayList<Type>(n.typeArguments().size());
 
@@ -550,12 +554,6 @@ public class Converter {
 						}
 					} catch (SemanticException z) {
 					}
-                    // yoav todo: we check 3 conditions:
-                    // toType.operator_as(fromType)
-                    // toType.implicit_operator_as(fromType)
-                    // fromType.implicit_operator_as(fromType)
-                    // but we should also check:
-                    // fromType.operator_as(fromType)
 				}
 			}
 

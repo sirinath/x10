@@ -27,7 +27,6 @@ import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.types.Types;
 import polyglot.util.Position;
-import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 import polyglot.visit.TypeBuilder;
 import x10.ast.*;
 import x10.constraint.XName;
@@ -39,7 +38,7 @@ import x10.extension.X10Ext;
 import x10cpp.visit.SharedVarsMethods;
 
 public class Struct {
-    private final static java.util.Set<String> ignoreTypes = CollectionFactory.newHashSet();
+    private final static java.util.Set<String> ignoreTypes = new HashSet<String>();
 
     static {
         ignoreTypes.add("Boolean");

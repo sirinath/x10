@@ -20,7 +20,7 @@ import polyglot.visit.*;
  * Contains an expression whose value is tested, a ``then'' statement 
  * (consequent), and optionally an ``else'' statement (alternate).
  */
-public abstract class If_c extends Stmt_c implements If
+public class If_c extends Stmt_c implements If
 {
     protected Expr cond;
     protected Stmt consequent;
@@ -96,7 +96,15 @@ public abstract class If_c extends Stmt_c implements If
     }
 
     /** Type check the statement. */
-    public abstract Node typeCheck(ContextVisitor tc) throws SemanticException;
+    public Node typeCheck(ContextVisitor tc) throws SemanticException {
+        TypeSystem ts = tc.typeSystem();
+
+	if (! ts.typeEquals(cond.type(), ts.Boolean(), tc.context())) {
+	    throw new SemanticException("Condition of if statement must have boolean type.",cond.position());
+	}
+
+	return this;
+    }
 
     public Type childExpectedType(Expr child, AscriptionVisitor av) {
         TypeSystem ts = av.typeSystem();

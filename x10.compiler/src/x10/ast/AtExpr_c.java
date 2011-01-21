@@ -65,8 +65,7 @@ public class AtExpr_c extends PlacedClosure_c
     }
     
     public String toString() {
-    	return  "(#" + hashCode() + // todo: using hashCode leads to non-determinism in the output of the compiler
-                ") at[" + returnType + "](" + place + ") " + body;
+    	return  "(#" + hashCode() + ") at[" + returnType + "](" + place + ") " + body;
     }
    
     /** Write the expression to an output file. */
