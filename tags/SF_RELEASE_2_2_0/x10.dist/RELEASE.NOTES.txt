@@ -1,0 +1,56 @@
+Release 2.2.0
+
+LANGUAGE CHANGES
+
+TO BE FILLED IN BY VIJAY/BARD
+
+Please consult the language specification for the details of
+these changes and for a list of additional changes.
+
+
+IMPLEMENTATION CHANGES
+
+TO BE FILLED IN BY DAVE/OLIVIER/IGOR/MIKIO
+
+
+LIMITATIONS OF THIS RELEASE
+
+The following features described in the 2.2.0 language manual do not
+currently work and will be fixed in the subsequent releases:
+  - Non-static type definitions as class or interface members
+    (static type defs do work)
+
+The constraint solver used by X10 typechecker is known to be incomplete 
+for situations in which a constraint implies an infinite number of 
+distinct constraints.
+
+Additionally, the following features described in the language
+manual do not currently work with the C++ backend and will be fixed in
+the subsequent releases:
+  - Garbage collection on AIX
+  - Non-final generic instance methods
+  - Exception stack traces on Cygwin
+
+As in previous releases, the X10 runtime uses a "busy wait" loop
+in the worker threads that execute asyncs. A consequence of this is
+that even if a place has no asyncs to execute, it will still consume
+CPU cycles busy waiting for new asyncs to be created.  
+See XTENLANG-1012 for more details.
+
+The generated C++ code requires g++ 4.2 or better to be compiled; 
+we do almost all of our testing against g++ 4.3.2.  On AIX, you
+may either use g++ 4.2 or better or xlC 10.1.0.4 or better.
+
+
+SUMMARY OF ISSUES RESOLVED IN THIS RELEASE
+
+Below is a summary of JIRA issues addressed for the X10 2.2.0
+
+
+For the details of JIRA issues fixed in this release, see
+http://jira.codehaus.org/browse/XTENLANG/fixforversion/FILL-IN-NUMBER-HERE
+
+Please use the X10 JIRA to report bugs, after ensuring the problem is
+not already reported:
+http://jira.codehaus.org/secure/IssueNavigator.jspa?reset=true&&pid=11812&resolution=-1
+
