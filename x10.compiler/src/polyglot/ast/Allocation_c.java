@@ -17,7 +17,6 @@ import polyglot.ast.Term;
 import polyglot.ast.TypeNode;
 import polyglot.util.Position;
 import polyglot.visit.CFGBuilder;
-import polyglot.visit.NodeVisitor;
 
 /**
  * @author Bowen Alpern
@@ -25,16 +24,29 @@ import polyglot.visit.NodeVisitor;
  */
 public class Allocation_c extends Expr_c implements Allocation {
     
-    TypeNode objectType;
     List<TypeNode> typeArguments;
 
     /**
      * @param pos
      */
-    public Allocation_c(Position pos, TypeNode objType, List<TypeNode> typeArgs) {
+    public Allocation_c(Position pos) {
         super(pos);
-        objectType = objType;
-        typeArguments = typeArgs;
+    }
+
+    /* (non-Javadoc)
+     * @see polyglot.ast.Term#firstChild()
+     */
+    public Term firstChild() {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see polyglot.ast.Term_c#acceptCFG(polyglot.visit.CFGBuilder, java.util.List)
+     */
+    @Override
+    public <S> List<S> acceptCFG(CFGBuilder v, List<S> succs) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /* (non-Javadoc)
@@ -48,69 +60,9 @@ public class Allocation_c extends Expr_c implements Allocation {
      * @see x10.ast.X10Allocation#typeArguments(java.util.List)
      */
     public Allocation typeArguments(List<TypeNode> typeArgs) {
-        if (typeArgs == typeArguments) return this;
-        Allocation_c c  = (Allocation_c) copy();
+        Allocation_c c = (Allocation_c) copy();
         c.typeArguments = typeArgs;
         return c;
     }
 
-    /* (non-Javadoc)
-     * @see polyglot.ast.Allocation#objectType()
-     */
-    public TypeNode objectType() {
-        return objectType;
-    }
-
-    /* (non-Javadoc)
-     * @see polyglot.ast.Allocation#objectType(polyglot.ast.TypeNode)
-     */
-    public Allocation objectType(TypeNode objType) {
-        if (objType == objectType) return this;
-        Allocation_c a = (Allocation_c) copy();
-        a.objectType   = objType;
-        return a;
-    }
-
-    /**
-     * @param objType
-     * @param typeArgs
-     * @return
-     */
-    private Node reconstruct(TypeNode objType, List<TypeNode> typeArgs) {
-        if (objType == objectType && typeArgs == typeArguments) return this;
-        Allocation_c a  = (Allocation_c) copy();
-        a.objectType    = objType;
-        a.typeArguments = typeArgs;
-        return a;
-    }
-
-    /* (non-Javadoc)
-     * @see polyglot.ast.Term_c#acceptCFG(polyglot.visit.CFGBuilder, java.util.List)
-     */
-    @Override
-    public <S> List<S> acceptCFG(CFGBuilder v, List<S> succs) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see polyglot.ast.Node_c#visitChildren(polyglot.visit.NodeVisitor)
-     */
-    @Override
-    public Node visitChildren(NodeVisitor v) {
-        TypeNode objType = (TypeNode) visitChild(objectType, v);
-        List<TypeNode> typeArgs = visitList(typeArguments, v);
-        return reconstruct(objType, typeArgs);
-    }
-
-    /* (non-Javadoc)
-     * @see polyglot.ast.Term#firstChild()
-     */
-    public Term firstChild() {
-        return null;
-    }
-
-    public String toString() {
-        return "new " + objectType;
-    }
 }

@@ -42,6 +42,7 @@ public class TypeRewriter extends TypeTransformer {
     /**
      * @param localDefMap 
      * @param renamingMap 
+     * @param x10AlphaRenamer
      */
     TypeRewriter(Map<Name, Name> renamingMap, Map<Name, LocalDef> localDefMap) {
         this.renamingMap = renamingMap;

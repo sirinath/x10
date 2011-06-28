@@ -104,7 +104,6 @@ public class TypeTransformer extends NodeTransformer {
     protected CConstraint transformConstraint(CConstraint c) {
         if (c == null)
             return null;
-        VarDef currentLocal = this.visitor().context().varWhoseTypeIsBeingElaborated();
         List<XVar> oldvars = new ArrayList<XVar>();
         List<XVar> newvars = new ArrayList<XVar>();
         for (XVar v : c.vars()) {
@@ -112,8 +111,7 @@ public class TypeTransformer extends NodeTransformer {
                 CLocal l = (CLocal) v;
                 X10LocalDef ld = l.name();
                 X10LocalDef newld = vars.get(ld);
-                if (ld == currentLocal) { // we are in the declaration for this variable
-                    assert (newld == null);
+                if (newld == null) { // have not seen the declaration yet
                     Type rt = Types.get(ld.type());
                     TypeSystem ts = rt.typeSystem();
                     newld = copyLocalDef(ld);
@@ -122,7 +120,7 @@ public class TypeTransformer extends NodeTransformer {
                     Type newrt = transformType(rt);
                     newld.setType(Types.ref(newrt));
                 }
-                if (newld == null || newld == ld) continue;
+                if (newld == ld) continue;
                 oldvars.add(v);
                 //if (!l.s.endsWith("!!!")) l.s+="!!!"; // validation
                 //newvars.add(CTerms.makeLocal(newld, newld.name().toString())); // validation
@@ -130,10 +128,7 @@ public class TypeTransformer extends NodeTransformer {
             }
         }
         try {
-            CConstraint newC = c.substitute(newvars.toArray(new XTerm[0]), oldvars.toArray(new XVar[0]));
-            if (newC != c && (!newC.entails(c) || !c.entails(newC))) {
-                c = newC;
-            }
+            c = c.substitute(newvars.toArray(new XTerm[0]), oldvars.toArray(new XVar[0]));
         } catch (XFailure e) {
             throw new InternalCompilerError("Unexpected failure while transforming constraint: "+c);
         }
@@ -275,14 +270,7 @@ public class TypeTransformer extends NodeTransformer {
                 qt = qt.typeArguments(ntas);
             }
             X10ClassType ct = (X10ClassType) qt.outer();
-            X10ClassType nct = ct == null ? null : (X10ClassType) transformType(ct);
-            if (ct != null && !qt.isInnerClass()) {
-                nct = nct.typeArguments(null);
-                TypeSystem ts = ct.typeSystem();
-                if (ts.typeEquals(nct, ct, ts.emptyContext())) {
-                    nct = ct;
-                }
-            }
+            X10ClassType nct = (X10ClassType) transformType(ct);
             if (nct != ct) {
                 qt = qt.container(nct);
             }

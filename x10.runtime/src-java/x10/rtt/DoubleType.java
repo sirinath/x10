@@ -12,21 +12,15 @@
 package x10.rtt;
 
 
-public class DoubleType extends RuntimeType<x10.core.Double> {
+public class DoubleType extends RuntimeType<Double> {
 
-    private static final long serialVersionUID = 1L;
-
-    // make sure deserialized RTT object is not duplicated
-    private Object readResolve() throws java.io.ObjectStreamException {
-        return Types.DOUBLE;
-    }
+	private static final long serialVersionUID = 1L;
 
     public DoubleType() {
-        super(x10.core.Double.class,
+//        super(double.class,
+        super(Double.class,
               new Type[] {
                   new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
-                  new ParameterizedType(x10.lang.Arithmetic.$RTT, UnresolvedType.THIS),
-                  new ParameterizedType(x10.util.Ordered.$RTT, UnresolvedType.THIS),
                   Types.STRUCT
               });
     }
@@ -38,8 +32,8 @@ public class DoubleType extends RuntimeType<x10.core.Double> {
 
     // for shortcut 
     @Override
-    public boolean instanceOf(Object o) {
-        return o instanceof x10.core.Double;
+    public boolean instanceof$(Object o) {
+        return o instanceof java.lang.Double;
     }
 
     @Override
@@ -57,13 +51,20 @@ public class DoubleType extends RuntimeType<x10.core.Double> {
     }
     
     @Override
-    public x10.core.Double getArray(Object array, int i) {
-        return x10.core.Double.$box(((double[]) array)[i]);
+    public Double getArray(Object array, int i) {
+        return ((double[]) array)[i];
     }
     
+//    @Override
+//    public Double setArray(Object array, int i, Double v) {
+//        // avoid boxing again
+////        return ((double[]) array)[i] = v;
+//        ((double[]) array)[i] = v;
+//        return v;
+//    }
     @Override
-    public void setArray(Object array, int i, x10.core.Double v) {
-        ((double[]) array)[i] = x10.core.Double.$unbox(v);
+    public void setArray(Object array, int i, Double v) {
+        ((double[]) array)[i] = v;
     }
     
     @Override

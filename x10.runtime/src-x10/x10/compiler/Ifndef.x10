@@ -13,4 +13,4 @@ package x10.compiler;
 
 import x10.lang.annotations.*;
 
-public interface Ifndef(macro:String) extends FieldAnnotation,MethodAnnotation,StatementAnnotation,ClassAnnotation { }
+public interface Ifndef(macro:String) extends FieldAnnotation,MethodAnnotation,StatementAnnotation { }

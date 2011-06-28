@@ -53,8 +53,6 @@ import x10.constraint.XFailure;
 import x10.constraint.XTerm;
 import x10.types.ConstrainedType;
 import x10.types.X10FieldInstance;
-import x10.types.constants.ConstantValue;
-import x10.types.constants.IntegralValue;
 import x10.types.matcher.X10TypeMatcher;
 
 import x10.util.AltSynthesizer;
@@ -440,7 +438,7 @@ public class ForLoopOptimizer extends ContextVisitor {
                             assert (1 == args.size());
                             Expr arg = args.get(0);
                             if (arg.isConstant()) {
-                                int i = ((IntegralValue) arg.constantValue()).intValue();
+                                int i =(Integer) arg.constantValue();
                                 return syn.createLocal(n.position(), indices[i]);
                             }
                             call = call.target(syn.createLocal(target.position(), rail));
@@ -502,7 +500,7 @@ public class ForLoopOptimizer extends ContextVisitor {
         if (null == propertyFI) return null;
         Expr propertyExpr = syn.createFieldRef(expr.position(), expr, propertyFI);
         if (null == propertyExpr) return null;
-        return ConstantValue.toJavaObject(ConstantPropagator.constantValue(propertyExpr));
+        return ConstantPropagator.constantValue(propertyExpr);
     }
 
    

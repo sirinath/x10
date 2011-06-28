@@ -14,7 +14,6 @@ import java.util.List;
 import polyglot.types.*;
 import polyglot.util.*;
 import polyglot.visit.*;
-import x10.types.constants.ConstantValue;
 
 /**
  * A <code>Field</code> is an immutable representation of a Java field
@@ -218,7 +217,7 @@ e = new Exception();
       return false;
   }
 
-  public ConstantValue constantValue() {
+  public Object constantValue() {
     if (isConstant()) {
       return fi.constantValue();
     }

@@ -32,13 +32,14 @@ public class TypeExpander extends Expander {
 	        		| (inSuper ? X10PrettyPrinterVisitor.NO_VARIANCE : 0));
 	    }
 	    
-	    Type type() {
-	    	return t;
-	    }
-	    
-	    int flags() {
-	    	return flags;
-	    }
+	    // not used
+//	    Type type() {
+//	    	return t;
+//	    }
+//	    
+//	    int flags() {
+//	    	return flags;
+//	    }
 
 	    @Override
 	    public String toString() {
@@ -57,9 +58,5 @@ public class TypeExpander extends Expander {
 	        finally {
 //	            X10PrettyPrinterVisitor.this.tr = old;
 	        }
-	    }
-	    
-	    public void expand(Translator tr, int flags) {
-            er.printType(t, flags);
 	    }
 	}

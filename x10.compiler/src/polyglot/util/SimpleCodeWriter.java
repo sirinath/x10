@@ -66,11 +66,6 @@ public class SimpleCodeWriter extends CodeWriter {
 	    write(s, s.length());
     }
 
-    public void writeln(String s) {
-        write(s);
-        newline();
-     }
-
     public void write(String s, int length) {
 	output.print(s);
 	pos += length;

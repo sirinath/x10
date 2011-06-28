@@ -30,29 +30,8 @@ public abstract class Unsigned {
     public static long toSLong(int a) {
         return a;
     }
-    
-    /**
-     * Converts a ULong to double
-     * @param a unboxed ULong value represented as long
-     * @return value converted to double
-     */
-    public static double toDouble(long a) {
-        double v = (double)a;
-        if (a >= 0) return v;
-        else return v - 2.0*java.lang.Long.MIN_VALUE;
-    }
-    
-    /**
-     * Converts a ULong to float
-     * @param a unboxed ULong value represented as long
-     * @return value converted to float
-     */
-    public static float toFloat(long a) {
-        double v = (double)a;
-        if (a >= 0) return (float)v;
-        else return (float)(v - 2.0*java.lang.Long.MIN_VALUE);
-    }
 
+    /*
     public static int inject(int a) {
         return (a + java.lang.Integer.MIN_VALUE);
     }
@@ -66,6 +45,7 @@ public abstract class Unsigned {
         return (a - java.lang.Long.MIN_VALUE);
     }
 
+    // followings are correct but not used
     public static boolean le(int a, int b) {
         return inject(a) <= inject(b);
     }
@@ -90,6 +70,7 @@ public abstract class Unsigned {
     public static boolean lt(long a, long b) {
         return inject(a) < inject(b);
     }
+    */
     
     public static int div(int a, int b) {
 //        return (int) div(toULong(a), toULong(b));
@@ -228,29 +209,29 @@ public abstract class Unsigned {
     }
     */
     
-    public static java.lang.String toString(byte a, int radix) {
+    /*
+    // followings are correct but not used
+    public static String toString(byte a, int radix) {
         return Integer.toString(toUInt(a), radix);
     }
-    public static java.lang.String toString(byte a) {
+    public static String toString(byte a) {
         return toString(a, 10);
     }
-    public static java.lang.String toString(short a, int radix) {
+    public static String toString(short a, int radix) {
         return Integer.toString(toUInt(a), radix);
     }
-    public static java.lang.String toString(short a) {
+    public static String toString(short a) {
         return toString(a, 10);
     }
-    public static java.lang.String toString(int a, int radix) {
-        return java.lang.Long.toString(toULong(a), radix);
+    public static String toString(int a, int radix) {
+        return Long.toString(toULong(a), radix);
     }
-    public static java.lang.String toString(int a) {
+    public static String toString(int a) {
         return toString(a, 10);
     }
+    */
     public static java.lang.String toString(long a, int radix) {
         return toULONG(a).toString(radix);
-    }
-    public static java.lang.String toString(long a) {
-        return toULONG(a).toString();
     }
     /*
     // followings are correct but not used

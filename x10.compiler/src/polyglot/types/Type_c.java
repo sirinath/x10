@@ -63,8 +63,6 @@ public abstract class Type_c extends TypeObject_c implements Type
     public boolean isNull() { return false; }
     public boolean isClass() { return false; }
     public boolean isArray() { return false; }
-    public final boolean isAny() { return ts.isAny(this); }
-    public final boolean isParameterType() { return ts.isParameterType(this); }
     
     public final boolean isNumeric() { return ts.isNumeric(this); }
     public final boolean isUnsignedNumeric() { return ts.isUnsignedNumeric(this); }
@@ -79,10 +77,6 @@ public abstract class Type_c extends TypeObject_c implements Type
     public final boolean isLong() { return ts.isLong(this); }
     public final boolean isFloat() { return ts.isFloat(this); }
     public final boolean isDouble() { return ts.isDouble(this); }
-    public final boolean isUByte() { return ts.isUByte(this); }
-    public final boolean isUShort() { return ts.isUShort(this); }
-    public final boolean isUInt() { return ts.isUInt(this); }
-    public final boolean isULong() { return ts.isULong(this); }
 
     public Name name() { return null; }
     public QName fullName() {

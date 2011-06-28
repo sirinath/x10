@@ -61,7 +61,6 @@ public class X10CPPCompilerOptions extends x10.X10CompilerOptions {
         }
         
         if (args[i].equals("-gpt")) {
-            macros.add("__GPT__");
             gpt = true;
             return ++i;
         }

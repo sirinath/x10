@@ -11,54 +11,22 @@
 package x10.types.constants;
 
 import polyglot.ast.Expr;
-import polyglot.ast.Lit;
-import polyglot.ast.NodeFactory;
-import polyglot.ast.NullLit;
-import polyglot.types.NullType;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;
-import polyglot.types.Types;
 import polyglot.util.Position;
-import x10.types.constraints.CTerms;
 
 /**
- * A constant value the represents the constant null.
+ * @author Bowen Alpern
+ *
  */
 public final class NullValue extends ConstantValue {
 
-    NullValue() { }
-
-    @Override
-    public Object toJavaObject() { return null; }
-    
-    @Override
-    public NullLit toLit(NodeFactory nf, TypeSystem ts, Type type, Position pos) {
-        type = Types.addSelfBinding(type, CTerms.makeLit(toJavaObject(), getLitType(ts)));
-        return (NullLit)nf.NullLit(pos).type(type);
+    /**
+     * @param v
+     * @param ts
+     */
+    NullValue(TypeSystem ts) {
+        super(null, ts.Null());
     }
 
-    @Override
-    public NullType getLitType(TypeSystem ts) {
-        return ts.Null();
-    }
-
-    @Override
-    public Lit toUntypedLit(NodeFactory nf, Position pos) {
-        return nf.NullLit(pos);
-    }
-
-    @Override
-    public boolean equals(Object that) {
-        return that instanceof NullValue;
-    }
-    
-    @Override 
-    public int hashCode() {
-        return 2112;
-    }
-    
-    @Override
-    public String toString() {
-        return "null";
-    }
 }

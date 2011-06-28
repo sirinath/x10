@@ -27,7 +27,7 @@ import x10.util.Ordered;
  */
 @NativeRep("java", "float", null, "x10.rtt.Types.FLOAT")
 @NativeRep("c++", "x10_float", "x10_float", null)
-public struct Float implements Comparable[Float], Arithmetic[Float], Ordered[Float] {
+public struct Float implements Comparable[Float] /*TODO implements Arithmetic[Float], Ordered[Float]*/ {
 
     /**
      * A less-than operator.
@@ -188,7 +188,7 @@ public struct Float implements Comparable[Float], Arithmetic[Float], Ordered[Flo
      * @param x the given UByte
      * @return the given UByte converted to a Float.
      */
-    @Native("java", "((float)((int)(#x)&0xff))")
+    @Native("java", "((float)(byte)(#x.byteVal))")
     @Native("c++",  "((x10_float) (#1))")
     public native static operator (x:UByte): Float;
 
@@ -197,7 +197,7 @@ public struct Float implements Comparable[Float], Arithmetic[Float], Ordered[Flo
      * @param x the given UShort
      * @return the given UShort converted to a Float.
      */
-    @Native("java", "((float)((int)(#x)&0xffff))")
+    @Native("java", "((float)(short)(#x.shortVal))")
     @Native("c++",  "((x10_float) (#1))")
     public native static operator (x:UShort): Float;
 
@@ -206,7 +206,7 @@ public struct Float implements Comparable[Float], Arithmetic[Float], Ordered[Flo
      * @param x the given UInt
      * @return the given UInt converted to a Float.
      */
-    @Native("java", "((float)(((long)#x)&0xffffffffL))")
+    @Native("java", "((float)(int)(#x.intVal))")
     @Native("c++",  "((x10_float) (#1))")
     public native static operator (x:UInt): Float;
 
@@ -215,7 +215,7 @@ public struct Float implements Comparable[Float], Arithmetic[Float], Ordered[Flo
      * @param x the given ULong
      * @return the given ULong converted to a Float.
      */
-    @Native("java", "(x10.core.Unsigned.toFloat(#x))")
+    @Native("java", "((float)(long)(#x.longVal))")
     @Native("c++",  "((x10_float) (#1))")
     public native static operator (x:ULong): Float;
 

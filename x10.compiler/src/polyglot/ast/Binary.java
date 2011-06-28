@@ -7,6 +7,7 @@
 
 package polyglot.ast;
 
+import x10.ast.X10Binary;
 import x10.types.MethodInstance;
 
 /**
@@ -41,8 +42,6 @@ public interface Binary extends Expr
         LARROW  ("<-", Precedence.SHIFT),
         FUNNEL  ("-<", Precedence.SHIFT),
         LFUNNEL (">-", Precedence.SHIFT),
-        DIAMOND ("<>", Precedence.SHIFT),
-        BOWTIE  ("><", Precedence.SHIFT),
         STARSTAR("**", Precedence.MUL),
         TWIDDLE ("~", Precedence.EQUAL),
         NTWIDDLE("!~", Precedence.EQUAL),
@@ -93,8 +92,6 @@ public interface Binary extends Expr
     public static final Operator LARROW = Operator.LARROW;
     public static final Operator FUNNEL = Operator.FUNNEL;
     public static final Operator LFUNNEL = Operator.LFUNNEL;
-    public static final Operator DIAMOND = Operator.DIAMOND;
-    public static final Operator BOWTIE = Operator.BOWTIE;
     public static final Operator STARSTAR = Operator.STARSTAR;
     public static final Operator TWIDDLE = Operator.TWIDDLE;
     public static final Operator NTWIDDLE = Operator.NTWIDDLE;
@@ -143,7 +140,7 @@ public interface Binary extends Expr
     Binary precedence(Precedence precedence);
     
     boolean invert();
-    Binary invert(boolean invert);
+    X10Binary invert(boolean invert);
     MethodInstance methodInstance();
-    Binary methodInstance(MethodInstance mi);
+    X10Binary methodInstance(MethodInstance mi);
 }

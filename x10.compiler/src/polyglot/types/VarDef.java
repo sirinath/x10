@@ -36,14 +36,14 @@ public interface VarDef extends TypeObject, Def
     /**
      * The variable's constant value, or null.
      */
-    x10.types.constants.ConstantValue constantValue();
+    Object constantValue();
 
     /**
      * Destructively set the constant value of the field.
      * @param value the constant value.  Should be an instance of String,
      * Boolean, Byte, Short, Character, Integer, Long, Float, Double, or null.
      */
-    void setConstantValue(x10.types.constants.ConstantValue value);
+    void setConstantValue(Object value);
     
     /**
      * Mark the variable as not a compile time constant.

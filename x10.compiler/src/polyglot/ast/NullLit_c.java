@@ -11,7 +11,6 @@ import polyglot.util.CodeWriter;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.PrettyPrinter;
-import x10.types.constants.ConstantValue;
 
 /**
  * The Java literal <code>null</code>.
@@ -47,8 +46,8 @@ public class NullLit_c extends Lit_c implements NullLit
         return false;  
     }
     
-    public ConstantValue constantValue() {
-        return ConstantValue.makeNull();
+    public Object constantValue() {
+        return null;
     }
     
 }

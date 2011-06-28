@@ -20,7 +20,7 @@ class TypedefConstraint3h extends TypedefTest {
     public def run():boolean = {
 
         type T(x:int){x==1} = int;
-        val one:int{self==1} = 1;
+        var one:int{self==1} = 1;
         var a:T(one);
 
         return result;

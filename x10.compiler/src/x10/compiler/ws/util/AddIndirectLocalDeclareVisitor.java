@@ -9,6 +9,7 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
+
 package x10.compiler.ws.util;
 
 import java.util.ArrayList;
@@ -23,16 +24,11 @@ import polyglot.ast.Local;
 import polyglot.ast.Node;
 import polyglot.ast.NodeFactory;
 import polyglot.ast.Stmt;
-import polyglot.frontend.Job;
-import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
-import polyglot.util.CollectionUtil;
-import x10.types.TypeParamSubst;
-import x10.util.CollectionFactory;
-import x10.visit.NodeTransformingVisitor;
-import x10.visit.Reinstantiator;
+import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /**
+ * @author Haichuan
  * For inner class frames, each frame should have indirect references
  * to access upper frames' fields(transformed from locals).
  * 
@@ -41,33 +37,29 @@ import x10.visit.Reinstantiator;
  * 
  * It process the code block, and add the local declares
  *
- * @author Haichuan
  */
-public class AddIndirectLocalDeclareVisitor extends ContextVisitor {
+public class AddIndirectLocalDeclareVisitor extends NodeVisitor{
+    NodeFactory xnf;
     Block targetBlock;
-    Map<Expr, Stmt> refToDeclMap;
+    Map<Expr, Stmt>refToDeclMap;
     
-    public AddIndirectLocalDeclareVisitor(Job job, Map<Expr, Stmt> refToDeclMap) {
-        super(job, job.extensionInfo().typeSystem(), job.extensionInfo().nodeFactory());
+    public AddIndirectLocalDeclareVisitor(NodeFactory xnf, Map<Expr, Stmt>refToDeclMap){
+        this.xnf = xnf;
         this.refToDeclMap = refToDeclMap;
     }
     
-    public Node override(Node parent, Node child) {
+    public Node visitEdge(Node parent, Node child) {
         //in the first step, we need decide the target block
-        if (child instanceof Block && targetBlock == null) {
+        if(child instanceof Block && targetBlock == null){
             targetBlock = (Block) child; //the outer block
         }
-        return null;
+        return super.visitEdge(parent, child);
     }
 
-    public Node leaveCall(Node parent, Node old, Node n, NodeVisitor v) {
-        if (old == targetBlock && refToDeclMap != null) { //only process the target block
+    public Node leave(Node old, Node n, NodeVisitor v) {
+        if(old == targetBlock && refToDeclMap != null){ //only process the target block
             
             Block block = (Block)n;
-            
-            Reinstantiator reinstantiator = new Reinstantiator(TypeParamSubst.IDENTITY);
-            ContextVisitor visitor = new NodeTransformingVisitor(job, ts, nf, reinstantiator).context(context());
-            block = (Block) block.visit(visitor); // reinstantiate locals in the body
             
             //first detect all locals;
             LocalExprFinder lef = new LocalExprFinder();
@@ -81,11 +73,11 @@ public class AddIndirectLocalDeclareVisitor extends ContextVisitor {
                 }
             }
             //finally, add all these into the block
-            if (localDecls.size() > 0) {
+            if(localDecls.size() > 0){
                 ArrayList<Stmt> nStmts = new ArrayList<Stmt>();
                 nStmts.addAll(localDecls);
                 nStmts.addAll(block.statements());
-                block = block.statements(nStmts);
+                block = xnf.Block(block.position(), nStmts);
             }
             return block;
         }

@@ -485,9 +485,6 @@ public class Flags implements Serializable
             return true;
         }
 
-        if (!isProperty() && f.isProperty())
-            return true;
-
         return false;
     }
 

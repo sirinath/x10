@@ -44,7 +44,6 @@ import x10.constraint.XVar;
 import x10.types.X10ClassType;
 import x10.types.checker.Converter;
 import polyglot.types.TypeSystem;
-import x10.types.constants.ConstantValue;
 import x10.types.constraints.CConstraint;
 import x10.types.constraints.CConstraint;
 import x10.errors.Errors;
@@ -73,7 +72,7 @@ public class Tuple_c extends Expr_c implements Tuple {
     }
     
     @Override
-    public ConstantValue constantValue() {
+    public Object constantValue() {
     	return null;
     }
     

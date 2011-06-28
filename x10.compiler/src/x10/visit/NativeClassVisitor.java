@@ -70,7 +70,6 @@ import x10.types.X10Def;
 import x10.types.X10FieldDef;
 import x10.types.X10MethodDef;
 import x10.util.FileUtils;
-import x10.types.constants.StringValue;
 
 /**
  * Visitor that expands @NativeClass and @NativeDef annotations.
@@ -102,7 +101,7 @@ public class NativeClassVisitor extends ContextVisitor {
     }
 
     protected String getNativeClassName(X10ClassDef def) throws SemanticException {
-        Type t = xts.NativeClass();
+        Type t = xts.systemResolver().findOne(QName.make("x10.compiler.NativeClass"));
         List<Type> as = def.annotationsMatching(t);
         for (Type at : as) {
             String lang = getPropertyInit(at, 0);
@@ -114,7 +113,7 @@ public class NativeClassVisitor extends ContextVisitor {
     }
 
     protected String getNativeClassPackage(X10ClassDef def) throws SemanticException {
-        Type t = xts.NativeClass();
+        Type t = xts.systemResolver().findOne(QName.make("x10.compiler.NativeClass"));
         List<Type> as = def.annotationsMatching(t);
         for (Type at : as) {
             String lang = getPropertyInit(at, 0);
@@ -131,8 +130,8 @@ public class NativeClassVisitor extends ContextVisitor {
             X10ClassType act = (X10ClassType) at;
             if (index < act.propertyInitializers().size()) {
                 Expr e = act.propertyInitializer(index);
-                if (e.isConstant() && e.constantValue() instanceof StringValue) {
-                    return ((StringValue) e.constantValue()).value();
+                if (e.isConstant() && e.constantValue() instanceof String) {
+                    return (String) e.constantValue();
                 } else {
                     throw new SemanticException("Property initializer for @" + at + " must be a string literal.");
                 }

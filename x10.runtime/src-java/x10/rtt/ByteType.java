@@ -11,24 +11,18 @@
 
 package x10.rtt;
 
-public class ByteType extends RuntimeType<x10.core.Byte> {
 
-    private static final long serialVersionUID = 1L;
+public class ByteType extends RuntimeType<Byte> {
 
-    // make sure deserialized RTT object is not duplicated
-    private Object readResolve() throws java.io.ObjectStreamException {
-        return Types.BYTE;
-    }
+	private static final long serialVersionUID = 1L;
 
     public ByteType() {
-        super(x10.core.Byte.class,
-            new Type[] {
-                new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
-                new ParameterizedType(x10.lang.Arithmetic.$RTT, UnresolvedType.THIS),
-                new ParameterizedType(x10.lang.Bitwise.$RTT, UnresolvedType.THIS),
-                new ParameterizedType(x10.util.Ordered.$RTT, UnresolvedType.THIS),
-                Types.STRUCT
-            });
+//        super(byte.class,
+        super(Byte.class,
+              new Type[] {
+                  new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
+                  Types.STRUCT
+              });
     }
     
     @Override
@@ -38,10 +32,10 @@ public class ByteType extends RuntimeType<x10.core.Byte> {
 
     // for shortcut 
     @Override
-    public boolean instanceOf(Object o) {
-        return o instanceof x10.core.Byte;
+    public boolean instanceof$(Object o) {
+        return o instanceof java.lang.Byte;
     }
-    
+
     @Override
     public Object makeArray(int length) {
         return new byte[length];
@@ -51,19 +45,26 @@ public class ByteType extends RuntimeType<x10.core.Byte> {
     public Object makeArray(Object... elem) {
         byte[] arr = new byte[elem.length];
         for (int i = 0; i < elem.length; i++) {
-            arr[i] = x10.core.Byte.$unbox(elem[i]);
+            arr[i] = ((Number)elem[i]).byteValue();
         }
         return arr;
     }
     
     @Override
-    public x10.core.Byte getArray(Object array, int i) {
-        return x10.core.Byte.$box(((byte[]) array)[i]);
+    public Byte getArray(Object array, int i) {
+        return ((byte[]) array)[i];
     }
     
+//    @Override
+//    public Byte setArray(Object array, int i, Byte v) {
+//        // avoid boxing again
+////        return ((byte[]) array)[i] = v;
+//        ((byte[]) array)[i] = v;
+//        return v;
+//    }
     @Override
-    public void setArray(Object array, int i, x10.core.Byte v) {
-        ((byte[]) array)[i] = x10.core.Byte.$unbox(v);
+    public void setArray(Object array, int i, Byte v) {
+        ((byte[]) array)[i] = v;
     }
     
     @Override

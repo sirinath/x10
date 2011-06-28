@@ -58,7 +58,7 @@ public class ThisDef_c extends VarDef_c implements ThisDef {
     }
 
     @Override
-    public void setConstantValue(x10.types.constants.ConstantValue constantValue) {
+    public void setConstantValue(Object constantValue) {
         super.setConstantValue(constantValue);
         this.asInstance = null;
     }

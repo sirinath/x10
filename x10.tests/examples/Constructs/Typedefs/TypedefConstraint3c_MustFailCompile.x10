@@ -20,9 +20,10 @@ class TypedefConstraint3c_MustFailCompile extends TypedefTest {
     public def run():boolean = {
 
         type T(x:int){x==1} = int;
-        val one:int = 1; // fails because one: int, not int{self==1}
+        var one:int = 1; // fails because one: int, not int{self==1}
         var a:T(one); // ERR
-        return true;
+
+        return result;
     }
 
     public static def main(var args: Array[String](1)): void = {

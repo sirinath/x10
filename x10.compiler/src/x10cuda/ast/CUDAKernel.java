@@ -2,7 +2,6 @@ package x10cuda.ast;
 
 import java.util.List;
 
-import polyglot.ast.Block;
 import polyglot.ast.Block_c;
 import polyglot.ast.Expr;
 import polyglot.ast.Formal;
@@ -16,35 +15,39 @@ import x10cuda.types.SharedMem;
 
 public class CUDAKernel extends Block_c {
 
-    public CUDAKernel(Position pos, List<Stmt> statements, Block body) {
-        super(pos, statements);
-        this.body = body;
-    }
+	public CUDAKernel(Position pos, List<Stmt> statements) {
+		super(pos, statements);
+	}
 
-    public CUDAKernel reconstruct(List<Stmt> statements) {
-        CUDAKernel this_ = (CUDAKernel) super.reconstruct(statements);
-        return this_;
-    }
+
+	public CUDAKernel reconstruct (List<Stmt> statements) {
+		CUDAKernel this_ = (CUDAKernel) super.reconstruct(statements);
+		return this_;
+	}
 
     public Node visitChildren(NodeVisitor v) {
-        CUDAKernel this_ = (CUDAKernel) super.visitChildren(v);
+//    	return reconstruct(left, right);
 
-        this_.blocks = (Expr) visitChild(this.blocks, v);
-        this_.threads = (Expr) visitChild(this.threads, v);
-        this_.blocksVar = (Formal) visitChild(this.blocksVar, v);
-        this_.threadsVar = (Formal) visitChild(this.threadsVar, v);
-        this_.shm = shm.clone();
-        this_.shm.visitChildren(this, v);
-        this_.cmem = cmem.clone();
-        this_.cmem.visitChildren(this, v);
-        this_.autoBlocks = (LocalDecl) visitChild(this.autoBlocks, v);
-        this_.autoThreads = (LocalDecl) visitChild(this.autoThreads, v);
-        this_.body = (Block) visitChild(this.body, v);
+    	CUDAKernel this_ = (CUDAKernel)super.visitChildren(v);
 
+    	this_.blocks = (Expr) visitChild(this.blocks, v);
+    	this_.threads = (Expr) visitChild(this.threads, v);
+    	this_.blocksVar = (Formal)visitChild(this.blocksVar, v);
+    	this_.threadsVar = (Formal)visitChild(this.threadsVar, v);
+    	this_.shm = shm.clone();
+    	this_.cmem = cmem.clone();
+    	this_.shm.visitChildren(this, v);
+    	this_.cmem.visitChildren(this, v);
+    	this_.autoBlocks = (LocalDecl)visitChild(this.autoBlocks, v);
+    	this_.autoThreads = (LocalDecl)visitChild(this.autoThreads, v);
         return this_;
     }
 
-    public Expr blocks;
+	// cannot be 0 because we want 0 to mean uninitialised
+	private static int fresh = 1;
+	public static int fresh() { return fresh++; }
+	
+	public Expr blocks;
     public Expr threads;
     public Formal blocksVar;
     public Formal threadsVar;
@@ -53,29 +56,22 @@ public class CUDAKernel extends Block_c {
     public boolean directParams;
     public LocalDecl autoBlocks;
     public LocalDecl autoThreads;
-    protected Block body;
-
-    public Block body() {
-        return body;
-    }
-    public CUDAKernel body(Block body) {
-        if (body == this.body) return this;
-        CUDAKernel copy = (CUDAKernel) copy();
-        copy.body = body;
-        return copy;
-    }
+    public int innerStatementTag;
 
     public String toString() {
-        return super.toString()+"  "+
-               "/"+"*"+"blocks: "+blocks+"  "+
-               "threads: "+threads+"  "+
-               "blocksVar: "+blocksVar+"  "+
-               "threadsVar: "+threadsVar+"  "+
-               "shm: "+shm+"  "+
-               "cmem: "+cmem+"  "+
-               "directParams: "+directParams+"  "+
-               "autoBlocks: "+autoBlocks+"  "+
-               "autoThreads: "+autoBlocks+"*"+"/"+"  "+
-               body.toString();
+		return "/*blocks: "+blocks+"  "+
+		       "threads: "+threads+"  "+
+		       "blocksVar: "+blocksVar+"  "+
+		       "threadsVar: "+threadsVar+"  "+
+		       "shm: "+shm+"  "+
+		       "cmem: "+cmem+"  "+
+		       "directParams: "+directParams+"  "+
+		       "autoBlocks: "+autoBlocks+"  "+
+		       "autoThreads: "+autoBlocks+"  "+
+		       "innerStatementTag: "+innerStatementTag+"*/  "+
+		       super.toString();
+       
     }
+    
+    
 }

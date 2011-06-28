@@ -31,7 +31,6 @@ import polyglot.types.QName;
 import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;
-import x10.types.constants.StringValue;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.AmbMacroTypeNode_c;
@@ -76,7 +75,7 @@ public class IfdefVisitor extends ContextVisitor {
                 Errors.issue(job, new SemanticException("@Ifndef must have a unique constant String parameter"), n);
                 continue;
             }
-            String macro = ((StringValue) l.get(0).constantValue()).value();
+            String macro = (String) l.get(0).constantValue();
             if (job.extensionInfo().getOptions().macros.contains(macro)) {
                 return null;
             }
@@ -99,7 +98,7 @@ public class IfdefVisitor extends ContextVisitor {
                 Errors.issue(job, new SemanticException("@Ifdef must have a unique constant String parameter"), n);
                 continue;
             }
-            String macro = ((StringValue) l.get(0).constantValue()).value();
+            String macro = (String) l.get(0).constantValue();
             if (job.extensionInfo().getOptions().macros.contains(macro)) {
                 return n;
             }

@@ -11,7 +11,6 @@ import java.util.List;
 
 import polyglot.util.Position;
 import polyglot.visit.CFGBuilder;
-import x10.types.constants.ConstantValue;
 
 /**
  * <code>Lit</code> represents any Java literal.
@@ -43,5 +42,5 @@ public abstract class Lit_c extends Expr_c implements Lit
 	return true;
     }
     
-    public abstract ConstantValue constantValue();
+    public abstract Object constantValue();
 }

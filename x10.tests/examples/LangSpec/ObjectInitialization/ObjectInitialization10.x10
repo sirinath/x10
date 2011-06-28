@@ -26,15 +26,11 @@ public class ObjectInitialization10 extends x10Test {
     }
 
 
-// file ObjectInitialization line 223
+// file ObjectInitialization line 229
 
 final static  class C2 {
-  protected val a:Int;
-  protected val b:Int;
-  protected val c:Int;
-  protected var x:Int;
-  protected var y:Int;
-  protected var z:Int;
+  protected val a:Int, b:Int, c:Int;
+  protected var x:Int, y:Int, z:Int;
   def this() {
     a = 1;
     this.aplomb();

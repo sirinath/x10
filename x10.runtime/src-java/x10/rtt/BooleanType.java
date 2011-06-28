@@ -12,17 +12,13 @@
 package x10.rtt;
 
 
-public class BooleanType extends RuntimeType<x10.core.Boolean> {
+public class BooleanType extends RuntimeType<Boolean> {
 
-    private static final long serialVersionUID = 1L;
-
-    // make sure deserialized RTT object is not duplicated
-    private Object readResolve() throws java.io.ObjectStreamException {
-        return Types.BOOLEAN;
-    }
+	private static final long serialVersionUID = 1L;
 
     public BooleanType() {
-        super(x10.core.Boolean.class,
+//        super(boolean.class,
+        super(Boolean.class,
               new Type[] {
                   new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
                   Types.STRUCT
@@ -36,8 +32,8 @@ public class BooleanType extends RuntimeType<x10.core.Boolean> {
 
     // for shortcut 
     @Override
-    public boolean instanceOf(Object o) {
-        return o instanceof x10.core.Boolean;
+    public boolean instanceof$(Object o) {
+        return o instanceof java.lang.Boolean;
     }
 
     @Override
@@ -55,18 +51,20 @@ public class BooleanType extends RuntimeType<x10.core.Boolean> {
     }
     
     @Override
-    public x10.core.Boolean getArray(Object array, int i) {
-        return x10.core.Boolean.$box(((boolean[]) array)[i]);
+    public Boolean getArray(Object array, int i) {
+        return ((boolean[]) array)[i];
     }
     
 //    @Override
-//    public x10.core.Boolean setArray(Object array, int i, x10.core.Boolean v) {
-//        ((boolean[]) array)[i] = x10.core.Boolean.$unbox(v);
+//    public Boolean setArray(Object array, int i, Boolean v) {
+//        // avoid boxing again
+////        return ((boolean[]) array)[i] = v;
+//        ((boolean[]) array)[i] = v;
 //        return v;
 //    }
     @Override
-    public void setArray(Object array, int i, x10.core.Boolean v) {
-        ((boolean[]) array)[i] = x10.core.Boolean.$unbox(v);
+    public void setArray(Object array, int i, Boolean v) {
+        ((boolean[]) array)[i] = v;
     }
     
     @Override

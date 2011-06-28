@@ -40,8 +40,7 @@ class FRASimpleDist {
 
     // Utility routine to start random number generator at Nth step
     static def HPCC_starts(var n:long): long {
-        var i:int;
-        var j:int;
+        var i:int, j:int;
         val m2 = new Array[long](64);
         while (n < 0L) n += PERIOD;
         while (n > PERIOD) n -= PERIOD;

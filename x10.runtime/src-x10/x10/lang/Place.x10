@@ -12,6 +12,7 @@
 package x10.lang;
 
 import x10.compiler.Native;
+import x10.compiler.TempNoInline_1;
 import x10.compiler.CompilerFlags;
 
 /**
@@ -146,7 +147,7 @@ public final struct Place(id: Int)  {
      */
     public def next(i: Int): Place {
         // -1 % n == -1, not n-1, so need to add n
-        if (isHost(id)) {
+        if (@TempNoInline_1 isHost(id)) {
             val k = (id + i % MAX_PLACES + MAX_PLACES) % MAX_PLACES;
             return place(k);
         }

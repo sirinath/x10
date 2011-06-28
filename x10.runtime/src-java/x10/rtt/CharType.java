@@ -12,20 +12,15 @@
 package x10.rtt;
 
 
-public class CharType extends RuntimeType<x10.core.Char> {
+public class CharType extends RuntimeType<Character> {
 
-    private static final long serialVersionUID = 1L;
-
-    // make sure deserialized RTT object is not duplicated
-    private Object readResolve() throws java.io.ObjectStreamException {
-        return Types.CHAR;
-    }
+	private static final long serialVersionUID = 1L;
 
     public CharType() {
-        super(x10.core.Char.class,
+//        super(char.class,
+        super(Character.class,
               new Type[] {
                   new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
-                  new ParameterizedType(x10.util.Ordered.$RTT, UnresolvedType.THIS),
                   Types.STRUCT
               });
     }
@@ -37,8 +32,8 @@ public class CharType extends RuntimeType<x10.core.Char> {
 
     // for shortcut 
     @Override
-    public boolean instanceOf(Object o) {
-        return o instanceof x10.core.Char;
+    public boolean instanceof$(Object o) {
+        return o instanceof java.lang.Character;
     }
 
     @Override
@@ -56,18 +51,20 @@ public class CharType extends RuntimeType<x10.core.Char> {
     }
     
     @Override
-    public x10.core.Char getArray(Object array, int i) {
-        return x10.core.Char.$box(((char[]) array)[i]);
+    public Character getArray(Object array, int i) {
+        return ((char[]) array)[i];
     }
     
 //    @Override
-//    public Character setArray(Object array, int i, x10.core.Char v) {
-//        ((char[]) array)[i] = x10.core.Char.$unbox(v);
+//    public Character setArray(Object array, int i, Character v) {
+//        // avoid boxing again
+////        return ((char[]) array)[i] = v;
+//        ((char[]) array)[i] = v;
 //        return v;
 //    }
     @Override
-    public void setArray(Object array, int i, x10.core.Char v) {
-        ((char[]) array)[i] = x10.core.Char.$unbox(v);
+    public void setArray(Object array, int i, Character v) {
+        ((char[]) array)[i] = v;
     }
     
     @Override

@@ -14,11 +14,11 @@ package x10.core;
 import x10.rtt.Types;
 
 final public class String extends x10.core.Ref implements
-    x10.core.fun.Fun_0_1<x10.core.Int, x10.core.Char>,
+    x10.core.fun.Fun_0_1<java.lang.Integer, java.lang.Character>,
     java.lang.Comparable<java.lang.String>, x10.util.Ordered
 {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
     public static final x10.rtt.RuntimeType<java.lang.String> $RTT = Types.STRING;
     
@@ -26,10 +26,9 @@ final public class String extends x10.core.Ref implements
     public x10.rtt.Type<?> $getParam(int i) {return null;}
     
     // dispatcher for method abstract public (a1:Z1)=> U.$apply(a1:Z1): U
-    public x10.core.Char $apply(final x10.core.Int a1, final x10.rtt.Type t1) {
-        return x10.core.Char.$box($apply(x10.core.Int.$unbox(a1)));
+    public java.lang.Character $apply(final java.lang.Integer a1, final x10.rtt.Type t1) {
+        return $apply((int)(java.lang.Integer)a1);
     }
-
     // dispatcher for method abstract public x10.lang.Comparable.compareTo(that:T): x10.lang.Int
     public java.lang.Object compareTo(final java.lang.Object a1, final x10.rtt.Type t1) {
         return compareTo((java.lang.String)a1);
@@ -55,49 +54,38 @@ final public class String extends x10.core.Ref implements
 		return $ge$O((java.lang.String) a1);
 	}
 
-    public java.lang.String $value;
-
-    public String(java.lang.String value) {
-        $value = value;
-    }
+    public java.lang.String $str;
 
     public String(java.lang.System[] $dummy) {
         super($dummy);
     }
 
-    public String $init(java.lang.String value) {
-        $value = value;
+    public String $init() {
+        $str = "";
         return this;
     }
     
     public String() {
-        $value = "";
+        $str = "";
     }
 
-    public String $init() {
-        $value = "";
+    public static String box(java.lang.String str) {
+        return str == null ? null : new String(str);
+    }
+    public static java.lang.String unbox(Object obj) {
+        return obj instanceof x10.core.String ? ((x10.core.String) obj).$str : (java.lang.String) obj;
+    }
+    public String $init(final java.lang.String str) {
+        $str = str;
         return this;
     }
     
-    public static String $box(java.lang.String value) {
-        return value == null ? null : new String(value);
-    }
-    
-    public static java.lang.String $unbox(String obj) {
-        return obj.$value;
-    }
-
-    // make $box/$unbox idempotent
-    public static String $box(String obj) {
-    	return obj;
-    }
-    
-    public static java.lang.String $unbox(java.lang.String value) {
-    	return value;
+    public String(final java.lang.String str) {
+        $str = str;
     }
 
 //    public String(final x10.core.String id$1) {
-//        $value = id$1.$value;
+//        $str = id$1.$str;
 //    }
 //
 //    public String(final x10.array.Array<java.lang.Character> r,
@@ -105,7 +93,7 @@ final public class String extends x10.core.Ref implements
 //                  final int length,
 //                  java.lang.Class $dummy0)
 //    {
-//        $value = new java.lang.String(r.raw().getCharArray(), offset, length);
+//        $str = new java.lang.String(r.raw().getCharArray(), offset, length);
 //    }
 //
 //    public String(final x10.core.Rail<java.lang.Character> r,
@@ -113,112 +101,109 @@ final public class String extends x10.core.Ref implements
 //                  final int length,
 //                  java.lang.Class[] $dummy0)
 //    {
-//        $value = new java.lang.String(r.getCharArray(), offset, length);
+//        $str = new java.lang.String(r.getCharArray(), offset, length);
 //    }
 
-    @Override
     public boolean equals(final java.lang.Object id$2) {
         if (id$2 instanceof java.lang.String) {
-            return $value.equals(id$2);
+            return $str.equals(id$2);
         }
         if (id$2 instanceof x10.core.String) {
-            return $value.equals(((x10.core.String)id$2).$value);
+            return $str.equals(((x10.core.String)id$2).$str);
         }
         return false;
     }
 
 //    public boolean equalsIgnoreCase(final java.lang.String id$3) {
-//        return $value.equalsIgnoreCase(id$3);
+//        return $str.equalsIgnoreCase(id$3);
 //    }
 
-    @Override
     public int hashCode() {
-        return $value.hashCode();
+        return $str.hashCode();
     }
 
-    @Override
     public java.lang.String toString() {
-        return $value;
+        return $str;
     }
 
 //    public int length() {
-//        return $value.length();
+//        return $str.length();
 //    }
 
     public char $apply(final int index) {
-        return $value.charAt(index);
+        return $str.charAt(index);
     }
 
 	public boolean $lt$O(final java.lang.String x) {
-		return $value.compareTo(x) < 0;
+		return $str.compareTo(x) < 0;
 	}
 
 	public boolean $gt$O(final java.lang.String x) {
-		return $value.compareTo(x) > 0;
+		return $str.compareTo(x) > 0;
 	}
 
 	public boolean $le$O(final java.lang.String x) {
-		return $value.compareTo(x) <= 0;
+		return $str.compareTo(x) <= 0;
 	}
 
 	public boolean $ge$O(final java.lang.String x) {
-		return $value.compareTo(x) >= 0;
+		return $str.compareTo(x) >= 0;
 	}
 
 //    public char charAt(final int index) {
-//        return $value.charAt(index);
+//        return $str.charAt(index);
 //    }
 //
 //    public x10.core.Rail<java.lang.Character> chars() {
-//        return x10.core.ArrayFactory.<java.lang.Character>makeRailFromJavaArray(x10.rtt.Types.CHAR, $value.toCharArray());
+//        return x10.core.ArrayFactory.<java.lang.Character>makeRailFromJavaArray(x10.rtt.Types.CHAR, $str.toCharArray());
 //    }
 //
 //    public x10.core.Rail<java.lang.Byte> bytes() {
-//        return x10.core.ArrayFactory.<java.lang.Byte>makeRailFromJavaArray(x10.rtt.Types.BYTE, $value.getBytes());
+//        return x10.core.ArrayFactory.<java.lang.Byte>makeRailFromJavaArray(x10.rtt.Types.BYTE, $str.getBytes());
 //    }
 //
 //    public x10.core.String substring(final int fromIndex, final int toIndex) {
-//        return new x10.core.String($value.substring(fromIndex, toIndex));
+//        return new x10.core.String($str.substring(fromIndex, toIndex));
 //    }
 //
 //    public x10.core.String substring(final int fromIndex) {
-//        return new x10.core.String($value.substring(fromIndex));
+//        return new x10.core.String($str.substring(fromIndex));
 //    }
 //
 //    public int indexOf(final char ch) {
-//        return $value.indexOf(ch);
+//        return $str.indexOf(ch);
 //    }
 //
 //    public int indexOf(final char ch, final int i) {
-//        return $value.indexOf(ch, i);
+//        return $str.indexOf(ch, i);
 //    }
 //
 //    public int indexOf(final x10.core.String str) {
-//        return $value.indexOf(str.$value);
+//        return $str.indexOf(str.$str);
 //    }
 //
 //    public int indexOf(final x10.core.String str, final int i) {
-//        return $value.indexOf(str.$value, i);
+//        return $str.indexOf(str.$str, i);
 //    }
 //
 //    public int lastIndexOf(final char ch) {
-//        return $value.lastIndexOf(ch);
+//        return $str.lastIndexOf(ch);
 //    }
 //
 //    public int lastIndexOf(final char ch, final int i) {
-//        return $value.lastIndexOf(ch, i);
+//        return $str.lastIndexOf(ch, i);
 //    }
 //
 //    public int lastIndexOf(final x10.core.String str) {
-//        return $value.lastIndexOf(str.$value);
+//        return $str.lastIndexOf(str.$str);
 //    }
 //
 //    public int lastIndexOf(final x10.core.String str, final int i) {
-//        return $value.lastIndexOf(str.$value, i);
+//        return $str.lastIndexOf(str.$str, i);
 //    }
 //
 //    public x10.core.Rail<x10.core.String> split(final x10.core.String regex) {
-//        java.lang.String[] split = $value.split(regex.$value);
+//        java.lang.String[] split = $str.split(regex.$str);
 //        x10.core.String[] res = new x10.core.String[split.length];
 //        for (int i = 0; i < split.length; i++) {
 //            res[i] = new x10.core.String(split[i]);
@@ -227,7 +212,7 @@ final public class String extends x10.core.Ref implements
 //    }
 //
 //    public x10.core.String trim() {
-//        return new x10.core.String($value.trim());
+//        return new x10.core.String($str.trim());
 //    }
 
 //    public static <T>x10.core.String
@@ -240,80 +225,58 @@ final public class String extends x10.core.Ref implements
 //        format_1_$_x10$lang$Any_$(final x10.core.String fmt,
 //                                  final x10.array.Array<java.lang.Object> args)
 //    {
-//        return new x10.core.String(java.lang.String.format(fmt.$value, args.raw().getObjectArray()));
+//        return new x10.core.String(java.lang.String.format(fmt.$str, args.raw().getObjectArray()));
 //    }
-	
-	public static java.lang.String format(java.lang.String format, Object[] args) {
-	    Object[] copy = new Object[args.length];
-	    // rebox x10.core.Int objects into java.lang.Integers
-	    for (int i = 0; i < args.length; i++) {
-    	    if (args[i] instanceof x10.core.Byte)
-	            copy[i] = new java.lang.Byte(x10.core.Byte.$unbox((x10.core.Byte)args[i]));
-    	    else if (args[i] instanceof x10.core.Short)
-	            copy[i] = new java.lang.Short(x10.core.Short.$unbox((x10.core.Short)args[i]));
-    	    else if (args[i] instanceof x10.core.Int)
-	            copy[i] = new java.lang.Integer(x10.core.Int.$unbox((x10.core.Int)args[i]));
-    	    else if (args[i] instanceof x10.core.Long)
-	            copy[i] = new java.lang.Long(x10.core.Long.$unbox((x10.core.Long)args[i]));
-    	    else if (args[i] instanceof x10.core.Float)
-	            copy[i] = new java.lang.Float(x10.core.Float.$unbox((x10.core.Float)args[i]));
-    	    else if (args[i] instanceof x10.core.Double)
-	            copy[i] = new java.lang.Double(x10.core.Double.$unbox((x10.core.Double)args[i]));
-	        else
-    	        copy[i] = args[i];
-	    }
-	    return java.lang.String.format(format, copy);
-	}
 
 //    public x10.core.String toLowerCase() {
-//        return new x10.core.String($value.toLowerCase());
+//        return new x10.core.String($str.toLowerCase());
 //    }
 //
 //    public x10.core.String toUpperCase() {
-//        return new x10.core.String($value.toUpperCase());
+//        return new x10.core.String($str.toUpperCase());
 //    }
 //
     public int compareTo(final java.lang.String arg) {
-        return $value.compareTo(arg);
+        return $str.compareTo(arg);
     }
 //
 //    public int compareToIgnoreCase(final x10.core.String arg) {
-//        return $value.compareToIgnoreCase(arg.$value);
+//        return $str.compareToIgnoreCase(arg.$str);
 //    }
 //
 //    public boolean startsWith(final x10.core.String arg) {
-//        return $value.startsWith(arg.$value);
+//        return $str.startsWith(arg.$str);
 //    }
 //
 //    public boolean endsWith(final x10.core.String arg) {
-//        return $value.endsWith(arg.$value);
+//        return $str.endsWith(arg.$str);
 //    }
 //
 //    public boolean $lt(final x10.core.String x) {
-//        return $value.compareTo(x.$value) < 0;
+//        return $str.compareTo(x.$str) < 0;
 //    }
 //
 //    public boolean $gt(final x10.core.String x) {
-//        return $value.compareTo(x.$value) > 0;
+//        return $str.compareTo(x.$str) > 0;
 //    }
 //
 //    public boolean $le(final x10.core.String x) {
-//        return $value.compareTo(x.$value) <= 0;
+//        return $str.compareTo(x.$str) <= 0;
 //    }
 //
 //    public boolean $ge(final x10.core.String x) {
-//        return $value.compareTo(x.$value) >= 0;
+//        return $str.compareTo(x.$str) >= 0;
 //    }
 //
 //    final public <T>x10.core.String
 //        $plus_0_$$x10$lang$String_T(final x10.rtt.Type T, final T x)
 //    {
-//        return new x10.core.String($value + x);
+//        return new x10.core.String($str + x);
 //    }
 //
 //    public static <T>x10.core.String
 //        $plus_0_$$x10$lang$String_T(final x10.rtt.Type T, final T x, final x10.core.String y)
 //    {
-//        return new x10.core.String(x + y.$value);
+//        return new x10.core.String(x + y.$str);
 //    }
 }

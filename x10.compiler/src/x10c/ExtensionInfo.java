@@ -29,7 +29,6 @@ import x10.visit.X10Translator;
 import x10c.ast.X10CNodeFactory_c;
 import x10c.types.X10CTypeSystem_c;
 import x10c.visit.AsyncInitializer;
-import x10c.visit.BoxingDetector;
 import x10c.visit.CastRemover;
 import x10c.visit.ClosureRemover;
 import x10c.visit.ClosuresToStaticMethods;
@@ -96,7 +95,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
                     goals.add(CastsRemoved(job));
                     goals.add(JavaCaster(job));
                     goals.add(InlineHelped(job));
-                    goals.add(BoxingDetector(job));
                 }
                 goals.add(g);
             }
@@ -174,12 +172,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
             TypeSystem ts = extInfo.typeSystem();
             NodeFactory nf = extInfo.nodeFactory();
             return new ValidatingVisitorGoal("InlineHelped", job, new InlineHelper(job, ts, nf)).intern(this);
-        }
-        
-        private Goal BoxingDetector(Job job) {
-            TypeSystem ts = extInfo.typeSystem();
-            NodeFactory nf = extInfo.nodeFactory();
-            return new ValidatingVisitorGoal("BoxingDetector", job, new BoxingDetector(ts, nf)).intern(this);
         }
 
         private Goal AsyncInitializer(Job job) {

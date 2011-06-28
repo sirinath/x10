@@ -506,19 +506,11 @@ public class X10New_c extends New_c implements X10New {
                 ci = ci.error(e);
             }
         }
-        boolean doCoercion = false;
         if (!ts.hasUnknown(tp) && !ts.isSubtype(tp1, t1, context)) {
-            Expr newNewExpr = Converter.attemptCoercion(tc, result.type(tp1), t1);
-            if (newNewExpr != null) {
-                // I cann't keep newNewExpr, because result is still going to be modified (and I cannot do this check later because ci might be modified and it is stored in result)
-                // so, sadly, I have to call attemptCoercion twice.
-                doCoercion = true;
-            } else {
-                SemanticException e = Errors.NewIncompatibleType.make(result.type(tp1),  t1, tc, pos);
-                Errors.issue(tc.job(), e, this);
-                if (ci.error() == null) {
-                    ci = ci.error(e);
-                }
+            SemanticException e = Errors.NewIncompatibleType.make(result.type(tp1),  t1, tc, pos);
+            Errors.issue(tc.job(), e, this);
+            if (ci.error() == null) {
+                ci = ci.error(e);
             }
         }
 
@@ -559,9 +551,7 @@ public class X10New_c extends New_c implements X10New {
         }
 
         result = (X10New_c) result.type(type);
-        return doCoercion ?
-                Converter.attemptCoercion(tc, result, t1) :
-                result;
+        return result;
     }
 
     /**

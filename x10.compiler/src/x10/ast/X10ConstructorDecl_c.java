@@ -396,11 +396,6 @@ public class X10ConstructorDecl_c extends ConstructorDecl_c implements X10Constr
             c.setCollectingFinishScope(offerType.type());
         }
 
-        if (child == guard) {
-            TypeSystem ts = c.typeSystem();
-            c = c.pushDepType(Types.<Type>ref(ts.unknownType(this.position)));
-        }
-
         // Add the constructor guard into the environment.
         if (guard != null) {
             if (child == body || child == returnType || child == hasType) {
@@ -505,8 +500,7 @@ public class X10ConstructorDecl_c extends ConstructorDecl_c implements X10Constr
         
         // Step I.b.  Check the guard.
         if (nn.guard() != null) {
-        	ContextVisitor guardtc = childtc.context(childtc.context().pushDepType(Types.<Type>ref(xts.unknownType(nn.guard().position()))));
-        	DepParameterExpr processedWhere = (DepParameterExpr) nn.visitChild(nn.guard(), guardtc);
+        	DepParameterExpr processedWhere = (DepParameterExpr) nn.visitChild(nn.guard(), childtc);
         	nn = (X10ConstructorDecl) nn.guard(processedWhere);
         
         	// Now build the new formal arg list.

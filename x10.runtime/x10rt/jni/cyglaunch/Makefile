@@ -9,14 +9,8 @@
 #  (C) Copyright IBM Corporation 2006-2010.
 #
 
-include ../../../Make.rules
-
-ifneq ($(CYGLAUNCH_CC),)
-  override CC:=$(CYGLAUNCH_CC)
-endif
-ifneq ($(CYGLAUNCH_CXX),)
-  override CXX:=$(CYGLAUNCH_CXX)
-endif
+CC=gcc $(CCEXTRA)
+CXX=g++ $(CCEXTRA)
 override CFLAGS+=-I"${JAVA_HOME}/include" -I"${JAVA_HOME}/include/win32" $(CFLAGSEXTRA) -g -I"$(X10_HOME)/x10.runtime/x10rt/include"
 override CXXFLAGS+=-I"${JAVA_HOME}/include" -I"${JAVA_HOME}/include/win32" $(CFLAGSEXTRA) -g -I"$(X10_HOME)/x10.runtime/x10rt/include"
 override LDFLAGS+="-L$(X10_HOME)/x10.runtime/x10rt/lib" -Wl,--add-stdcall-alias
@@ -31,7 +25,7 @@ LIBSFX=.dll
 
 .SUFFIXES: .java .class .o .c .h $(LIBSFX)
 
-all: G.class H.class H.dll I.class Topology.class Basic.class cyglaunch
+all: cyglaunch G.class H.class H.dll I.class
 .PHONY: all
 
 $(LIBPFX)%$(LIBSFX):	%.o
@@ -49,5 +43,5 @@ $(LIBPFX)%$(LIBSFX):	%.o
 %.o:	%.cc %.h
 	$(CXX) $(CFLAGS) -c -o $@ $(filter %.cc,$^)
 
-clean:;	$(RM) G.class H.class H.dll H.h I.class Topology.class Basic.class cyglaunch.exe
+clean:;	$(RM) cyglaunch.exe G.class H.class H.dll H.h
 .PHONY: clean

@@ -73,11 +73,14 @@ public final class Configuration extends x10.config.Configuration {
     public boolean INLINE_CLOSURES = true;
     private static final String INLINE_CLOSURES_desc = "Enable inlining of closure literal calls";
 
-    public boolean INLINE_METHODS_IMPLICIT = true;
+    public boolean INLINE_METHODS_IMPLICIT = false;
     private static final String INLINE_METHODS_IMPLICIT_desc = "Inline methods that don't make many calls";
 
     public boolean INLINE_CONSTRUCTORS = true;
     private static final String INLINE_CONSTRUCTORS_desc = "Inline constructor calls";
+    
+    public boolean INLINE_STRUCT_CONSTRUCTORS = false;
+    private static final String INLINE_STRUCT_CONSTRUCTORS_desc = "Inline all calls to struct constructors";
 
     public boolean ALLOW_STATEMENT_EXPRESSIONS = true;
     private static final String ALLOW_STATEMENT_EXPRESSIONS_desc = "Allow statement expressions in generated code";
@@ -85,7 +88,7 @@ public final class Configuration extends x10.config.Configuration {
     public boolean FLATTEN_EXPRESSIONS = false;
     private static final String FLATTEN_EXPRESSIONS_desc = "Flatten all expressions";
     
-    public boolean CODE_CLEAN_UP = true;
+    public boolean CODE_CLEAN_UP = false;
     private static final String CODE_CLEAN_UP_desc = "Code clean up - removing excess blocks and unreachable code";
 
     public String PLUGINS = "";

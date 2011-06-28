@@ -75,7 +75,6 @@ import x10.types.MethodInstance;
 import x10.types.X10FieldInstance;
 import x10.types.X10LocalDef;
 import x10.types.checker.Converter;
-import x10.types.constants.ConstantValue;
 import x10.types.constraints.CConstraint;
 import x10.visit.ConstantPropagator;
 import x10.visit.Desugarer;
@@ -1001,7 +1000,7 @@ public class AltSynthesizer {
         if (null == propertyFI) return null;
         Expr propertyExpr = createFieldRef(expr.position(), expr, propertyFI);
         if (null == propertyExpr) return null;
-        return ConstantValue.toJavaObject(ConstantPropagator.constantValue(propertyExpr));
+        return ConstantPropagator.constantValue(propertyExpr);
     }
 
 
@@ -1157,8 +1156,8 @@ public class AltSynthesizer {
      * @return a synthesized Allocation node.
      * TODO: move to Synthesizer
      */
-    public Allocation createAllocation(Position pos, TypeNode objType, List<TypeNode> typeArgs) {
-        return (Allocation) ((Allocation) ((X10NodeFactory_c) nf).Allocation(pos, objType, typeArgs).type(objType.type()));
+    public Allocation createAllocation(Position pos, Type type, List<TypeNode> typeArgs) {
+        return (Allocation) ((Allocation) ((X10NodeFactory_c) nf).Allocation(pos).type(type)).typeArguments(typeArgs);
     }
 
     

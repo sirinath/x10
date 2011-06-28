@@ -18,7 +18,6 @@ import polyglot.util.*;
 import x10.ast.X10ClassDecl;
 import x10.types.X10ClassDef;
 import x10.types.X10ParsedClassType_c;
-import x10.types.constants.ConstantValue;
 
 /**
  * Visitor which serializes class objects and adds a field to the class
@@ -132,7 +131,7 @@ public class ClassSerializer extends NodeVisitor
 	    fi = ts.fieldDef(pos, Types.ref(new X10ParsedClassType_c(cd)),
                                   flags, Types.ref(ts.String()),
                                   Name.make("jlc$CompilerVersion$" + suffix));
-            fi.setConstantValue(ConstantValue.makeString(version));
+            fi.setConstantValue(version);
             ii = ts.initializerDef(pos, Types.ref(new X10ParsedClassType_c(cd)), Flags.STATIC);
 	    f = nf.FieldDecl(fi.position(), nf.FlagsNode(fi.position(), fi.flags()),
 		             nf.CanonicalTypeNode(fi.position(), fi.type()),
@@ -149,7 +148,7 @@ public class ClassSerializer extends NodeVisitor
 	    fi = ts.fieldDef(pos, Types.ref(new X10ParsedClassType_c(cd)),
                                   flags, Types.ref(ts.Long()),
                                   Name.make("jlc$SourceLastModified$" + suffix));
-            fi.setConstantValue(ConstantValue.makeLong(time));
+            fi.setConstantValue(new Long(time));
             ii = ts.initializerDef(pos, Types.ref(new X10ParsedClassType_c(cd)), Flags.STATIC);
 	    f = nf.FieldDecl(fi.position(), nf.FlagsNode(fi.position(), fi.flags()),
 		             nf.CanonicalTypeNode(fi.position(), fi.type()),
@@ -176,7 +175,7 @@ public class ClassSerializer extends NodeVisitor
                 fi = ts.fieldDef(pos, Types.ref(new X10ParsedClassType_c(cd)),
                                       flags, Types.ref(ts.String()),
                                       Name.make("jlc$ClassType$" + suffix + additionalFieldSuffix));
-                fi.setConstantValue(ConstantValue.makeString(encoded));
+                fi.setConstantValue(encoded);
                 ii = ts.initializerDef(pos, Types.ref(new X10ParsedClassType_c(cd)), Flags.STATIC);
 
                 f = nf.FieldDecl(fi.position(), nf.FlagsNode(fi.position(), fi.flags()),

@@ -60,7 +60,7 @@ public class FieldDef_c extends VarDef_c implements FieldDef
     }
 
     @Override
-    public void setConstantValue(x10.types.constants.ConstantValue constantValue) {
+    public void setConstantValue(Object constantValue) {
         super.setConstantValue(constantValue);
         this.asInstance = null;
     }

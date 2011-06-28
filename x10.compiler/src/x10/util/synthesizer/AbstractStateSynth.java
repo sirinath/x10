@@ -67,8 +67,4 @@ public abstract class AbstractStateSynth {
     public boolean isClosed() {
         return closed;
     }
-    
-    public Position pos() {
-        return pos;
-    }
 }

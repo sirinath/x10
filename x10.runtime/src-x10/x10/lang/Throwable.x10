@@ -17,8 +17,7 @@ import x10.compiler.NativeRep;
 import x10.io.Printer;
 import x10.io.Console;
 
-// XTENLANG-2686: x10.lang.Throwable is now mapped to x10.core.X10Throwable, which is a subclass of x10.core.Throwable
-@NativeRep("java", "x10.core.X10Throwable", null, "x10.core.X10Throwable.$RTT")
+@NativeRep("java", "x10.core.Throwable", null, "x10.core.Throwable.$RTT")
 @NativeRep("c++", "x10aux::ref<x10::lang::Throwable>", "x10::lang::Throwable", null)
 public class Throwable {
     @Native("java", "#this.getCause()")
@@ -56,18 +55,16 @@ public class Throwable {
         val m = getMessage();
         return m == null ? typeName() : typeName() + ": " + getMessage();
     }
-
-    // @Native("java", "x10.core.ThrowableUtilities.getStackTrace(#this)")
-    @Native("java", "#this.$getStackTrace()")
+   
+    @Native("java", "x10.core.ThrowableUtilities.getStackTrace(#this)")
     @Native("c++", "(#this)->getStackTrace()")
     public final native def getStackTrace() : Array[String](1);
 
     @Native("java", "#this.printStackTrace()")
     @Native("c++", "(#this)->printStackTrace()")
     public native def printStackTrace() : void;
-
-    // @Native("java", "x10.core.ThrowableUtilities.printStackTrace(#this, #p)")
-    @Native("java", "#this.printStackTrace(#p)")
+    
+    @Native("java", "x10.core.ThrowableUtilities.printStackTrace(#this, #p)")
     @Native("c++",  "(#this)->printStackTrace(#p)")
     public native def printStackTrace(p: Printer) : void;
 

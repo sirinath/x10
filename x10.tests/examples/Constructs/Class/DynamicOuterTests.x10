@@ -19,20 +19,20 @@ import x10.compiler.tests.*;
  */
 public class DynamicOuterTests extends x10Test {
     static class A (i:Int) {
-        class X(j:ULong) {
+        class X(j:String) {
             def m(Int{self==A.this.i}){}
-            def n(a:A, x:A{self.i==a.i}.X{self.j==0xd00d1eabadbaff1eUL}){}
+            def n(a:A, x:A{self.i==a.i}.X{self.j=="x"}){}
         }
     }
 
     public def run(): boolean = {
         val a = new A(3);
-        val x = a.new X(0xd00d1eabadbaff1eUL);
+        val x = a.new X("x");
         x.m(a.i);
         x.m(3);
         // @ERR { x.m(4);  }
         var b:A=a;
-        x.n(b, x); // ERR: Warning: Generated a dynamic check for the method call.
+        x.n(b, x);
         return true;
     }
 

@@ -26,13 +26,12 @@ public class Structs3q6l extends x10Test {
     }
 
 
-// file Structs line 184
+// file Structs line 182
  static struct Horse(x:Int){
   static def example(){
     val aa : Array[Any](1) = ["an Object" as Any, "another one"];
     aa(0) = Horse(8);
     aa(1) = 13;
-    val ah : Array[Horse](1) = [Horse(7), Horse(13)];
   }
 }
 

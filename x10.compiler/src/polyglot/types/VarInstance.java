@@ -1,7 +1,5 @@
 package polyglot.types;
 
-import x10.types.constants.ConstantValue;
-
 public interface VarInstance<T extends VarDef> extends Use<T> {
     /**
      * The flags of the variable.
@@ -24,8 +22,8 @@ public interface VarInstance<T extends VarDef> extends Use<T> {
     /**
      * The variable's constant value, or null.
      */
-    ConstantValue constantValue();
-    VarInstance<T> constantValue(ConstantValue o);
+    Object constantValue();
+    VarInstance<T> constantValue(Object o);
     VarInstance<T> notConstant();
 
     /**

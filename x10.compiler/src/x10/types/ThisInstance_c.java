@@ -27,7 +27,6 @@ import polyglot.util.Position;
 import x10.constraint.XFailure;
 import x10.constraint.XLocal;
 import x10.types.checker.PlaceChecker;
-import x10.types.constants.ConstantValue;
 import x10.types.constraints.CConstraint;
 
 public class ThisInstance_c extends VarInstance_c<ThisDef> implements ThisInstance {
@@ -85,7 +84,7 @@ public class ThisInstance_c extends VarInstance_c<ThisDef> implements ThisInstan
         return (ThisInstance) super.flags(flags);
     }
 
-    public ThisInstance constantValue(ConstantValue o) {
+    public ThisInstance constantValue(Object o) {
         return (ThisInstance) super.constantValue(o);
     }
 

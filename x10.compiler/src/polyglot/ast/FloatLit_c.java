@@ -12,7 +12,6 @@ import polyglot.types.SemanticException;
 import polyglot.util.*;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.PrettyPrinter;
-import x10.types.constants.ConstantValue;
 
 /** 
  * A <code>FloatLit</code> represents a literal in java of type
@@ -75,12 +74,12 @@ public abstract class FloatLit_c extends Lit_c implements FloatLit
 	}
     }
 
-    public ConstantValue constantValue() {
+    public Object constantValue() {
       if (kind == FLOAT) {
-        return ConstantValue.makeFloat((float)value);
+        return new Float(value);
       }
       else {
-        return ConstantValue.makeDouble(value);
+        return new Double(value);
       }
     }
 

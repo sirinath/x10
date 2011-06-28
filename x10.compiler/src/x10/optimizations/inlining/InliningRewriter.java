@@ -14,7 +14,6 @@ import polyglot.ast.ConstructorDecl;
 import polyglot.ast.Expr;
 import polyglot.ast.Field;
 import polyglot.ast.FieldAssign;
-import polyglot.ast.Formal;
 import polyglot.ast.Id;
 import polyglot.ast.Node;
 import polyglot.ast.NodeFactory;
@@ -24,7 +23,6 @@ import polyglot.ast.Special;
 import polyglot.ast.Stmt;
 import polyglot.ast.Throw;
 import polyglot.frontend.Job;
-import polyglot.types.CodeDef;
 import polyglot.types.ConstructorDef;
 import polyglot.types.Context;
 import polyglot.types.FieldInstance;
@@ -37,21 +35,17 @@ import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeSystem;
 import polyglot.types.Types;
-import polyglot.types.VarDef;
-import polyglot.types.VarInstance;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.Position;
 import polyglot.visit.ContextVisitor;
 import polyglot.visit.NodeVisitor;
 import x10.ast.AssignPropertyCall;
 import x10.ast.Closure;
-import x10.ast.Closure_c;
 import x10.ast.StmtSeq;
 import x10.ast.X10ConstructorCall;
 import x10.ast.X10ConstructorDecl;
 import x10.ast.X10MethodDecl;
 import x10.ast.X10Special;
-import x10.types.ClosureDef;
 import x10.types.MethodInstance;
 import x10.types.X10FieldInstance;
 import x10.util.AltSynthesizer;
@@ -62,10 +56,10 @@ import x10.util.AltSynthesizer;
  * statements if it's void. Also, replaces "this" parameter by a local
  * variable.
  * 
- * @author igor
+ * @author igor TODO: factor out into its own class
  */
 public class InliningRewriter extends ContextVisitor {
-    private final CodeDef def;
+    private final ProcedureDef def;
     private final LocalDef ths;
     private final LocalDef ret;
     private final Name label;
@@ -80,10 +74,14 @@ public class InliningRewriter extends ContextVisitor {
         this(decl.procedureInstance(), ths, decl.body().statements(), j, ts, nf, ctx);
     }
 
+    public InliningRewriter(ConstructorDecl decl, LocalDef ths, Job j, TypeSystem ts, NodeFactory nf, Context ctx) {
+        this(decl.constructorDef(), ths, decl.body().statements(), j, ts, nf, ctx);
+    }
+
     private InliningRewriter(ProcedureDef def, LocalDef ths, List<Stmt> body, Job j, TypeSystem ts, NodeFactory nf, Context ctx) {
-        super(j, ts, nf);
+    	super(j, ts, nf);
         this.context = ctx;
-        this.def = ctx.currentCode();
+        this.def = def;
         this.ths = ths;
         this.syn = new AltSynthesizer(ts, nf);
         if (def instanceof ConstructorDef) {
@@ -118,6 +116,10 @@ public class InliningRewriter extends ContextVisitor {
         if (n instanceof AmbExpr || n instanceof AmbAssign || n instanceof AmbTypeNode) {
             throw new InternalCompilerError("Ambiguous node found: " + n, n.position());
         }
+        if (n instanceof X10MethodDecl)
+            return visitMethodDecl((X10MethodDecl) n);
+        if (n instanceof X10ConstructorDecl) 
+            return visitConstructorDecl((X10ConstructorDecl) n);
         if (n instanceof Closure)
             return visitClosure((Closure) n);
         if (n instanceof Return)
@@ -138,10 +140,7 @@ public class InliningRewriter extends ContextVisitor {
         return n;
     }
 
-    public Block rewriteBody(Position pos, Block body) {
-        if (body == null) {
-            return null;
-        }
+    private Block rewriteBody(Position pos, Block body) {
         if (failed[0]) {
             return null;
         }
@@ -183,57 +182,27 @@ public class InliningRewriter extends ContextVisitor {
         return nf.Block(body.position(), newBody);
     }
 
-    public static Block rewriteProcedureBody(ProcedureDecl decl, LocalDef thisDef, Job job, Context cxt) {
-        cxt = cxt.pushBlock();
-        if (thisDef != null) {
-            cxt.addVariable(thisDef.asInstance());
-        }
-        for (Formal f : decl.formals()) {
-            cxt.addVariable(f.localDef().asInstance());
-        }
-        InliningRewriter rewriter = new InliningRewriter(decl, thisDef, job, job.extensionInfo().typeSystem(), job.extensionInfo().nodeFactory(), cxt);
-        Block body = (Block) decl.body().visit(rewriter);
-        return rewriter.rewriteBody(decl.position(), body);
+    // def m(`x:`T):R=S -> def m(`x:`T)={r:R; L:{ S[return v/r=v; break L;]; }; return r;}
+    private X10MethodDecl visitMethodDecl(X10MethodDecl n) {
+        // First check that we are within the right method
+        if (n.methodDef() != def)
+            return n;
+        return (X10MethodDecl) n.body(rewriteBody(n.position(), n.body()));
+    }
+    
+    // def this(`x:`T){S} -> def this(`x:`T)={L:{ S[return; / break L;] }; return;}
+    private X10ConstructorDecl visitConstructorDecl(X10ConstructorDecl n) {
+        // First check that we are within the right method
+        if (n.constructorDef() != def)
+            return n;
+        return (X10ConstructorDecl) n.body(rewriteBody(n.position(), n.body()));
     }
 
-    // def m(`x:`T):R=S -> {r:R; L:{ S[return v/r=v; break L;]; }; return r;}
-    public static Block rewriteMethodBody(X10MethodDecl decl, LocalDef thisDef, Job job, Context cxt) {
-        return rewriteProcedureBody(decl, thisDef, job, cxt);
-    }
-
-    // def this(`x:`T){S} -> {L:{ S[return; / break L;] }; return;}
-    public static Block rewriteConstructorBody(X10ConstructorDecl decl, LocalDef thisDef, Job job, Context cxt) {
-        return rewriteProcedureBody(decl, thisDef, job, cxt);
-    }
-
-    // (`x:`T):R=>S -> {r:R; L:{ S[return v/r=v; break L;]; }; return r;}
-    public static Block rewriteClosureBody(Closure cl, Job job, Context cxt) {
-        cxt = cxt.pushBlock();
-        for (Formal f : cl.formals()) {
-            cxt.addVariable(f.localDef().asInstance());
-        }
-        InliningRewriter rewriter = new InliningRewriter(cl, job, job.extensionInfo().typeSystem(), job.extensionInfo().nodeFactory(), cxt);
-        Block body = (Block) cl.body().visit(rewriter);
-        return rewriter.rewriteBody(cl.position(), body); // Ensure that the last statement of the body is the only return in the closure
-    }
-
+    // (`x:`T):R=>S -> (`x:`T)=>{r:R; L:{ S[return v/r=v; break L;]; }; return r;}
     private Closure visitClosure(Closure n) {
-        // First propagate the captured environment outward
-        ClosureDef cd = n.closureDef();
-        // an inlined closure cannot capture anything but locals in the caller, so clean up the captured environment
-        if (ths != null) {
-            List<VarInstance<?>> env = new ArrayList<VarInstance<?>>(cd.capturedEnvironment().size());
-            for (VarInstance<?> vi : cd.capturedEnvironment()) {
-                if (vi instanceof LocalInstance) {
-                    env.add(vi);
-                }
-            }
-            if (env.size() != cd.capturedEnvironment().size()) {
-                cd.setCapturedEnvironment(env); // The closure def should have been reinstantiated
-            }
-        }
-        Closure_c.propagateCapturedEnvironment(context, cd);
-        return n;
+        // First check that we are within the right closure
+        if (n.closureDef() != def) return n;
+        return (Closure) n.body(rewriteBody(n.position(), n.body()));
     }
 
     // return v; -> r=v; break L;
@@ -298,6 +267,8 @@ public class InliningRewriter extends ContextVisitor {
 
     // f -> ths.f
     private Field visitField(Field n) {
+        // First check that we are within the right code body
+        if (!context.currentCode().equals(def)) return n;
         if (!n.isTargetImplicit()) return n;
         FieldInstance fi = n.fieldInstance();
         assert ((ths == null) == (fi.flags().isStatic()));
@@ -310,6 +281,8 @@ public class InliningRewriter extends ContextVisitor {
 
     // m(...) -> ths.m(...)
     private Call visitCall(Call old, Call n) {
+        // First check that we are within the right code body
+        if (!context.currentCode().equals(def)) return n;
         if (!n.isTargetImplicit()) return n;
         MethodInstance mi = n.methodInstance();
         assert ((ths == null) == (mi.flags().isStatic()));
@@ -323,22 +296,28 @@ public class InliningRewriter extends ContextVisitor {
         return n.target(getThis(pos)).targetImplicit(false);
     }
 
-    // this(...) -> ths.this(...)
+    /**
+     * @param n
+     * @return
+     */
     private Node visitX10ConstructorCall(X10ConstructorCall n) {
+        // First check that we are within the right code body
+        if (!context.currentCode().equals(def)) return n;
         if (null != n.target()) return n;
         return n.target(getThis(n.position()));
     }
 
     // this -> ths
     private Expr visitSpecial(Special n) {
-        // First make sure ths is defined
+        // First check that we are within the right code body
+        if (!context.currentCode().equals(def)) return n;
+        // Make sure ths is defined
         if (null == ths) return n; // nothing to be done (e.g. "this" in a closure)
         // Complicated cases don't get this far
         assert (n.kind() == X10Special.SUPER || n.kind() == X10Special.THIS);
         if (null != n.qualifier()) { // when the Inliner runs all outer classes have been stripped away, the qualifier should be redundant
             if (Inliner.DEBUG) Inliner.debug("Inliner ignoring special qualifier " +n.qualifier(), n);
         }
-        context.recordCapturedVariable(ths.asInstance());
         // return a local for the inlined this
         return getThis(n.position());
     }

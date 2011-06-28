@@ -97,6 +97,10 @@ public class MethodSynth extends AbstractStateSynth implements IClassMemberSynth
              Flags.NONE, new ArrayList<Formal>(), new ArrayList<Type>(), xct.typeSystem().Void());
     }
     
+    public MethodSynth(NodeFactory xnf, Context xct, ClassDef classDef, String methodName){
+        this(xnf, xct, compilerPos, classDef, methodName);
+    }
+     
     public void setFlag(Flags flags) {
         try {
             checkClose();

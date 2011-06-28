@@ -11,6 +11,8 @@
 
 package x10.array;
 
+import x10.compiler.TempNoInline_0;
+
 /**
  * This class wraps another distribution to restrict the region
  * to a subset of the original dist's region.
@@ -19,7 +21,7 @@ final class WrappedDistPlaceRestricted extends Dist {
     val base:Dist(rank);
     val filter:Place;
 
-    def this(d:Dist, p:Place):WrappedDistPlaceRestricted(d.rank) {
+    @TempNoInline_0 def this(d:Dist, p:Place):WrappedDistPlaceRestricted(d.rank) {
         super(d(p));
         base = d; 
         filter = p;

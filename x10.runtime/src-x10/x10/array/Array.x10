@@ -17,6 +17,7 @@ import x10.compiler.Header;
 import x10.compiler.Inline;
 import x10.compiler.Native;
 import x10.compiler.NoInline;
+import x10.compiler.TempNoInline_0;
 import x10.compiler.NoReturn;
 import x10.util.IndexedMemoryChunk;
 
@@ -376,16 +377,22 @@ public final class Array[T] (
     	};
     };
     
-    public def sequence(){this.rank==1}:Sequence[T] = new Sequence[T]() {
-    	public def iterator() = new Iterator[T]() {
-    		val regIt = Array.this.iterator();
-    		public def next() = Array.this(regIt.next());
-    		public def hasNext() = regIt.hasNext();
-    	};
-    	// The :T below should not be needed, see XTENLANG-2700.
-    	public operator this(i:Int):T=Array.this(i);
-    	public property def size()=Array.this.size;
-    };
+    // TODO Inliner should remove the local class from the body of the constructor before instantiation
+    public @TempNoInline_0 def sequence(){this.rank==1}:Sequence[T] = {
+    		// once XTENLANG-2699 is fixed, replace
+    		// with anonymous class.
+    	class MySequence implements Sequence[T] {
+        	public def iterator() = new Iterator[T]() {
+        		val regIt = Array.this.iterator();
+        		public def next() = Array.this(regIt.next());
+        		public def hasNext() = regIt.hasNext();
+        	};
+        	// The :T below should not be needed, see XTENLANG-2700.
+        	public operator this(i:Int):T=Array.this(i); 
+        	public def size()=Array.this.size;
+        }
+    	@TempNoInline_0 new MySequence()
+    }
 
     
     /**
@@ -605,7 +612,7 @@ public final class Array[T] (
     public def fill(v:T) {
         if (region.rect) {
             // In a rect region, every element in the backing raw IndexedMemoryChunk[T]
-            // is included in the points of region, therefore we can simply fill
+            // is included in the points of region, therfore we can simply fill
             // the IndexedMemoryChunk itself.
             for (var i:int =0; i<raw.length(); i++) {
                 raw(i) = v;
@@ -616,16 +623,7 @@ public final class Array[T] (
             }
         }
     }
-
-
-    /**
-     * Fill all elements of the array with the zero value of type T 
-     * @see x10.lang.Zero.get[T]()
-     */
-    public def clear(){T haszero} {
-        raw.clear(0, raw.length());
-    }
-
+    
     
     /**
      * Map the function onto the elements of this array

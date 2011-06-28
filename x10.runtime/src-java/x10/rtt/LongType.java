@@ -11,24 +11,18 @@
 
 package x10.rtt;
 
-public class LongType extends RuntimeType<x10.core.Long> {
 
-    private static final long serialVersionUID = 1L;
+public class LongType extends RuntimeType<Long> {
 
-    // make sure deserialized RTT object is not duplicated
-    private Object readResolve() throws java.io.ObjectStreamException {
-        return Types.LONG;
-    }
+	private static final long serialVersionUID = 1L;
 
     public LongType() {
-        super(x10.core.Long.class,
-            new Type[] {
-                new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
-                new ParameterizedType(x10.lang.Arithmetic.$RTT, UnresolvedType.THIS),
-                new ParameterizedType(x10.lang.Bitwise.$RTT, UnresolvedType.THIS),
-                new ParameterizedType(x10.util.Ordered.$RTT, UnresolvedType.THIS),
-                Types.STRUCT
-            });
+//        super(long.class,
+        super(Long.class,
+              new Type[] {
+                  new ParameterizedType(Types.COMPARABLE, UnresolvedType.THIS),
+                  Types.STRUCT
+              });
     }
     
     @Override
@@ -38,10 +32,10 @@ public class LongType extends RuntimeType<x10.core.Long> {
 
     // for shortcut 
     @Override
-    public boolean instanceOf(Object o) {
-        return o instanceof x10.core.Long;
+    public boolean instanceof$(Object o) {
+        return o instanceof java.lang.Long;
     }
-    
+
     @Override
     public Object makeArray(int length) {
         return new long[length];
@@ -51,19 +45,26 @@ public class LongType extends RuntimeType<x10.core.Long> {
     public Object makeArray(Object... elem) {
         long[] arr = new long[elem.length];
         for (int i = 0; i < elem.length; i++) {
-            arr[i] = x10.core.Long.$unbox(elem[i]);
+            arr[i] = ((Number)elem[i]).longValue();
         }
         return arr;
     }
     
     @Override
-    public x10.core.Long getArray(Object array, int i) {
-        return x10.core.Long.$box(((long[]) array)[i]);
+    public Long getArray(Object array, int i) {
+        return ((long[]) array)[i];
     }
     
+//    @Override
+//    public Long setArray(Object array, int i, Long v) {
+//        // avoid boxing again
+////        return ((long[]) array)[i] = v;
+//        ((long[]) array)[i] = v;
+//        return v;
+//    }
     @Override
-    public void setArray(Object array, int i, x10.core.Long v) {
-        ((long[]) array)[i] = x10.core.Long.$unbox(v);
+    public void setArray(Object array, int i, Long v) {
+        ((long[]) array)[i] = v;
     }
     
     @Override

@@ -14,10 +14,7 @@ import polyglot.types.LocalDef;
 import polyglot.types.Name;
 import polyglot.util.InternalCompilerError;
 import polyglot.util.UniqueID;
-import polyglot.util.CollectionUtil;
-import x10.ast.ForLoop;
-import x10.ast.StmtSeq;
-import x10.util.CollectionFactory;
+import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
 
 /**
  * The <code>AlphaRenamer</code> runs over the AST and alpha-renames any local
@@ -38,16 +35,13 @@ public class AlphaRenamer extends NodeVisitor {
 
   protected Map<Name,Name> labelMap;
 
-  protected boolean clearMaps;
 
   /**
    * Creates a visitor for alpha-renaming locals.
-   */
+   *
+   * @param nf  The node factory to be used when generating new nodes.
+   **/
   public AlphaRenamer() {
-    this(true);
-  }
-
-  public AlphaRenamer(boolean clearOutOfScopeMaps) {
     this.setStack = new Stack<Set<Name>>();
     this.setStack.push( CollectionFactory.<Name>newHashSet() );
 
@@ -55,7 +49,6 @@ public class AlphaRenamer extends NodeVisitor {
     this.renamingMap = CollectionFactory.newHashMap();
     this.labelMap = CollectionFactory.newHashMap();
     this.freshVars = CollectionFactory.newHashSet();
-    this.clearMaps = clearOutOfScopeMaps;
   }
 
   /** Map from local def to old names. */
@@ -66,7 +59,7 @@ public class AlphaRenamer extends NodeVisitor {
   public static final String LABEL_PREFIX = "label ";
 
   public NodeVisitor enter( Node n ) {
-    if ( isNewScope(n) ) {
+    if ( n instanceof Block ) {
       // Push a new, empty set onto the stack.
       setStack.push( CollectionFactory.<Name>newHashSet() );
     }
@@ -119,14 +112,12 @@ public class AlphaRenamer extends NodeVisitor {
   }
 
   public Node leave( Node old, Node n, NodeVisitor v ) {
-    if ( isNewScope(n) ) {
+    if ( n instanceof Block ) {
       // Pop the current name set off the stack and remove the corresponding
       // entries from the renaming map.
       Set<Name> s = setStack.pop();
-      if (clearMaps) {
-        renamingMap.keySet().removeAll(s);
-        labelMap.keySet().removeAll(s);
-      }
+      renamingMap.keySet().removeAll(s);
+      labelMap.keySet().removeAll(s);
       return n;
     }
 
@@ -231,12 +222,5 @@ public class AlphaRenamer extends NodeVisitor {
     }
 
     return n;
-  }
-
-  /**
-   * Does this node define a new scope with its own locals?
-   */
-  protected static boolean isNewScope(Node n) {
-    return (n instanceof Block && !(n instanceof StmtSeq)) || n instanceof For || n instanceof ForLoop;
   }
 }

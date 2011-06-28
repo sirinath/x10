@@ -63,11 +63,12 @@ import x10.constraint.XUQV;
 import x10.constraint.XVar;
 import x10.constraint.XTerm;
 import x10.constraint.XTerms;
+import x10.constraint.XVar;
 import x10.constraint.XField;
 import x10.errors.Errors;
 import x10.errors.Errors.IllegalConstraint;
 import x10.types.checker.PlaceChecker;
-import x10.types.constants.ConstantValue;
+import x10.types.constraints.CConstraint;
 import x10.types.constraints.CConstraint;
 import x10.types.constraints.CLocal;
 import x10.types.constraints.CTerms;
@@ -136,7 +137,7 @@ public class XTypeTranslator {
         if (term instanceof Expr) {
             Expr e = (Expr) term;
             if (e.isConstant())
-                return CTerms.makeLit(ConstantValue.toJavaObject(e.constantValue()), e.type());
+                return XTerms.makeLit(e.constantValue());
         }
         if (term instanceof X10Cast) {
             X10Cast cast = ((X10Cast) term);
@@ -197,7 +198,7 @@ public class XTypeTranslator {
                 Type container = Types.get(fi.def().container());
                 container = Types.baseType(container);
                 if (container instanceof X10ClassType) {
-                    target = XTerms.makeLit(((X10ClassType) container).fullName());
+                    target  = XTerms.makeLit(((X10ClassType) container).fullName());
                 }
                 else {
                     throw new Errors.CannotTranslateStaticField(container, fi.position());
@@ -336,7 +337,7 @@ public class XTypeTranslator {
       * @return
       */
     public XLit translate(Lit t) {
-        return CTerms.makeLit(ConstantValue.toJavaObject(t.constantValue()), t.type());
+        return XTerms.makeLit(t.constantValue());
     }
     
     /**
@@ -369,30 +370,27 @@ public class XTypeTranslator {
     /**
      * Translate into the literal t.
      * @param t
-     * @param ts TODO
      * @return
      */
-    public static XLit translate(int t, TypeSystem ts) {
-        return CTerms.makeLit(t, ts.Int());
+    public static XLit translate(int t) {
+        return XTerms.makeLit(t);
     }
 
     /**
      * Translate into the literal t.
      * @param t
-     * @param ts TODO
      * @return
      */
-    public static XLit translate(boolean t, TypeSystem ts) {
-        return CTerms.makeLit(t, ts.Boolean());
+    public static XLit translate(boolean t) {
+        return XTerms.makeLit(t);
     }
 
     /**
      * Return the XLit representing null.
-     * @param ts TODO
      * @return
      */
-    public static XLit transNull(TypeSystem ts) {
-        return CTerms.makeLit(null, ts.Null());
+    public static XLit transNull() {
+        return XTerms.makeLit(null);
     }
 
     /**

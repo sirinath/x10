@@ -8,8 +8,6 @@
 
 package polyglot.ast;
 
-import java.math.BigInteger;
-
 import polyglot.types.SemanticException;
 import polyglot.types.TypeSystem;
 import polyglot.types.Type;
@@ -20,7 +18,6 @@ import polyglot.visit.ContextVisitor;
 import polyglot.visit.PrettyPrinter;
 import x10.errors.Errors;
 import x10.errors.Errors.IllegalConstraint;
-import x10.types.constants.ConstantValue;
 import x10.types.constraints.CConstraint;
 import x10.constraint.XTerm;
 import x10.constraint.XFailure;
@@ -156,25 +153,15 @@ public class IntLit_c extends NumLit_c implements IntLit
             long a = value;
             if (a >= 0)
                 return Long.toString(a);
-            byte[] bytes = new byte[9];
-            for (int i = 0; i < 8; i++) {
-                bytes[8-i] = (byte) (a & 0xff);
-                a >>>= 8;
+            while (a != 0) {
+                char ch = (char) ('0' + a % 10);
+                sb.append(ch);
+                a /= 10;
             }
-            return new BigInteger(bytes).toString() + "UL";
+            return sb.reverse().toString() + "UL";
         }
         else {
-            String s = Long.toString((int) value);
-            if (kind() == BYTE) {
-            	s += "Y";
-            } else if (kind() == UBYTE) {
-            	s += "UY";
-            } else if (kind() == SHORT) {
-            	s += "S";
-            } else if (kind() == USHORT) {
-            	s += "US";
-            }
-            return s;
+            return Long.toString((int) value);
         }
     }
 
@@ -182,8 +169,14 @@ public class IntLit_c extends NumLit_c implements IntLit
         w.write(toString());
     }
 
-    public ConstantValue constantValue() {
-        return ConstantValue.makeIntegral(value, kind());
+    public Object constantValue() {
+        // this object is used in the constraint system (see XTerms.ZERO_INT and ZERO_LONG)
+	if (kind() == LONG || kind()==UINT || kind()==ULONG) {  // todo: what about ULong out of range?
+            return Long.valueOf(value);
+	}
+	else {
+            return Integer.valueOf((int) value);
+	}
     }
 
     public Precedence precedence() {

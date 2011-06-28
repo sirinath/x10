@@ -177,7 +177,7 @@ public class X10Parser extends Object implements RuleAction
     //
     
 
-    //#line 205 "x10/parser/x10.g
+    //#line 188 "x10/parser/x10.g
 
     public x10.parser.X10SemanticRules r;
 
@@ -193,9 +193,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 1:  TypeName ::= TypeName . ErrorId
             //
             case 1: {
-                //#line 217 "x10/parser/x10.g"
+                //#line 200 "x10/parser/x10.g"
                 Object TypeName = (Object) getRhsSym(1);
-                //#line 219 "x10/parser/x10.g"
+                //#line 202 "x10/parser/x10.g"
 		r.rule_TypeName0(TypeName);
                     break;
             }
@@ -203,59 +203,59 @@ public class X10Parser extends Object implements RuleAction
             // Rule 2:  PackageName ::= PackageName . ErrorId
             //
             case 2: {
-                //#line 222 "x10/parser/x10.g"
+                //#line 205 "x10/parser/x10.g"
                 Object PackageName = (Object) getRhsSym(1);
-                //#line 224 "x10/parser/x10.g"
+                //#line 207 "x10/parser/x10.g"
 		r.rule_PackageName0(PackageName);
                     break;
             }
             //
-            // Rule 3:  ExpressionName ::= FullyQualifiedName . ErrorId
+            // Rule 3:  ExpressionName ::= AmbiguousName . ErrorId
             //
             case 3: {
-                //#line 227 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 229 "x10/parser/x10.g"
-		r.rule_ExpressionName0(FullyQualifiedName);
+                //#line 210 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 212 "x10/parser/x10.g"
+		r.rule_ExpressionName0(AmbiguousName);
                     break;
             }
             //
-            // Rule 4:  MethodName ::= FullyQualifiedName . ErrorId
+            // Rule 4:  MethodName ::= AmbiguousName . ErrorId
             //
             case 4: {
-                //#line 232 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 234 "x10/parser/x10.g"
-		r.rule_MethodName0(FullyQualifiedName);
+                //#line 215 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 217 "x10/parser/x10.g"
+		r.rule_MethodName0(AmbiguousName);
                     break;
             }
             //
             // Rule 5:  PackageOrTypeName ::= PackageOrTypeName . ErrorId
             //
             case 5: {
-                //#line 237 "x10/parser/x10.g"
+                //#line 220 "x10/parser/x10.g"
                 Object PackageOrTypeName = (Object) getRhsSym(1);
-                //#line 239 "x10/parser/x10.g"
+                //#line 222 "x10/parser/x10.g"
 		r.rule_PackageOrTypeName0(PackageOrTypeName);
                     break;
             }
             //
-            // Rule 6:  FullyQualifiedName ::= FullyQualifiedName . ErrorId
+            // Rule 6:  AmbiguousName ::= AmbiguousName . ErrorId
             //
             case 6: {
-                //#line 242 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 244 "x10/parser/x10.g"
-		r.rule_FullyQualifiedName0(FullyQualifiedName);
+                //#line 225 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 227 "x10/parser/x10.g"
+		r.rule_AmbiguousName0(AmbiguousName);
                     break;
             }
             //
             // Rule 7:  FieldAccess ::= ErrorPrimaryPrefix
             //
             case 7: {
-                //#line 247 "x10/parser/x10.g"
+                //#line 230 "x10/parser/x10.g"
                 Object ErrorPrimaryPrefix = (Object) getRhsSym(1);
-                //#line 249 "x10/parser/x10.g"
+                //#line 232 "x10/parser/x10.g"
 		r.rule_FieldAccess0(ErrorPrimaryPrefix);
                 break;
             }
@@ -263,9 +263,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 8:  FieldAccess ::= ErrorSuperPrefix
             //
             case 8: {
-                //#line 251 "x10/parser/x10.g"
+                //#line 234 "x10/parser/x10.g"
                 Object ErrorSuperPrefix = (Object) getRhsSym(1);
-                //#line 253 "x10/parser/x10.g"
+                //#line 236 "x10/parser/x10.g"
 		r.rule_FieldAccess1(ErrorSuperPrefix);
                 break;
             }
@@ -273,9 +273,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 9:  FieldAccess ::= ErrorClassNameSuperPrefix
             //
             case 9: {
-                //#line 255 "x10/parser/x10.g"
+                //#line 238 "x10/parser/x10.g"
                 Object ErrorClassNameSuperPrefix = (Object) getRhsSym(1);
-                //#line 257 "x10/parser/x10.g"
+                //#line 240 "x10/parser/x10.g"
 		r.rule_FieldAccess2(ErrorClassNameSuperPrefix);
                 break;
             }
@@ -283,11 +283,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 10:  MethodInvocation ::= ErrorPrimaryPrefix ( ArgumentListopt )
             //
             case 10: {
-                //#line 260 "x10/parser/x10.g"
+                //#line 243 "x10/parser/x10.g"
                 Object ErrorPrimaryPrefix = (Object) getRhsSym(1);
-                //#line 260 "x10/parser/x10.g"
+                //#line 243 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(3);
-                //#line 262 "x10/parser/x10.g"
+                //#line 245 "x10/parser/x10.g"
 		r.rule_MethodInvocation0(ErrorPrimaryPrefix,ArgumentListopt);
                 break;
             }
@@ -295,11 +295,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 11:  MethodInvocation ::= ErrorSuperPrefix ( ArgumentListopt )
             //
             case 11: {
-                //#line 264 "x10/parser/x10.g"
+                //#line 247 "x10/parser/x10.g"
                 Object ErrorSuperPrefix = (Object) getRhsSym(1);
-                //#line 264 "x10/parser/x10.g"
+                //#line 247 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(3);
-                //#line 266 "x10/parser/x10.g"
+                //#line 249 "x10/parser/x10.g"
 		r.rule_MethodInvocation1(ErrorSuperPrefix,ArgumentListopt);
                 break;
             }
@@ -307,11 +307,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 12:  MethodInvocation ::= ErrorClassNameSuperPrefix ( ArgumentListopt )
             //
             case 12: {
-                //#line 268 "x10/parser/x10.g"
+                //#line 251 "x10/parser/x10.g"
                 Object ErrorClassNameSuperPrefix = (Object) getRhsSym(1);
-                //#line 268 "x10/parser/x10.g"
+                //#line 251 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(3);
-                //#line 270 "x10/parser/x10.g"
+                //#line 253 "x10/parser/x10.g"
 		r.rule_MethodInvocation2(ErrorClassNameSuperPrefix,ArgumentListopt);
                 break;
             }
@@ -319,9 +319,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 13:  ErrorPrimaryPrefix ::= Primary . ErrorId
             //
             case 13: {
-                //#line 273 "x10/parser/x10.g"
+                //#line 256 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 275 "x10/parser/x10.g"
+                //#line 258 "x10/parser/x10.g"
 		r.rule_ErrorPrimaryPrefix0(Primary);
                 break;
             }
@@ -330,7 +330,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 14: {
                 
-                //#line 279 "x10/parser/x10.g"
+                //#line 262 "x10/parser/x10.g"
 		r.rule_ErrorSuperPrefix0();
                 break;
             }
@@ -338,9 +338,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 15:  ErrorClassNameSuperPrefix ::= ClassName . super . ErrorId
             //
             case 15: {
-                //#line 281 "x10/parser/x10.g"
+                //#line 264 "x10/parser/x10.g"
                 Object ClassName = (Object) getRhsSym(1);
-                //#line 283 "x10/parser/x10.g"
+                //#line 266 "x10/parser/x10.g"
 		r.rule_ErrorClassNameSuperPrefix0(ClassName);
                 break;
             }
@@ -349,7 +349,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 16: {
                 
-                //#line 292 "x10/parser/x10.g"
+                //#line 275 "x10/parser/x10.g"
 		r.rule_Modifiersopt0();
                 break;
             }
@@ -357,11 +357,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 17:  Modifiersopt ::= Modifiersopt Modifier
             //
             case 17: {
-                //#line 294 "x10/parser/x10.g"
+                //#line 277 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 294 "x10/parser/x10.g"
+                //#line 277 "x10/parser/x10.g"
                 Object Modifier = (Object) getRhsSym(2);
-                //#line 296 "x10/parser/x10.g"
+                //#line 279 "x10/parser/x10.g"
 		r.rule_Modifiersopt1(Modifiersopt,Modifier);
                 break;
             }
@@ -370,7 +370,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 18: {
                 
-                //#line 301 "x10/parser/x10.g"
+                //#line 284 "x10/parser/x10.g"
 		r.rule_Modifier0();
                 break;
             }
@@ -378,9 +378,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 19:  Modifier ::= Annotation
             //
             case 19: {
-                //#line 303 "x10/parser/x10.g"
+                //#line 286 "x10/parser/x10.g"
                 Object Annotation = (Object) getRhsSym(1);
-                //#line 305 "x10/parser/x10.g"
+                //#line 288 "x10/parser/x10.g"
 		r.rule_Modifier1(Annotation);
                 break;
             }
@@ -389,7 +389,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 20: {
                 
-                //#line 309 "x10/parser/x10.g"
+                //#line 292 "x10/parser/x10.g"
 		r.rule_Modifier2();
                 break;
             }
@@ -398,7 +398,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 21: {
                 
-                //#line 313 "x10/parser/x10.g"
+                //#line 301 "x10/parser/x10.g"
 		r.rule_Modifier3();
                 break;
             }
@@ -407,7 +407,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 22: {
                 
-                //#line 317 "x10/parser/x10.g"
+                //#line 310 "x10/parser/x10.g"
 		r.rule_Modifier4();
                 break;
             }
@@ -416,7 +416,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 23: {
                 
-                //#line 321 "x10/parser/x10.g"
+                //#line 314 "x10/parser/x10.g"
 		r.rule_Modifier5();
                 break;
             }
@@ -425,7 +425,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 24: {
                 
-                //#line 325 "x10/parser/x10.g"
+                //#line 318 "x10/parser/x10.g"
 		r.rule_Modifier6();
                 break;
             }
@@ -434,7 +434,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 25: {
                 
-                //#line 329 "x10/parser/x10.g"
+                //#line 322 "x10/parser/x10.g"
 		r.rule_Modifier7();
                 break;
             }
@@ -443,7 +443,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 26: {
                 
-                //#line 333 "x10/parser/x10.g"
+                //#line 326 "x10/parser/x10.g"
 		r.rule_Modifier8();
                 break;
             }
@@ -452,7 +452,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 27: {
                 
-                //#line 337 "x10/parser/x10.g"
+                //#line 330 "x10/parser/x10.g"
 		r.rule_Modifier9();
                 break;
             }
@@ -461,7 +461,7 @@ public class X10Parser extends Object implements RuleAction
             //
             case 28: {
                 
-                //#line 341 "x10/parser/x10.g"
+                //#line 334 "x10/parser/x10.g"
 		r.rule_Modifier10();
                 break;
             }
@@ -469,11 +469,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 30:  MethodModifiersopt ::= MethodModifiersopt property$property
             //
             case 30: {
-                //#line 345 "x10/parser/x10.g"
+                //#line 338 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 345 "x10/parser/x10.g"
+                //#line 338 "x10/parser/x10.g"
                 IToken property = (IToken) getRhsIToken(2);
-                //#line 347 "x10/parser/x10.g"
+                //#line 340 "x10/parser/x10.g"
 		r.rule_MethodModifiersopt1(MethodModifiersopt);
                 break;
             }
@@ -481,11 +481,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 31:  MethodModifiersopt ::= MethodModifiersopt Modifier
             //
             case 31: {
-                //#line 349 "x10/parser/x10.g"
+                //#line 342 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 349 "x10/parser/x10.g"
+                //#line 342 "x10/parser/x10.g"
                 Object Modifier = (Object) getRhsSym(2);
-                //#line 351 "x10/parser/x10.g"
+                //#line 344 "x10/parser/x10.g"
 		r.rule_MethodModifiersopt2(MethodModifiersopt,Modifier);
                 break;
             }
@@ -493,17 +493,17 @@ public class X10Parser extends Object implements RuleAction
             // Rule 32:  TypeDefDeclaration ::= Modifiersopt type Identifier TypeParametersopt WhereClauseopt = Type ;
             //
             case 32: {
-                //#line 354 "x10/parser/x10.g"
+                //#line 347 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 354 "x10/parser/x10.g"
+                //#line 347 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 354 "x10/parser/x10.g"
+                //#line 347 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(4);
-                //#line 354 "x10/parser/x10.g"
+                //#line 347 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(5);
-                //#line 354 "x10/parser/x10.g"
+                //#line 347 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(7);
-                //#line 356 "x10/parser/x10.g"
+                //#line 349 "x10/parser/x10.g"
 		r.rule_TypeDefDeclaration0(Modifiersopt,Identifier,TypeParametersopt,WhereClauseopt,Type);
                 break;
             }
@@ -511,19 +511,19 @@ public class X10Parser extends Object implements RuleAction
             // Rule 33:  TypeDefDeclaration ::= Modifiersopt type Identifier TypeParametersopt ( FormalParameterList ) WhereClauseopt = Type ;
             //
             case 33: {
-                //#line 358 "x10/parser/x10.g"
+                //#line 351 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 358 "x10/parser/x10.g"
+                //#line 351 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 358 "x10/parser/x10.g"
+                //#line 351 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(4);
-                //#line 358 "x10/parser/x10.g"
+                //#line 351 "x10/parser/x10.g"
                 Object FormalParameterList = (Object) getRhsSym(6);
-                //#line 358 "x10/parser/x10.g"
+                //#line 351 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(8);
-                //#line 358 "x10/parser/x10.g"
+                //#line 351 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(10);
-                //#line 360 "x10/parser/x10.g"
+                //#line 353 "x10/parser/x10.g"
 		r.rule_TypeDefDeclaration1(Modifiersopt,Identifier,TypeParametersopt,FormalParameterList,WhereClauseopt,Type);
                 break;
             }
@@ -531,9 +531,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 34:  Properties ::= ( PropertyList )
             //
             case 34: {
-                //#line 363 "x10/parser/x10.g"
+                //#line 356 "x10/parser/x10.g"
                 Object PropertyList = (Object) getRhsSym(2);
-                //#line 365 "x10/parser/x10.g"
+                //#line 358 "x10/parser/x10.g"
 		r.rule_Properties0(PropertyList);
              break;
             } 
@@ -541,9 +541,9 @@ public class X10Parser extends Object implements RuleAction
             // Rule 35:  PropertyList ::= Property
             //
             case 35: {
-                //#line 368 "x10/parser/x10.g"
+                //#line 361 "x10/parser/x10.g"
                 Object Property = (Object) getRhsSym(1);
-                //#line 370 "x10/parser/x10.g"
+                //#line 363 "x10/parser/x10.g"
 		r.rule_PropertyList0(Property);
                 break;
             }
@@ -551,11 +551,11 @@ public class X10Parser extends Object implements RuleAction
             // Rule 36:  PropertyList ::= PropertyList , Property
             //
             case 36: {
-                //#line 372 "x10/parser/x10.g"
+                //#line 365 "x10/parser/x10.g"
                 Object PropertyList = (Object) getRhsSym(1);
-                //#line 372 "x10/parser/x10.g"
+                //#line 365 "x10/parser/x10.g"
                 Object Property = (Object) getRhsSym(3);
-                //#line 374 "x10/parser/x10.g"
+                //#line 367 "x10/parser/x10.g"
 		r.rule_PropertyList1(PropertyList,Property);
                 break;
             }
@@ -563,761 +563,784 @@ public class X10Parser extends Object implements RuleAction
             // Rule 37:  Property ::= Annotationsopt Identifier ResultType
             //
             case 37: {
-                //#line 378 "x10/parser/x10.g"
+                //#line 371 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(1);
-                //#line 378 "x10/parser/x10.g"
+                //#line 371 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(2);
-                //#line 378 "x10/parser/x10.g"
+                //#line 371 "x10/parser/x10.g"
                 Object ResultType = (Object) getRhsSym(3);
-                //#line 380 "x10/parser/x10.g"
+                //#line 373 "x10/parser/x10.g"
 		r.rule_Property0(Annotationsopt,Identifier,ResultType);
                 break;
             }
             //
-            // Rule 38:  MethodDeclaration ::= MethodModifiersopt def Identifier TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 38:  MethodDeclaration ::= MethodModifiersopt def Identifier TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt Offersopt MethodBody
             //
             case 38: {
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(4);
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
                 Object FormalParameters = (Object) getRhsSym(5);
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(6);
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(7);
-                //#line 383 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(8);
-                //#line 383 "x10/parser/x10.g"
+                //#line 376 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(8);
+                //#line 376 "x10/parser/x10.g"
                 Object MethodBody = (Object) getRhsSym(9);
-                //#line 385 "x10/parser/x10.g"
-		r.rule_MethodDeclaration0(MethodModifiersopt,Identifier,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
+                //#line 378 "x10/parser/x10.g"
+		r.rule_MethodDeclaration0(MethodModifiersopt,Identifier,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                            
+
+                                        
                 break;
             }
             //
-            // Rule 44:  BinaryOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) BinOp ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 39:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) BinOp ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt Offersopt MethodBody
+            //
+            case 39: {
+                //#line 383 "x10/parser/x10.g"
+                Object MethodModifiersopt = (Object) getRhsSym(1);
+                //#line 383 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(3);
+                //#line 383 "x10/parser/x10.g"
+                Object fp1 = (Object) getRhsSym(5);
+                //#line 383 "x10/parser/x10.g"
+                Object BinOp = (Object) getRhsSym(7);
+                //#line 383 "x10/parser/x10.g"
+                Object fp2 = (Object) getRhsSym(9);
+                //#line 383 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(11);
+                //#line 383 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(12);
+                //#line 383 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(13);
+                //#line 383 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(14);
+                //#line 385 "x10/parser/x10.g"
+		r.rule_MethodDeclaration1(MethodModifiersopt,TypeParametersopt,fp1,BinOp,fp2,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                                
+                break;
+            }
+            //
+            // Rule 40:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt PrefixOp ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt Offersopt MethodBody
+            //
+            case 40: {
+                //#line 388 "x10/parser/x10.g"
+                Object MethodModifiersopt = (Object) getRhsSym(1);
+                //#line 388 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(3);
+                //#line 388 "x10/parser/x10.g"
+                Object PrefixOp = (Object) getRhsSym(4);
+                //#line 388 "x10/parser/x10.g"
+                Object fp2 = (Object) getRhsSym(6);
+                //#line 388 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(8);
+                //#line 388 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(9);
+                //#line 388 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(10);
+                //#line 388 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(11);
+                //#line 390 "x10/parser/x10.g"
+		r.rule_MethodDeclaration2(MethodModifiersopt,TypeParametersopt,PrefixOp,fp2,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                                
+                break;
+            }
+            //
+            // Rule 41:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt this BinOp ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt Offersopt MethodBody
+            //
+            case 41: {
+                //#line 393 "x10/parser/x10.g"
+                Object MethodModifiersopt = (Object) getRhsSym(1);
+                //#line 393 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(3);
+                //#line 393 "x10/parser/x10.g"
+                Object BinOp = (Object) getRhsSym(5);
+                //#line 393 "x10/parser/x10.g"
+                Object fp2 = (Object) getRhsSym(7);
+                //#line 393 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(9);
+                //#line 393 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(10);
+                //#line 393 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(11);
+                //#line 393 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(12);
+                //#line 395 "x10/parser/x10.g"
+		r.rule_MethodDeclaration3(MethodModifiersopt,TypeParametersopt,BinOp,fp2,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                               
+                break;
+            }
+            //
+            // Rule 42:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) BinOp this WhereClauseopt HasResultTypeopt Offersopt MethodBody
+            //
+            case 42: {
+                //#line 398 "x10/parser/x10.g"
+                Object MethodModifiersopt = (Object) getRhsSym(1);
+                //#line 398 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(3);
+                //#line 398 "x10/parser/x10.g"
+                Object fp1 = (Object) getRhsSym(5);
+                //#line 398 "x10/parser/x10.g"
+                Object BinOp = (Object) getRhsSym(7);
+                //#line 398 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(9);
+                //#line 398 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(10);
+                //#line 398 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(11);
+                //#line 398 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(12);
+                //#line 400 "x10/parser/x10.g"
+		r.rule_MethodDeclaration4(MethodModifiersopt,TypeParametersopt,fp1,BinOp,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                             
+                break;
+            }
+            //
+            // Rule 43:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt PrefixOp this WhereClauseopt HasResultTypeopt Offersopt MethodBody
+            //
+            case 43: {
+                //#line 403 "x10/parser/x10.g"
+                Object MethodModifiersopt = (Object) getRhsSym(1);
+                //#line 403 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(3);
+                //#line 403 "x10/parser/x10.g"
+                Object PrefixOp = (Object) getRhsSym(4);
+                //#line 403 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(6);
+                //#line 403 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(7);
+                //#line 403 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(8);
+                //#line 403 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(9);
+                //#line 405 "x10/parser/x10.g"
+		r.rule_MethodDeclaration5(MethodModifiersopt,TypeParametersopt,PrefixOp,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                            
+                break;
+            }
+            //
+            // Rule 44:  MethodDeclaration ::= MethodModifiersopt operator this TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt Offersopt MethodBody
             //
             case 44: {
-                //#line 393 "x10/parser/x10.g"
+                //#line 408 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 393 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 393 "x10/parser/x10.g"
-                Object fp1 = (Object) getRhsSym(5);
-                //#line 393 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(7);
-                //#line 393 "x10/parser/x10.g"
-                Object fp2 = (Object) getRhsSym(9);
-                //#line 393 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(11);
-                //#line 393 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(12);
-                //#line 393 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(13);
-                //#line 393 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(14);
-                //#line 395 "x10/parser/x10.g"
-		r.rule_MethodDeclaration1(MethodModifiersopt,TypeParametersopt,fp1,BinOp,fp2,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
+                //#line 408 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(4);
+                //#line 408 "x10/parser/x10.g"
+                Object FormalParameters = (Object) getRhsSym(5);
+                //#line 408 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(6);
+                //#line 408 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(7);
+                //#line 408 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(8);
+                //#line 408 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(9);
+                //#line 410 "x10/parser/x10.g"
+		r.rule_MethodDeclaration6(MethodModifiersopt,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                              
                 break;
             }
             //
-            // Rule 45:  BinaryOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt this BinOp ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 45:  MethodDeclaration ::= MethodModifiersopt operator this TypeParametersopt FormalParameters = ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt Offersopt MethodBody
             //
             case 45: {
-                //#line 397 "x10/parser/x10.g"
+                //#line 413 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 397 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 397 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(5);
-                //#line 397 "x10/parser/x10.g"
-                Object fp2 = (Object) getRhsSym(7);
-                //#line 397 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(9);
-                //#line 397 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(10);
-                //#line 397 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(11);
-                //#line 397 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(12);
-                //#line 399 "x10/parser/x10.g"
-		r.rule_MethodDeclaration3(MethodModifiersopt,TypeParametersopt,BinOp,fp2,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
+                //#line 413 "x10/parser/x10.g"
+                Object TypeParametersopt = (Object) getRhsSym(4);
+                //#line 413 "x10/parser/x10.g"
+                Object FormalParameters = (Object) getRhsSym(5);
+                //#line 413 "x10/parser/x10.g"
+                Object fp2 = (Object) getRhsSym(8);
+                //#line 413 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(10);
+                //#line 413 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(11);
+                //#line 413 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(12);
+                //#line 413 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(13);
+                //#line 415 "x10/parser/x10.g"
+		r.rule_MethodDeclaration7(MethodModifiersopt,TypeParametersopt,FormalParameters,fp2,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                                 
                 break;
             }
             //
-            // Rule 46:  BinaryOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) BinOp this WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 46:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) as Type WhereClauseopt Offersopt MethodBody
             //
             case 46: {
-                //#line 401 "x10/parser/x10.g"
+                //#line 420 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 401 "x10/parser/x10.g"
+                //#line 420 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 401 "x10/parser/x10.g"
+                //#line 420 "x10/parser/x10.g"
                 Object fp1 = (Object) getRhsSym(5);
-                //#line 401 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(7);
-                //#line 401 "x10/parser/x10.g"
+                //#line 420 "x10/parser/x10.g"
+                Object Type = (Object) getRhsSym(8);
+                //#line 420 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(9);
-                //#line 401 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(10);
-                //#line 401 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(11);
-                //#line 401 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(12);
-                //#line 403 "x10/parser/x10.g"
-		r.rule_MethodDeclaration4(MethodModifiersopt,TypeParametersopt,fp1,BinOp,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
+                //#line 420 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(10);
+                //#line 420 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(11);
+                //#line 422 "x10/parser/x10.g"
+		r.rule_MethodDeclaration8(MethodModifiersopt,TypeParametersopt,fp1,Type,WhereClauseopt,Offersopt,MethodBody);
+                                                 
                 break;
             }
             //
-            // Rule 47:  PrefixOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt PrefixOp ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 47:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) as ? WhereClauseopt HasResultTypeopt Offersopt MethodBody
             //
             case 47: {
-                //#line 406 "x10/parser/x10.g"
+                //#line 425 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 406 "x10/parser/x10.g"
+                //#line 425 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 406 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(4);
-                //#line 406 "x10/parser/x10.g"
-                Object fp2 = (Object) getRhsSym(6);
-                //#line 406 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(8);
-                //#line 406 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(9);
-                //#line 406 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(10);
-                //#line 406 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(11);
-                //#line 408 "x10/parser/x10.g"
-		r.rule_MethodDeclaration2(MethodModifiersopt,TypeParametersopt,PrefixOp,fp2,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
+                //#line 425 "x10/parser/x10.g"
+                Object fp1 = (Object) getRhsSym(5);
+                //#line 425 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(9);
+                //#line 425 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(10);
+                //#line 425 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(11);
+                //#line 425 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(12);
+                //#line 427 "x10/parser/x10.g"
+		r.rule_MethodDeclaration9(MethodModifiersopt,TypeParametersopt,fp1,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                                 
                 break;
             }
             //
-            // Rule 48:  PrefixOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt PrefixOp this WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 48:  MethodDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) WhereClauseopt HasResultTypeopt Offersopt MethodBody
             //
             case 48: {
-                //#line 410 "x10/parser/x10.g"
+                //#line 430 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 410 "x10/parser/x10.g"
+                //#line 430 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 410 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(4);
-                //#line 410 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(6);
-                //#line 410 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(7);
-                //#line 410 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(8);
-                //#line 410 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(9);
-                //#line 412 "x10/parser/x10.g"
-		r.rule_MethodDeclaration5(MethodModifiersopt,TypeParametersopt,PrefixOp,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
+                //#line 430 "x10/parser/x10.g"
+                Object fp1 = (Object) getRhsSym(5);
+                //#line 430 "x10/parser/x10.g"
+                Object WhereClauseopt = (Object) getRhsSym(7);
+                //#line 430 "x10/parser/x10.g"
+                Object HasResultTypeopt = (Object) getRhsSym(8);
+                //#line 430 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(9);
+                //#line 430 "x10/parser/x10.g"
+                Object MethodBody = (Object) getRhsSym(10);
+                //#line 432 "x10/parser/x10.g"
+		r.rule_MethodDeclaration10(MethodModifiersopt,TypeParametersopt,fp1,WhereClauseopt,HasResultTypeopt,Offersopt,MethodBody);
+                                                 
                 break;
             }
             //
-            // Rule 49:  ApplyOperatorDeclaration ::= MethodModifiersopt operator this TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
+            // Rule 49:  PropertyMethodDeclaration ::= MethodModifiersopt Identifier TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt MethodBody
             //
             case 49: {
-                //#line 415 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 415 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(4);
-                //#line 415 "x10/parser/x10.g"
-                Object FormalParameters = (Object) getRhsSym(5);
-                //#line 415 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(6);
-                //#line 415 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(7);
-                //#line 415 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(8);
-                //#line 415 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(9);
-                //#line 417 "x10/parser/x10.g"
-		r.rule_MethodDeclaration6(MethodModifiersopt,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
-                break;
-            }
-            //
-            // Rule 50:  SetOperatorDeclaration ::= MethodModifiersopt operator this TypeParametersopt FormalParameters = ( FormalParameter$fp2 ) WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
-            //
-            case 50: {
-                //#line 420 "x10/parser/x10.g"
-                Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 420 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(4);
-                //#line 420 "x10/parser/x10.g"
-                Object FormalParameters = (Object) getRhsSym(5);
-                //#line 420 "x10/parser/x10.g"
-                Object fp2 = (Object) getRhsSym(8);
-                //#line 420 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(10);
-                //#line 420 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(11);
-                //#line 420 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(12);
-                //#line 420 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(13);
-                //#line 422 "x10/parser/x10.g"
-		r.rule_MethodDeclaration7(MethodModifiersopt,TypeParametersopt,FormalParameters,fp2,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
-                break;
-            }
-            //
-            // Rule 53:  ExplicitConversionOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) as Type WhereClauseopt OBSOLETE_Offersopt MethodBody
-            //
-            case 53: {
-                //#line 429 "x10/parser/x10.g"
-                Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 429 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 429 "x10/parser/x10.g"
-                Object fp1 = (Object) getRhsSym(5);
-                //#line 429 "x10/parser/x10.g"
-                Object Type = (Object) getRhsSym(8);
-                //#line 429 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(9);
-                //#line 429 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(10);
-                //#line 429 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(11);
-                //#line 431 "x10/parser/x10.g"
-		r.rule_MethodDeclaration8(MethodModifiersopt,TypeParametersopt,fp1,Type,WhereClauseopt,OBSOLETE_Offersopt,MethodBody);
-                break;
-            }
-            //
-            // Rule 54:  ExplicitConversionOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) as ? WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
-            //
-            case 54: {
-                //#line 433 "x10/parser/x10.g"
-                Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 433 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 433 "x10/parser/x10.g"
-                Object fp1 = (Object) getRhsSym(5);
-                //#line 433 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(9);
-                //#line 433 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(10);
-                //#line 433 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(11);
-                //#line 433 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(12);
-                //#line 435 "x10/parser/x10.g"
-		r.rule_MethodDeclaration9(MethodModifiersopt,TypeParametersopt,fp1,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
-                break;
-            }
-            //
-            // Rule 55:  ImplicitConversionOperatorDeclaration ::= MethodModifiersopt operator TypeParametersopt ( FormalParameter$fp1 ) WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt MethodBody
-            //
-            case 55: {
-                //#line 438 "x10/parser/x10.g"
-                Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 438 "x10/parser/x10.g"
-                Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 438 "x10/parser/x10.g"
-                Object fp1 = (Object) getRhsSym(5);
-                //#line 438 "x10/parser/x10.g"
-                Object WhereClauseopt = (Object) getRhsSym(7);
-                //#line 438 "x10/parser/x10.g"
-                Object HasResultTypeopt = (Object) getRhsSym(8);
-                //#line 438 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(9);
-                //#line 438 "x10/parser/x10.g"
-                Object MethodBody = (Object) getRhsSym(10);
-                //#line 440 "x10/parser/x10.g"
-		r.rule_MethodDeclaration10(MethodModifiersopt,TypeParametersopt,fp1,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,MethodBody);
-                break;
-            }
-            //
-            // Rule 56:  PropertyMethodDeclaration ::= MethodModifiersopt Identifier TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt MethodBody
-            //
-            case 56: {
-                //#line 443 "x10/parser/x10.g"
-                Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 443 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(2);
-                //#line 443 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(3);
-                //#line 443 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object FormalParameters = (Object) getRhsSym(4);
-                //#line 443 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(5);
-                //#line 443 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(6);
-                //#line 443 "x10/parser/x10.g"
+                //#line 436 "x10/parser/x10.g"
                 Object MethodBody = (Object) getRhsSym(7);
-                //#line 445 "x10/parser/x10.g"
+                //#line 438 "x10/parser/x10.g"
 		r.rule_PropertyMethodDeclaration0(MethodModifiersopt,Identifier,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,MethodBody);
                                               
                 break;
             }
             //
-            // Rule 57:  PropertyMethodDeclaration ::= MethodModifiersopt Identifier WhereClauseopt HasResultTypeopt MethodBody
+            // Rule 50:  PropertyMethodDeclaration ::= MethodModifiersopt Identifier WhereClauseopt HasResultTypeopt MethodBody
             //
-            case 57: {
-                //#line 448 "x10/parser/x10.g"
+            case 50: {
+                //#line 441 "x10/parser/x10.g"
                 Object MethodModifiersopt = (Object) getRhsSym(1);
-                //#line 448 "x10/parser/x10.g"
+                //#line 441 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(2);
-                //#line 448 "x10/parser/x10.g"
+                //#line 441 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(3);
-                //#line 448 "x10/parser/x10.g"
+                //#line 441 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(4);
-                //#line 448 "x10/parser/x10.g"
+                //#line 441 "x10/parser/x10.g"
                 Object MethodBody = (Object) getRhsSym(5);
-                //#line 450 "x10/parser/x10.g"
+                //#line 443 "x10/parser/x10.g"
 		r.rule_PropertyMethodDeclaration1(MethodModifiersopt,Identifier,WhereClauseopt,HasResultTypeopt,MethodBody);
                                              
                 break;
             }
             //
-            // Rule 58:  ExplicitConstructorInvocation ::= this TypeArgumentsopt ( ArgumentListopt ) ;
+            // Rule 51:  ExplicitConstructorInvocation ::= this TypeArgumentsopt ( ArgumentListopt ) ;
             //
-            case 58: {
-                //#line 454 "x10/parser/x10.g"
+            case 51: {
+                //#line 447 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(2);
-                //#line 454 "x10/parser/x10.g"
+                //#line 447 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(4);
-                //#line 456 "x10/parser/x10.g"
+                //#line 449 "x10/parser/x10.g"
 		r.rule_ExplicitConstructorInvocation0(TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 59:  ExplicitConstructorInvocation ::= super TypeArgumentsopt ( ArgumentListopt ) ;
+            // Rule 52:  ExplicitConstructorInvocation ::= super TypeArgumentsopt ( ArgumentListopt ) ;
             //
-            case 59: {
-                //#line 458 "x10/parser/x10.g"
+            case 52: {
+                //#line 451 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(2);
-                //#line 458 "x10/parser/x10.g"
+                //#line 451 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(4);
-                //#line 460 "x10/parser/x10.g"
+                //#line 453 "x10/parser/x10.g"
 		r.rule_ExplicitConstructorInvocation1(TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 60:  ExplicitConstructorInvocation ::= Primary . this TypeArgumentsopt ( ArgumentListopt ) ;
+            // Rule 53:  ExplicitConstructorInvocation ::= Primary . this TypeArgumentsopt ( ArgumentListopt ) ;
             //
-            case 60: {
-                //#line 462 "x10/parser/x10.g"
+            case 53: {
+                //#line 455 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 462 "x10/parser/x10.g"
+                //#line 455 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(4);
-                //#line 462 "x10/parser/x10.g"
+                //#line 455 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(6);
-                //#line 464 "x10/parser/x10.g"
+                //#line 457 "x10/parser/x10.g"
 		r.rule_ExplicitConstructorInvocation2(Primary,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 61:  ExplicitConstructorInvocation ::= Primary . super TypeArgumentsopt ( ArgumentListopt ) ;
+            // Rule 54:  ExplicitConstructorInvocation ::= Primary . super TypeArgumentsopt ( ArgumentListopt ) ;
             //
-            case 61: {
-                //#line 466 "x10/parser/x10.g"
+            case 54: {
+                //#line 459 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 466 "x10/parser/x10.g"
+                //#line 459 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(4);
-                //#line 466 "x10/parser/x10.g"
+                //#line 459 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(6);
-                //#line 468 "x10/parser/x10.g"
+                //#line 461 "x10/parser/x10.g"
 		r.rule_ExplicitConstructorInvocation3(Primary,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 62:  InterfaceDeclaration ::= Modifiersopt interface Identifier TypeParamsWithVarianceopt Propertiesopt WhereClauseopt ExtendsInterfacesopt InterfaceBody
+            // Rule 55:  NormalInterfaceDeclaration ::= Modifiersopt interface Identifier TypeParamsWithVarianceopt Propertiesopt WhereClauseopt ExtendsInterfacesopt InterfaceBody
             //
-            case 62: {
-                //#line 471 "x10/parser/x10.g"
+            case 55: {
+                //#line 464 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 471 "x10/parser/x10.g"
+                //#line 464 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 471 "x10/parser/x10.g"
+                //#line 464 "x10/parser/x10.g"
                 Object TypeParamsWithVarianceopt = (Object) getRhsSym(4);
-                //#line 471 "x10/parser/x10.g"
+                //#line 464 "x10/parser/x10.g"
                 Object Propertiesopt = (Object) getRhsSym(5);
-                //#line 471 "x10/parser/x10.g"
+                //#line 464 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(6);
-                //#line 471 "x10/parser/x10.g"
+                //#line 464 "x10/parser/x10.g"
                 Object ExtendsInterfacesopt = (Object) getRhsSym(7);
-                //#line 471 "x10/parser/x10.g"
+                //#line 464 "x10/parser/x10.g"
                 Object InterfaceBody = (Object) getRhsSym(8);
-                //#line 473 "x10/parser/x10.g"
-		r.rule_InterfaceDeclaration0(Modifiersopt,Identifier,TypeParamsWithVarianceopt,Propertiesopt,WhereClauseopt,ExtendsInterfacesopt,InterfaceBody);
+                //#line 466 "x10/parser/x10.g"
+		r.rule_NormalInterfaceDeclaration0(Modifiersopt,Identifier,TypeParamsWithVarianceopt,Propertiesopt,WhereClauseopt,ExtendsInterfacesopt,InterfaceBody);
                 break;
             }
             //
-            // Rule 63:  ClassInstanceCreationExpression ::= new TypeName TypeArgumentsopt ( ArgumentListopt ) ClassBodyopt
+            // Rule 56:  ClassInstanceCreationExpression ::= new TypeName TypeArgumentsopt ( ArgumentListopt ) ClassBodyopt
             //
-            case 63: {
-                //#line 476 "x10/parser/x10.g"
+            case 56: {
+                //#line 469 "x10/parser/x10.g"
                 Object TypeName = (Object) getRhsSym(2);
-                //#line 476 "x10/parser/x10.g"
+                //#line 469 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(3);
-                //#line 476 "x10/parser/x10.g"
+                //#line 469 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(5);
-                //#line 476 "x10/parser/x10.g"
+                //#line 469 "x10/parser/x10.g"
                 Object ClassBodyopt = (Object) getRhsSym(7);
-                //#line 478 "x10/parser/x10.g"
+                //#line 471 "x10/parser/x10.g"
 		r.rule_ClassInstanceCreationExpression0(TypeName,TypeArgumentsopt,ArgumentListopt,ClassBodyopt);
                 break;
             }
             //
-            // Rule 64:  ClassInstanceCreationExpression ::= Primary . new Identifier TypeArgumentsopt ( ArgumentListopt ) ClassBodyopt
+            // Rule 57:  ClassInstanceCreationExpression ::= Primary . new Identifier TypeArgumentsopt ( ArgumentListopt ) ClassBodyopt
             //
-            case 64: {
-                //#line 480 "x10/parser/x10.g"
+            case 57: {
+                //#line 473 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 480 "x10/parser/x10.g"
+                //#line 473 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(4);
-                //#line 480 "x10/parser/x10.g"
+                //#line 473 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(5);
-                //#line 480 "x10/parser/x10.g"
+                //#line 473 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(7);
-                //#line 480 "x10/parser/x10.g"
+                //#line 473 "x10/parser/x10.g"
                 Object ClassBodyopt = (Object) getRhsSym(9);
-                //#line 482 "x10/parser/x10.g"
+                //#line 475 "x10/parser/x10.g"
 		r.rule_ClassInstanceCreationExpression2(Primary,Identifier,TypeArgumentsopt,ArgumentListopt,ClassBodyopt);
                 break;
             }
             //
-            // Rule 65:  ClassInstanceCreationExpression ::= FullyQualifiedName . new Identifier TypeArgumentsopt ( ArgumentListopt ) ClassBodyopt
+            // Rule 58:  ClassInstanceCreationExpression ::= AmbiguousName . new Identifier TypeArgumentsopt ( ArgumentListopt ) ClassBodyopt
             //
-            case 65: {
-                //#line 484 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 484 "x10/parser/x10.g"
+            case 58: {
+                //#line 477 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 477 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(4);
-                //#line 484 "x10/parser/x10.g"
+                //#line 477 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(5);
-                //#line 484 "x10/parser/x10.g"
+                //#line 477 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(7);
-                //#line 484 "x10/parser/x10.g"
+                //#line 477 "x10/parser/x10.g"
                 Object ClassBodyopt = (Object) getRhsSym(9);
-                //#line 486 "x10/parser/x10.g"
-		r.rule_ClassInstanceCreationExpression3(FullyQualifiedName,Identifier,TypeArgumentsopt,ArgumentListopt,ClassBodyopt);
+                //#line 479 "x10/parser/x10.g"
+		r.rule_ClassInstanceCreationExpression3(AmbiguousName,Identifier,TypeArgumentsopt,ArgumentListopt,ClassBodyopt);
                 break;
             }
             //
-            // Rule 66:  AssignPropertyCall ::= property TypeArgumentsopt ( ArgumentListopt ) ;
+            // Rule 59:  AssignPropertyCall ::= property TypeArgumentsopt ( ArgumentListopt ) ;
             //
-            case 66: {
-                //#line 489 "x10/parser/x10.g"
+            case 59: {
+                //#line 482 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(2);
-                //#line 489 "x10/parser/x10.g"
+                //#line 482 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(4);
-                //#line 491 "x10/parser/x10.g"
+                //#line 484 "x10/parser/x10.g"
 		r.rule_AssignPropertyCall0(TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 70:  FunctionType ::= TypeParametersopt ( FormalParameterListopt ) WhereClauseopt OBSOLETE_Offersopt => Type
+            // Rule 63:  FunctionType ::= TypeParametersopt ( FormalParameterListopt ) WhereClauseopt Offersopt => Type
             //
-            case 70: {
-                //#line 499 "x10/parser/x10.g"
+            case 63: {
+                //#line 492 "x10/parser/x10.g"
                 Object TypeParametersopt = (Object) getRhsSym(1);
-                //#line 499 "x10/parser/x10.g"
+                //#line 492 "x10/parser/x10.g"
                 Object FormalParameterListopt = (Object) getRhsSym(3);
-                //#line 499 "x10/parser/x10.g"
+                //#line 492 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(5);
-                //#line 499 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(6);
-                //#line 499 "x10/parser/x10.g"
+                //#line 492 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(6);
+                //#line 492 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(8);
-                //#line 501 "x10/parser/x10.g"
-		r.rule_FunctionType0(TypeParametersopt,FormalParameterListopt,WhereClauseopt,OBSOLETE_Offersopt,Type);
+                //#line 494 "x10/parser/x10.g"
+		r.rule_FunctionType0(TypeParametersopt,FormalParameterListopt,WhereClauseopt,Offersopt,Type);
                 break;
             }
             //
-            // Rule 72:  AnnotatedType ::= Type Annotations
+            // Rule 65:  AnnotatedType ::= Type Annotations
             //
-            case 72: {
-                //#line 506 "x10/parser/x10.g"
+            case 65: {
+                //#line 504 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(1);
-                //#line 506 "x10/parser/x10.g"
+                //#line 504 "x10/parser/x10.g"
                 Object Annotations = (Object) getRhsSym(2);
-                //#line 508 "x10/parser/x10.g"
+                //#line 506 "x10/parser/x10.g"
 		r.rule_AnnotatedType0(Type,Annotations);
                 break;
             }
             //
-            // Rule 75:  Void ::= void
+            // Rule 68:  VoidType ::= void
             //
-            case 75: {
+            case 68: {
                 
-                //#line 516 "x10/parser/x10.g"
-		r.rule_Void0();
+                //#line 514 "x10/parser/x10.g"
+		r.rule_VoidType0();
                 break;
             }
             //
-            // Rule 76:  SimpleNamedType ::= TypeName
+            // Rule 69:  SimpleNamedType ::= TypeName
             //
-            case 76: {
-                //#line 520 "x10/parser/x10.g"
+            case 69: {
+                //#line 518 "x10/parser/x10.g"
                 Object TypeName = (Object) getRhsSym(1);
-                //#line 522 "x10/parser/x10.g"
+                //#line 520 "x10/parser/x10.g"
 		r.rule_SimpleNamedType0(TypeName);
                 break;
             }
             //
-            // Rule 77:  SimpleNamedType ::= Primary . Identifier
+            // Rule 70:  SimpleNamedType ::= Primary . Identifier
             //
-            case 77: {
-                //#line 524 "x10/parser/x10.g"
+            case 70: {
+                //#line 522 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 524 "x10/parser/x10.g"
+                //#line 522 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 526 "x10/parser/x10.g"
+                //#line 524 "x10/parser/x10.g"
 		r.rule_SimpleNamedType1(Primary,Identifier);
                 break;
             }
             //
-            // Rule 78:  SimpleNamedType ::= ParameterizedNamedType . Identifier
+            // Rule 71:  SimpleNamedType ::= ParameterizedNamedType . Identifier
             //
-            case 78: {
-                //#line 528 "x10/parser/x10.g"
+            case 71: {
+                //#line 526 "x10/parser/x10.g"
                 Object ParameterizedNamedType = (Object) getRhsSym(1);
-                //#line 528 "x10/parser/x10.g"
+                //#line 526 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 530 "x10/parser/x10.g"
+                //#line 528 "x10/parser/x10.g"
 		r.rule_SimpleNamedType2(ParameterizedNamedType,Identifier);
                 break;
             }
             //
-            // Rule 79:  SimpleNamedType ::= DepNamedType . Identifier
+            // Rule 72:  SimpleNamedType ::= DepNamedType . Identifier
             //
-            case 79: {
-                //#line 532 "x10/parser/x10.g"
+            case 72: {
+                //#line 530 "x10/parser/x10.g"
                 Object DepNamedType = (Object) getRhsSym(1);
-                //#line 532 "x10/parser/x10.g"
+                //#line 530 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 534 "x10/parser/x10.g"
+                //#line 532 "x10/parser/x10.g"
 		r.rule_SimpleNamedType3(DepNamedType,Identifier);
                 break;
             }
             //
-            // Rule 80:  ParameterizedNamedType ::= SimpleNamedType Arguments
+            // Rule 73:  ParameterizedNamedType ::= SimpleNamedType Arguments
             //
-            case 80: {
-                //#line 537 "x10/parser/x10.g"
+            case 73: {
+                //#line 535 "x10/parser/x10.g"
                 Object SimpleNamedType = (Object) getRhsSym(1);
-                //#line 537 "x10/parser/x10.g"
+                //#line 535 "x10/parser/x10.g"
                 Object Arguments = (Object) getRhsSym(2);
-                //#line 539 "x10/parser/x10.g"
+                //#line 537 "x10/parser/x10.g"
 		r.rule_ParameterizedNamedType0(SimpleNamedType,Arguments);
                 break;
             }
             //
-            // Rule 81:  ParameterizedNamedType ::= SimpleNamedType TypeArguments
+            // Rule 74:  ParameterizedNamedType ::= SimpleNamedType TypeArguments
             //
-            case 81: {
-                //#line 541 "x10/parser/x10.g"
+            case 74: {
+                //#line 539 "x10/parser/x10.g"
                 Object SimpleNamedType = (Object) getRhsSym(1);
-                //#line 541 "x10/parser/x10.g"
+                //#line 539 "x10/parser/x10.g"
                 Object TypeArguments = (Object) getRhsSym(2);
-                //#line 543 "x10/parser/x10.g"
+                //#line 541 "x10/parser/x10.g"
 		r.rule_ParameterizedNamedType1(SimpleNamedType,TypeArguments);
                 break;
             }
             //
-            // Rule 82:  ParameterizedNamedType ::= SimpleNamedType TypeArguments Arguments
+            // Rule 75:  ParameterizedNamedType ::= SimpleNamedType TypeArguments Arguments
             //
-            case 82: {
-                //#line 545 "x10/parser/x10.g"
+            case 75: {
+                //#line 543 "x10/parser/x10.g"
                 Object SimpleNamedType = (Object) getRhsSym(1);
-                //#line 545 "x10/parser/x10.g"
+                //#line 543 "x10/parser/x10.g"
                 Object TypeArguments = (Object) getRhsSym(2);
-                //#line 545 "x10/parser/x10.g"
+                //#line 543 "x10/parser/x10.g"
                 Object Arguments = (Object) getRhsSym(3);
-                //#line 547 "x10/parser/x10.g"
+                //#line 545 "x10/parser/x10.g"
 		r.rule_ParameterizedNamedType2(SimpleNamedType,TypeArguments,Arguments);
                 break;
             }
             //
-            // Rule 83:  DepNamedType ::= SimpleNamedType DepParameters
+            // Rule 76:  DepNamedType ::= SimpleNamedType DepParameters
             //
-            case 83: {
-                //#line 550 "x10/parser/x10.g"
+            case 76: {
+                //#line 548 "x10/parser/x10.g"
                 Object SimpleNamedType = (Object) getRhsSym(1);
-                //#line 550 "x10/parser/x10.g"
+                //#line 548 "x10/parser/x10.g"
                 Object DepParameters = (Object) getRhsSym(2);
-                //#line 552 "x10/parser/x10.g"
+                //#line 550 "x10/parser/x10.g"
 		r.rule_DepNamedType0(SimpleNamedType,DepParameters);
                 break;
             }
             //
-            // Rule 84:  DepNamedType ::= ParameterizedNamedType DepParameters
+            // Rule 77:  DepNamedType ::= ParameterizedNamedType DepParameters
             //
-            case 84: {
-                //#line 554 "x10/parser/x10.g"
+            case 77: {
+                //#line 552 "x10/parser/x10.g"
                 Object ParameterizedNamedType = (Object) getRhsSym(1);
-                //#line 554 "x10/parser/x10.g"
+                //#line 552 "x10/parser/x10.g"
                 Object DepParameters = (Object) getRhsSym(2);
-                //#line 556 "x10/parser/x10.g"
+                //#line 554 "x10/parser/x10.g"
 		r.rule_DepNamedType1(ParameterizedNamedType,DepParameters);
                 break;
             }
             //
-            // Rule 89:  DepParameters ::= { FUTURE_ExistentialListopt ConstraintConjunctionopt }
+            // Rule 82:  DepParameters ::= { ExistentialListopt Conjunctionopt }
             //
-            case 89: {
+            case 82: {
+                //#line 563 "x10/parser/x10.g"
+                Object ExistentialListopt = (Object) getRhsSym(2);
+                //#line 563 "x10/parser/x10.g"
+                Object Conjunctionopt = (Object) getRhsSym(3);
                 //#line 565 "x10/parser/x10.g"
-                Object FUTURE_ExistentialListopt = (Object) getRhsSym(2);
-                //#line 565 "x10/parser/x10.g"
-                Object ConstraintConjunctionopt = (Object) getRhsSym(3);
-                //#line 567 "x10/parser/x10.g"
-		r.rule_DepParameters0(FUTURE_ExistentialListopt,ConstraintConjunctionopt);
+		r.rule_DepParameters0(ExistentialListopt,Conjunctionopt);
                 break;
             }
             //
-            // Rule 90:  TypeParamsWithVariance ::= [ TypeParamWithVarianceList ]
+            // Rule 83:  TypeParamsWithVariance ::= [ TypeParamWithVarianceList ]
             //
-            case 90: {
-                //#line 571 "x10/parser/x10.g"
+            case 83: {
+                //#line 569 "x10/parser/x10.g"
                 Object TypeParamWithVarianceList = (Object) getRhsSym(2);
-                //#line 573 "x10/parser/x10.g"
+                //#line 571 "x10/parser/x10.g"
 		r.rule_TypeParamsWithVariance0(TypeParamWithVarianceList);
                 break;
             }
             //
-            // Rule 91:  TypeParameters ::= [ TypeParameterList ]
+            // Rule 84:  TypeParameters ::= [ TypeParameterList ]
             //
-            case 91: {
-                //#line 576 "x10/parser/x10.g"
+            case 84: {
+                //#line 574 "x10/parser/x10.g"
                 Object TypeParameterList = (Object) getRhsSym(2);
-                //#line 578 "x10/parser/x10.g"
+                //#line 576 "x10/parser/x10.g"
 		r.rule_TypeParameters0(TypeParameterList);
                 break;
             }
             //
-            // Rule 92:  FormalParameters ::= ( FormalParameterListopt )
+            // Rule 85:  FormalParameters ::= ( FormalParameterListopt )
             //
-            case 92: {
-                //#line 581 "x10/parser/x10.g"
+            case 85: {
+                //#line 579 "x10/parser/x10.g"
                 Object FormalParameterListopt = (Object) getRhsSym(2);
-                //#line 583 "x10/parser/x10.g"
+                //#line 581 "x10/parser/x10.g"
 		r.rule_FormalParameters0(FormalParameterListopt);
                 break;
             }
             //
-            // Rule 93:  ConstraintConjunction ::= Expression
+            // Rule 86:  Conjunction ::= Expression
             //
-            case 93: {
-                //#line 586 "x10/parser/x10.g"
+            case 86: {
+                //#line 584 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(1);
+                //#line 586 "x10/parser/x10.g"
+		r.rule_Conjunction0(Expression);
+                break;
+            }
+            //
+            // Rule 87:  Conjunction ::= Conjunction , Expression
+            //
+            case 87: {
                 //#line 588 "x10/parser/x10.g"
-		r.rule_ConstraintConjunction0(Expression);
-                break;
-            }
-            //
-            // Rule 94:  ConstraintConjunction ::= ConstraintConjunction , Expression
-            //
-            case 94: {
-                //#line 590 "x10/parser/x10.g"
-                Object ConstraintConjunction = (Object) getRhsSym(1);
-                //#line 590 "x10/parser/x10.g"
+                Object Conjunction = (Object) getRhsSym(1);
+                //#line 588 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 592 "x10/parser/x10.g"
-		r.rule_ConstraintConjunction1(ConstraintConjunction,Expression);
+                //#line 590 "x10/parser/x10.g"
+		r.rule_Conjunction1(Conjunction,Expression);
                 break;
             }
             //
-            // Rule 95:  HasZeroConstraint ::= Type$t1 haszero
+            // Rule 88:  HasZeroConstraint ::= Type$t1 haszero
             //
-            case 95: {
-                //#line 595 "x10/parser/x10.g"
+            case 88: {
+                //#line 593 "x10/parser/x10.g"
                 Object t1 = (Object) getRhsSym(1);
-                //#line 597 "x10/parser/x10.g"
+                //#line 595 "x10/parser/x10.g"
 		r.rule_HasZeroConstraint0(t1);
                 break;
             }
             //
-            // Rule 96:  SubtypeConstraint ::= Type$t1 <: Type$t2
+            // Rule 89:  SubtypeConstraint ::= Type$t1 <: Type$t2
             //
-            case 96: {
-                //#line 600 "x10/parser/x10.g"
+            case 89: {
+                //#line 598 "x10/parser/x10.g"
                 Object t1 = (Object) getRhsSym(1);
-                //#line 600 "x10/parser/x10.g"
+                //#line 598 "x10/parser/x10.g"
                 Object t2 = (Object) getRhsSym(3);
-                //#line 602 "x10/parser/x10.g"
+                //#line 600 "x10/parser/x10.g"
 		r.rule_SubtypeConstraint0(t1,t2);
                 break;
             }
             //
-            // Rule 97:  SubtypeConstraint ::= Type$t1 :> Type$t2
+            // Rule 90:  SubtypeConstraint ::= Type$t1 :> Type$t2
             //
-            case 97: {
-                //#line 604 "x10/parser/x10.g"
+            case 90: {
+                //#line 602 "x10/parser/x10.g"
                 Object t1 = (Object) getRhsSym(1);
-                //#line 604 "x10/parser/x10.g"
+                //#line 602 "x10/parser/x10.g"
                 Object t2 = (Object) getRhsSym(3);
-                //#line 606 "x10/parser/x10.g"
+                //#line 604 "x10/parser/x10.g"
 		r.rule_SubtypeConstraint1(t1,t2);
                 break;
             }
             //
-            // Rule 98:  WhereClause ::= DepParameters
+            // Rule 91:  WhereClause ::= DepParameters
             //
-            case 98: {
-                //#line 609 "x10/parser/x10.g"
+            case 91: {
+                //#line 607 "x10/parser/x10.g"
                 Object DepParameters = (Object) getRhsSym(1);
-                //#line 611 "x10/parser/x10.g"
+                //#line 609 "x10/parser/x10.g"
 		r.rule_WhereClause0(DepParameters);
                   break;
             }
             //
-            // Rule 99:  ConstraintConjunctionopt ::= $Empty
+            // Rule 92:  Conjunctionopt ::= $Empty
             //
-            case 99: {
+            case 92: {
                 
-                //#line 616 "x10/parser/x10.g"
-		r.rule_ConstraintConjunctionopt0();
+                //#line 614 "x10/parser/x10.g"
+		r.rule_Conjunctionopt0();
                   break;
             }
             //
-            // Rule 100:  ConstraintConjunctionopt ::= ConstraintConjunction
+            // Rule 93:  Conjunctionopt ::= Conjunction
+            //
+            case 93: {
+                //#line 616 "x10/parser/x10.g"
+                Object Conjunction = (Object) getRhsSym(1);
+                //#line 618 "x10/parser/x10.g"
+		r.rule_Conjunctionopt1(Conjunction);
+                break;
+            }
+            //
+            // Rule 94:  ExistentialListopt ::= $Empty
+            //
+            case 94: {
+                
+                //#line 623 "x10/parser/x10.g"
+		r.rule_ExistentialListopt0();
+                  break;
+            }
+            //
+            // Rule 95:  ExistentialListopt ::= ExistentialList ;
+            //
+            case 95: {
+                //#line 625 "x10/parser/x10.g"
+                Object ExistentialList = (Object) getRhsSym(1);
+                //#line 627 "x10/parser/x10.g"
+		r.rule_ExistentialListopt1(ExistentialList);
+                break;
+            }
+            //
+            // Rule 96:  ExistentialList ::= FormalParameter
+            //
+            case 96: {
+                //#line 630 "x10/parser/x10.g"
+                Object FormalParameter = (Object) getRhsSym(1);
+                //#line 632 "x10/parser/x10.g"
+		r.rule_ExistentialList0(FormalParameter);
+                break;
+            }
+            //
+            // Rule 97:  ExistentialList ::= ExistentialList ; FormalParameter
+            //
+            case 97: {
+                //#line 634 "x10/parser/x10.g"
+                Object ExistentialList = (Object) getRhsSym(1);
+                //#line 634 "x10/parser/x10.g"
+                Object FormalParameter = (Object) getRhsSym(3);
+                //#line 636 "x10/parser/x10.g"
+		r.rule_ExistentialList1(ExistentialList,FormalParameter);
+                break;
+            }
+            //
+            // Rule 100:  NormalClassDeclaration ::= Modifiersopt class Identifier TypeParamsWithVarianceopt Propertiesopt WhereClauseopt Superopt Interfacesopt ClassBody
             //
             case 100: {
-                //#line 618 "x10/parser/x10.g"
-                Object ConstraintConjunction = (Object) getRhsSym(1);
-                //#line 620 "x10/parser/x10.g"
-		r.rule_ConstraintConjunctionopt1(ConstraintConjunction);
-                break;
-            }
-            //
-            // Rule 101:  FUTURE_ExistentialListopt ::= $Empty
-            //
-            case 101: {
-                
-                //#line 625 "x10/parser/x10.g"
-		r.rule_FUTURE_ExistentialListopt0();
-                break;
-            }
-            //
-            // Rule 102:  FUTURE_ExistentialList ::= FormalParameter
-            //
-            case 102: {
-                //#line 633 "x10/parser/x10.g"
-                Object FormalParameter = (Object) getRhsSym(1);
-                //#line 635 "x10/parser/x10.g"
-		r.rule_FUTURE_ExistentialList0(FormalParameter);
-                break;
-            }
-            //
-            // Rule 103:  FUTURE_ExistentialList ::= FUTURE_ExistentialList ; FormalParameter
-            //
-            case 103: {
-                //#line 637 "x10/parser/x10.g"
-                Object FUTURE_ExistentialList = (Object) getRhsSym(1);
-                //#line 637 "x10/parser/x10.g"
-                Object FormalParameter = (Object) getRhsSym(3);
-                //#line 639 "x10/parser/x10.g"
-		r.rule_FUTURE_ExistentialList1(FUTURE_ExistentialList,FormalParameter);
-                break;
-            }
-            //
-            // Rule 104:  ClassDeclaration ::= Modifiersopt class Identifier TypeParamsWithVarianceopt Propertiesopt WhereClauseopt Superopt Interfacesopt ClassBody
-            //
-            case 104: {
                 //#line 644 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
                 //#line 644 "x10/parser/x10.g"
@@ -1339,9 +1362,9 @@ public class X10Parser extends Object implements RuleAction
                 break;
             }
             //
-            // Rule 105:  StructDeclaration ::= Modifiersopt struct Identifier TypeParamsWithVarianceopt Propertiesopt WhereClauseopt Interfacesopt ClassBody
+            // Rule 101:  StructDeclaration ::= Modifiersopt struct Identifier TypeParamsWithVarianceopt Propertiesopt WhereClauseopt Interfacesopt ClassBody
             //
-            case 105: {
+            case 101: {
                 //#line 650 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
                 //#line 650 "x10/parser/x10.g"
@@ -1361,9 +1384,9 @@ public class X10Parser extends Object implements RuleAction
                 break;
             }
             //
-            // Rule 106:  ConstructorDeclaration ::= Modifiersopt def this TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt ConstructorBody
+            // Rule 102:  ConstructorDeclaration ::= Modifiersopt def this TypeParametersopt FormalParameters WhereClauseopt HasResultTypeopt Offersopt ConstructorBody
             //
-            case 106: {
+            case 102: {
                 //#line 655 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
                 //#line 655 "x10/parser/x10.g"
@@ -1375,18 +1398,18 @@ public class X10Parser extends Object implements RuleAction
                 //#line 655 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(7);
                 //#line 655 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(8);
+                Object Offersopt = (Object) getRhsSym(8);
                 //#line 655 "x10/parser/x10.g"
                 Object ConstructorBody = (Object) getRhsSym(9);
                 //#line 657 "x10/parser/x10.g"
-		r.rule_ConstructorDeclaration0(Modifiersopt,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,ConstructorBody);
+		r.rule_ConstructorDeclaration0(Modifiersopt,TypeParametersopt,FormalParameters,WhereClauseopt,HasResultTypeopt,Offersopt,ConstructorBody);
                                                            
                 break;
             }
             //
-            // Rule 107:  Super ::= extends ClassType
+            // Rule 103:  Super ::= extends ClassType
             //
-            case 107: {
+            case 103: {
                 //#line 661 "x10/parser/x10.g"
                 Object ClassType = (Object) getRhsSym(2);
                 //#line 663 "x10/parser/x10.g"
@@ -1394,4184 +1417,4068 @@ public class X10Parser extends Object implements RuleAction
                 break;
             }
             //
-            // Rule 108:  VarKeyword ::= val
+            // Rule 104:  FieldKeyword ::= val
             //
-            case 108: {
+            case 104: {
                 
                 //#line 668 "x10/parser/x10.g"
+		r.rule_FieldKeyword0();
+                break;
+            }
+            //
+            // Rule 105:  FieldKeyword ::= var
+            //
+            case 105: {
+                
+                //#line 672 "x10/parser/x10.g"
+		r.rule_FieldKeyword1();
+                break;
+            }
+            //
+            // Rule 106:  VarKeyword ::= val
+            //
+            case 106: {
+                
+                //#line 679 "x10/parser/x10.g"
 		r.rule_VarKeyword0();
                 break;
             }
             //
-            // Rule 109:  VarKeyword ::= var
+            // Rule 107:  VarKeyword ::= var
             //
-            case 109: {
+            case 107: {
                 
-                //#line 672 "x10/parser/x10.g"
+                //#line 683 "x10/parser/x10.g"
 		r.rule_VarKeyword1();
                 break;
             }
             //
-            // Rule 110:  FieldDeclaration ::= Modifiersopt VarKeyword FieldDeclarators ;
+            // Rule 108:  FieldDeclaration ::= Modifiersopt FieldKeyword FieldDeclarators ;
             //
-            case 110: {
-                //#line 675 "x10/parser/x10.g"
+            case 108: {
+                //#line 687 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 675 "x10/parser/x10.g"
-                Object VarKeyword = (Object) getRhsSym(2);
-                //#line 675 "x10/parser/x10.g"
+                //#line 687 "x10/parser/x10.g"
+                Object FieldKeyword = (Object) getRhsSym(2);
+                //#line 687 "x10/parser/x10.g"
                 Object FieldDeclarators = (Object) getRhsSym(3);
-                //#line 677 "x10/parser/x10.g"
-		r.rule_FieldDeclaration0(Modifiersopt,VarKeyword,FieldDeclarators);
+                //#line 689 "x10/parser/x10.g"
+		r.rule_FieldDeclaration0(Modifiersopt,FieldKeyword,FieldDeclarators);
+    
                 break;
             }
             //
-            // Rule 111:  FieldDeclaration ::= Modifiersopt FieldDeclarators ;
+            // Rule 109:  FieldDeclaration ::= Modifiersopt FieldDeclarators ;
             //
-            case 111: {
-                //#line 679 "x10/parser/x10.g"
+            case 109: {
+                //#line 693 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 679 "x10/parser/x10.g"
+                //#line 693 "x10/parser/x10.g"
                 Object FieldDeclarators = (Object) getRhsSym(2);
-                //#line 681 "x10/parser/x10.g"
+                //#line 695 "x10/parser/x10.g"
 		r.rule_FieldDeclaration1(Modifiersopt,FieldDeclarators);
+    
                 break;
             }
             //
-            // Rule 114:  AnnotationStatement ::= Annotationsopt NonExpressionStatement
+            // Rule 112:  AnnotationStatement ::= Annotationsopt NonExpressionStatement
             //
-            case 114: {
-                //#line 690 "x10/parser/x10.g"
+            case 112: {
+                //#line 705 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(1);
-                //#line 690 "x10/parser/x10.g"
+                //#line 705 "x10/parser/x10.g"
                 Object NonExpressionStatement = (Object) getRhsSym(2);
-                //#line 692 "x10/parser/x10.g"
+                //#line 707 "x10/parser/x10.g"
 		r.rule_AnnotationStatement0(Annotationsopt,NonExpressionStatement);
                 break;
             }
             //
-            // Rule 138:  OBSOLETE_OfferStatement ::= offer Expression ;
+            // Rule 136:  OfferStatement ::= offer Expression ;
             //
-            case 138: {
-                //#line 719 "x10/parser/x10.g"
+            case 136: {
+                //#line 736 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(2);
-                //#line 721 "x10/parser/x10.g"
-		r.rule_OBSOLETE_OfferStatement0(Expression);
+                //#line 738 "x10/parser/x10.g"
+		r.rule_OfferStatement0(Expression);
                 break;
             }
             //
-            // Rule 139:  IfThenStatement ::= if ( Expression ) Statement
+            // Rule 137:  IfThenStatement ::= if ( Expression ) Statement
             //
-            case 139: {
-                //#line 724 "x10/parser/x10.g"
+            case 137: {
+                //#line 741 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 724 "x10/parser/x10.g"
+                //#line 741 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(5);
-                //#line 726 "x10/parser/x10.g"
+                //#line 743 "x10/parser/x10.g"
 		r.rule_IfThenStatement0(Expression,Statement);
                 break;
             }
             //
-            // Rule 140:  IfThenElseStatement ::= if ( Expression ) Statement$s1 else Statement$s2
+            // Rule 138:  IfThenElseStatement ::= if ( Expression ) Statement$s1 else Statement$s2
             //
-            case 140: {
-                //#line 729 "x10/parser/x10.g"
+            case 138: {
+                //#line 746 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 729 "x10/parser/x10.g"
+                //#line 746 "x10/parser/x10.g"
                 Object s1 = (Object) getRhsSym(5);
-                //#line 729 "x10/parser/x10.g"
+                //#line 746 "x10/parser/x10.g"
                 Object s2 = (Object) getRhsSym(7);
-                //#line 731 "x10/parser/x10.g"
+                //#line 748 "x10/parser/x10.g"
 		r.rule_IfThenElseStatement0(Expression,s1,s2);
                 break;
             }
             //
-            // Rule 141:  EmptyStatement ::= ;
+            // Rule 139:  EmptyStatement ::= ;
             //
-            case 141: {
+            case 139: {
                 
-                //#line 736 "x10/parser/x10.g"
+                //#line 753 "x10/parser/x10.g"
 		r.rule_EmptyStatement0();
                 break;
             }
             //
-            // Rule 142:  LabeledStatement ::= Identifier : LoopStatement
+            // Rule 140:  LabeledStatement ::= Identifier : LoopStatement
             //
-            case 142: {
-                //#line 739 "x10/parser/x10.g"
+            case 140: {
+                //#line 756 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 739 "x10/parser/x10.g"
+                //#line 756 "x10/parser/x10.g"
                 Object LoopStatement = (Object) getRhsSym(3);
-                //#line 741 "x10/parser/x10.g"
+                //#line 758 "x10/parser/x10.g"
 		r.rule_LabeledStatement0(Identifier,LoopStatement);
                 break;
             }
             //
-            // Rule 147:  ExpressionStatement ::= StatementExpression ;
+            // Rule 145:  ExpressionStatement ::= StatementExpression ;
             //
-            case 147: {
-                //#line 749 "x10/parser/x10.g"
+            case 145: {
+                //#line 767 "x10/parser/x10.g"
                 Object StatementExpression = (Object) getRhsSym(1);
-                //#line 751 "x10/parser/x10.g"
+                //#line 769 "x10/parser/x10.g"
 		r.rule_ExpressionStatement0(StatementExpression);
                 break;
             }
             //
-            // Rule 169:  AssertStatement ::= assert Expression ;
+            // Rule 153:  AssertStatement ::= assert Expression ;
             //
-            case 169: {
-                //#line 777 "x10/parser/x10.g"
+            case 153: {
+                //#line 780 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(2);
-                //#line 779 "x10/parser/x10.g"
+                //#line 782 "x10/parser/x10.g"
 		r.rule_AssertStatement0(Expression);
                 break;
             }
             //
-            // Rule 170:  AssertStatement ::= assert Expression$expr1 : Expression$expr2 ;
+            // Rule 154:  AssertStatement ::= assert Expression$expr1 : Expression$expr2 ;
             //
-            case 170: {
-                //#line 781 "x10/parser/x10.g"
+            case 154: {
+                //#line 784 "x10/parser/x10.g"
                 Object expr1 = (Object) getRhsSym(2);
-                //#line 781 "x10/parser/x10.g"
+                //#line 784 "x10/parser/x10.g"
                 Object expr2 = (Object) getRhsSym(4);
-                //#line 783 "x10/parser/x10.g"
+                //#line 786 "x10/parser/x10.g"
 		r.rule_AssertStatement1(expr1,expr2);
                 break;
             }
             //
-            // Rule 171:  SwitchStatement ::= switch ( Expression ) SwitchBlock
+            // Rule 155:  SwitchStatement ::= switch ( Expression ) SwitchBlock
             //
-            case 171: {
-                //#line 786 "x10/parser/x10.g"
+            case 155: {
+                //#line 789 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 786 "x10/parser/x10.g"
+                //#line 789 "x10/parser/x10.g"
                 Object SwitchBlock = (Object) getRhsSym(5);
-                //#line 788 "x10/parser/x10.g"
+                //#line 791 "x10/parser/x10.g"
 		r.rule_SwitchStatement0(Expression,SwitchBlock);
                 break;
             }
             //
-            // Rule 172:  SwitchBlock ::= { SwitchBlockStatementGroupsopt SwitchLabelsopt }
+            // Rule 156:  SwitchBlock ::= { SwitchBlockStatementGroupsopt SwitchLabelsopt }
             //
-            case 172: {
-                //#line 791 "x10/parser/x10.g"
+            case 156: {
+                //#line 794 "x10/parser/x10.g"
                 Object SwitchBlockStatementGroupsopt = (Object) getRhsSym(2);
-                //#line 791 "x10/parser/x10.g"
+                //#line 794 "x10/parser/x10.g"
                 Object SwitchLabelsopt = (Object) getRhsSym(3);
-                //#line 793 "x10/parser/x10.g"
+                //#line 796 "x10/parser/x10.g"
 		r.rule_SwitchBlock0(SwitchBlockStatementGroupsopt,SwitchLabelsopt);
                 break;
             }
             //
-            // Rule 174:  SwitchBlockStatementGroups ::= SwitchBlockStatementGroups SwitchBlockStatementGroup
+            // Rule 158:  SwitchBlockStatementGroups ::= SwitchBlockStatementGroups SwitchBlockStatementGroup
             //
-            case 174: {
-                //#line 797 "x10/parser/x10.g"
+            case 158: {
+                //#line 800 "x10/parser/x10.g"
                 Object SwitchBlockStatementGroups = (Object) getRhsSym(1);
-                //#line 797 "x10/parser/x10.g"
+                //#line 800 "x10/parser/x10.g"
                 Object SwitchBlockStatementGroup = (Object) getRhsSym(2);
-                //#line 799 "x10/parser/x10.g"
+                //#line 802 "x10/parser/x10.g"
 		r.rule_SwitchBlockStatementGroups1(SwitchBlockStatementGroups,SwitchBlockStatementGroup);
                 break;
             }
             //
-            // Rule 175:  SwitchBlockStatementGroup ::= SwitchLabels BlockStatements
+            // Rule 159:  SwitchBlockStatementGroup ::= SwitchLabels BlockStatements
             //
-            case 175: {
-                //#line 802 "x10/parser/x10.g"
+            case 159: {
+                //#line 805 "x10/parser/x10.g"
                 Object SwitchLabels = (Object) getRhsSym(1);
-                //#line 802 "x10/parser/x10.g"
+                //#line 805 "x10/parser/x10.g"
                 Object BlockStatements = (Object) getRhsSym(2);
-                //#line 804 "x10/parser/x10.g"
+                //#line 807 "x10/parser/x10.g"
 		r.rule_SwitchBlockStatementGroup0(SwitchLabels,BlockStatements);
                 break;
             }
             //
-            // Rule 176:  SwitchLabels ::= SwitchLabel
+            // Rule 160:  SwitchLabels ::= SwitchLabel
             //
-            case 176: {
-                //#line 807 "x10/parser/x10.g"
+            case 160: {
+                //#line 810 "x10/parser/x10.g"
                 Object SwitchLabel = (Object) getRhsSym(1);
-                //#line 809 "x10/parser/x10.g"
+                //#line 812 "x10/parser/x10.g"
 		r.rule_SwitchLabels0(SwitchLabel);
                 break;
             }
             //
-            // Rule 177:  SwitchLabels ::= SwitchLabels SwitchLabel
+            // Rule 161:  SwitchLabels ::= SwitchLabels SwitchLabel
             //
-            case 177: {
-                //#line 811 "x10/parser/x10.g"
+            case 161: {
+                //#line 814 "x10/parser/x10.g"
                 Object SwitchLabels = (Object) getRhsSym(1);
-                //#line 811 "x10/parser/x10.g"
+                //#line 814 "x10/parser/x10.g"
                 Object SwitchLabel = (Object) getRhsSym(2);
-                //#line 813 "x10/parser/x10.g"
+                //#line 816 "x10/parser/x10.g"
 		r.rule_SwitchLabels1(SwitchLabels,SwitchLabel);
                 break;
             }
             //
-            // Rule 178:  SwitchLabel ::= case ConstantExpression :
+            // Rule 162:  SwitchLabel ::= case ConstantExpression :
             //
-            case 178: {
-                //#line 816 "x10/parser/x10.g"
+            case 162: {
+                //#line 819 "x10/parser/x10.g"
                 Object ConstantExpression = (Object) getRhsSym(2);
-                //#line 818 "x10/parser/x10.g"
+                //#line 821 "x10/parser/x10.g"
 		r.rule_SwitchLabel0(ConstantExpression);
                 break;
             }
             //
-            // Rule 179:  SwitchLabel ::= default :
+            // Rule 163:  SwitchLabel ::= default :
             //
-            case 179: {
+            case 163: {
                 
-                //#line 822 "x10/parser/x10.g"
+                //#line 825 "x10/parser/x10.g"
 		r.rule_SwitchLabel1();
                 break;
             }
             //
-            // Rule 180:  WhileStatement ::= while ( Expression ) Statement
+            // Rule 164:  WhileStatement ::= while ( Expression ) Statement
             //
-            case 180: {
-                //#line 825 "x10/parser/x10.g"
+            case 164: {
+                //#line 828 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 825 "x10/parser/x10.g"
+                //#line 828 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(5);
-                //#line 827 "x10/parser/x10.g"
+                //#line 830 "x10/parser/x10.g"
 		r.rule_WhileStatement0(Expression,Statement);
                 break;
             }
             //
-            // Rule 181:  DoStatement ::= do Statement while ( Expression ) ;
+            // Rule 165:  DoStatement ::= do Statement while ( Expression ) ;
             //
-            case 181: {
-                //#line 830 "x10/parser/x10.g"
+            case 165: {
+                //#line 833 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(2);
-                //#line 830 "x10/parser/x10.g"
+                //#line 833 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(5);
-                //#line 832 "x10/parser/x10.g"
+                //#line 835 "x10/parser/x10.g"
 		r.rule_DoStatement0(Statement,Expression);
                 break;
             }
             //
-            // Rule 184:  BasicForStatement ::= for ( ForInitopt ; Expressionopt ; ForUpdateopt ) Statement
+            // Rule 168:  BasicForStatement ::= for ( ForInitopt ; Expressionopt ; ForUpdateopt ) Statement
             //
-            case 184: {
-                //#line 838 "x10/parser/x10.g"
+            case 168: {
+                //#line 841 "x10/parser/x10.g"
                 Object ForInitopt = (Object) getRhsSym(3);
-                //#line 838 "x10/parser/x10.g"
+                //#line 841 "x10/parser/x10.g"
                 Object Expressionopt = (Object) getRhsSym(5);
-                //#line 838 "x10/parser/x10.g"
+                //#line 841 "x10/parser/x10.g"
                 Object ForUpdateopt = (Object) getRhsSym(7);
-                //#line 838 "x10/parser/x10.g"
+                //#line 841 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(9);
-                //#line 840 "x10/parser/x10.g"
+                //#line 843 "x10/parser/x10.g"
 		r.rule_BasicForStatement0(ForInitopt,Expressionopt,ForUpdateopt,Statement);
                 break;
             }
             //
-            // Rule 186:  ForInit ::= LocalVariableDeclaration
+            // Rule 170:  ForInit ::= LocalVariableDeclaration
             //
-            case 186: {
-                //#line 844 "x10/parser/x10.g"
+            case 170: {
+                //#line 847 "x10/parser/x10.g"
                 Object LocalVariableDeclaration = (Object) getRhsSym(1);
-                //#line 846 "x10/parser/x10.g"
+                //#line 849 "x10/parser/x10.g"
 		r.rule_ForInit1(LocalVariableDeclaration);
                 break;
             }
             //
-            // Rule 188:  StatementExpressionList ::= StatementExpression
+            // Rule 172:  StatementExpressionList ::= StatementExpression
             //
-            case 188: {
-                //#line 851 "x10/parser/x10.g"
+            case 172: {
+                //#line 854 "x10/parser/x10.g"
                 Object StatementExpression = (Object) getRhsSym(1);
-                //#line 853 "x10/parser/x10.g"
+                //#line 856 "x10/parser/x10.g"
 		r.rule_StatementExpressionList0(StatementExpression);
                 break;
             }
             //
-            // Rule 189:  StatementExpressionList ::= StatementExpressionList , StatementExpression
+            // Rule 173:  StatementExpressionList ::= StatementExpressionList , StatementExpression
             //
-            case 189: {
-                //#line 855 "x10/parser/x10.g"
+            case 173: {
+                //#line 858 "x10/parser/x10.g"
                 Object StatementExpressionList = (Object) getRhsSym(1);
-                //#line 855 "x10/parser/x10.g"
+                //#line 858 "x10/parser/x10.g"
                 Object StatementExpression = (Object) getRhsSym(3);
-                //#line 857 "x10/parser/x10.g"
+                //#line 860 "x10/parser/x10.g"
 		r.rule_StatementExpressionList1(StatementExpressionList,StatementExpression);
                 break;
             }
             //
-            // Rule 190:  BreakStatement ::= break Identifieropt ;
+            // Rule 174:  BreakStatement ::= break Identifieropt ;
             //
-            case 190: {
-                //#line 860 "x10/parser/x10.g"
+            case 174: {
+                //#line 863 "x10/parser/x10.g"
                 Object Identifieropt = (Object) getRhsSym(2);
-                //#line 862 "x10/parser/x10.g"
+                //#line 865 "x10/parser/x10.g"
 		r.rule_BreakStatement0(Identifieropt);
                 break;
             }
             //
-            // Rule 191:  ContinueStatement ::= continue Identifieropt ;
+            // Rule 175:  ContinueStatement ::= continue Identifieropt ;
             //
-            case 191: {
-                //#line 865 "x10/parser/x10.g"
+            case 175: {
+                //#line 868 "x10/parser/x10.g"
                 Object Identifieropt = (Object) getRhsSym(2);
-                //#line 867 "x10/parser/x10.g"
+                //#line 870 "x10/parser/x10.g"
 		r.rule_ContinueStatement0(Identifieropt);
                 break;
             }
             //
-            // Rule 192:  ReturnStatement ::= return Expressionopt ;
+            // Rule 176:  ReturnStatement ::= return Expressionopt ;
             //
-            case 192: {
-                //#line 870 "x10/parser/x10.g"
+            case 176: {
+                //#line 873 "x10/parser/x10.g"
                 Object Expressionopt = (Object) getRhsSym(2);
-                //#line 872 "x10/parser/x10.g"
+                //#line 875 "x10/parser/x10.g"
 		r.rule_ReturnStatement0(Expressionopt);
                 break;
             }
             //
-            // Rule 193:  ThrowStatement ::= throw Expression ;
+            // Rule 177:  ThrowStatement ::= throw Expression ;
             //
-            case 193: {
-                //#line 875 "x10/parser/x10.g"
+            case 177: {
+                //#line 878 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(2);
-                //#line 877 "x10/parser/x10.g"
+                //#line 880 "x10/parser/x10.g"
 		r.rule_ThrowStatement0(Expression);
                 break;
             }
             //
-            // Rule 194:  TryStatement ::= try Block Catches
+            // Rule 178:  TryStatement ::= try Block Catches
             //
-            case 194: {
-                //#line 880 "x10/parser/x10.g"
+            case 178: {
+                //#line 883 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(2);
-                //#line 880 "x10/parser/x10.g"
+                //#line 883 "x10/parser/x10.g"
                 Object Catches = (Object) getRhsSym(3);
-                //#line 882 "x10/parser/x10.g"
+                //#line 885 "x10/parser/x10.g"
 		r.rule_TryStatement0(Block,Catches);
                 break;
             }
             //
-            // Rule 195:  TryStatement ::= try Block Catchesopt Finally
+            // Rule 179:  TryStatement ::= try Block Catchesopt Finally
             //
-            case 195: {
-                //#line 884 "x10/parser/x10.g"
+            case 179: {
+                //#line 887 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(2);
-                //#line 884 "x10/parser/x10.g"
+                //#line 887 "x10/parser/x10.g"
                 Object Catchesopt = (Object) getRhsSym(3);
-                //#line 884 "x10/parser/x10.g"
+                //#line 887 "x10/parser/x10.g"
                 Object Finally = (Object) getRhsSym(4);
-                //#line 886 "x10/parser/x10.g"
+                //#line 889 "x10/parser/x10.g"
 		r.rule_TryStatement1(Block,Catchesopt,Finally);
                 break;
             }
             //
-            // Rule 196:  Catches ::= CatchClause
+            // Rule 180:  Catches ::= CatchClause
             //
-            case 196: {
-                //#line 889 "x10/parser/x10.g"
+            case 180: {
+                //#line 892 "x10/parser/x10.g"
                 Object CatchClause = (Object) getRhsSym(1);
-                //#line 891 "x10/parser/x10.g"
+                //#line 894 "x10/parser/x10.g"
 		r.rule_Catches0(CatchClause);
                 break;
             }
             //
-            // Rule 197:  Catches ::= Catches CatchClause
+            // Rule 181:  Catches ::= Catches CatchClause
             //
-            case 197: {
-                //#line 893 "x10/parser/x10.g"
+            case 181: {
+                //#line 896 "x10/parser/x10.g"
                 Object Catches = (Object) getRhsSym(1);
-                //#line 893 "x10/parser/x10.g"
+                //#line 896 "x10/parser/x10.g"
                 Object CatchClause = (Object) getRhsSym(2);
-                //#line 895 "x10/parser/x10.g"
+                //#line 898 "x10/parser/x10.g"
 		r.rule_Catches1(Catches,CatchClause);
                 break;
             }
             //
-            // Rule 198:  CatchClause ::= catch ( FormalParameter ) Block
+            // Rule 182:  CatchClause ::= catch ( FormalParameter ) Block
             //
-            case 198: {
-                //#line 898 "x10/parser/x10.g"
+            case 182: {
+                //#line 901 "x10/parser/x10.g"
                 Object FormalParameter = (Object) getRhsSym(3);
-                //#line 898 "x10/parser/x10.g"
+                //#line 901 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(5);
-                //#line 900 "x10/parser/x10.g"
+                //#line 903 "x10/parser/x10.g"
 		r.rule_CatchClause0(FormalParameter,Block);
                 break;
             }
             //
-            // Rule 199:  Finally ::= finally Block
+            // Rule 183:  Finally ::= finally Block
             //
-            case 199: {
-                //#line 903 "x10/parser/x10.g"
+            case 183: {
+                //#line 906 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(2);
-                //#line 905 "x10/parser/x10.g"
+                //#line 908 "x10/parser/x10.g"
 		r.rule_Finally0(Block);
                 break;
             }
             //
-            // Rule 200:  ClockedClause ::= clocked Arguments
+            // Rule 184:  ClockedClause ::= clocked ( ClockList )
             //
-            case 200: {
-                //#line 908 "x10/parser/x10.g"
-                Object Arguments = (Object) getRhsSym(2);
-                //#line 910 "x10/parser/x10.g"
-		r.rule_ClockedClause0(Arguments);
+            case 184: {
+                //#line 911 "x10/parser/x10.g"
+                Object ClockList = (Object) getRhsSym(3);
+                //#line 913 "x10/parser/x10.g"
+		r.rule_ClockedClause0(ClockList);
                 break;
             }
             //
-            // Rule 201:  AsyncStatement ::= async ClockedClauseopt Statement
+            // Rule 185:  AsyncStatement ::= async ClockedClauseopt Statement
             //
-            case 201: {
-                //#line 914 "x10/parser/x10.g"
+            case 185: {
+                //#line 917 "x10/parser/x10.g"
                 Object ClockedClauseopt = (Object) getRhsSym(2);
-                //#line 914 "x10/parser/x10.g"
+                //#line 917 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(3);
-                //#line 916 "x10/parser/x10.g"
+                //#line 919 "x10/parser/x10.g"
 		r.rule_AsyncStatement0(ClockedClauseopt,Statement);
                 break;
             }
             //
-            // Rule 202:  AsyncStatement ::= clocked async Statement
+            // Rule 186:  AsyncStatement ::= clocked async Statement
             //
-            case 202: {
-                //#line 918 "x10/parser/x10.g"
+            case 186: {
+                //#line 921 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(3);
-                //#line 920 "x10/parser/x10.g"
+                //#line 923 "x10/parser/x10.g"
 		r.rule_AsyncStatement1(Statement);
                 break;
             }
             //
-            // Rule 203:  AtStatement ::= at ( Expression ) Statement
+            // Rule 187:  AtStatement ::= at PlaceExpressionSingleList Statement
             //
-            case 203: {
-                //#line 924 "x10/parser/x10.g"
-                Object Expression = (Object) getRhsSym(3);
-                //#line 924 "x10/parser/x10.g"
-                Object Statement = (Object) getRhsSym(5);
-                //#line 926 "x10/parser/x10.g"
-		r.rule_AtStatement0(Expression,Statement);
+            case 187: {
+                //#line 927 "x10/parser/x10.g"
+                Object PlaceExpressionSingleList = (Object) getRhsSym(2);
+                //#line 927 "x10/parser/x10.g"
+                Object Statement = (Object) getRhsSym(3);
+                //#line 929 "x10/parser/x10.g"
+		r.rule_AtStatement0(PlaceExpressionSingleList,Statement);
                 break;
             }
             //
-            // Rule 204:  AtomicStatement ::= atomic Statement
+            // Rule 188:  AtomicStatement ::= atomic Statement
             //
-            case 204: {
-                //#line 967 "x10/parser/x10.g"
+            case 188: {
+                //#line 970 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(2);
-                //#line 969 "x10/parser/x10.g"
+                //#line 972 "x10/parser/x10.g"
 		r.rule_AtomicStatement0(Statement);
                 break;
             }
             //
-            // Rule 205:  WhenStatement ::= when ( Expression ) Statement
+            // Rule 189:  WhenStatement ::= when ( Expression ) Statement
             //
-            case 205: {
-                //#line 973 "x10/parser/x10.g"
+            case 189: {
+                //#line 976 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 973 "x10/parser/x10.g"
+                //#line 976 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(5);
-                //#line 975 "x10/parser/x10.g"
+                //#line 978 "x10/parser/x10.g"
 		r.rule_WhenStatement0(Expression,Statement);
                 break;
             }
             //
-            // Rule 206:  AtEachStatement ::= ateach ( LoopIndex in Expression ) ClockedClauseopt Statement
+            // Rule 190:  AtEachStatement ::= ateach ( LoopIndex in Expression ) ClockedClauseopt Statement
             //
-            case 206: {
-                //#line 984 "x10/parser/x10.g"
+            case 190: {
+                //#line 1038 "x10/parser/x10.g"
                 Object LoopIndex = (Object) getRhsSym(3);
-                //#line 984 "x10/parser/x10.g"
+                //#line 1038 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(5);
-                //#line 984 "x10/parser/x10.g"
+                //#line 1038 "x10/parser/x10.g"
                 Object ClockedClauseopt = (Object) getRhsSym(7);
-                //#line 984 "x10/parser/x10.g"
+                //#line 1038 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(8);
-                //#line 986 "x10/parser/x10.g"
+                //#line 1040 "x10/parser/x10.g"
 		r.rule_AtEachStatement0(LoopIndex,Expression,ClockedClauseopt,Statement);
                 break;
             }
             //
-            // Rule 207:  AtEachStatement ::= ateach ( Expression ) Statement
+            // Rule 191:  AtEachStatement ::= ateach ( Expression ) Statement
             //
-            case 207: {
-                //#line 988 "x10/parser/x10.g"
+            case 191: {
+                //#line 1042 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 988 "x10/parser/x10.g"
+                //#line 1042 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(5);
-                //#line 990 "x10/parser/x10.g"
+                //#line 1044 "x10/parser/x10.g"
 		r.rule_AtEachStatement1(Expression,Statement);
                 break;
             }
             //
-            // Rule 208:  EnhancedForStatement ::= for ( LoopIndex in Expression ) Statement
+            // Rule 192:  EnhancedForStatement ::= for ( LoopIndex in Expression ) Statement
             //
-            case 208: {
-                //#line 992 "x10/parser/x10.g"
+            case 192: {
+                //#line 1046 "x10/parser/x10.g"
                 Object LoopIndex = (Object) getRhsSym(3);
-                //#line 992 "x10/parser/x10.g"
+                //#line 1046 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(5);
-                //#line 992 "x10/parser/x10.g"
+                //#line 1046 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(7);
-                //#line 994 "x10/parser/x10.g"
+                //#line 1048 "x10/parser/x10.g"
 		r.rule_EnhancedForStatement0(LoopIndex,Expression,Statement);
                 break;
             }
             //
-            // Rule 209:  EnhancedForStatement ::= for ( Expression ) Statement
+            // Rule 193:  EnhancedForStatement ::= for ( Expression ) Statement
             //
-            case 209: {
-                //#line 996 "x10/parser/x10.g"
+            case 193: {
+                //#line 1050 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 996 "x10/parser/x10.g"
+                //#line 1050 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(5);
-                //#line 998 "x10/parser/x10.g"
+                //#line 1052 "x10/parser/x10.g"
 		r.rule_EnhancedForStatement1(Expression,Statement);
                 break;
             }
             //
-            // Rule 210:  FinishStatement ::= finish Statement
+            // Rule 194:  FinishStatement ::= finish Statement
             //
-            case 210: {
-                //#line 1002 "x10/parser/x10.g"
+            case 194: {
+                //#line 1056 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(2);
-                //#line 1004 "x10/parser/x10.g"
+                //#line 1058 "x10/parser/x10.g"
 		r.rule_FinishStatement0(Statement);
                 break;
             }
             //
-            // Rule 211:  FinishStatement ::= clocked finish Statement
+            // Rule 195:  FinishStatement ::= clocked finish Statement
             //
-            case 211: {
-                //#line 1006 "x10/parser/x10.g"
+            case 195: {
+                //#line 1060 "x10/parser/x10.g"
                 Object Statement = (Object) getRhsSym(3);
-                //#line 1008 "x10/parser/x10.g"
+                //#line 1062 "x10/parser/x10.g"
 		r.rule_FinishStatement1(Statement);
                 break;
             }
             //
-            // Rule 213:  CastExpression ::= ExpressionName
+            // Rule 196:  PlaceExpressionSingleList ::= ( PlaceExpression )
             //
-            case 213: {
-                //#line 1012 "x10/parser/x10.g"
+            case 196: {
+                //#line 1064 "x10/parser/x10.g"
+                Object PlaceExpression = (Object) getRhsSym(2);
+                //#line 1066 "x10/parser/x10.g"
+		r.rule_PlaceExpressionSingleList0(PlaceExpression);
+                break;
+            }
+            //
+            // Rule 198:  ClockList ::= Clock
+            //
+            case 198: {
+                //#line 1071 "x10/parser/x10.g"
+                Object Clock = (Object) getRhsSym(1);
+                //#line 1073 "x10/parser/x10.g"
+		r.rule_ClockList0(Clock);
+                break;
+            }
+            //
+            // Rule 199:  ClockList ::= ClockList , Clock
+            //
+            case 199: {
+                //#line 1075 "x10/parser/x10.g"
+                Object ClockList = (Object) getRhsSym(1);
+                //#line 1075 "x10/parser/x10.g"
+                Object Clock = (Object) getRhsSym(3);
+                //#line 1077 "x10/parser/x10.g"
+		r.rule_ClockList1(ClockList,Clock);
+                break;
+            }
+            //
+            // Rule 200:  Clock ::= Expression
+            //
+            case 200: {
+                //#line 1081 "x10/parser/x10.g"
+                Object Expression = (Object) getRhsSym(1);
+                //#line 1083 "x10/parser/x10.g"
+		r.rule_Clock0(Expression);
+                break;
+            }
+            //
+            // Rule 202:  CastExpression ::= ExpressionName
+            //
+            case 202: {
+                //#line 1093 "x10/parser/x10.g"
                 Object ExpressionName = (Object) getRhsSym(1);
-                //#line 1014 "x10/parser/x10.g"
+                //#line 1095 "x10/parser/x10.g"
 		r.rule_CastExpression1(ExpressionName);
                 break;
             }
             //
-            // Rule 214:  CastExpression ::= CastExpression as Type
+            // Rule 203:  CastExpression ::= CastExpression as Type
             //
-            case 214: {
-                //#line 1016 "x10/parser/x10.g"
+            case 203: {
+                //#line 1097 "x10/parser/x10.g"
                 Object CastExpression = (Object) getRhsSym(1);
-                //#line 1016 "x10/parser/x10.g"
+                //#line 1097 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(3);
-                //#line 1018 "x10/parser/x10.g"
+                //#line 1099 "x10/parser/x10.g"
 		r.rule_CastExpression2(CastExpression,Type);
                 break;
             }
             //
-            // Rule 215:  TypeParamWithVarianceList ::= TypeParameter
+            // Rule 204:  TypeParamWithVarianceList ::= TypeParamWithVariance
             //
-            case 215: {
-                //#line 1022 "x10/parser/x10.g"
-                Object TypeParameter = (Object) getRhsSym(1);
-                //#line 1024 "x10/parser/x10.g"
-		r.rule_TypeParamWithVarianceList0(TypeParameter);
+            case 204: {
+                //#line 1103 "x10/parser/x10.g"
+                Object TypeParamWithVariance = (Object) getRhsSym(1);
+                //#line 1105 "x10/parser/x10.g"
+		r.rule_TypeParamWithVarianceList0(TypeParamWithVariance);
                 break;
             }
             //
-            // Rule 216:  TypeParamWithVarianceList ::= OBSOLETE_TypeParamWithVariance
+            // Rule 205:  TypeParamWithVarianceList ::= TypeParamWithVarianceList , TypeParamWithVariance
             //
-            case 216: {
-                //#line 1026 "x10/parser/x10.g"
-                Object OBSOLETE_TypeParamWithVariance = (Object) getRhsSym(1);
-                //#line 1028 "x10/parser/x10.g"
-		r.rule_TypeParamWithVarianceList1(OBSOLETE_TypeParamWithVariance);
-                break;
-            }
-            //
-            // Rule 217:  TypeParamWithVarianceList ::= TypeParamWithVarianceList , TypeParameter
-            //
-            case 217: {
-                //#line 1030 "x10/parser/x10.g"
+            case 205: {
+                //#line 1107 "x10/parser/x10.g"
                 Object TypeParamWithVarianceList = (Object) getRhsSym(1);
-                //#line 1030 "x10/parser/x10.g"
-                Object TypeParameter = (Object) getRhsSym(3);
-                //#line 1032 "x10/parser/x10.g"
-		r.rule_TypeParamWithVarianceList2(TypeParamWithVarianceList,TypeParameter);
+                //#line 1107 "x10/parser/x10.g"
+                Object TypeParamWithVariance = (Object) getRhsSym(3);
+                //#line 1109 "x10/parser/x10.g"
+		r.rule_TypeParamWithVarianceList1(TypeParamWithVarianceList,TypeParamWithVariance);
                 break;
             }
             //
-            // Rule 218:  TypeParamWithVarianceList ::= TypeParamWithVarianceList , OBSOLETE_TypeParamWithVariance
+            // Rule 206:  TypeParameterList ::= TypeParameter
             //
-            case 218: {
-                //#line 1034 "x10/parser/x10.g"
-                Object TypeParamWithVarianceList = (Object) getRhsSym(1);
-                //#line 1034 "x10/parser/x10.g"
-                Object OBSOLETE_TypeParamWithVariance = (Object) getRhsSym(3);
-                //#line 1036 "x10/parser/x10.g"
-		r.rule_TypeParamWithVarianceList3(TypeParamWithVarianceList,OBSOLETE_TypeParamWithVariance);
-                break;
-            }
-            //
-            // Rule 219:  TypeParameterList ::= TypeParameter
-            //
-            case 219: {
-                //#line 1039 "x10/parser/x10.g"
+            case 206: {
+                //#line 1112 "x10/parser/x10.g"
                 Object TypeParameter = (Object) getRhsSym(1);
-                //#line 1041 "x10/parser/x10.g"
+                //#line 1114 "x10/parser/x10.g"
 		r.rule_TypeParameterList0(TypeParameter);
                 break;
             }
             //
-            // Rule 220:  TypeParameterList ::= TypeParameterList , TypeParameter
+            // Rule 207:  TypeParameterList ::= TypeParameterList , TypeParameter
             //
-            case 220: {
-                //#line 1043 "x10/parser/x10.g"
+            case 207: {
+                //#line 1116 "x10/parser/x10.g"
                 Object TypeParameterList = (Object) getRhsSym(1);
-                //#line 1043 "x10/parser/x10.g"
+                //#line 1116 "x10/parser/x10.g"
                 Object TypeParameter = (Object) getRhsSym(3);
-                //#line 1045 "x10/parser/x10.g"
+                //#line 1118 "x10/parser/x10.g"
 		r.rule_TypeParameterList1(TypeParameterList,TypeParameter);
                 break;
             }
             //
-            // Rule 221:  OBSOLETE_TypeParamWithVariance ::= + TypeParameter
+            // Rule 208:  TypeParamWithVariance ::= Identifier
             //
-            case 221: {
-                //#line 1048 "x10/parser/x10.g"
-                Object TypeParameter = (Object) getRhsSym(2);
-                //#line 1050 "x10/parser/x10.g"
-		r.rule_OBSOLETE_TypeParamWithVariance0(TypeParameter);
-                break;
-            }
-            //
-            // Rule 222:  OBSOLETE_TypeParamWithVariance ::= - TypeParameter
-            //
-            case 222: {
-                //#line 1052 "x10/parser/x10.g"
-                Object TypeParameter = (Object) getRhsSym(2);
-                //#line 1054 "x10/parser/x10.g"
-		r.rule_OBSOLETE_TypeParamWithVariance1(TypeParameter);
-                break;
-            }
-            //
-            // Rule 223:  TypeParameter ::= Identifier
-            //
-            case 223: {
-                //#line 1057 "x10/parser/x10.g"
+            case 208: {
+                //#line 1121 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1059 "x10/parser/x10.g"
+                //#line 1123 "x10/parser/x10.g"
+		r.rule_TypeParamWithVariance0(Identifier);
+                break;
+            }
+            //
+            // Rule 209:  TypeParamWithVariance ::= + Identifier
+            //
+            case 209: {
+                //#line 1125 "x10/parser/x10.g"
+                Object Identifier = (Object) getRhsSym(2);
+                //#line 1127 "x10/parser/x10.g"
+		r.rule_TypeParamWithVariance1(Identifier);
+                break;
+            }
+            //
+            // Rule 210:  TypeParamWithVariance ::= - Identifier
+            //
+            case 210: {
+                //#line 1129 "x10/parser/x10.g"
+                Object Identifier = (Object) getRhsSym(2);
+                //#line 1131 "x10/parser/x10.g"
+		r.rule_TypeParamWithVariance2(Identifier);
+                break;
+            }
+            //
+            // Rule 211:  TypeParameter ::= Identifier
+            //
+            case 211: {
+                //#line 1134 "x10/parser/x10.g"
+                Object Identifier = (Object) getRhsSym(1);
+                //#line 1136 "x10/parser/x10.g"
 		r.rule_TypeParameter0(Identifier);
                 break;
             }
             //
-            // Rule 224:  ClosureExpression ::= FormalParameters WhereClauseopt HasResultTypeopt OBSOLETE_Offersopt => ClosureBody
+            // Rule 212:  ClosureExpression ::= FormalParameters WhereClauseopt HasResultTypeopt Offersopt => ClosureBody
             //
-            case 224: {
-                //#line 1062 "x10/parser/x10.g"
+            case 212: {
+                //#line 1158 "x10/parser/x10.g"
                 Object FormalParameters = (Object) getRhsSym(1);
-                //#line 1062 "x10/parser/x10.g"
+                //#line 1158 "x10/parser/x10.g"
                 Object WhereClauseopt = (Object) getRhsSym(2);
-                //#line 1062 "x10/parser/x10.g"
+                //#line 1158 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(3);
-                //#line 1062 "x10/parser/x10.g"
-                Object OBSOLETE_Offersopt = (Object) getRhsSym(4);
-                //#line 1062 "x10/parser/x10.g"
+                //#line 1158 "x10/parser/x10.g"
+                Object Offersopt = (Object) getRhsSym(4);
+                //#line 1158 "x10/parser/x10.g"
                 Object ClosureBody = (Object) getRhsSym(6);
-                //#line 1064 "x10/parser/x10.g"
-		r.rule_ClosureExpression0(FormalParameters,WhereClauseopt,HasResultTypeopt,OBSOLETE_Offersopt,ClosureBody);
+                //#line 1160 "x10/parser/x10.g"
+		r.rule_ClosureExpression0(FormalParameters,WhereClauseopt,HasResultTypeopt,Offersopt,ClosureBody);
                 break;
             }
             //
-            // Rule 225:  LastExpression ::= Expression
+            // Rule 213:  LastExpression ::= Expression
             //
-            case 225: {
-                //#line 1067 "x10/parser/x10.g"
+            case 213: {
+                //#line 1163 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(1);
-                //#line 1069 "x10/parser/x10.g"
+                //#line 1165 "x10/parser/x10.g"
 		r.rule_LastExpression0(Expression);
                 break;
             }
             //
-            // Rule 226:  ClosureBody ::= Expression
+            // Rule 214:  ClosureBody ::= Expression
             //
-            case 226: {
-                //#line 1072 "x10/parser/x10.g"
+            case 214: {
+                //#line 1168 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(1);
-                //#line 1074 "x10/parser/x10.g"
+                //#line 1170 "x10/parser/x10.g"
 		r.rule_ClosureBody0(Expression);
                 break;
             }
             //
-            // Rule 227:  ClosureBody ::= Annotationsopt { BlockStatementsopt LastExpression }
+            // Rule 215:  ClosureBody ::= Annotationsopt { BlockStatementsopt LastExpression }
             //
-            case 227: {
-                //#line 1076 "x10/parser/x10.g"
+            case 215: {
+                //#line 1172 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(1);
-                //#line 1076 "x10/parser/x10.g"
+                //#line 1172 "x10/parser/x10.g"
                 Object BlockStatementsopt = (Object) getRhsSym(3);
-                //#line 1076 "x10/parser/x10.g"
+                //#line 1172 "x10/parser/x10.g"
                 Object LastExpression = (Object) getRhsSym(4);
-                //#line 1078 "x10/parser/x10.g"
+                //#line 1174 "x10/parser/x10.g"
 		r.rule_ClosureBody1(Annotationsopt,BlockStatementsopt,LastExpression);
                 break;
             }
             //
-            // Rule 228:  ClosureBody ::= Annotationsopt Block
+            // Rule 216:  ClosureBody ::= Annotationsopt Block
             //
-            case 228: {
-                //#line 1080 "x10/parser/x10.g"
+            case 216: {
+                //#line 1176 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(1);
-                //#line 1080 "x10/parser/x10.g"
+                //#line 1176 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(2);
-                //#line 1082 "x10/parser/x10.g"
+                //#line 1178 "x10/parser/x10.g"
 		r.rule_ClosureBody2(Annotationsopt,Block);
                 break;
             }
             //
-            // Rule 229:  AtExpression ::= at ( Expression ) ClosureBody
+            // Rule 217:  AtExpression ::= at PlaceExpressionSingleList ClosureBody
             //
-            case 229: {
-                //#line 1086 "x10/parser/x10.g"
-                Object Expression = (Object) getRhsSym(3);
-                //#line 1086 "x10/parser/x10.g"
-                Object ClosureBody = (Object) getRhsSym(5);
-                //#line 1088 "x10/parser/x10.g"
-		r.rule_AtExpression0(Expression,ClosureBody);
+            case 217: {
+                //#line 1182 "x10/parser/x10.g"
+                Object PlaceExpressionSingleList = (Object) getRhsSym(2);
+                //#line 1182 "x10/parser/x10.g"
+                Object ClosureBody = (Object) getRhsSym(3);
+                //#line 1184 "x10/parser/x10.g"
+		r.rule_AtExpression0(PlaceExpressionSingleList,ClosureBody);
                 break;
             }
             //
-            // Rule 230:  OBSOLETE_FinishExpression ::= finish ( Expression ) Block
+            // Rule 218:  FinishExpression ::= finish ( Expression ) Block
             //
-            case 230: {
-                //#line 1129 "x10/parser/x10.g"
+            case 218: {
+                //#line 1225 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 1129 "x10/parser/x10.g"
+                //#line 1225 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(5);
-                //#line 1131 "x10/parser/x10.g"
-		r.rule_OBSOLETE_FinishExpression0(Expression,Block);
+                //#line 1227 "x10/parser/x10.g"
+		r.rule_FinishExpression0(Expression,Block);
                 break;
             }
             //
-            // Rule 231:  WhereClauseopt ::= $Empty
+            // Rule 219:  WhereClauseopt ::= $Empty
             //
-            case 231:
+            case 219:
                 setResult(null);
                 break;
 
             //
-            // Rule 233:  ClockedClauseopt ::= $Empty
+            // Rule 221:  ClockedClauseopt ::= $Empty
             //
-            case 233: {
+            case 221: {
                 
-                //#line 1142 "x10/parser/x10.g"
+                //#line 1271 "x10/parser/x10.g"
 		r.rule_ClockedClauseopt0();
                 break;
             }
             //
-            // Rule 235:  TypeName ::= Identifier
+            // Rule 223:  TypeName ::= Identifier
             //
-            case 235: {
-                //#line 1151 "x10/parser/x10.g"
+            case 223: {
+                //#line 1280 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1153 "x10/parser/x10.g"
+                //#line 1282 "x10/parser/x10.g"
 		r.rule_TypeName1(Identifier);
                 break;
             }
             //
-            // Rule 236:  TypeName ::= TypeName . Identifier
+            // Rule 224:  TypeName ::= TypeName . Identifier
             //
-            case 236: {
-                //#line 1155 "x10/parser/x10.g"
+            case 224: {
+                //#line 1284 "x10/parser/x10.g"
                 Object TypeName = (Object) getRhsSym(1);
-                //#line 1155 "x10/parser/x10.g"
+                //#line 1284 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1157 "x10/parser/x10.g"
+                //#line 1286 "x10/parser/x10.g"
 		r.rule_TypeName2(TypeName,Identifier);
                 break;
             }
             //
-            // Rule 238:  TypeArguments ::= [ TypeArgumentList ]
+            // Rule 226:  TypeArguments ::= [ TypeArgumentList ]
             //
-            case 238: {
-                //#line 1162 "x10/parser/x10.g"
+            case 226: {
+                //#line 1291 "x10/parser/x10.g"
                 Object TypeArgumentList = (Object) getRhsSym(2);
-                //#line 1164 "x10/parser/x10.g"
+                //#line 1293 "x10/parser/x10.g"
 		r.rule_TypeArguments0(TypeArgumentList);
                 break;
             }
             //
-            // Rule 239:  TypeArgumentList ::= Type
+            // Rule 227:  TypeArgumentList ::= Type
             //
-            case 239: {
-                //#line 1168 "x10/parser/x10.g"
+            case 227: {
+                //#line 1297 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(1);
-                //#line 1170 "x10/parser/x10.g"
+                //#line 1299 "x10/parser/x10.g"
 		r.rule_TypeArgumentList0(Type);
                 break;
             }
             //
-            // Rule 240:  TypeArgumentList ::= TypeArgumentList , Type
+            // Rule 228:  TypeArgumentList ::= TypeArgumentList , Type
             //
-            case 240: {
-                //#line 1172 "x10/parser/x10.g"
+            case 228: {
+                //#line 1301 "x10/parser/x10.g"
                 Object TypeArgumentList = (Object) getRhsSym(1);
-                //#line 1172 "x10/parser/x10.g"
+                //#line 1301 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(3);
-                //#line 1174 "x10/parser/x10.g"
+                //#line 1303 "x10/parser/x10.g"
 		r.rule_TypeArgumentList1(TypeArgumentList,Type);
                 break;
             }
             //
-            // Rule 241:  PackageName ::= Identifier
+            // Rule 229:  PackageName ::= Identifier
             //
-            case 241: {
-                //#line 1181 "x10/parser/x10.g"
+            case 229: {
+                //#line 1310 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1183 "x10/parser/x10.g"
+                //#line 1312 "x10/parser/x10.g"
 		r.rule_PackageName1(Identifier);
                 break;
             }
             //
-            // Rule 242:  PackageName ::= PackageName . Identifier
+            // Rule 230:  PackageName ::= PackageName . Identifier
             //
-            case 242: {
-                //#line 1185 "x10/parser/x10.g"
+            case 230: {
+                //#line 1314 "x10/parser/x10.g"
                 Object PackageName = (Object) getRhsSym(1);
-                //#line 1185 "x10/parser/x10.g"
+                //#line 1314 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1187 "x10/parser/x10.g"
+                //#line 1316 "x10/parser/x10.g"
 		r.rule_PackageName2(PackageName,Identifier);
                 break;
             }
             //
-            // Rule 243:  ExpressionName ::= Identifier
+            // Rule 231:  ExpressionName ::= Identifier
             //
-            case 243: {
-                //#line 1196 "x10/parser/x10.g"
+            case 231: {
+                //#line 1325 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1198 "x10/parser/x10.g"
+                //#line 1327 "x10/parser/x10.g"
 		r.rule_ExpressionName1(Identifier);
                 break;
             }
             //
-            // Rule 244:  ExpressionName ::= FullyQualifiedName . Identifier
+            // Rule 232:  ExpressionName ::= AmbiguousName . Identifier
             //
-            case 244: {
-                //#line 1200 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1200 "x10/parser/x10.g"
+            case 232: {
+                //#line 1329 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 1329 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1202 "x10/parser/x10.g"
-		r.rule_ExpressionName2(FullyQualifiedName,Identifier);
+                //#line 1331 "x10/parser/x10.g"
+		r.rule_ExpressionName2(AmbiguousName,Identifier);
                 break;
             }
             //
-            // Rule 245:  MethodName ::= Identifier
+            // Rule 233:  MethodName ::= Identifier
             //
-            case 245: {
-                //#line 1205 "x10/parser/x10.g"
+            case 233: {
+                //#line 1334 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1207 "x10/parser/x10.g"
+                //#line 1336 "x10/parser/x10.g"
 		r.rule_MethodName1(Identifier);
                 break;
             }
             //
-            // Rule 246:  MethodName ::= FullyQualifiedName . Identifier
+            // Rule 234:  MethodName ::= AmbiguousName . Identifier
             //
-            case 246: {
-                //#line 1209 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1209 "x10/parser/x10.g"
+            case 234: {
+                //#line 1338 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 1338 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1211 "x10/parser/x10.g"
-		r.rule_MethodName2(FullyQualifiedName,Identifier);
+                //#line 1340 "x10/parser/x10.g"
+		r.rule_MethodName2(AmbiguousName,Identifier);
                 break;
             }
             //
-            // Rule 247:  PackageOrTypeName ::= Identifier
+            // Rule 235:  PackageOrTypeName ::= Identifier
             //
-            case 247: {
-                //#line 1214 "x10/parser/x10.g"
+            case 235: {
+                //#line 1343 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1216 "x10/parser/x10.g"
+                //#line 1345 "x10/parser/x10.g"
 		r.rule_PackageOrTypeName1(Identifier);
                 break;
             }
             //
-            // Rule 248:  PackageOrTypeName ::= PackageOrTypeName . Identifier
+            // Rule 236:  PackageOrTypeName ::= PackageOrTypeName . Identifier
             //
-            case 248: {
-                //#line 1218 "x10/parser/x10.g"
+            case 236: {
+                //#line 1347 "x10/parser/x10.g"
                 Object PackageOrTypeName = (Object) getRhsSym(1);
-                //#line 1218 "x10/parser/x10.g"
+                //#line 1347 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1220 "x10/parser/x10.g"
+                //#line 1349 "x10/parser/x10.g"
 		r.rule_PackageOrTypeName2(PackageOrTypeName,Identifier);
                 break;
             }
             //
-            // Rule 249:  FullyQualifiedName ::= Identifier
+            // Rule 237:  AmbiguousName ::= Identifier
             //
-            case 249: {
-                //#line 1223 "x10/parser/x10.g"
+            case 237: {
+                //#line 1352 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1225 "x10/parser/x10.g"
-		r.rule_FullyQualifiedName1(Identifier);
+                //#line 1354 "x10/parser/x10.g"
+		r.rule_AmbiguousName1(Identifier);
                 break;
             }
             //
-            // Rule 250:  FullyQualifiedName ::= FullyQualifiedName . Identifier
+            // Rule 238:  AmbiguousName ::= AmbiguousName . Identifier
             //
-            case 250: {
-                //#line 1227 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1227 "x10/parser/x10.g"
+            case 238: {
+                //#line 1356 "x10/parser/x10.g"
+                Object AmbiguousName = (Object) getRhsSym(1);
+                //#line 1356 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1229 "x10/parser/x10.g"
-		r.rule_FullyQualifiedName2(FullyQualifiedName,Identifier);
+                //#line 1358 "x10/parser/x10.g"
+		r.rule_AmbiguousName2(AmbiguousName,Identifier);
                 break;
             }
             //
-            // Rule 251:  CompilationUnit ::= PackageDeclarationopt TypeDeclarationsopt
+            // Rule 239:  CompilationUnit ::= PackageDeclarationopt TypeDeclarationsopt
             //
-            case 251: {
-                //#line 1234 "x10/parser/x10.g"
+            case 239: {
+                //#line 1363 "x10/parser/x10.g"
                 Object PackageDeclarationopt = (Object) getRhsSym(1);
-                //#line 1234 "x10/parser/x10.g"
+                //#line 1363 "x10/parser/x10.g"
                 Object TypeDeclarationsopt = (Object) getRhsSym(2);
-                //#line 1236 "x10/parser/x10.g"
+                //#line 1365 "x10/parser/x10.g"
 		r.rule_CompilationUnit0(PackageDeclarationopt,TypeDeclarationsopt);
                 break;
             }
             //
-            // Rule 252:  CompilationUnit ::= PackageDeclarationopt ImportDeclarations TypeDeclarationsopt
+            // Rule 240:  CompilationUnit ::= PackageDeclarationopt ImportDeclarations TypeDeclarationsopt
             //
-            case 252: {
-                //#line 1238 "x10/parser/x10.g"
+            case 240: {
+                //#line 1367 "x10/parser/x10.g"
                 Object PackageDeclarationopt = (Object) getRhsSym(1);
-                //#line 1238 "x10/parser/x10.g"
+                //#line 1367 "x10/parser/x10.g"
                 Object ImportDeclarations = (Object) getRhsSym(2);
-                //#line 1238 "x10/parser/x10.g"
+                //#line 1367 "x10/parser/x10.g"
                 Object TypeDeclarationsopt = (Object) getRhsSym(3);
-                //#line 1240 "x10/parser/x10.g"
+                //#line 1369 "x10/parser/x10.g"
 		r.rule_CompilationUnit1(PackageDeclarationopt,ImportDeclarations,TypeDeclarationsopt);
                 break;
             }
             //
-            // Rule 253:  CompilationUnit ::= ImportDeclarations PackageDeclaration$misplacedPackageDeclaration ImportDeclarationsopt$misplacedImportDeclarations TypeDeclarationsopt
+            // Rule 241:  CompilationUnit ::= ImportDeclarations PackageDeclaration$misplacedPackageDeclaration ImportDeclarationsopt$misplacedImportDeclarations TypeDeclarationsopt
             //
-            case 253: {
-                //#line 1242 "x10/parser/x10.g"
+            case 241: {
+                //#line 1371 "x10/parser/x10.g"
                 Object ImportDeclarations = (Object) getRhsSym(1);
-                //#line 1242 "x10/parser/x10.g"
+                //#line 1371 "x10/parser/x10.g"
                 Object misplacedPackageDeclaration = (Object) getRhsSym(2);
-                //#line 1242 "x10/parser/x10.g"
+                //#line 1371 "x10/parser/x10.g"
                 Object misplacedImportDeclarations = (Object) getRhsSym(3);
-                //#line 1242 "x10/parser/x10.g"
+                //#line 1371 "x10/parser/x10.g"
                 Object TypeDeclarationsopt = (Object) getRhsSym(4);
-                //#line 1244 "x10/parser/x10.g"
+                //#line 1373 "x10/parser/x10.g"
 		r.rule_CompilationUnit2(ImportDeclarations,misplacedPackageDeclaration,misplacedImportDeclarations,TypeDeclarationsopt);
                 break;
             }
             //
-            // Rule 254:  CompilationUnit ::= PackageDeclaration ImportDeclarations PackageDeclaration$misplacedPackageDeclaration ImportDeclarationsopt$misplacedImportDeclarations TypeDeclarationsopt
+            // Rule 242:  CompilationUnit ::= PackageDeclaration ImportDeclarations PackageDeclaration$misplacedPackageDeclaration ImportDeclarationsopt$misplacedImportDeclarations TypeDeclarationsopt
             //
-            case 254: {
-                //#line 1246 "x10/parser/x10.g"
+            case 242: {
+                //#line 1375 "x10/parser/x10.g"
                 Object PackageDeclaration = (Object) getRhsSym(1);
-                //#line 1246 "x10/parser/x10.g"
+                //#line 1375 "x10/parser/x10.g"
                 Object ImportDeclarations = (Object) getRhsSym(2);
-                //#line 1246 "x10/parser/x10.g"
+                //#line 1375 "x10/parser/x10.g"
                 Object misplacedPackageDeclaration = (Object) getRhsSym(3);
-                //#line 1246 "x10/parser/x10.g"
+                //#line 1375 "x10/parser/x10.g"
                 Object misplacedImportDeclarations = (Object) getRhsSym(4);
-                //#line 1246 "x10/parser/x10.g"
+                //#line 1375 "x10/parser/x10.g"
                 Object TypeDeclarationsopt = (Object) getRhsSym(5);
-                //#line 1248 "x10/parser/x10.g"
+                //#line 1377 "x10/parser/x10.g"
 		r.rule_CompilationUnit3(PackageDeclaration,ImportDeclarations,misplacedPackageDeclaration,misplacedImportDeclarations,TypeDeclarationsopt);
                 break;
             }
             //
-            // Rule 255:  ImportDeclarations ::= ImportDeclaration
+            // Rule 243:  ImportDeclarations ::= ImportDeclaration
             //
-            case 255: {
-                //#line 1251 "x10/parser/x10.g"
+            case 243: {
+                //#line 1380 "x10/parser/x10.g"
                 Object ImportDeclaration = (Object) getRhsSym(1);
-                //#line 1253 "x10/parser/x10.g"
+                //#line 1382 "x10/parser/x10.g"
 		r.rule_ImportDeclarations0(ImportDeclaration);
                 break;
             }
             //
-            // Rule 256:  ImportDeclarations ::= ImportDeclarations ImportDeclaration
+            // Rule 244:  ImportDeclarations ::= ImportDeclarations ImportDeclaration
             //
-            case 256: {
-                //#line 1255 "x10/parser/x10.g"
+            case 244: {
+                //#line 1384 "x10/parser/x10.g"
                 Object ImportDeclarations = (Object) getRhsSym(1);
-                //#line 1255 "x10/parser/x10.g"
+                //#line 1384 "x10/parser/x10.g"
                 Object ImportDeclaration = (Object) getRhsSym(2);
-                //#line 1257 "x10/parser/x10.g"
+                //#line 1386 "x10/parser/x10.g"
 		r.rule_ImportDeclarations1(ImportDeclarations,ImportDeclaration);
                 break;
             }
             //
-            // Rule 257:  TypeDeclarations ::= TypeDeclaration
+            // Rule 245:  TypeDeclarations ::= TypeDeclaration
             //
-            case 257: {
-                //#line 1260 "x10/parser/x10.g"
+            case 245: {
+                //#line 1389 "x10/parser/x10.g"
                 Object TypeDeclaration = (Object) getRhsSym(1);
-                //#line 1262 "x10/parser/x10.g"
+                //#line 1391 "x10/parser/x10.g"
 		r.rule_TypeDeclarations0(TypeDeclaration);
                 break;
             }
             //
-            // Rule 258:  TypeDeclarations ::= TypeDeclarations TypeDeclaration
+            // Rule 246:  TypeDeclarations ::= TypeDeclarations TypeDeclaration
             //
-            case 258: {
-                //#line 1264 "x10/parser/x10.g"
+            case 246: {
+                //#line 1393 "x10/parser/x10.g"
                 Object TypeDeclarations = (Object) getRhsSym(1);
-                //#line 1264 "x10/parser/x10.g"
+                //#line 1393 "x10/parser/x10.g"
                 Object TypeDeclaration = (Object) getRhsSym(2);
-                //#line 1266 "x10/parser/x10.g"
+                //#line 1395 "x10/parser/x10.g"
 		r.rule_TypeDeclarations1(TypeDeclarations,TypeDeclaration);
                 break;
             }
             //
-            // Rule 259:  PackageDeclaration ::= Annotationsopt package PackageName ;
+            // Rule 247:  PackageDeclaration ::= Annotationsopt package PackageName ;
             //
-            case 259: {
-                //#line 1269 "x10/parser/x10.g"
+            case 247: {
+                //#line 1398 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(1);
-                //#line 1269 "x10/parser/x10.g"
+                //#line 1398 "x10/parser/x10.g"
                 Object PackageName = (Object) getRhsSym(3);
-                //#line 1271 "x10/parser/x10.g"
+                //#line 1400 "x10/parser/x10.g"
 		r.rule_PackageDeclaration0(Annotationsopt,PackageName);
                 break;
             }
             //
-            // Rule 262:  SingleTypeImportDeclaration ::= import TypeName ;
+            // Rule 250:  SingleTypeImportDeclaration ::= import TypeName ;
             //
-            case 262: {
-                //#line 1280 "x10/parser/x10.g"
+            case 250: {
+                //#line 1409 "x10/parser/x10.g"
                 Object TypeName = (Object) getRhsSym(2);
-                //#line 1282 "x10/parser/x10.g"
+                //#line 1411 "x10/parser/x10.g"
 		r.rule_SingleTypeImportDeclaration0(TypeName);
                 break;
             }
             //
-            // Rule 263:  TypeImportOnDemandDeclaration ::= import PackageOrTypeName . * ;
+            // Rule 251:  TypeImportOnDemandDeclaration ::= import PackageOrTypeName . * ;
             //
-            case 263: {
-                //#line 1285 "x10/parser/x10.g"
+            case 251: {
+                //#line 1414 "x10/parser/x10.g"
                 Object PackageOrTypeName = (Object) getRhsSym(2);
-                //#line 1287 "x10/parser/x10.g"
+                //#line 1416 "x10/parser/x10.g"
 		r.rule_TypeImportOnDemandDeclaration0(PackageOrTypeName);
                 break;
             }
             //
-            // Rule 268:  TypeDeclaration ::= ;
+            // Rule 255:  TypeDeclaration ::= ;
             //
-            case 268: {
+            case 255: {
                 
-                //#line 1302 "x10/parser/x10.g"
+                //#line 1430 "x10/parser/x10.g"
 		r.rule_TypeDeclaration3();
                 break;
             }
             //
-            // Rule 269:  Interfaces ::= implements InterfaceTypeList
+            // Rule 256:  Interfaces ::= implements InterfaceTypeList
             //
-            case 269: {
-                //#line 1308 "x10/parser/x10.g"
+            case 256: {
+                //#line 1544 "x10/parser/x10.g"
                 Object InterfaceTypeList = (Object) getRhsSym(2);
-                //#line 1310 "x10/parser/x10.g"
+                //#line 1546 "x10/parser/x10.g"
 		r.rule_Interfaces0(InterfaceTypeList);
                 break;
             }
             //
-            // Rule 270:  InterfaceTypeList ::= Type
+            // Rule 257:  InterfaceTypeList ::= Type
             //
-            case 270: {
-                //#line 1313 "x10/parser/x10.g"
+            case 257: {
+                //#line 1549 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(1);
-                //#line 1315 "x10/parser/x10.g"
+                //#line 1551 "x10/parser/x10.g"
 		r.rule_InterfaceTypeList0(Type);
                 break;
             }
             //
-            // Rule 271:  InterfaceTypeList ::= InterfaceTypeList , Type
+            // Rule 258:  InterfaceTypeList ::= InterfaceTypeList , Type
             //
-            case 271: {
-                //#line 1317 "x10/parser/x10.g"
+            case 258: {
+                //#line 1553 "x10/parser/x10.g"
                 Object InterfaceTypeList = (Object) getRhsSym(1);
-                //#line 1317 "x10/parser/x10.g"
+                //#line 1553 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(3);
-                //#line 1319 "x10/parser/x10.g"
+                //#line 1555 "x10/parser/x10.g"
 		r.rule_InterfaceTypeList1(InterfaceTypeList,Type);
                 break;
             }
             //
-            // Rule 272:  ClassBody ::= { ClassMemberDeclarationsopt }
+            // Rule 259:  ClassBody ::= { ClassBodyDeclarationsopt }
             //
-            case 272: {
-                //#line 1325 "x10/parser/x10.g"
-                Object ClassMemberDeclarationsopt = (Object) getRhsSym(2);
-                //#line 1327 "x10/parser/x10.g"
-		r.rule_ClassBody0(ClassMemberDeclarationsopt);
+            case 259: {
+                //#line 1561 "x10/parser/x10.g"
+                Object ClassBodyDeclarationsopt = (Object) getRhsSym(2);
+                //#line 1563 "x10/parser/x10.g"
+		r.rule_ClassBody0(ClassBodyDeclarationsopt);
                 break;
             }
             //
-            // Rule 273:  ClassMemberDeclarations ::= ClassMemberDeclaration
+            // Rule 261:  ClassBodyDeclarations ::= ClassBodyDeclarations ClassBodyDeclaration
             //
-            case 273: {
-                //#line 1330 "x10/parser/x10.g"
-                Object ClassMemberDeclaration = (Object) getRhsSym(1);
-                //#line 1332 "x10/parser/x10.g"
-		r.rule_ClassMemberDeclarations0(ClassMemberDeclaration);
+            case 261: {
+                //#line 1567 "x10/parser/x10.g"
+                Object ClassBodyDeclarations = (Object) getRhsSym(1);
+                //#line 1567 "x10/parser/x10.g"
+                Object ClassBodyDeclaration = (Object) getRhsSym(2);
+                //#line 1569 "x10/parser/x10.g"
+		r.rule_ClassBodyDeclarations1(ClassBodyDeclarations,ClassBodyDeclaration);
                 break;
             }
             //
-            // Rule 274:  ClassMemberDeclarations ::= ClassMemberDeclarations ClassMemberDeclaration
+            // Rule 263:  ClassBodyDeclaration ::= ConstructorDeclaration
             //
-            case 274: {
-                //#line 1334 "x10/parser/x10.g"
-                Object ClassMemberDeclarations = (Object) getRhsSym(1);
-                //#line 1334 "x10/parser/x10.g"
-                Object ClassMemberDeclaration = (Object) getRhsSym(2);
-                //#line 1336 "x10/parser/x10.g"
-		r.rule_ClassMemberDeclarations1(ClassMemberDeclarations,ClassMemberDeclaration);
-                break;
-            }
-            //
-            // Rule 276:  ClassMemberDeclaration ::= ConstructorDeclaration
-            //
-            case 276: {
-                //#line 1340 "x10/parser/x10.g"
+            case 263: {
+                //#line 1587 "x10/parser/x10.g"
                 Object ConstructorDeclaration = (Object) getRhsSym(1);
-                //#line 1342 "x10/parser/x10.g"
-		r.rule_ClassMemberDeclaration1(ConstructorDeclaration);
+                //#line 1589 "x10/parser/x10.g"
+		r.rule_ClassBodyDeclaration1(ConstructorDeclaration);
                 break;
             }
             //
-            // Rule 277:  FormalDeclarators ::= FormalDeclarator
+            // Rule 265:  ClassMemberDeclaration ::= MethodDeclaration
             //
-            case 277: {
-                //#line 1359 "x10/parser/x10.g"
+            case 265: {
+                //#line 1593 "x10/parser/x10.g"
+                Object MethodDeclaration = (Object) getRhsSym(1);
+                //#line 1595 "x10/parser/x10.g"
+		r.rule_ClassMemberDeclaration1(MethodDeclaration);
+                break;
+            }
+            //
+            // Rule 266:  ClassMemberDeclaration ::= PropertyMethodDeclaration
+            //
+            case 266: {
+                //#line 1597 "x10/parser/x10.g"
+                Object PropertyMethodDeclaration = (Object) getRhsSym(1);
+                //#line 1599 "x10/parser/x10.g"
+		r.rule_ClassMemberDeclaration2(PropertyMethodDeclaration);
+                break;
+            }
+            //
+            // Rule 267:  ClassMemberDeclaration ::= TypeDefDeclaration
+            //
+            case 267: {
+                //#line 1601 "x10/parser/x10.g"
+                Object TypeDefDeclaration = (Object) getRhsSym(1);
+                //#line 1603 "x10/parser/x10.g"
+		r.rule_ClassMemberDeclaration3(TypeDefDeclaration);
+                break;
+            }
+            //
+            // Rule 268:  ClassMemberDeclaration ::= ClassDeclaration
+            //
+            case 268: {
+                //#line 1605 "x10/parser/x10.g"
+                Object ClassDeclaration = (Object) getRhsSym(1);
+                //#line 1607 "x10/parser/x10.g"
+		r.rule_ClassMemberDeclaration4(ClassDeclaration);
+                break;
+            }
+            //
+            // Rule 269:  ClassMemberDeclaration ::= InterfaceDeclaration
+            //
+            case 269: {
+                //#line 1609 "x10/parser/x10.g"
+                Object InterfaceDeclaration = (Object) getRhsSym(1);
+                //#line 1611 "x10/parser/x10.g"
+		r.rule_ClassMemberDeclaration5(InterfaceDeclaration);
+                break;
+            }
+            //
+            // Rule 270:  ClassMemberDeclaration ::= ;
+            //
+            case 270: {
+                
+                //#line 1615 "x10/parser/x10.g"
+		r.rule_ClassMemberDeclaration6();
+                break;
+            }
+            //
+            // Rule 271:  FormalDeclarators ::= FormalDeclarator
+            //
+            case 271: {
+                //#line 1618 "x10/parser/x10.g"
                 Object FormalDeclarator = (Object) getRhsSym(1);
-                //#line 1361 "x10/parser/x10.g"
+                //#line 1620 "x10/parser/x10.g"
 		r.rule_FormalDeclarators0(FormalDeclarator);
                 break;
             }
             //
-            // Rule 278:  FormalDeclarators ::= FormalDeclarators , FormalDeclarator
+            // Rule 272:  FormalDeclarators ::= FormalDeclarators , FormalDeclarator
             //
-            case 278: {
-                //#line 1363 "x10/parser/x10.g"
+            case 272: {
+                //#line 1622 "x10/parser/x10.g"
                 Object FormalDeclarators = (Object) getRhsSym(1);
-                //#line 1363 "x10/parser/x10.g"
+                //#line 1622 "x10/parser/x10.g"
                 Object FormalDeclarator = (Object) getRhsSym(3);
-                //#line 1365 "x10/parser/x10.g"
+                //#line 1624 "x10/parser/x10.g"
 		r.rule_FormalDeclarators1(FormalDeclarators,FormalDeclarator);
                 break;
             }
             //
-            // Rule 279:  FieldDeclarators ::= FieldDeclarator
+            // Rule 273:  FieldDeclarators ::= FieldDeclarator
             //
-            case 279: {
-                //#line 1369 "x10/parser/x10.g"
+            case 273: {
+                //#line 1628 "x10/parser/x10.g"
                 Object FieldDeclarator = (Object) getRhsSym(1);
-                //#line 1371 "x10/parser/x10.g"
+                //#line 1630 "x10/parser/x10.g"
 		r.rule_FieldDeclarators0(FieldDeclarator);
                 break;
             }
             //
-            // Rule 280:  FieldDeclarators ::= FieldDeclarators , FieldDeclarator
+            // Rule 274:  FieldDeclarators ::= FieldDeclarators , FieldDeclarator
             //
-            case 280: {
-                //#line 1373 "x10/parser/x10.g"
+            case 274: {
+                //#line 1632 "x10/parser/x10.g"
                 Object FieldDeclarators = (Object) getRhsSym(1);
-                //#line 1373 "x10/parser/x10.g"
+                //#line 1632 "x10/parser/x10.g"
                 Object FieldDeclarator = (Object) getRhsSym(3);
-                //#line 1375 "x10/parser/x10.g"
+                //#line 1634 "x10/parser/x10.g"
 		r.rule_FieldDeclarators1(FieldDeclarators,FieldDeclarator);
                 break;
             }
             //
-            // Rule 281:  VariableDeclaratorsWithType ::= VariableDeclaratorWithType
+            // Rule 275:  VariableDeclaratorsWithType ::= VariableDeclaratorWithType
             //
-            case 281: {
-                //#line 1379 "x10/parser/x10.g"
+            case 275: {
+                //#line 1638 "x10/parser/x10.g"
                 Object VariableDeclaratorWithType = (Object) getRhsSym(1);
-                //#line 1381 "x10/parser/x10.g"
+                //#line 1640 "x10/parser/x10.g"
 		r.rule_VariableDeclaratorsWithType0(VariableDeclaratorWithType);
                 break;
             }
             //
-            // Rule 282:  VariableDeclaratorsWithType ::= VariableDeclaratorsWithType , VariableDeclaratorWithType
+            // Rule 276:  VariableDeclaratorsWithType ::= VariableDeclaratorsWithType , VariableDeclaratorWithType
             //
-            case 282: {
-                //#line 1383 "x10/parser/x10.g"
+            case 276: {
+                //#line 1642 "x10/parser/x10.g"
                 Object VariableDeclaratorsWithType = (Object) getRhsSym(1);
-                //#line 1383 "x10/parser/x10.g"
+                //#line 1642 "x10/parser/x10.g"
                 Object VariableDeclaratorWithType = (Object) getRhsSym(3);
-                //#line 1385 "x10/parser/x10.g"
+                //#line 1644 "x10/parser/x10.g"
 		r.rule_VariableDeclaratorsWithType1(VariableDeclaratorsWithType,VariableDeclaratorWithType);
                 break;
             }
             //
-            // Rule 283:  VariableDeclarators ::= VariableDeclarator
+            // Rule 277:  VariableDeclarators ::= VariableDeclarator
             //
-            case 283: {
-                //#line 1388 "x10/parser/x10.g"
+            case 277: {
+                //#line 1647 "x10/parser/x10.g"
                 Object VariableDeclarator = (Object) getRhsSym(1);
-                //#line 1390 "x10/parser/x10.g"
+                //#line 1649 "x10/parser/x10.g"
 		r.rule_VariableDeclarators0(VariableDeclarator);
                 break;
             }
             //
-            // Rule 284:  VariableDeclarators ::= VariableDeclarators , VariableDeclarator
+            // Rule 278:  VariableDeclarators ::= VariableDeclarators , VariableDeclarator
             //
-            case 284: {
-                //#line 1392 "x10/parser/x10.g"
+            case 278: {
+                //#line 1651 "x10/parser/x10.g"
                 Object VariableDeclarators = (Object) getRhsSym(1);
-                //#line 1392 "x10/parser/x10.g"
+                //#line 1651 "x10/parser/x10.g"
                 Object VariableDeclarator = (Object) getRhsSym(3);
-                //#line 1394 "x10/parser/x10.g"
+                //#line 1653 "x10/parser/x10.g"
 		r.rule_VariableDeclarators1(VariableDeclarators,VariableDeclarator);
                 break;
             }
             //
-            // Rule 285:  AtCaptureDeclarators ::= AtCaptureDeclarator
+            // Rule 279:  AtCaptureDeclarators ::= AtCaptureDeclarator
             //
-            case 285: {
-                //#line 1397 "x10/parser/x10.g"
+            case 279: {
+                //#line 1656 "x10/parser/x10.g"
                 Object AtCaptureDeclarator = (Object) getRhsSym(1);
-                //#line 1399 "x10/parser/x10.g"
+                //#line 1658 "x10/parser/x10.g"
 		r.rule_AtCaptureDeclarators0(AtCaptureDeclarator);
                 break;
             }
             //
-            // Rule 286:  AtCaptureDeclarators ::= AtCaptureDeclarators , AtCaptureDeclarator
+            // Rule 280:  AtCaptureDeclarators ::= AtCaptureDeclarators , AtCaptureDeclarator
             //
-            case 286: {
-                //#line 1401 "x10/parser/x10.g"
+            case 280: {
+                //#line 1660 "x10/parser/x10.g"
                 Object AtCaptureDeclarators = (Object) getRhsSym(1);
-                //#line 1401 "x10/parser/x10.g"
+                //#line 1660 "x10/parser/x10.g"
                 Object AtCaptureDeclarator = (Object) getRhsSym(3);
-                //#line 1403 "x10/parser/x10.g"
+                //#line 1662 "x10/parser/x10.g"
 		r.rule_AtCaptureDeclarators1(AtCaptureDeclarators,AtCaptureDeclarator);
                 break;
             }
             //
-            // Rule 287:  HomeVariableList ::= HomeVariable
+            // Rule 281:  HomeVariableList ::= HomeVariable
             //
-            case 287: {
-                //#line 1406 "x10/parser/x10.g"
+            case 281: {
+                //#line 1665 "x10/parser/x10.g"
                 Object HomeVariable = (Object) getRhsSym(1);
-                //#line 1408 "x10/parser/x10.g"
+                //#line 1667 "x10/parser/x10.g"
 		r.rule_HomeVariableList0(HomeVariable);
                 break;
             }
             //
-            // Rule 288:  HomeVariableList ::= HomeVariableList , HomeVariable
+            // Rule 282:  HomeVariableList ::= HomeVariableList , HomeVariable
             //
-            case 288: {
-                //#line 1410 "x10/parser/x10.g"
+            case 282: {
+                //#line 1669 "x10/parser/x10.g"
                 Object HomeVariableList = (Object) getRhsSym(1);
-                //#line 1410 "x10/parser/x10.g"
+                //#line 1669 "x10/parser/x10.g"
                 Object HomeVariable = (Object) getRhsSym(3);
-                //#line 1412 "x10/parser/x10.g"
+                //#line 1671 "x10/parser/x10.g"
 		r.rule_HomeVariableList1(HomeVariableList,HomeVariable);
                 break;
             }
             //
-            // Rule 289:  HomeVariable ::= Identifier
+            // Rule 283:  HomeVariable ::= Identifier
             //
-            case 289: {
-                //#line 1415 "x10/parser/x10.g"
+            case 283: {
+                //#line 1674 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1417 "x10/parser/x10.g"
+                //#line 1676 "x10/parser/x10.g"
 		r.rule_HomeVariable0(Identifier);
                 break;
             }
             //
-            // Rule 290:  HomeVariable ::= this
+            // Rule 284:  HomeVariable ::= this
             //
-            case 290: {
+            case 284: {
                 
-                //#line 1421 "x10/parser/x10.g"
+                //#line 1680 "x10/parser/x10.g"
 		r.rule_HomeVariable1();
                 break;
             }
             //
-            // Rule 292:  ResultType ::= : Type
+            // Rule 286:  ResultType ::= : Type
             //
-            case 292: {
-                //#line 1426 "x10/parser/x10.g"
+            case 286: {
+                //#line 1732 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(2);
-                //#line 1428 "x10/parser/x10.g"
+                //#line 1734 "x10/parser/x10.g"
 		r.rule_ResultType0(Type);
                 break;
             }
             //
-            // Rule 294:  HasResultType ::= <: Type
+            // Rule 287:  HasResultType ::= : Type
             //
-            case 294: {
-                //#line 1431 "x10/parser/x10.g"
+            case 287: {
+                //#line 1736 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(2);
-                //#line 1433 "x10/parser/x10.g"
+                //#line 1738 "x10/parser/x10.g"
+		r.rule_HasResultType0(Type);
+                break;
+            }
+            //
+            // Rule 288:  HasResultType ::= <: Type
+            //
+            case 288: {
+                //#line 1740 "x10/parser/x10.g"
+                Object Type = (Object) getRhsSym(2);
+                //#line 1742 "x10/parser/x10.g"
 		r.rule_HasResultType1(Type);
                 break;
             }
             //
-            // Rule 295:  FormalParameterList ::= FormalParameter
+            // Rule 289:  FormalParameterList ::= FormalParameter
             //
-            case 295: {
-                //#line 1436 "x10/parser/x10.g"
+            case 289: {
+                //#line 1754 "x10/parser/x10.g"
                 Object FormalParameter = (Object) getRhsSym(1);
-                //#line 1438 "x10/parser/x10.g"
+                //#line 1756 "x10/parser/x10.g"
 		r.rule_FormalParameterList0(FormalParameter);
                 break;
             }
             //
-            // Rule 296:  FormalParameterList ::= FormalParameterList , FormalParameter
+            // Rule 290:  FormalParameterList ::= FormalParameterList , FormalParameter
             //
-            case 296: {
-                //#line 1440 "x10/parser/x10.g"
+            case 290: {
+                //#line 1758 "x10/parser/x10.g"
                 Object FormalParameterList = (Object) getRhsSym(1);
-                //#line 1440 "x10/parser/x10.g"
+                //#line 1758 "x10/parser/x10.g"
                 Object FormalParameter = (Object) getRhsSym(3);
-                //#line 1442 "x10/parser/x10.g"
+                //#line 1760 "x10/parser/x10.g"
 		r.rule_FormalParameterList1(FormalParameterList,FormalParameter);
                 break;
             }
             //
-            // Rule 297:  LoopIndexDeclarator ::= Identifier HasResultTypeopt
+            // Rule 291:  LoopIndexDeclarator ::= Identifier HasResultTypeopt
             //
-            case 297: {
-                //#line 1445 "x10/parser/x10.g"
+            case 291: {
+                //#line 1763 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1445 "x10/parser/x10.g"
+                //#line 1763 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(2);
-                //#line 1447 "x10/parser/x10.g"
+                //#line 1765 "x10/parser/x10.g"
 		r.rule_LoopIndexDeclarator0(Identifier,HasResultTypeopt);
                 break;
             }
             //
-            // Rule 298:  LoopIndexDeclarator ::= [ IdentifierList ] HasResultTypeopt
+            // Rule 292:  LoopIndexDeclarator ::= [ IdentifierList ] HasResultTypeopt
             //
-            case 298: {
-                //#line 1449 "x10/parser/x10.g"
+            case 292: {
+                //#line 1767 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(2);
-                //#line 1449 "x10/parser/x10.g"
+                //#line 1767 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(4);
-                //#line 1451 "x10/parser/x10.g"
+                //#line 1769 "x10/parser/x10.g"
 		r.rule_LoopIndexDeclarator1(IdentifierList,HasResultTypeopt);
                 break;
             }
             //
-            // Rule 299:  LoopIndexDeclarator ::= Identifier [ IdentifierList ] HasResultTypeopt
+            // Rule 293:  LoopIndexDeclarator ::= Identifier [ IdentifierList ] HasResultTypeopt
             //
-            case 299: {
-                //#line 1453 "x10/parser/x10.g"
+            case 293: {
+                //#line 1771 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1453 "x10/parser/x10.g"
+                //#line 1771 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(3);
-                //#line 1453 "x10/parser/x10.g"
+                //#line 1771 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(5);
-                //#line 1455 "x10/parser/x10.g"
+                //#line 1773 "x10/parser/x10.g"
 		r.rule_LoopIndexDeclarator2(Identifier,IdentifierList,HasResultTypeopt);
                 break;
             }
             //
-            // Rule 300:  LoopIndex ::= Modifiersopt LoopIndexDeclarator
+            // Rule 294:  LoopIndex ::= Modifiersopt LoopIndexDeclarator
             //
-            case 300: {
-                //#line 1458 "x10/parser/x10.g"
+            case 294: {
+                //#line 1776 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1458 "x10/parser/x10.g"
+                //#line 1776 "x10/parser/x10.g"
                 Object LoopIndexDeclarator = (Object) getRhsSym(2);
-                //#line 1460 "x10/parser/x10.g"
+                //#line 1778 "x10/parser/x10.g"
 		r.rule_LoopIndex0(Modifiersopt,LoopIndexDeclarator);
                 break;
             }
             //
-            // Rule 301:  LoopIndex ::= Modifiersopt VarKeyword LoopIndexDeclarator
+            // Rule 295:  LoopIndex ::= Modifiersopt VarKeyword LoopIndexDeclarator
             //
-            case 301: {
-                //#line 1462 "x10/parser/x10.g"
+            case 295: {
+                //#line 1780 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1462 "x10/parser/x10.g"
+                //#line 1780 "x10/parser/x10.g"
                 Object VarKeyword = (Object) getRhsSym(2);
-                //#line 1462 "x10/parser/x10.g"
+                //#line 1780 "x10/parser/x10.g"
                 Object LoopIndexDeclarator = (Object) getRhsSym(3);
-                //#line 1464 "x10/parser/x10.g"
+                //#line 1782 "x10/parser/x10.g"
 		r.rule_LoopIndex1(Modifiersopt,VarKeyword,LoopIndexDeclarator);
                 break;
             }
             //
-            // Rule 302:  FormalParameter ::= Modifiersopt FormalDeclarator
+            // Rule 296:  FormalParameter ::= Modifiersopt FormalDeclarator
             //
-            case 302: {
-                //#line 1467 "x10/parser/x10.g"
+            case 296: {
+                //#line 1785 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1467 "x10/parser/x10.g"
+                //#line 1785 "x10/parser/x10.g"
                 Object FormalDeclarator = (Object) getRhsSym(2);
-                //#line 1469 "x10/parser/x10.g"
+                //#line 1787 "x10/parser/x10.g"
 		r.rule_FormalParameter0(Modifiersopt,FormalDeclarator);
                 break;
             }
             //
-            // Rule 303:  FormalParameter ::= Modifiersopt VarKeyword FormalDeclarator
+            // Rule 297:  FormalParameter ::= Modifiersopt VarKeyword FormalDeclarator
             //
-            case 303: {
-                //#line 1471 "x10/parser/x10.g"
+            case 297: {
+                //#line 1789 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1471 "x10/parser/x10.g"
+                //#line 1789 "x10/parser/x10.g"
                 Object VarKeyword = (Object) getRhsSym(2);
-                //#line 1471 "x10/parser/x10.g"
+                //#line 1789 "x10/parser/x10.g"
                 Object FormalDeclarator = (Object) getRhsSym(3);
-                //#line 1473 "x10/parser/x10.g"
+                //#line 1791 "x10/parser/x10.g"
 		r.rule_FormalParameter1(Modifiersopt,VarKeyword,FormalDeclarator);
                 break;
             }
             //
-            // Rule 304:  FormalParameter ::= Type
+            // Rule 298:  FormalParameter ::= Type
             //
-            case 304: {
-                //#line 1475 "x10/parser/x10.g"
+            case 298: {
+                //#line 1793 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(1);
-                //#line 1477 "x10/parser/x10.g"
+                //#line 1795 "x10/parser/x10.g"
 		r.rule_FormalParameter2(Type);
                 break;
             }
             //
-            // Rule 305:  OBSOLETE_Offers ::= offers Type
+            // Rule 299:  Offers ::= offers Type
             //
-            case 305: {
-                //#line 1480 "x10/parser/x10.g"
+            case 299: {
+                //#line 1931 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(2);
-                //#line 1482 "x10/parser/x10.g"
-		r.rule_OBSOLETE_Offers0(Type);
+                //#line 1933 "x10/parser/x10.g"
+		r.rule_Offers0(Type);
                 break;
             }
             //
-            // Rule 306:  MethodBody ::= = LastExpression ;
+            // Rule 300:  MethodBody ::= = LastExpression ;
             //
-            case 306: {
-                //#line 1486 "x10/parser/x10.g"
+            case 300: {
+                //#line 1937 "x10/parser/x10.g"
                 Object LastExpression = (Object) getRhsSym(2);
-                //#line 1488 "x10/parser/x10.g"
+                //#line 1939 "x10/parser/x10.g"
 		r.rule_MethodBody0(LastExpression);
                 break;
             }
             //
-            // Rule 307:  MethodBody ::= = Annotationsopt { BlockStatementsopt LastExpression }
+            // Rule 301:  MethodBody ::= = Annotationsopt { BlockStatementsopt LastExpression }
             //
-            case 307: {
-                //#line 1490 "x10/parser/x10.g"
+            case 301: {
+                //#line 1941 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(2);
-                //#line 1490 "x10/parser/x10.g"
+                //#line 1941 "x10/parser/x10.g"
                 Object BlockStatementsopt = (Object) getRhsSym(4);
-                //#line 1490 "x10/parser/x10.g"
+                //#line 1941 "x10/parser/x10.g"
                 Object LastExpression = (Object) getRhsSym(5);
-                //#line 1492 "x10/parser/x10.g"
+                //#line 1943 "x10/parser/x10.g"
 		r.rule_MethodBody1(Annotationsopt,BlockStatementsopt,LastExpression);
                 break;
             }
             //
-            // Rule 308:  MethodBody ::= = Annotationsopt Block
+            // Rule 302:  MethodBody ::= = Annotationsopt Block
             //
-            case 308: {
-                //#line 1494 "x10/parser/x10.g"
+            case 302: {
+                //#line 1945 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(2);
-                //#line 1494 "x10/parser/x10.g"
+                //#line 1945 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(3);
-                //#line 1496 "x10/parser/x10.g"
+                //#line 1947 "x10/parser/x10.g"
 		r.rule_MethodBody2(Annotationsopt,Block);
                 break;
             }
             //
-            // Rule 309:  MethodBody ::= Annotationsopt Block
+            // Rule 303:  MethodBody ::= Annotationsopt Block
             //
-            case 309: {
-                //#line 1498 "x10/parser/x10.g"
+            case 303: {
+                //#line 1949 "x10/parser/x10.g"
                 Object Annotationsopt = (Object) getRhsSym(1);
-                //#line 1498 "x10/parser/x10.g"
+                //#line 1949 "x10/parser/x10.g"
                 Object Block = (Object) getRhsSym(2);
-                //#line 1500 "x10/parser/x10.g"
+                //#line 1951 "x10/parser/x10.g"
 		r.rule_MethodBody3(Annotationsopt,Block);
                 break;
             }
             //
-            // Rule 310:  MethodBody ::= ;
+            // Rule 304:  MethodBody ::= ;
             //
-            case 310:
+            case 304:
                 setResult(null);
                 break;
 
             //
-            // Rule 311:  ConstructorBody ::= = ConstructorBlock
+            // Rule 305:  ConstructorBody ::= = ConstructorBlock
             //
-            case 311: {
-                //#line 1517 "x10/parser/x10.g"
+            case 305: {
+                //#line 2019 "x10/parser/x10.g"
                 Object ConstructorBlock = (Object) getRhsSym(2);
-                //#line 1519 "x10/parser/x10.g"
+                //#line 2021 "x10/parser/x10.g"
 		r.rule_ConstructorBody0(ConstructorBlock);
                 break;
             }
             //
-            // Rule 312:  ConstructorBody ::= ConstructorBlock
+            // Rule 306:  ConstructorBody ::= ConstructorBlock
             //
-            case 312: {
-                //#line 1521 "x10/parser/x10.g"
+            case 306: {
+                //#line 2023 "x10/parser/x10.g"
                 Object ConstructorBlock = (Object) getRhsSym(1);
-                //#line 1523 "x10/parser/x10.g"
+                //#line 2025 "x10/parser/x10.g"
 		r.rule_ConstructorBody1(ConstructorBlock);
                 break;
             }
             //
-            // Rule 313:  ConstructorBody ::= = ExplicitConstructorInvocation
+            // Rule 307:  ConstructorBody ::= = ExplicitConstructorInvocation
             //
-            case 313: {
-                //#line 1525 "x10/parser/x10.g"
+            case 307: {
+                //#line 2027 "x10/parser/x10.g"
                 Object ExplicitConstructorInvocation = (Object) getRhsSym(2);
-                //#line 1527 "x10/parser/x10.g"
+                //#line 2029 "x10/parser/x10.g"
 		r.rule_ConstructorBody2(ExplicitConstructorInvocation);
                 break;
             }
             //
-            // Rule 314:  ConstructorBody ::= = AssignPropertyCall
+            // Rule 308:  ConstructorBody ::= = AssignPropertyCall
             //
-            case 314: {
-                //#line 1529 "x10/parser/x10.g"
+            case 308: {
+                //#line 2031 "x10/parser/x10.g"
                 Object AssignPropertyCall = (Object) getRhsSym(2);
-                //#line 1531 "x10/parser/x10.g"
+                //#line 2033 "x10/parser/x10.g"
 		r.rule_ConstructorBody3(AssignPropertyCall);
                 break;
             }
             //
-            // Rule 315:  ConstructorBody ::= ;
+            // Rule 309:  ConstructorBody ::= ;
             //
-            case 315:
+            case 309:
                 setResult(null);
                 break;
 
             //
-            // Rule 316:  ConstructorBlock ::= { ExplicitConstructorInvocationopt BlockStatementsopt }
+            // Rule 310:  ConstructorBlock ::= { ExplicitConstructorInvocationopt BlockStatementsopt }
             //
-            case 316: {
-                //#line 1536 "x10/parser/x10.g"
+            case 310: {
+                //#line 2038 "x10/parser/x10.g"
                 Object ExplicitConstructorInvocationopt = (Object) getRhsSym(2);
-                //#line 1536 "x10/parser/x10.g"
+                //#line 2038 "x10/parser/x10.g"
                 Object BlockStatementsopt = (Object) getRhsSym(3);
-                //#line 1538 "x10/parser/x10.g"
+                //#line 2040 "x10/parser/x10.g"
 		r.rule_ConstructorBlock0(ExplicitConstructorInvocationopt,BlockStatementsopt);
                 break;
             }
             //
-            // Rule 317:  Arguments ::= ( ArgumentList )
+            // Rule 311:  Arguments ::= ( ArgumentList )
             //
-            case 317: {
-                //#line 1541 "x10/parser/x10.g"
+            case 311: {
+                //#line 2043 "x10/parser/x10.g"
                 Object ArgumentList = (Object) getRhsSym(2);
-                //#line 1543 "x10/parser/x10.g"
+                //#line 2045 "x10/parser/x10.g"
 		r.rule_Arguments0(ArgumentList);
                 break;
             }
             //
-            // Rule 318:  ExtendsInterfaces ::= extends Type
+            // Rule 313:  ExtendsInterfaces ::= extends Type
             //
-            case 318: {
-                //#line 1547 "x10/parser/x10.g"
+            case 313: {
+                //#line 2099 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(2);
-                //#line 1549 "x10/parser/x10.g"
+                //#line 2101 "x10/parser/x10.g"
 		r.rule_ExtendsInterfaces0(Type);
                 break;
             }
             //
-            // Rule 319:  ExtendsInterfaces ::= ExtendsInterfaces , Type
+            // Rule 314:  ExtendsInterfaces ::= ExtendsInterfaces , Type
             //
-            case 319: {
-                //#line 1551 "x10/parser/x10.g"
+            case 314: {
+                //#line 2103 "x10/parser/x10.g"
                 Object ExtendsInterfaces = (Object) getRhsSym(1);
-                //#line 1551 "x10/parser/x10.g"
+                //#line 2103 "x10/parser/x10.g"
                 Object Type = (Object) getRhsSym(3);
-                //#line 1553 "x10/parser/x10.g"
+                //#line 2105 "x10/parser/x10.g"
 		r.rule_ExtendsInterfaces1(ExtendsInterfaces,Type);
                 break;
             }
             //
-            // Rule 320:  InterfaceBody ::= { InterfaceMemberDeclarationsopt }
+            // Rule 315:  InterfaceBody ::= { InterfaceMemberDeclarationsopt }
             //
-            case 320: {
-                //#line 1559 "x10/parser/x10.g"
+            case 315: {
+                //#line 2111 "x10/parser/x10.g"
                 Object InterfaceMemberDeclarationsopt = (Object) getRhsSym(2);
-                //#line 1561 "x10/parser/x10.g"
+                //#line 2113 "x10/parser/x10.g"
 		r.rule_InterfaceBody0(InterfaceMemberDeclarationsopt);
                 break;
             }
             //
-            // Rule 321:  InterfaceMemberDeclarations ::= InterfaceMemberDeclaration
+            // Rule 317:  InterfaceMemberDeclarations ::= InterfaceMemberDeclarations InterfaceMemberDeclaration
             //
-            case 321: {
-                //#line 1564 "x10/parser/x10.g"
-                Object InterfaceMemberDeclaration = (Object) getRhsSym(1);
-                //#line 1566 "x10/parser/x10.g"
-		r.rule_InterfaceMemberDeclarations0(InterfaceMemberDeclaration);
-                break;
-            }
-            //
-            // Rule 322:  InterfaceMemberDeclarations ::= InterfaceMemberDeclarations InterfaceMemberDeclaration
-            //
-            case 322: {
-                //#line 1568 "x10/parser/x10.g"
+            case 317: {
+                //#line 2117 "x10/parser/x10.g"
                 Object InterfaceMemberDeclarations = (Object) getRhsSym(1);
-                //#line 1568 "x10/parser/x10.g"
+                //#line 2117 "x10/parser/x10.g"
                 Object InterfaceMemberDeclaration = (Object) getRhsSym(2);
-                //#line 1570 "x10/parser/x10.g"
+                //#line 2119 "x10/parser/x10.g"
 		r.rule_InterfaceMemberDeclarations1(InterfaceMemberDeclarations,InterfaceMemberDeclaration);
                 break;
             }
             //
-            // Rule 323:  InterfaceMemberDeclaration ::= MethodDeclaration
+            // Rule 318:  InterfaceMemberDeclaration ::= MethodDeclaration
             //
-            case 323: {
-                //#line 1573 "x10/parser/x10.g"
+            case 318: {
+                //#line 2122 "x10/parser/x10.g"
                 Object MethodDeclaration = (Object) getRhsSym(1);
-                //#line 1575 "x10/parser/x10.g"
+                //#line 2124 "x10/parser/x10.g"
 		r.rule_InterfaceMemberDeclaration0(MethodDeclaration);
                 break;
             }
             //
-            // Rule 324:  InterfaceMemberDeclaration ::= PropertyMethodDeclaration
+            // Rule 319:  InterfaceMemberDeclaration ::= PropertyMethodDeclaration
             //
-            case 324: {
-                //#line 1577 "x10/parser/x10.g"
+            case 319: {
+                //#line 2126 "x10/parser/x10.g"
                 Object PropertyMethodDeclaration = (Object) getRhsSym(1);
-                //#line 1579 "x10/parser/x10.g"
+                //#line 2128 "x10/parser/x10.g"
 		r.rule_InterfaceMemberDeclaration1(PropertyMethodDeclaration);
                 break;
             }
             //
-            // Rule 325:  InterfaceMemberDeclaration ::= FieldDeclaration
+            // Rule 320:  InterfaceMemberDeclaration ::= FieldDeclaration
             //
-            case 325: {
-                //#line 1581 "x10/parser/x10.g"
+            case 320: {
+                //#line 2130 "x10/parser/x10.g"
                 Object FieldDeclaration = (Object) getRhsSym(1);
-                //#line 1583 "x10/parser/x10.g"
+                //#line 2132 "x10/parser/x10.g"
 		r.rule_InterfaceMemberDeclaration2(FieldDeclaration);
                 break;
             }
             //
-            // Rule 326:  InterfaceMemberDeclaration ::= TypeDeclaration
+            // Rule 321:  InterfaceMemberDeclaration ::= ClassDeclaration
             //
-            case 326: {
-                //#line 1585 "x10/parser/x10.g"
-                Object TypeDeclaration = (Object) getRhsSym(1);
-                //#line 1587 "x10/parser/x10.g"
-		r.rule_InterfaceMemberDeclaration3(TypeDeclaration);
+            case 321: {
+                //#line 2134 "x10/parser/x10.g"
+                Object ClassDeclaration = (Object) getRhsSym(1);
+                //#line 2136 "x10/parser/x10.g"
+		r.rule_InterfaceMemberDeclaration3(ClassDeclaration);
                 break;
             }
             //
-            // Rule 327:  Annotations ::= Annotation
+            // Rule 322:  InterfaceMemberDeclaration ::= InterfaceDeclaration
             //
-            case 327: {
-                //#line 1590 "x10/parser/x10.g"
+            case 322: {
+                //#line 2138 "x10/parser/x10.g"
+                Object InterfaceDeclaration = (Object) getRhsSym(1);
+                //#line 2140 "x10/parser/x10.g"
+		r.rule_InterfaceMemberDeclaration4(InterfaceDeclaration);
+                break;
+            }
+            //
+            // Rule 323:  InterfaceMemberDeclaration ::= TypeDefDeclaration
+            //
+            case 323: {
+                //#line 2142 "x10/parser/x10.g"
+                Object TypeDefDeclaration = (Object) getRhsSym(1);
+                //#line 2144 "x10/parser/x10.g"
+		r.rule_InterfaceMemberDeclaration5(TypeDefDeclaration);
+                break;
+            }
+            //
+            // Rule 324:  InterfaceMemberDeclaration ::= ;
+            //
+            case 324: {
+                
+                //#line 2148 "x10/parser/x10.g"
+		r.rule_InterfaceMemberDeclaration6();
+                break;
+            }
+            //
+            // Rule 325:  Annotations ::= Annotation
+            //
+            case 325: {
+                //#line 2151 "x10/parser/x10.g"
                 Object Annotation = (Object) getRhsSym(1);
-                //#line 1592 "x10/parser/x10.g"
+                //#line 2153 "x10/parser/x10.g"
 		r.rule_Annotations0(Annotation);
                 break;
             }
             //
-            // Rule 328:  Annotations ::= Annotations Annotation
+            // Rule 326:  Annotations ::= Annotations Annotation
             //
-            case 328: {
-                //#line 1594 "x10/parser/x10.g"
+            case 326: {
+                //#line 2155 "x10/parser/x10.g"
                 Object Annotations = (Object) getRhsSym(1);
-                //#line 1594 "x10/parser/x10.g"
+                //#line 2155 "x10/parser/x10.g"
                 Object Annotation = (Object) getRhsSym(2);
-                //#line 1596 "x10/parser/x10.g"
+                //#line 2157 "x10/parser/x10.g"
 		r.rule_Annotations1(Annotations,Annotation);
                 break;
             }
             //
-            // Rule 329:  Annotation ::= @ NamedTypeNoConstraints
+            // Rule 327:  Annotation ::= @ NamedTypeNoConstraints
             //
-            case 329: {
-                //#line 1599 "x10/parser/x10.g"
+            case 327: {
+                //#line 2160 "x10/parser/x10.g"
                 Object NamedTypeNoConstraints = (Object) getRhsSym(2);
-                //#line 1601 "x10/parser/x10.g"
+                //#line 2162 "x10/parser/x10.g"
 		r.rule_Annotation0(NamedTypeNoConstraints);
                 break;
             }
             //
-            // Rule 330:  Identifier ::= IDENTIFIER$ident
+            // Rule 328:  Identifier ::= IDENTIFIER$ident
             //
-            case 330: {
-                //#line 1604 "x10/parser/x10.g"
+            case 328: {
+                //#line 2174 "x10/parser/x10.g"
                 IToken ident = (IToken) getRhsIToken(1);
-                //#line 1606 "x10/parser/x10.g"
+                //#line 2176 "x10/parser/x10.g"
 		r.rule_Identifier0();
                 break;
             }
             //
-            // Rule 331:  Block ::= { BlockStatementsopt }
+            // Rule 329:  Block ::= { BlockStatementsopt }
             //
-            case 331: {
-                //#line 1609 "x10/parser/x10.g"
+            case 329: {
+                //#line 2209 "x10/parser/x10.g"
                 Object BlockStatementsopt = (Object) getRhsSym(2);
-                //#line 1611 "x10/parser/x10.g"
+                //#line 2211 "x10/parser/x10.g"
 		r.rule_Block0(BlockStatementsopt);
                 break;
             }
             //
-            // Rule 332:  BlockStatements ::= BlockInteriorStatement
+            // Rule 330:  BlockStatements ::= BlockStatement
             //
-            case 332: {
-                //#line 1614 "x10/parser/x10.g"
-                Object BlockInteriorStatement = (Object) getRhsSym(1);
-                //#line 1616 "x10/parser/x10.g"
-		r.rule_BlockStatements0(BlockInteriorStatement);
+            case 330: {
+                //#line 2214 "x10/parser/x10.g"
+                Object BlockStatement = (Object) getRhsSym(1);
+                //#line 2216 "x10/parser/x10.g"
+		r.rule_BlockStatements0(BlockStatement);
                 break;
             }
             //
-            // Rule 333:  BlockStatements ::= BlockStatements BlockInteriorStatement
+            // Rule 331:  BlockStatements ::= BlockStatements BlockStatement
+            //
+            case 331: {
+                //#line 2218 "x10/parser/x10.g"
+                Object BlockStatements = (Object) getRhsSym(1);
+                //#line 2218 "x10/parser/x10.g"
+                Object BlockStatement = (Object) getRhsSym(2);
+                //#line 2220 "x10/parser/x10.g"
+		r.rule_BlockStatements1(BlockStatements,BlockStatement);
+                break;
+            }
+            //
+            // Rule 333:  BlockStatement ::= ClassDeclaration
             //
             case 333: {
-                //#line 1618 "x10/parser/x10.g"
-                Object BlockStatements = (Object) getRhsSym(1);
-                //#line 1618 "x10/parser/x10.g"
-                Object BlockInteriorStatement = (Object) getRhsSym(2);
-                //#line 1620 "x10/parser/x10.g"
-		r.rule_BlockStatements1(BlockStatements,BlockInteriorStatement);
+                //#line 2224 "x10/parser/x10.g"
+                Object ClassDeclaration = (Object) getRhsSym(1);
+                //#line 2226 "x10/parser/x10.g"
+		r.rule_BlockStatement1(ClassDeclaration);
                 break;
             }
             //
-            // Rule 335:  BlockInteriorStatement ::= ClassDeclaration
+            // Rule 334:  BlockStatement ::= TypeDefDeclaration
+            //
+            case 334: {
+                //#line 2228 "x10/parser/x10.g"
+                Object TypeDefDeclaration = (Object) getRhsSym(1);
+                //#line 2230 "x10/parser/x10.g"
+		r.rule_BlockStatement2(TypeDefDeclaration);
+                break;
+            }
+            //
+            // Rule 335:  BlockStatement ::= Statement
             //
             case 335: {
-                //#line 1624 "x10/parser/x10.g"
-                Object ClassDeclaration = (Object) getRhsSym(1);
-                //#line 1626 "x10/parser/x10.g"
-		r.rule_BlockInteriorStatement1(ClassDeclaration);
+                //#line 2232 "x10/parser/x10.g"
+                Object Statement = (Object) getRhsSym(1);
+                //#line 2234 "x10/parser/x10.g"
+		r.rule_BlockStatement3(Statement);
                 break;
             }
             //
-            // Rule 336:  BlockInteriorStatement ::= StructDeclaration
+            // Rule 336:  IdentifierList ::= Identifier
             //
             case 336: {
-                //#line 1628 "x10/parser/x10.g"
-                Object StructDeclaration = (Object) getRhsSym(1);
-                //#line 1630 "x10/parser/x10.g"
-		r.rule_BlockInteriorStatement2(StructDeclaration);
-                break;
-            }
-            //
-            // Rule 337:  BlockInteriorStatement ::= TypeDefDeclaration
-            //
-            case 337: {
-                //#line 1632 "x10/parser/x10.g"
-                Object TypeDefDeclaration = (Object) getRhsSym(1);
-                //#line 1634 "x10/parser/x10.g"
-		r.rule_BlockInteriorStatement3(TypeDefDeclaration);
-                break;
-            }
-            //
-            // Rule 338:  BlockInteriorStatement ::= Statement
-            //
-            case 338: {
-                //#line 1636 "x10/parser/x10.g"
-                Object Statement = (Object) getRhsSym(1);
-                //#line 1638 "x10/parser/x10.g"
-		r.rule_BlockInteriorStatement4(Statement);
-                break;
-            }
-            //
-            // Rule 339:  IdentifierList ::= Identifier
-            //
-            case 339: {
-                //#line 1641 "x10/parser/x10.g"
+                //#line 2237 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1643 "x10/parser/x10.g"
+                //#line 2239 "x10/parser/x10.g"
 		r.rule_IdentifierList0(Identifier);
                 break;
             }
             //
-            // Rule 340:  IdentifierList ::= IdentifierList , Identifier
+            // Rule 337:  IdentifierList ::= IdentifierList , Identifier
             //
-            case 340: {
-                //#line 1645 "x10/parser/x10.g"
+            case 337: {
+                //#line 2241 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(1);
-                //#line 1645 "x10/parser/x10.g"
+                //#line 2241 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1647 "x10/parser/x10.g"
+                //#line 2243 "x10/parser/x10.g"
 		r.rule_IdentifierList1(IdentifierList,Identifier);
                 break;
             }
             //
-            // Rule 341:  FormalDeclarator ::= Identifier ResultType
+            // Rule 338:  FormalDeclarator ::= Identifier ResultType
             //
-            case 341: {
-                //#line 1650 "x10/parser/x10.g"
+            case 338: {
+                //#line 2246 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1650 "x10/parser/x10.g"
+                //#line 2246 "x10/parser/x10.g"
                 Object ResultType = (Object) getRhsSym(2);
-                //#line 1652 "x10/parser/x10.g"
+                //#line 2248 "x10/parser/x10.g"
 		r.rule_FormalDeclarator0(Identifier,ResultType);
                 break;
             }
             //
-            // Rule 342:  FormalDeclarator ::= [ IdentifierList ] ResultType
+            // Rule 339:  FormalDeclarator ::= [ IdentifierList ] ResultType
             //
-            case 342: {
-                //#line 1654 "x10/parser/x10.g"
+            case 339: {
+                //#line 2250 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(2);
-                //#line 1654 "x10/parser/x10.g"
+                //#line 2250 "x10/parser/x10.g"
                 Object ResultType = (Object) getRhsSym(4);
-                //#line 1656 "x10/parser/x10.g"
+                //#line 2252 "x10/parser/x10.g"
 		r.rule_FormalDeclarator1(IdentifierList,ResultType);
                 break;
             }
             //
-            // Rule 343:  FormalDeclarator ::= Identifier [ IdentifierList ] ResultType
+            // Rule 340:  FormalDeclarator ::= Identifier [ IdentifierList ] ResultType
             //
-            case 343: {
-                //#line 1658 "x10/parser/x10.g"
+            case 340: {
+                //#line 2254 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1658 "x10/parser/x10.g"
+                //#line 2254 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(3);
-                //#line 1658 "x10/parser/x10.g"
+                //#line 2254 "x10/parser/x10.g"
                 Object ResultType = (Object) getRhsSym(5);
-                //#line 1660 "x10/parser/x10.g"
+                //#line 2256 "x10/parser/x10.g"
 		r.rule_FormalDeclarator2(Identifier,IdentifierList,ResultType);
                 break;
             }
             //
-            // Rule 344:  FieldDeclarator ::= Identifier HasResultType
+            // Rule 341:  FieldDeclarator ::= Identifier HasResultType
             //
-            case 344: {
-                //#line 1663 "x10/parser/x10.g"
+            case 341: {
+                //#line 2259 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1663 "x10/parser/x10.g"
+                //#line 2259 "x10/parser/x10.g"
                 Object HasResultType = (Object) getRhsSym(2);
-                //#line 1665 "x10/parser/x10.g"
+                //#line 2261 "x10/parser/x10.g"
 		r.rule_FieldDeclarator0(Identifier,HasResultType);
                 break;
             }
             //
-            // Rule 345:  FieldDeclarator ::= Identifier HasResultTypeopt = VariableInitializer
+            // Rule 342:  FieldDeclarator ::= Identifier HasResultTypeopt = VariableInitializer
             //
-            case 345: {
-                //#line 1667 "x10/parser/x10.g"
+            case 342: {
+                //#line 2263 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1667 "x10/parser/x10.g"
+                //#line 2263 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(2);
-                //#line 1667 "x10/parser/x10.g"
+                //#line 2263 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(4);
-                //#line 1669 "x10/parser/x10.g"
+                //#line 2265 "x10/parser/x10.g"
 		r.rule_FieldDeclarator1(Identifier,HasResultTypeopt,VariableInitializer);
                 break;
             }
             //
-            // Rule 346:  VariableDeclarator ::= Identifier HasResultTypeopt = VariableInitializer
+            // Rule 343:  VariableDeclarator ::= Identifier HasResultTypeopt = VariableInitializer
             //
-            case 346: {
-                //#line 1672 "x10/parser/x10.g"
+            case 343: {
+                //#line 2268 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1672 "x10/parser/x10.g"
+                //#line 2268 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(2);
-                //#line 1672 "x10/parser/x10.g"
+                //#line 2268 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(4);
-                //#line 1674 "x10/parser/x10.g"
+                //#line 2270 "x10/parser/x10.g"
 		r.rule_VariableDeclarator0(Identifier,HasResultTypeopt,VariableInitializer);
                 break;
             }
             //
-            // Rule 347:  VariableDeclarator ::= [ IdentifierList ] HasResultTypeopt = VariableInitializer
+            // Rule 344:  VariableDeclarator ::= [ IdentifierList ] HasResultTypeopt = VariableInitializer
             //
-            case 347: {
-                //#line 1676 "x10/parser/x10.g"
+            case 344: {
+                //#line 2272 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(2);
-                //#line 1676 "x10/parser/x10.g"
+                //#line 2272 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(4);
-                //#line 1676 "x10/parser/x10.g"
+                //#line 2272 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(6);
-                //#line 1678 "x10/parser/x10.g"
+                //#line 2274 "x10/parser/x10.g"
 		r.rule_VariableDeclarator1(IdentifierList,HasResultTypeopt,VariableInitializer);
                 break;
             }
             //
-            // Rule 348:  VariableDeclarator ::= Identifier [ IdentifierList ] HasResultTypeopt = VariableInitializer
+            // Rule 345:  VariableDeclarator ::= Identifier [ IdentifierList ] HasResultTypeopt = VariableInitializer
             //
-            case 348: {
-                //#line 1680 "x10/parser/x10.g"
+            case 345: {
+                //#line 2276 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1680 "x10/parser/x10.g"
+                //#line 2276 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(3);
-                //#line 1680 "x10/parser/x10.g"
+                //#line 2276 "x10/parser/x10.g"
                 Object HasResultTypeopt = (Object) getRhsSym(5);
-                //#line 1680 "x10/parser/x10.g"
+                //#line 2276 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(7);
-                //#line 1682 "x10/parser/x10.g"
+                //#line 2278 "x10/parser/x10.g"
 		r.rule_VariableDeclarator2(Identifier,IdentifierList,HasResultTypeopt,VariableInitializer);
                 break;
             }
             //
-            // Rule 349:  VariableDeclaratorWithType ::= Identifier HasResultType = VariableInitializer
+            // Rule 346:  VariableDeclaratorWithType ::= Identifier HasResultType = VariableInitializer
             //
-            case 349: {
-                //#line 1685 "x10/parser/x10.g"
+            case 346: {
+                //#line 2281 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1685 "x10/parser/x10.g"
+                //#line 2281 "x10/parser/x10.g"
                 Object HasResultType = (Object) getRhsSym(2);
-                //#line 1685 "x10/parser/x10.g"
+                //#line 2281 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(4);
-                //#line 1687 "x10/parser/x10.g"
+                //#line 2283 "x10/parser/x10.g"
 		r.rule_VariableDeclaratorWithType0(Identifier,HasResultType,VariableInitializer);
                 break;
             }
             //
-            // Rule 350:  VariableDeclaratorWithType ::= [ IdentifierList ] HasResultType = VariableInitializer
+            // Rule 347:  VariableDeclaratorWithType ::= [ IdentifierList ] HasResultType = VariableInitializer
             //
-            case 350: {
-                //#line 1689 "x10/parser/x10.g"
+            case 347: {
+                //#line 2285 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(2);
-                //#line 1689 "x10/parser/x10.g"
+                //#line 2285 "x10/parser/x10.g"
                 Object HasResultType = (Object) getRhsSym(4);
-                //#line 1689 "x10/parser/x10.g"
+                //#line 2285 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(6);
-                //#line 1691 "x10/parser/x10.g"
+                //#line 2287 "x10/parser/x10.g"
 		r.rule_VariableDeclaratorWithType1(IdentifierList,HasResultType,VariableInitializer);
                 break;
             }
             //
-            // Rule 351:  VariableDeclaratorWithType ::= Identifier [ IdentifierList ] HasResultType = VariableInitializer
+            // Rule 348:  VariableDeclaratorWithType ::= Identifier [ IdentifierList ] HasResultType = VariableInitializer
             //
-            case 351: {
-                //#line 1693 "x10/parser/x10.g"
+            case 348: {
+                //#line 2289 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1693 "x10/parser/x10.g"
+                //#line 2289 "x10/parser/x10.g"
                 Object IdentifierList = (Object) getRhsSym(3);
-                //#line 1693 "x10/parser/x10.g"
+                //#line 2289 "x10/parser/x10.g"
                 Object HasResultType = (Object) getRhsSym(5);
-                //#line 1693 "x10/parser/x10.g"
+                //#line 2289 "x10/parser/x10.g"
                 Object VariableInitializer = (Object) getRhsSym(7);
-                //#line 1695 "x10/parser/x10.g"
+                //#line 2291 "x10/parser/x10.g"
 		r.rule_VariableDeclaratorWithType2(Identifier,IdentifierList,HasResultType,VariableInitializer);
                 break;
             }
             //
-            // Rule 352:  AtCaptureDeclarator ::= Modifiersopt VarKeywordopt VariableDeclarator
+            // Rule 349:  AtCaptureDeclarator ::= Modifiersopt VarKeywordopt VariableDeclarator
             //
-            case 352: {
-                //#line 1698 "x10/parser/x10.g"
+            case 349: {
+                //#line 2294 "x10/parser/x10.g"
                 Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1698 "x10/parser/x10.g"
+                //#line 2294 "x10/parser/x10.g"
                 Object VarKeywordopt = (Object) getRhsSym(2);
-                //#line 1698 "x10/parser/x10.g"
+                //#line 2294 "x10/parser/x10.g"
                 Object VariableDeclarator = (Object) getRhsSym(3);
-                //#line 1700 "x10/parser/x10.g"
+                //#line 2296 "x10/parser/x10.g"
 		r.rule_AtCaptureDeclarator0(Modifiersopt,VarKeywordopt,VariableDeclarator);
                 break;
             }
             //
-            // Rule 353:  AtCaptureDeclarator ::= Identifier
+            // Rule 350:  AtCaptureDeclarator ::= Identifier
             //
-            case 353: {
-                //#line 1702 "x10/parser/x10.g"
+            case 350: {
+                //#line 2298 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 1704 "x10/parser/x10.g"
+                //#line 2300 "x10/parser/x10.g"
 		r.rule_AtCaptureDeclarator1(Identifier);
                 break;
             }
             //
-            // Rule 354:  AtCaptureDeclarator ::= this
+            // Rule 351:  AtCaptureDeclarator ::= this
             //
-            case 354: {
+            case 351: {
                 
-                //#line 1708 "x10/parser/x10.g"
+                //#line 2304 "x10/parser/x10.g"
 		r.rule_AtCaptureDeclarator2();
                 break;
             }
             //
-            // Rule 356:  LocalVariableDeclaration ::= Modifiersopt VarKeyword VariableDeclarators
+            // Rule 353:  LocalVariableDeclaration ::= Modifiersopt VarKeyword VariableDeclarators
+            //
+            case 353: {
+                //#line 2309 "x10/parser/x10.g"
+                Object Modifiersopt = (Object) getRhsSym(1);
+                //#line 2309 "x10/parser/x10.g"
+                Object VarKeyword = (Object) getRhsSym(2);
+                //#line 2309 "x10/parser/x10.g"
+                Object VariableDeclarators = (Object) getRhsSym(3);
+                //#line 2311 "x10/parser/x10.g"
+		r.rule_LocalVariableDeclaration0(Modifiersopt,VarKeyword,VariableDeclarators);
+    
+                break;
+            }
+            //
+            // Rule 354:  LocalVariableDeclaration ::= Modifiersopt VariableDeclaratorsWithType
+            //
+            case 354: {
+                //#line 2314 "x10/parser/x10.g"
+                Object Modifiersopt = (Object) getRhsSym(1);
+                //#line 2314 "x10/parser/x10.g"
+                Object VariableDeclaratorsWithType = (Object) getRhsSym(2);
+                //#line 2316 "x10/parser/x10.g"
+		r.rule_LocalVariableDeclaration1(Modifiersopt,VariableDeclaratorsWithType);
+    
+                break;
+            }
+            //
+            // Rule 355:  LocalVariableDeclaration ::= Modifiersopt VarKeyword FormalDeclarators
+            //
+            case 355: {
+                //#line 2319 "x10/parser/x10.g"
+                Object Modifiersopt = (Object) getRhsSym(1);
+                //#line 2319 "x10/parser/x10.g"
+                Object VarKeyword = (Object) getRhsSym(2);
+                //#line 2319 "x10/parser/x10.g"
+                Object FormalDeclarators = (Object) getRhsSym(3);
+                //#line 2321 "x10/parser/x10.g"
+		r.rule_LocalVariableDeclaration2(Modifiersopt,VarKeyword,FormalDeclarators);
+    
+                break;
+            }
+            //
+            // Rule 356:  Primary ::= here
             //
             case 356: {
-                //#line 1713 "x10/parser/x10.g"
-                Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1713 "x10/parser/x10.g"
-                Object VarKeyword = (Object) getRhsSym(2);
-                //#line 1713 "x10/parser/x10.g"
-                Object VariableDeclarators = (Object) getRhsSym(3);
-                //#line 1715 "x10/parser/x10.g"
-		r.rule_LocalVariableDeclaration0(Modifiersopt,VarKeyword,VariableDeclarators);
-                break;
-            }
-            //
-            // Rule 357:  LocalVariableDeclaration ::= Modifiersopt VariableDeclaratorsWithType
-            //
-            case 357: {
-                //#line 1717 "x10/parser/x10.g"
-                Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1717 "x10/parser/x10.g"
-                Object VariableDeclaratorsWithType = (Object) getRhsSym(2);
-                //#line 1719 "x10/parser/x10.g"
-		r.rule_LocalVariableDeclaration1(Modifiersopt,VariableDeclaratorsWithType);
-                break;
-            }
-            //
-            // Rule 358:  LocalVariableDeclaration ::= Modifiersopt VarKeyword FormalDeclarators
-            //
-            case 358: {
-                //#line 1721 "x10/parser/x10.g"
-                Object Modifiersopt = (Object) getRhsSym(1);
-                //#line 1721 "x10/parser/x10.g"
-                Object VarKeyword = (Object) getRhsSym(2);
-                //#line 1721 "x10/parser/x10.g"
-                Object FormalDeclarators = (Object) getRhsSym(3);
-                //#line 1723 "x10/parser/x10.g"
-		r.rule_LocalVariableDeclaration2(Modifiersopt,VarKeyword,FormalDeclarators);
-                break;
-            }
-            //
-            // Rule 359:  Primary ::= here
-            //
-            case 359: {
                 
-                //#line 1733 "x10/parser/x10.g"
+                //#line 2332 "x10/parser/x10.g"
 		r.rule_Primary0();
                 break;
             }
             //
-            // Rule 360:  Primary ::= [ ArgumentListopt ]
+            // Rule 357:  Primary ::= [ ArgumentListopt ]
             //
-            case 360: {
-                //#line 1735 "x10/parser/x10.g"
+            case 357: {
+                //#line 2334 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(2);
-                //#line 1737 "x10/parser/x10.g"
+                //#line 2336 "x10/parser/x10.g"
 		r.rule_Primary1(ArgumentListopt);
                 break;
             }
             //
-            // Rule 362:  Primary ::= self
+            // Rule 359:  Primary ::= self
             //
-            case 362: {
+            case 359: {
                 
-                //#line 1743 "x10/parser/x10.g"
+                //#line 2342 "x10/parser/x10.g"
 		r.rule_Primary3();
                 break;
             }
             //
-            // Rule 363:  Primary ::= this
+            // Rule 360:  Primary ::= this
             //
-            case 363: {
+            case 360: {
                 
-                //#line 1747 "x10/parser/x10.g"
+                //#line 2346 "x10/parser/x10.g"
 		r.rule_Primary4();
                 break;
             }
             //
-            // Rule 364:  Primary ::= ClassName . this
+            // Rule 361:  Primary ::= ClassName . this
             //
-            case 364: {
-                //#line 1749 "x10/parser/x10.g"
+            case 361: {
+                //#line 2348 "x10/parser/x10.g"
                 Object ClassName = (Object) getRhsSym(1);
-                //#line 1751 "x10/parser/x10.g"
+                //#line 2350 "x10/parser/x10.g"
 		r.rule_Primary5(ClassName);
                 break;
             }
             //
-            // Rule 365:  Primary ::= ( Expression )
+            // Rule 362:  Primary ::= ( Expression )
             //
-            case 365: {
-                //#line 1753 "x10/parser/x10.g"
+            case 362: {
+                //#line 2352 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(2);
-                //#line 1755 "x10/parser/x10.g"
+                //#line 2354 "x10/parser/x10.g"
 		r.rule_Primary6(Expression);
                 break;
             }
             //
-            // Rule 371:  OBSOLETE_OperatorFunction ::= TypeName . BinOp
+            // Rule 368:  OperatorFunction ::= TypeName . +
             //
-            case 371: {
-                //#line 1763 "x10/parser/x10.g"
+            case 368: {
+                //#line 2362 "x10/parser/x10.g"
                 Object TypeName = (Object) getRhsSym(1);
-                //#line 1763 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(3);
-                //#line 1765 "x10/parser/x10.g"
-		r.rule_OBSOLETE_OperatorFunction0(TypeName,BinOp);
+                //#line 2364 "x10/parser/x10.g"
+		r.rule_OperatorFunction0(TypeName);
                 break;
             }
             //
-            // Rule 372:  Literal ::= IntegerLiteral$lit
+            // Rule 369:  OperatorFunction ::= TypeName . -
+            //
+            case 369: {
+                //#line 2366 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2368 "x10/parser/x10.g"
+		r.rule_OperatorFunction1(TypeName);
+                break;
+            }
+            //
+            // Rule 370:  OperatorFunction ::= TypeName . *
+            //
+            case 370: {
+                //#line 2370 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2372 "x10/parser/x10.g"
+		r.rule_OperatorFunction2(TypeName);
+                break;
+            }
+            //
+            // Rule 371:  OperatorFunction ::= TypeName . /
+            //
+            case 371: {
+                //#line 2374 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2376 "x10/parser/x10.g"
+		r.rule_OperatorFunction3(TypeName);
+                break;
+            }
+            //
+            // Rule 372:  OperatorFunction ::= TypeName . %
             //
             case 372: {
-                //#line 1768 "x10/parser/x10.g"
+                //#line 2378 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2380 "x10/parser/x10.g"
+		r.rule_OperatorFunction4(TypeName);
+                break;
+            }
+            //
+            // Rule 373:  OperatorFunction ::= TypeName . &
+            //
+            case 373: {
+                //#line 2382 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2384 "x10/parser/x10.g"
+		r.rule_OperatorFunction5(TypeName);
+                break;
+            }
+            //
+            // Rule 374:  OperatorFunction ::= TypeName . |
+            //
+            case 374: {
+                //#line 2386 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2388 "x10/parser/x10.g"
+		r.rule_OperatorFunction6(TypeName);
+                break;
+            }
+            //
+            // Rule 375:  OperatorFunction ::= TypeName . ^
+            //
+            case 375: {
+                //#line 2390 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2392 "x10/parser/x10.g"
+		r.rule_OperatorFunction7(TypeName);
+                break;
+            }
+            //
+            // Rule 376:  OperatorFunction ::= TypeName . <<
+            //
+            case 376: {
+                //#line 2394 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2396 "x10/parser/x10.g"
+		r.rule_OperatorFunction8(TypeName);
+                break;
+            }
+            //
+            // Rule 377:  OperatorFunction ::= TypeName . >>
+            //
+            case 377: {
+                //#line 2398 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2400 "x10/parser/x10.g"
+		r.rule_OperatorFunction9(TypeName);
+                break;
+            }
+            //
+            // Rule 378:  OperatorFunction ::= TypeName . >>>
+            //
+            case 378: {
+                //#line 2402 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2404 "x10/parser/x10.g"
+		r.rule_OperatorFunction10(TypeName);
+                break;
+            }
+            //
+            // Rule 379:  OperatorFunction ::= TypeName . <
+            //
+            case 379: {
+                //#line 2406 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2408 "x10/parser/x10.g"
+		r.rule_OperatorFunction11(TypeName);
+                break;
+            }
+            //
+            // Rule 380:  OperatorFunction ::= TypeName . <=
+            //
+            case 380: {
+                //#line 2410 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2412 "x10/parser/x10.g"
+		r.rule_OperatorFunction12(TypeName);
+                break;
+            }
+            //
+            // Rule 381:  OperatorFunction ::= TypeName . >=
+            //
+            case 381: {
+                //#line 2414 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2416 "x10/parser/x10.g"
+		r.rule_OperatorFunction13(TypeName);
+                break;
+            }
+            //
+            // Rule 382:  OperatorFunction ::= TypeName . >
+            //
+            case 382: {
+                //#line 2418 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2420 "x10/parser/x10.g"
+		r.rule_OperatorFunction14(TypeName);
+                break;
+            }
+            //
+            // Rule 383:  OperatorFunction ::= TypeName . ==
+            //
+            case 383: {
+                //#line 2422 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2424 "x10/parser/x10.g"
+		r.rule_OperatorFunction15(TypeName);
+                break;
+            }
+            //
+            // Rule 384:  OperatorFunction ::= TypeName . !=
+            //
+            case 384: {
+                //#line 2426 "x10/parser/x10.g"
+                Object TypeName = (Object) getRhsSym(1);
+                //#line 2428 "x10/parser/x10.g"
+		r.rule_OperatorFunction16(TypeName);
+                break;
+            }
+            //
+            // Rule 385:  Literal ::= IntegerLiteral$lit
+            //
+            case 385: {
+                //#line 2431 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1770 "x10/parser/x10.g"
+                //#line 2433 "x10/parser/x10.g"
 		r.rule_Literal0();
                 break;
             }
             //
-            // Rule 373:  Literal ::= LongLiteral$lit
+            // Rule 386:  Literal ::= LongLiteral$lit
             //
-            case 373: {
-                //#line 1772 "x10/parser/x10.g"
+            case 386: {
+                //#line 2435 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1774 "x10/parser/x10.g"
+                //#line 2437 "x10/parser/x10.g"
 		r.rule_Literal1();
                 break;
             }
             //
-            // Rule 374:  Literal ::= ByteLiteral
+            // Rule 387:  Literal ::= ByteLiteral
             //
-            case 374: {
+            case 387: {
                 
-                //#line 1778 "x10/parser/x10.g"
+                //#line 2441 "x10/parser/x10.g"
 		r.rule_LiteralByte();
                 break;
             }
             //
-            // Rule 375:  Literal ::= UnsignedByteLiteral
+            // Rule 388:  Literal ::= UnsignedByteLiteral
             //
-            case 375: {
+            case 388: {
                 
-                //#line 1782 "x10/parser/x10.g"
+                //#line 2445 "x10/parser/x10.g"
 		r.rule_LiteralUByte();
                 break;
             }
             //
-            // Rule 376:  Literal ::= ShortLiteral
+            // Rule 389:  Literal ::= ShortLiteral
             //
-            case 376: {
+            case 389: {
                 
-                //#line 1786 "x10/parser/x10.g"
+                //#line 2449 "x10/parser/x10.g"
 		r.rule_LiteralShort();
                 break;
             }
             //
-            // Rule 377:  Literal ::= UnsignedShortLiteral
+            // Rule 390:  Literal ::= UnsignedShortLiteral
             //
-            case 377: {
+            case 390: {
                 
-                //#line 1790 "x10/parser/x10.g"
+                //#line 2453 "x10/parser/x10.g"
 		r.rule_LiteralUShort();
                 break;
             }
             //
-            // Rule 378:  Literal ::= UnsignedIntegerLiteral$lit
+            // Rule 391:  Literal ::= UnsignedIntegerLiteral$lit
             //
-            case 378: {
-                //#line 1792 "x10/parser/x10.g"
+            case 391: {
+                //#line 2455 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1794 "x10/parser/x10.g"
+                //#line 2457 "x10/parser/x10.g"
 		r.rule_Literal2();
                 break;
             }
             //
-            // Rule 379:  Literal ::= UnsignedLongLiteral$lit
+            // Rule 392:  Literal ::= UnsignedLongLiteral$lit
             //
-            case 379: {
-                //#line 1796 "x10/parser/x10.g"
+            case 392: {
+                //#line 2459 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1798 "x10/parser/x10.g"
+                //#line 2461 "x10/parser/x10.g"
 		r.rule_Literal3();
                 break;
             }
             //
-            // Rule 380:  Literal ::= FloatingPointLiteral$lit
+            // Rule 393:  Literal ::= FloatingPointLiteral$lit
             //
-            case 380: {
-                //#line 1800 "x10/parser/x10.g"
+            case 393: {
+                //#line 2463 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1802 "x10/parser/x10.g"
+                //#line 2465 "x10/parser/x10.g"
 		r.rule_Literal4();
                 break;
             }
             //
-            // Rule 381:  Literal ::= DoubleLiteral$lit
+            // Rule 394:  Literal ::= DoubleLiteral$lit
             //
-            case 381: {
-                //#line 1804 "x10/parser/x10.g"
+            case 394: {
+                //#line 2467 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1806 "x10/parser/x10.g"
+                //#line 2469 "x10/parser/x10.g"
 		r.rule_Literal5();
                 break;
             }
             //
-            // Rule 382:  Literal ::= BooleanLiteral
+            // Rule 395:  Literal ::= BooleanLiteral
             //
-            case 382: {
-                //#line 1808 "x10/parser/x10.g"
+            case 395: {
+                //#line 2471 "x10/parser/x10.g"
                 Object BooleanLiteral = (Object) getRhsSym(1);
-                //#line 1810 "x10/parser/x10.g"
+                //#line 2473 "x10/parser/x10.g"
 		r.rule_Literal6(BooleanLiteral);
                 break;
             }
             //
-            // Rule 383:  Literal ::= CharacterLiteral$lit
+            // Rule 396:  Literal ::= CharacterLiteral$lit
             //
-            case 383: {
-                //#line 1812 "x10/parser/x10.g"
+            case 396: {
+                //#line 2475 "x10/parser/x10.g"
                 IToken lit = (IToken) getRhsIToken(1);
-                //#line 1814 "x10/parser/x10.g"
+                //#line 2477 "x10/parser/x10.g"
 		r.rule_Literal7();
                 break;
             }
             //
-            // Rule 384:  Literal ::= StringLiteral$str
+            // Rule 397:  Literal ::= StringLiteral$str
             //
-            case 384: {
-                //#line 1816 "x10/parser/x10.g"
+            case 397: {
+                //#line 2479 "x10/parser/x10.g"
                 IToken str = (IToken) getRhsIToken(1);
-                //#line 1818 "x10/parser/x10.g"
+                //#line 2481 "x10/parser/x10.g"
 		r.rule_Literal8();
                 break;
             }
             //
-            // Rule 385:  Literal ::= null
+            // Rule 398:  Literal ::= null
             //
-            case 385: {
+            case 398: {
                 
-                //#line 1822 "x10/parser/x10.g"
+                //#line 2485 "x10/parser/x10.g"
 		r.rule_Literal9();
                 break;
             }
             //
-            // Rule 386:  BooleanLiteral ::= true$trueLiteral
+            // Rule 399:  BooleanLiteral ::= true$trueLiteral
             //
-            case 386: {
-                //#line 1825 "x10/parser/x10.g"
+            case 399: {
+                //#line 2488 "x10/parser/x10.g"
                 IToken trueLiteral = (IToken) getRhsIToken(1);
-                //#line 1827 "x10/parser/x10.g"
+                //#line 2490 "x10/parser/x10.g"
 		r.rule_BooleanLiteral0();
                 break;
             }
             //
-            // Rule 387:  BooleanLiteral ::= false$falseLiteral
+            // Rule 400:  BooleanLiteral ::= false$falseLiteral
             //
-            case 387: {
-                //#line 1829 "x10/parser/x10.g"
+            case 400: {
+                //#line 2492 "x10/parser/x10.g"
                 IToken falseLiteral = (IToken) getRhsIToken(1);
-                //#line 1831 "x10/parser/x10.g"
+                //#line 2494 "x10/parser/x10.g"
 		r.rule_BooleanLiteral1();
                 break;
             }
             //
-            // Rule 388:  ArgumentList ::= Expression
+            // Rule 401:  ArgumentList ::= Expression
             //
-            case 388: {
-                //#line 1837 "x10/parser/x10.g"
+            case 401: {
+                //#line 2500 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(1);
-                //#line 1839 "x10/parser/x10.g"
+                //#line 2502 "x10/parser/x10.g"
 		r.rule_ArgumentList0(Expression);
                 break;
             }
             //
-            // Rule 389:  ArgumentList ::= ArgumentList , Expression
+            // Rule 402:  ArgumentList ::= ArgumentList , Expression
             //
-            case 389: {
-                //#line 1841 "x10/parser/x10.g"
+            case 402: {
+                //#line 2504 "x10/parser/x10.g"
                 Object ArgumentList = (Object) getRhsSym(1);
-                //#line 1841 "x10/parser/x10.g"
+                //#line 2504 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 1843 "x10/parser/x10.g"
+                //#line 2506 "x10/parser/x10.g"
 		r.rule_ArgumentList1(ArgumentList,Expression);
                 break;
             }
             //
-            // Rule 390:  FieldAccess ::= Primary . Identifier
+            // Rule 403:  FieldAccess ::= Primary . Identifier
             //
-            case 390: {
-                //#line 1846 "x10/parser/x10.g"
+            case 403: {
+                //#line 2509 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 1846 "x10/parser/x10.g"
+                //#line 2509 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1848 "x10/parser/x10.g"
+                //#line 2511 "x10/parser/x10.g"
 		r.rule_FieldAccess3(Primary,Identifier);
                 break;
             }
             //
-            // Rule 391:  FieldAccess ::= super . Identifier
+            // Rule 404:  FieldAccess ::= super . Identifier
             //
-            case 391: {
-                //#line 1850 "x10/parser/x10.g"
+            case 404: {
+                //#line 2513 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1852 "x10/parser/x10.g"
+                //#line 2515 "x10/parser/x10.g"
 		r.rule_FieldAccess4(Identifier);
                 break;
             }
             //
-            // Rule 392:  FieldAccess ::= ClassName . super$sup . Identifier
+            // Rule 405:  FieldAccess ::= ClassName . super$sup . Identifier
             //
-            case 392: {
-                //#line 1854 "x10/parser/x10.g"
+            case 405: {
+                //#line 2517 "x10/parser/x10.g"
                 Object ClassName = (Object) getRhsSym(1);
-                //#line 1854 "x10/parser/x10.g"
+                //#line 2517 "x10/parser/x10.g"
                 IToken sup = (IToken) getRhsIToken(3);
-                //#line 1854 "x10/parser/x10.g"
+                //#line 2517 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(5);
-                //#line 1856 "x10/parser/x10.g"
+                //#line 2519 "x10/parser/x10.g"
 		r.rule_FieldAccess5(ClassName,Identifier);
                 break;
             }
             //
-            // Rule 393:  MethodInvocation ::= MethodName TypeArgumentsopt ( ArgumentListopt )
+            // Rule 406:  FieldAccess ::= Primary . class$c
             //
-            case 393: {
-                //#line 1859 "x10/parser/x10.g"
+            case 406: {
+                //#line 2521 "x10/parser/x10.g"
+                Object Primary = (Object) getRhsSym(1);
+                //#line 2521 "x10/parser/x10.g"
+                IToken c = (IToken) getRhsIToken(3);
+                //#line 2523 "x10/parser/x10.g"
+		r.rule_FieldAccess6(Primary);
+                break;
+            }
+            //
+            // Rule 407:  FieldAccess ::= super . class$c
+            //
+            case 407: {
+                //#line 2525 "x10/parser/x10.g"
+                IToken c = (IToken) getRhsIToken(3);
+                //#line 2527 "x10/parser/x10.g"
+		r.rule_FieldAccess7();
+                break;
+            }
+            //
+            // Rule 408:  FieldAccess ::= ClassName . super$sup . class$c
+            //
+            case 408: {
+                //#line 2529 "x10/parser/x10.g"
+                Object ClassName = (Object) getRhsSym(1);
+                //#line 2529 "x10/parser/x10.g"
+                IToken sup = (IToken) getRhsIToken(3);
+                //#line 2529 "x10/parser/x10.g"
+                IToken c = (IToken) getRhsIToken(5);
+                //#line 2531 "x10/parser/x10.g"
+		r.rule_FieldAccess8(ClassName);
+                break;
+            }
+            //
+            // Rule 409:  MethodInvocation ::= MethodName TypeArgumentsopt ( ArgumentListopt )
+            //
+            case 409: {
+                //#line 2534 "x10/parser/x10.g"
                 Object MethodName = (Object) getRhsSym(1);
-                //#line 1859 "x10/parser/x10.g"
+                //#line 2534 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(2);
-                //#line 1859 "x10/parser/x10.g"
+                //#line 2534 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(4);
-                //#line 1861 "x10/parser/x10.g"
+                //#line 2536 "x10/parser/x10.g"
 		r.rule_MethodInvocation3(MethodName,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 394:  MethodInvocation ::= Primary . Identifier TypeArgumentsopt ( ArgumentListopt )
+            // Rule 410:  MethodInvocation ::= Primary . Identifier TypeArgumentsopt ( ArgumentListopt )
             //
-            case 394: {
-                //#line 1863 "x10/parser/x10.g"
+            case 410: {
+                //#line 2538 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 1863 "x10/parser/x10.g"
+                //#line 2538 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1863 "x10/parser/x10.g"
+                //#line 2538 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(4);
-                //#line 1863 "x10/parser/x10.g"
+                //#line 2538 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(6);
-                //#line 1865 "x10/parser/x10.g"
+                //#line 2540 "x10/parser/x10.g"
 		r.rule_MethodInvocation4(Primary,Identifier,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 395:  MethodInvocation ::= super . Identifier TypeArgumentsopt ( ArgumentListopt )
+            // Rule 411:  MethodInvocation ::= super . Identifier TypeArgumentsopt ( ArgumentListopt )
             //
-            case 395: {
-                //#line 1867 "x10/parser/x10.g"
+            case 411: {
+                //#line 2542 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(3);
-                //#line 1867 "x10/parser/x10.g"
+                //#line 2542 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(4);
-                //#line 1867 "x10/parser/x10.g"
+                //#line 2542 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(6);
-                //#line 1869 "x10/parser/x10.g"
+                //#line 2544 "x10/parser/x10.g"
 		r.rule_MethodInvocation5(Identifier,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 396:  MethodInvocation ::= ClassName . super . Identifier TypeArgumentsopt ( ArgumentListopt )
+            // Rule 412:  MethodInvocation ::= ClassName . super$sup . Identifier TypeArgumentsopt ( ArgumentListopt )
             //
-            case 396: {
-                //#line 1871 "x10/parser/x10.g"
+            case 412: {
+                //#line 2546 "x10/parser/x10.g"
                 Object ClassName = (Object) getRhsSym(1);
-                //#line 1871 "x10/parser/x10.g"
+                //#line 2546 "x10/parser/x10.g"
+                IToken sup = (IToken) getRhsIToken(3);
+                //#line 2546 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(5);
-                //#line 1871 "x10/parser/x10.g"
+                //#line 2546 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(6);
-                //#line 1871 "x10/parser/x10.g"
+                //#line 2546 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(8);
-                //#line 1873 "x10/parser/x10.g"
+                //#line 2548 "x10/parser/x10.g"
 		r.rule_MethodInvocation6(ClassName,Identifier,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 397:  MethodInvocation ::= Primary TypeArgumentsopt ( ArgumentListopt )
+            // Rule 413:  MethodInvocation ::= Primary TypeArgumentsopt ( ArgumentListopt )
             //
-            case 397: {
-                //#line 1875 "x10/parser/x10.g"
+            case 413: {
+                //#line 2550 "x10/parser/x10.g"
                 Object Primary = (Object) getRhsSym(1);
-                //#line 1875 "x10/parser/x10.g"
+                //#line 2550 "x10/parser/x10.g"
                 Object TypeArgumentsopt = (Object) getRhsSym(2);
-                //#line 1875 "x10/parser/x10.g"
+                //#line 2550 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(4);
-                //#line 1877 "x10/parser/x10.g"
+                //#line 2552 "x10/parser/x10.g"
 		r.rule_MethodInvocation7(Primary,TypeArgumentsopt,ArgumentListopt);
                 break;
             }
             //
-            // Rule 398:  MethodInvocation ::= OperatorPrefix TypeArgumentsopt ( ArgumentListopt )
-            //
-            case 398: {
-                //#line 1879 "x10/parser/x10.g"
-                Object OperatorPrefix = (Object) getRhsSym(1);
-                //#line 1879 "x10/parser/x10.g"
-                Object TypeArgumentsopt = (Object) getRhsSym(2);
-                //#line 1879 "x10/parser/x10.g"
-                Object ArgumentListopt = (Object) getRhsSym(4);
-                //#line 1881 "x10/parser/x10.g"
-		r.rule_MethodInvocation8(OperatorPrefix,TypeArgumentsopt,ArgumentListopt);
-                break;
-            }
-            //
-            // Rule 399:  MethodInvocation ::= ClassName . operator as [ Type ] TypeArgumentsopt ( ArgumentListopt )
-            //
-            case 399: {
-                //#line 1883 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 1883 "x10/parser/x10.g"
-                Object Type = (Object) getRhsSym(6);
-                //#line 1883 "x10/parser/x10.g"
-                Object TypeArgumentsopt = (Object) getRhsSym(8);
-                //#line 1883 "x10/parser/x10.g"
-                Object ArgumentListopt = (Object) getRhsSym(10);
-                //#line 1885 "x10/parser/x10.g"
-		r.rule_OperatorPrefix25(ClassName,Type,TypeArgumentsopt,ArgumentListopt);
-                break;
-            }
-            //
-            // Rule 400:  MethodInvocation ::= ClassName . operator [ Type ] TypeArgumentsopt ( ArgumentListopt )
-            //
-            case 400: {
-                //#line 1887 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 1887 "x10/parser/x10.g"
-                Object Type = (Object) getRhsSym(5);
-                //#line 1887 "x10/parser/x10.g"
-                Object TypeArgumentsopt = (Object) getRhsSym(7);
-                //#line 1887 "x10/parser/x10.g"
-                Object ArgumentListopt = (Object) getRhsSym(9);
-                //#line 1889 "x10/parser/x10.g"
-		r.rule_OperatorPrefix26(ClassName,Type,TypeArgumentsopt,ArgumentListopt);
-                break;
-            }
-            //
-            // Rule 401:  OperatorPrefix ::= operator BinOp
-            //
-            case 401: {
-                //#line 1892 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(2);
-                //#line 1894 "x10/parser/x10.g"
-		r.rule_OperatorPrefix0(BinOp);
-                break;
-            }
-            //
-            // Rule 402:  OperatorPrefix ::= FullyQualifiedName . operator BinOp
-            //
-            case 402: {
-                //#line 1896 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1896 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(4);
-                //#line 1898 "x10/parser/x10.g"
-		r.rule_OperatorPrefix1(FullyQualifiedName,BinOp);
-                break;
-            }
-            //
-            // Rule 403:  OperatorPrefix ::= Primary . operator BinOp
-            //
-            case 403: {
-                //#line 1900 "x10/parser/x10.g"
-                Object Primary = (Object) getRhsSym(1);
-                //#line 1900 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(4);
-                //#line 1902 "x10/parser/x10.g"
-		r.rule_OperatorPrefix2(Primary,BinOp);
-                break;
-            }
-            //
-            // Rule 404:  OperatorPrefix ::= super . operator BinOp
-            //
-            case 404: {
-                //#line 1904 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(4);
-                //#line 1906 "x10/parser/x10.g"
-		r.rule_OperatorPrefix3(BinOp);
-                break;
-            }
-            //
-            // Rule 405:  OperatorPrefix ::= ClassName . super . operator BinOp
-            //
-            case 405: {
-                //#line 1908 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 1908 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(6);
-                //#line 1910 "x10/parser/x10.g"
-		r.rule_OperatorPrefix4(ClassName,BinOp);
-                break;
-            }
-            //
-            // Rule 406:  OperatorPrefix ::= operator ( ) BinOp
-            //
-            case 406: {
-                //#line 1912 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(4);
-                //#line 1914 "x10/parser/x10.g"
-		r.rule_OperatorPrefix5(BinOp);
-                break;
-            }
-            //
-            // Rule 407:  OperatorPrefix ::= FullyQualifiedName . operator ( ) BinOp
-            //
-            case 407: {
-                //#line 1916 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1916 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(6);
-                //#line 1918 "x10/parser/x10.g"
-		r.rule_OperatorPrefix6(FullyQualifiedName,BinOp);
-                break;
-            }
-            //
-            // Rule 408:  OperatorPrefix ::= Primary . operator ( ) BinOp
-            //
-            case 408: {
-                //#line 1920 "x10/parser/x10.g"
-                Object Primary = (Object) getRhsSym(1);
-                //#line 1920 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(6);
-                //#line 1922 "x10/parser/x10.g"
-		r.rule_OperatorPrefix7(Primary,BinOp);
-                break;
-            }
-            //
-            // Rule 409:  OperatorPrefix ::= super . operator ( ) BinOp
-            //
-            case 409: {
-                //#line 1924 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(6);
-                //#line 1926 "x10/parser/x10.g"
-		r.rule_OperatorPrefix8(BinOp);
-                break;
-            }
-            //
-            // Rule 410:  OperatorPrefix ::= ClassName . super . operator ( ) BinOp
-            //
-            case 410: {
-                //#line 1928 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 1928 "x10/parser/x10.g"
-                Object BinOp = (Object) getRhsSym(8);
-                //#line 1930 "x10/parser/x10.g"
-		r.rule_OperatorPrefix9(ClassName,BinOp);
-                break;
-            }
-            //
-            // Rule 411:  OperatorPrefix ::= operator PrefixOp
-            //
-            case 411: {
-                //#line 1932 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(2);
-                //#line 1934 "x10/parser/x10.g"
-		r.rule_OperatorPrefix10(PrefixOp);
-                break;
-            }
-            //
-            // Rule 412:  OperatorPrefix ::= FullyQualifiedName . operator PrefixOp
-            //
-            case 412: {
-                //#line 1936 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1936 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(4);
-                //#line 1938 "x10/parser/x10.g"
-		r.rule_OperatorPrefix11(FullyQualifiedName,PrefixOp);
-                break;
-            }
-            //
-            // Rule 413:  OperatorPrefix ::= Primary . operator PrefixOp
-            //
-            case 413: {
-                //#line 1940 "x10/parser/x10.g"
-                Object Primary = (Object) getRhsSym(1);
-                //#line 1940 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(4);
-                //#line 1942 "x10/parser/x10.g"
-		r.rule_OperatorPrefix12(Primary,PrefixOp);
-                break;
-            }
-            //
-            // Rule 414:  OperatorPrefix ::= super . operator PrefixOp
+            // Rule 414:  MethodSelection ::= MethodName . ( FormalParameterListopt )
             //
             case 414: {
-                //#line 1944 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(4);
-                //#line 1946 "x10/parser/x10.g"
-		r.rule_OperatorPrefix13(PrefixOp);
+                //#line 2555 "x10/parser/x10.g"
+                Object MethodName = (Object) getRhsSym(1);
+                //#line 2555 "x10/parser/x10.g"
+                Object FormalParameterListopt = (Object) getRhsSym(4);
+                //#line 2557 "x10/parser/x10.g"
+		r.rule_MethodSelection0(MethodName,FormalParameterListopt);
                 break;
             }
             //
-            // Rule 415:  OperatorPrefix ::= ClassName . super . operator PrefixOp
+            // Rule 415:  MethodSelection ::= Primary . Identifier . ( FormalParameterListopt )
             //
             case 415: {
-                //#line 1948 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 1948 "x10/parser/x10.g"
-                Object PrefixOp = (Object) getRhsSym(6);
-                //#line 1950 "x10/parser/x10.g"
-		r.rule_OperatorPrefix14(ClassName,PrefixOp);
+                //#line 2559 "x10/parser/x10.g"
+                Object Primary = (Object) getRhsSym(1);
+                //#line 2559 "x10/parser/x10.g"
+                Object Identifier = (Object) getRhsSym(3);
+                //#line 2559 "x10/parser/x10.g"
+                Object FormalParameterListopt = (Object) getRhsSym(6);
+                //#line 2561 "x10/parser/x10.g"
+		r.rule_MethodSelection1(Primary,Identifier,FormalParameterListopt);
                 break;
             }
             //
-            // Rule 416:  OperatorPrefix ::= operator ( )
+            // Rule 416:  MethodSelection ::= super . Identifier . ( FormalParameterListopt )
             //
             case 416: {
-                
-                //#line 1954 "x10/parser/x10.g"
-		r.rule_OperatorPrefix15();
+                //#line 2563 "x10/parser/x10.g"
+                Object Identifier = (Object) getRhsSym(3);
+                //#line 2563 "x10/parser/x10.g"
+                Object FormalParameterListopt = (Object) getRhsSym(6);
+                //#line 2565 "x10/parser/x10.g"
+		r.rule_MethodSelection2(Identifier,FormalParameterListopt);
                 break;
             }
             //
-            // Rule 417:  OperatorPrefix ::= FullyQualifiedName . operator ( )
+            // Rule 417:  MethodSelection ::= ClassName . super$sup . Identifier . ( FormalParameterListopt )
             //
             case 417: {
-                //#line 1956 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1958 "x10/parser/x10.g"
-		r.rule_OperatorPrefix16(FullyQualifiedName);
-                break;
-            }
-            //
-            // Rule 418:  OperatorPrefix ::= Primary . operator ( )
-            //
-            case 418: {
-                //#line 1960 "x10/parser/x10.g"
-                Object Primary = (Object) getRhsSym(1);
-                //#line 1962 "x10/parser/x10.g"
-		r.rule_OperatorPrefix17(Primary);
-                break;
-            }
-            //
-            // Rule 419:  OperatorPrefix ::= super . operator ( )
-            //
-            case 419: {
-                
-                //#line 1966 "x10/parser/x10.g"
-		r.rule_OperatorPrefix18();
-                break;
-            }
-            //
-            // Rule 420:  OperatorPrefix ::= ClassName . super . operator ( )
-            //
-            case 420: {
-                //#line 1968 "x10/parser/x10.g"
+                //#line 2567 "x10/parser/x10.g"
                 Object ClassName = (Object) getRhsSym(1);
-                //#line 1970 "x10/parser/x10.g"
-		r.rule_OperatorPrefix19(ClassName);
+                //#line 2567 "x10/parser/x10.g"
+                IToken sup = (IToken) getRhsIToken(3);
+                //#line 2567 "x10/parser/x10.g"
+                Object Identifier = (Object) getRhsSym(5);
+                //#line 2567 "x10/parser/x10.g"
+                Object FormalParameterListopt = (Object) getRhsSym(8);
+                //#line 2569 "x10/parser/x10.g"
+		r.rule_MethodSelection3(ClassName,Identifier,FormalParameterListopt);
                 break;
             }
             //
-            // Rule 421:  OperatorPrefix ::= operator ( ) =
+            // Rule 421:  PostIncrementExpression ::= PostfixExpression ++
             //
             case 421: {
-                
-                //#line 1974 "x10/parser/x10.g"
-		r.rule_OperatorPrefix20();
-                break;
-            }
-            //
-            // Rule 422:  OperatorPrefix ::= FullyQualifiedName . operator ( ) =
-            //
-            case 422: {
-                //#line 1976 "x10/parser/x10.g"
-                Object FullyQualifiedName = (Object) getRhsSym(1);
-                //#line 1978 "x10/parser/x10.g"
-		r.rule_OperatorPrefix21(FullyQualifiedName);
-                break;
-            }
-            //
-            // Rule 423:  OperatorPrefix ::= Primary . operator ( ) =
-            //
-            case 423: {
-                //#line 1980 "x10/parser/x10.g"
-                Object Primary = (Object) getRhsSym(1);
-                //#line 1982 "x10/parser/x10.g"
-		r.rule_OperatorPrefix22(Primary);
-                break;
-            }
-            //
-            // Rule 424:  OperatorPrefix ::= super . operator ( ) =
-            //
-            case 424: {
-                
-                //#line 1986 "x10/parser/x10.g"
-		r.rule_OperatorPrefix23();
-                break;
-            }
-            //
-            // Rule 425:  OperatorPrefix ::= ClassName . super . operator ( ) =
-            //
-            case 425: {
-                //#line 1988 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 1990 "x10/parser/x10.g"
-		r.rule_OperatorPrefix24(ClassName);
-                break;
-            }
-            //
-            // Rule 426:  OBSOLETE_MethodSelection ::= MethodName . ( FormalParameterListopt )
-            //
-            case 426: {
-                //#line 1993 "x10/parser/x10.g"
-                Object MethodName = (Object) getRhsSym(1);
-                //#line 1993 "x10/parser/x10.g"
-                Object FormalParameterListopt = (Object) getRhsSym(4);
-                //#line 1995 "x10/parser/x10.g"
-		r.rule_OBSOLETE_MethodSelection0(MethodName,FormalParameterListopt);
-                break;
-            }
-            //
-            // Rule 427:  OBSOLETE_MethodSelection ::= Primary . Identifier . ( FormalParameterListopt )
-            //
-            case 427: {
-                //#line 1997 "x10/parser/x10.g"
-                Object Primary = (Object) getRhsSym(1);
-                //#line 1997 "x10/parser/x10.g"
-                Object Identifier = (Object) getRhsSym(3);
-                //#line 1997 "x10/parser/x10.g"
-                Object FormalParameterListopt = (Object) getRhsSym(6);
-                //#line 1999 "x10/parser/x10.g"
-		r.rule_OBSOLETE_MethodSelection1(Primary,Identifier,FormalParameterListopt);
-                break;
-            }
-            //
-            // Rule 428:  OBSOLETE_MethodSelection ::= super . Identifier . ( FormalParameterListopt )
-            //
-            case 428: {
-                //#line 2001 "x10/parser/x10.g"
-                Object Identifier = (Object) getRhsSym(3);
-                //#line 2001 "x10/parser/x10.g"
-                Object FormalParameterListopt = (Object) getRhsSym(6);
-                //#line 2003 "x10/parser/x10.g"
-		r.rule_OBSOLETE_MethodSelection2(Identifier,FormalParameterListopt);
-                break;
-            }
-            //
-            // Rule 429:  OBSOLETE_MethodSelection ::= ClassName . super$sup . Identifier . ( FormalParameterListopt )
-            //
-            case 429: {
-                //#line 2005 "x10/parser/x10.g"
-                Object ClassName = (Object) getRhsSym(1);
-                //#line 2005 "x10/parser/x10.g"
-                IToken sup = (IToken) getRhsIToken(3);
-                //#line 2005 "x10/parser/x10.g"
-                Object Identifier = (Object) getRhsSym(5);
-                //#line 2005 "x10/parser/x10.g"
-                Object FormalParameterListopt = (Object) getRhsSym(8);
-                //#line 2007 "x10/parser/x10.g"
-		r.rule_OBSOLETE_MethodSelection3(ClassName,Identifier,FormalParameterListopt);
-                break;
-            }
-            //
-            // Rule 433:  PostIncrementExpression ::= PostfixExpression ++
-            //
-            case 433: {
-                //#line 2014 "x10/parser/x10.g"
+                //#line 2576 "x10/parser/x10.g"
                 Object PostfixExpression = (Object) getRhsSym(1);
-                //#line 2016 "x10/parser/x10.g"
+                //#line 2578 "x10/parser/x10.g"
 		r.rule_PostIncrementExpression0(PostfixExpression);
                 break;
             }
             //
-            // Rule 434:  PostDecrementExpression ::= PostfixExpression --
+            // Rule 422:  PostDecrementExpression ::= PostfixExpression --
             //
-            case 434: {
-                //#line 2019 "x10/parser/x10.g"
+            case 422: {
+                //#line 2581 "x10/parser/x10.g"
                 Object PostfixExpression = (Object) getRhsSym(1);
-                //#line 2021 "x10/parser/x10.g"
+                //#line 2583 "x10/parser/x10.g"
 		r.rule_PostDecrementExpression0(PostfixExpression);
                 break;
             }
             //
-            // Rule 439:  OverloadableUnaryExpressionPlusMinus ::= + UnaryExpressionNotPlusMinus
+            // Rule 425:  UnannotatedUnaryExpression ::= + UnaryExpressionNotPlusMinus
             //
-            case 439: {
-                //#line 2029 "x10/parser/x10.g"
+            case 425: {
+                //#line 2588 "x10/parser/x10.g"
                 Object UnaryExpressionNotPlusMinus = (Object) getRhsSym(2);
-                //#line 2031 "x10/parser/x10.g"
+                //#line 2590 "x10/parser/x10.g"
 		r.rule_UnannotatedUnaryExpression2(UnaryExpressionNotPlusMinus);
                 break;
             }
             //
-            // Rule 440:  OverloadableUnaryExpressionPlusMinus ::= - UnaryExpressionNotPlusMinus
+            // Rule 426:  UnannotatedUnaryExpression ::= - UnaryExpressionNotPlusMinus
             //
-            case 440: {
-                //#line 2033 "x10/parser/x10.g"
+            case 426: {
+                //#line 2592 "x10/parser/x10.g"
                 Object UnaryExpressionNotPlusMinus = (Object) getRhsSym(2);
-                //#line 2035 "x10/parser/x10.g"
+                //#line 2594 "x10/parser/x10.g"
 		r.rule_UnannotatedUnaryExpression3(UnaryExpressionNotPlusMinus);
                 break;
             }
             //
-            // Rule 442:  UnaryExpression ::= Annotations UnannotatedUnaryExpression
+            // Rule 429:  UnaryExpression ::= Annotations UnannotatedUnaryExpression
             //
-            case 442: {
-                //#line 2039 "x10/parser/x10.g"
+            case 429: {
+                //#line 2599 "x10/parser/x10.g"
                 Object Annotations = (Object) getRhsSym(1);
-                //#line 2039 "x10/parser/x10.g"
+                //#line 2599 "x10/parser/x10.g"
                 Object UnannotatedUnaryExpression = (Object) getRhsSym(2);
-                //#line 2041 "x10/parser/x10.g"
+                //#line 2601 "x10/parser/x10.g"
 		r.rule_UnaryExpression1(Annotations,UnannotatedUnaryExpression);
                 break;
             }
             //
-            // Rule 443:  PreIncrementExpression ::= ++ UnaryExpressionNotPlusMinus
+            // Rule 430:  PreIncrementExpression ::= ++ UnaryExpressionNotPlusMinus
             //
-            case 443: {
-                //#line 2044 "x10/parser/x10.g"
+            case 430: {
+                //#line 2604 "x10/parser/x10.g"
                 Object UnaryExpressionNotPlusMinus = (Object) getRhsSym(2);
-                //#line 2046 "x10/parser/x10.g"
+                //#line 2606 "x10/parser/x10.g"
 		r.rule_PreIncrementExpression0(UnaryExpressionNotPlusMinus);
                 break;
             }
             //
-            // Rule 444:  PreDecrementExpression ::= -- UnaryExpressionNotPlusMinus
+            // Rule 431:  PreDecrementExpression ::= -- UnaryExpressionNotPlusMinus
             //
-            case 444: {
-                //#line 2049 "x10/parser/x10.g"
+            case 431: {
+                //#line 2609 "x10/parser/x10.g"
                 Object UnaryExpressionNotPlusMinus = (Object) getRhsSym(2);
-                //#line 2051 "x10/parser/x10.g"
+                //#line 2611 "x10/parser/x10.g"
 		r.rule_PreDecrementExpression0(UnaryExpressionNotPlusMinus);
                 break;
             }
             //
-            // Rule 447:  OverloadableUnaryExpression ::= ~ UnaryExpression
+            // Rule 433:  UnaryExpressionNotPlusMinus ::= ~ UnaryExpression
             //
-            case 447: {
-                //#line 2057 "x10/parser/x10.g"
+            case 433: {
+                //#line 2615 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2059 "x10/parser/x10.g"
+                //#line 2617 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus1(UnaryExpression);
                 break;
             }
             //
-            // Rule 448:  OverloadableUnaryExpression ::= ! UnaryExpression
+            // Rule 434:  UnaryExpressionNotPlusMinus ::= ! UnaryExpression
             //
-            case 448: {
-                //#line 2061 "x10/parser/x10.g"
+            case 434: {
+                //#line 2619 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2063 "x10/parser/x10.g"
+                //#line 2621 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus2(UnaryExpression);
                 break;
             }
             //
-            // Rule 449:  OverloadableUnaryExpression ::= ^ UnaryExpression
+            // Rule 435:  UnaryExpressionNotPlusMinus ::= ^ UnaryExpression
             //
-            case 449: {
-                //#line 2065 "x10/parser/x10.g"
+            case 435: {
+                //#line 2623 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2067 "x10/parser/x10.g"
+                //#line 2625 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus3(UnaryExpression);
                 break;
             }
             //
-            // Rule 450:  OverloadableUnaryExpression ::= | UnaryExpression
+            // Rule 436:  UnaryExpressionNotPlusMinus ::= | UnaryExpression
             //
-            case 450: {
-                //#line 2069 "x10/parser/x10.g"
+            case 436: {
+                //#line 2627 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2071 "x10/parser/x10.g"
+                //#line 2629 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus4(UnaryExpression);
                 break;
             }
             //
-            // Rule 451:  OverloadableUnaryExpression ::= & UnaryExpression
+            // Rule 437:  UnaryExpressionNotPlusMinus ::= & UnaryExpression
             //
-            case 451: {
-                //#line 2073 "x10/parser/x10.g"
+            case 437: {
+                //#line 2631 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2075 "x10/parser/x10.g"
+                //#line 2633 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus5(UnaryExpression);
                 break;
             }
             //
-            // Rule 452:  OverloadableUnaryExpression ::= * UnaryExpression
+            // Rule 438:  UnaryExpressionNotPlusMinus ::= * UnaryExpression
             //
-            case 452: {
-                //#line 2077 "x10/parser/x10.g"
+            case 438: {
+                //#line 2635 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2079 "x10/parser/x10.g"
+                //#line 2637 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus6(UnaryExpression);
                 break;
             }
             //
-            // Rule 453:  OverloadableUnaryExpression ::= / UnaryExpression
+            // Rule 439:  UnaryExpressionNotPlusMinus ::= / UnaryExpression
             //
-            case 453: {
-                //#line 2081 "x10/parser/x10.g"
+            case 439: {
+                //#line 2639 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2083 "x10/parser/x10.g"
+                //#line 2641 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus7(UnaryExpression);
                 break;
             }
             //
-            // Rule 454:  OverloadableUnaryExpression ::= % UnaryExpression
+            // Rule 440:  UnaryExpressionNotPlusMinus ::= % UnaryExpression
             //
-            case 454: {
-                //#line 2085 "x10/parser/x10.g"
+            case 440: {
+                //#line 2643 "x10/parser/x10.g"
                 Object UnaryExpression = (Object) getRhsSym(2);
-                //#line 2087 "x10/parser/x10.g"
+                //#line 2645 "x10/parser/x10.g"
 		r.rule_UnaryExpressionNotPlusMinus8(UnaryExpression);
                 break;
             }
             //
-            // Rule 457:  OverloadableRangeExpression ::= RangeExpression .. UnaryExpression
+            // Rule 442:  RangeExpression ::= RangeExpression$expr1 .. UnaryExpression$expr2
             //
-            case 457: {
-                //#line 2093 "x10/parser/x10.g"
-                Object RangeExpression = (Object) getRhsSym(1);
-                //#line 2093 "x10/parser/x10.g"
-                Object UnaryExpression = (Object) getRhsSym(3);
-                //#line 2095 "x10/parser/x10.g"
-		r.rule_RangeExpression1(RangeExpression,UnaryExpression);
+            case 442: {
+                //#line 2649 "x10/parser/x10.g"
+                Object expr1 = (Object) getRhsSym(1);
+                //#line 2649 "x10/parser/x10.g"
+                Object expr2 = (Object) getRhsSym(3);
+                //#line 2651 "x10/parser/x10.g"
+		r.rule_RangeExpression1(expr1,expr2);
                 break;
             }
             //
-            // Rule 460:  OverloadableMultiplicativeExpression ::= MultiplicativeExpression * RangeExpression
+            // Rule 444:  MultiplicativeExpression ::= MultiplicativeExpression * RangeExpression
             //
-            case 460: {
-                //#line 2101 "x10/parser/x10.g"
+            case 444: {
+                //#line 2655 "x10/parser/x10.g"
                 Object MultiplicativeExpression = (Object) getRhsSym(1);
-                //#line 2101 "x10/parser/x10.g"
+                //#line 2655 "x10/parser/x10.g"
                 Object RangeExpression = (Object) getRhsSym(3);
-                //#line 2103 "x10/parser/x10.g"
+                //#line 2657 "x10/parser/x10.g"
 		r.rule_MultiplicativeExpression1(MultiplicativeExpression,RangeExpression);
                 break;
             }
             //
-            // Rule 461:  OverloadableMultiplicativeExpression ::= MultiplicativeExpression / RangeExpression
+            // Rule 445:  MultiplicativeExpression ::= MultiplicativeExpression / RangeExpression
             //
-            case 461: {
-                //#line 2105 "x10/parser/x10.g"
+            case 445: {
+                //#line 2659 "x10/parser/x10.g"
                 Object MultiplicativeExpression = (Object) getRhsSym(1);
-                //#line 2105 "x10/parser/x10.g"
+                //#line 2659 "x10/parser/x10.g"
                 Object RangeExpression = (Object) getRhsSym(3);
-                //#line 2107 "x10/parser/x10.g"
+                //#line 2661 "x10/parser/x10.g"
 		r.rule_MultiplicativeExpression2(MultiplicativeExpression,RangeExpression);
                 break;
             }
             //
-            // Rule 462:  OverloadableMultiplicativeExpression ::= MultiplicativeExpression % RangeExpression
+            // Rule 446:  MultiplicativeExpression ::= MultiplicativeExpression % RangeExpression
             //
-            case 462: {
-                //#line 2109 "x10/parser/x10.g"
+            case 446: {
+                //#line 2663 "x10/parser/x10.g"
                 Object MultiplicativeExpression = (Object) getRhsSym(1);
-                //#line 2109 "x10/parser/x10.g"
+                //#line 2663 "x10/parser/x10.g"
                 Object RangeExpression = (Object) getRhsSym(3);
-                //#line 2111 "x10/parser/x10.g"
+                //#line 2665 "x10/parser/x10.g"
 		r.rule_MultiplicativeExpression3(MultiplicativeExpression,RangeExpression);
                 break;
             }
             //
-            // Rule 463:  OverloadableMultiplicativeExpression ::= MultiplicativeExpression ** RangeExpression
+            // Rule 447:  MultiplicativeExpression ::= MultiplicativeExpression ** RangeExpression
             //
-            case 463: {
-                //#line 2113 "x10/parser/x10.g"
+            case 447: {
+                //#line 2667 "x10/parser/x10.g"
                 Object MultiplicativeExpression = (Object) getRhsSym(1);
-                //#line 2113 "x10/parser/x10.g"
+                //#line 2667 "x10/parser/x10.g"
                 Object RangeExpression = (Object) getRhsSym(3);
-                //#line 2115 "x10/parser/x10.g"
+                //#line 2669 "x10/parser/x10.g"
 		r.rule_MultiplicativeExpression4(MultiplicativeExpression,RangeExpression);
                 break;
             }
             //
-            // Rule 466:  OverloadableAdditiveExpression ::= AdditiveExpression + MultiplicativeExpression
+            // Rule 449:  AdditiveExpression ::= AdditiveExpression + MultiplicativeExpression
             //
-            case 466: {
-                //#line 2121 "x10/parser/x10.g"
+            case 449: {
+                //#line 2673 "x10/parser/x10.g"
                 Object AdditiveExpression = (Object) getRhsSym(1);
-                //#line 2121 "x10/parser/x10.g"
+                //#line 2673 "x10/parser/x10.g"
                 Object MultiplicativeExpression = (Object) getRhsSym(3);
-                //#line 2123 "x10/parser/x10.g"
+                //#line 2675 "x10/parser/x10.g"
 		r.rule_AdditiveExpression1(AdditiveExpression,MultiplicativeExpression);
                 break;
             }
             //
-            // Rule 467:  OverloadableAdditiveExpression ::= AdditiveExpression - MultiplicativeExpression
+            // Rule 450:  AdditiveExpression ::= AdditiveExpression - MultiplicativeExpression
             //
-            case 467: {
-                //#line 2125 "x10/parser/x10.g"
+            case 450: {
+                //#line 2677 "x10/parser/x10.g"
                 Object AdditiveExpression = (Object) getRhsSym(1);
-                //#line 2125 "x10/parser/x10.g"
+                //#line 2677 "x10/parser/x10.g"
                 Object MultiplicativeExpression = (Object) getRhsSym(3);
-                //#line 2127 "x10/parser/x10.g"
+                //#line 2679 "x10/parser/x10.g"
 		r.rule_AdditiveExpression2(AdditiveExpression,MultiplicativeExpression);
                 break;
             }
             //
-            // Rule 470:  OverloadableShiftExpression ::= ShiftExpression << AdditiveExpression
+            // Rule 452:  ShiftExpression ::= ShiftExpression << AdditiveExpression
             //
-            case 470: {
-                //#line 2133 "x10/parser/x10.g"
+            case 452: {
+                //#line 2683 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(1);
-                //#line 2133 "x10/parser/x10.g"
+                //#line 2683 "x10/parser/x10.g"
                 Object AdditiveExpression = (Object) getRhsSym(3);
-                //#line 2135 "x10/parser/x10.g"
+                //#line 2685 "x10/parser/x10.g"
 		r.rule_ShiftExpression1(ShiftExpression,AdditiveExpression);
                 break;
             }
             //
-            // Rule 471:  OverloadableShiftExpression ::= ShiftExpression >> AdditiveExpression
+            // Rule 453:  ShiftExpression ::= ShiftExpression >> AdditiveExpression
             //
-            case 471: {
-                //#line 2137 "x10/parser/x10.g"
+            case 453: {
+                //#line 2687 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(1);
-                //#line 2137 "x10/parser/x10.g"
+                //#line 2687 "x10/parser/x10.g"
                 Object AdditiveExpression = (Object) getRhsSym(3);
-                //#line 2139 "x10/parser/x10.g"
+                //#line 2689 "x10/parser/x10.g"
 		r.rule_ShiftExpression2(ShiftExpression,AdditiveExpression);
                 break;
             }
             //
-            // Rule 472:  OverloadableShiftExpression ::= ShiftExpression >>> AdditiveExpression
+            // Rule 454:  ShiftExpression ::= ShiftExpression >>> AdditiveExpression
             //
-            case 472: {
-                //#line 2141 "x10/parser/x10.g"
+            case 454: {
+                //#line 2691 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(1);
-                //#line 2141 "x10/parser/x10.g"
+                //#line 2691 "x10/parser/x10.g"
                 Object AdditiveExpression = (Object) getRhsSym(3);
-                //#line 2143 "x10/parser/x10.g"
+                //#line 2693 "x10/parser/x10.g"
 		r.rule_ShiftExpression3(ShiftExpression,AdditiveExpression);
                 break;
             }
             //
-            // Rule 473:  OverloadableShiftExpression ::= ShiftExpression$expr1 -> AdditiveExpression$expr2
+            // Rule 455:  ShiftExpression ::= ShiftExpression$expr1 -> AdditiveExpression$expr2
             //
-            case 473: {
-                //#line 2145 "x10/parser/x10.g"
+            case 455: {
+                //#line 2695 "x10/parser/x10.g"
                 Object expr1 = (Object) getRhsSym(1);
-                //#line 2145 "x10/parser/x10.g"
+                //#line 2695 "x10/parser/x10.g"
                 Object expr2 = (Object) getRhsSym(3);
-                //#line 2147 "x10/parser/x10.g"
+                //#line 2697 "x10/parser/x10.g"
 		r.rule_ShiftExpression4(expr1,expr2);
                 break;
             }
             //
-            // Rule 474:  OverloadableShiftExpression ::= ShiftExpression$expr1 <- AdditiveExpression$expr2
+            // Rule 456:  ShiftExpression ::= ShiftExpression$expr1 <- AdditiveExpression$expr2
             //
-            case 474: {
-                //#line 2149 "x10/parser/x10.g"
+            case 456: {
+                //#line 2699 "x10/parser/x10.g"
                 Object expr1 = (Object) getRhsSym(1);
-                //#line 2149 "x10/parser/x10.g"
+                //#line 2699 "x10/parser/x10.g"
                 Object expr2 = (Object) getRhsSym(3);
-                //#line 2151 "x10/parser/x10.g"
+                //#line 2701 "x10/parser/x10.g"
 		r.rule_ShiftExpression5(expr1,expr2);
                 break;
             }
             //
-            // Rule 475:  OverloadableShiftExpression ::= ShiftExpression$expr1 -< AdditiveExpression$expr2
+            // Rule 457:  ShiftExpression ::= ShiftExpression$expr1 -< AdditiveExpression$expr2
             //
-            case 475: {
-                //#line 2153 "x10/parser/x10.g"
+            case 457: {
+                //#line 2703 "x10/parser/x10.g"
                 Object expr1 = (Object) getRhsSym(1);
-                //#line 2153 "x10/parser/x10.g"
+                //#line 2703 "x10/parser/x10.g"
                 Object expr2 = (Object) getRhsSym(3);
-                //#line 2155 "x10/parser/x10.g"
+                //#line 2705 "x10/parser/x10.g"
 		r.rule_ShiftExpression6(expr1,expr2);
                 break;
             }
             //
-            // Rule 476:  OverloadableShiftExpression ::= ShiftExpression$expr1 >- AdditiveExpression$expr2
+            // Rule 458:  ShiftExpression ::= ShiftExpression$expr1 >- AdditiveExpression$expr2
             //
-            case 476: {
-                //#line 2157 "x10/parser/x10.g"
+            case 458: {
+                //#line 2707 "x10/parser/x10.g"
                 Object expr1 = (Object) getRhsSym(1);
-                //#line 2157 "x10/parser/x10.g"
+                //#line 2707 "x10/parser/x10.g"
                 Object expr2 = (Object) getRhsSym(3);
-                //#line 2159 "x10/parser/x10.g"
+                //#line 2709 "x10/parser/x10.g"
 		r.rule_ShiftExpression7(expr1,expr2);
                 break;
             }
             //
-            // Rule 477:  OverloadableShiftExpression ::= ShiftExpression$expr1 ! AdditiveExpression$expr2
+            // Rule 459:  ShiftExpression ::= ShiftExpression$expr1 ! AdditiveExpression$expr2
             //
-            case 477: {
-                //#line 2161 "x10/parser/x10.g"
+            case 459: {
+                //#line 2711 "x10/parser/x10.g"
                 Object expr1 = (Object) getRhsSym(1);
-                //#line 2161 "x10/parser/x10.g"
+                //#line 2711 "x10/parser/x10.g"
                 Object expr2 = (Object) getRhsSym(3);
-                //#line 2163 "x10/parser/x10.g"
+                //#line 2713 "x10/parser/x10.g"
 		r.rule_ShiftExpression8(expr1,expr2);
                 break;
             }
             //
-            // Rule 478:  OverloadableShiftExpression ::= ShiftExpression$expr1 <> AdditiveExpression$expr2
+            // Rule 463:  RelationalExpression ::= RelationalExpression < ShiftExpression
             //
-            case 478: {
-                //#line 2165 "x10/parser/x10.g"
-                Object expr1 = (Object) getRhsSym(1);
-                //#line 2165 "x10/parser/x10.g"
-                Object expr2 = (Object) getRhsSym(3);
-                //#line 2167 "x10/parser/x10.g"
-		r.rule_ShiftExpression9(expr1,expr2);
-                break;
-            }
-            //
-            // Rule 479:  OverloadableShiftExpression ::= ShiftExpression$expr1 >< AdditiveExpression$expr2
-            //
-            case 479: {
-                //#line 2169 "x10/parser/x10.g"
-                Object expr1 = (Object) getRhsSym(1);
-                //#line 2169 "x10/parser/x10.g"
-                Object expr2 = (Object) getRhsSym(3);
-                //#line 2171 "x10/parser/x10.g"
-		r.rule_ShiftExpression10(expr1,expr2);
-                break;
-            }
-            //
-            // Rule 484:  RelationalExpression ::= RelationalExpression instanceof Type
-            //
-            case 484: {
-                //#line 2178 "x10/parser/x10.g"
+            case 463: {
+                //#line 2719 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(1);
-                //#line 2178 "x10/parser/x10.g"
-                Object Type = (Object) getRhsSym(3);
-                //#line 2180 "x10/parser/x10.g"
-		r.rule_RelationalExpression7(RelationalExpression,Type);
-                break;
-            }
-            //
-            // Rule 485:  OverloadableRelationalExpression ::= RelationalExpression < ShiftExpression
-            //
-            case 485: {
-                //#line 2183 "x10/parser/x10.g"
-                Object RelationalExpression = (Object) getRhsSym(1);
-                //#line 2183 "x10/parser/x10.g"
+                //#line 2719 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(3);
-                //#line 2185 "x10/parser/x10.g"
+                //#line 2721 "x10/parser/x10.g"
 		r.rule_RelationalExpression3(RelationalExpression,ShiftExpression);
                 break;
             }
             //
-            // Rule 486:  OverloadableRelationalExpression ::= RelationalExpression > ShiftExpression
+            // Rule 464:  RelationalExpression ::= RelationalExpression > ShiftExpression
             //
-            case 486: {
-                //#line 2187 "x10/parser/x10.g"
+            case 464: {
+                //#line 2723 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(1);
-                //#line 2187 "x10/parser/x10.g"
+                //#line 2723 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(3);
-                //#line 2189 "x10/parser/x10.g"
+                //#line 2725 "x10/parser/x10.g"
 		r.rule_RelationalExpression4(RelationalExpression,ShiftExpression);
                 break;
             }
             //
-            // Rule 487:  OverloadableRelationalExpression ::= RelationalExpression <= ShiftExpression
+            // Rule 465:  RelationalExpression ::= RelationalExpression <= ShiftExpression
             //
-            case 487: {
-                //#line 2191 "x10/parser/x10.g"
+            case 465: {
+                //#line 2727 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(1);
-                //#line 2191 "x10/parser/x10.g"
+                //#line 2727 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(3);
-                //#line 2193 "x10/parser/x10.g"
+                //#line 2729 "x10/parser/x10.g"
 		r.rule_RelationalExpression5(RelationalExpression,ShiftExpression);
                 break;
             }
             //
-            // Rule 488:  OverloadableRelationalExpression ::= RelationalExpression >= ShiftExpression
+            // Rule 466:  RelationalExpression ::= RelationalExpression >= ShiftExpression
             //
-            case 488: {
-                //#line 2195 "x10/parser/x10.g"
+            case 466: {
+                //#line 2731 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(1);
-                //#line 2195 "x10/parser/x10.g"
+                //#line 2731 "x10/parser/x10.g"
                 Object ShiftExpression = (Object) getRhsSym(3);
-                //#line 2197 "x10/parser/x10.g"
+                //#line 2733 "x10/parser/x10.g"
 		r.rule_RelationalExpression6(RelationalExpression,ShiftExpression);
                 break;
             }
             //
-            // Rule 490:  EqualityExpression ::= EqualityExpression == RelationalExpression
+            // Rule 467:  RelationalExpression ::= RelationalExpression instanceof Type
             //
-            case 490: {
-                //#line 2201 "x10/parser/x10.g"
+            case 467: {
+                //#line 2735 "x10/parser/x10.g"
+                Object RelationalExpression = (Object) getRhsSym(1);
+                //#line 2735 "x10/parser/x10.g"
+                Object Type = (Object) getRhsSym(3);
+                //#line 2737 "x10/parser/x10.g"
+		r.rule_RelationalExpression7(RelationalExpression,Type);
+                break;
+            }
+            //
+            // Rule 469:  EqualityExpression ::= EqualityExpression == RelationalExpression
+            //
+            case 469: {
+                //#line 2741 "x10/parser/x10.g"
                 Object EqualityExpression = (Object) getRhsSym(1);
-                //#line 2201 "x10/parser/x10.g"
+                //#line 2741 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(3);
-                //#line 2203 "x10/parser/x10.g"
+                //#line 2743 "x10/parser/x10.g"
 		r.rule_EqualityExpression1(EqualityExpression,RelationalExpression);
                 break;
             }
             //
-            // Rule 491:  EqualityExpression ::= EqualityExpression != RelationalExpression
+            // Rule 470:  EqualityExpression ::= EqualityExpression != RelationalExpression
             //
-            case 491: {
-                //#line 2205 "x10/parser/x10.g"
+            case 470: {
+                //#line 2745 "x10/parser/x10.g"
                 Object EqualityExpression = (Object) getRhsSym(1);
-                //#line 2205 "x10/parser/x10.g"
+                //#line 2745 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(3);
-                //#line 2207 "x10/parser/x10.g"
+                //#line 2747 "x10/parser/x10.g"
 		r.rule_EqualityExpression2(EqualityExpression,RelationalExpression);
                 break;
             }
             //
-            // Rule 492:  EqualityExpression ::= Type$t1 == Type$t2
+            // Rule 471:  EqualityExpression ::= Type$t1 == Type$t2
             //
-            case 492: {
-                //#line 2209 "x10/parser/x10.g"
+            case 471: {
+                //#line 2749 "x10/parser/x10.g"
                 Object t1 = (Object) getRhsSym(1);
-                //#line 2209 "x10/parser/x10.g"
+                //#line 2749 "x10/parser/x10.g"
                 Object t2 = (Object) getRhsSym(3);
-                //#line 2211 "x10/parser/x10.g"
+                //#line 2751 "x10/parser/x10.g"
 		r.rule_EqualityExpression3(t1,t2);
                 break;
             }
             //
-            // Rule 494:  OverloadableEqualityExpression ::= EqualityExpression ~ RelationalExpression
+            // Rule 472:  EqualityExpression ::= EqualityExpression ~ RelationalExpression
             //
-            case 494: {
-                //#line 2215 "x10/parser/x10.g"
+            case 472: {
+                //#line 2753 "x10/parser/x10.g"
                 Object EqualityExpression = (Object) getRhsSym(1);
-                //#line 2215 "x10/parser/x10.g"
+                //#line 2753 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(3);
-                //#line 2217 "x10/parser/x10.g"
+                //#line 2755 "x10/parser/x10.g"
 		r.rule_EqualityExpression4(EqualityExpression,RelationalExpression);
                 break;
             }
             //
-            // Rule 495:  OverloadableEqualityExpression ::= EqualityExpression !~ RelationalExpression
+            // Rule 473:  EqualityExpression ::= EqualityExpression !~ RelationalExpression
             //
-            case 495: {
-                //#line 2219 "x10/parser/x10.g"
+            case 473: {
+                //#line 2757 "x10/parser/x10.g"
                 Object EqualityExpression = (Object) getRhsSym(1);
-                //#line 2219 "x10/parser/x10.g"
+                //#line 2757 "x10/parser/x10.g"
                 Object RelationalExpression = (Object) getRhsSym(3);
-                //#line 2221 "x10/parser/x10.g"
+                //#line 2759 "x10/parser/x10.g"
 		r.rule_EqualityExpression5(EqualityExpression,RelationalExpression);
                 break;
             }
             //
-            // Rule 498:  OverloadableAndExpression ::= AndExpression & EqualityExpression
+            // Rule 475:  AndExpression ::= AndExpression & EqualityExpression
             //
-            case 498: {
-                //#line 2227 "x10/parser/x10.g"
+            case 475: {
+                //#line 2763 "x10/parser/x10.g"
                 Object AndExpression = (Object) getRhsSym(1);
-                //#line 2227 "x10/parser/x10.g"
+                //#line 2763 "x10/parser/x10.g"
                 Object EqualityExpression = (Object) getRhsSym(3);
-                //#line 2229 "x10/parser/x10.g"
+                //#line 2765 "x10/parser/x10.g"
 		r.rule_AndExpression1(AndExpression,EqualityExpression);
                 break;
             }
             //
-            // Rule 501:  OverloadableExclusiveOrExpression ::= ExclusiveOrExpression ^ AndExpression
+            // Rule 477:  ExclusiveOrExpression ::= ExclusiveOrExpression ^ AndExpression
             //
-            case 501: {
-                //#line 2235 "x10/parser/x10.g"
+            case 477: {
+                //#line 2769 "x10/parser/x10.g"
                 Object ExclusiveOrExpression = (Object) getRhsSym(1);
-                //#line 2235 "x10/parser/x10.g"
+                //#line 2769 "x10/parser/x10.g"
                 Object AndExpression = (Object) getRhsSym(3);
-                //#line 2237 "x10/parser/x10.g"
+                //#line 2771 "x10/parser/x10.g"
 		r.rule_ExclusiveOrExpression1(ExclusiveOrExpression,AndExpression);
                 break;
             }
             //
-            // Rule 504:  OverloadableInclusiveOrExpression ::= InclusiveOrExpression | ExclusiveOrExpression
+            // Rule 479:  InclusiveOrExpression ::= InclusiveOrExpression | ExclusiveOrExpression
             //
-            case 504: {
-                //#line 2243 "x10/parser/x10.g"
+            case 479: {
+                //#line 2775 "x10/parser/x10.g"
                 Object InclusiveOrExpression = (Object) getRhsSym(1);
-                //#line 2243 "x10/parser/x10.g"
+                //#line 2775 "x10/parser/x10.g"
                 Object ExclusiveOrExpression = (Object) getRhsSym(3);
-                //#line 2245 "x10/parser/x10.g"
+                //#line 2777 "x10/parser/x10.g"
 		r.rule_InclusiveOrExpression1(InclusiveOrExpression,ExclusiveOrExpression);
                 break;
             }
             //
-            // Rule 507:  OverloadableConditionalAndExpression ::= ConditionalAndExpression && InclusiveOrExpression
+            // Rule 481:  ConditionalAndExpression ::= ConditionalAndExpression && InclusiveOrExpression
             //
-            case 507: {
-                //#line 2251 "x10/parser/x10.g"
+            case 481: {
+                //#line 2781 "x10/parser/x10.g"
                 Object ConditionalAndExpression = (Object) getRhsSym(1);
-                //#line 2251 "x10/parser/x10.g"
+                //#line 2781 "x10/parser/x10.g"
                 Object InclusiveOrExpression = (Object) getRhsSym(3);
-                //#line 2253 "x10/parser/x10.g"
+                //#line 2783 "x10/parser/x10.g"
 		r.rule_ConditionalAndExpression1(ConditionalAndExpression,InclusiveOrExpression);
                 break;
             }
             //
-            // Rule 510:  OverloadableConditionalOrExpression ::= ConditionalOrExpression || ConditionalAndExpression
+            // Rule 483:  ConditionalOrExpression ::= ConditionalOrExpression || ConditionalAndExpression
             //
-            case 510: {
-                //#line 2259 "x10/parser/x10.g"
+            case 483: {
+                //#line 2787 "x10/parser/x10.g"
                 Object ConditionalOrExpression = (Object) getRhsSym(1);
-                //#line 2259 "x10/parser/x10.g"
+                //#line 2787 "x10/parser/x10.g"
                 Object ConditionalAndExpression = (Object) getRhsSym(3);
-                //#line 2261 "x10/parser/x10.g"
+                //#line 2789 "x10/parser/x10.g"
 		r.rule_ConditionalOrExpression1(ConditionalOrExpression,ConditionalAndExpression);
                 break;
             }
             //
-            // Rule 515:  ConditionalExpression ::= ConditionalOrExpression ? Expression : ConditionalExpression
+            // Rule 488:  ConditionalExpression ::= ConditionalOrExpression ? Expression : ConditionalExpression
             //
-            case 515: {
-                //#line 2269 "x10/parser/x10.g"
+            case 488: {
+                //#line 2797 "x10/parser/x10.g"
                 Object ConditionalOrExpression = (Object) getRhsSym(1);
-                //#line 2269 "x10/parser/x10.g"
+                //#line 2797 "x10/parser/x10.g"
                 Object Expression = (Object) getRhsSym(3);
-                //#line 2269 "x10/parser/x10.g"
+                //#line 2797 "x10/parser/x10.g"
                 Object ConditionalExpression = (Object) getRhsSym(5);
-                //#line 2271 "x10/parser/x10.g"
+                //#line 2799 "x10/parser/x10.g"
 		r.rule_ConditionalExpression4(ConditionalOrExpression,Expression,ConditionalExpression);
                 break;
             }
             //
-            // Rule 518:  Assignment ::= LeftHandSide AssignmentOperator AssignmentExpression
+            // Rule 491:  Assignment ::= LeftHandSide AssignmentOperator AssignmentExpression
             //
-            case 518: {
-                //#line 2277 "x10/parser/x10.g"
+            case 491: {
+                //#line 2805 "x10/parser/x10.g"
                 Object LeftHandSide = (Object) getRhsSym(1);
-                //#line 2277 "x10/parser/x10.g"
+                //#line 2805 "x10/parser/x10.g"
                 Object AssignmentOperator = (Object) getRhsSym(2);
-                //#line 2277 "x10/parser/x10.g"
+                //#line 2805 "x10/parser/x10.g"
                 Object AssignmentExpression = (Object) getRhsSym(3);
-                //#line 2279 "x10/parser/x10.g"
+                //#line 2807 "x10/parser/x10.g"
 		r.rule_Assignment0(LeftHandSide,AssignmentOperator,AssignmentExpression);
                 break;
             }
             //
-            // Rule 519:  Assignment ::= ExpressionName$e1 ( ArgumentListopt ) AssignmentOperator AssignmentExpression
+            // Rule 492:  Assignment ::= ExpressionName$e1 ( ArgumentListopt ) AssignmentOperator AssignmentExpression
             //
-            case 519: {
-                //#line 2281 "x10/parser/x10.g"
+            case 492: {
+                //#line 2809 "x10/parser/x10.g"
                 Object e1 = (Object) getRhsSym(1);
-                //#line 2281 "x10/parser/x10.g"
+                //#line 2809 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(3);
-                //#line 2281 "x10/parser/x10.g"
+                //#line 2809 "x10/parser/x10.g"
                 Object AssignmentOperator = (Object) getRhsSym(5);
-                //#line 2281 "x10/parser/x10.g"
+                //#line 2809 "x10/parser/x10.g"
                 Object AssignmentExpression = (Object) getRhsSym(6);
-                //#line 2283 "x10/parser/x10.g"
+                //#line 2811 "x10/parser/x10.g"
 		r.rule_Assignment1(e1,ArgumentListopt,AssignmentOperator,AssignmentExpression);
                 break;
             }
             //
-            // Rule 520:  Assignment ::= Primary$e1 ( ArgumentListopt ) AssignmentOperator AssignmentExpression
+            // Rule 493:  Assignment ::= Primary$e1 ( ArgumentListopt ) AssignmentOperator AssignmentExpression
             //
-            case 520: {
-                //#line 2285 "x10/parser/x10.g"
+            case 493: {
+                //#line 2813 "x10/parser/x10.g"
                 Object e1 = (Object) getRhsSym(1);
-                //#line 2285 "x10/parser/x10.g"
+                //#line 2813 "x10/parser/x10.g"
                 Object ArgumentListopt = (Object) getRhsSym(3);
-                //#line 2285 "x10/parser/x10.g"
+                //#line 2813 "x10/parser/x10.g"
                 Object AssignmentOperator = (Object) getRhsSym(5);
-                //#line 2285 "x10/parser/x10.g"
+                //#line 2813 "x10/parser/x10.g"
                 Object AssignmentExpression = (Object) getRhsSym(6);
-                //#line 2287 "x10/parser/x10.g"
+                //#line 2815 "x10/parser/x10.g"
 		r.rule_Assignment2(e1,ArgumentListopt,AssignmentOperator,AssignmentExpression);
                 break;
             }
             //
-            // Rule 521:  LeftHandSide ::= ExpressionName
+            // Rule 494:  LeftHandSide ::= ExpressionName
             //
-            case 521: {
-                //#line 2290 "x10/parser/x10.g"
+            case 494: {
+                //#line 2818 "x10/parser/x10.g"
                 Object ExpressionName = (Object) getRhsSym(1);
-                //#line 2292 "x10/parser/x10.g"
+                //#line 2820 "x10/parser/x10.g"
 		r.rule_LeftHandSide0(ExpressionName);
                 break;
             }
             //
-            // Rule 523:  AssignmentOperator ::= =
+            // Rule 496:  AssignmentOperator ::= =
             //
-            case 523: {
+            case 496: {
                 
-                //#line 2298 "x10/parser/x10.g"
+                //#line 2826 "x10/parser/x10.g"
 		r.rule_AssignmentOperator0();
                 break;
             }
             //
-            // Rule 524:  AssignmentOperator ::= *=
+            // Rule 497:  AssignmentOperator ::= *=
             //
-            case 524: {
+            case 497: {
                 
-                //#line 2302 "x10/parser/x10.g"
+                //#line 2830 "x10/parser/x10.g"
 		r.rule_AssignmentOperator1();
                 break;
             }
             //
-            // Rule 525:  AssignmentOperator ::= /=
+            // Rule 498:  AssignmentOperator ::= /=
             //
-            case 525: {
+            case 498: {
                 
-                //#line 2306 "x10/parser/x10.g"
+                //#line 2834 "x10/parser/x10.g"
 		r.rule_AssignmentOperator2();
                 break;
             }
             //
-            // Rule 526:  AssignmentOperator ::= %=
+            // Rule 499:  AssignmentOperator ::= %=
             //
-            case 526: {
+            case 499: {
                 
-                //#line 2310 "x10/parser/x10.g"
+                //#line 2838 "x10/parser/x10.g"
 		r.rule_AssignmentOperator3();
                 break;
             }
             //
-            // Rule 527:  AssignmentOperator ::= +=
+            // Rule 500:  AssignmentOperator ::= +=
             //
-            case 527: {
+            case 500: {
                 
-                //#line 2314 "x10/parser/x10.g"
+                //#line 2842 "x10/parser/x10.g"
 		r.rule_AssignmentOperator4();
                 break;
             }
             //
-            // Rule 528:  AssignmentOperator ::= -=
+            // Rule 501:  AssignmentOperator ::= -=
             //
-            case 528: {
+            case 501: {
                 
-                //#line 2318 "x10/parser/x10.g"
+                //#line 2846 "x10/parser/x10.g"
 		r.rule_AssignmentOperator5();
                 break;
             }
             //
-            // Rule 529:  AssignmentOperator ::= <<=
+            // Rule 502:  AssignmentOperator ::= <<=
             //
-            case 529: {
+            case 502: {
                 
-                //#line 2322 "x10/parser/x10.g"
+                //#line 2850 "x10/parser/x10.g"
 		r.rule_AssignmentOperator6();
                 break;
             }
             //
-            // Rule 530:  AssignmentOperator ::= >>=
+            // Rule 503:  AssignmentOperator ::= >>=
             //
-            case 530: {
+            case 503: {
                 
-                //#line 2326 "x10/parser/x10.g"
+                //#line 2854 "x10/parser/x10.g"
 		r.rule_AssignmentOperator7();
                 break;
             }
             //
-            // Rule 531:  AssignmentOperator ::= >>>=
+            // Rule 504:  AssignmentOperator ::= >>>=
             //
-            case 531: {
+            case 504: {
                 
-                //#line 2330 "x10/parser/x10.g"
+                //#line 2858 "x10/parser/x10.g"
 		r.rule_AssignmentOperator8();
                 break;
             }
             //
-            // Rule 532:  AssignmentOperator ::= &=
+            // Rule 505:  AssignmentOperator ::= &=
             //
-            case 532: {
+            case 505: {
                 
-                //#line 2334 "x10/parser/x10.g"
+                //#line 2862 "x10/parser/x10.g"
 		r.rule_AssignmentOperator9();
                 break;
             }
             //
-            // Rule 533:  AssignmentOperator ::= ^=
+            // Rule 506:  AssignmentOperator ::= ^=
             //
-            case 533: {
+            case 506: {
                 
-                //#line 2338 "x10/parser/x10.g"
+                //#line 2866 "x10/parser/x10.g"
 		r.rule_AssignmentOperator10();
                 break;
             }
             //
-            // Rule 534:  AssignmentOperator ::= |=
+            // Rule 507:  AssignmentOperator ::= |=
             //
-            case 534: {
+            case 507: {
                 
-                //#line 2342 "x10/parser/x10.g"
+                //#line 2870 "x10/parser/x10.g"
 		r.rule_AssignmentOperator11();
                 break;
             }
             //
-            // Rule 535:  AssignmentOperator ::= ..=
+            // Rule 510:  PrefixOp ::= +
             //
-            case 535: {
+            case 510: {
                 
-                //#line 2346 "x10/parser/x10.g"
-		r.rule_AssignmentOperator12();
-                break;
-            }
-            //
-            // Rule 536:  AssignmentOperator ::= ->=
-            //
-            case 536: {
-                
-                //#line 2350 "x10/parser/x10.g"
-		r.rule_AssignmentOperator13();
-                break;
-            }
-            //
-            // Rule 537:  AssignmentOperator ::= <-=
-            //
-            case 537: {
-                
-                //#line 2354 "x10/parser/x10.g"
-		r.rule_AssignmentOperator14();
-                break;
-            }
-            //
-            // Rule 538:  AssignmentOperator ::= -<=
-            //
-            case 538: {
-                
-                //#line 2358 "x10/parser/x10.g"
-		r.rule_AssignmentOperator15();
-                break;
-            }
-            //
-            // Rule 539:  AssignmentOperator ::= >-=
-            //
-            case 539: {
-                
-                //#line 2362 "x10/parser/x10.g"
-		r.rule_AssignmentOperator16();
-                break;
-            }
-            //
-            // Rule 540:  AssignmentOperator ::= **=
-            //
-            case 540: {
-                
-                //#line 2366 "x10/parser/x10.g"
-		r.rule_AssignmentOperator17();
-                break;
-            }
-            //
-            // Rule 541:  AssignmentOperator ::= <>=
-            //
-            case 541: {
-                
-                //#line 2370 "x10/parser/x10.g"
-		r.rule_AssignmentOperator18();
-                break;
-            }
-            //
-            // Rule 542:  AssignmentOperator ::= ><=
-            //
-            case 542: {
-                
-                //#line 2374 "x10/parser/x10.g"
-		r.rule_AssignmentOperator19();
-                break;
-            }
-            //
-            // Rule 543:  AssignmentOperator ::= ~=
-            //
-            case 543: {
-                
-                //#line 2378 "x10/parser/x10.g"
-		r.rule_AssignmentOperator20();
-                break;
-            }
-            //
-            // Rule 546:  PrefixOp ::= +
-            //
-            case 546: {
-                
-                //#line 2388 "x10/parser/x10.g"
+                //#line 2880 "x10/parser/x10.g"
 		r.rule_PrefixOp0();
                 break;
             }
             //
-            // Rule 547:  PrefixOp ::= -
+            // Rule 511:  PrefixOp ::= -
             //
-            case 547: {
+            case 511: {
                 
-                //#line 2392 "x10/parser/x10.g"
+                //#line 2884 "x10/parser/x10.g"
 		r.rule_PrefixOp1();
                 break;
             }
             //
-            // Rule 548:  PrefixOp ::= !
+            // Rule 512:  PrefixOp ::= !
             //
-            case 548: {
+            case 512: {
                 
-                //#line 2396 "x10/parser/x10.g"
+                //#line 2888 "x10/parser/x10.g"
 		r.rule_PrefixOp2();
                 break;
             }
             //
-            // Rule 549:  PrefixOp ::= ~
+            // Rule 513:  PrefixOp ::= ~
             //
-            case 549: {
+            case 513: {
                 
-                //#line 2400 "x10/parser/x10.g"
+                //#line 2892 "x10/parser/x10.g"
 		r.rule_PrefixOp3();
                 break;
             }
             //
-            // Rule 550:  PrefixOp ::= ^
+            // Rule 514:  PrefixOp ::= ^
             //
-            case 550: {
+            case 514: {
                 
-                //#line 2406 "x10/parser/x10.g"
+                //#line 2896 "x10/parser/x10.g"
 		r.rule_PrefixOp4();
                 break;
             }
             //
-            // Rule 551:  PrefixOp ::= |
+            // Rule 515:  PrefixOp ::= |
             //
-            case 551: {
+            case 515: {
                 
-                //#line 2410 "x10/parser/x10.g"
+                //#line 2900 "x10/parser/x10.g"
 		r.rule_PrefixOp5();
                 break;
             }
             //
-            // Rule 552:  PrefixOp ::= &
+            // Rule 516:  PrefixOp ::= &
             //
-            case 552: {
+            case 516: {
                 
-                //#line 2414 "x10/parser/x10.g"
+                //#line 2904 "x10/parser/x10.g"
 		r.rule_PrefixOp6();
                 break;
             }
             //
-            // Rule 553:  PrefixOp ::= *
+            // Rule 517:  PrefixOp ::= *
             //
-            case 553: {
+            case 517: {
                 
-                //#line 2418 "x10/parser/x10.g"
+                //#line 2908 "x10/parser/x10.g"
 		r.rule_PrefixOp7();
                 break;
             }
             //
-            // Rule 554:  PrefixOp ::= /
+            // Rule 518:  PrefixOp ::= /
             //
-            case 554: {
+            case 518: {
                 
-                //#line 2422 "x10/parser/x10.g"
+                //#line 2912 "x10/parser/x10.g"
 		r.rule_PrefixOp8();
                 break;
             }
             //
-            // Rule 555:  PrefixOp ::= %
+            // Rule 519:  PrefixOp ::= %
             //
-            case 555: {
+            case 519: {
                 
-                //#line 2426 "x10/parser/x10.g"
+                //#line 2916 "x10/parser/x10.g"
 		r.rule_PrefixOp9();
                 break;
             }
             //
-            // Rule 556:  BinOp ::= +
+            // Rule 520:  BinOp ::= +
             //
-            case 556: {
+            case 520: {
                 
-                //#line 2431 "x10/parser/x10.g"
+                //#line 2921 "x10/parser/x10.g"
 		r.rule_BinOp0();
                 break;
             }
             //
-            // Rule 557:  BinOp ::= -
+            // Rule 521:  BinOp ::= -
             //
-            case 557: {
+            case 521: {
                 
-                //#line 2435 "x10/parser/x10.g"
+                //#line 2925 "x10/parser/x10.g"
 		r.rule_BinOp1();
                 break;
             }
             //
-            // Rule 558:  BinOp ::= *
+            // Rule 522:  BinOp ::= *
             //
-            case 558: {
+            case 522: {
                 
-                //#line 2439 "x10/parser/x10.g"
+                //#line 2929 "x10/parser/x10.g"
 		r.rule_BinOp2();
                 break;
             }
             //
-            // Rule 559:  BinOp ::= /
+            // Rule 523:  BinOp ::= /
             //
-            case 559: {
+            case 523: {
                 
-                //#line 2443 "x10/parser/x10.g"
+                //#line 2933 "x10/parser/x10.g"
 		r.rule_BinOp3();
                 break;
             }
             //
-            // Rule 560:  BinOp ::= %
+            // Rule 524:  BinOp ::= %
             //
-            case 560: {
+            case 524: {
                 
-                //#line 2447 "x10/parser/x10.g"
+                //#line 2937 "x10/parser/x10.g"
 		r.rule_BinOp4();
                 break;
             }
             //
-            // Rule 561:  BinOp ::= &
+            // Rule 525:  BinOp ::= &
             //
-            case 561: {
+            case 525: {
                 
-                //#line 2451 "x10/parser/x10.g"
+                //#line 2941 "x10/parser/x10.g"
 		r.rule_BinOp5();
                 break;
             }
             //
-            // Rule 562:  BinOp ::= |
+            // Rule 526:  BinOp ::= |
             //
-            case 562: {
+            case 526: {
                 
-                //#line 2455 "x10/parser/x10.g"
+                //#line 2945 "x10/parser/x10.g"
 		r.rule_BinOp6();
                 break;
             }
             //
-            // Rule 563:  BinOp ::= ^
+            // Rule 527:  BinOp ::= ^
             //
-            case 563: {
+            case 527: {
                 
-                //#line 2459 "x10/parser/x10.g"
+                //#line 2949 "x10/parser/x10.g"
 		r.rule_BinOp7();
                 break;
             }
             //
-            // Rule 564:  BinOp ::= &&
+            // Rule 528:  BinOp ::= &&
             //
-            case 564: {
+            case 528: {
                 
-                //#line 2463 "x10/parser/x10.g"
+                //#line 2953 "x10/parser/x10.g"
 		r.rule_BinOp8();
                 break;
             }
             //
-            // Rule 565:  BinOp ::= ||
+            // Rule 529:  BinOp ::= ||
             //
-            case 565: {
+            case 529: {
                 
-                //#line 2467 "x10/parser/x10.g"
+                //#line 2957 "x10/parser/x10.g"
 		r.rule_BinOp9();
                 break;
             }
             //
-            // Rule 566:  BinOp ::= <<
+            // Rule 530:  BinOp ::= <<
             //
-            case 566: {
+            case 530: {
                 
-                //#line 2471 "x10/parser/x10.g"
+                //#line 2961 "x10/parser/x10.g"
 		r.rule_BinOp10();
                 break;
             }
             //
-            // Rule 567:  BinOp ::= >>
+            // Rule 531:  BinOp ::= >>
             //
-            case 567: {
+            case 531: {
                 
-                //#line 2475 "x10/parser/x10.g"
+                //#line 2965 "x10/parser/x10.g"
 		r.rule_BinOp11();
                 break;
             }
             //
-            // Rule 568:  BinOp ::= >>>
+            // Rule 532:  BinOp ::= >>>
             //
-            case 568: {
+            case 532: {
                 
-                //#line 2479 "x10/parser/x10.g"
+                //#line 2969 "x10/parser/x10.g"
 		r.rule_BinOp12();
                 break;
             }
             //
-            // Rule 569:  BinOp ::= >=
+            // Rule 533:  BinOp ::= >=
             //
-            case 569: {
+            case 533: {
                 
-                //#line 2483 "x10/parser/x10.g"
+                //#line 2973 "x10/parser/x10.g"
 		r.rule_BinOp13();
                 break;
             }
             //
-            // Rule 570:  BinOp ::= <=
+            // Rule 534:  BinOp ::= <=
             //
-            case 570: {
+            case 534: {
                 
-                //#line 2487 "x10/parser/x10.g"
+                //#line 2977 "x10/parser/x10.g"
 		r.rule_BinOp14();
                 break;
             }
             //
-            // Rule 571:  BinOp ::= >
+            // Rule 535:  BinOp ::= >
             //
-            case 571: {
+            case 535: {
                 
-                //#line 2491 "x10/parser/x10.g"
+                //#line 2981 "x10/parser/x10.g"
 		r.rule_BinOp15();
                 break;
             }
             //
-            // Rule 572:  BinOp ::= <
+            // Rule 536:  BinOp ::= <
             //
-            case 572: {
+            case 536: {
                 
-                //#line 2495 "x10/parser/x10.g"
+                //#line 2985 "x10/parser/x10.g"
 		r.rule_BinOp16();
                 break;
             }
             //
-            // Rule 573:  BinOp ::= ==
+            // Rule 537:  BinOp ::= ==
             //
-            case 573: {
+            case 537: {
                 
-                //#line 2502 "x10/parser/x10.g"
+                //#line 2992 "x10/parser/x10.g"
 		r.rule_BinOp17();
                 break;
             }
             //
-            // Rule 574:  BinOp ::= !=
+            // Rule 538:  BinOp ::= !=
             //
-            case 574: {
+            case 538: {
                 
-                //#line 2506 "x10/parser/x10.g"
+                //#line 2996 "x10/parser/x10.g"
 		r.rule_BinOp18();
                 break;
             }
             //
-            // Rule 575:  BinOp ::= ..
+            // Rule 539:  BinOp ::= ..
             //
-            case 575: {
+            case 539: {
                 
-                //#line 2512 "x10/parser/x10.g"
+                //#line 3002 "x10/parser/x10.g"
 		r.rule_BinOp19();
                 break;
             }
             //
-            // Rule 576:  BinOp ::= ->
+            // Rule 540:  BinOp ::= ->
             //
-            case 576: {
+            case 540: {
                 
-                //#line 2516 "x10/parser/x10.g"
+                //#line 3006 "x10/parser/x10.g"
 		r.rule_BinOp20();
                 break;
             }
             //
-            // Rule 577:  BinOp ::= <-
+            // Rule 541:  BinOp ::= <-
             //
-            case 577: {
+            case 541: {
                 
-                //#line 2520 "x10/parser/x10.g"
+                //#line 3010 "x10/parser/x10.g"
 		r.rule_BinOp21();
                 break;
             }
             //
-            // Rule 578:  BinOp ::= -<
+            // Rule 542:  BinOp ::= -<
             //
-            case 578: {
+            case 542: {
                 
-                //#line 2524 "x10/parser/x10.g"
+                //#line 3014 "x10/parser/x10.g"
 		r.rule_BinOp22();
                 break;
             }
             //
-            // Rule 579:  BinOp ::= >-
+            // Rule 543:  BinOp ::= >-
             //
-            case 579: {
+            case 543: {
                 
-                //#line 2528 "x10/parser/x10.g"
+                //#line 3018 "x10/parser/x10.g"
 		r.rule_BinOp23();
                 break;
             }
             //
-            // Rule 580:  BinOp ::= **
+            // Rule 544:  BinOp ::= **
             //
-            case 580: {
+            case 544: {
                 
-                //#line 2532 "x10/parser/x10.g"
+                //#line 3022 "x10/parser/x10.g"
 		r.rule_BinOp24();
                 break;
             }
             //
-            // Rule 581:  BinOp ::= ~
+            // Rule 545:  BinOp ::= ~
             //
-            case 581: {
+            case 545: {
                 
-                //#line 2536 "x10/parser/x10.g"
+                //#line 3026 "x10/parser/x10.g"
 		r.rule_BinOp25();
                 break;
             }
             //
-            // Rule 582:  BinOp ::= !~
+            // Rule 546:  BinOp ::= !~
             //
-            case 582: {
+            case 546: {
                 
-                //#line 2540 "x10/parser/x10.g"
+                //#line 3030 "x10/parser/x10.g"
 		r.rule_BinOp26();
                 break;
             }
             //
-            // Rule 583:  BinOp ::= !
+            // Rule 547:  BinOp ::= !
             //
-            case 583: {
+            case 547: {
                 
-                //#line 2544 "x10/parser/x10.g"
+                //#line 3034 "x10/parser/x10.g"
 		r.rule_BinOp27();
                 break;
             }
             //
-            // Rule 584:  BinOp ::= <>
+            // Rule 548:  Catchesopt ::= $Empty
             //
-            case 584: {
+            case 548: {
                 
-                //#line 2548 "x10/parser/x10.g"
-		r.rule_BinOp28();
-                break;
-            }
-            //
-            // Rule 585:  BinOp ::= ><
-            //
-            case 585: {
-                
-                //#line 2552 "x10/parser/x10.g"
-		r.rule_BinOp29();
-                break;
-            }
-            //
-            // Rule 586:  Catchesopt ::= $Empty
-            //
-            case 586: {
-                
-                //#line 2560 "x10/parser/x10.g"
+                //#line 3042 "x10/parser/x10.g"
 		r.rule_Catchesopt0();
                 break;
             }
             //
-            // Rule 588:  Identifieropt ::= $Empty
+            // Rule 550:  Identifieropt ::= $Empty
             //
-            case 588:
+            case 550:
                 setResult(null);
                 break;
 
             //
-            // Rule 589:  Identifieropt ::= Identifier
+            // Rule 551:  Identifieropt ::= Identifier
             //
-            case 589: {
-                //#line 2566 "x10/parser/x10.g"
+            case 551: {
+                //#line 3048 "x10/parser/x10.g"
                 Object Identifier = (Object) getRhsSym(1);
-                //#line 2568 "x10/parser/x10.g"
+                //#line 3050 "x10/parser/x10.g"
 		r.rule_Identifieropt1(Identifier);
                 break;
             }
             //
-            // Rule 590:  ForUpdateopt ::= $Empty
+            // Rule 552:  ForUpdateopt ::= $Empty
             //
-            case 590: {
+            case 552: {
                 
-                //#line 2573 "x10/parser/x10.g"
+                //#line 3055 "x10/parser/x10.g"
 		r.rule_ForUpdateopt0();
                 break;
             }
             //
-            // Rule 592:  Expressionopt ::= $Empty
+            // Rule 554:  Expressionopt ::= $Empty
             //
-            case 592:
+            case 554:
                 setResult(null);
                 break;
 
             //
-            // Rule 594:  ForInitopt ::= $Empty
+            // Rule 556:  ForInitopt ::= $Empty
             //
-            case 594: {
+            case 556: {
                 
-                //#line 2583 "x10/parser/x10.g"
+                //#line 3065 "x10/parser/x10.g"
 		r.rule_ForInitopt0();
                 break;
             }
             //
-            // Rule 596:  SwitchLabelsopt ::= $Empty
+            // Rule 558:  SwitchLabelsopt ::= $Empty
             //
-            case 596: {
+            case 558: {
                 
-                //#line 2589 "x10/parser/x10.g"
+                //#line 3071 "x10/parser/x10.g"
 		r.rule_SwitchLabelsopt0();
                 break;
             }
             //
-            // Rule 598:  SwitchBlockStatementGroupsopt ::= $Empty
+            // Rule 560:  SwitchBlockStatementGroupsopt ::= $Empty
             //
-            case 598: {
+            case 560: {
                 
-                //#line 2595 "x10/parser/x10.g"
+                //#line 3077 "x10/parser/x10.g"
 		r.rule_SwitchBlockStatementGroupsopt0();
                 break;
             }
             //
-            // Rule 600:  InterfaceMemberDeclarationsopt ::= $Empty
+            // Rule 562:  InterfaceMemberDeclarationsopt ::= $Empty
             //
-            case 600: {
+            case 562: {
                 
-                //#line 2601 "x10/parser/x10.g"
+                //#line 3100 "x10/parser/x10.g"
 		r.rule_InterfaceMemberDeclarationsopt0();
                 break;
             }
             //
-            // Rule 602:  ExtendsInterfacesopt ::= $Empty
+            // Rule 564:  ExtendsInterfacesopt ::= $Empty
             //
-            case 602: {
+            case 564: {
                 
-                //#line 2607 "x10/parser/x10.g"
+                //#line 3106 "x10/parser/x10.g"
 		r.rule_ExtendsInterfacesopt0();
                 break;
             }
             //
-            // Rule 604:  ClassBodyopt ::= $Empty
+            // Rule 566:  ClassBodyopt ::= $Empty
+            //
+            case 566:
+                setResult(null);
+                break;
+
+            //
+            // Rule 568:  ArgumentListopt ::= $Empty
+            //
+            case 568: {
+                
+                //#line 3136 "x10/parser/x10.g"
+		r.rule_ArgumentListopt0();
+                break;
+            }
+            //
+            // Rule 570:  BlockStatementsopt ::= $Empty
+            //
+            case 570: {
+                
+                //#line 3142 "x10/parser/x10.g"
+		r.rule_BlockStatementsopt0();
+                break;
+            }
+            //
+            // Rule 572:  ExplicitConstructorInvocationopt ::= $Empty
+            //
+            case 572:
+                setResult(null);
+                break;
+
+            //
+            // Rule 574:  FormalParameterListopt ::= $Empty
+            //
+            case 574: {
+                
+                //#line 3162 "x10/parser/x10.g"
+		r.rule_FormalParameterListopt0();
+                break;
+            }
+            //
+            // Rule 576:  Offersopt ::= $Empty
+            //
+            case 576: {
+                
+                //#line 3174 "x10/parser/x10.g"
+		r.rule_Offersopt0();
+                break;
+            }
+            //
+            // Rule 578:  ClassBodyDeclarationsopt ::= $Empty
+            //
+            case 578: {
+                
+                //#line 3210 "x10/parser/x10.g"
+		r.rule_ClassBodyDeclarationsopt0();
+                break;
+            }
+            //
+            // Rule 580:  Interfacesopt ::= $Empty
+            //
+            case 580: {
+                
+                //#line 3216 "x10/parser/x10.g"
+		r.rule_Interfacesopt0();
+                break;
+            }
+            //
+            // Rule 582:  Superopt ::= $Empty
+            //
+            case 582:
+                setResult(null);
+                break;
+
+            //
+            // Rule 584:  TypeParametersopt ::= $Empty
+            //
+            case 584: {
+                
+                //#line 3226 "x10/parser/x10.g"
+		r.rule_TypeParametersopt0();
+                break;
+            }
+            //
+            // Rule 586:  FormalParametersopt ::= $Empty
+            //
+            case 586: {
+                
+                //#line 3232 "x10/parser/x10.g"
+		r.rule_FormalParametersopt0();
+                break;
+            }
+            //
+            // Rule 588:  Annotationsopt ::= $Empty
+            //
+            case 588: {
+                
+                //#line 3238 "x10/parser/x10.g"
+		r.rule_Annotationsopt0();
+                break;
+            }
+            //
+            // Rule 590:  TypeDeclarationsopt ::= $Empty
+            //
+            case 590: {
+                
+                //#line 3244 "x10/parser/x10.g"
+		r.rule_TypeDeclarationsopt0();
+                break;
+            }
+            //
+            // Rule 592:  ImportDeclarationsopt ::= $Empty
+            //
+            case 592: {
+                
+                //#line 3250 "x10/parser/x10.g"
+		r.rule_ImportDeclarationsopt0();
+                break;
+            }
+            //
+            // Rule 594:  PackageDeclarationopt ::= $Empty
+            //
+            case 594:
+                setResult(null);
+                break;
+
+            //
+            // Rule 596:  HasResultTypeopt ::= $Empty
+            //
+            case 596:
+                setResult(null);
+                break;
+
+            //
+            // Rule 598:  TypeArgumentsopt ::= $Empty
+            //
+            case 598: {
+                
+                //#line 3270 "x10/parser/x10.g"
+		r.rule_TypeArgumentsopt0();
+                break;
+            }
+            //
+            // Rule 600:  TypeParamsWithVarianceopt ::= $Empty
+            //
+            case 600: {
+                
+                //#line 3276 "x10/parser/x10.g"
+		r.rule_TypeParamsWithVarianceopt0();
+                break;
+            }
+            //
+            // Rule 602:  Propertiesopt ::= $Empty
+            //
+            case 602: {
+                
+                //#line 3282 "x10/parser/x10.g"
+		r.rule_Propertiesopt0();
+                break;
+            }
+            //
+            // Rule 604:  VarKeywordopt ::= $Empty
             //
             case 604:
                 setResult(null);
                 break;
 
             //
-            // Rule 606:  ArgumentListopt ::= $Empty
+            // Rule 606:  AtCaptureDeclaratorsopt ::= $Empty
             //
             case 606: {
                 
-                //#line 2617 "x10/parser/x10.g"
-		r.rule_ArgumentListopt0();
-                break;
-            }
-            //
-            // Rule 608:  BlockStatementsopt ::= $Empty
-            //
-            case 608: {
-                
-                //#line 2623 "x10/parser/x10.g"
-		r.rule_BlockStatementsopt0();
-                break;
-            }
-            //
-            // Rule 610:  ExplicitConstructorInvocationopt ::= $Empty
-            //
-            case 610:
-                setResult(null);
-                break;
-
-            //
-            // Rule 612:  FormalParameterListopt ::= $Empty
-            //
-            case 612: {
-                
-                //#line 2633 "x10/parser/x10.g"
-		r.rule_FormalParameterListopt0();
-                break;
-            }
-            //
-            // Rule 614:  OBSOLETE_Offersopt ::= $Empty
-            //
-            case 614: {
-                
-                //#line 2639 "x10/parser/x10.g"
-		r.rule_OBSOLETE_Offersopt0();
-                break;
-            }
-            //
-            // Rule 616:  ClassMemberDeclarationsopt ::= $Empty
-            //
-            case 616: {
-                
-                //#line 2645 "x10/parser/x10.g"
-		r.rule_ClassMemberDeclarationsopt0();
-                break;
-            }
-            //
-            // Rule 618:  Interfacesopt ::= $Empty
-            //
-            case 618: {
-                
-                //#line 2651 "x10/parser/x10.g"
-		r.rule_Interfacesopt0();
-                break;
-            }
-            //
-            // Rule 620:  Superopt ::= $Empty
-            //
-            case 620:
-                setResult(null);
-                break;
-
-            //
-            // Rule 622:  TypeParametersopt ::= $Empty
-            //
-            case 622: {
-                
-                //#line 2661 "x10/parser/x10.g"
-		r.rule_TypeParametersopt0();
-                break;
-            }
-            //
-            // Rule 624:  FormalParametersopt ::= $Empty
-            //
-            case 624: {
-                
-                //#line 2667 "x10/parser/x10.g"
-		r.rule_FormalParametersopt0();
-                break;
-            }
-            //
-            // Rule 626:  Annotationsopt ::= $Empty
-            //
-            case 626: {
-                
-                //#line 2673 "x10/parser/x10.g"
-		r.rule_Annotationsopt0();
-                break;
-            }
-            //
-            // Rule 628:  TypeDeclarationsopt ::= $Empty
-            //
-            case 628: {
-                
-                //#line 2679 "x10/parser/x10.g"
-		r.rule_TypeDeclarationsopt0();
-                break;
-            }
-            //
-            // Rule 630:  ImportDeclarationsopt ::= $Empty
-            //
-            case 630: {
-                
-                //#line 2685 "x10/parser/x10.g"
-		r.rule_ImportDeclarationsopt0();
-                break;
-            }
-            //
-            // Rule 632:  PackageDeclarationopt ::= $Empty
-            //
-            case 632:
-                setResult(null);
-                break;
-
-            //
-            // Rule 634:  HasResultTypeopt ::= $Empty
-            //
-            case 634:
-                setResult(null);
-                break;
-
-            //
-            // Rule 636:  TypeArgumentsopt ::= $Empty
-            //
-            case 636: {
-                
-                //#line 2699 "x10/parser/x10.g"
-		r.rule_TypeArgumentsopt0();
-                break;
-            }
-            //
-            // Rule 638:  TypeParamsWithVarianceopt ::= $Empty
-            //
-            case 638: {
-                
-                //#line 2705 "x10/parser/x10.g"
-		r.rule_TypeParamsWithVarianceopt0();
-                break;
-            }
-            //
-            // Rule 640:  Propertiesopt ::= $Empty
-            //
-            case 640: {
-                
-                //#line 2711 "x10/parser/x10.g"
-		r.rule_Propertiesopt0();
-                break;
-            }
-            //
-            // Rule 642:  VarKeywordopt ::= $Empty
-            //
-            case 642:
-                setResult(null);
-                break;
-
-            //
-            // Rule 644:  AtCaptureDeclaratorsopt ::= $Empty
-            //
-            case 644: {
-                
-                //#line 2721 "x10/parser/x10.g"
+                //#line 3292 "x10/parser/x10.g"
 		r.rule_AtCaptureDeclaratorsopt0();
                 break;
             }

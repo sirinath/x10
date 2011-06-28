@@ -24,7 +24,7 @@ public class ErrorInfo
   public static final int INVARIANT_VIOLATION_KIND = 11;
 
   public static boolean isErrorKind(int kind) {
-      return kind!=WARNING && kind!=DEBUG && kind!=SHOULD_BE_ERR_MARKER && kind!=SHOULD_NOT_BE_ERR_MARKER && kind!=ERR_MARKER;
+      return kind!=WARNING && kind!=DEBUG;
   }
   protected static String[] errorStrings = {
     "Warning",

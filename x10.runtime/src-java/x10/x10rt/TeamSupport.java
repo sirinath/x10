@@ -47,13 +47,8 @@ public class TeamSupport {
         }
         return typeCode;
     }
-    
-    private static void aboutToDie(String methodName) {
-        System.err.println("About to die in " + methodName);
-        System.exit(1);
-    }
-
-	public static void nativeMake(IndexedMemoryChunk<Place> places, int count, IndexedMemoryChunk<x10.core.Int> result) {
+	
+	public static void nativeMake(IndexedMemoryChunk<Place> places, int count, IndexedMemoryChunk<Integer> result) {
 	    Place[] np = (Place[])places.getBackingArray();
 	    int[] int_places = new int[np.length];
 	    for (int i=0; i<places.length; i++) {
@@ -63,47 +58,36 @@ public class TeamSupport {
 
 	    FinishState fs = ActivityManagement.activityCreationBookkeeping();
 
-	    try {
-	        nativeMakeImpl(int_places, count, nr, fs);
-	    } catch (UnsatisfiedLinkError e) {
-	        aboutToDie("nativeMake");
-	    }
+		nativeMakeImpl(int_places, count, nr, fs);
 	}
 	
 	
 	public static int nativeSize(int id) {
-	    int size = 0;
-	    try {
-	        size = nativeSizeImpl(id);
-	    } catch (UnsatisfiedLinkError e) {
-	        aboutToDie("nativeSize");
-	    }
-	    return size;
+	    return nativeSizeImpl(id);
 	}
 	
 	public static void nativeBarrier(int id, int role) {
 	    FinishState fs = ActivityManagement.activityCreationBookkeeping();
 	    
-	    try {
-                nativeBarrierImpl(id, role, fs);
-	    } catch (UnsatisfiedLinkError e) {
-	        aboutToDie("nativeBarrier");
-	    }
+	    nativeBarrierImpl(id, role, fs);
 	}
 	
     public static void nativeScatter(int id, int role, int root, IndexedMemoryChunk<?> src, int src_off, 
 	                                 IndexedMemoryChunk<?> dst, int dst_off, int count) {
-        aboutToDie("nativeScatter");
-    }
+        System.err.println("About to die in nativeScatter");
+        ThrowableUtilities.UnsupportedOperationException("nativeScatter");
+	}
 	
     public static void nativeBcast(int id, int role, int root, IndexedMemoryChunk<?> src, int src_off, 
                                    IndexedMemoryChunk<?> dst, int dst_off, int count) {
-        aboutToDie("nativeBcast");
+        System.err.println("About to die in nativeBcast");
+        ThrowableUtilities.UnsupportedOperationException("nativeBcast");
     }
     
     public static void nativeAllToAll(int id, int role, IndexedMemoryChunk<?> src, int src_off, 
                                       IndexedMemoryChunk<?> dst, int dst_off, int count) {
-        aboutToDie("nativeAllToAll");
+        System.err.println("About to die in nativeAllToAll");
+        ThrowableUtilities.UnsupportedOperationException("nativeAllToAll");
     }
     
     public static void nativeAllReduce(int id, int role, IndexedMemoryChunk<?> src, int src_off, 
@@ -116,35 +100,30 @@ public class TeamSupport {
         
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
 
-        try {
-            nativeAllReduceImpl(id, role, srcRaw, src_off, dstRaw, dst_off, count, op, typeCode, fs);
-        } catch (UnsatisfiedLinkError e) {
-            aboutToDie("nativeAllReduce");
-        }
+        nativeAllReduceImpl(id, role, srcRaw, src_off, dstRaw, dst_off, count, op, typeCode, fs);
     }
 
     public static void nativeIndexOfMax(int id, int role, IndexedMemoryChunk<?> src,
                                         IndexedMemoryChunk<?> dst) {
-        aboutToDie("nativeIndexOfMax");
+        System.err.println("About to die in nativeIndexOfMax");
+        ThrowableUtilities.UnsupportedOperationException("nativeIndexOfMax");
     }
 
     public static void nativeIndexOfMin(int id, int role, IndexedMemoryChunk<?> src,
                                         IndexedMemoryChunk<?> dst) {
-        aboutToDie("nativeIndexOfMin");
+        System.err.println("About to die in nativeIndexOfMin");
+        ThrowableUtilities.UnsupportedOperationException("nativeIndexOfMin");
     }
 
-    public static void nativeSplit(int id, int role, int color, int new_role, IndexedMemoryChunk<x10.core.Int> result) {
-        aboutToDie("nativeSplit");
+    public static void nativeSplit(int id, int role, int color, int new_role, IndexedMemoryChunk<Integer> result) {
+        System.err.println("About to die in nativeSplit");
+        ThrowableUtilities.UnsupportedOperationException("nativeSplit");
     }
     
     public static void nativeDel(int id, int role) {
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
         
-        try {
-            nativeDelImpl(id, role, fs);
-        } catch (UnsatisfiedLinkError e) {
-            aboutToDie("nativeDel");
-        }
+        nativeDelImpl(id, role, fs);
     }
     
 	private static native void nativeMakeImpl(int[] places, int count, int[] result, FinishState fs);

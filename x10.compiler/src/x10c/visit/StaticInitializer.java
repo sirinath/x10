@@ -105,7 +105,6 @@ import x10.constraint.XTerm;
 import x10.constraint.XTermKind;
 import x10.emitter.Emitter;
 import x10.extension.X10Ext;
-import x10.types.checker.Converter;
 import x10.types.constraints.CConstraint;
 import x10.types.ConstrainedType;
 import x10.types.ParameterType;
@@ -770,7 +769,7 @@ public class StaticInitializer extends ContextVisitor {
         TypeNode receiver = xnf.X10CanonicalTypeNode(pos, classDef.asType());
 
         FieldInstance fi = initInfo.fieldDef.asInstance();
-        Expr right = (Expr)xnf.X10Cast(pos, xnf.CanonicalTypeNode(pos, fi.type()), genDeserializeField(pos, ba, baName), Converter.ConversionType.PRIMITIVE).type(fi.type());
+        Expr right = genDeserializeField(pos, ba, baName);
         Name name = initInfo.fieldDef.name();
         Expr left = xnf.Field(pos, receiver, xnf.Id(pos, name)).fieldInstance(fi).type(right.type());
 
@@ -812,7 +811,7 @@ public class StaticInitializer extends ContextVisitor {
                                       FieldDef fdCond, FieldDef fdId, FieldDecl fdPLH, X10ClassDef classDef) {
         // get MethodDef
         Name name = Name.make(initializerPrefix+fName);
-        Type type = fieldInfo.fieldDef.type().get();
+        Type type = fieldInfo.right.type();
         MethodDef md = fieldInfo.methodDef;
         if (md == null) {
             md = makeMethodDef(pos, classDef.asType(), name, type);
@@ -1209,10 +1208,6 @@ public class StaticInitializer extends ContextVisitor {
                     return false;
             }
             return isConstantExpression(cc.target());
-        }
-        if (e instanceof Call) {
-            Call c = (Call) e;
-            return c.isConstant();
         }
         return false;
     }

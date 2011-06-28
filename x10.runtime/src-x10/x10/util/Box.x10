@@ -11,6 +11,8 @@
 
 package x10.util;
 
+import x10.compiler.TempNoInline_3;
+
 public final class Box[T] implements ()=> T {
     public val value: T;
     public def this(x: T) { value = x; }
@@ -35,5 +37,5 @@ public final class Box[T] implements ()=> T {
         return false;
     }
 
-    //public static operator[T](x:T):Box[T] = new Box[T](x);
+    //public static @TempNoInline_3 operator[T](x:T):Box[T] = new Box[T](x);
 }

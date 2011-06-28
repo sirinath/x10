@@ -154,26 +154,6 @@ public interface Type extends Qualifier, Annotated, Named
     boolean isDouble();
 
     /**
-     * Return true if UByte
-     */
-    boolean isUByte();
-
-    /**
-     * Return true if UShort
-     */
-    boolean isUShort();
-
-    /**
-     * Return true if UInt
-     */
-    boolean isUInt();
-
-    /**
-     * Return true if ULong
-     */
-    boolean isULong();
-
-    /**
      * Return true if int, short, byte, or char.
      */
     boolean isIntOrLess();
@@ -228,16 +208,6 @@ public interface Type extends Qualifier, Annotated, Named
      * the same type system.
      */
     boolean isComparable(Type t);
-    
-    /**
-     * Return true if the type is Any
-     */
-    boolean isAny();
-    
-    /**
-     * Return true if the type is a type parameter
-     */
-    boolean isParameterType();
     
 
     /**

@@ -85,7 +85,6 @@ import polyglot.ast.Empty_c;
 import polyglot.ast.Eval_c;
 import polyglot.ast.Expr;
 import polyglot.ast.FieldAssign;
-import polyglot.ast.FieldAssign_c;
 import polyglot.ast.FieldDecl_c;
 import polyglot.ast.Field_c;
 import polyglot.ast.FloatLit_c;
@@ -905,16 +904,32 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
         sw.set(save_header, save_body);
 	}
-    
-    /**
-     * This method walks the AST for the ClassDecl n and finds all AST nodes
-     * that refer to types.  For example allocations, type nodes, instance field
-     * access and method calls.  It then extracts all the types referenced in these
-     * AST nodes by calling the helper method extractAllClassTypes.
-     */
+
     private ArrayList<ClassType> referencedTypes(X10ClassDecl_c n, X10ClassDef def) {
-		X10SearchVisitor<Node> xTypes = new X10SearchVisitor<Node>(X10CanonicalTypeNode_c.class, Closure_c.class, Tuple_c.class, 
-		                                                           Allocation_c.class, X10Call_c.class, Field_c.class, FieldAssign_c.class);
+        // FIXME: [IP] There is a problem with include ordering.
+		// We cannot just blindly include a header for every type used
+		// because of recursive dependences.  So we need to do partial
+		// ordering.  For that, we need to include only those headers
+		// that define classes for which the code needs a full definition.
+		// Otherwise, just declare a class and include the header in the
+		// implementation file instead.
+		// As I can see, the only uses that need a full definition are
+		// field reads (in static final field initializers) and
+		// inheritance.  So find all class declarations and field
+		// declarations, and do #include for those headers.
+		//
+		// [DC] static final field initialisers should be in the cc file,
+		// with everything else that needs a full definition (lookups,
+		// construction, etc)
+		//
+		// [DC] generic classes might cause a problem though, as their
+		// function bodies are in the header.  We can still get cycles
+		// through this approach.  We may need two layers of headers or
+		// something for generic classes, in a manner that reflects the
+		// (h,cc) pairing for non-generic classes.
+
+		// TODO: sort by namespace and combine things in the same namespace
+		X10SearchVisitor<Node> xTypes = new X10SearchVisitor<Node>(X10CanonicalTypeNode_c.class, Closure_c.class, Tuple_c.class, Allocation_c.class, X10Call_c.class);
 		n.visit(xTypes);
 		ArrayList<ClassType> types = new ArrayList<ClassType>();
 		Set<ClassType> dupes = CollectionFactory.newHashSet();
@@ -942,16 +957,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
                     extractAllClassTypes(((Allocation_c) tn).type(), types, dupes);
 		        } else if (tn instanceof X10Call_c) {
                     extractAllClassTypes(((X10Call_c) tn).methodInstance().container(), types, dupes);
-		        } else if (tn instanceof Field_c) {
-		            Field_c f = (Field_c)tn;
-		            if (!f.flags().isStatic()) {
-		                extractAllClassTypes(f.fieldInstance().container(), types, dupes);
-		            }
-		        } else if (tn instanceof FieldAssign_c) {
-		            FieldAssign_c f = (FieldAssign_c) tn;
-		            if (!f.fieldInstance().flags().isStatic()) {
-                        extractAllClassTypes(f.fieldInstance().container(), types, dupes);		                
-		            }
 		        }
 		    }
         }
@@ -1417,10 +1422,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 			return;
 		}
 		int mid = getUniqueId_().intValue();
-		ClassifiedStream saved_closure_stream = context.closures;
 		if (def.typeParameters().size() != 0) {
 		    sw.pushCurrentStream(context.genericFunctions);
-		    context.closures = context.genericFunctionClosures;
 		    String guard = getHeaderGuard(getHeader(mi.container().toClass()));
 		    sw.write("#ifndef "+guard+"_"+mi.name().toString()+"_"+mid); sw.newline();
 		    sw.write("#define "+guard+"_"+mi.name().toString()+"_"+mid); sw.newline();
@@ -1525,7 +1528,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		    String guard = getHeaderGuard(getHeader(mi.container().toClass()));
 		    context.genericFunctions.writeln("#endif // "+guard+"_"+mi.name().toString()+"_"+mid);
 		}
-		context.closures = saved_closure_stream;
 	}
 
 
@@ -2100,7 +2102,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 				sw.write("*"+"/");
 			} else if (n.expr() instanceof CharLit_c) {
 			    CharLit_c lit = (CharLit_c)n.expr();
-			    sw.write("'"+StringUtil.escape(lit.value())+"'");
+			    sw.write("'"+StringUtil.escape(lit.charValue())+"'");
 			} else {
 				n.print(n.expr(), sw, tr);
 			}
@@ -2924,12 +2926,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	public void visit(Local_c n) {
 		X10CPPContext_c c = (X10CPPContext_c) tr.context();
 		LocalInstance var = n.localInstance();
-		// Make sure there is no mismatch between n.name() and var.name()
-		if (var.name() != n.name().id()) {
-		    assert var.name() == n.name().id();
-		}
 		if (c.isInsideClosure())
-			c.saveEnvVariableInfo(var.name().toString());
+			c.saveEnvVariableInfo(n.name().toString());
 		sw.write(mangled_non_method_name(var.name().toString()));
 	}
 
@@ -3066,17 +3064,17 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
         if (nativeString) {
             sw.write("\"");
-            sw.write(StringUtil.escape(n.value()));
+            sw.write(StringUtil.escape(n.stringValue()));
             sw.write("\"");
         } else {
             sw.write("x10aux::string_utils::lit(\"");
-            sw.write(StringUtil.escape(n.value()));
+            sw.write(StringUtil.escape(n.stringValue()));
             sw.write("\")");
         }
 	}
 
 	public void visit(CharLit_c lit) {
-		sw.write("((x10_char)'"+StringUtil.escape(lit.value())+"')");
+		sw.write("((x10_char)'"+StringUtil.escape(lit.charValue())+"')");
 	}
 
 	public void visit(BooleanLit_c lit) {
@@ -3397,17 +3395,27 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         // Thus, later closures can be used by earlier ones, but not vice versa.
         ClassifiedStream saved_closures = c.closures;
         ClassifiedStream saved_generic_closures = c.genericFunctionClosures;
-        c.closures = sw.getNewStream(c.closures.ext, c.closures, true);
-        sw.pushCurrentStream(c.closures);
+        ClassifiedStream inc_s;
+        if (in_template_closure) {
+            inc_s = sw.getNewStream(c.genericFunctionClosures.ext, c.genericFunctionClosures, true);
+            c.closures = inc_s;
+            c.genericFunctionClosures = inc_s;
+        } else {
+            inc_s = sw.getNewStream(c.closures.ext, c.closures, true);
+            c.closures = inc_s;
+        }
+        sw.pushCurrentStream(inc_s);
 
-        // A stream to put definitions of static variables for the closure class.
-        // If the def is not templatized, it has to go in the CC stream independent of
-        // which stream the rest of the closure declaration is going. 
-        ClassifiedStream defn_s =  in_template_closure ? sw.currentStream() : c.staticClosureDefinitions;
+        StreamWrapper inc = sw;
+        
+        // A stream to put definitions of static variables.
+        // If the def is templatized, it has to go in the inc stream.
+        // If the def is not templatized, it has to go in the CC stream (even if sw is the Header stream).
+        ClassifiedStream defn_s =  in_template_closure ? inc.currentStream() : c.staticClosureDefinitions;
 
         String headerGuard = getHeaderGuard(cname);
-        sw.write("#ifndef "+headerGuard+"_CLOSURE"); sw.newline();
-        sw.write("#define "+headerGuard+"_CLOSURE"); sw.newline();
+        inc.write("#ifndef "+headerGuard+"_CLOSURE"); inc.newline();
+        inc.write("#define "+headerGuard+"_CLOSURE"); inc.newline();
 
         Type retType = n.returnType().type();
         X10ClassType sup = (X10ClassType) ClosureSynthesizer.closureBaseInterfaceDef(xts,0, n.formals().size(), retType.isVoid()).asType();
@@ -3419,34 +3427,34 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         String superType = Emitter.translateType(sup.typeArguments(supArgs));
         String superTypeRef = Emitter.translateType(sup.typeArguments(supArgs), true);
 
-        sw.write("#include <x10/lang/Closure.h>"); sw.newline();
+        inc.write("#include <x10/lang/Closure.h>"); inc.newline();
         String header = getHeader(sup);
-        sw.write("#include <"+header+">"); sw.newline();
+        inc.write("#include <"+header+">"); inc.newline();
         // class header
         if (!freeTypeParams.isEmpty())
-            emitter.printTemplateSignature(freeTypeParams, sw);
-        sw.write("class "+cname+" : public "+CLOSURE_TYPE+" {");
-        sw.newline(4); sw.begin(0);
-        sw.write("public:") ; sw.newline(); sw.forceNewline();
+            emitter.printTemplateSignature(freeTypeParams, inc);
+        inc.write("class "+cname+" : public "+CLOSURE_TYPE+" {");
+        inc.newline(4); inc.begin(0);
+        inc.write("public:") ; inc.newline(); inc.forceNewline();
 
         /* ITables declarations */
-        sw.write("static "+(in_template_closure ? "typename " : "")+superType+(in_template_closure ? "::template itable " : "::itable")+chevrons(cnamet)+" _itable;"); sw.newline();
-        sw.write("static x10aux::itable_entry _itables[2];"); sw.newline(); sw.forceNewline();
-        sw.write("virtual x10aux::itable_entry* _getITables() { return _itables; }"); sw.newline(); sw.forceNewline();
+        inc.write("static "+(in_template_closure ? "typename " : "")+superType+(in_template_closure ? "::template itable " : "::itable")+chevrons(cnamet)+" _itable;"); inc.newline();
+        inc.write("static x10aux::itable_entry _itables[2];"); inc.newline(); inc.forceNewline();
+        inc.write("virtual x10aux::itable_entry* _getITables() { return _itables; }"); inc.newline(); inc.forceNewline();
 
-        sw.write("// closure body"); sw.newline();
-        sw.write(Emitter.translateType(retType, true)+" "+Emitter.mangled_method_name(ClosureCall.APPLY.toString())+"(");
+        inc.write("// closure body"); inc.newline();
+        inc.write(Emitter.translateType(retType, true)+" "+Emitter.mangled_method_name(ClosureCall.APPLY.toString())+"(");
         prefix = "";
         for (Formal formal : n.formals()) {
-            sw.write(prefix);
-            n.print(formal, sw, tr);
+            inc.write(prefix);
+            n.print(formal, inc, tr);
             prefix = ", ";
         }
-        sw.write(") ");
-        n.print(n.body(), sw, tr);
-        sw.newline(); sw.forceNewline();
+        inc.write(") ");
+        n.print(n.body(), inc, tr);
+        inc.newline(); inc.forceNewline();
 
-        sw.write("// captured environment"); sw.newline();
+        inc.write("// captured environment"); inc.newline();
         List<VarInstance<?>> refs = computeBoxedRefs(c, closureDef);
 
         List<VarInstance<? extends VarDef>> env = closureDef.capturedEnvironment();
@@ -3460,7 +3468,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         
 		if (((X10CPPCompilerOptions)tr.job().extensionInfo().getOptions()).x10_config.DEBUG)
 		{
-			String key = ((StreamWrapper)sw).getStreamName(StreamWrapper.CC);
+			String key = ((StreamWrapper)inc).getStreamName(StreamWrapper.CC);
 			Map<String, LineNumberMap> fileToLineNumberMap = c.<Map<String, LineNumberMap>>findData(X10CPPTranslator.FILE_TO_LINE_NUMBER_MAP);
 		    if (fileToLineNumberMap != null) 
 		    {
@@ -3488,32 +3496,35 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		    }
 		}
 
-        emitter.printDeclarationList(sw, c, c.variables, refs);
-        sw.forceNewline();
+        emitter.printDeclarationList(inc, c, c.variables, refs);
+        inc.forceNewline();
 
-        sw.write("x10aux::serialization_id_t "+SERIALIZE_ID_METHOD+"() {");
-        sw.newline(4); sw.begin(0);
-        sw.write("return "+SERIALIZATION_ID_FIELD+";"); sw.end(); sw.newline();
-        sw.write("}"); sw.newline(); sw.forceNewline();
+        inc.write("x10aux::serialization_id_t "+SERIALIZE_ID_METHOD+"() {");
+        inc.newline(4); inc.begin(0);
+        inc.write("return "+SERIALIZATION_ID_FIELD+";"); inc.end(); inc.newline();
+        inc.write("}"); inc.newline(); inc.forceNewline();
 
-        generateClosureSerializationFunctions(c, cnamet, sw, n.body(), refs);
+        generateClosureSerializationFunctions(c, cnamet, inc, n.body(), refs);
 
-        sw.write(cname+"(");
+//        inc.write(cname+"("+SERIALIZATION_MARKER+") { }");
+//        inc.newline(); inc.forceNewline();
+
+        inc.write(cname+"(");
         for (int i = 0; i < c.variables.size(); i++) {
-            if (i > 0) sw.write(", ");
+            if (i > 0) inc.write(", ");
             VarInstance<?> var = (VarInstance<?>) c.variables.get(i);
             String name = var.name().toString();
             if (name.equals(THIS))
                 name = SAVED_THIS;
             else name = mangled_non_method_name(name);
             if (refs.contains(var)) {
-                sw.write(make_captured_lval(var.type()) + " " + name);
+                inc.write(make_captured_lval(var.type()) + " " + name);
             } else {
-                sw.write(Emitter.translateType(var.type(), true) + " " + name);
+                inc.write(Emitter.translateType(var.type(), true) + " " + name);
             }
         }
-        sw.write(")");
-        sw.begin(0);
+        inc.write(")");
+        inc.begin(0);
         // FIXME: factor out this loop
         for (int i = 0 ; i < c.variables.size() ; i++) {
             VarInstance<?> var = (VarInstance<?>) c.variables.get(i);
@@ -3521,37 +3532,37 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             if (name.equals(THIS))
                 name = SAVED_THIS;
             else name = mangled_non_method_name(name);
-            if (i > 0) sw.write(", "); else sw.write(" : ");
-            sw.write(name + "(" + name + ")");
+            if (i > 0) inc.write(", "); else inc.write(" : ");
+            inc.write(name + "(" + name + ")");
         }
-        sw.end();
-        sw.write(" { }"); sw.newline(); sw.forceNewline();
+        inc.end();
+        inc.write(" { }"); inc.newline(); inc.forceNewline();
 
-        sw.write("static const x10aux::serialization_id_t "+SERIALIZATION_ID_FIELD+";");
-        sw.newline(); sw.forceNewline();
+        inc.write("static const x10aux::serialization_id_t "+SERIALIZATION_ID_FIELD+";");
+        inc.newline(); inc.forceNewline();
 
-        sw.write("static const x10aux::RuntimeType* getRTT() {"+
+        inc.write("static const x10aux::RuntimeType* getRTT() {"+
                   " return x10aux::getRTT"+chevrons(superType)+"(); }");
-        sw.newline();
-        sw.write("virtual const x10aux::RuntimeType *_type() const {"+
+        inc.newline();
+        inc.write("virtual const x10aux::RuntimeType *_type() const {"+
                   " return x10aux::getRTT"+chevrons(superType)+"(); }");
-        sw.newline(); sw.forceNewline();
+        inc.newline(); inc.forceNewline();
 
-        sw.write(Emitter.translateType(xts.String(), true)+" toString() {");
-        sw.newline(4); sw.begin(0);
-        sw.write("return x10aux::string_utils::lit(this->toNativeString());");
-        sw.end(); sw.newline();
-        sw.write("}");
-        sw.newline(); sw.forceNewline();
+        inc.write(Emitter.translateType(xts.String(), true)+" toString() {");
+        inc.newline(4); inc.begin(0);
+        inc.write("return x10aux::string_utils::lit(this->toNativeString());");
+        inc.end(); inc.newline();
+        inc.write("}");
+        inc.newline(); inc.forceNewline();
 
-        sw.write("const char* toNativeString() {");
-        sw.newline(4); sw.begin(0);
-        sw.write("return \""+StringUtil.escape(n.position().nameAndLineString())+"\";");
-        sw.end(); sw.newline();
-        sw.write("}");
-        sw.end(); sw.newline(); sw.forceNewline();
+        inc.write("const char* toNativeString() {");
+        inc.newline(4); inc.begin(0);
+        inc.write("return \""+StringUtil.escape(n.position().nameAndLineString())+"\";");
+        inc.end(); inc.newline();
+        inc.write("}");
+        inc.end(); inc.newline(); inc.forceNewline();
 
-        sw.write("};"); sw.newline(); sw.forceNewline();
+        inc.write("};"); inc.newline(); inc.forceNewline();
 
         if (in_template_closure)
             emitter.printTemplateSignature(freeTypeParams, defn_s);
@@ -3591,14 +3602,13 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		}
 		generateClosureDeserializationIdDef(defn_s, cnamet, freeTypeParams, hostClassName, n.body(), kind);
 
-		sw.write("#endif // "+headerGuard+"_CLOSURE"); sw.newline();
+		inc.write("#endif // "+headerGuard+"_CLOSURE"); inc.newline();
 
-		// Done generating closure definition.  Pop streams.
         sw.popCurrentStream();
         c.closures = saved_closures;
         c.genericFunctionClosures = saved_generic_closures;
-        
-        // create closure instantiation.
+
+        // create closure instantiation (not in inc but where the closure was defined)
         // note that we alloc using the typeof the superType but we pass in the correct size
         // this is because otherwise alloc may (when debugging is on) try to examine the
         // RTT of the closure (which doesn't exist)

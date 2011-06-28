@@ -116,7 +116,7 @@ public class WSClosureFrameClassGen extends WSRegularFrameClassGen {
      * @throws SemanticException
      */
     protected void genApplyMethod(Type returnType) throws SemanticException{
-        MethodSynth applyMSynth = classSynth.createMethod(classSynth.pos(), "apply");
+        MethodSynth applyMSynth = classSynth.createMethod(compilerPos, "apply");
         applyMSynth.setFlag(Flags.PUBLIC);
         applyMSynth.setReturnType(returnType);
         CodeBlockSynth applyMBSynth = applyMSynth.getMethodBodySynth(compilerPos);

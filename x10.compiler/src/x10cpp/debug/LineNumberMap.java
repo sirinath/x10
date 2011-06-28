@@ -30,7 +30,6 @@ import polyglot.types.MethodDef;
 import polyglot.types.ProcedureDef;
 import polyglot.types.Ref;
 import polyglot.types.Type;
-import polyglot.types.TypeSystem;
 import polyglot.util.QuotedStringTokenizer;
 import polyglot.util.StringUtil;
 import polyglot.util.CollectionUtil; import x10.util.CollectionFactory;
@@ -256,7 +255,7 @@ public class LineNumberMap extends StringTable {
 		assert (c != null);
 		assert (f != null);
 		String sc = c.toString().replace("$", "::");
-		String sn = n == null ? TypeSystem.CONSTRUCTOR_NAME : n;
+		String sn = n == null ? "this" : n;
 		String sr = r == null ? "" : r.toString();
 		String[] sa = new String[f.size()];
 		for (int i = 0; i < sa.length; i++) {

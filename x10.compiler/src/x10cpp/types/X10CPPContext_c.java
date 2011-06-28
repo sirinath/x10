@@ -53,6 +53,7 @@ public class X10CPPContext_c extends Context {
 
     public void advanceClosureId() { g.closureId++; }
     public int closureId() { return g.closureId; }
+    protected void resetClosureId() { g.closureId = -1; }
 
     /**
      * Every context has some arbitrary data, associated with string keys.
@@ -90,6 +91,7 @@ public class X10CPPContext_c extends Context {
         assert kind == SOURCE;
         pendingStaticDecls = new ArrayList<ClassMember>();
         classProperties = new ArrayList<PropertyDecl>(props);
+        resetClosureId();
     }
 
     /**
@@ -225,9 +227,6 @@ public class X10CPPContext_c extends Context {
 
     private void addVar(String name) {
 		VarInstance<?> vi = lookup(name, this);
-		if (vi==null) {
-		    System.out.println("Internal compiler error: this variable name could not be looked up: "+name);
-		}
         assert vi != null : name.toString();
 		boolean contains = false;
         for (VarInstance<?> vi2 : variables) {

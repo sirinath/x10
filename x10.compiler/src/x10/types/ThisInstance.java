@@ -17,13 +17,12 @@ import polyglot.types.SemanticException;
 import polyglot.types.Type;
 import polyglot.types.TypeObject;
 import polyglot.types.VarInstance;
-import x10.types.constants.ConstantValue;
 
 public interface ThisInstance extends VarInstance<ThisDef>, TypeObject, X10Use<ThisDef> {
     ThisInstance flags(Flags flags);
     ThisInstance name(Name name);
     ThisInstance type(Type type);
-    ThisInstance constantValue(ConstantValue o);
+    ThisInstance constantValue(Object o);
     ThisInstance notConstant();
     ThisInstance error(SemanticException e);
 }
