@@ -1,0 +1,213 @@
+We now demonstrate that several common idioms of concurrency and
+communication lie in Safe X10. These programs are X10 programs where
+methods and statements intended to be safe are marked with a
+\code{@safe} annotation, thereby triggering appropriate compiler
+checks.
+
+\subsection{Example use of \code{Acc}}
+\begin{example}[Histogram]
+The histogram problem is easily represented with a \code{Rail} of
+accumulators: 
+\begin{lstlisting}
+@safe
+def histogram(N:Int, A:Rail[Int(0..N)]) :Rail[Int](N+1) {
+    val result = new Rail[Acc[Int]](N+1,
+      (Int)=>new Acc[Int](0,Int.+));
+    finish for (i in A.values()) async {
+        result(i) <- 1;
+    }
+    return new Rail[Int](N+1, (i:Int)=> result(i));
+}
+\end{lstlisting}
+\end{example}
+Note that programs that accumulate a figure of merit can be written
+with accumulators. For instance the N-Queen program needs to use a
+single accumulator for collecting the result. Indeed it can be written
+with the even more restrictive collecting finish style discussed
+below. Similarly for Monte-Carlo simulations in which the main
+activity spawns several children activities to perform a simulation,
+and the simulation returns results which can be accumulated to
+obtain the final answer. We have also written a muti-place
+implementation of Bader and Ja Ja median finding algorithm in Safe
+X10, using accumulators and clocked types. 
+
+Map Reduce applications such as word-count (that do not require
+intermediate sorting of results) can also be expressed directly:
+\begin{example}[Distributed word-count]
+Here the difference from histogram is that the accumulation may be
+done at a remote place. 
+\begin{lstlisting}
+@safe
+def wordCount(m:DistStream[Word]) :DistHashMap[Word,Int](m.dist) {
+   val a = new DistHashMap[Word, Acc[Int]](m.dist,
+          (w:Word)=> new Acc[Int](Int.Sum)));
+   finish for (p in m.dist.places()) async at(p) {
+      for (word in m(p).words())
+          a(word)<- 1;
+   }
+   return new DistHashMap[Word, Int](m.dist, (w:Word)=> a(w));
+}
+\end{lstlisting}
+
+\end{example}
+
+
+Accumulators can be used to implement collective operations such as
+distributed reductions in a straightforward ``shared memory'' style.
+
+\begin{example}[Reduction]
+Here we show the single-sided, blocking version. Spawned activities
+update an accumulator created by the parent activity, which reads it
+after a \code{finish}. 
+  \begin{lstlisting}
+@safe
+def reduce[T](da:DistArray[T], red:Reducible[T]):T {
+    val acc = new Acc[T](red);
+    finish for (dest in da.dist.places())
+        async
+            at (dest) 
+               for (p in dist | here)
+                 acc <- da(p);
+    return acc();
+}
+\end{lstlisting}
+\end{example}
+
+
+%%An \code{allReduce} can be implemented by following the above
+%%operation with a broadcast:
+%%\begin{lstlisting}
+%%  @safe
+%%  def allReduce[T](in:DistArray[T]{self.dist==Dist.UNIQUE},
+%%    red:Reducible[T], out:DistArray[T](in.dist)):void {
+%%    val x = reduce(in, red);
+%%    finish for (dest in out.dist.places()) async at (dest) {
+%%      for (p in out.dist |here)
+%%        out(p)=x;
+%%    }
+%%  }
+%%\end{lstlisting}
+%%One can write this code using a clock (to avoid two finish nests).
+%%
+%%The collective style requires extending clock so the advance method
+%%takes arbitrary args and performs collective operations on them,
+%%mimicking the MPI API.
+
+\paragraph{Collecting \code{finish}}
+
+The collecting \code{finish} construct is of the form \code{finish(r)
+  S}, where \code{r} is an instance of \code{Reducible[T]} and
+\code{S} is a statement. Within the dynamic execution of \code{S}, any
+execution of the statement \code{offer t;} results in a value \code{t}
+being accumulated in a set. (\code{t} must be of type \code{T}.) The
+result of the reduction of this set of \code{T} values with \code{r}
+is then returned.
+
+\begin{lstlisting}
+  {
+    val x = new Acc[T](r);
+    finish {
+      S [ x <- t / offer t]
+    }
+    x()
+  }
+\end{lstlisting}
+
+An attractive aspect of collecting finish is that nesting is used
+quite naturally to reflect the relationship between the parallel
+computation performing the accumulation and the value returned. In
+particular there is no need to explicitly introduce the notion of an
+accumulator, or to register it with the current block, or to check
+that other activities in the current block have quiesced.
+
+On the other hand, this strength is also a limitation. It is not
+possible to use the same idiom for clocked code, i.e.{} collect values
+being offered by multiple \code{clocked} asyncs in the current phase.
+Further, using this idiom safely across method calls requires the
+addition of \code{offers T} clauses (similar to \code{throws T})
+clauses, specifying the type of the value being offered. Otherwise at
+run-time a value of an incompatible type may be offered leading to a
+run-time exception. Finally, the lack of a name for the result being
+collecting means that it is difficult to use the same computation to
+accumulate multiple separate values without more contortions. E.g.{}
+one could set the return type to be a tuple of values, but then the
+\code{offer} statement would need to specify the index for which the
+\code{offer} was intended. Now it is not clear that the index type
+should be arithmetic -- why should not one be able to collect into the
+range of a \code{HashMap} (so the index type could be an arbitrary
+type \code{Key})?
+
+We feel that these decisions are all orthogonal to the actual process
+of accumulating and should be dealt with by the data-structuring
+aspects of the language design.
+
+\subsection{Clocked computations}
+
+\begin{example}[Pipeline]
+This example creates $3$ stages in parallel. Stage $1$ gets the input
+(in this case generating the natural numbers), Stage $2$ increments it
+by $1$, Stage $3$ doubles it and prints the value. An immutable array of 
+clocked values forms the pipeline.
+\begin{lstlisting}
+@safe
+def pipeline() {
+    val a = [new Clocked[Int](0,0),
+             new Clocked[Int](0,0),
+             new Clocked[Int](0,0)];
+    clocked finish {
+       for (i in a) {
+        if (i==0) 
+          clocked async {
+            for (var j:Int=0;; i++) {
+                a(i)()=j;
+                advance;}}
+        if (i==1)
+          clocked async {
+            advance;
+            for (;;) {
+                a(i)()= a(i-1)()+1; //1,2,3,...
+                advance;}}
+        if (i==2) 
+          clocked async {
+           advance;
+           advance;
+           for(;;) {
+              a(i)()= 2*a(i-1)();
+              advance;
+              Console.OUT.println(a(i)()); //2,4...
+        }}}}}
+  \end{lstlisting}
+Note the serial schedule generates:
+\begin{lstlisting}
+  a(0)()=0; advance;
+  a(0)()=1; a(1)()=1; advance;
+  a(0)()=2; a(1)()=2; a(2)()=2; advance; //print 2
+  a(0)()=3; a(1)()=3; a(2)()=4; advance; //print 4
+  ...
+\end{lstlisting}
+\noindent This shows the pipelined nature of the computation. 
+\end{example}
+
+\begin{example}[Butterfly idiom]
+This program uses a butterfly idiom to compute an all to all
+reduction.
+\begin{lstlisting}
+def reduce[T](da:DistArray[T], red:Reducible[T]) {
+  val P = Place.MAX_PLACES;
+  val phases = Utils.log2(P);
+  val x = new DistArray[Clocked[Acc[T]]](da.dist,
+    (p:Point(da.rank))=>new Clocked[Acc[T]](new Acc[T](da(p),red),
+       new Acc[T](da(p),red)));
+  clocked finish  {
+    for (p in x.dist.places()) clocked async at(p) {
+      var shift:Int=1;
+      for (phase in 0..phases-1) {
+        x((p.id+shift)%P)() <- x(p.id)();
+        shift *=2;
+        advance;}}}
+  return x(0)();
+}
+\end{lstlisting}
+\end{example}
+
+\input {examples/stencil.x10}
