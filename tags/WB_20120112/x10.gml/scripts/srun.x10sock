@@ -1,9 +1,0 @@
-#!/bin/sh
-export X10_HOSTFILE="hosts.$SLURM_JOB_ID"
-export X10_NPLACES=$SLURM_NPROCS
-export X10_SINGLE_JVM=""
-srun -l /bin/hostname -s | sort -n | awk '{print $2}' > $X10_HOSTFILE
-"$@"
-rc=$?
-rm -f $X10_HOSTFILE
-exit $rc
