@@ -1,0 +1,234 @@
+The formalism with clocked types is too complicated, so I'll start by focusing just on accumulators.
+
+Examples why accumulators need these two dynamic checks:
+1) that a read is done in the same block the accumulator was defined,
+2) that a write is done only in children blocks.
+
+1) This check is done in rule R-Acc-R,
+when reading from "a()" we check that "a" was created in the same block.
+For example, the following is disallowed:
+\begin{lstlisting}
+val a = new Acc(0);
+async { val z = a(); } // allowing this read will lead to indeterminacy (returns either 0 or 1), because the second async might or might not have executed.
+async { a<-1; }
+\end{lstlisting}
+
+2) This check is done in rule R-Acc-W,
+when writing to "a" we check that "a" is in $\pi$ (the permissions of the current block).
+If we assume that we do allow field assignment,
+then the reason for this check is that non-children activities might gain access to the accumulator,
+and the wait done at the read won't wait for those activities thus leading to indeterminacy.
+For example:
+\begin{lstlisting}
+val acc1 = new Acc(0);
+val cell = new Cell(acc1);
+async { 
+	val a = cell.value; // might be an alias to acc1 or acc2
+	val x = a(); // allowing this read will lead to indeterminacy (returns 0, 1, or 3)
+}
+async {
+	val acc2 = new Acc(1);
+	cell.value = acc2; // data race!
+	acc2 <- 2;
+}
+\end{lstlisting}
+However, we disallowed field assignment to avoid data races (and have determinacy).
+Without field assignment, all objects can be stack allocated (an object cannot outlive its block, because an object can only point to objects created before it in scope).
+Therefore, the second check vacaously passes (it always succeeds because an accumulator cannot leak to a non-children activity).
+Phrased differently, our formalism has no need to keep track of $\pi$ (because we do not have field assignment).
+
+The formalism without clocked types and without $\pi$ looks as follows:
+\begin{figure}[t]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+
+$\hP ::= \ol{\hL},\hS$ & Program. \\
+
+$\hL ::= \hclass ~ \hC~\hextends~\hD~\lb~\ol{\hF};~\ol{\hM}~\rb$
+& cLass declaration. \\
+
+$\hF ::= \hvar\,\hf:\hC$
+& Field declaration. \\
+
+$\hM ::= \hdef\ \hm(\ol{\hx}:\ol{\hC}):\hC\{\hS\}$
+& Method declaration. \\
+
+$\hp ::= \hl ~~|~~ \hx$
+& Path. \\ %(location or parameter)
+
+$\he ::=  \hp.\hf  ~|~ \hnew{\hC}(\ol{\hp}) ~|~ \hp()$
+& Expressions. \\ %: locations, parameters, field access,  %invocation, \code{new}
+$\hS ::=  \epsilon ~|~  \hp.\hm(\ol{\hp}); ~|~$ &  \\
+$~~~~~ \valt{\hx}{\he} ~|~ \hp \leftarrow \hp ~|~ \hS~\hS ~|~  $ &\\
+$~~~~~ \finishasync{\blockt{\ol{\hl}}{\hS}} $ & Statements. \\ %: locations, parameters, field access, invocation, \code{new}
+
+\hline
+\end{tabular}
+\end{center}
+\caption{FX10 Syntax without clocked types.}
+\label{Figure:syntax2}
+\end{figure}
+
+
+\begin{figure*}[t]
+
+\begin{center}
+\begin{tabular}{|c|}
+\hline
+$\typerule{
+}{
+ \epsilon,\cH \reduce \cH
+}$~\RULE{(R-Epsilon)}
+~
+$\typerule{
+ \hS,\cH \reduce \hS',\cH' ~|~ \cH'
+}{
+  \begin{array}{rcl}
+    \finishasync{\blockt{\ol{\hl}}{\hS}},\cH&\reduce &\finishasync{\blockt{\ol{\hl}}{\hS'}},\cH'
+    ~|~ \cH' \\
+    \hS~\hS_1, \cH &\reduce& \hS'~\hS_1,\cH' ~|~ \hS_1,\cH' \\
+  \end{array}
+}$~\RULE{(R-Trans)} 
+\\\\
+
+$\typerule{
+    \cH(\hl)=\hC(\ol{\hl'})
+}{
+  \hval{\hx}{\hl.\hf_i}{\hS},\cH \reduce \hS[\hl_i'/\hx],\cH
+}$~\RULE{(R-Access)} 
+\gap
+$\typerule{
+    \cH(\hl')=\hC(\ldots)
+        \gap
+    \mbody{}(\hm,\hC)=\ol{\hx}.\hS
+}{
+  \hl'.\hm(\ol{\hl}),\cH \reduce \hS[\ol{\hl}/\ol{\hx},\hl'/\hthis],\cH
+}$~\RULE{(R-Invoke)} 
+\\\\
+$\typerule{
+\cH(\ha)=\hAcc(\hr,\hv) \gap  \gap \ha\in \ol{\hl}
+}{
+\blockt{\ol{\hl}}{\hval{\hx}{\ha()}~\hS},\cH \reduce
+\blockt{\ol{\hl}}{\hS[\hv/\hx]}, \cH'
+}$~\RULE{(R-Acc-R)} 
+~
+$\typerule{
+  \cH(\ha)=\hAcc(\hr,\hv)\gap \hw=\hr(\hv,\hl) 
+}{
+  \ha \leftarrow \hl,\cH \reduce \cH[\ha \mapsto \hAcc(\hr,\hw)]
+}$~\RULE{(R-Acc-W)} 
+\\\\
+$\typerule{
+    \hl' \not \in \dom(\cH)
+}{
+\blockt{\ol{\ha}}{\valt{\hx}{\hnew{\hC(\ol{\hl})}}~\hS},\cH \reduce
+   \blockt{\ol{\ha},\hl}{\hS[\hl'/\hx]},\cH[ \hl' \mapsto \hC(\ol{\hl})] \\
+}$~\RULE{(R-New)} 
+\\\\
+\hline
+
+$\typerule{
+  \hS,\cH \reduce \hS', \cH' ~|~ \cH'
+}{
+  \async{\blockt{\ol{\hl}}{\hS"}}~\hS, \cH \reduce \async{\blockt{\ol{\hl}}{\hS"}}~\hS', \cH' ~|~ \async{\blockt{\ol{\hl}}{\hS"}}, \cH'\\
+}$~\RULE{(R-Async)-}
+\\
+\hline
+\end{tabular}
+\end{center}
+
+
+\caption{FX10 Reduction Rules without clocked types}
+\label{Figure:reduction2}
+\end{figure*}
+
+We now prove deadlock freedom, determinacy, and that in the sequential scheduler a configuration has a single successor.
+
+A read from an accumulator waits until all its children activities terminate.
+We now prove that this wait cannot lead to deadlock.
+\begin{Lemma}
+\textbf{Deadlock Freedom~}
+There cannot be a circle in the accumulators wait-for graph.
+\end{Lemma}
+\begin{proof}
+Assume we have a circle in the wait-for graph, i.e., 
+	there is a serie $a_1, \ldots, a_n$ of accumulators where $a_i$ waits for its children activities that include a read of $a_{i+1}$
+	(and $a_n$ for $a_1$).
+If any of $a_i$ are in a \emph{proper} child activity, then we have a contradiction that $a_1$ is in a child activity of $a_n$
+	(because the proper-child relationship is acyclic).
+Otherwise, all reads are done by the same activity, thus $n=1$ (an activity is executing one statement at a time).
+\end{proof}
+
+\begin{Lemma}
+\textbf{Sequential Scheduler~}
+Given a configuration~$\hS,\cH$ and well-typed program $\ol{\hL},\hS$,
+    then at most one of the reduction rules (excluding \RULE{(R-Async)-})
+    is applicable on~$\hS,\cH$.
+\label{Lemma:Sequential}
+\end{Lemma}
+\begin{proof}
+By structural induction on~\hS.
+According to the syntax \hS has one of the following forms:
+	\beqst
+	\epsilon
+	\gap 
+	\hp.\hm(\ol{\hp});
+	\gap  
+	\hS' \hS" 
+	\gap 
+	\valt{\hx}{\he} 
+	\\
+	\hp \leftarrow \hp
+	\gap 
+	\finishasync{\blockt{\ol{\hl}}{\hS}}
+	\eeq
+	where $\he$ is either
+	$\hp.\hf  \gap  \hnew{\hC}(\ol{\hp}) \gap \hp()$.
+Each form can match at most one reduction rule:
+	(i)~$\epsilon$ can only match \RULE{(R-Epsilon)},
+	(ii)~$\hp.\hm(\ol{\hp});$ can only match \RULE{(R-Invoke)},
+	(iii)~$\hS' \hS"$ can only match the second outcome of \RULE{(R-Trans)},
+	(iv)~$\valt{\hx}{\hp.\hf}$ can only match \RULE{(R-Access)},
+	(v)~$\valt{\hx}{\hnew{\hC}(\ol{\hp})}$ can only match \RULE{(R-New)},
+	(vi)~$\valt{\hx}{\hp()}$ can only match \RULE{(R-Acc-R)},
+	(vii)~$\hp \leftarrow \hp$ can only match \RULE{(R-Acc-W)},
+	(viii)~$\finishasync{\blockt{\ol{\hl}}{\hS}}$ can only match the first outcome of \RULE{(R-Trans)}.
+\end{proof}
+
+\begin{Theorem}
+\textbf{Determinacy~}
+Given a well-typed program $\ol{\hL},\hS$ in heap $\cH$,
+    if $\hS,\cH \stackrel{*}\reduce \cH'$ and $\hS,\cH \stackrel{*}\reduce \cH"$
+    then $\cH'$ and $\cH"$ are isomorphic.
+\end{Theorem}
+\begin{proof}
+From \Ref{Lemma}{Sequential}, if we exclude rule \RULE{(R-Async)-} then 
+	we get a sequential scheduler.
+Therefore we just need to prove that if both these two rules apply on a statement:
+	\RULE{(R-Async)-} and \RULE{(R-Trans)},
+	then the outcome is the same.
+Consider a statement that might match both rules:
+	$\async{\blockt{\ol{\hl}}{\hS_0}}~\hS_1$.
+We need to show that we can execute $\hS_0$ and $\hS_1$ in parallel and get the same outcome as if we would have executed
+	them sequentially (first $\hS_0$ and then $\hS_1$).
+	
+If one excludes accumulators, then the resulting language has no side-effects (because we do not support field assignment to avoid data races).
+Without side-effects we can trivially execute $\hS_0$ and $\hS_1$ in parallel
+	(there might be a problem only if they have a side-effect on the same object).
+With accumulators, we do have side-effects from rule \RULE{(R-Acc-W)} that shows that an accumulator-write mutates the heap.
+Consider the set of all accumulators~$A$ that currently exists in the heap before the execution of $\hS_0$ and $\hS_1$.
+Then the side-effects of $\hS_0$ and $\hS_1$ are only reads and writes from $A$ 
+	(accumulators created during execution of $\hS_i$
+	cannot leak to $\hS_{1-i}$ because we do not have field assignment.
+	In the general X10 this might happen, and therefore we use $\pi$ to track the write-permissions of different activities,
+	to ensure that even if leaking is possible then a write is still illegal at runtime).
+Consider the intersection of side-effects of $\hS_0$ and $\hS_1$.
+The problematic cases are a write-read or write-write conflicts.
+Write-write conflicts are determinate with accumulators because the reduction operator is associative-commutative.
+Write-read conflicts are possible, but only $\hS_1$ might read from an accumulator 
+	(a proper child activity cannot read from an accumulator due to \RULE{(R-Acc-R)}),
+	and $\hS_1$ can read only after $\hS_0$ was terminated (\RULE{(R-Acc-R)}),
+	therefore it will always read the same value (after all the writes to the accumulator finished).
+\end{proof}
+
