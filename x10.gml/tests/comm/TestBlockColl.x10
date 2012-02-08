@@ -22,8 +22,6 @@ import x10.matrix.comm.BlockBcast;
 import x10.matrix.comm.BlockScatter;
 import x10.matrix.comm.BlockGather;
 import x10.matrix.comm.BlockRingCast;
-import x10.matrix.comm.BlockRingReduce;
-import x10.matrix.comm.BlockReduce;
 
 
 /**
@@ -39,7 +37,7 @@ public class TestBlockColl{
 		val n = args.size > 1 ?Int.parse(args(1)):2;
 		val bm= args.size > 2 ?Int.parse(args(2)):2;
 		val bn= args.size > 3 ?Int.parse(args(3)):3;
-		val d = args.size > 4 ? Double.parse(args(4)):0.9;
+		val d = args.size > 4 ? Double.parse(args(4)):0.80;
 		val testcase = new BlockCollTest(m, n, bm, bn, d);
 		testcase.run();
 	}
@@ -58,8 +56,7 @@ class BlockCollTest {
 
 	public val dbmat:DistBlockMatrix;
 	public val sbmat:DistBlockMatrix;
-	public val tmpmat:DistBlockMatrix;
-
+	
 	public val dblks:BlockMatrix;
 	public val sblks:BlockMatrix;
 	
@@ -72,12 +69,11 @@ class BlockCollTest {
 		bM = bm; bN = bn;
 		
 		dbmat = DistBlockMatrix.makeDense(m*bm, n*bn, bm, bn);
-		tmpmat = DistBlockMatrix.makeDense(m*bm, n*bn, bm, bn);
 		sbmat = DistBlockMatrix.makeSparse(m*bm, n*bn, bm, bn, nzdensity);
 		
 		dbmat.initBlock(rootbid, (x:Int, y:Int)=>(1.0+x+y));
 		sbmat.initBlock(rootbid, (x:Int, y:Int)=>1.0*(x+y)*((x+y)%2));
-		
+
 		dblks = BlockMatrix.makeDense(dbmat.getGrid());
 		sblks = BlockMatrix.makeSparse(sbmat.getGrid(), nzdensity);
 		
@@ -87,24 +83,16 @@ class BlockCollTest {
 	public def run(): void {
  		// Set the matrix function
 		var retval:Boolean = true;
-
-		Console.OUT.println("****************************************************************");
 		Console.OUT.println("Test dense blocks collective commu in distributed block matrix");
-		Console.OUT.println("****************************************************************");
 
 		retval &= testBcast(dbmat);
 		retval &= testGather(dbmat, dblks);
 		retval &= testScatter(dblks, dbmat);
 		retval &= testRingCastRow(dbmat);
 		retval &= testRingCastCol(dbmat);
-	
-		retval &= testRingReduceRow(dbmat);
-		retval &= testRingReduceCol(dbmat);
-		
 
-		Console.OUT.println("****************************************************************");
+		Console.OUT.println("");
 		Console.OUT.println("Test sparse blocks collective commu in distributed block matrix");	
-		Console.OUT.println("****************************************************************");
 		retval &= testBcast(sbmat);
 		retval &= testGather(sbmat, sblks);
 		retval &= testScatter(sblks, sbmat);
@@ -125,17 +113,15 @@ class BlockCollTest {
 				"("+bM+","+bN+") blocks over "+ numplace+" places");
 		
 		//bmat.fetchBlock(rootbid).print("BCast root");
-		for (var rtbid:Int=0; rtbid < bmat.getGrid().size && ret; rtbid++) {
-			Console.OUT.println("Bcast from root block "+rtbid); Console.OUT.flush();
+		for (var rtbid:Int=0; rtbid < bmat.getGrid().size; rtbid++) {
+			Console.OUT.println("Bcast from root block "+rtbid);
 			bmat.reset();
-			bmat.initBlock(rtbid, (r:Int, c:Int)=>(1.0+r+c)*((r+c)%3));
-			//bmat.printMatrix();
+			bmat.initBlock(rtbid, (r:Int, c:Int)=>(1.0+r+c)*((r+c)%2));
 			val st:Long =  Timer.milliTime();
 			BlockBcast.bcast(bmat.handleBS, rtbid);
 			avgt += (Timer.milliTime() - st);
 			//bmat.printMatrix();
-			//bmat.handleBS().getFirstMatrix().printMatrix();
-			ret &= bmat.checkAllBlocksEqual();
+			ret &= dbmat.syncCheck();
 		}
 	
 		Console.OUT.printf("Bcast %d bytes average time: %.3f ms\n", 
@@ -156,13 +142,12 @@ class BlockCollTest {
 		
 		Console.OUT.printf("\nTest gather of dist block matrix over %d places\n", numplace);
 		blksmat.reset();
-		//distmat.printMatrix();
 		
 		Debug.flushln("Start gathering "+numplace+" places");
 		var st:Long =  Timer.milliTime();
 		BlockGather.gather(distmat.handleBS, blksmat.listBs);
 		//Debug.flushln("Done");
-		//blksmat.printMatrix();
+		
 		ret = distmat.equals(blksmat as Matrix(distmat.M, distmat.N));
 		Debug.flushln("Done verification");
 
@@ -213,7 +198,7 @@ class BlockCollTest {
 			
 		}
 		
-		ret = distmat.checkAllBlocksEqual();
+		ret = distmat.syncCheck();
 		Debug.flushln("Done verification");
 
 		if (ret)
@@ -242,7 +227,7 @@ class BlockCollTest {
 			//distmat.printMatrix("");
 		}
 		
-		ret = distmat.checkAllBlocksEqual();
+		ret = distmat.syncCheck();
 		Debug.flushln("Done verification");
 
 		if (ret)
@@ -251,58 +236,5 @@ class BlockCollTest {
 			Console.OUT.println("-----Test ringcast column-wise for dist block matrix failed!-----");
 		return ret;
 	}
-
 	
-	public def testRingReduceRow(distmat:DistBlockMatrix):Boolean {
-		var ret:Boolean = true;
-		val grid = distmat.getGrid();
-
-		Console.OUT.printf("\nTest ring reduce row-wise of dist block matrix over %d places\n", numplace);
-		distmat.reset();
-		var cid:Int =0;
-		for (var rid:Int=0; rid<grid.numRowBlocks && ret; rid++, cid=(cid+1)%grid.numColBlocks) {
-			distmat.init(1.0);
-			val rtbid  = grid.getBlockId(rid, cid);
-			val colcnt = grid.getColSize(rtbid);
-			
-			//distmat.printMatrix("Init");
-			BlockRingReduce.rowReduceSum(distmat.handleBS, tmpmat.handleBS, rtbid, colcnt);
-			//distmat.printMatrix("row cast result");
-			
-			ret &= distmat.fetchBlock(rtbid).getMatrix().equals(1.0*grid.numColBlocks);
-		}
-		
-		if (ret)
-			Console.OUT.println("Test ring reduce row-wise for dist block matrix test passed!");
-		else
-			Console.OUT.println("-----Test ring reduce row-wise for dist block matrix failed!-----");
-		return ret;
-	}
-	
-	public def testRingReduceCol(distmat:DistBlockMatrix):Boolean {
-		var ret:Boolean = true;
-		val grid = distmat.getGrid();
-
-		Console.OUT.printf("\nTest ring reduce col-wise of dist block matrix over %d places\n", numplace);
-		distmat.reset();
-		var rid:Int =0;
-		for (var cid:Int=0; cid<grid.numColBlocks; cid++, rid=(rid+1)%grid.numRowBlocks) {
-			distmat.init(1.0);
-			val rtbid  = grid.getBlockId(rid, cid);
-			val colcnt = grid.getColSize(rtbid);
-			
-			//distmat.printMatrix("Init");
-			BlockRingReduce.colReduceSum(distmat.handleBS, tmpmat.handleBS, rtbid, colcnt);
-			//distmat.printMatrix("row cast result");
-			
-			ret &= distmat.fetchBlock(rtbid).getMatrix().equals(1.0*grid.numRowBlocks);
-		}
-		
-		if (ret)
-			Console.OUT.println("Test ring reduce col-wise for dist block matrix test passed!");
-		else
-			Console.OUT.println("-----Test ring reduce col-wise for dist block matrix failed!-----");
-		return ret;
-	}
-
 }

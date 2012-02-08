@@ -20,8 +20,6 @@ import x10.matrix.sparse.SparseCSC;
 
 import x10.matrix.Debug;
 import x10.matrix.block.Grid;
-import x10.matrix.block.DenseBlock;
-import x10.matrix.block.SparseBlock;
 import x10.matrix.block.MatrixBlock;
 
 /**
@@ -39,109 +37,24 @@ public class BlockSet  {
 	//-----------------------------------------
 		
 	public val blocklist:ArrayList[MatrixBlock];
-	//--------------------------
-	
-	/**
-	 * This is available for fast access after is built.
-	 */
-	protected var blockMap:Array[MatrixBlock](2);
-	
-	
 	//==========================================
 
+	// public def this() {
+	// 	blocklist = new ArrayList[MatrixBlock]();
+	// }
+	// 
+	// public def this(bl:ArrayList[MatrixBlock]) {
+	// 	blocklist = bl;
+	// }
+	
 	public def this(g:Grid, map:DistMap) {
 		grid=g; dmap = map;
-		blocklist = new ArrayList[MatrixBlock]();	
-		blockMap=null;
+		blocklist = new ArrayList[MatrixBlock]();		
 	}
 
 	public def this(g:Grid, map:DistMap, bl:ArrayList[MatrixBlock]) {
 		grid=g; dmap = map; blocklist = bl;
-		blockMap = null;
 	}
-	//========================================
-	/**
-	 * Creating block set for given matrix, partition and distribution.
-	 * No memory allocation is performed.
-	 * 
-	 * @param  m      number of rows in matrix
-	 * @param  n      number of columns in matrix
-	 * @param  rowBs  number of partition blocks in row
-	 * @param  colBs  number of partition blocks in column
-	 * @param  rowCs  number of group of blocks in row of grid distribution
-	 * @param  colCs  number of group of blocks in column of grid distribution
-	 */
-	public static def make(m:Int, n:Int, rowBs:Int, colBs:Int, rowCs:Int, colCs:Int) {
-		val gd = new Grid(m, n, rowBs, colBs);
-		Debug.assure(rowCs*colCs == Place.MAX_PLACES, 
-				"number of distributions groups of blocks must equal to number of places");
-		val dp = new DistGrid(gd, rowCs, colCs);
-		return new BlockSet(gd, dp.dmap);
-	}
-
-	public def allocDenseBlocks() : BlockSet {
-		val itr = dmap.getBlockIterator(here.id());
-		while (itr.hasNext()) {
-			val bid    = itr.next();
-			val rowbid = grid.getRowBlockId(bid);
-			val colbid = grid.getColBlockId(bid);
-			val m      = grid.rowBs(rowbid);
-			val n      = grid.colBs(colbid);
-			add(DenseBlock.make(rowbid, colbid, m, n));
-		}
-		return this;
-	}
-	
-	public def allocSparseBlocks(nzd:Double) : BlockSet {
-		val itr = dmap.getBlockIterator(here.id());
-		while (itr.hasNext()) {
-			val bid    = itr.next();
-			val rowbid = grid.getRowBlockId(bid);
-			val colbid = grid.getColBlockId(bid);
-			val m      = grid.rowBs(rowbid);
-			val n      = grid.colBs(colbid);
-			add(SparseBlock.make(rowbid, colbid, m, n, nzd));
-		}
-		return this;
-	}
-	//--------------
-	public static def makeDense(m:Int, n:Int, rowBs:Int, colBs:Int, rowCs:Int, colCs:Int) =
-		make(m, n, rowBs, colBs, rowCs, colCs).allocDenseBlocks();
-	
-	public static def makeSparse(m:Int, n:Int, rowBs:Int, colBs:Int, rowCs:Int, colCs:Int, nzd:Double) =
-		make(m, n, rowBs, colBs, rowCs, colCs).allocSparseBlocks(nzd);
-	//--------------------
-	
-	public static def makeDense(g:Grid, d:DistMap) {
-		return new BlockSet(g,d).allocDenseBlocks();
-	}
-	
-	public static def makeSparse(g:Grid, d:DistMap, nzd:Double) {
-		return new BlockSet(g,d).allocSparseBlocks(nzd);
-	}
-	//-------------------------
-	public def allocFirstColBlocks():ArrayList[MatrixBlock] {
-		val reg  = blockMap.region;
-		val nrbs = reg.max(0)-reg.min(0)+1 ;
-		val blst = new ArrayList[MatrixBlock](nrbs);
-		val cb = reg.min(1);
-		for (var rb:Int=reg.min(0); rb<=reg.max(0); rb++) {
-			blst.add(blockMap(rb, cb).alloc());
-		}
-		return blst;
-	}
-
-	public def allocFirstRowBlocks():ArrayList[MatrixBlock] {
-		val reg  = blockMap.region;
-		val ncbs = reg.max(1)-reg.min(1)+1 ;
-		val blst = new ArrayList[MatrixBlock](ncbs);
-		val rb = reg.min(0);
-		for (var cb:Int=reg.min(1); cb<=reg.max(1); cb++) {
-			blst.add(blockMap(rb, cb).alloc());
-		}
-		return blst;
-	}
-	
 	//========================================
 	public def getGrid()   = grid;
 	public def getDistMap()= dmap;
@@ -178,50 +91,6 @@ public class BlockSet  {
 		return retval;
 	}
 	//=======================================
-	/**
-	 * Sort all blocks in column-major
-	 */
-	protected def sort() {
-		this.blocklist.sort((b1:MatrixBlock,b2:MatrixBlock)=>cmp(b1,b2));
-	}
-	
-	/**
-	 * Sort all blocks in column-major
-	 */
-	protected static def cmp(b1:MatrixBlock, b2:MatrixBlock):Int {
-		val retval:Int=0;
-		if (b1.myColId == b2.myColId) 
-			return b1.myRowId-b2.myRowId;
-		else 
-			return b1.myColId-b2.myColId;
-	}
-	
-	public def buildBlockMap() {
-		if (blockMap != null) return;
-		//sort list first
-		sort();
-		//Figure out how mange blocks in rwo and column
-		var nrb:Int = 1;
-		val stcb:Int = blocklist.get(0).myColId;
-		while (nrb<blocklist.size()) {
-			val blk = blocklist.get(nrb);
-			if (blk.myColId != stcb) break;
-			nrb++;
-		}
-		val numColBlk:Int = blocklist.size()/nrb;
-		val numRowBlk:Int = nrb;
-		//Debug.flushln("Build block "+numRowBlk+"x"+numColBlk);
-		Debug.assure(numRowBlk*numColBlk==blocklist.size());
-		// Assuming all blocks forms in rectangle 
-		val minRow = blocklist.get(0).myRowId;
-		val minCol = blocklist.get(0).myColId;
-		val maxRow = minRow+numRowBlk-1;
-		val maxCol = minCol+numColBlk-1;
-		blockMap = new Array[MatrixBlock]((minRow..maxRow)*(minCol..maxCol), 
-				(p:Point)=>blocklist.get(p(0)+p(1)*numRowBlk));
-		
-	}
-	//=======================================
 	public def find(rid:Int, cid:Int): MatrixBlock {
 		val it = this.iterator();
 		while (it.hasNext()) {
@@ -247,8 +116,6 @@ public class BlockSet  {
 	protected def get(i:Int) = blocklist.get(i);
 	
 	public def getFirst() = blocklist.getFirst();
-	
-	public def getFirstMatrix() = blocklist.getFirst().getMatrix();
 	
 	public def getLocalBlockIdAt(index:Int):Int {
 		val grid = getGrid();
@@ -320,17 +187,10 @@ public class BlockSet  {
 	/**
 	 * 
 	 */
-	protected def clear():void {
+	public def clear():void {
 		this.blocklist.clear();
 	}
-	
-	protected def reset():void {
-		val it = this.blocklist.iterator();
-		while (it.hasNext()) {
-			val b = it.next();
-			b.reset();
-		}
-	}
+
 	//=============================================
 	
 	public static def localCopy(srcblk:MatrixBlock, bs:BlockSet, dstidx:Int): void {
@@ -362,18 +222,8 @@ public class BlockSet  {
 				rootblk.copyTo(blk);
 		}
 	}
-	
-	public def sync(rootblk:MatrixBlock, colOff:Int, colCnt:Int) : void {
-		val it = this.blocklist.iterator();
-		while (it.hasNext()) {
-			val blk = it.next();
-			if (blk != rootblk)	
-				rootblk.copyCols(colOff, colCnt, blk.getMatrix());
-		}
-	}
-		
 	//======================================
-	public def selectCast(rootblk:MatrixBlock, colCnt:Int, select:(Int,Int)=>Int) {
+	public def ringCast(rootblk:MatrixBlock, colCnt:Int, select:(Int,Int)=>Int) {
 		val it = this.blocklist.iterator();
 		val target = select(rootblk.myRowId, rootblk.myColId);
 		while (it.hasNext()) {
@@ -389,16 +239,15 @@ public class BlockSet  {
 	}
 	
 	//======================================
-	
-	public static def cellSum(a:DenseMatrix, b:DenseMatrix) : void {
-		b.cellAdd(a as DenseMatrix(b.M, b.N));
-	}
-	
-	/**
-	 * 
-	 */
 	public def reduceSum(rtblk:MatrixBlock): void {
-		reduce(rtblk, (a:DenseMatrix, b:DenseMatrix)=>b.cellAdd(a as DenseMatrix(b.M,b.N)));
+		val it = this.blocklist.iterator();
+		while (it.hasNext()) {
+			val blk = it.next();
+			if (blk != rtblk) {
+				val rtmat = rtblk.getMatrix();
+				rtmat.cellAdd(blk.getMatrix() as Matrix(rtmat.M, rtmat.N));
+			}
+		}
 	}
 	
 	public def reduceSum(rootbid:Int) : void {
@@ -409,71 +258,6 @@ public class BlockSet  {
 	public def reduceSumToFirst() : void {
 		val rtblk = getFirst();
 		reduceSum(rtblk);
-	}
-	
-	//-------------
-	/**
-	 * Operate all blocks in the set and store the reducution result in specified root
-	 * block. The root block is input and output, overwritten with the result
-	 * 
-	 * @param rtblk       root block which stores the reduce result
-	 * @param opFunc      reduce function which takes two operands. First is input and second is input/output dense matrix
-	 */
-	public def reduce(rtblk:MatrixBlock, opFunc:(DenseMatrix,DenseMatrix)=>DenseMatrix) :void {
-		val it = this.blocklist.iterator();
-		while (it.hasNext()) {
-			val blk = it.next();
-			if (blk != rtblk) {
-				val rtmat = rtblk.getMatrix() as DenseMatrix;
-				val opmat = blk.getMatrix() as DenseMatrix(rtmat.M, rtmat.N);
-				opFunc(opmat, rtmat);
-				//rtmat.cellAdd(blk.getMatrix() as Matrix(rtmat.M, rtmat.N));
-			}
-		}		
-		
-	}
-	
-	/**
-	 * Perform reduce operation on all blocks and store result to the first
-	 * block in the set
-	 */
-	public def reduce(opFunc:(DenseMatrix,DenseMatrix)=>DenseMatrix) :void {
-		val rootblk = this.getFirst();
-		reduce(rootblk, opFunc);
-	}
-
-	/**
-	 * Perform reduce all blocks and store result to the specified block.
-	 */
-	public def reduce(rootBlockId:Int, opFunc:(DenseMatrix,DenseMatrix)=>DenseMatrix): void {
-		val rootblk = this.findBlock(rootBlockId);
-		reduce(rootblk, opFunc);
-	}
-	
-	//--------------------
-	public def selectReduce(rootblk:MatrixBlock, colCnt:Int, select:(Int,Int)=>Int, 
-			opFunc:(DenseMatrix,DenseMatrix, Int)=>DenseMatrix) : void{
-		
-		val rootden = rootblk.getMatrix() as DenseMatrix;
-		val it = this.blocklist.iterator();
-		val target = select(rootblk.myRowId, rootblk.myColId);
-		while (it.hasNext()) {
-			val blk = it.next();
-			if (blk != rootblk) {
-				val chkid = select(blk.myRowId, blk.myColId);
-				if (target == chkid) {
-					//Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
-					//rootblk.copyCols(0, colCnt, blk.getMatrix());
-					opFunc(blk.getMatrix() as DenseMatrix, rootden, colCnt);
-				}
-			}
-		}
-	}
-	
-	public def selectReduce(rootbid:Int, colCnt:Int, select:(Int,Int)=>Int, 
-			opFunc:(DenseMatrix,DenseMatrix,Int)=>DenseMatrix) {
-		 val rootblk = this.findLocalRootBlock(rootbid, select);
-		selectReduce(rootblk, colCnt, select, opFunc);
 	}
 	
 	//======================================
@@ -496,22 +280,9 @@ public class BlockSet  {
 		if (blkitr.hasNext() || mapitr.hasNext()) {
 			Debug.exit("Dist blocks and their mapping are not consistent");		
 		}
-		
+			
 		return true;
 	}
-	
-	public def allEqual(tgtmat:Matrix):Boolean {
-		var retval:Boolean = true;
-		val blkitr = this.iterator();
-
-		while (blkitr.hasNext() && retval) {
-			val chkmat = blkitr.next().getMatrix();
-			if (chkmat != tgtmat )
-				retval &= tgtmat.equals(chkmat as Matrix(tgtmat.M,tgtmat.N));
-		}
-		return retval;
-	}
-	
 	//=================================================
 	//=================================================
 
@@ -545,20 +316,4 @@ public class BlockSet  {
 		}
 		return outstr;	
 	}
-	
-	public def printBlockMap() {
-		var outstr:String="";
-		
-		if (blockMap==null) buildBlockMap();
-		for (var r:Int=blockMap.region.min(0); r<=blockMap.region.max(0); r++) {
-			for (var c:Int=blockMap.region.min(1); c<=blockMap.region.max(1); c++) {
-				val b = blockMap(r, c);
-				outstr +=("Block("+r+","+c+"):["+b.myRowId+","+b.myColId+"] ");
-			}
-			outstr += "\n";
-		}
-		Console.OUT.println(outstr);
-		Console.OUT.flush();
-	}
-	
 }

@@ -134,7 +134,7 @@ public class Grid(M:Int, N:Int,
 
 	/**
 	 * Make a grid partitioning based on specified matrix dimension and
-	 * maximize the number of row blocks allowed.
+	 * max number of row blocks allowed and total number blocks.
 	 *
 	 * @param  m          number of rows in matrix
 	 * @param  n          number of columns in matrix
@@ -142,21 +142,13 @@ public class Grid(M:Int, N:Int,
 	 * @param totalBs     total number of blocks
 	 * 
 	 */
-	public static def makeMaxRow(m:Int, n:Int, var maxRowBs:Int, totalBs:Int) {
-		if (maxRowBs > m ) maxRowBs = m;
+	public static def make(m:Int, n:Int, var maxRowBs:Int, totalBs:Int) {
 		while (totalBs % maxRowBs != 0) { maxRowBs--; }
 		if (maxRowBs == 0) maxRowBs = 1;
 		val cb = totalBs/maxRowBs;
 		return new Grid(m, n, maxRowBs, cb);
 	}
 	
-	public static def makeMaxCol(m:Int, n:Int, var maxColBs:Int, totalBs:Int) {
-		if (maxColBs > n ) maxColBs = n;
-		while (totalBs % maxColBs != 0) { maxColBs--; }
-		if (maxColBs == 0) maxColBs = 1;
-		val rb = totalBs/maxColBs;
-		return new Grid(m, n, rb, maxColBs);
-	}	
 	/**
 	 * Make a grid partitioning based on specified matrix dimension and total
 	 * number of blocks, where the difference between numbers of row blocks
@@ -168,7 +160,7 @@ public class Grid(M:Int, N:Int,
 	 * @param totalBs    total number of partition blocks
 	 */
 	public static def make(m:Int, n:Int, totalBs:Int) =
-		makeMaxRow(m, n, Math.sqrt(totalBs as Double) as Int, totalBs); 
+		make(m, n, Math.sqrt(totalBs as Double) as Int, totalBs); 
 	/*{
 		var rb:Int = Math.sqRoot(s) as Int;
 		if (rb == 0) rb = 1;
@@ -184,7 +176,7 @@ public class Grid(M:Int, N:Int,
 	 * This method creates a squared or close to squared partitioning.
 	 */
 	public static def make(m:Int, n:Int) =
-		makeMaxRow(m, n, Math.sqrt(Place.MAX_PLACES) as Int, Place.MAX_PLACES); 
+		make(m, n, Math.sqrt(Place.MAX_PLACES) as Int, Place.MAX_PLACES); 
 
 	
 	/**
@@ -377,12 +369,11 @@ public class Grid(M:Int, N:Int,
 	/**
 	 * Return a grid partition for the transposed matrix.
 	 */
-	public def newT():Grid = new Grid(this.colBs, this.rowBs);
-	//{
-		//val g = new Grid(this.N, this.M, this.numColBlocks, this.numRowBlocks);
+	public def newT():Grid {
+		val g = new Grid(this.N, this.M, this.numColBlocks, this.numRowBlocks);
 		//g.transpose = !this.transpose;
-		//return g;
-	//}
+		return g;
+	}
 
 	//=========================================================
 	/**
@@ -408,16 +399,13 @@ public class Grid(M:Int, N:Int,
 		var retval:Boolean = likeMe(that);
 		
 		if (this ==that) return true;
-		if (!likeMe(that)) return false;
-
-		return (match(this.rowBs, that.rowBs) && match(this.colBs, that.colBs));
-	}
-	
-	public static def match(alist:Array[Int](1), blist:Array[Int](1)):Boolean {
-		var ret:Boolean = true;
-		for (var i:Int=0; i<alist.size&&i<blist.size&&ret; i++)
-			ret &= (alist(i) == blist(i));
-		return ret;
+		
+		for (var r:Int=0; r<numRowBlocks&&retval; r++)
+			retval &= (rowBs(r)==that.rowBs(r));
+		
+		for (var c:Int=0; c<numColBlocks&&retval; c++) 
+			retval &= (colBs(c)==that.colBs(c));
+		return retval;
 	}
 	
 	//=========================================================

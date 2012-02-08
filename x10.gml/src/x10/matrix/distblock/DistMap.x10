@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2012.
+ *  (C) Copyright IBM Corporation 2006-2011.
  */
 
 package x10.matrix.distblock;
@@ -75,11 +75,6 @@ public class DistMap(numBlock:Int, numPlace:Int)  {
 	}
 	
 	public static def makeCylic(numBlk:Int, numPlc:Int) = make(numBlk, (i:Int)=>i%numPlc);
-	public static def makeUnique() = make(Place.MAX_PLACES, (i:Int)=>i);
-	public static def makeUnique(numBlk:Int) = make(numBlk, (i:Int)=>i);
-	
-	public static def makeConstant(numBlk:Int) = make(numBlk, (i:Int)=>0);
-	public static def makeConstant(numBlk:Int, p:Int) = make(numBlk, (i:Int)=>p); 
 	
 	//==========================================
 	
@@ -119,6 +114,26 @@ public class DistMap(numBlock:Int, numPlace:Int)  {
  	//--------------------------------------
  	//
  	//--------------------------------------
+ 	
+ 	public def getPlaceList(grid:Grid, rootbid:Int, select:(Int,Int)=>Int):Array[Int](1) {
+ 		val alist = new ArrayList[Int]();
+ 		val rowbid = grid.getRowBlockId(rootbid);
+ 		val colbid = grid.getColBlockId(rootbid);
+ 		//Check blocks in the same row, iterate all column ids
+ 		//Check blocks in the same column, iterate all row ids
+ 		val targetsize = select(grid.numColBlocks, grid.numRowBlocks);
+ 		
+ 		for (var id:Int=0; id<targetsize; id++) {
+ 			val pid = select(
+ 					findPlace(grid.getBlockId(rowbid, id)), 
+ 					findPlace(grid.getBlockId(id, colbid)));
+ 			
+ 			if (! alist.contains(pid))
+ 				alist.add(pid);
+ 		}
+ 		return alist.toArray();
+ 	}
+ 	
  	public def getPlaceListInRing(grid:Grid, rootbid:Int, select:(Int,Int)=>Int):Array[Int](1) {
  		val alist = new ArrayList[Int]();
  		val rowbid = grid.getRowBlockId(rootbid);
@@ -157,28 +172,12 @@ public class DistMap(numBlock:Int, numPlace:Int)  {
  		val newlst = getBlockList(plcID);
  		newlst.add(blkID);
  	}
- 	//=======================================
- 	
- 	// public def transEquals(g:Grid, tmap:DistMap):Boolean {
- 	// 	var retval:Boolean = true;
- 	// 	val tg = g.newT();
- 	// 	for (var rb:Int=0; rb<g.numRowBlocks&&retval; rb++) {
- 	// 		for (var cb:Int=0; cb<g.numColBlocks&&retval; cb++) {
- 	// 			val bid = g.getBlockId(rb, cb);
- 	// 			val tbid = tg.getBlockId(cb,rb);
- 	// 			retval &= (blockmap(bid)==tmap.blockmap(tbid));
- 	// 		}
- 	// 	}
- 	// 	return retval;
- 	// }
- 	
+
  	//=======================================
  	public def equals(that:DistMap) : Boolean {
  		var retval:Boolean = true;
  		
  		if (this==that) return true;
- 		if (this.numBlock!=that.numBlock) return false;
-
  		for (var i:Int=0; i<blockmap.size && retval; i++) {
  			retval &= this.blockmap(i)==that.blockmap(i);
  		}

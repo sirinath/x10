@@ -189,9 +189,8 @@ int solve_linear_equation(double* A, double* B, int* IPIV, int* dim)
 	             // unit diagonal elements of L are not stored.
 	//double* B; // On exit, if INFO = 0, the N-by-NRHS solution matrix X.
 	int INFO;
-#ifdef ENABLE_LAPACK
+
 	dgesv_(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
-#endif
 	return INFO;
 }
 
@@ -207,10 +206,8 @@ int comp_eigenvalue(double* A, double* W, double* WORK, int* dim)
 	//int LWORK; //work space size optimized on exit, LWORK >= max(1,3*N-1).
 	int*  LWORK = &dim[1];//dim[1];
 	int INFO;
-#ifdef ENABLE_LAPACK
-	dsyev_(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
-#endif
 
+	dsyev_(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
 	return INFO;
 }
 
@@ -227,8 +224,6 @@ int comp_eigenvector(double* A, double* W, double* WORK, int* dim)
 	int*  LWORK = &dim[1];
 	int INFO;
 
-#ifdef ENABLE_LAPACK
 	dsyev_(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
-#endif
 	return INFO;
 }
