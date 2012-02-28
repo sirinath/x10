@@ -137,10 +137,9 @@ public class SparseCSR extends Matrix {
 		return this;
 	} 
 	
-	public def init(v:Double):SparseCSR(this) {
+	public def init(v:Double):void {
 		val nzd = 1.0 * getStorageSize()/M/N;
 		init(v, nzd);
-		return this;
 	}
 
 	/**
@@ -160,17 +159,6 @@ public class SparseCSR extends Matrix {
 		initRandom(nzd);
 		return this;
 	}
-	
-	public def initRandom(lo:Int, up:Int, nzp:Double): SparseCSR(this) {
-		crdata.initRandomFast(M, nzp, lo, up);
-		return this;
-	}
-	
-	public def initRandom(lo:Int, up:Int): SparseCSR(this) {
-		val nzd = 1.0 * getStorageSize()/M/N;
-		crdata.initRandomFast(M, nzd, lo, up);
-		return this;
-	}	
 	/**
 	 * Initialize with given function with range [0..M, 0..N]
 	 */

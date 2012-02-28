@@ -95,9 +95,6 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * Initial matrix data with function, mapping (row index, column index) to double. 
 	 */
 	abstract public def init(f:(Int, Int)=>Double):Matrix(this);
-	abstract public def init(dv:Double):Matrix(this);
-	abstract public def initRandom():Matrix(this);
-	abstract public def initRandom(lowBound:Int, upperBound:Int):Matrix(this);
 	
 	//======================================================================
 	// Data copy and reset 
@@ -303,7 +300,10 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * @param plus	result add-on flag. If true, this += A &#42 B.
 	 * @return		multiplication result
 	 */
-	abstract public def mult(A:Matrix(this.M),B:Matrix(A.N,this.N),	plus:Boolean):Matrix(this);		
+	abstract public def mult(
+			A:Matrix(this.M), 
+			B:Matrix(A.N,this.N), 
+			plus:Boolean):Matrix(this);		
 		   
 	/** 
 	 * Compute this += A<sup>T</sup> &#42 B if plus is true, otherwise 
@@ -314,7 +314,10 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * @param plus	result add-on flag. If true, add the multiplication result to output matrix.
 	 * @return		multiplication result
 	 */
-	abstract public def transMult(A:Matrix{self.N==this.M}, B:Matrix(A.M,this.N), plus:Boolean):Matrix(this); 
+	abstract public def transMult(
+			A:Matrix{self.N==this.M}, 
+			B:Matrix(A.M,this.N), 
+			plus:Boolean):Matrix(this); 
 			
 	/** 
 	 * Compute this += A &#42 B<sup>T</sup> if plus is true, otherwise 
@@ -325,7 +328,10 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * @param plus	result add-on flag. If true, this += A &#42 B<sup>T</sup>.
 	 * @return		multiplication result
 	 */
-	abstract public def multTrans(A:Matrix(this.M),	B:Matrix(this.N, A.N), plus:Boolean):Matrix(this);
+	abstract public def multTrans(
+			A:Matrix(this.M), 
+			B:Matrix(this.N, A.N), 
+			plus:Boolean):Matrix(this);
 	
 	//=====================================================================
 	// Operator overloading
@@ -449,8 +455,6 @@ public abstract class Matrix(M:Int, N:Int) {
 	 */	
 	//public def equal(v:Double):Boolean = Matrix.testSame(this, v);
 	public def equals(v:Double):Boolean = VerifyTools.testSame(this, v);
-	public def equals(v:Int):Boolean    = VerifyTools.testSame(this, v as Double);
-	public def equals(v:Long):Boolean   = VerifyTools.testSame(this, v as Double);
 	
 	
 	/** 

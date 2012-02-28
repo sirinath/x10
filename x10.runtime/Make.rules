@@ -101,33 +101,15 @@ endif
 ifndef NO_VAR_OVERRIDE
 
 ifdef ENABLE_CROSS_COMPILE_BGP
+  override MPICXX = /bgsys/drivers/ppcfloor/comm/bin/mpicxx
+  override CXX = /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-g++
+  override LDFLAGS += -lpthread
   export X10_STATIC_LIB=1
+  override CC =/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc
   export X10RT_PLATFORM=bgp
-  ifdef USE_GCC
-    override CXX = /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-g++
-    override LDFLAGS += -lpthread
-    override CC =/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc
-    ifdef OPTIMIZE
-      override CXXFLAGS += -O2 -finline-functions
-    endif
+  ifdef OPTIMIZE
+    override CXXFLAGS += -O2 -finline-functions
   endif
-  ifdef USE_XLC
-    # have to override CXX, but let user specify CUSTOM_XLC if they
-    # need something other than just xlC_r to be used as CXX
-    ifdef CUSTOM_XLC
-      override CXX = $(CUSTOM_XLC)
-      override CC = $(CUSTOM_XLC)
-    else
-      override CXX = bgxlC_r
-      override CC = bgxlc_r     
-    endif
-    ifdef OPTIMIZE
-      override CXXFLAGS += -O3 -qinline
-    endif
-    override CXXFLAGS += -qsuppress=1540-0809:1500-029:1540-1101:1540-1102
-    override CXXFLAGS += $(XLC_EXTRA_FLAGS)
-  endif
-
 else
 
   # platform independent compiler flags and commands
@@ -172,19 +154,15 @@ else
     ifdef USE_GCC
       export X10RT_PLATFORM=aix_gcc
       override CXXFLAGS += -maix64
-      ifndef X10_STATIC_LIB
-        override CXXFLAGS_SHARED += -shared -fPIC -Wl,-bbigtoc -Wl,-G -Wl,-lptools_ptr
-      endif
+      override CXXFLAGS_SHARED += -shared -fPIC -Wl,-bbigtoc -Wl,-G -Wl,-lptools_ptr
       override LDFLAGS += -Wl,-brtl,-lpthreads
       export X10RT_TEST_LDFLAGS = -Wl,-L"$(X10_HOME)"/x10.runtime/x10rt/lib
     endif
     ifdef USE_XLC
       export X10RT_PLATFORM=aix_xlc
       override CXXFLAGS += -qrtti=all
-      ifndef X10_STATIC_LIB
-        override CXXFLAGS_SHARED += -qpic=large
-        override LDFLAGS_SHARED += -bnoentry -G -bbigtoc -lpthreads -lm -lptools_ptr
-      endif
+      override CXXFLAGS_SHARED += -qpic=large
+      override LDFLAGS_SHARED += -bnoentry -G -bbigtoc -lpthreads -lm -lptools_ptr
       override LDFLAGS += -brtl
       ifeq ($(AR),ar) # use AIX default ar
         AR = /usr/bin/ar
@@ -204,16 +182,12 @@ else
     ifeq ($(shell uname -s),Linux)
       ifdef USE_GCC
         override CXXFLAGS += -pthread
-        ifndef X10_STATIC_LIB
-          override CXXFLAGS_SHARED += -shared -fPIC
-        endif
+        override CXXFLAGS_SHARED += -shared -fPIC
         export X10RT_TEST_LDFLAGS = -Wl,--rpath -Wl,"$(X10_HOME)"/x10.runtime/x10rt/lib
       endif
       ifdef USE_XLC
         override CXXFLAGS += -qpic
-        ifndef X10_STATIC_LIB
-          override CXXFLAGS_SHARED += -qmkshrobj
-        endif
+        override CXXFLAGS_SHARED += -qmkshrobj
         export X10RT_TEST_LDFLAGS = -Wl,--rpath -Wl,"$(X10_HOME)"/x10.runtime/x10rt/lib
       endif
       ifdef USE_64BIT
@@ -240,9 +214,7 @@ else
       export X10RT_PLATFORM=cygwin
       override CXX ?= g++-4
       override CC ?= gcc-4
-      ifndef X10_STATIC_LIB
-        override CXXFLAGS_SHARED += -shared -Wl,--export-all-symbols -Wl,--enable-auto-import
-      endif
+      override CXXFLAGS_SHARED += -shared -Wl,--export-all-symbols -Wl,--enable-auto-import
       override XRX_PROPS_CXXFLAGS += -msse2 -mfpmath=sse
       LIBPREFIX :=
       LIBSUFFIX := .dll
@@ -254,10 +226,8 @@ else
     else
     ifeq ($(shell uname -s),Darwin)
       export X10RT_PLATFORM=$(shell echo | gcc -E -dM - | grep -q x86_64 && echo darwin64 || echo darwin)
-      ifndef X10_STATIC_LIB
-        override CXXFLAGS_SHARED += -fPIC
-        override LDFLAGS_SHARED += -dynamiclib -undefined dynamic_lookup -install_name '@rpath/$@'
-      endif
+      override CXXFLAGS_SHARED += -fPIC
+      override LDFLAGS_SHARED += -dynamiclib -undefined dynamic_lookup -install_name '@rpath/$@'
       export X10RT_TEST_LDFLAGS = -Wl,-rpath -Wl,"$(X10_HOME)"/x10.runtime/x10rt/lib -Wl,-rpath -Wl,"$(X10_HOME)"/x10.runtime/x10rt
       ifdef USE_32BIT
         override CXXFLAGS += -arch i386
@@ -274,18 +244,14 @@ else
     else
     ifeq ($(shell uname -s),SunOS)
       export X10RT_PLATFORM=sunos
-      ifndef X10_STATIC_LIB
-        override CXXFLAGS_SHARED += -shared -fPIC
-        override LDFLAGS_SHARED += -lresolv -lnsl -lsocket -lrt
-      endif
+      override CXXFLAGS_SHARED += -shared -fPIC
       override LDFLAGS += -lresolv -lnsl -lsocket -lrt
+      override LDFLAGS_SHARED += -lresolv -lnsl -lsocket -lrt
       export X10RT_TEST_LDFLAGS = -lrt
     else
     ifeq ($(shell uname -s),FreeBSD)
       override CXXFLAGS += -pthread
-      ifndef X10_STATIC_LIB
-        override CXXFLAGS_SHARED += -shared -fPIC
-      endif
+      override CXXFLAGS_SHARED += -shared -fPIC
       export X10RT_TEST_LDFLAGS = -Wl,--rpath -Wl,"$(X10_HOME)"/x10.runtime/x10rt/lib
       ifeq ($(shell uname -m),amd64)
         export X10RT_PLATFORM=freebsd_amd64

@@ -15,11 +15,9 @@ public class SharedLibProperties {
     public final Properties props;
     public final Collection<String> cxxFlags;
     public final Collection<String> ldFlags;
-    public final String libPrefix;
-    public final String libSuffix;
-    public final boolean staticLib;
-    public final String ar;
-    public final String arFlags;
+    String libPrefix;
+    String libSuffix;
+    boolean staticLib;
     
     public SharedLibProperties(Properties p) {
         props = p;
@@ -28,8 +26,6 @@ public class SharedLibProperties {
         libPrefix = p.getProperty("X10LIB_LIBPREFIX");
         libSuffix = p.getProperty("X10LIB_LIBSUFFIX");
         staticLib = p.getProperty("X10LIB_X10_STATIC_LIB").length() > 0;
-        ar = p.getProperty("X10LIB_AR");
-        arFlags = p.getProperty("X10LIB_ARFLAGS");
     }
 
 }

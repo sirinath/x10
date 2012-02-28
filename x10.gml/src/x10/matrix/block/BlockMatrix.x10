@@ -6,13 +6,12 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2012.
+ *  (C) Copyright IBM Corporation 2006-2011.
  */
 
 package x10.matrix.block;
 
 import x10.io.Console;
-import x10.util.ArrayList;
 
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
@@ -30,10 +29,8 @@ public type BlockMatrix(C:BlockMatrix)=BlockMatrix{self==C};
  */
 public class BlockMatrix(grid:Grid) extends Matrix  {
 
-	public val listBs:ArrayList[MatrixBlock];
-	//----------------------------------------
-	public var blockMap:Array[MatrixBlock](2);
-	
+	public val listBs:Array[MatrixBlock](1);
+
 	//================================================================
 	/**
 	 * Construtblock matrix instance.
@@ -41,11 +38,10 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 * @param  gp  Grid partition
 	 * @param  ms  Matrix block array
 	 */
-	public def this(gp:Grid, ms:ArrayList[MatrixBlock]) {
+	public def this(gp:Grid, ms:Array[MatrixBlock](1)) {
 		super(gp.M, gp.N);
 		property(gp);
 		listBs = ms;
-		blockMap=null;
 	}
 
 	/**
@@ -58,7 +54,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	public def this(gp:Grid) {
 		super(gp.M, gp.N);
 		property(gp);
-		listBs = new ArrayList[MatrixBlock](gp.size);
+		listBs = new Array[MatrixBlock](gp.size);
 	}
 
 
@@ -115,10 +111,10 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	public def alloc(m:Int, n:Int):BlockMatrix(m,n) {
 		Debug.assure(m==M&&n==N);
 		val nm = new BlockMatrix(this.grid) as BlockMatrix(m,n);
-		for(var p :Int=0; p<nm.grid.size; p++) {
+		for([p] :Point in nm.listBs) {
 			val rid = this.grid.getRowBlockId(p);
 			val cid = this.grid.getColBlockId(p);
-			val mat = this.listBs.get(p).getMatrix();
+			val mat = this.listBs(p).getMatrix();
 			if (mat instanceof DenseMatrix)
 				nm.listBs(p) = new DenseBlock(rid, cid, mat as DenseMatrix);
 			else if (mat instanceof SparseCSC)
@@ -131,7 +127,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 
 
 	public def allocDenseBlocks() : BlockMatrix(this) {
-		for(var p :Int=0; p<grid.size; p++) {
+		for([p] :Point in listBs) {
 			val rid = this.grid.getRowBlockId(p);
 			val cid = this.grid.getColBlockId(p);
 			this.listBs(p) = DenseBlock.make(this.grid, rid, cid);
@@ -140,7 +136,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	}
 
 	public def allocSparseBlocks(nzd:Double): BlockMatrix(this) {
-		for(var p :Int=0; p<grid.size; p++) {
+		for([p] :Point in listBs) {
 			val rid = this.grid.getRowBlockId(p);
 			val cid = this.grid.getColBlockId(p);
 			this.listBs(p) = SparseBlock.make(this.grid, rid, cid, nzd);
@@ -154,7 +150,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 */
 	public def clone():BlockMatrix(M,N) {
 		val nbm = new BlockMatrix(this.grid) as BlockMatrix(M,N);
-		for(var p :Int=0; p<grid.size; p++) {
+		for([p]  in listBs) {
 			nbm.listBs(p) = this.listBs(p).clone();//getMatrix(p).clone();
 		}
 		return nbm;
@@ -167,7 +163,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def init(ival:Double):BlockMatrix(this) {
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			listBs(p).init(ival);
 		}
 		return this;
@@ -193,24 +189,18 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 * 
 	 */
 	public def initRandom():BlockMatrix(this) {
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			listBs(p).initRandom();
 		}
 		return this;
 	}
-	
-	public def initRandom(lo:Int, up:Int):BlockMatrix(this) {
-		for (var p :Int=0; p<grid.size; p++) {
-			listBs(p).initRandom(lo, up);
-		}
-		return this;
-	}
+
 	/**
 	 * Reset all entry to 0.0
 	 *
 	 */
 	public def reset():void {
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			listBs(p).getMatrix().reset();
 		}
 	}
@@ -227,42 +217,10 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	public def getMatrix(i:Int) <: Matrix = this.listBs(i).getMatrix();
 	
 	public def getBlock(i:Int) = this.listBs(i);
-	//-------------------------------------------
-		
-	public def findBlock(rid:Int, cid:Int):MatrixBlock {
-		val bid = grid.getBlockId(rid, cid);
-		val blk = listBs(bid);
-		if (blk.myRowId==rid && blk.myColId==cid) return blk;
-		Debug.flushln("Block Id is not mapped to the same index in the listBs, try to search listBs");
-		return searchBlock(rid, cid);
-	}
 	
-	public def searchBlock(rid:Int, cid:Int):MatrixBlock {
-		val it = listBs.iterator();
-		while (it.hasNext()) {
-			val blk = it.next();
-			if (blk.myRowId == rid &&
-					blk.myColId == cid ) return blk;
-		}
-		return null;
-	}
-	//-------------------------------------------
-	/**
-	 * For fast asscess block without searching block every time.
-	 * Restriction is block row id and column id must be the same as the block map
-	 * corrodinate indexes. 
-	 * This process is not a must, since block matrix has block id mapped to the
-	 * same index ID in listBs.
-	 */
-	public def buildBlockMap(): void{
-		if (blockMap != null) return;
-		val rowmax = grid.numRowBlocks -1;
-		val colmax = grid.numColBlocks -1;
-		blockMap = new Array[MatrixBlock]((0..rowmax)*(0..colmax), (p:Point(2))=>findBlock(p(0),p(1)));
-	}
-	
-	//-------------------------------------------
 
+	//---------
+ 
 	//	public  def apply(var r:Int, var c:Int):Double {
 	/**
 	 *  Return element value in matrix. override the method in super class.
@@ -321,8 +279,8 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
     public def copyTo(that:BlockMatrix(M,N)): void {
     	Debug.assure(this.grid.equals(that.grid), "Data partitioning is not compatible");
     	
-    	for (var p :Int=0; p<grid.size; p++) {
-    		this.listBs(p).copyTo(that.listBs(p));
+    	for (val [b] : Point in this.listBs) {
+    		this.listBs(b).copyTo(that.listBs(b));
     	}
     }
 
@@ -393,7 +351,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 * @param  a  -- the scaling factor
 	 */
 	public  def scale(a:Double) {
-		for (var b:Int=0; b<grid.size; b++) {
+		for (val [b] : Point in listBs) {
 			listBs(b).getMatrix().scale(a);
 		}
 		return this;
@@ -436,7 +394,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 		Debug.assure(likeMe(that), "Block matrix add fails - matrix type not compatible");
 		
 		//Debug.flushln("Here ");
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = this.listBs(p).getMatrix();
 			val src = that.listBs(p).getMatrix();
 			dst.cellAdd(src as Matrix(dst.M, dst.N));
@@ -447,7 +405,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	
 	public def cellAdd(d:Double):BlockMatrix(this) {
 		//Debug.flushln("Here ");
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).getMatrix();
 			dst.cellAdd(d);
 		}
@@ -490,10 +448,9 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 * 
 	 */
 	public def cellSub(that:BlockMatrix(M,N)) {
-		Debug.assure(likeMe(that), 
-				"Block matrix substract fails - matrix partition not compatible");
+		Debug.assure(likeMe(that), "Block matrix substract fails - matrix type not compatible");
 		
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = this.listBs(p).getMatrix();
 			val obj = that.listBs(p).getMatrix();
 			dst.cellSub(obj as Matrix(dst.M, dst.N));
@@ -504,7 +461,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 * this = v - this
 	 */
 	public def cellSubFrom(dv:Double) : BlockMatrix(this) {
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = this.getMatrix(p);
 			dst.cellSubFrom(dv);
 		}
@@ -542,11 +499,10 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 * this *= x;
 	 *
 	 */
-	public def cellMult(that:BlockMatrix(M,N)):BlockMatrix(this) {
-		Debug.assure(likeMe(that), 
-				"Block matrix cell mult fails - matrices partition not match");
+	public def cellMult(that:DenseBlockMatrix(M,N)):BlockMatrix(this) {
+		Debug.assure(likeMe(that), "Block matrix cell mult fails - matrices not match");
 		
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = this.listBs(p).getMatrix();
 			val src = that.listBs(p).getMatrix();
 			dst.cellMult(src as Matrix(dst.M, dst.N));
@@ -588,10 +544,9 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def cellDiv(that:BlockMatrix(M,N)): BlockMatrix(this) {
-		Debug.assure(likeMe(that), 
-				"Block matrix cell divide fails - matrices partition not match");
+		Debug.assure(likeMe(that), "Block matrix cell divide fails - matrices not match");
 		
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = this.listBs(p).getMatrix();
 			val src = that.listBs(p).getMatrix();
 			dst.cellDiv(src as Matrix(dst.M, dst.N));
@@ -605,7 +560,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	 */
 	public def cellDiv(v:Double): BlockMatrix(this) {
 		
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			val dst = this.listBs(p).getMatrix();
 			dst.scale(1.0/v);
 		}
@@ -657,31 +612,6 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
     }
 	
 	//====================================================================
-	public def mult(
-			A:BlockMatrix(this.M), 
-			B:BlockMatrix(A.N,this.N), 
-			plus:Boolean):Matrix(this) {
-		BlockBlockMult.mult(A, B, this, plus);
-		return this;	
-	}
-	
-	public def transMult(
-			A:BlockMatrix{self.N==this.M}, 
-			B:BlockMatrix(A.M,this.N), 
-			plus:Boolean):Matrix(this) {
-		BlockBlockMult.transMult(A, B, this, plus);
-		return this;	
-	}
-	
-	public def multTrans(
-			A:BlockMatrix(this.M), 
-			B:BlockMatrix(this.N,A.N), 
-			plus:Boolean):Matrix(this) {
-		BlockBlockMult.multTrans(A, B, this, plus);
-		return this;
-	}
-	
-	//====================================================================
 	//Operator overload
 	//====================================================================
 	public operator - this = this.clone().scale(-1.0) as BlockMatrix(M,N);
@@ -715,7 +645,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	//====================================================================
 	public def getStorageSize():Long {
 		var nzcnt:Long=0;
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in listBs) {
 			nzcnt += listBs(p).getStorageSize();
 		}
 		return nzcnt;	
@@ -731,13 +661,10 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 	    (A instanceof BlockMatrix &&
 	            (A as BlockMatrix).grid.equals(this.grid));
 
-	public def likeMe(A:BlockMatrix):Boolean =
-		((A.grid==this.grid || A.grid.equals(this.grid)));
-
 
 	public def toString():String {
 		var output:String="---------- Block Matrix ["+M+"x"+N+"] ----------\n";;
-		for (var p :Int=0; p<grid.size; p++) {
+		for (val [p] :Point in this.listBs) {
 			output+= "--- Block("+p+") ---\n"+this.listBs(p).toString();
 		}
 		output += "----------------------------------------------------\n";
@@ -758,19 +685,4 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 		Debug.println(dbstr);
 	}
 
-	public def printBlockMap() {
-		var outstr:String="";
-		
-		if (blockMap==null) buildBlockMap();
-		for (var r:Int=blockMap.region.min(0); r<=blockMap.region.max(0); r++) {
-			for (var c:Int=blockMap.region.min(1); c<=blockMap.region.max(1); c++) {
-				val b = blockMap(r, c);
-				outstr +=("Block("+r+","+c+"):["+b.myRowId+","+b.myColId+"] ");
-			}
-			outstr += "\n";
-		}
-		Console.OUT.println(outstr);
-		Console.OUT.flush();
-	}
-	
 }

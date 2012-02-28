@@ -10,9 +10,9 @@
 ###################################################
 # Source and target file
 ###################################################
-target_list 	= TestDistBlock TestDupBlock TestDistMult TestDistDupMult TestSumma
+target_list 	= TestDistBlock
 
-target		= TestSumma
+target		= TestDistBlock
 #target		= TestDistSparse
 #target		= TestDist
 #target		= TestDistDupMult

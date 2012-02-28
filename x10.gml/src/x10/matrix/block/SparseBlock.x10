@@ -206,7 +206,7 @@ public class SparseBlock extends MatrixBlock {
 	/**
 	 * Return the element value array of the sparse block
 	 */
-	public def getData():Array[Double](1){rail}   = sparse.getValue();
+	public def getData():Array[Double](1)   = sparse.getValue();
 
 	/**
 	 * Return the index array of the sparse block
@@ -221,16 +221,11 @@ public class SparseBlock extends MatrixBlock {
 	//-------------------------------------------------------------------
 	// Overwrite MatrixBlock methods
 
-	public def alloc(m:Int, n:Int) =
-		new SparseBlock(myRowId, myColId, sparse.alloc(m, n));	
-	public def alloc() =
-		new SparseBlock(myRowId, myColId, sparse.alloc(sparse.M, sparse.N));
-	
-	public def allocFull(m:Int, n:Int) = 
-		make(myRowId, myColId, m, n, 1.0);
-		
-	
-	
+	public def alloc(m:Int, n:Int) 
+		= new SparseBlock(myRowId, myColId, sparse.alloc(m, n));	
+	public def alloc() 
+		= new SparseBlock(myRowId, myColId, sparse.alloc(sparse.M, sparse.N));
+	//
 	/**
 	 * Make a copy of myself
 	 */

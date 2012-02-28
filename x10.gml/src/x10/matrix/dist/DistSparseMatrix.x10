@@ -306,18 +306,16 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
 	 * @param up     upper bound of random value
 	 * @see initRandom(Double)
 	 */
-	public def initRandom(lb:Int, ub:Int) :DistSparseMatrix(this) {
+	public def initRandom(lb:Int, ub:Int) :void {
 		finish ateach (val [p] :Point in this.dist) {
 			distBs(p).sparse.initRandom(lb, ub);
-		}
-		return this;
+		}	
 	}
 
-	public def initRandom() : DistSparseMatrix(this) {
+	public def initRandom() :void {
 		finish ateach (val [p] :Point in this.dist) {
 			distBs(p).sparse.initRandom();
 		}	
-		return this;
 	}
 
 	//==================================================================

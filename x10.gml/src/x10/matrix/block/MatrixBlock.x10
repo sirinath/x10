@@ -51,15 +51,6 @@ public abstract class MatrixBlock {
 	 * Record the communication time involved in sending/receiving the block.
 	 */
 	public var commTime:Long = 0;
-	//-----------------------------
-	
-	/**
-	 * Neighbor block places
-	 */
-	public var placeEast:Int=-1;
-	public var placeWest:Int=-1;
-	public var placeNorth:Int=-1;
-	public var placeSouth:Int=-1;
 	
 	//===================================
 	// Constructor
@@ -123,10 +114,8 @@ public abstract class MatrixBlock {
 	/**
 	 * Allocate memory space for the same matrix block of this
 	 */
-	abstract public def alloc(m:Int, n:Int):MatrixBlock;
-	public def alloc():MatrixBlock = alloc(getMatrix().M,getMatrix().N);
-	abstract public def allocFull(m:Int, n:Int):MatrixBlock;
-
+	abstract public def alloc():MatrixBlock;
+	
 	/**
 	 * Make a copy of myself
 	 */
@@ -140,14 +129,13 @@ public abstract class MatrixBlock {
 	/**
 	 * Return the underlying matrix element data storage.
 	 */
-	abstract public def getData():Array[Double](1){rail};
+	abstract public def getData():Array[Double](1);
 
 	/**
 	 * Return the index array, the surface indices for the sparse matrix.
 	 * Not valid for dense matrix block.
 	 */
 	abstract public def getIndex():Array[Int](1);
-	public def getCompressArray() = (getMatrix() as SparseCSC).ccdata;
 
 	/**
 	 * Return the matrix data of specified row and column index.
@@ -198,16 +186,8 @@ public abstract class MatrixBlock {
 			return true;
 		return false;
 	}
-	//-------------------------------
-	public def equals(other:MatrixBlock):Boolean {
-		val srcmat = getMatrix();
-		val objmat = other.getMatrix() as Matrix(srcmat.M, srcmat.N);
-		return srcmat.equals(objmat);
-	}
-	//-------------------------------
-	public abstract def getStorageSize():Int ;
-	//--------------------------------
 	
+	public abstract def getStorageSize():Int ;
 	//--------------------------------
 	public def toString() : String {
 		val output:String = "Matrix Block ("+myRowId+","+myColId+") : " +
@@ -225,9 +205,6 @@ public abstract class MatrixBlock {
 	public def debugPrint(msg:String) {
 		if (Debug.disable) return;
 		Debug.println(msg+this.toString());
-	}
-	public def printMatrix(msg:String) {
-		getMatrix().printMatrix("Block ("+myRowId+","+myColId+") : "+msg);
 	}
 
 }

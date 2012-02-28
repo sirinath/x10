@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2012.
+ *  (C) Copyright IBM Corporation 2006-2011.
  */
 
 package x10.matrix.distblock;
@@ -20,10 +20,6 @@ import x10.matrix.block.Grid;
 import x10.matrix.block.MatrixBlock;
 import x10.matrix.block.DenseBlock;
 import x10.matrix.block.SparseBlock;
-import x10.matrix.block.BlockMatrix;
-import x10.matrix.comm.BlockGather;
-import x10.matrix.comm.BlockScatter;
-
 
 public type DistBlockMatrix(M:Int, N:Int)=DistBlockMatrix{self.M==M, self.N==N};   
 public type DistBlockMatrix(M:Int)=DistBlockMatrix{self.M==M}; 
@@ -46,14 +42,11 @@ public class DistBlockMatrix extends Matrix{
 
 	//public val grid:Grid;
 	public val handleBS:PlaceLocalHandle[BlockSet];
-	//public val local:PlaceLocalHandle[BlockMatrix(M,N)]; //Repackaged in blockmatrix
-
 	//==============================================
 	
 	public def this(bs:PlaceLocalHandle[BlockSet]) {
 		super(bs().grid.M, bs().grid.N);
 		handleBS  = bs;
-
 	}
 	//==============================================
 	
@@ -87,8 +80,7 @@ public class DistBlockMatrix extends Matrix{
 	public static def make(m:Int, n:Int, 
 			rowBs:Int, colBs:Int, 
 			rowPs:Int, colPs:Int):DistBlockMatrix(m,n) {
-		Debug.assure(rowPs*colPs==Place.MAX_PLACES, "Block partitioning error");
-		val grid = new Grid(m, n, rowBs, colBs);		
+		val grid = new Grid(m, n, rowBs, colBs);
 		val dstgrid = new DistGrid(grid, rowPs, colPs);
 		return DistBlockMatrix.make(grid, dstgrid.dmap);		
 	}
@@ -148,23 +140,18 @@ public class DistBlockMatrix extends Matrix{
 	public static def makeDense(d:DistBlockMatrix):DistBlockMatrix(d.M,d.N) {
 		val sblks = d.handleBS;
 		val dblks = PlaceLocalHandle.make[BlockSet](Dist.makeUnique(), 
-				()=>(BlockSet.makeDense(sblks().grid, sblks().dmap)));
+				()=>(new BlockSet(sblks().grid, sblks().dmap)));
 
 		val nm = new DistBlockMatrix(dblks);
+		nm.allocDenseBlocks();
 		return nm as DistBlockMatrix(d.M,d.N);
 	}
 
-	public static def makeDense(g:Grid, d:DistMap):DistBlockMatrix(g.M,g.N) {
-		val bs = PlaceLocalHandle.make[BlockSet](Dist.makeUnique(), 
-				()=>(BlockSet.makeDense(g, d)));//Remote capture
-		return new DistBlockMatrix(bs) as DistBlockMatrix(g.M,g.N);		
-	}
+	public static def makeDense(g:Grid, m:DistMap):DistBlockMatrix(g.M,g.N) =
+		DistBlockMatrix.make(g, m).allocDenseBlocks();
 	
-	public static def makeSparse(g:Grid, d:DistMap, nzp:Double):DistBlockMatrix(g.M,g.N) {
-		val bs = PlaceLocalHandle.make[BlockSet](Dist.makeUnique(), 
-				()=>(BlockSet.makeSparse(g, d, nzp)));//Remote capture
-		return new DistBlockMatrix(bs) as DistBlockMatrix(g.M,g.N);		
-	}
+	public static def makeSparse(g:Grid, m:DistMap, nzp:Double):DistBlockMatrix(g.M,g.N) =
+		DistBlockMatrix.make(g, m).allocSparseBlocks(nzp);
 	
 	public static def makeDense(m:Int, n:Int, rbs:Int, cbs:Int) =
 		make(m, n, rbs, cbs).allocDenseBlocks();
@@ -179,7 +166,18 @@ public class DistBlockMatrix extends Matrix{
 	public def allocDenseBlocks():DistBlockMatrix(this) {
 
 		finish ateach (d:Point in Dist.makeUnique()) {
-			handleBS().allocDenseBlocks();
+			val pid = here.id();
+			val blks = handleBS();
+				
+			val itr = blks.dmap.getBlockIterator(pid);
+			while (itr.hasNext()) {
+				val bid    = itr.next();
+				val rowbid = blks.grid.getRowBlockId(bid);
+				val colbid = blks.grid.getColBlockId(bid);
+				val m      = blks.grid.rowBs(rowbid);
+				val n      = blks.grid.colBs(colbid);
+				blks.add(DenseBlock.make(rowbid, colbid, m, n));
+			}
 		}
 		return this;
 	}
@@ -187,45 +185,35 @@ public class DistBlockMatrix extends Matrix{
 	/**
 	 * Allocate sparse matrix for all blocks
 	 */
-	public def allocSparseBlocks(nzd:Double):DistBlockMatrix(this) {
+	public def allocSparseBlocks(nnz:Double):DistBlockMatrix(this) {
 		//Remote capture: nnz
 		finish ateach (d:Point in Dist.makeUnique()) {
-			handleBS().allocSparseBlocks(nzd);
+			val pid = here.id();
+			val blks = handleBS();
+			
+			val itr = blks.dmap.getBlockIterator(pid);
+			while (itr.hasNext()) {
+				val bid = itr.next();
+				val rowbid = blks.grid.getRowBlockId(bid);
+				val colbid = blks.grid.getColBlockId(bid);
+				val m      = blks.grid.rowBs(rowbid);
+				val n      = blks.grid.colBs(colbid);
+				blks.add(SparseBlock.make(rowbid, colbid, m, n, nnz));
+			}
 		}
 		return this;
 	}
 	
-	//================================================
-	
-	/**
-	 * Used to create temporary space in SUMMA. This method does not creat a complete 
-	 * distributed block matrix. It only creates the front blocks of specified number of rows.
-	 * The front row blocks are used to as temp space to store data of rows of matrix from
-	 * of the second perand in SUMMA
-	 */
-	public def makeTempFrontRowBlocks(rowCnt:Int) =
-		PlaceLocalHandle.make[BlockSet](Dist.makeUnique(),
-				()=>this.handleBS().makeFrontRowBlockSet(rowCnt));
-	
-	/**
-	 * Used to creat temporary space in SUMMA. This method does not creat a complete 
-	 * distributed block matrix. It only creates the front blocks of specified number of
-	 * columns. The front column blocks are used to as temp space to store data of
-	 * columns from the first operand matrix in SUMMA
-	 */
-	public def makeTempFrontColBlocks(colCnt:Int) =
-		PlaceLocalHandle.make[BlockSet](Dist.makeUnique(),
-				()=>this.handleBS().makeFrontColBlockSet(colCnt));
-
-	public def makeTempFrontColDenseBlocks(colCnt:Int) =
-		PlaceLocalHandle.make[BlockSet](Dist.makeUnique(),
-				()=>this.handleBS().makeFrontColDenseBlockSet(colCnt));
 	
 	//================================================
 	public def init(dval:Double) : DistBlockMatrix(this){
 		//Remote capture: dval 
 		finish ateach (d:Point in Dist.makeUnique()) {
+			val pid = here.id();
 			val blks = handleBS();
+			val dmap = blks.dmap;
+			
+			val mapitr = dmap.getBlockIterator(pid);
 			val blkitr = blks.iterator();
 			while (blkitr.hasNext()) {
 				val blk = blkitr.next();
@@ -237,7 +225,8 @@ public class DistBlockMatrix extends Matrix{
 	
 	public def initRandom() : DistBlockMatrix(this){
 		finish ateach (d:Point in Dist.makeUnique()) {
-			val blkitr = handleBS().iterator();
+			val blks   = handleBS();			
+			val blkitr = blks.iterator();
 			while (blkitr.hasNext()) {
 				val blk = blkitr.next();
 				blk.initRandom();
@@ -248,7 +237,8 @@ public class DistBlockMatrix extends Matrix{
 	
 	public def initRandom(lb:Int, ub:Int) : DistBlockMatrix(this){
 		finish ateach (d:Point in Dist.makeUnique()) {
-			val blkitr = handleBS().iterator();
+			val blks   = handleBS();			
+			val blkitr = blks.iterator();
 			while (blkitr.hasNext()) {
 				val blk = blkitr.next();
 				blk.initRandom(lb, ub);
@@ -299,7 +289,8 @@ public class DistBlockMatrix extends Matrix{
 		Debug.assure(m==M&&n==N, "Matrix dimension is not same");
 		val nm = DistBlockMatrix.make(getGrid(), getMap()) as DistBlockMatrix(m,n);
 		finish ateach (d:Point in Dist.makeUnique()) {
-			val blkitr = handleBS().iterator();
+			val blks   = this.handleBS();			
+			val blkitr = blks.iterator();
 			val nblk   = nm.handleBS();
 			while (blkitr.hasNext()) {
 				val mb = blkitr.next();
@@ -320,70 +311,45 @@ public class DistBlockMatrix extends Matrix{
 	
 	public def reset() {
 		finish ateach (d:Point in Dist.makeUnique()) {
-			handleBS().reset();
+			val blks   = this.handleBS();			
+			val blkitr = blks.iterator();
+			while (blkitr.hasNext()) {
+				val blk = blkitr.next();
+				blk.reset();
+			}
 		}
 	}
-	
 	//=============================================
 	// Copy
 	//=============================================
 
-	public def copyTo(that:DistBlockMatrix(M,N)) {
+	public def copyTo(dst:DistBlockMatrix(M,N)) {
 		finish ateach (d in Dist.makeUnique()) {
-			val sit  = this.handleBS().iterator();
-			val dit  = that.handleBS().iterator();
+			val sblk = this.handleBS();
+			val dblk = dst.handleBS();
+			val sit  = sblk.iterator();
+			val dit  = dblk.iterator();
 			while (sit.hasNext()&&dit.hasNext()) {
-				val sblk = sit.next();
-				val dblk = dit.next();
-				Debug.assure(sblk.myRowId==dblk.myRowId && sblk.myColId==dblk.myColId,
-						"Block mismatch in DistBlockMatrix copyTo");
-				val smat = sblk.getMatrix();
-				val dmat = dblk.getMatrix();
+				val smat = sit.next().getMatrix();
+				val dmat = dit.next().getMatrix();
 				smat.copyTo(dmat as Matrix(smat.M, smat.N));
 			}
 		}
 	}
 	
-	public def copyTo(dst:BlockMatrix(M,N)) {
-		val srcgrid = this.getGrid();
-		Debug.assure(srcgrid.equals(dst.grid),
-			"source and destionation matrix partitions are not compatible");
-		BlockGather.gather(this.handleBS, dst.listBs);
+	public def copyTo(dst:DenseMatrix(M,N)):void {
+		throw new UnsupportedOperationException();		
 	}
 	
-	public def copyTo(dst:Matrix(M,N)):void {
-		val grid = getGrid();
-		if (dst instanceof DistBlockMatrix) {
-			copyTo(dst as DistBlockMatrix(M,N));
-		} else if (dst instanceof BlockMatrix) {
-			copyTo(dst as BlockMatrix(M,N));
-		} else if ((dst.N == 1)&&( dst instanceof DenseMatrix)) {
-			BlockGather.gatherVector(this.handleBS, dst as DenseMatrix(M,1));
-		} else if (grid.numRowBlocks==1) {
-			BlockGather.gatherRowBs(this.handleBS, dst);
-		} else {
-			Debug.exit("Not supported matrix type for converting DistBlockMatrix");
-		}
+	public def copyTo(mat:Matrix(M,N)): void {
+		
+		if (mat instanceof DistBlockMatrix)
+			copyTo(mat as DistBlockMatrix);
+		else if (mat instanceof DenseMatrix)
+			copyTo(mat as DenseMatrix);
+		else
+			Debug.exit("CopyTo: target matrix is not supported");
 	}
-	
-	public def copyTo(den:DenseMatrix(M,N)): void {
-		if (den.N == 1) {
-			BlockGather.gatherVector(this.handleBS, den as DenseMatrix(M,1));
-		} else {
-			Debug.exit("DistBlockMatrix does not support direct copyTo densematrix,"+
-					"unless it is single-column matrix (vector)."+
-					"Workaround is to use inter-media BlockMatrix to save gathered blocks"+
-					"and then convert to dense by calling BlockMatrix.copyTo(DenseMatrix)");
-		}
-	}
-
-	public def copyFrom(src:BlockMatrix(M,N)) {
-		val dstgrid = getGrid();
-		Debug.assure(dstgrid.equals(src.grid),
-		"source and destionation matrix partitions are not compatible");
-		BlockScatter.scatter(src.listBs, this.handleBS);
-	}
-	
 	//=============================================
 	public  operator this(x:Int, y:Int):Double {
 		val grid = handleBS().grid;
@@ -424,8 +390,7 @@ public class DistBlockMatrix extends Matrix{
 	
 	//--------------------------------------------
 	/**
-	 * Get block to here. If block is not at local, it will be remote captured
-	 * and compied to here.
+	 * Get block to here. If block is not at local, it will be remote captured.
 	 */
 	public def fetchBlock(bid:Int):MatrixBlock {
 		val map = getMap();
@@ -433,9 +398,9 @@ public class DistBlockMatrix extends Matrix{
 		val blk = at (Dist.makeUnique()(pid)) handleBS().findBlock(bid);
 		return blk;
 	}
-	public def fetchBlock(rid:Int, cid:Int):MatrixBlock =
-		fetchBlock(getGrid().getBlockId(rid, cid));
 
+	
+	
 	public def getGrid():Grid   = this.handleBS().grid;
 	public def getMap():DistMap = this.handleBS().dmap;
 
@@ -624,36 +589,7 @@ public class DistBlockMatrix extends Matrix{
 	//=============================================
 	// Util
 	//=============================================
-	
-	/**
-	 * Build block map in all places to allow fast access local block given block row and column id.
-	 * Do not call this method, if distribution of blocks is not grid-like.
-	 */
-	public def buildBlockMap() {
-		finish ateach (Dist.makeUnique()) {
-			handleBS().buildBlockMap();
-		}
-	}
-	
-	// public def buildRowCastPlaceMap() {
-	// 	finish ateach (Dist.makeUnique()) {
-	// 		val bs = handleBS();
-	// 		if (bs.rowCastPlaceMap == null) {
-	// 			bs.rowCastPlaceMap = CastPlaceMap.buildRowCastMap(bs.grid, bs.dmap);				
-	// 		}
-	// 	}
-	// }
-	// 
-	// public def buildColCastPlaceMap() {
-	// 	finish ateach (Dist.makeUnique()) {
-	// 		val bs = handleBS();
-	// 		if (bs.colCastPlaceMap == null) {
-	// 			bs.colCastPlaceMap = CastPlaceMap.buildColCastMap(bs.grid, bs.dmap);
-	// 		}
-	// 	}
-	// }	
-	
-	//===============================================
+
 	public def likeMe(A:Matrix):Boolean {
 		if (A instanceof DistBlockMatrix) {
 			val srcBs = this.handleBS();
@@ -666,36 +602,38 @@ public class DistBlockMatrix extends Matrix{
 	}
 	//=============================================
 
+	public def checkMapDist() : Boolean {
+		for (p in Place.places()) at (p) {
+			val blks = handleBS();
+			blks.check();
+		}
+		return true;
+	}	
+	//=============================================
 	public def localSync() {
 		finish ateach (p:Point in Dist.makeUnique()) {
 			val bset = handleBS();
 			bset.sync(bset.getFirst());
 		}
 	}
-	//=============================================
 	
-	/**
-	 * Check all blocks are same or not
-	 */
-	public def checkAllBlocksEqual() : Boolean {
-		val rtmat:Matrix = handleBS().getFirst().getMatrix();
-		var retval:Boolean = true;
-		for (var p:Int =0 ; p<Place.MAX_PLACES && retval; p++) {
-			//Debug.flushln("Check block local sync at "+p);
-			if (here.id() != p) {
-				retval &= at (Dist.makeUnique()(p)) {
-					//Remote capture: rtmat
-					handleBS().allEqual(rtmat)				
-				};
-			} else {
-				retval &= handleBS().allEqual(rtmat);
+	
+	public def syncCheck():Boolean {
+		val grid = this.getGrid();
+		val map  = this.getMap();
+		val lclmat  = this.handleBS().getFirst().getMatrix();
+		for (var b:Int=1; b<grid.size; b++) {
+			val bid:Int = b;
+			val rmtplc = map.findPlace(bid);
+			val rmtmat = at (Dist.makeUnique()(rmtplc)) handleBS().find(bid).getMatrix();
+
+			if (! lclmat.equals(rmtmat as Matrix(lclmat.M, lclmat.N))) {
+				Console.OUT.println("Integrity check found differences between the 0-th block and "+b+"-th block");
+				Console.OUT.flush();
+				return false;
 			}
-			
-			if (!retval) 
-				Console.OUT.println("Integrity check failed at place "+p);
 		}
-		//Debug.flushln("Check block local sync done");
-		return retval;
+		return true;
 	}
 	
 	public def getTotalDataSize():Int {

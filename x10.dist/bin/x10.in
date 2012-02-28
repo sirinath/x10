@@ -2,7 +2,6 @@ MAIN_CLASS='$Main'
 
 help=""
 time=""
-timelimit=""
 verbose=""
 extra_cp=""
 extra_lib=""
@@ -23,7 +22,6 @@ while [ -n "$1" ]; do
         -h|-help|--help) help="1"; break;;
         -v|-verbose|--verbose) verbose="1";;
         -t|-time) time="time ";;
-        -timelimit) shift; timelimit="timeout --signal=9 $1 ";;
 #        -ms) shift; ms="$1";;
         -ms*) ms="${1##-ms}";;
         -Xms*) ms="${1##-Xms}";;
@@ -39,14 +37,7 @@ while [ -n "$1" ]; do
              fi
              # TODO: add tests for more system properties above
              defs="${defs} $1";;
-        -classpath|-cp)
-            shift
-            if [ -z "$extra_cp" ] ; then
-                extra_cp="${1}"
-            else
-                extra_cp="${extra_cp}${PATH_SEP}${1}"
-            fi
-            ;;
+        -classpath|-cp) shift; extra_cp="$1";;
         -libpath) shift; extra_lib="$1";;
         -config) shift; config="$1.cfg";;
         -nocompressedrefs) nocompressedrefs="true";;
@@ -72,7 +63,6 @@ if [ -n "$help" -o -z "${args[*]}" ]; then
 Usage: x10 [options] <main-class> [arg0 arg1 ...]
 where [options] includes:
     -t -time                 display execution time
-    -timelimit <limit>       force exit when the time limit is reached (suffix of s,m,h,d)
     -v -verbose --verbose    print verbose debugging information
     -h -help --help          print this message
     -ms<size>                set initial heap size to <size>, e.g. -ms256m
@@ -244,9 +234,9 @@ fi
 command=("$JAVA" "${java_args[@]}" $config "${args[@]}")
 [ -n "$verbose" ] && echo "${command[*]}"
 if [[ "$UNAME" = CYGWIN* && -z "$ENABLE_CYGWIN_MULTIVM" ]]; then
-    $time$timelimit "${command[@]}"
+    $time "${command[@]}"
 else 
-    $time$timelimit$launcher "${command[@]}"
+    $time$launcher "${command[@]}"
 fi
 
 exit $?

@@ -2675,8 +2675,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
                         boolean closeParen = false;
                         if (expr instanceof X10Call) {
                             X10Call call = (X10Call)expr;
-                            MethodInstance mi = call.methodInstance();
-                            if ((isBoxedType(mi.def().returnType().get()) && !er.isInlinedCall(call)) && !isPrimitiveGenericMethod(mi)
+                            if ((isBoxedType(call.methodInstance().def().returnType().get()) && !er.isInlinedCall(call))
                                     || er.isDispatcher(call.methodInstance()))
                                 closeParen = er.printUnboxConversion(castType);
                         } else if (expr instanceof ClosureCall) {
@@ -4668,18 +4667,6 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
 
     public static boolean isSpecialType(Type type) {
         return isPrimitive(Types.baseType(type)) || isString(type);
-    }
-    
-    /**
-     * Returns true if the method does not satisfy the boxing rules. 
-     * The currently existing example is Java array access methods, which are declared as generic methods,
-     * but are implemented without boxing using @Native snippets.
-     * @param mi - MethodInstance
-     * @return true if method should be treated specially wrt argument and return value boxing.
-     */
-    public static boolean isPrimitiveGenericMethod(MethodInstance mi) {
-        if (mi.container().fullName().toString().equals("x10.interop.Java.array")) return true;
-        return false;
     }
 
     public static boolean hasParams(Type t) {
