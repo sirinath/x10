@@ -26,6 +26,8 @@ public class Debug {
 	//public static val console:PConsole = new PConsole();
 	public static val console = new DistPConsole();
 	//
+
+
 	//===========================
 	public static final def get():Debug {
 		return instance;
@@ -40,7 +42,7 @@ public class Debug {
 	//
 	public static def assure(v:Boolean, msg:String) {
 		if (!v) {
-			val fmsg = "Assertion fail at P" + here.id()+" - "+msg;
+			val fmsg = "Assertion fail! " + msg;
 			console.flush();
 			throw new UnsupportedOperationException(fmsg);
 		}

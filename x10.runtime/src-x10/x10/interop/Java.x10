@@ -17,7 +17,6 @@ public class Java {
     public static type double = x10.lang.Double;
     public static type char = x10.lang.Char;
     // Java arrays (special)
-    // TODO: reject unsigned types for element type
     @NativeRep("java", "#T[]", null, "x10.rtt.Types.getRTT(#T[].class)")
     public static final class array[T](
         @Native("java", "(#this).length")
@@ -67,8 +66,6 @@ public class Java {
     // Java conversions (array)
     @Native("java", "(#T[])#a.raw.getBackingArray()")
     public static native def convert[T](a:x10.array.Array[T](1)):Java.array[T];
-    // XTENLANG-3063
-    // @Native("java", "new x10.array.Array((java.lang.System[]) null, #T$rtt).$init(new x10.core.IndexedMemoryChunk(#T$rtt, #a.length, #a), (x10.array.Array.__0$1x10$array$Array$$T$2) null)")
-    @Native("java", "new x10.array.Array((java.lang.System[]) null, #T$rtt).x10$array$Array$$init$S(new x10.core.IndexedMemoryChunk(#T$rtt, #a.length, #a), (x10.array.Array.__0$1x10$array$Array$$T$2) null)")
+    @Native("java", "new x10.array.Array((java.lang.System[]) null, #T$rtt).$init(new x10.core.IndexedMemoryChunk(#T$rtt, #a.length, #a), (x10.array.Array.__0$1x10$array$Array$$T$2) null)")
     public static native def convert[T](a:Java.array[T]):x10.array.Array[T](1);
 }

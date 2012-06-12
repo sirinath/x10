@@ -19,7 +19,6 @@ import x10.matrix.RandTool;
 
 import x10.util.Pair;
 import x10.util.Random;
-import x10.util.StringBuilder;
 
 /**
  * Stores <tt>n</tt> elements, <tt>A(a1)=v1, ..., A(in)=an</tt>,
@@ -44,8 +43,8 @@ public class CompressArray {
 
     //static type Rail[T] = Array[T](1){rail};
 
-	public var index:Array[Int](1){rail}; // the indices i1,..., in; indices must be positive
-	public var value:Array[Double](1){rail};//{self.size==index.size,rail}; // the values v1,..., vn
+	public var index:Array[Int](1); // the indices i1,..., in; indices must be positive
+	public var value:Array[Double](1);//{self.size==index.size,rail}; // the values v1,..., vn
 
 	
 	protected var count:Int=0; // n
@@ -621,13 +620,13 @@ s	 * has different original size (uncompress data array size) from the source.
 	// Util methods
 	//=========================================================
 	public def toString():String {
-		val outstr = new StringBuilder();
-		outstr.add("Compressd Array (" + this.storageSize()+ ") NZ "+count+"  [");
+		var outstr:String="Compressd Array (" + this.storageSize() 
+							   + ") NZ "+count+"  [";
 		for (var i:Int=0; i<this.count; i++) {
-			outstr.add(" "+getIndex(i)+":"+getValue(i)+" ");
+			outstr += " "+getIndex(i)+":"+getValue(i)+" ";
 		}
-		outstr.add(" ]");
-		return outstr.toString();
+		outstr += " ]";
+		return outstr;
 	}
 
 	public def print(msg:String) {

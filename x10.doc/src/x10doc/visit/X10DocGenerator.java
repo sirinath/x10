@@ -75,8 +75,7 @@ public class X10DocGenerator extends X10DelegatingVisitor {
 
 		// List<TopLevelDecl> decls = n.decls();
 		// X10ClassDoc[] classes = new X10ClassDoc[decls.size()];
-		ExtensionInfo extInfo = (ExtensionInfo)job.extensionInfo();
-		this.rootDoc = X10RootDoc.getRootDoc(extInfo.getOptions().output_directory.getPath(), extInfo.getOptions().doc_access_modifier);
+		this.rootDoc = X10RootDoc.getRootDoc(job.extensionInfo().getOptions().output_directory.getPath());
 		this.stack = new Stack<X10ClassDoc>();
 		for (TopLevelDecl td: n.decls()) {
 			// System.out.println("in visit(SourceFile_c): topleveldecl.getClass() = " + td.getClass());

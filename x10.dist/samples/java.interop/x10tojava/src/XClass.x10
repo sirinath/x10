@@ -29,5 +29,6 @@ public class XClass extends JClass {
 	o.println(x.hashCode());
 	o.println(x.toString());
 	o.println(x instanceof Any);
+	//o.println(x instanceof Object); // compile error (see below)
     }
 }

@@ -59,14 +59,4 @@ public class MathTool {
 			d += (a(i)-b(i))*(a(i)-b(i));
 		return Math.sqrt(d);
 	}
-	
-	/**
-	 * Return an integer value which is no bigger than the square root of a specified integer, which
-	 * is evenly divisble.
-	 */
-	public static def sqrt(n:Int):Int {
-		var rt:Int = Math.sqrt(n) as Int;
-		for (; rt > 1 && n%rt != 0; rt--);
-		return rt;
-	}
 }

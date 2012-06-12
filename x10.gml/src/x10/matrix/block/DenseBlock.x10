@@ -14,7 +14,6 @@ package x10.matrix.block;
 import x10.io.Console;
 import x10.util.Random;
 import x10.util.Timer;
-import x10.util.StringBuilder;
 
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
@@ -160,7 +159,7 @@ public class DenseBlock extends MatrixBlock {
 	/**
 	 * Return the data array storing the matrix block data.
 	 */
-	public def getData():Array[Double](1){rail} = dense.d;
+	public def getData():Array[Double](1) = dense.d;
 
 	/**
 	 * Return the surface index array. Valid for sparse matrix only.
@@ -177,7 +176,6 @@ public class DenseBlock extends MatrixBlock {
 	public def alloc(m:Int, n:Int) = new DenseBlock(myRowId, myColId, dense.alloc(m, n));	
 
 	public def alloc()             = new DenseBlock(myRowId, myColId, dense.alloc(dense.M, dense.N));
-	public def allocFull(m:Int, n:Int) = new DenseBlock(myRowId, myColId, dense.alloc(m, n));
 
 	public def clone() {
 		//Debug.flushln("Clone dense block");

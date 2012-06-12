@@ -18,7 +18,7 @@ import x10.matrix.SymMatrix;
 import x10.matrix.TriMatrix;
 
 /**
- * This class provides static methods to perform LAPACK routines using dense
+ * This class provides static methods to perform LAPACK routines throug dense
  * matrix and vector:
  * 
  * 1) Solve linear equations
@@ -40,7 +40,7 @@ public class DenseMatrixLAPACK {
 	}
 	
 	public static def solveLinearEquation(A:DenseMatrix, BX:DenseMatrix(A.N), ipvec:Vector(A.M)) : Int {
-		val ip:Array[Int](1) = new Array[Int](ipvec.M, (i:Int)=>(ipvec.d(i) as Int));
+		val ip:Array[Int](1) = new Array[Int](ipvec.N, (i:Int)=>(ipvec.d(i) as Int));
 		return DriverLAPACK.solveLinearEquation(A.d, BX.d, ip, [A.N, BX.N]);
 	}
 	

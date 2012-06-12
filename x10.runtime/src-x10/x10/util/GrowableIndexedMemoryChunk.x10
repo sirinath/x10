@@ -114,8 +114,6 @@ public final class GrowableIndexedMemoryChunk[T] implements CustomSerialization 
         }
     }
 
-    def imc() = imc;
-
     /** 
      * Get the current length; indices from 0..length-1 are currently valid 
      * values of type T and may be accessed.

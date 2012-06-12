@@ -29,7 +29,7 @@
 target		= DistDenseBench
 
 #List of all targets
-target_list = DistDenseBench DistSparseBench 
+target_list = DistDenseBench DistSparseBench
 ##SummaMPIBench
 
 #-------------------------------------

@@ -14,7 +14,6 @@ package x10.matrix;
 import x10.io.Console;
 import x10.util.Random;
 import x10.util.Timer;
-import x10.util.StringBuilder;
 
 import x10.matrix.blas.DenseMatrixBLAS;
 
@@ -28,8 +27,7 @@ public type SymMatrix(C:Matrix)=SymMatrix{self==C};
  * The symmetric matrix in X10 stores the lower part of matrix data in column based.
  * However, the full matrix storage needs to be allocated, which compiles with
  * BLAS symmetric matrix.
- * <p>
- * For distributed symmetric matrix, please check DistSymBuilder and DistBlockMatrix.
+ * Currently, there is no distributed structure for symmetric matrix. 
  */
 public class SymMatrix extends Matrix{self.M==self.N} {
 	
@@ -234,15 +232,7 @@ public class SymMatrix extends Matrix{self.M==self.N} {
 			this.d(x*M +y) = v;
 		return v;
 	}	
-	//=====================================================================
-	// Transpose
-	//=====================================================================
-	public def T(sym:SymMatrix(M)) {
-		copyTo(sym);
-	}
-	
-	public def T():SymMatrix(N) = clone();
-	
+
 	//=====================================================================
 	// Cellwise operations. Only lower triangular part is modified.
 	//=====================================================================
@@ -517,16 +507,16 @@ public class SymMatrix extends Matrix{self.M==self.N} {
 	
 	public def toString():String {
 		var idx:Int=0;
-		val outstr = new StringBuilder();
-		outstr.add("--------- Symmetric Matrix "+M+" x "+N+" lower part data ---------\n");
+		var outstr:String ="--------- Symmetric Matrix "+M+" x "+N+" lower part data ---------\n";
 		for (var r:Int=0; r<M; r++) {
-			outstr.add(r+"\t[");
+			var rowstr:String=r.toString()+"\t[ ";
 			for (var c:Int=0; c<=r; c++)
-				outstr.add(this(r,c).toString()+" ");
-			outstr.add("]\n");
+				rowstr += this(r,c).toString()+" ";
+			rowstr +="]\n";
+			outstr += rowstr;
 		}
-		outstr.add("---------------------------------------\n");
-		return outstr.toString();	
+		outstr += "---------------------------------------\n";
+		return outstr; 	
 	}
 	
 	public def print(msg:String): void {

@@ -264,7 +264,7 @@ namespace {
         blocking_barrier();
 
         // Spread the knowledge of accelerators around
-#ifdef ENABLE_CUDA        
+        
         g.naccels[x10rt_lgl_here()] = cfgc;
 
         x10rt_place finish_counter = x10rt_lgl_nhosts()-1;
@@ -281,10 +281,6 @@ namespace {
         for (x10rt_place i=0 ; i<x10rt_lgl_nhosts() ; ++i) {
             g.nplaces += g.naccels[i];
         }
-#else
-        g.nplaces = x10rt_lgl_nhosts();
-        memset(g.naccels, 0, sizeof(x10rt_place)*g.nplaces);
-#endif
 
 
         // now assign the node ids and populate the datastructure that represents
@@ -317,7 +313,7 @@ namespace {
         }
 
         // set up the type information
-#ifdef ENABLE_CUDA
+
         finish_counter = (x10rt_lgl_nhosts()-1) * cfgc;
 
         for (x10rt_place j=0 ; j<g.naccels[x10rt_lgl_here()] ; ++j) {
@@ -334,11 +330,9 @@ namespace {
         }
 
         while (finish_counter!=0) x10rt_net_probe();
-#else
-        for (x10rt_place j=0; j<g.naccels[x10rt_lgl_here()]; ++j)
-            g.type[g.child[x10rt_lgl_here()][j]] = cfgv[j].cat;
-#endif
+
         blocking_barrier();
+
     }
 
 }
@@ -797,29 +791,8 @@ void x10rt_lgl_probe (void)
             abort();
         }
     }
-    // advance collectives as much as possible
-    while (x10rt_emu_coll_probe());
+    x10rt_emu_coll_probe();
 }
-
-void x10rt_lgl_blocking_probe (void)
-{
-    // first attempt to make progress on collectives
-    if (x10rt_emu_coll_probe()) {
-        // unsafe to block if collectives have made progress
-        x10rt_lgl_probe();
-        return;
-    }
-#if !defined(__bgp__)
-    // blocking probe
-    x10rt_net_blocking_probe();
-#else
-    // Compatibility hack with pgas_bgp; treat blocking probe as just a probe
-    x10rt_lgl_probe();
-#endif
-    // advance collectives as much as possible
-    while (x10rt_emu_coll_probe());
-}
-
 
 void x10rt_lgl_finalize (void)
 {

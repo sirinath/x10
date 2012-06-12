@@ -38,11 +38,7 @@
 #define X10_LAUNCHER_PARENT "X10_LAUNCHER_PARENT" // the hostname:port of the parent launcher.  This is set by the launcher.
 #define X10_LAUNCHER_RUNLAUNCHER "X10_LAUNCHER_RUNLAUNCHER" // this is a flag to run as a runtime or a launcher.  Set by the launcher.
 #define X10_LAUNCHER_CWD "X10_LAUNCHER_CWD" // the working directory of the program
-#define X10_SCRATCH_CWD "X10_SCRATCH_CWD" // Make a new (empty) cwd directory for each place to run in
 #define X10_GDB "X10_GDB" // This flag causes the runtime to launch under gdb in a new xterm
-#define X10_JDB "X10_JDB" // This flag causes the runtime to add extra parameters that java interprets to turn on jdb support in the vm 
-#define X10_JDB_BASE_PORT "X10_JDB_BASE_PORT" // Port to run jdb on (+ the place index)
-#define X10_JDB_SUSPEND "X10_JDB_SUSPEND" // Whether to suspend all, none, or the first place's jdb vms (i.e. start execution paused)
 #define X10_FORCEPORTS "X10_FORCEPORTS" // a way to force specific listen ports, to run without the launcher
 #define X10_NOYIELD "X10_NOYIELD" // setting this flag means "don't issue a sched_yield() after a probe comes up empty".
 #define X10_LAZYLINKS "X10_LAZYLINKS" // flag to establish place to place links to be at startup, instead of lazily.
@@ -62,11 +58,6 @@ struct ctrl_msg
 	// followed by the data
 };
 
-static inline bool checkBoolEnvVar(char* value)
-{
-    return (value && !(strcasecmp("false", value) == 0) && !(strcasecmp("0", value) == 0) && !(strcasecmp("f", value) == 0));
-}
-
 /* ************************************************************************ */
 /*                ProcManager class definition                              */
 /* ************************************************************************ */
@@ -76,7 +67,6 @@ class Launcher
 	public:
 		static int _parentLauncherControlLink; /* parent control connection */
 		static void Setup(int argc, char ** argv);
-		static void enterRandomScratchDir(uint32_t _myproc);
 		static void cb_sighandler_cld(int signo);
 		static void cb_sighandler_term(int signo);
 		static int lookupPlace(uint32_t myPlace, uint32_t destPlace, char* response, int responseLen);

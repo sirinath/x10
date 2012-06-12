@@ -37,12 +37,9 @@ public class Ref implements RefI {
     // constructor for non-virtual call
     public final Ref x10$lang$Object$$init$S() {return this;}
     
-    // XTENLANG-3063
-    // not used if X10PrettyPrinterVisitor.supportConstructorWithThrows == true
     public Ref $init(){return x10$lang$Object$$init$S();}
 	
-    // not used
-//    public static Ref $make() { return new Ref(); }
+    public static Ref $make() { return new Ref(); }
 
     /* TODO to be removed
     public void $init(Object out$){}

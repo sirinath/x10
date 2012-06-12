@@ -64,9 +64,7 @@ public class PreLoader {
 		// N.B. we must return false for all x10 classes since they need preloading to make static initialization work properly
 		boolean isSystemClass = false;
 		
-        boolean precisePreload = Boolean.getBoolean("x10.PRECISE_PRELOAD_TEST");
-           	        
-		if (!precisePreload && !supportExecutableJar) {
+		if (!supportExecutableJar) {
 			
 	    isSystemClass = c.getClassLoader() == bootstrap;
 	    
@@ -159,8 +157,6 @@ public class PreLoader {
 					preLoad(toFileName(nm), c, intern);
 				} catch (ClassNotFoundException e) {
 //					System.err.println(i+": "+nm+" not found");
-				} catch (NoClassDefFoundError e) {
-					System.out.println("Preloader: could not load " + e.getMessage() + " (ignored).");
 				}
 			}
 		} catch (IOException e) { e.printStackTrace(System.err); assert false; }

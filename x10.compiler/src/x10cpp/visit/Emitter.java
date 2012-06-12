@@ -888,7 +888,7 @@ public class Emitter {
 		if (query.hasAnnotation(n, "x10.compiler.Volatile")) {
 			h.write("volatile ");
 		}
-		
+
 		printType(n.type().type(), h);
 		h.allowBreak(2, 2, " ", 1);
 		if (qualify) {

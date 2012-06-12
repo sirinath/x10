@@ -91,11 +91,16 @@ struct x10SocketState
 	pthread_mutex_t pendingWriteLock;
 } state;
 
-bool probe (bool onlyProcessAccept, bool block);
+bool probe (bool onlyProcessAccept);
 
 /*********************************************
  *  utility methods
 *********************************************/
+
+bool checkBoolEnvVar(char* value)
+{
+	return (value && !(strcasecmp("false", value) == 0) && !(strcasecmp("0", value) == 0) && !(strcasecmp("f", value) == 0));	
+}
 
 void error(const char* message)
 {
@@ -394,7 +399,7 @@ int initLink(uint32_t remotePlace)
 		return -1;
 
 	if (!state.linkAtStartup || state.socketLinks[remotePlace].fd <= 0)
-		probe(true, false); // handle any incoming connection requests - we may be able to skip a lookup.
+		probe(true); // handle any incoming connection requests - we may be able to skip a lookup.
 
 	if (state.socketLinks[remotePlace].fd <= 0)
 	{
@@ -539,7 +544,7 @@ int initLink(uint32_t remotePlace)
 					fprintf(stderr, "X10rt.Sockets: Place %u did NOT establish a link to place %u\n", state.myPlaceId, remotePlace);
 				#endif
 				while (state.socketLinks[remotePlace].fd < 0) // there is a pending connection coming in.
-					probe(true, false);
+					probe(true);
 			}
 		}
 		else
@@ -818,28 +823,20 @@ void x10rt_net_probe ()
 			initLink(i); // connect to all lower places
 		for (unsigned i=state.myPlaceId+1; i<state.numPlaces; i++)
 			while (state.socketLinks[i].fd <= 0)
-				probe(true, false); // wait for connections from all upper places
+				probe(true); // wait for connections from all upper places
 		state.linkAtStartup = false;
 	}
-	else
-		while (probe(false, false)) { }
+	else 
+		while (probe(false)) { }
 }
 
-void x10rt_net_blocking_probe ()
-{
-	// Call the blocking form of probe, returning after the one call.
-	probe(false, true);
-	// then, loop again to gather everything from the network before returning.
-	while (probe(false, false)) { }
-}
-
-// return T if data was processed or sent, F if not
-bool probe (bool onlyProcessAccept, bool block)
+// return T if data was processed, F if not
+bool probe (bool onlyProcessAccept)
 {
 	if (pthread_mutex_lock(&state.readLock) < 0)
 		return false;
 	uint32_t whichPlaceToHandle = state.nextSocketToCheck;
-	int ret = poll(state.socketLinks, state.numPlaces, (block && state.pendingWrites == NULL)?-1:(state.linkAtStartup?100:0));
+	int ret = poll(state.socketLinks, state.numPlaces, state.linkAtStartup?100:0);
 	if (ret > 0)
 	{ // There is at least one socket with something interesting to look at
 
@@ -1087,10 +1084,10 @@ bool probe (bool onlyProcessAccept, bool block)
 	else
 	{
 		pthread_mutex_unlock(&state.readLock);
-		bool dataRemains = flushPendingData();
+		flushPendingData();
 		if (state.yieldAfterProbe) // This would be a good time for a yield in some systems.
 			sched_yield();
-		return dataRemains && block;
+		return false;
 	}
 }
 

@@ -10,9 +10,9 @@
 ###################################################
 # Source and target file
 ###################################################
-target_list 	= TestMult TestSparse TestSparseDense TestDenseSparse TestDistBlockMatrix
+target_list 	= TestMult TestSparse TestSparseDense TestDenseSparse
 
-target		= TestDistBlockMatrix
+target		= TestMult
 
 # build path
 build_path	= build

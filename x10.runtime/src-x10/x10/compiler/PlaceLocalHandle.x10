@@ -11,12 +11,14 @@
 
 package x10.compiler;
 
-import x10.lang.annotations.*;
+import x10.compiler.NativeRep;
 
-/** Annotation to mark property methods as being opaque to the constraint
- * solver.
+/**
+ * Used for generating static initialization code (SingleVM MultiPlace support) in Java backend.
  * 
- * This means they are not inlined, although the body (X10 code) is still used
- * to implement constraint checks in casts.
  */
-public interface Opaque(name: String) extends MethodAnnotation { }
+@NativeRep("java", "x10.runtime.impl.java.PlaceLocalHandle", null, null)
+class PlaceLocalHandle {
+}
+
+// vim:shiftwidth=4:tabstop=4:expandtab

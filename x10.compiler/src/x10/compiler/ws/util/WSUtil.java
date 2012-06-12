@@ -491,7 +491,6 @@ public class WSUtil {
     static public MethodInstance createWSMethodInstance(MethodInstance mi, TypeSystem ts) {
     	X10MethodDef mDef = createWSCallMethodDef(mi.def(), ts);
     	MethodInstance m = mDef.asInstance();
-    	m = (MethodInstance) m.container(mi.container());
 
     	List<Type> formalTypes = new ArrayList<Type>();
         formalTypes.add((ts.Worker()));

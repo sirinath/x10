@@ -25,13 +25,12 @@ abstract public class Throwable extends java.lang.RuntimeException {
     private static final long serialVersionUID = 1L;
     public java.lang.String message = null;
 
-    // not used
-//    // constructor just for allocation
-//    public Throwable(java.lang.System[] $dummy) {
-//        super();
-//    }
-//
-//    public Throwable $init() {return this;}
+    // constructor just for allocation
+    public Throwable(java.lang.System[] $dummy) {
+        super();
+    }
+
+    public Throwable $init() {return this;}
     
     public Throwable() {
         super();

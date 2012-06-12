@@ -103,25 +103,25 @@ public class BlockBcast extends BlockRemoteCopy {
 	 * @return            Number of elements broadcast
 	 */
 	protected static def mpiBcastDense(distBS:BlocksPLH, rootbid:Int, colOff:Int, colCnt:Int):Int {
-		
+			
 		if (colCnt < 0) return 0;
+		val datasz:Int = compBlockDataSize(distBS, rootbid, colOff, colCnt);
 		
 		@Ifdef("MPI_COMMU") {
 			val rootpid    = distBS().findPlace(rootbid);
 			//Get the data count from root block
-			finish ateach (Dist.makeUnique()) {
-				//Remote capture: colOff, colCnt, rootpid
+			finish ateach (d:Point in Dist.makeUnique()) {
+				//Remote capture: colOff, datasz, rootpid, rootpid
 				val bset = distBS();
 				val blk  = (here.id()==rootpid)?bset.findBlock(rootbid):bset.getFirst();
 				val den  = blk.getMatrix() as DenseMatrix;
 				val offset = den.M * colOff;
-				val datasz = den.M * colCnt;
 				
 				WrapMPI.world.bcast(den.d, offset, datasz, rootpid);
-				bset.sync(blk, colOff, colCnt);
+				bset.sync(blk); 
 			}
 		}
-		return distBS().getFirstMatrix().M * colCnt;
+		return datasz;
 	}
 
 	/**
@@ -130,12 +130,13 @@ public class BlockBcast extends BlockRemoteCopy {
 	 */
 	protected static def mpiBcastSparse(distBS:BlocksPLH, rootbid:Int, colOff:Int, colCnt:Int):Int {
 		
+		val root   = here.id();
 		val datasz = compBlockDataSize(distBS, rootbid, colOff, colCnt);  
 
 		@Ifdef("MPI_COMMU") {
+			val rootpid    = distBS().findPlace(rootbid);
 			finish ateach (val [p]:Point in Dist.makeUnique()) {
-				//Need: rootbid, distBS, datasz, colOff, colCnt,
-				val rootpid    = distBS().findPlace(rootbid);
+				//Need: rootpid, rootbid, distBS, datasz, colOff, colCnt,
 				val bset = distBS();
 				val blk  = (here.id()==rootpid)?bset.findBlock(rootbid):bset.getFirst();
 				val spa  = blk.getMatrix() as SparseCSC;
@@ -149,15 +150,15 @@ public class BlockBcast extends BlockRemoteCopy {
 				else
 					spa.initRemoteCopyAtDest(colOff, colCnt, datasz);
 				
-				WrapMPI.world.bcast(spa.getIndex(), offset, datasz, rootpid);
-				WrapMPI.world.bcast(spa.getValue(), offset, datasz, rootpid);
+				WrapMPI.world.bcast(spa.getIndex(), offset, datasz, root);
+				WrapMPI.world.bcast(spa.getValue(), offset, datasz, root);
 				
 				if (p == rootpid) 
 					spa.finalizeRemoteCopyAtSource();
 				else
 					spa.finalizeRemoteCopyAtDest();
 				
-				bset.sync(blk, colOff, colCnt);
+				bset.sync(blk);
 			}
 		}
 		return datasz;
@@ -183,21 +184,14 @@ public class BlockBcast extends BlockRemoteCopy {
 			val rtblk = distBS().findBlock(rootbid);
 			if (Place.MAX_PLACES > 1) {
 				datcnt = compBlockDataSize(distBS, rootbid, colOff, colCnt);
-				if (datcnt == 0) return 0;
 				if (rtblk.isSparse()) {
 					val spa = rtblk.getMatrix() as SparseCSC;
 					spa.initRemoteCopyAtSource(colOff, colCnt);
-					startBinaryTreeCast(distBS, rtblk, colOff, colCnt, datcnt);	
-					spa.finalizeRemoteCopyAtSource();
-
-				} else {
-					startBinaryTreeCast(distBS, rtblk, colOff, colCnt, datcnt);
-				}
-			}
-			distBS().sync(rtblk, colOff, colCnt);
-
+				} 
+				startBinaryTreeCast(distBS, rtblk, colOff, colCnt, datcnt);	
+			} 
 			//Finalize broadcast: finialize remote copy and local block set sync
-			//finalizeBcast(distBS, rootbid, colOff, colCnt);
+			finalizeBcast(distBS, rootbid);
 		}
 		return datcnt;
 	}
@@ -235,7 +229,6 @@ public class BlockBcast extends BlockRemoteCopy {
 
 				if (plcnt > 1)
 					castToBranch(distBS, dstblk, colOff, colCnt, datCnt, plcnt);
-				distBS().sync(dstblk, colOff, colCnt);
 			}
 			
 		} else if (srcblk.isSparse()) {
@@ -251,16 +244,16 @@ public class BlockBcast extends BlockRemoteCopy {
 				val dstblk = distBS().getFirst();
 				val dstspa = dstblk.getMatrix() as SparseCSC;
 				val dstoff = dstspa.getNonZeroOffset(colOff); 
-
+				// Using copyFrom style
+				//++++++++++++++++++++++++++++++++++++++++++++
+				//Do NOT call getIndex()/getValue() before init at destination place
+				//+++++++++++++++++++++++++++++++++++++++++++++
 				dstspa.initRemoteCopyAtDest(colOff, colCnt, datCnt);
 				finish Array.asyncCopy[Int   ](srcidx, srcoff, dstspa.getIndex(), dstoff, datCnt);
 				finish Array.asyncCopy[Double](srcval, srcoff, dstspa.getValue(), dstoff, datCnt);
 				
 				if (plcnt > 1 )
 					castToBranch(distBS, dstblk, colOff, colCnt, datCnt, plcnt);
-
-				dstspa.finalizeRemoteCopyAtDest();
-				distBS().sync(dstblk, colOff, colCnt);
 			}
 		} else {
 			Debug.exit("Matrix block type is not supported");
@@ -287,22 +280,22 @@ public class BlockBcast extends BlockRemoteCopy {
 		}
 	}
 	//---------------------------------------------------------------
-	// private static def finalizeBcast(distBS:BlocksPLH, rootbid:Int, colOff:Int, colCnt:Int){
-	// 	val rootpid = here.id();
-	// 	finish ateach ([p]:Point in Dist.makeUnique()) {
-	// 		//Remote block set update
-	// 		val bset = distBS();
-	// 		val blk  = (here.id()==rootpid)?bset.findBlock(rootbid):bset.getFirst();
-	// 		if (blk.isSparse() && Place.MAX_PLACES > 1) {
-	// 			val spa = blk.getMatrix() as SparseCSC;
-	// 			if (here.id() != rootpid)
-	// 				spa.finalizeRemoteCopyAtDest();
-	// 			else
-	// 				spa.finalizeRemoteCopyAtSource();
-	// 		}
-	// 		bset.sync(blk, colOff, colCnt);
-	// 	}	
-	// }
+	private static def finalizeBcast(distBS:BlocksPLH, rootbid:Int){
+		val rootpid = here.id();
+		finish ateach ([p]:Point in Dist.makeUnique()) {
+			//Remote block set update
+			val bset = distBS();
+			val blk  = (here.id()==rootpid)?bset.findBlock(rootbid):bset.getFirst();
+			if (blk.isSparse() && Place.MAX_PLACES > 1) {
+				val spa = blk.getMatrix() as SparseCSC;
+				if (here.id() != rootpid)
+					spa.finalizeRemoteCopyAtDest();
+				else
+					spa.finalizeRemoteCopyAtSource();
+			}
+			bset.sync(blk);
+		}	
+	}
 	
 	//----------------------------------------------------------------
 }

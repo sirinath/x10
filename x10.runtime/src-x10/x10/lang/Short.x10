@@ -267,7 +267,7 @@ public struct Short implements Comparable[Short], Arithmetic[Short], Bitwise[Sho
     public native static operator (x:Double) as Short;
 
     /**
-     * Convert a given UShort to a Short.
+     * Coerce a given UShort to a Short.
      * @param x the given UShort
      * @return the given UShort converted to a Short.
      */
@@ -275,14 +275,6 @@ public struct Short implements Comparable[Short], Arithmetic[Short], Bitwise[Sho
     @Native("c++",  "((x10_short) (#1))")
     public native static operator (x:UShort) as Short;
 
-    /**
-     * Coerce a given UByte to a Short.
-     * @param x the given UByte
-     * @return the given UByte converted to a Short.
-     */
-    @Native("java", "((short)(#x))")
-    @Native("c++",  "((x10_short) (#1))")
-    public native static operator (x:UByte): Short;
 
     /**
      * A constant holding the minimum value a Short can have, -2<sup>15</sup>.
@@ -358,6 +350,7 @@ public struct Short implements Comparable[Short], Arithmetic[Short], Bitwise[Sho
     /**
      * @deprecated use {@link #parse(String,Int)} instead
      */
+    // @Native("java", "x10.core.Signed.parseShort(#s, #radix)")
     @Native("java", "java.lang.Short.parseShort(#s, #radix)")
     @Native("c++", "x10aux::short_utils::parseShort(#1, #2)")
     public native static def parseShort(s:String, radix:Int): Short; //throwsNumberFormatException;
@@ -365,6 +358,7 @@ public struct Short implements Comparable[Short], Arithmetic[Short], Bitwise[Sho
     /**
      * @deprecated use {@link #parse(String)} instead
      */
+    // @Native("java", "x10.core.Signed.parseShort(#s)")
     @Native("java", "java.lang.Short.parseShort(#s)")
     @Native("c++", "x10aux::short_utils::parseShort(#1)")
     public native static def parseShort(s:String): Short; //throwsNumberFormatException;
@@ -376,6 +370,7 @@ public struct Short implements Comparable[Short], Arithmetic[Short], Bitwise[Sho
      * @return the Short represented by the String argument in the specified radix.
      * @throws NumberFormatException if the String does not contain a parsable Short.
      */
+    // @Native("java", "x10.core.Signed.parseShort(#s, #radix)")
     @Native("java", "java.lang.Short.parseShort(#s, #radix)")
     @Native("c++", "x10aux::short_utils::parseShort(#1, #2)")
     public native static def parse(s:String, radix:Int): Short; //throwsNumberFormatException;
@@ -386,6 +381,7 @@ public struct Short implements Comparable[Short], Arithmetic[Short], Bitwise[Sho
      * @return the Short represented by the String argument.
      * @throws NumberFormatException if the String does not contain a parsable Short.
      */
+    // @Native("java", "x10.core.Signed.parseShort(#s)")
     @Native("java", "java.lang.Short.parseShort(#s)")
     @Native("c++", "x10aux::short_utils::parseShort(#1)")
     public native static def parse(s:String): Short; //throwsNumberFormatException;

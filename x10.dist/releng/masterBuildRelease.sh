@@ -2,9 +2,7 @@
 
 # Dave Grove
 
-hosts="condor.watson.ibm.com triloka3.watson.ibm.com triloka4.watson.ibm.com bellatrix.watson.ibm.com nashira.watson.ibm.com rlsedx10.watson.ibm.com rlsecomp1.watson.ibm.com"
-
-x10dt_hosts="condor.watson.ibm.com triloka3.watson.ibm.com bellatrix.watson.ibm.com nashira.watson.ibm.com"
+hosts="condor.watson.ibm.com triloka3.watson.ibm.com triloka4.watson.ibm.com bellatrix.watson.ibm.com nashira.watson.ibm.com rlsedx10.watson.ibm.com"
 
 # TODO: we should get svn info by parsing svn info URL and extracting revision from there.
 while [ $# != 0 ]; do
@@ -24,16 +22,8 @@ while [ $# != 0 ]; do
 	shift
     ;;
 
-    -x10dt_hosts)
-        hosts=$x10dt_hosts
-    ;;
-
     -nodebug)
 	debug_arg="-nodebug"
-    ;;
-
-    -skip_source)
-        pushed_source="done"       
     ;;
 
    esac
@@ -71,14 +61,13 @@ do
 	echo "transfering from localhost to orquesta"
 	scp x10-$version*.tar.bz2 orquesta.watson.ibm.com:/var/www/localhost/htdocs/x10dt/x10-rc-builds/$version
 	rm x10-$version*.tar.bz2
-
-	echo "Packaging benchmarks"
-	./packageBenchmarks.sh -dir /tmp/x10-bench-$USER -version $version -tag $tag
-	echo "transfering benchmarks tar to orquesta"
-	scp /tmp/x10-bench-$USER/x10-benchmarks-$version.tar.bz2 orquesta.watson.ibm.com:/var/www/localhost/htdocs/x10dt/x10-rc-builds/$version 
-
 	export pushed_source="done"
     fi
 
     #ssh $host rm -rf /tmp/x10-rc-$USER 
 done
+
+echo "Packaging benchmarks"
+./packageBenchmarks.sh -dir /tmp/x10-bench-$USER -version $version -tag $tag
+echo "transfering benchmarks tar to orquesta"
+scp /tmp/x10-bench-$USER/x10-benchmarks-$version.tar.bz2 orquesta.watson.ibm.com:/var/www/localhost/htdocs/x10dt/x10-rc-builds/$version 

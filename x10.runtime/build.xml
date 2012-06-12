@@ -27,12 +27,10 @@
     <property name="EXPERIMENTAL" value="false" />
     <property name="DISABLE_GC" value="false" />
     <property name="NO_CHECKS" value="false" />
-    <property name="HOMOGENEOUS" value="true" />
     <property name="X10RT_MPI" value="false" />
     <property name="X10RT_PAMI" value="false" />
     <property name="X10RT_PGAS" value="true" />
     <property name="X10RT_CUDA" value="false" />
-    <property name="GCC_SYMBOLS" value="false" />
     <path id="project.classpath">
         <path refid="mainproject.classpath"/>
         <path refid="x10.constraints.classpath"/>
@@ -84,8 +82,6 @@
     <condition property="bdwgc.enabled">
         <and>
             <isfalse value="${DISABLE_GC}" />
-	    <!-- TODO BGQ: For purposes of initial porting, disable GC when building for BG/Q -->
-	    <isfalse value="${CROSS_COMPILE_BGQ}" />
             <or>
                 <os family="unix" name="linux"/>
                 <os family="mac"/>
@@ -94,14 +90,6 @@
             </or>
         </and>
     </condition>
-
-    <condition property="x10rt.jnibindings.disabled">
-        <or>
-            <istrue value="${CROSS_COMPILE_BGP}" />
-            <istrue value="${CROSS_COMPILE_BGQ}" />
-        </or>
-    </condition>
-
     <!-- darwin architectures -->
     <condition property="darwin.32" value="-arch i386 " else="">
         <and>
@@ -133,29 +121,17 @@
     <condition property="cppmake.x10rt_mpi" value="ENABLE_X10RT_MPI=1" else="DISABLE_X10RT_MPI=1">
         <istrue value="${X10RT_MPI}" />
     </condition>
-    <condition property="cppmake.x10rt_pami" value="ENABLE_X10RT_PAMI=1" else="DISABLE_X10RT_PAMI=1">
-        <or> 
-            <istrue value="${X10RT_PAMI}" />
-            <istrue value="${CROSS_COMPILE_BGQ}" />
-        </or>
-    </condition>
+	<condition property="cppmake.x10rt_pami" value="ENABLE_X10RT_PAMI=1" else="DISABLE_X10RT_PAMI=1">
+	    <istrue value="${X10RT_PAMI}" />
+	</condition>
     <condition property="cppmake.x10rt_pgas" value="ENABLE_X10RT_PGAS=1" else="DISABLE_X10RT_PGAS=1">
         <istrue value="${X10RT_PGAS}" />
     </condition>
     <condition property="cppmake.x10rt_cuda" value="ENABLE_X10RT_CUDA=1" else="DISABLE_X10RT_CUDA=1">
         <istrue value="${X10RT_CUDA}" />
     </condition>
-    <condition property="cppmake.gcc_symbols" value="ENABLE_GCC_SYMBOLS=1" else="DISABLE_GCC_SYMBOLS=1">
-        <istrue value="${GCC_SYMBOLS}" />
-    </condition>
     <condition property="cppmake.cross_compile_bgp" value="ENABLE_CROSS_COMPILE_BGP=1" else="DISABLE_CROSS_COMPILE_BGP=1">
         <istrue value="${CROSS_COMPILE_BGP}" />
-    </condition>
-    <condition property="cppmake.cross_compile_bgq" value="ENABLE_CROSS_COMPILE_BGQ=1" else="DISABLE_CROSS_COMPILE_BGQ=1">
-        <istrue value="${CROSS_COMPILE_BGQ}" />
-    </condition>
-    <condition property="cppmake.homogeneous" value="HOMOGENEOUS=1" else="DUMMY_ARG=1">
-        <istrue value="${HOMOGENEOUS}" />
     </condition>
     <condition property="x10c.optimize" value="-O" else="">
         <istrue value="${optimize}" />
@@ -193,7 +169,6 @@
             <arg value="-j1" />
             <arg value="clean"/>
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
     <target name="prepare-clean-bdwgc" if="bdwgc.enabled">
@@ -214,7 +189,6 @@
             <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
 
@@ -224,15 +198,12 @@
             <arg value="-j1" />
             <arg value="install" />
             <arg value="${cppmake.optimize}" />
-            <arg value="${cppmake.homogeneous}" />
             <arg value="${cppmake.debug}" />
-            <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
     <target name="dist-java" depends="jar,dist-stdlibprops">
@@ -250,12 +221,9 @@
             <arg value="${cppmake.gcarg}" />
             <arg value="${cppmake.experimental}" />
             <arg value="${cppmake.optimize}" />
-            <arg value="${cppmake.homogeneous}" />
             <arg value="${cppmake.debug}" />
-            <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
     <target name="dist-cpp-no-x10rt" depends="build-cpp,available-procs">
@@ -267,10 +235,8 @@
             <arg value="${cppmake.experimental}" />
             <arg value="${cppmake.optimize}" />
             <arg value="${cppmake.debug}" />
-            <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
     <target name="dist-stdlibprops" depends="init">
@@ -281,10 +247,8 @@
             <arg value="${cppmake.experimental}" />
             <arg value="${cppmake.optimize}" />
             <arg value="${cppmake.debug}" />
-            <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
     <target name="dist" depends="dist-java,dist-cpp" description="generate part of the distribution">
@@ -378,7 +342,7 @@
         <mkdir dir="x10rt/lib"/>
     </target>
 
-    <target name="jni-headers" depends="init,init-x10rt,build-x10-x10rt" unless="x10rt.jnibindings.disabled" >
+    <target name="jni-headers" depends="init,init-x10rt,build-x10-x10rt">
         <javah destdir="x10rt/include">
             <classpath>
               <path refid="project.classpath"/>
@@ -397,15 +361,12 @@
             <env key="ANT_JAVA_HOME" value="${java.home}" />
             <arg value="-j1" />
             <arg value="${cppmake.optimize}" />
-            <arg value="${cppmake.homogeneous}" />
             <arg value="${cppmake.debug}" />
-            <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
 
@@ -416,16 +377,13 @@
             <arg value="${cppmake.gcarg}" />
             <arg value="${cppmake.experimental}" />
             <arg value="${cppmake.optimize}" />
-            <arg value="${cppmake.homogeneous}" />
             <arg value="${cppmake.debug}" />
-            <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
             <arg value="${cppmake.cross_compile_bgp}" />
-            <arg value="${cppmake.cross_compile_bgq}" />
         </exec>
     </target>
 

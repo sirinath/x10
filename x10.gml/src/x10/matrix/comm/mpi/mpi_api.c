@@ -1,7 +1,12 @@
 /*
- *  This file is part of the X10 Applications project.
+ *  This file is part of the X10 project (http://x10-lang.org).
  *
- *  (C) Copyright IBM Corporation 2011.
+ *  This file is licensed to You under the Eclipse Public License (EPL);
+ *  You may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *      http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ *  (C) Copyright IBM Corporation 2006-2011.
  */
 
 #include <stdlib.h>
@@ -11,17 +16,6 @@
 #include "mpi.h"
 #include "mpi_api.h"
 #endif
-
-#ifdef MPI_COMMU
-MPI_Comm GML_COMM_WORLD;
-#endif
-
-void mpi_new_comm()
-{
-#ifdef MPI_COMMU
-   MPI_Comm_dup(MPI_COMM_WORLD,&GML_COMM_WORLD);
-#endif
-}
 
 void mpi_get_name_maxlen(int* l)
 {
@@ -33,14 +27,14 @@ void mpi_get_name_maxlen(int* l)
 void mpi_get_comm_pid(int* rk)
 {
 #ifdef MPI_COMMU
-  MPI_Comm_rank(GML_COMM_WORLD, rk);
+  MPI_Comm_rank(MPI_COMM_WORLD, rk);
 #endif
 }
 
 void mpi_get_comm_nporc(int* np)
 {
 #ifdef MPI_COMMU
-  MPI_Comm_size(GML_COMM_WORLD, np);
+  MPI_Comm_size(MPI_COMM_WORLD, np);
 #endif
 }
 
@@ -50,8 +44,8 @@ void mpi_get_proc_info(int* rk, int* np, int*len, int* strn)
   int i;
   char pname[MPI_MAX_PROCESSOR_NAME];
 
-  MPI_Comm_size(GML_COMM_WORLD, np);
-  MPI_Comm_rank(GML_COMM_WORLD, rk);
+  MPI_Comm_size(MPI_COMM_WORLD, np);
+  MPI_Comm_rank(MPI_COMM_WORLD, rk);
   MPI_Get_processor_name (pname, len);
 
   for (i=0; i<(*len); i++)
@@ -83,7 +77,7 @@ void mpi_send_double(double* buf, int off, int cnt, int dst, int tag)
 #ifdef MPI_COMMU
   double* pbuf = (off > 0)?(buf+off):buf;
   MPI_Send(pbuf, cnt, MPI_DOUBLE_PRECISION, dst, 
-		   tag, GML_COMM_WORLD);
+		   tag, MPI_COMM_WORLD); 
 #endif
 }
 
@@ -96,7 +90,7 @@ void mpi_recv_double(double* buf, int off, int cnt, int src, int tag)
 
   MPI_Status st;
   MPI_Recv(pbuf, cnt, MPI_DOUBLE_PRECISION, src, 
-		   tag, GML_COMM_WORLD, &st);
+		   tag, MPI_COMM_WORLD, &st);
 #endif
 }
 
@@ -106,7 +100,7 @@ void mpi_send_int(int* buf, int off, int cnt, int dst, int tag)
 #ifdef MPI_COMMU
   int* pbuf = (off>0)?(buf+off):buf;
   MPI_Send(pbuf, cnt, MPI_INT, dst, 
-		   tag, GML_COMM_WORLD);
+		   tag, MPI_COMM_WORLD); 
 #endif
 }
 void mpi_recv_int(int* buf, int off, int cnt, int src, int tag)
@@ -114,7 +108,7 @@ void mpi_recv_int(int* buf, int off, int cnt, int src, int tag)
 #ifdef MPI_COMMU
   MPI_Status st;
   MPI_Recv(buf, cnt, MPI_INT, src, 
-		   tag, GML_COMM_WORLD, &st);
+		   tag, MPI_COMM_WORLD, &st);
 #endif
 }
 
@@ -130,7 +124,7 @@ void mpi_Isend_double(double* buf, int off, int cnt, int dst, int tag, void* req
   double* pbuf = (off>0)?(buf+off):buf;
 
   MPI_Isend(pbuf, cnt, MPI_DOUBLE_PRECISION, dst, 
-			tag, GML_COMM_WORLD, (MPI_Request*) req);
+			tag, MPI_COMM_WORLD, (MPI_Request*) req); 
 #endif
 }
 
@@ -142,7 +136,7 @@ void mpi_Irecv_double(double* buf, int off, int cnt, int src, int tag, void* req
   double* pbuf = (off>0)?(buf+off):buf;
 
   MPI_Irecv(pbuf, cnt, MPI_DOUBLE_PRECISION, src, 
-			tag,  GML_COMM_WORLD, (MPI_Request*) req);
+			tag,  MPI_COMM_WORLD, (MPI_Request*) req);
 #endif
 
 }
@@ -154,7 +148,7 @@ void mpi_Isend_int(int* buf, int off, int cnt, int dst, int tag, void* req)
   int* pbuf = (off>0)?(buf+off):buf;
 
   MPI_Isend(pbuf, cnt, MPI_INT, dst, 
-			tag, GML_COMM_WORLD, (MPI_Request*) req);
+			tag, MPI_COMM_WORLD, (MPI_Request*) req); 
 #endif
 }
 
@@ -164,7 +158,7 @@ void mpi_Irecv_int(int* buf, int off, int cnt, int src, int tag, void* req)
   int* pbuf = (off>0)?(buf+off):buf;
   
   MPI_Irecv(pbuf, cnt, MPI_INT, src, 
-			tag,  GML_COMM_WORLD, (MPI_Request*) req);
+			tag,  MPI_COMM_WORLD, (MPI_Request*) req);
 
 #endif
 }
@@ -174,7 +168,7 @@ void mpi_bcast_int(int* buf, int off, int cnt, int root)
 #ifdef MPI_COMMU
   int* pbuf = (off>0)?(buf+off):buf;
   // void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm);
-  MPI_Bcast(pbuf, cnt, MPI_INT, root, GML_COMM_WORLD);
+  MPI_Bcast(pbuf, cnt, MPI_INT, root, MPI_COMM_WORLD);
 #endif
 }
 
@@ -182,7 +176,7 @@ void mpi_bcast_double(double* buf, int off, int cnt, int root)
 {
 #ifdef MPI_COMMU
   double* pbuf = (off>0)?(buf+off):buf;
-  MPI_Bcast(pbuf, cnt, MPI_DOUBLE, root, GML_COMM_WORLD);
+  MPI_Bcast(pbuf, cnt, MPI_DOUBLE, root, MPI_COMM_WORLD);
 #endif
 }
 //-------------------------
@@ -194,7 +188,7 @@ void mpi_gatherv_double(double* sendbuf, int sendoff, int sendcnt,
   double* sbuf = (sendoff>0)?(sendbuf+sendoff):sendbuf;
   double* rbuf = (recvoff>0)?(recvbuf+recvoff):recvbuf;
   //int np;
-  //MPI_Comm_size(GML_COMM_WORLD, &np);
+  //MPI_Comm_size(MPI_COMM_WORLD, &np);
   //static int* displs = new int(np);
 
   //displs[0]=0;
@@ -205,9 +199,9 @@ void mpi_gatherv_double(double* sendbuf, int sendoff, int sendcnt,
   //fflush(stdout);
   MPI_Gatherv(sbuf, sendcnt, MPI_DOUBLE,
 			  rbuf, recvcnts, displs, MPI_DOUBLE, 
-			  root, GML_COMM_WORLD);
+			  root, MPI_COMM_WORLD); 
 //  MPI_Allgather(sbuf, sendcnt, MPI_DOUBLE, 
-//				rbuf, recvcnt, MPI_DOUBLE, GML_COMM_WORLD);
+//				rbuf, recvcnt, MPI_DOUBLE, MPI_COMM_WORLD);
   //printf("Recving off:%d val: %f %f %f %f cnt %d\n", 
   //		 recvoff, recvbuf[0], recvbuf[1], recvbuf[2], recvbuf[3], recvcnts[0]);
   //fflush(stdout);
@@ -226,7 +220,7 @@ void mpi_gatherv_int(int* sendbuf, int sendoff, int sendcnt,
 
   MPI_Gatherv(sbuf, sendcnt, MPI_INT,
 			  rbuf, recvcnts, displs, MPI_INT, 
-			  root, GML_COMM_WORLD);
+			  root, MPI_COMM_WORLD); 
 #endif
 }
 
@@ -238,7 +232,7 @@ void mpi_scatterv_double(double* sendbuf, int* sendcnts, int* displs,
 #ifdef MPI_COMMU
   MPI_Scatterv(sendbuf, sendcnts, displs, MPI_DOUBLE,
 			   recvbuf, recvcnt, MPI_DOUBLE, 
-			   root, GML_COMM_WORLD);
+			   root, MPI_COMM_WORLD); 
 #endif
 }
 
@@ -249,7 +243,7 @@ void mpi_scatterv_int(int* sendbuf, int* sendcnts,  int* displs,
 
   MPI_Scatterv(sendbuf, sendcnts, displs, MPI_INT, 
 			   recvbuf, recvcnt, MPI_INT, 
-			   root, GML_COMM_WORLD);
+			   root, MPI_COMM_WORLD); 
 #endif
 }
 
@@ -262,7 +256,7 @@ void mpi_allgatherv_double(double* sendbuf, int sendoff, int sendcnt,
   double* rbuf = (recvoff>0)?(recvbuf+recvoff):recvbuf;
   //int np;
 
-  //MPI_Comm_size(GML_COMM_WORLD, &np);
+  //MPI_Comm_size(MPI_COMM_WORLD, &np);
    //static int* displs = new int(np);
 
   //displs[0]=0;
@@ -272,9 +266,9 @@ void mpi_allgatherv_double(double* sendbuf, int sendoff, int sendcnt,
   //printf("Sending %f %d\n", sbuf[0], sendcnt);
   //fflush(stdout);
   MPI_Allgatherv(sbuf, sendcnt, MPI_DOUBLE,
- 				 rbuf, recvcnts, displs, MPI_DOUBLE, GML_COMM_WORLD);
+ 				 rbuf, recvcnts, displs, MPI_DOUBLE, MPI_COMM_WORLD); 
 //  MPI_Allgather(sbuf, sendcnt, MPI_DOUBLE, 
-//				rbuf, recvcnt, MPI_DOUBLE, GML_COMM_WORLD);
+//				rbuf, recvcnt, MPI_DOUBLE, MPI_COMM_WORLD);
   //printf("Recving off:%d val: %f %f %f %f cnt %d\n", 
   //		 recvoff, recvbuf[0], recvbuf[1], recvbuf[2], recvbuf[3], recvcnts[0]);
   //fflush(stdout);
@@ -293,7 +287,7 @@ void mpi_reduce_sum_int(int* sendbuf, int soff, int* recvbuf, int roff,  int cnt
   int* sbuf = (soff>0)?(sendbuf+soff):sendbuf;
   int* rbuf = (roff>0)?(recvbuf+roff):recvbuf;
 
-  MPI_Reduce(sbuf, rbuf, cnt, MPI_INT, MPI_SUM, root, GML_COMM_WORLD);
+  MPI_Reduce(sbuf, rbuf, cnt, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
 #endif
 }
 
@@ -305,7 +299,7 @@ void mpi_reduce_sum_double(double* sendbuf, int soff, double* recvbuf, int roff,
   double* sbuf = (soff>0)?(sendbuf+soff):sendbuf;
   double* rbuf = (roff>0)?(recvbuf+roff):recvbuf;
 
-  MPI_Reduce(sbuf, rbuf, cnt, MPI_DOUBLE, MPI_SUM, root, GML_COMM_WORLD);
+  MPI_Reduce(sbuf, rbuf, cnt, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
 #endif
 }
 //------------------------
@@ -316,7 +310,7 @@ void mpi_allreduce_sum_int(int*sendbuf, int soff, int* recvbuf, int roff, int cn
   //				  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) 
   int* sbuf = (soff>0)?(sendbuf+soff):sendbuf;
   int* rbuf = (roff>0)?(recvbuf+roff):recvbuf;
-  MPI_Allreduce(sbuf, rbuf, cnt, MPI_INT, MPI_SUM, GML_COMM_WORLD);
+  MPI_Allreduce(sbuf, rbuf, cnt, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 #endif
 }
 
@@ -327,7 +321,7 @@ void mpi_allreduce_sum_double(double*sendbuf, int soff, double* recvbuf, int rof
   //				  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) 
   double* sbuf = (soff>0)?(sendbuf+soff):sendbuf;
   double* rbuf = (roff>0)?(recvbuf+roff):recvbuf;
-  MPI_Allreduce(sbuf, rbuf, cnt, MPI_DOUBLE, MPI_SUM, GML_COMM_WORLD);
+  MPI_Allreduce(sbuf, rbuf, cnt, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 }
 

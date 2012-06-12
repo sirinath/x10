@@ -49,19 +49,18 @@ public class X10RootDoc extends X10Doc implements RootDoc {
     
 	X10ClassDoc[] includedClasses; 
 	private String outputDir;
-	private String accessModifier;
 	
 	public static final boolean printSwitch = false;
+	public static final String ACCESSMODFILTER = "-protected"; 
 	  // access modifier filter specified as a command-line option (RootDoc.options()) to the standard doclet; 
 	  // show only public and protected classes and class members
 
 	private static X10RootDoc globalRootDoc;
-	public static X10RootDoc getRootDoc(String outputDir, String accessModifier) {
+	public static X10RootDoc getRootDoc(String outputDir) {
 		if (globalRootDoc != null) {
 			assert (globalRootDoc.outputDir.equals(outputDir)) : "getRootDoc called with a different output directory";
-			assert (globalRootDoc.accessModifier.equals(accessModifier)) : "getRootDoc called with a different output directory";
 		} else {
-			globalRootDoc = new X10RootDoc(outputDir, accessModifier);
+			globalRootDoc = new X10RootDoc(outputDir);
 		}
 		return globalRootDoc;
 	}
@@ -83,7 +82,7 @@ public class X10RootDoc extends X10Doc implements RootDoc {
 		return globalRootDoc;
 	}
 
-	public X10RootDoc(String outputDir, String accessModifier) {
+	public X10RootDoc(String outputDir) {
 
 		this.specClasses = CollectionFactory.newHashMap();
 		this.specPackages = CollectionFactory.newHashMap();
@@ -91,7 +90,6 @@ public class X10RootDoc extends X10Doc implements RootDoc {
 		this.otherPackages = CollectionFactory.newHashMap();
 		this.primitiveTypes = CollectionFactory.newHashMap();
 		this.outputDir = outputDir;
-		this.accessModifier = accessModifier;
 		super.processComment("");
 	}
 
@@ -432,14 +430,14 @@ public class X10RootDoc extends X10Doc implements RootDoc {
 		// System.out.println("RootDoc.options() called.");
 		String[][] result = new String[][] {
 				{ "-d", outputDir },
-				{ accessModifier, ""}
+				{ ACCESSMODFILTER, ""}
 		};
 		return result;
 	}
 	
 	public String accessModFilter() {
 		// this method is intended to be called from X10*Doc.isIncluded(), X10ClassDoc.{methods(), fields()} etc.
-		return accessModifier;
+		return ACCESSMODFILTER;
 	}
 
 	/**
@@ -612,20 +610,15 @@ public class X10RootDoc extends X10Doc implements RootDoc {
 	}
 	
 	private X10ClassDoc findInCurrentClass(X10Doc holder, String startingName) {
-	    X10ClassDoc holderClass = holderClass(holder);
-	    String newClassName = startingName;
-	    if (holderClass != null) {
-	        newClassName = holderClass.classDef.fullName().toString()+ "." + startingName;
-	    }
+		String newClassName = holderClass(holder).classDef.fullName().toString()
+				+ "." + startingName;
 		X10ClassDoc classDoc = (X10ClassDoc) this.classNamed(newClassName);
 		return classDoc;
 	}
 	
 	private X10ClassDoc findInEnclosingAndSuperClasses(X10Doc holder, String startingName)
 	{
-	    X10ClassDoc holderClass = holderClass(holder);
-	    if (null == holderClass) return null;
-		ClassType ct = holderClass.classDef.asType();
+		ClassType ct = holderClass(holder).classDef.asType();
 		for(ClassType superType : HierarchyUtils.getSuperTypes(ct))
 		{
 			String superName = superType.fullName().toString();
@@ -641,39 +634,24 @@ public class X10RootDoc extends X10Doc implements RootDoc {
 	
 	private X10ClassDoc findInCurrentPackage(X10Doc holder, String startingName)
 	{
-	    String pack = null;
-	    if (holder instanceof X10PackageDoc) {
-	        pack = holder.name();
-	    } else {
-	        X10ClassDoc holderClass = holderClass(holder);
-	        if (holderClass != null) {
-	            pack = holderClass.classDef.package_().toString();
-	        }
-	    }
-	    
-		String newClassName = (pack != null ? pack + "." : "") + startingName;
+		String newClassName = holderClass(holder).classDef.package_().toString() + "." + startingName;
 		X10ClassDoc classDoc = (X10ClassDoc) this.classNamed(newClassName);
 		return classDoc;
 	}
 	
 	private X10ClassDoc findInImports(X10Doc holder, String startingName) {
 		X10ClassDoc classDoc = null;
-		X10ClassDoc holderClass = holderClass(holder);
-		if (holderClass != null && holderClass.source != null) {
+		if (holderClass(holder).source != null) {
 			for (Import i : holderClass(holder).source.imports()) {
+				
 				if ((classDoc = isName(i.name().toString(), startingName)) != null) {
 					return classDoc;
 				}
 			}
 		}
 
-		// x10.lang and x10.array are auto-imported.
 		String lang = "x10.lang." + startingName;
 		classDoc = (X10ClassDoc) this.classNamed(lang);
-		if (classDoc == null) {
-	        String array = "x10.array." + startingName;
-	        classDoc = (X10ClassDoc) this.classNamed(array);
-		}
 		return classDoc;
 	}
 	

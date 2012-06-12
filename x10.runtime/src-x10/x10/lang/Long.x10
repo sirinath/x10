@@ -268,34 +268,7 @@ public struct Long implements Comparable[Long], Arithmetic[Long], Bitwise[Long],
     public native static operator (x:Double) as Long;
 
     /**
-     * Coerce a given UByte to a Long.
-     * @param x the given UByte
-     * @return the given UByte converted to a Long.
-     */
-    @Native("java", "((long)#x)")
-    @Native("c++",  "((x10_long) (#1))")
-    public native static operator (x:UByte): Long;
-
-    /**
-     * Coerce a given UShort to a Long.
-     * @param x the given UShort
-     * @return the given UShort converted to a Long.
-     */
-    @Native("java", "((long)#x)")
-    @Native("c++",  "((x10_long) (#1))")
-    public native static operator (x:UShort): Long;
-
-    /**
-     * Coerce a given UInt to a Long.
-     * @param x the given UInt
-     * @return the given UInt converted to a Long.
-     */
-    @Native("java", "((long)(#x))")
-    @Native("c++",  "((x10_long) (#1))")
-    public native static operator (x:UInt): Long;
-
-    /**
-     * Convert a given ULong to a Long.
+     * Coerce a given ULong to a Long.
      * @param x the given ULong
      * @return the given ULong converted to a Long.
      */
@@ -378,6 +351,7 @@ public struct Long implements Comparable[Long], Arithmetic[Long], Bitwise[Long],
     /**
      * @deprecated use {@link #parse(String,Long)} instead
      */
+    // @Native("java", "x10.core.Signed.parseLong(#s, #radix)")
     @Native("java", "java.lang.Long.parseLong(#s, #radix)")
     @Native("c++", "x10aux::long_utils::parseLong(#1, #2)")
     public native static def parseLong(s:String, radix:Int): Long; //throwsNumberFormatException;
@@ -385,6 +359,7 @@ public struct Long implements Comparable[Long], Arithmetic[Long], Bitwise[Long],
     /**
      * @deprecated use {@link #parse(String)} instead
      */
+    // @Native("java", "x10.core.Signed.parseLong(#s)")
     @Native("java", "java.lang.Long.parseLong(#s)")
     @Native("c++", "x10aux::long_utils::parseLong(#1)")
     public native static def parseLong(s:String): Long; //throwsNumberFormatException;
@@ -396,6 +371,7 @@ public struct Long implements Comparable[Long], Arithmetic[Long], Bitwise[Long],
      * @return the Long represented by the String argument in the specified radix.
      * @throws NumberFormatException if the String does not contain a parsable Long.
      */
+    // @Native("java", "x10.core.Signed.parseLong(#s, #radix)")
     @Native("java", "java.lang.Long.parseLong(#s, #radix)")
     @Native("c++", "x10aux::long_utils::parseLong(#1, #2)")
     public native static def parse(s:String, radix:Int): Long; //throwsNumberFormatException;
@@ -406,6 +382,7 @@ public struct Long implements Comparable[Long], Arithmetic[Long], Bitwise[Long],
      * @return the Long represented by the String argument.
      * @throws NumberFormatException if the String does not contain a parsable Long.
      */
+    // @Native("java", "x10.core.Signed.parseLong(#s)")
     @Native("java", "java.lang.Long.parseLong(#s)")
     @Native("c++", "x10aux::long_utils::parseLong(#1)")
     public native static def parse(s:String): Long; //throwsNumberFormatException;
@@ -571,9 +548,7 @@ public struct Long implements Comparable[Long], Arithmetic[Long], Bitwise[Long],
     * @param upper the upper bound
     * @return a range from lower to upper, inclusive.
     */
-	// XTENLANG-3063
-   // @Native("java", "new x10.lang.LongRange((java.lang.System[]) null).$init(#x, #y)")
-   @Native("java", "new x10.lang.LongRange((java.lang.System[]) null).x10$lang$LongRange$$init$S(#x, #y)")
+   @Native("java", "new x10.lang.LongRange((java.lang.System[]) null).$init(#x, #y)")
    @Native("c++", "x10::lang::LongRange::_make(#1, #2)")
    public native static operator (x:Long) .. (y:Long):LongRange{min==x,max==y};
 }

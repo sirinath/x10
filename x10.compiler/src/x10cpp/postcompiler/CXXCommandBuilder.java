@@ -110,16 +110,6 @@ public class CXXCommandBuilder {
     protected final boolean usingXLC() {
         return defaultPostCompiler().contains("xlC");
     }
-    
-    protected final boolean bluegene() {
-        return bluegeneP() || bluegeneQ();
-    }
-    protected final boolean bluegeneP() {
-        return platform.contains("bgp");
-    }
-    protected final boolean bluegeneQ() {
-        return platform.contains("bgq");
-    }
 
     /** 
      * Add all command line arguments to the C++ compiler
@@ -151,7 +141,7 @@ public class CXXCommandBuilder {
             cxxCmd.add(usingXLC() ? "-O3" : "-O2");
             cxxCmd.add(usingXLC() ? "-qinline" : "-finline-functions");
             cxxCmd.add("-DNO_TRACING");
-            if (usingXLC() && !bluegene()) {
+            if (usingXLC()) {
                 cxxCmd.add("-qhot");
                 cxxCmd.add("-qtune=auto");
                 cxxCmd.add("-qarch=auto");
@@ -203,9 +193,6 @@ public class CXXCommandBuilder {
      * @param cxxCmd the container to which to append the arguments.
      */
     public void addPostArgs(ArrayList<String> cxxCmd) {
-        if (sharedLibProps.staticLib && !usingXLC()) {
-            cxxCmd.add("-Wl,--start-group");
-        }
         for (PrecompiledLibrary pcl:options.x10libs) {
             
             if (options.x10_config.DEBUG && !options.x10_config.DEBUG_APP_ONLY) {
@@ -216,10 +203,7 @@ public class CXXCommandBuilder {
             cxxCmd.addAll(pcl.ldFlags);
             cxxCmd.addAll(pcl.libs);
         }
-        if (sharedLibProps.staticLib && !usingXLC()) {
-            cxxCmd.add("-Wl,--end-group");
-        }
-
+            
         // x10rt
         cxxCmd.add("-L"+options.distPath()+"/lib");
         cxxCmd.addAll(x10rt.ldFlags);
@@ -241,27 +225,24 @@ public class CXXCommandBuilder {
      * @param cxxCmd the container to which to append the arguments.
      */
     public void addExecutablePath(ArrayList<String> cxxCmd) {
-        File exe = targetFilePath();
-        if (exe != null) {
-            cxxCmd.add("-o");
-            cxxCmd.add(exe.getAbsolutePath().replace(File.separatorChar,'/'));
-        }
-    }
-
-    public File targetFilePath() {
-        File target = null;
+        File exe = null;
         if (options.buildX10Lib != null) {
         	if (options.executable_path != null) {
-                target = new File(options.buildX10Lib + "/lib/" + sharedLibProps.libPrefix + options.executable_path + sharedLibProps.libSuffix);
-         	}
+                exe = new File(options.buildX10Lib + "/lib/" + sharedLibProps.libPrefix + options.executable_path + sharedLibProps.libSuffix);
+        	} else {
+                return;
+        	}
         } else {
         	if (options.executable_path != null) {
-                target = new File(options.executable_path);
+                exe = new File(options.executable_path);
 	        } else if (options.x10_config.MAIN_CLASS != null) {
-	            target = new File(options.output_directory, options.x10_config.MAIN_CLASS);
+	            exe = new File(options.output_directory, options.x10_config.MAIN_CLASS);
+	        } else {
+	            return;
 	        }
         }
-        return target;
+        cxxCmd.add("-o");
+        cxxCmd.add(exe.getAbsolutePath().replace(File.separatorChar,'/'));
     }
 
     /** Construct the C++ compilation command */
@@ -294,11 +275,7 @@ public class CXXCommandBuilder {
         boolean skipArgs = token.equals("%");
         if (!skipArgs) {
             addPreArgs(cxxCmd);
-            if (options.buildX10Lib != null && sharedLibProps.staticLib) {
-                cxxCmd.add("-c");
-            } else {
-                addExecutablePath(cxxCmd);
-            }
+            addExecutablePath(cxxCmd);
         }
 
         for (String file : outputFiles) {
@@ -381,9 +358,8 @@ public class CXXCommandBuilder {
         } else if (platform.startsWith("freebsd_")) {
         	cbb = new FreeBSD_CXXCommandBuilder();
         } else if (platform.startsWith("bgp")) {
+            // TODO: define specialized CXXCommandBuilder for bgp?
         	cbb = new Linux_CXXCommandBuilder();            
-        } else if (platform.startsWith("bgq")) {
-            cbb = new Linux_CXXCommandBuilder();            
         } else {   
             eq.enqueue(ErrorInfo.WARNING,
                        "Unknown platform '"+platform+"'; using the default post-compiler (g++)");

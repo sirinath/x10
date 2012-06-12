@@ -271,31 +271,14 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
     public native static operator (x:Double) as Int;
 
     /**
-     * Coerce a given UByte to an Int.
-     * @param x the given UByte
-     * @return the given UByte converted to an Int.
-     */
-    @Native("java", "((int)#x)")
-    @Native("c++",  "((x10_int) (#1))")
-    public native static operator (x:UByte): Int;
-
-    /**
-     * Coerce a given UShort to an Int.
-     * @param x the given UShort
-     * @return the given UShort converted to an Int.
-     */
-    @Native("java", "((int)#x)")
-    @Native("c++",  "((x10_int) (#1))")
-    public native static operator (x:UShort): Int;
-
-    /**
-     * Convert a given UInt to an Int.
+     * Coerce a given UInt to an Int.
      * @param x the given UInt
      * @return the given UInt converted to an Int.
      */
     @Native("java", "((int)#x)")
     @Native("c++",  "((x10_int) (#1))")
     public native static operator (x:UInt) as Int;
+
 
     /**
      * A constant holding the minimum value an Int can have, -2<sup>31</sup>.
@@ -371,6 +354,7 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
     /**
      * @deprecated use {@link #parse(String,Int)} instead
      */
+    // @Native("java", "x10.core.Signed.parseInt(#s, #radix)")
     @Native("java", "java.lang.Integer.parseInt(#s, #radix)")
     @Native("c++", "x10aux::int_utils::parseInt(#1, #2)")
     public native static def parseInt(s:String, radix:Int): Int; //throwsNumberFormatException;
@@ -378,6 +362,7 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
     /**
      * @deprecated use {@link #parse(String)} instead
      */
+    // @Native("java", "x10.core.Signed.parseInt(#s)")
     @Native("java", "java.lang.Integer.parseInt(#s)")
     @Native("c++", "x10aux::int_utils::parseInt(#1)")
     public native static def parseInt(s:String): Int; //throwsNumberFormatException;
@@ -389,6 +374,7 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
      * @return the Int represented by the String argument in the specified radix.
      * @throws NumberFormatException if the String does not contain a parsable Int.
      */
+    // @Native("java", "x10.core.Signed.parseInt(#s, #radix)")
     @Native("java", "java.lang.Integer.parseInt(#s, #radix)")
     @Native("c++", "x10aux::int_utils::parseInt(#1, #2)")
     public native static def parse(s:String, radix:Int): Int; //throwsNumberFormatException;
@@ -399,6 +385,7 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
      * @return the Int represented by the String argument.
      * @throws NumberFormatException if the String does not contain a parsable Int.
      */
+    // @Native("java", "x10.core.Signed.parseInt(#s)")
     @Native("java", "java.lang.Integer.parseInt(#s)")
     @Native("c++", "x10aux::int_utils::parseInt(#1)")
     public native static def parse(s:String): Int; //throwsNumberFormatException;
@@ -564,9 +551,7 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
      * @param upper the upper bound
      * @return a range from lower to upper, inclusive.
      */
-    // XTENLANG-3063
-    // @Native("java", "new x10.lang.IntRange((java.lang.System[]) null).$init(#x, #y)")
-    @Native("java", "new x10.lang.IntRange((java.lang.System[]) null).x10$lang$IntRange$$init$S(#x, #y)")
+    @Native("java", "new x10.lang.IntRange((java.lang.System[]) null).$init(#x, #y)")
     @Native("c++", "x10::lang::IntRange::_make(#1, #2)")
     public native static operator (x:Int) .. (y:Int):IntRange{min==x,max==y};
 }

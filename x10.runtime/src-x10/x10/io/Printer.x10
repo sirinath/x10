@@ -52,12 +52,17 @@ public class Printer extends FilterWriter {
     public def print(s:String): void {
         lock.lock();
         try {
-            val ss = s != null ? s : "null";
+        	val ss = s != null ? s : "null";
             val b = ss.bytes();
             write(b, 0, b.size);
-        } finally {
-            lock.unlock();
         }
+        catch (e: IOException) {
+            // should use a finally block here but until we fix XTENLANG-203 this is better
+            lock.unlock();
+            throw e;
+        }
+        // should use a finally block here but until we fix XTENLANG-203 this is better
+        lock.unlock();
     }
 
     public def printf(fmt: String): void { printfArray(fmt, new Array[Any](0)); }

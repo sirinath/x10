@@ -350,6 +350,7 @@ public struct Byte implements Comparable[Byte], Arithmetic[Byte], Bitwise[Byte],
     /**
      * @deprecated use {@link #parse(String,Int)} instead
      */
+    // @Native("java", "x10.core.Signed.parseByte(#s, #radix)")
     @Native("java", "java.lang.Byte.parseByte(#s, #radix)")
     @Native("c++", "x10aux::byte_utils::parseByte(#1, #2)")
     public native static def parseByte(s:String, radix:Int): Byte; //throwsNumberFormatException;
@@ -357,6 +358,7 @@ public struct Byte implements Comparable[Byte], Arithmetic[Byte], Bitwise[Byte],
     /**
      * @deprecated use {@link #parse(String)} instead
      */
+    // @Native("java", "x10.core.Signed.parseByte(#s)")
     @Native("java", "java.lang.Byte.parseByte(#s)")
     @Native("c++", "x10aux::byte_utils::parseByte(#1)")
     public native static def parseByte(s:String): Byte ; //throwsNumberFormatException;
@@ -368,6 +370,7 @@ public struct Byte implements Comparable[Byte], Arithmetic[Byte], Bitwise[Byte],
      * @return the Byte represented by the String argument in the specified radix.
      * @; //throwsNumberFormatException if the String does not contain a parsable Byte.
      */
+    // @Native("java", "x10.core.Signed.parseByte(#s, #radix)")
     @Native("java", "java.lang.Byte.parseByte(#s, #radix)")
     @Native("c++", "x10aux::byte_utils::parseByte(#1, #2)")
     public native static def parse(s:String, radix:Int): Byte ; //throwsNumberFormatException;
@@ -378,6 +381,7 @@ public struct Byte implements Comparable[Byte], Arithmetic[Byte], Bitwise[Byte],
      * @return the Byte represented by the String argument.
      * @throws NumberFormatException if the String does not contain a parsable Byte.
      */
+    // @Native("java", "x10.core.Signed.parseByte(#s)")
     @Native("java", "java.lang.Byte.parseByte(#s)")
     @Native("c++", "x10aux::byte_utils::parseByte(#1)")
     public native static def parse(s:String): Byte ; //throwsNumberFormatException;

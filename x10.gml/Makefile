@@ -56,13 +56,13 @@ base_src=\
 	x10/matrix/Matrix.x10 \
 	x10/matrix/RandTool.x10 \
 	x10/matrix/DenseMatrix.x10 \
-	x10/matrix/VectorMult.x10 \
 	x10/matrix/DistPConsole.x10	\
 	x10/matrix/MatrixMultXTen.x10  \
 	x10/matrix/PConsole.x10 \
 	x10/matrix/VerifyTools.x10 
 
 comm_src=\
+	x10/matrix/comm/ArrayRcast.x10 \
 	x10/matrix/comm/ArrayBcast.x10 \
 	x10/matrix/comm/ArrayGather.x10 \
 	x10/matrix/comm/ArrayScatter.x10 \
@@ -81,19 +81,17 @@ comm_src=\
 	x10/matrix/comm/SparseRemoteSourceInfo.x10\
 	x10/matrix/comm/BlockRemoteCopy.x10 \
 	x10/matrix/comm/BlockBcast.x10 \
-	x10/matrix/comm/BlockGather.x10 \
 	x10/matrix/comm/BlockScatter.x10 \
-	x10/matrix/comm/BlockReduce.x10 \
-	x10/matrix/comm/BlockSetRemoteCopy.x10 \
-	x10/matrix/comm/BlockSetBcast.x10 \
-	x10/matrix/comm/BlockSetReduce.x10
-
+	x10/matrix/comm/BlockGather.x10 \
+	x10/matrix/comm/BlockRingCast.x10 \
+ 	x10/matrix/comm/BlockReduce.x10
 
 
 bwrap_src=\
 	x10/matrix/blas/DenseMatrixBLAS.x10 \
 	x10/matrix/blas/BLAS.x10 \
 	x10/matrix/blas/DriverBLAS.x10
+
 lapack_src=\
 	x10/matrix/lapack/DenseMatrixLAPACK.x10 \
 	x10/matrix/lapack/LAPACK.x10 \
@@ -119,8 +117,7 @@ block_src=\
 	x10/matrix/block/SparseBlock.x10 \
 	x10/matrix/block/DenseBlockMatrix.x10 \
 	x10/matrix/block/Grid.x10 \
-	x10/matrix/block/SparseBlockMatrix.x10 \
-	x10/matrix/block/BlockBlockMult.x10
+	x10/matrix/block/SparseBlockMatrix.x10
 
 dist_src=\
 	x10/matrix/dist/DistDenseMatrix.x10 \
@@ -135,26 +132,8 @@ dist_src=\
 	x10/matrix/distblock/DistMap.x10 \
 	x10/matrix/distblock/DistGrid.x10 \
 	x10/matrix/distblock/BlockSet.x10 \
-	x10/matrix/distblock/DistBlockMatrix.x10 \
-	x10/matrix/distblock/DupBlockMatrix.x10  \
-	x10/matrix/distblock/DistDistMult.x10 \
-	x10/matrix/distblock/CastPlaceMap.x10 \
-	x10/matrix/distblock/DistDupMult.x10 \
-	x10/matrix/distblock/DistVector.x10 \
-	x10/matrix/distblock/DupVector.x10 \
-	x10/matrix/distblock/BlockVectorMult.x10 \
-	x10/matrix/distblock/DistDupVectorMult.x10 \
-	x10/matrix/distblock/summa/SummaMult.x10 \
-	x10/matrix/distblock/summa/AllGridCast.x10 \
-	x10/matrix/distblock/summa/BlockGridCast.x10 \
-	x10/matrix/distblock/summa/BinaryTreeCast.x10 \
-	x10/matrix/distblock/summa/RingCast.x10 \
-	x10/matrix/distblock/summa/AllGridReduce.x10 \
-	x10/matrix/distblock/summa/BlockGridReduce.x10 \
-	x10/matrix/distblock/summa/BinaryTreeReduce.x10 \
-	x10/matrix/distblock/summa/RingReduce.x10 \
-	x10/matrix/distblock/summa/SummaMultTrans.x10
-
+	x10/matrix/distblock/DistBlockMatrix.x10
+	
 
 summa_src=\
 	x10/matrix/dist/summa/SummaDenseMultSparse.x10 \
@@ -189,14 +168,11 @@ include scripts/system_setting.mk
 
 
 #X10_FLAG	= -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS #-O -NO_CHECKS
-X10_FLAG	= -VERBOSE_CHECKS -O -NO_CHECKS  
-#-define ENABLE_RING_COMM
+X10_FLAG	= -VERBOSE_CHECKS -O -NO_CHECKS
 
-MPI_CFLAG   = -define MPI_COMMU -cxx-prearg -DMPI_COMMU 
-
-POST_CPP	= $(LAPACK_CFLAG) -post $(CPP) \# $(POST_PATH) \# $(POST_LIBS)
-POST_MPI	= $(MPI_CFLAG) $(LAPACK_CFLAG) -post $(MCC) \# $(POST_PATH) \# $(POST_LIBS)
-
+MPI_FLAG    = -define MPI_COMMU -cxx-prearg -DMPI_COMMU
+POST_CPP	= -post $(CPP) \# $(POST_PATH) \# $(POST_LIBS)
+POST_MPI	= -post $(MCC) \# $(POST_PATH) \# $(POST_LIBS)
 
 ###################################################
 # X10 file built rules
@@ -226,12 +202,12 @@ clib : $(clib_src) chk_dir
 ##-----------------------------------------------------------------------
 managed_gml		: $(lib_src)
 		@($(MAKE) jlib target=$@ src="$(lib_src)") 
-## native on socket
+
 native_gml		: $(lib_src)
 		@($(MAKE) clib target=$@ src="$(lib_src)" post_opts='$(POST_CPP)')
 
 native_mpi_gml	: $(lib_src) $(mpi_wrap) 
-		@($(MAKE) clib target=$@ src="$(lib_src) $(mpi_wrap)" post_opts='$(POST_MPI)')
+		@($(MAKE) clib target=$@ src="$(lib_src) $(mpi_wrap)" post_opts='$(MPI_FLAG) $(POST_MPI)')
 
 ### build basic non-dist lib, single place (sequential matrix lib)
 managed_seq_gml	: $(seq_src)
@@ -274,11 +250,11 @@ jblas		: libjblas.so
 chk_jlapack	: chk_lapack jlapack
 			cp $(lwrap_path)/WrapLAPACK.java $(build_path)/x10/matrix/lapack
 
-chk_lapack	:
-			mkdir -p $(build_path)/x10/matrix/lapack
+chk_lapack	:			
+			mkdir -p $(build_path)/x10/matrix/lapack 
 
 wrap_lapack.o: wrap_lapack.c
-			g++ -c -v -fPIC -DENABLE_LAPACK $< -o $@
+			g++ -c -v -fPIC $< -o $@
 
 jni_lapack.o: jni_lapack.c
 			g++ -I $(JNI_inc) -c -v -fPIC $< -o $@

@@ -620,34 +620,6 @@ public class X10CPPTranslator extends Translator {
 			if (!doPostCompile(options, eq, compilationUnits, cxxCmd)) return false;
 			
 			if (options.buildX10Lib != null) {
-			    if (shared_lib_props.staticLib) {
-			        ArrayList<String> arCmd = new ArrayList<String>();
-			        arCmd.add(shared_lib_props.ar);
-			        arCmd.add(shared_lib_props.arFlags);
-			        arCmd.add(ccb.targetFilePath().getPath());
-			        
-			        ArrayList<String> objFiles = new ArrayList<String>();
-			        for (String file : compiler.flatOutputFiles()) {
-			            int lastPeriod = file.lastIndexOf('.');
-			            if (-1 == lastPeriod) continue;
-			            String suffix = file.substring(lastPeriod+1, file.length());
-			            if (suffix.equals("cc") || suffix.equals("c") || suffix.equals("cpp") || suffix.equals("cxx")) {
-                            objFiles.add(file.substring(file.lastIndexOf(File.separatorChar)+1, lastPeriod)+".o");   
-			            }
-			        }
-			        if (!objFiles.isEmpty()) {
-			            arCmd.addAll(objFiles);
-			            boolean savedKeepOutputFiles = options.keep_output_files;
-			            options.keep_output_files = false;
-			            try {
-			                if (!doPostCompile(options, eq, objFiles, arCmd.toArray(new String[arCmd.size()]))) return false;
-			            } finally {
-			                options.keep_output_files = savedKeepOutputFiles;
-			            }
-			        }
-			    }
-			    
-			    
 				if (!emitPropertiesFile(options, ccb)) return false;
 			}
 
@@ -789,13 +761,13 @@ public class X10CPPTranslator extends Translator {
 
         	proc.waitFor();
 
-        	if (!options.keep_output_files && outputFiles != null) {
+        	if (!options.keep_output_files) {
         		String[] rmCmd = new String[1+outputFiles.size()];
         		rmCmd[0] = "rm";
         		Iterator<String> iter = outputFiles.iterator();
         		for (int i = 1; iter.hasNext(); i++)
         			rmCmd[i] = iter.next();
-        		runtime.exec(rmCmd, null, options.output_directory);
+        		runtime.exec(rmCmd);
         	}
 
         	if (output != null)

@@ -12,7 +12,6 @@
 package x10.matrix;
 
 import x10.io.Console;
-import x10.util.StringBuilder;
 
 public type Matrix(M:Int)=Matrix{self.M==M};
 public type Matrix(M:Int, N:Int)=Matrix{self.M==M, self.N==N};
@@ -96,9 +95,6 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * Initial matrix data with function, mapping (row index, column index) to double. 
 	 */
 	abstract public def init(f:(Int, Int)=>Double):Matrix(this);
-	abstract public def init(dv:Double):Matrix(this);
-	abstract public def initRandom():Matrix(this);
-	abstract public def initRandom(lowBound:Int, upperBound:Int):Matrix(this);
 	
 	//======================================================================
 	// Data copy and reset 
@@ -304,7 +300,10 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * @param plus	result add-on flag. If true, this += A &#42 B.
 	 * @return		multiplication result
 	 */
-	abstract public def mult(A:Matrix(this.M),B:Matrix(A.N,this.N),	plus:Boolean):Matrix(this);		
+	abstract public def mult(
+			A:Matrix(this.M), 
+			B:Matrix(A.N,this.N), 
+			plus:Boolean):Matrix(this);		
 		   
 	/** 
 	 * Compute this += A<sup>T</sup> &#42 B if plus is true, otherwise 
@@ -315,7 +314,10 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * @param plus	result add-on flag. If true, add the multiplication result to output matrix.
 	 * @return		multiplication result
 	 */
-	abstract public def transMult(A:Matrix{self.N==this.M}, B:Matrix(A.M,this.N), plus:Boolean):Matrix(this); 
+	abstract public def transMult(
+			A:Matrix{self.N==this.M}, 
+			B:Matrix(A.M,this.N), 
+			plus:Boolean):Matrix(this); 
 			
 	/** 
 	 * Compute this += A &#42 B<sup>T</sup> if plus is true, otherwise 
@@ -326,7 +328,10 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * @param plus	result add-on flag. If true, this += A &#42 B<sup>T</sup>.
 	 * @return		multiplication result
 	 */
-	abstract public def multTrans(A:Matrix(this.M),	B:Matrix(this.N, A.N), plus:Boolean):Matrix(this);
+	abstract public def multTrans(
+			A:Matrix(this.M), 
+			B:Matrix(this.N, A.N), 
+			plus:Boolean):Matrix(this);
 	
 	//=====================================================================
 	// Operator overloading
@@ -450,8 +455,6 @@ public abstract class Matrix(M:Int, N:Int) {
 	 */	
 	//public def equal(v:Double):Boolean = Matrix.testSame(this, v);
 	public def equals(v:Double):Boolean = VerifyTools.testSame(this, v);
-	public def equals(v:Int):Boolean    = VerifyTools.testSame(this, v as Double);
-	public def equals(v:Long):Boolean   = VerifyTools.testSame(this, v as Double);
 	
 	
 	/** 
@@ -472,16 +475,16 @@ public abstract class Matrix(M:Int, N:Int) {
 	 * Convert all elements in the matrix into a string
 	 */
 	public def dataToString():String {
-		val dstr = new StringBuilder();
-		dstr.add("--------- Matrix "+M+" x "+N+" ---------\n");
+		var dstr:String="--------- Matrix "+M+" x "+N+" ---------\n";
 		for (var r:Int=0; r<M; r++) {
-			dstr.add(r.toString()+"\t[ ");
+			var rstr:String=r.toString()+"\t[ ";
 			for (var c:Int=0; c<N; c++)
-				dstr.add(this(r,c).toString()+" ");
-			dstr.add("]\n");
+				rstr += this(r,c).toString()+" ";
+			rstr +="]\n";
+			dstr += rstr;
 		}
-		dstr.add("---------------------------------------");
-		return dstr.toString(); 
+		dstr += "---------------------------------------";
+		return dstr; 
 	}
 	
 	/**

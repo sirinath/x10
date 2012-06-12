@@ -44,8 +44,6 @@ import polyglot.util.Position;
 import polyglot.util.QuotedStringTokenizer;
 import polyglot.visit.Translator;
 import x10.X10CompilerOptions;
-import x10.ast.TypeDecl;
-import x10.emitter.Emitter;
 import x10.util.FileUtils;
 import x10c.X10CCompilerOptions;
 
@@ -119,19 +117,6 @@ public class X10Translator extends Translator {
 		return tr;
 	}
 	
-	private static boolean generateJavaFile(SourceFile sfn) {
-	    for (Iterator<TopLevelDecl> i = sfn.decls().iterator(); i.hasNext(); ) {
-	        TopLevelDecl decl = i.next();
-	        if (decl instanceof TypeDecl) continue;  // public type Int(b:Int) = Int{self==b};
-	        if (!(decl instanceof ClassDecl)) return true;
-	        if (Emitter.getJavaRep(((ClassDecl) decl).classDef()) == null) {
-//	            System.out.println("will generate " + sfn);
-	            return true;
-	        }
-	    }
-//            System.out.println("will NOT generate " + sfn);
-	    return false;
-	}
 	/** Override to not open a new file for each declaration. */
 	@Override
 	protected boolean translateSource(SourceFile sfn) {
@@ -140,9 +125,6 @@ public class X10Translator extends Translator {
 	    TargetFactory tf = this.tf;
 	    int outputWidth = job.compiler().outputWidth();
 	    CodeWriter w= null;
-
-	    // if all toplevel decls are @NativeRep'ed, stop generating Java file
-	    if (!generateJavaFile(sfn)) return true;
 
 	    try {
 	        File of;
@@ -382,15 +364,6 @@ public class X10Translator extends Translator {
                     	propFileWriter.println("X10LIB_SRC_JAR=" + jarFileName);
                     	propFileWriter.close();
                     }
-                }
-                // XTENLANG-2126
-                if (!options.keep_output_files) {
-                    java.util.ArrayList<String> rmCmd = new java.util.ArrayList<String>();
-                    rmCmd.add("rm");
-                    rmCmd.add("-rf");
-                    rmCmd.add(options.output_directory.getAbsolutePath()); // N.B. output_directory is a temporary directory
-//                    System.out.println(java.util.Arrays.toString(rmCmd.toArray(strarray)));
-                    runtime.exec(rmCmd.toArray(strarray));
                 }
             }
             catch(Exception e) {

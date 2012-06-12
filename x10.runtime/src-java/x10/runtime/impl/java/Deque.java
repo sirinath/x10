@@ -62,14 +62,9 @@ public class Deque extends Ref {
     // constructor just for allocation
     public Deque(java.lang.System[] $dummy) {super($dummy);}
 
-    public final Deque x10$lang$Deque$$init$S() {
+    public Deque $init() {
         queue = new RefI[INITIAL_QUEUE_CAPACITY];
         return this;
-    }
-    // XTENLANG-3063
-    // not used if X10PrettyPrinterVisitor.supportConstructorWithThrows == true
-    public Deque $init() {
-        return x10$lang$Deque$$init$S();
     }
     
     /**

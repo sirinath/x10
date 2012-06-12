@@ -231,7 +231,8 @@ public final class Array[T] (
      */
     public @Inline def this(backingStore:IndexedMemoryChunk[T])
     {
-        val myReg = new RectRegion1D(backingStore.length()-1);
+        val myReg = new RectRegion1D(0, backingStore.length()-1) 
+             as Region{self.rank==1,self.zeroBased,self.rect,self.rail,self!=null};
         property(myReg, 1, true, true, true, backingStore.length());
 
 	layout_min0 = layout_stride1 = layout_min1 = 0;
@@ -245,7 +246,8 @@ public final class Array[T] (
      */
     public @Inline def this(size:int) {T haszero}
     {
-        val myReg = new RectRegion1D(size-1);
+        val myReg = new RectRegion1D(0, size-1) 
+             as Region{self.rank==1,self.zeroBased,self.rect,self.rail,self!=null};
         property(myReg, 1, true, true, true, size);
 
 	layout_min0 = layout_stride1 = layout_min1 = 0;
@@ -272,7 +274,7 @@ public final class Array[T] (
      */    
     public @Inline def this(size:int, init:(int)=>T)
     {
-        val myReg = new RectRegion1D(size-1);
+        val myReg = new RectRegion1D(0, size-1) as Region{self.zeroBased, self.rail,self.rank==1,self.rect, self!=null};
         property(myReg, 1, true, true, true, size);
         
 	layout_min0 = layout_stride1 = layout_min1 = 0;
@@ -294,7 +296,8 @@ public final class Array[T] (
      */    
     public @Inline def this(size:int, init:T)
     {
-        val myReg = new RectRegion1D(size-1);
+        val myReg = new RectRegion1D(0, size-1)
+           as Region{self.rank==1,self.zeroBased,self.rect,self.rail,self!=null};
         property(myReg, 1, true, true, true, size);
         
 	layout_min0 = layout_stride1 = layout_min1 = 0;

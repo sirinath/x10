@@ -39,7 +39,7 @@ import x10.visit.ExpressionFlattener;
  * @author Bowen Alpern
  *
  */
-public abstract class AnnotationUtils {
+public class AnnotationUtils {
 
     /**
      * @param memberDef
@@ -91,7 +91,7 @@ public abstract class AnnotationUtils {
      * @param node
      * @return
      */
-    public static List<X10ClassType> getAnnotations(Node node) {
+    public List<X10ClassType> getAnnotations(Node node) {
         assert node.ext() instanceof X10Ext;
         return ((X10Ext) node.ext()).annotationTypes();
     }

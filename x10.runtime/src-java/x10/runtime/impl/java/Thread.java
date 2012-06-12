@@ -56,7 +56,7 @@ public class Thread implements x10.core.RefI {
         throw new UnsupportedOperationException("Cannot deserialize Thread");
     }
 
-    public final Thread x10$lang$Thread$$init$S(String name) {
+    public Thread $init(String name) {
         jthread = new java.lang.Thread(name) {
             public void run() {
                 context.set(Thread.this);
@@ -70,33 +70,19 @@ public class Thread implements x10.core.RefI {
         home = Place.place(X10RT.here());
         return this;
     }
-    // XTENLANG-3063
-    // not used if X10PrettyPrinterVisitor.supportConstructorWithThrows == true
-    public Thread $init(String name) {
-        return x10$lang$Thread$$init$S(name);
-    }
 
     public Thread(String name) {
-        // XTENLANG-3063
-//        $init(name);
-        x10$lang$Thread$$init$S(name);
+        $init(name);
     }
 
-    public final Thread x10$lang$Thread$$init$S() {
+    public Thread $init() {
         jthread = java.lang.Thread.currentThread();
         home = Place.place(X10RT.here());
         return this;
     }
-    // XTENLANG-3063
-    // not used if X10PrettyPrinterVisitor.supportConstructorWithThrows == true
-    public Thread $init() {
-        return x10$lang$Thread$$init$S();
-    }
 
     public Thread() {
-        // XTENLANG-3063
-//        $init();
-        x10$lang$Thread$$init$S();
+        $init();
     }
 
     public void $apply() {}

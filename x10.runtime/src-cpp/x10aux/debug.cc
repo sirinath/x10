@@ -15,7 +15,7 @@
 #if defined(DEBUG_SUPPORT)
 // Hook to trigger loading of FD2 component of debugger.
 
-#if defined (__linux__) && !defined(__bgp__) && !defined(__bgq__)
+#if defined (__linux__) && !defined(__bgp__) 
 class FDFDLoader {
 public:
     FDFDLoader();
@@ -25,22 +25,16 @@ static FDFDLoader dummy;
 
 #include <dlfcn.h>
 
-extern bool getBoolEnvVar(const char*);
-
 FDFDLoader::FDFDLoader() {
     void *handle;
 
     handle = dlopen("libderdFD2.so", RTLD_NOW);
-    if (getBoolEnvVar("X10_TRACE_FD2_LOAD")) {
-        if (!handle) {
-            fprintf(stderr, "FD2 lib not loaded (continuing): %s\n", dlerror());
-        } else {
-            fprintf(stderr, "FD2 lib loaded\n");
-        }
+    if (!handle) {
+        fprintf(stderr, "FD2 lib not loaded (continuing): %s\n", dlerror());
     }
 }
 
-#endif // __linux__ && !__bgp__ && !__bgq__
+#endif // __linux__ && !__bgp__
 
 #endif // DEBUG_SUPPORT
 

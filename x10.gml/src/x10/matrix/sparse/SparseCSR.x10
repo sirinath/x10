@@ -13,7 +13,6 @@ package x10.matrix.sparse;
 
 import x10.io.Console;
 import x10.util.Pair;
-import x10.util.StringBuilder;
 
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
@@ -138,10 +137,9 @@ public class SparseCSR extends Matrix {
 		return this;
 	} 
 	
-	public def init(v:Double):SparseCSR(this) {
+	public def init(v:Double):void {
 		val nzd = 1.0 * getStorageSize()/M/N;
 		init(v, nzd);
-		return this;
 	}
 
 	/**
@@ -161,17 +159,6 @@ public class SparseCSR extends Matrix {
 		initRandom(nzd);
 		return this;
 	}
-	
-	public def initRandom(lo:Int, up:Int, nzp:Double): SparseCSR(this) {
-		crdata.initRandomFast(M, nzp, lo, up);
-		return this;
-	}
-	
-	public def initRandom(lo:Int, up:Int): SparseCSR(this) {
-		val nzd = 1.0 * getStorageSize()/M/N;
-		crdata.initRandomFast(M, nzd, lo, up);
-		return this;
-	}	
 	/**
 	 * Initialize with given function with range [0..M, 0..N]
 	 */
@@ -930,7 +917,7 @@ public class SparseCSR extends Matrix {
 	/**
 	   Print the sparse matrix in CSR format
 	*/
-	public def print(msg:String) {
+	public def printSparse(msg:String) {
 		val outstr:String = msg + 
 			"------- Sparse Matrix in CSR "+M+"x"+N+"-------\n"+
 			this.toString() +
@@ -939,7 +926,7 @@ public class SparseCSR extends Matrix {
 		Console.OUT.flush();
 	}
 
-	public def print() { print("");}
+	public def printSparse() { printSparse("");}
 	public def debugPrint(msg:String) {
 		if (Debug.disable) return;
 		Debug.println(msg+this.toString());	

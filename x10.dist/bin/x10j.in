@@ -1,4 +1,3 @@
-verbose=""
 extra_cp=""
 args=""
 
@@ -10,7 +9,6 @@ while [ -n "$1" ]; do
         continue
     fi
     case "$1" in
-        -v|-verbose|--verbose) verbose="1";;
         -classpath|-cp) shift; extra_cp="$1";;
         --) parse=;;
         *) args="${args} '$1'";;
@@ -22,8 +20,7 @@ cp="${TOP}${FILE_SEP}stdlib${FILE_SEP}x10.jar${PATH_SEP}${TOP}${FILE_SEP}lib${FI
 [ -n "${extra_cp}" ] && cp="${extra_cp}${PATH_SEP}${cp}"
 
 command="\"${JAVA}\" -jar \"${TOP}${FILE_SEP}lib${FILE_SEP}${ECJ_JAR}\" -1.5 -nowarn -encoding utf-8 -classpath \"${cp}\" ${args}"
-
-[ -n "$verbose" ] && echo "$command"
+#echo "$command"
 
 eval "$command"
 exit $?

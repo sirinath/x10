@@ -58,7 +58,7 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
     public RuntimeType() {
     }
     
-    public RuntimeType(Class<?> javaClass) {
+    protected RuntimeType(Class<?> javaClass) {
         this(javaClass, null, null);
     }
 
@@ -82,22 +82,13 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         if (useCache) {
             RuntimeType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                RuntimeType<?> type0;
-                if (java.lang.String.class.equals(javaClass)) {
-                    type0 = Types.STRING;
-                } else {
-                    type0 = new RuntimeType<T>(javaClass, null, null);
-                }
+                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, null, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (RuntimeType<T>) type;
         } else {
-            if (java.lang.String.class.equals(javaClass)) {
-                return Types.STRING;
-            } else {
-                return new RuntimeType<T>(javaClass, null, null);
-            }
+            return new RuntimeType<T>(javaClass, null, null);
         }
     }
 
@@ -285,6 +276,10 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
             }
             return instantiateCheck(params, rtt, any);
         }
+        else if (Types.supportTypeParameterOfJavaType) {
+            RuntimeType<?> rtt = Types.getRTT(o);
+            return instantiateCheck(params, rtt, o);
+        }
         return false;
     }
 
@@ -447,43 +442,8 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         return ((T[])array).length;
     }
 
-    private static final String X10_INTEROP_JAVA_ARRAY = "x10.interop.Java.array";
-    private static String typeName(Class<?> javaClass) {
-        if (javaClass.isArray()) {
-            return X10_INTEROP_JAVA_ARRAY + "[" + typeName(javaClass.getComponentType()) + "]";
-        } else if (javaClass.isPrimitive()) {
-            if (byte.class.equals(javaClass)) {
-                return "x10.lang.Byte";
-            }
-            if (short.class.equals(javaClass)) {
-                return "x10.lang.Short";
-            }
-            if (int.class.equals(javaClass)) {
-                return "x10.lang.Int";
-            }
-            if (long.class.equals(javaClass)) {
-                return "x10.lang.Long";
-            }
-            if (float.class.equals(javaClass)) {
-                return "x10.lang.Float";
-            }
-            if (double.class.equals(javaClass)) {
-                return "x10.lang.Double";
-            }
-            if (char.class.equals(javaClass)) {
-                return "x10.lang.Char";
-            }
-            if (boolean.class.equals(javaClass)) {
-                return "x10.lang.Boolean";
-            }
-            assert false;
-            return "";
-        } else {
-            return javaClass.getName();            
-        }
-    }
     public String typeName() {
-        return typeName(javaClass);
+        return javaClass.getName();
     }
 
     protected final String typeNameForFun(Object o) {
@@ -514,7 +474,7 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         int numParams = numParams();
         String str = typeName();
         if (numParams > 0) {
-            if (o instanceof Any) {
+            if (o instanceof Any || Types.supportTypeParameterOfJavaType) {
                 str += "[";
                 for (int i = 0; i < numParams; i++) {
                     if (i != 0) str += ",";

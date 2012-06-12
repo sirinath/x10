@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -44,16 +45,15 @@ public abstract class Runtime implements x10.core.fun.VoidFun_0_0 {
 
     private String[] args;
 
-    // not used
-//    // constructor just for allocation
-//    public Runtime(java.lang.System[] $dummy) {
-//        // TODO
-//        // super($dummy);
-//    }
-//
-//    public Runtime $init() {
-//        return this;
-//    }
+    // constructor just for allocation
+    public Runtime(java.lang.System[] $dummy) {
+        // TODO
+        // super($dummy);
+    }
+
+    public Runtime $init() {
+        return this;
+    }
 
     public Runtime() {}
 
@@ -93,7 +93,6 @@ public abstract class Runtime implements x10.core.fun.VoidFun_0_0 {
         }
 
         // shutdown
-        X10RT.X10_EXITING_NORMALLY = true;
         System.exit(exitCode);
     }
 
@@ -189,11 +188,12 @@ public abstract class Runtime implements x10.core.fun.VoidFun_0_0 {
         }
 
         // build up Array[String] for args
-        // XTENLANG-3063
-//        final x10.array.Array<String> aargs = new x10.array.Array<String>((java.lang.System[]) null, Types.STRING).$init(args.length);
-        final x10.array.Array<String> aargs = new x10.array.Array<String>((java.lang.System[]) null, Types.STRING).x10$array$Array$$init$S(args.length);
+        final x10.array.Array<String> aargs = new x10.array.Array<String>((java.lang.System[]) null, Types.STRING).$init(args.length);
         for (int i = 0; i < args.length; i++) {
+            // for !Emitter.mangleDefaultOnDemandImportsAsShortName
             aargs.$set__1x10$array$Array$$T$G(i, args[i]);
+//            // for Emitter.mangleDefaultOnDemandImportsAsShortName
+//            aargs.$set__1$Array$$T$G(i, args[i]);
         }
 
         // execute root x10 activity
@@ -376,24 +376,23 @@ public abstract class Runtime implements x10.core.fun.VoidFun_0_0 {
     	return ba;
     }
 
-    // not used
-//    public static <T> byte[] serializeUsingReflection(T body) throws IOException {
-//    	long start = PROF_SER ? System.nanoTime() : 0;
-//    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//    	DataOutputStream oos = new DataOutputStream(baos);
-//    	X10JavaSerializer serializer = new X10JavaSerializer(oos);
-//    	serializer.writeObjectUsingReflection(body);
-//    	oos.close();
-//    	byte[] ba = baos.toByteArray();
-//    	if (PROF_SER) {
-//    		long stop = System.nanoTime();
-//    		long duration = stop-start;
-//    		if (duration >= PROF_SER_FILTER) {
-//    			System.out.println("Serialization took "+(((double)duration)/1e6)+" ms.");
-//    		}
-//    	}
-//    	return ba;
-//    }
+    public static <T> byte[] serializeUsingReflection(T body) throws IOException {
+    	long start = PROF_SER ? System.nanoTime() : 0;
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	DataOutputStream oos = new DataOutputStream(baos);
+    	X10JavaSerializer serializer = new X10JavaSerializer(oos);
+    	serializer.writeObjectUsingReflection(body);
+    	oos.close();
+    	byte[] ba = baos.toByteArray();
+    	if (PROF_SER) {
+    		long stop = System.nanoTime();
+    		long duration = stop-start;
+    		if (duration >= PROF_SER_FILTER) {
+    			System.out.println("Serialization took "+(((double)duration)/1e6)+" ms.");
+    		}
+    	}
+    	return ba;
+    }
 
 
 	private static Class<? extends Object> hadoopWritableClass = getHadoopClass();
@@ -509,20 +508,11 @@ public abstract class Runtime implements x10.core.fun.VoidFun_0_0 {
     }
 
     /**
-     * @MultiVM: mapped to Runtime.x10 -> blocking_probe(): void
-     */
-    public static void blockingProbe() {
-        X10RT.blockingProbe();
-    }
-
-    /**
      * Load environment variables.
      */
     public static x10.util.HashMap<String, String> loadenv() {
         Map<String, String> env = System.getenv();
-        // XTENLANG-3063
-//        x10.util.HashMap<String, String> map = new x10.util.HashMap<String, String>((java.lang.System[]) null, Types.STRING, Types.STRING).$init();
-        x10.util.HashMap<String, String> map = new x10.util.HashMap<String, String>((java.lang.System[]) null, Types.STRING, Types.STRING).x10$util$HashMap$$init$S();
+        x10.util.HashMap<String, String> map = new x10.util.HashMap<String, String>((java.lang.System[]) null, Types.STRING, Types.STRING).$init();
         for (Map.Entry<String, String> e : env.entrySet()) {
             map.put__0x10$util$HashMap$$K__1x10$util$HashMap$$V(e.getKey(), e.getValue());
         }

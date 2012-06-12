@@ -292,11 +292,11 @@ final class BlockBlockDist extends Dist {
     }
         
     public def restriction(r:Region(rank)):Dist(rank) {
-        return new WrappedDistRegionRestricted(this, r);
+        return new WrappedDistRegionRestricted(this, r) as Dist(rank); // TODO: cast should not be needed
     }
 
     public def restriction(p:Place):Dist(rank) {
-        return new WrappedDistPlaceRestricted(this, p);
+        return new WrappedDistPlaceRestricted(this, p) as Dist(rank); // TODO: cast should not be needed
     }
 
 

@@ -22,9 +22,7 @@ public class FileReader extends InputStreamReader {
     @NativeRep("java", "x10.core.io.FileInputStream", null, "x10.core.io.FileInputStream.$RTT")
     @NativeRep("c++", "x10aux::ref<x10::io::FileReader__FileInputStream>", "x10::io::FileReader__FileInputStream", null)
     protected final static class FileInputStream extends InputStream {
-    	// XTENLANG-3063
-        // @Native("java", "new x10.core.io.FileInputStream((java.lang.System[]) null).$init(#path)")
-    	@Native("java", "new x10.core.io.FileInputStream((java.lang.System[]) null).x10$io$FileReader$FileInputStream$$init$S(#path)")
+        @Native("java", "new x10.core.io.FileInputStream((java.lang.System[]) null).$init(#path)")
         public native def this(path: String); //throws FileNotFoundException;
     }
 

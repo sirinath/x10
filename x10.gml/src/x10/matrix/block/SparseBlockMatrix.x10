@@ -12,7 +12,6 @@
 package x10.matrix.block;
 
 import x10.io.Console;
-import x10.util.StringBuilder;
 
 import x10.matrix.Debug;
 import x10.matrix.VerifyTools;
@@ -196,13 +195,7 @@ public class SparseBlockMatrix(grid:Grid) extends Matrix  {
 		}
 		return this;
 	}
-	
-	public def initRandom(lo:Int, up:Int):SparseBlockMatrix(this) {
-		for (val [p] :Point in listBs) {
-			listBs(p).sparse.initRandom(lo,up);
-		}
-		return this;
-	}
+
 
 	//================================================================
 	// Data copy and reset

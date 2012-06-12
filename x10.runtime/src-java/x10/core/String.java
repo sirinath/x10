@@ -19,7 +19,6 @@ import x10.x10rt.X10JavaSerializable;
 import x10.x10rt.X10JavaSerializer;
 
 import java.io.IOException;
-import java.util.WeakHashMap;
 
 final public class String extends x10.core.Ref implements
     x10.core.fun.Fun_0_1<x10.core.Int, x10.core.Char>,
@@ -65,66 +64,44 @@ final public class String extends x10.core.Ref implements
     public java.lang.Object $ge(final java.lang.Object a1, final Type t1) {
         return x10.core.Boolean.$box($ge$O((java.lang.String) a1));
     }
-    // for X10PrettyPrinterVisitor.generateSpecialDispatcher
+    // for X10PrettyPrinterVisitor.returnSpecialTypeFromDispatcher
     // dispatcher for method abstract public x10.util.Ordered.operator<(that:T):x10.lang.Boolean
-    public boolean $lt$Z(java.lang.Object a1, Type t1) { return $lt$O((java.lang.String) a1); }
+    public boolean $lt$O(java.lang.Object a1, Type t1) { return $lt$O((java.lang.String) a1); }
     // dispatcher for method abstract public x10.util.Ordered.operator>(that:T):x10.lang.Boolean
-    public boolean $gt$Z(java.lang.Object a1, Type t1) { return $gt$O((java.lang.String) a1); }
+    public boolean $gt$O(java.lang.Object a1, Type t1) { return $gt$O((java.lang.String) a1); }
     // dispatcher for method abstract public x10.util.Ordered.operator<=(that:T):x10.lang.Boolean
-    public boolean $le$Z(java.lang.Object a1, Type t1) { return $le$O((java.lang.String) a1); }
+    public boolean $le$O(java.lang.Object a1, Type t1) { return $le$O((java.lang.String) a1); }
     // dispatcher for method abstract public x10.util.Ordered.operator>=(that:T):x10.lang.Boolean
-    public boolean $ge$Z(java.lang.Object a1, Type t1) { return $ge$O((java.lang.String) a1); }
+    public boolean $ge$O(java.lang.Object a1, Type t1) { return $ge$O((java.lang.String) a1); }
 
 
-    /*final*/ java.lang.String $value;
+    public java.lang.String $value;
 
-    private String(java.lang.String value) {
+    public String(java.lang.String value) {
         $value = value;
     }
 
     // constructor just for allocation
-    private String(java.lang.System[] $dummy) {
+    public String(java.lang.System[] $dummy) {
         super($dummy);
     }
 
-    // not used
-//    public String $init(java.lang.String value) {
-//        $value = value;
-//        return this;
-//    }
+    public String $init(java.lang.String value) {
+        $value = value;
+        return this;
+    }
     
-    // not used
-//    public String() {
-//        $value = "";
-//    }
-
-    // not used
-//    public String $init() {
-//        $value = "";
-//        return this;
-//    }
-    
-    private static final boolean useCache = true;
-    private static final WeakHashMap<java.lang.String,String> cache = new WeakHashMap<java.lang.String,String>();
-    private static String make(java.lang.String value) {
-        assert value != null;
-        if (useCache) {
-            String str;
-            synchronized (cache) {
-                str = cache.get(value);
-                if (str == null) {
-                    str = new String(value);
-                    cache.put(value,str);
-                }
-            }
-            return str;
-        } else {
-            return new String(value);
-        }
+    public String() {
+        $value = "";
     }
 
+    public String $init() {
+        $value = "";
+        return this;
+    }
+    
     public static String $box(java.lang.String value) {
-        return value == null ? null : make(value);
+        return value == null ? null : new String(value);
     }
     
     public static java.lang.String $unbox(String obj) {

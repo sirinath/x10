@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -142,53 +141,6 @@ int Launcher::lookupPlace(uint32_t myPlace, uint32_t destPlace, char* response, 
 }
 
 /* *********************************************************************** */
-/*     Create a new empty directory at this place and change to it         */
-/* *********************************************************************** */
-
-void Launcher::enterRandomScratchDir (uint32_t _myproc)
-{
-    // [DC] Deciding not to use mkdtemp as it is too recent (posix 2008)
-    // Although tmpnam may return a fresh path that then becomes occupied
-    // before the mkdir, we detect this and retry tmpnam so this should be safe.
-    // [DC] Since tmpnam seems to generate an irritating warning from GNU ld,
-    // rolling my own here
-
-    // this tries to avoid collisions
-    srand((unsigned int)getpid());
-
-    int max_attempts = 1000;
-    for (int attempts = 0 ; attempts<max_attempts ; attempts++) {
-
-        char random_path[PATH_MAX];
-
-        int r = snprintf(random_path, sizeof random_path, "%s/x10_scratch%d_%08x", P_tmpdir, _myproc, (unsigned int)rand());
-        if ((size_t)r >= sizeof random_path) {
-            DIE("Launcher %u: while trying to create a scratch directory string buffer (%Z bytes) overflowed.", _myproc, sizeof random_path);
-        }
-
-        // attempt to mkdir the random_path
-        r = mkdir(random_path, S_IRWXU);
-        if (r==-1) {
-            if (errno==EEXIST) continue; // try again
-            // some other sort of error...
-            DIE("Launcher %u: cannot create scratch directory \"%s\"", _myproc, random_path);
-        }
-
-        // successfully made random_path
-
-        r = chdir(random_path);
-        if (r==-1) {
-            DIE("Launcher %u: cannot chdir to scratch directory \"%s\"", _myproc, random_path);
-        }
-
-        return;
-    }
-
-    // if we didn't return already, attempts exceeded
-    DIE("Launcher %u: after %d attempts, could not make a fresh scratch directory", _myproc, max_attempts);
-}
-
-/* *********************************************************************** */
 /*     start all children. If there are no children, nothing is done       */
 /* *********************************************************************** */
 
@@ -220,8 +172,7 @@ void Launcher::startChildren()
 	if (!getenv(X10_LAUNCHER_CWD))
 	{
 		char dir[1024];
-		char *r = getcwd(dir, sizeof(dir));
-        if (r==NULL) DIE("Launcher %u: getcwd failed", _myproc);
+		getcwd(dir, sizeof(dir));
 		setenv(X10_LAUNCHER_CWD, dir, 1);
 	}
 
@@ -267,61 +218,10 @@ void Launcher::startChildren()
 				unsetenv(X10_LAUNCHER_SSH);
 				unsetenv(X10_LAUNCHER_RUNLAUNCHER);
 				setenv(X10_LAUNCHER_PARENT, masterPort, 1);
-                if (checkBoolEnvVar(getenv(X10_SCRATCH_CWD))) {
-                    enterRandomScratchDir(_myproc);
-                } else {
-                    int r = chdir(getenv(X10_LAUNCHER_CWD));
-                    if (r==-1) {
-                        DIE("Launcher %d: could not chdir to indicated working directory \"%s\"", _myproc, getenv(X10_LAUNCHER_CWD));
-                    }
-                }
+				chdir(getenv(X10_LAUNCHER_CWD));
 				unsetenv(X10_LAUNCHER_CWD);
 
 				// check to see if we want to launch this in a debugger
-                if (checkBoolEnvVar(getenv(X10_JDB)))
-                {
-                    const char *jdb_suspend = getenv(X10_JDB_SUSPEND) == NULL ? "none" : getenv(X10_JDB_SUSPEND);
-                    bool suspend_me = false;
-                    if (!strcmp(jdb_suspend,"none") || !strcmp(jdb_suspend,"NONE")) {
-                        suspend_me = false;
-                    } else if (!strcmp(jdb_suspend,"all") || !strcmp(jdb_suspend,"ALL")) {
-                        suspend_me = true;
-                    } else if (!strcmp(jdb_suspend,"first") || !strcmp(jdb_suspend,"FIRST")) {
-                        suspend_me = 0==_myproc;
-                    } else {
-                        DIE("The X10_JDB_SUSPEND value %s is invalid (must be none / all / first)\n", jdb_suspend);
-                    }
-                    long base_port = getenv(X10_JDB_BASE_PORT)==NULL ? 8000 : strtol(getenv(X10_JDB_BASE_PORT), NULL, 10);
-                    if (base_port < 0 || base_port > 65535) {
-                        DIE("The X10_JDB_BASE_PORT value %ld is invalid (must be 0 -> 65535)\n", base_port);
-                    }
-                    
-                    // launch this runtime in a debugger
-                    char** newargv;
-                    #ifdef DEBUG
-                        fprintf(stderr, "Runtime %u forked with jdb at port %d.  Running exec.\n", _myproc, base_port);
-                    #endif
-                    int numArgs = 0;
-                    while (_argv[numArgs] != NULL)
-                        numArgs++;
-                    newargv = (char**)alloca((numArgs+3)*sizeof(char*));
-                    if (newargv == NULL)
-                        DIE("Launcher %u: Allocating new argv for jdb params failed\n", _myproc);
-                    newargv[0] = _argv[0];
-                    newargv[1] = _argv[1];
-                    newargv[2] = (char*)"-Xdebug";
-                    char jdwp[1000] = "";
-                    snprintf(jdwp, sizeof jdwp, "-Xrunjdwp:transport=dt_socket,address=%ld,server=y,suspend=%s", base_port+_myproc, suspend_me ? "y" : "n");
-                    newargv[3] = jdwp;
-                    for (int i=2; i<numArgs; i++)
-                        newargv[i+2] = _argv[i];
-                    newargv[numArgs+2] = (char*)NULL;
-                    if (execvp(newargv[0], newargv))
-                        // can't get here, if the exec succeeded
-                        DIE("Launcher %u: runtime exec with jdb failed", _myproc);
-                }
-
-                // check to see if we want to launch this in a debugger
 				char* which = getenv(X10_GDB);
 				if (which != NULL)
 				{
@@ -510,9 +410,6 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 	/* --------------------------------------------- */
 
 	signal(SIGCHLD, SIG_DFL); // disable the SIGCHLD handler
-
-	// send SIGTERM to any remaining children
-	Launcher::cb_sighandler_term(SIGTERM);
 
 	// shut down any connections if they still exist
 	handleDeadParent();
@@ -1003,8 +900,7 @@ bool Launcher::handleChildCout(int childNo)
 		return handleDeadChild(childNo, 1);
 	else
 	{
-		int r = write(fileno(stdout), buf, n);
-        if (r==-1) DIE("Launcher %d could not write child process stdout buffer to launcher stdout", _myproc);
+		write(fileno(stdout), buf, n);
 		fflush(stdout);
 	}
 	return true;
@@ -1021,8 +917,7 @@ bool Launcher::handleChildCerror(int childNo)
 		return handleDeadChild(childNo, 2);
 	else
 	{
-		int r = write(fileno(stderr), buf, n);
-        if (r==-1) DIE("Launcher %d could not write child process stderr buffer to launcher stderr", _myproc);
+		write(fileno(stderr), buf, n);
 		fflush(stderr);
 	}
 	return true;
@@ -1267,10 +1162,6 @@ void Launcher::startSSHclient(uint32_t id, char* masterPort, char* remotehost)
 	char ** argv = (char **) alloca (sizeof(char *) * (_argc+environ_sz+32));
 	int z = 0;
 	argv[z] = _ssh_command;
-	static char ttyarg[] = "-tt";
-	argv[++z] = ttyarg;
-	static char quietarg[] = "-q";
-	argv[++z] = quietarg;
 	argv[++z] = remotehost;
     static char env_string[] = "env";
 	argv[++z] = env_string;

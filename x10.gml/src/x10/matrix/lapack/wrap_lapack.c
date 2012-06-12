@@ -87,11 +87,8 @@ SUBROUTINE DGESV( N, NRHS, A, LDA, IPIV, B, LDB, INFO )
 *                singular, so the solution could not be computed.
 *
 */
-#if defined(__bgp__)
-void dgesv(int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
-#else
 void dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
-#endif
+
 
 /****************************************************************************
 SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
@@ -168,11 +165,7 @@ SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
 *                form did not converge to zero.
 *
 */
-#if defined(__bgp__)
-void dsyev(char* JOBZ, char* UPLO, int* N, double* A, int* LDA, double* W, double* WORK, int* LWORK, int* INFO );
-#else
 void dsyev_(char* JOBZ, char* UPLO, int* N, double* A, int* LDA, double* W, double* WORK, int* LWORK, int* INFO );
-#endif
 
 
 
@@ -196,27 +189,15 @@ int solve_linear_equation(double* A, double* B, int* IPIV, int* dim)
 	             // unit diagonal elements of L are not stored.
 	//double* B; // On exit, if INFO = 0, the N-by-NRHS solution matrix X.
 	int INFO;
-#ifdef ENABLE_LAPACK
 
-#if defined(__bgp__)
-	dgesv(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
-#else
 	dgesv_(&N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO);
-#endif
-
-#else
-	printf("LAPACK is not added in GML build.\n");
-	printf("Uncomment the line: add_lapack = yes in system_setting.mk, and make sure lapack lib and path names are correct\n");
-	fflush(stdout);
-	exit(1);
-#endif
 	return INFO;
 }
 
 int comp_eigenvalue(double* A, double* W, double* WORK, int* dim)
 {
 	char JOBZ = 'N';   //Compute eigenvalues
-	char UPLO = dim[1]?'U':'L';
+	char UPLO = 'L';
 	int  N    = dim[0]; //order of A
 	int  LDA  = N; //leading dimension of A
 	//double* A;// Input, on exit, A is destroyed.
@@ -225,28 +206,15 @@ int comp_eigenvalue(double* A, double* W, double* WORK, int* dim)
 	//int LWORK; //work space size optimized on exit, LWORK >= max(1,3*N-1).
 	int*  LWORK = &dim[1];//dim[1];
 	int INFO;
-#ifdef ENABLE_LAPACK
 
-#if defined(__bgp__)
-	dsyev(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
-#else
 	dsyev_(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
-#endif
-
-#else
-	printf("LAPACK is not added in GML build.\n");
-	printf("Uncomment the line: add_lapack = yes in system_setting.mk, and make sure lapack lib and path names are correct\n");
-	fflush(stdout);
-	exit(1);
-#endif
-
 	return INFO;
 }
 
 int comp_eigenvector(double* A, double* W, double* WORK, int* dim)
 {
 	char JOBZ = 'V';    //Compute eigenvalues and eigenvectors
-	char UPLO = dim[1]?'U':'L';
+	char UPLO = 'L';
 	int  N    = dim[0]; //order of A
 	int  LDA  = N; //leading dimension of A
 	//double* A;// On exit, if INFO = 0, A contains the orthonormal eigenvectors of the matrix A.
@@ -256,18 +224,6 @@ int comp_eigenvector(double* A, double* W, double* WORK, int* dim)
 	int*  LWORK = &dim[1];
 	int INFO;
 
-#ifdef ENABLE_LAPACK
-
-#if defined(__bgp__)
-	dsyev(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
-#else
 	dsyev_(&JOBZ, &UPLO, &N, A, &LDA, W, WORK, LWORK, &INFO );
-#endif
-#else
-	printf("LAPACK is not added in GML build.\n");
-	printf("Uncomment the line: add_lapack = yes in system_setting.mk, and make sure lapack lib and path names are correct\n");
-	fflush(stdout);
-	exit(1);
-#endif
 	return INFO;
 }
