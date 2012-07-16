@@ -1,0 +1,64 @@
+Release 2.3.0
+
+MAJOR CHANGES
+
+The following major changes were made in the X10 language
+specification and implementation in this release.
+
+  + Java interoperability summary (Mikio to write).
+
+  + The semantics of static field initialization were changed so
+    that static fields are now lazily initialized on a per-Place basis 
+    when the field is first read by an activity executing in a given Place.
+    For more details, please see Section 8.6 (Static Initialization) in
+    the language specification. 
+
+  + Improvements in XRX busy-wait loop (Olivier to write)
+
+
+
+Please consult the language specification for the details of
+any minor language changes and specification clarifications made in
+this release.
+
+LIMITATIONS OF THIS RELEASE
+
+The following features described in the 2.3.0 language manual do not
+currently work and will be fixed in the subsequent releases:
+  - Non-static type definitions as class or interface members
+    (static type defs do work)
+
+The constraint solver used by X10 typechecker is known to be incomplete 
+for situations in which a constraint implies an infinite number of 
+distinct constraints.
+
+Additionally, the following features described in the language
+manual do not currently work with the C++ backend and will be fixed in
+the subsequent releases:
+  - Garbage collection on AIX
+  - Non-final generic instance methods
+  - Exception stack traces on Cygwin
+
+Although greatly improved from previous releases, the X10 runtime 
+still uses a modified "busy wait" loop in the worker threads that 
+execute asyncs. A consequence of this is that even if a Place has 
+no asyncs to execute, one worker thread in the Place will still consume
+CPU cycles busy waiting for messages to arrive from the network.  
+
+The generated C++ code requires g++ 4.2 or better to be compiled; 
+we do almost all of our testing against g++ 4.3.2.  On AIX, you
+may either use g++ 4.2 or better or xlC 10.1.0.4 or better.
+
+SUMMARY OF ISSUES RESOLVED IN THIS RELEASE
+
+Below is a summary of JIRA issues addressed for the X10 2.3.0
+
+JIRA ISSUES GO HERE
+
+For the details of JIRA issues fixed in this release, see
+http://jira.codehaus.org/browse/XTENLANG/fixforversion/NUMBER_HERE
+
+Please use the X10 JIRA to report bugs, after ensuring the problem is
+not already reported:
+http://jira.codehaus.org/secure/IssueNavigator.jspa?reset=true&&pid=11812&resolution=-1
+
