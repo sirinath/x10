@@ -22,8 +22,9 @@
 \usepackage{commands}
 
 \usepackage[
-pdfauthor={},
-pdftitle={An Introduction to Programming With X10},
+pdfauthor={Vijay Saraswat and Olivier Tardieu and David
+              Grove and David Cunningham and Mikio Takeuchi and Benjamin Herta},
+pdftitle={A Brief Introduction To X10},
 pdfcreator={pdftex},
 pdfkeywords={X10},
 linkcolor=blue,
@@ -33,14 +34,16 @@ urlcolor=blue
 
 \ifpdf
           \pdfinfo {
-              /Author   (Jonathan Brezin and Stephen J. Fink)
-              /Title    (Programming With X10)
+              /Author   (Vijay Saraswat and Olivier Tardieu and David
+              Grove and David Cunningham and Mikio Takeuchi and Benjamin Herta)
+              /Title    (A Brief Introduction To X10)
               /Keywords (X10)
               /Subject  ()
               /Creator  (TeX)
               /Producer (PDFLaTeX)
           }
 \fi
+
 
 \newcommand{\etc}{{\em etc.}}
 % Sizes and dimensions
@@ -67,13 +70,19 @@ urlcolor=blue
 
 \mainmatter
 
+\part{Programming Framework}
 \input{chapters/whyx10}
+\input{chapters/x10-basics}
 \input{chapters/apgas}
-\input{chapters/x10-summary}
-\input{chapters/basic-idioms}
-\input{chapters/advanced-idioms}
 
-%\input{chapter-arrays}
+\part{Programming Examples}
+\input{chapters/Basics}
+\input{chapters/Teams}
+\input{chapters/DistArrays}
+\input{chapters/Workers}
+\input{chapters/Unbalanced}
+
+\input{chapters/Conclusion}
 
 
 \renewcommand{\bibname}{References}
@@ -81,5 +90,22 @@ urlcolor=blue
 \bibliography{master}
 
 \appendix
+\chapter{X10doc for Key APIs}
+This chapter is intended to have the normative discussion, referenced
+by the rest of the book for details
+\section{x10.lang.Place}
+\section{x10.lang.GlobalRef}
+\section{x10.lang.PlaceLocalHandle}
+\section{x10.array.PlaceGroup}
+\section{x10.array.Array}
+\section{x10.lang.Runtime.Workers}
+\section{x10.util.Team}
+\section{x10.util.Options}
+
+\chapter{Building X10}
+Choosing which transports to work with. When to use MPI.
+
+How to make an optimized build.
+
 \end{document}
 

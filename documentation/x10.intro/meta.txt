@@ -1,6 +1,6 @@
 Sat Jul 28 04:27:59 2012
 
-Authors: Vijay, Olivier, Dave G, Dave C, Mikio, Ben, Bard, Jonathan
+Authors: Vijay, Olivier, Dave G, Dave C, Mikio, Ben, Bard, 
 
 This document is to be the guide to programming efficiently in X10 for
 the HPC programmer. 
@@ -35,37 +35,6 @@ illustrate all ideas. They will serve as the running guide.
 Everywhere (after the introduction) use concrete pieces of running
 code to explain concepts. 
 
-CONCEPTS THAT NEED TO BE EXPLAINED
-
- Basic APGAS model.
-
- GlobalRef
- PlaceLocalHandle
-
- IndexedMemoryChunk
-
- Arrays
- PlaceGroups
-
- Team
- 
-ORDER OF PROGRAMS
-
- Stream: PlaceGroup,GlobalRef, Pragma, IMC, Team
-   
- KMeans 
-
- FT
-
- LU
-
- RA
-
- SSCA1 ...?
-
- SSCA2
-
- UTS
 
 Target page count: 100-120 pp
 
@@ -73,7 +42,20 @@ Order of chapters
 
  I Introduction
 
- II APGAS Model
+ II Basics of X10 
+    basic oo structure
+    structs
+    functions
+    types -- constrained types, inner types, type-defs, type
+    inference, <: 
+
+    arrays -- indexedmemorychunk
+
+    interface to C/C++
+
+    annotations, pragmas
+
+III APGAS Model
 
   a. places
     at, object model (copying of values), 
@@ -87,19 +69,6 @@ Order of chapters
    (How exensively are clocks used in these benchmarks?)
 
   e. atomic, when (They may not play a major role in this document.)
-   
- III Basics of X10 
-    basic oo structure
-    structs
-    functions
-    types -- constrained types, inner types, type-defs, type
-    inference, <: 
-
-    arrays -- indexedmemorychunk
-
-    interface to C/C++
-
-    annotations, pragmas
    
 IV.  APGAS  model as realized in X10
 
@@ -115,9 +84,6 @@ IV.  APGAS  model as realized in X10
 
     Array .. array copy.
 
-    finish realizations
-         SPMD finish
-         Async and back
 
  IV Stream
     Explain the basic computational problem.
@@ -170,7 +136,7 @@ VII Using multiple threads
         allreduce
       Performance
 
-VIII putting it all together
+VIII Putting it all together
     UTS
       all the idioms
 
@@ -178,7 +144,10 @@ VIII putting it all together
 
 TBD: Do we have space and time for SSCA1?
 
-Appendix Key Libraries x10doc for them. Reference discussion.
+Appendix x10doc for key library routines. 
+
+This chapter is intended to have the normative discussion, referenced
+to by the rest of the book for details.
 
   IndexedMemoryChunk
 
