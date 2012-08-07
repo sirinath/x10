@@ -1,0 +1,110 @@
+\documentclass[a4paper]{article}
+
+
+\usepackage{fullpage}
+
+\title{Initialization in X10 - Technical Report}
+
+\author{Yoav Zibin \texttt{yoav.zibin@gmail.com}}
+
+\date{}
+
+
+
+
+\input{../commands}
+
+
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\lstset{language=java,basicstyle=\ttfamily\small}
+
+\section{Introduction}
+This technical report formalizes the hardhat initialization rules in X10
+    using \emph{Featherweight X10} (FX10).
+Read first the paper ``Object Initialization in X10" to understand the motivation behind the hardhat rules.
+    %the terminology (e.g., raw and cooked objects),
+%    the initialization rules of X10,
+%    and their connection with X10's concurrent and distributed constructs (\finish, \async, and \code{at}).
+
+\begin{proof}
+Proof of the main theorem in the paper.
+We will break the proof into several lemmas, each proving points (i)--(iv).
+\end{proof}
+
+
+\begin{Lemma}[closed]
+  \textbf{(Closed is preserved)}
+    For every closed expression~$\grave{\he} \neq \hl$, and a well-typed heap~$H$,
+        if $H,\grave{\he} \reducesto H',\acute{\he}$,
+        then $\acute{\he}$ is closed.
+\end{Lemma}
+\begin{proof}
+Let's consider all the possible reduction rules in \Ref{Figure}{reduction}.
+We will prove by induction on the size of $\he$.
+
+Consider \RULE{R-Async}, where~$\grave{\he} = \async~\hl;\acute{\he}$:
+\[\typerule{
+}{
+  \async~\hl;\acute{\he},H \reduce \acute{\he},H
+}
+\]
+Then, because $\grave{\he}$ is closed, then $\acute{\he}$ is closed.
+
+Consider \RULE{RC-Receiver}, where~$\grave{\he} = \he.\hm(\ol{\he})$:
+\[\typerule{
+    \he,H \reduce \he',H'
+}{
+  \he.\hm(\ol{\he}),H \reduce \he'.\hm(\ol{\he}),H'
+}
+\]
+By induction (the size of~$\he$ is smaller than the size of~$\grave{\he}$), we have that~$\he'$ is closed.
+Therefore,~$\acute{\he} = \he'.\hm(\ol{\he})$ is closed.
+
+The only remaining two interesting cases are~\RULE{R-New} and~\RULE{R-Invoke}.
+Consider~\RULE{R-Invoke} (\RULE{R-New} is handled similarly), where~$\grave{\he} = \hl'.\hm(\ol{\hl})$:
+\[
+\typerule{
+    H(\hl')=\hC(\ldots)
+        \gap
+    \mbody{}(\hm,\hC)=\ol{\hx}.\he
+}{
+  \hl'.\hm(\ol{\hl}),H \reduce [\ol{\hl}/\ol{\hx},\hl'/\this]\he,H
+}
+\]
+Note that \he might not be closed, i.e., it may contain method parameters or \this.
+However, because the program is well-typed and~$\mbody{}(\hm,\hC)=\ol{\hx}.\he$,
+    then \he may only contain either~$\hx_i$ or \this,
+    and these are substituted by locations in~$[\ol{\hl}/\ol{\hx},\hl'/\this]\he$,
+    thus~$\grave{\he}$ is closed.
+\end{proof}
+
+\begin{Lemma}[well-typed]
+  \textbf{(Heap is well-typed)}
+    For every closed expression~$\grave{\he} \neq \hl$, and a well-typed heap~$H$,
+        if $H,\grave{\he} \reducesto H',\acute{\he}$,
+        then $H'$ is well-typed.
+\end{Lemma}
+\begin{proof}
+Let's consider all the possible reduction rules in \Ref{Figure}{reduction}.
+We will prove by induction on the size of $\he$.
+
+For the following rules we have that~$H=H'$, thus $H'$ is well-typed:
+\RULE{R-Finish}
+\RULE{R-Async}
+\RULE{R-Field-Access}
+
+
+\RULE{R-Field-Assign}
+
+\end{proof}
+
+%\input{val}
+
+\end{document}

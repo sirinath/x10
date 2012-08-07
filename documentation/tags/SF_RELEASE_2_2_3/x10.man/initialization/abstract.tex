@@ -1,0 +1,26 @@
+X10 is an object oriented programming language with a sophisticated
+    type system (constraints, class invariants, non-erased generics, closures)
+    and concurrency constructs (asynchronous activities, multiple places\removeGlobalRef{, global references}).
+Object initialization is a cross-cutting concern that interacts with all of these features
+    in delicate ways that may cause type, runtime, and security errors.
+This paper discusses possible designs for object initialization,
+    and the ``hardhat'' design chosen and implemented in X10 version 2.2.
+Our implementation includes a
+    fixed-point inter-procedural (intra-class)
+    data-flow analysis
+    that infers, for each method called during initialization,
+    the set of fields that are read, and
+    those that are asynchronously and synchronously assigned.
+Our codebase of more than 200K lines of code only had 104 annotations.
+%	and Java code was converted to X10 with minor changes.
+Finally, we formalize the essence of initialization checking with an
+effect system intended to complement a standard FJ style
+formalization of the type system for X10. This system is substantially
+simpler than the masked types of \cite{XinQi:2009}. To our knowledge, this is
+the first formalization of a type and (flow-sensitive) effect system
+for safe initialization in the presence of concurrency
+constructs. This formalization can be extended to cover all the
+features discussed in the first part of the paper.
+%Finally, we present a case study in which a large collection of java classes
+%    were converted to X10,
+%    and discuss the consequences of having a hardhat design.
