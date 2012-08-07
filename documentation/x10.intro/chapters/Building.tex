@@ -52,6 +52,6 @@ takes arguments to enable runtime optimizations, reduced error checking, and
 transport selection of your program source, at build-time.  Use the {\tt -O}
 {\tt -NO\_CHECKS}, and {\tt -STATIC\_CHECKS} flags for the fastest performance,
 after you are satisfied with the correctness of your program.  To choose a
-network transport other than sockets, specify {\tt PAMI}, {\tt MPI}, or {\tt
+network transport other than sockets, specify {\tt pami}, {\tt mpi}, or {\tt
 standalone} as the value of the {\tt -x10rt} flag.  For example: 
-``{\tt x10c++ -O -NO\_CHECKS -STATIC\_CHECKS -x10rt PAMI YourProgram.x10}''.
+``{\tt x10c++ -O -NO\_CHECKS -STATIC\_CHECKS -x10rt pami YourProgram.x10}''.
