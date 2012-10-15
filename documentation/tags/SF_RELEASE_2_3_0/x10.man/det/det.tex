@@ -1,0 +1,94 @@
+\documentclass[9pt]{sigplanconf}
+
+%\conferenceinfo{X10'11,} {June 4, 2011, San Jose, California, USA.}
+%\CopyrightYear{2011}
+%\crdata{978-1-4503-0770-3}
+%\copyrightdata{}
+
+% \stepcounter Doesn't work in a caption!
+\newcounter{RuleCounter}
+\stepcounter{RuleCounter}
+\newcommand{\userule}[1]{\arabic{#1}}
+\newcommand{\definerule}[1]{\newcounter{#1}\addtocounter{#1}{\arabic{RuleCounter}}\stepcounter{RuleCounter}}
+\newcommand{\removeGlobalRef}[1]{}
+\newcommand{\Xten}[0]{X10}
+
+\input{commands}
+
+\begin{document}
+
+
+
+
+\title{Lightweight Safe Concurrent Programming}
+
+\authorinfo{}{}{}
+%\authorinfo{Vijay Saraswat$^1$ \and Yoav Zibin$^1$ \and Nalini Vasudevan$^2$ \and
+%  Yan Li$^3$ \and Olivier Tardieu$^1$ \and Nathaniel Clinger$^1$}
+%           {IBM research in TJ Watson$^1$ and China$^3$~~~~Intel Labs$^2$}
+%          {vsaraswa$~|~$zibin$~|~$tardieu$~|~$clinger@us.ibm.com~~~~naliniv@gmail.com$^2$~~~~liyancrl@cn.ibm.com$^3$}
+%Nalini is at Intel Labs. naliniv@gmail.com,
+%Yan Li is at China Research Lab. liyancrl@cn.ibm.com
+
+\maketitle
+
+
+
+\begin{abstract}
+\input{abstract-2}
+\end{abstract}
+
+%\category{D.3.3}{Programming Languages}{Language Constructs and Features}
+%\category{D.1.5}{Programming Techniques}{Object-oriented Programming}
+
+%\terms
+%Asynchronous, Initialization, Types, X10
+
+% Keywords are not required in the paper itself - only in the submission system's meta data.
+% \keywords
+% Immutability, Ownership, Java
+
+\Section[introduction]{Introduction}
+\input{introduction}
+
+
+%\vspace{-0.3cm}
+%\Section[x10]{X10}
+%\input{x10}
+
+\vspace{-0.3cm}
+\Section[constructs]{Accumulators and Clocked Types}
+\input{constructs}
+
+\Section[examples]{Programming Examples}
+\input{examples}
+
+%\vspace{-0.3cm}
+%\Section[implementation]{Implementation Considerations}
+%\input{implementation}
+
+\vspace{-0.3cm}
+\Section[semantics]{Semantics}
+\input{semantics-5}
+
+\Section[related]{Related Work}
+\input{related-work}
+
+\Section[conclusion]{Conclusion and Future Work}
+\input{conclusions}
+
+%\Section[effects]{Effects}
+%\input{effects}
+
+%\acks
+%%This material is based in part on work supported by the Defense Advanced Research Projects Agency under its Agreement No. HR0011-07-9-0002.
+
+
+\bibliographystyle{abbrv} %plain plainnat abbrvnat abbrv
+\bibliography{x10,ddc}
+
+\Appendix{Proofs for the Formalism}
+\input{proof-sketch}
+
+
+\end{document}
