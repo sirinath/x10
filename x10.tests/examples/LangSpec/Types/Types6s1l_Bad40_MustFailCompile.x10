@@ -1,4 +1,4 @@
-/* Current test harness gets confused by packages, but it would be in package Types6s1l_Bad42_MustFailCompile;
+/* Current test harness gets confused by packages, but it would be in package Types6s1l_Bad40_MustFailCompile;
 */
 // Warning: This file is auto-generated from the TeX source of the language spec.
 // If you need it changed, work with the specification writers.
@@ -19,15 +19,14 @@ import harness.x10Test;
 
 
 
-public class Types6s1l_Bad42_MustFailCompile extends x10Test {
+public class Types6s1l_Bad40_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
-        new Types6s1l_Bad42_MustFailCompile().execute();
+   public static def main(var args: Array[String](1)): void = {
+        new Types6s1l_Bad40_MustFailCompile().execute();
     }
 
 
-// file Types line 1414
-//OPTIONS: -STATIC_CHECKS
+// file Types line 1413
  static class Keyed {
   private val k : Int;
   public def this(k : Int) {
@@ -37,10 +36,10 @@ public class Types6s1l_Bad42_MustFailCompile extends x10Test {
   public def key():Int{self==this.k} = this.k;
 }
  static class Snooper {
-  public static def main(argv:Rail[String]) {
+  public static def main(argv:Array[String](1)) {
     val keyed : Keyed = new Keyed(8);
-    //ERROR: keyed.secret(keyed.k);
- keyed.secret(8); // ERR
+ keyed.secret(keyed.k); // ERR
+    //ERROR: keyed.secret(8);
     val kk = keyed.key();
     keyed.secret(kk);
   }

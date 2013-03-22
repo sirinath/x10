@@ -9,17 +9,16 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;
-
 /**
  * Take an intersection of two rectangular regions, construct an array
  * from it, and examine it.
  */
+
 class PolyIntersection2 extends TestRegion {
 
     public def run() {
-        val r1 = Region.makeRectangular([1,2], [5,7]) as Region(2);
-        val r2 = Region.makeRectangular([3,3], [8,9]) as Region(2);
+        val r1 = Region.makeRectangular([1,2], [5,7]);
+        val r2 = Region.makeRectangular([3,3], [8,9]);
         val r3 = r1.intersection(r2);
         prArray("rectangular intersection", r3);
         return status();
@@ -39,7 +38,7 @@ class PolyIntersection2 extends TestRegion {
         "    4  . . . 2 6 0 4 8 . . \n"+
         "    5  . . . 5 0 5 0 5 . . \n";
     
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PolyIntersection2().execute();
     }
 }

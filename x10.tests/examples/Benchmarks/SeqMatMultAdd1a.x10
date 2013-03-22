@@ -9,14 +9,13 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.simplearray.Array;
-
 /**
  * @author bdlucas
  */
+
 public class SeqMatMultAdd1a extends Benchmark {
 
-    val N:long = 55*5;
+    val N = 55*5;
     def expected() = -6866925.0;
     def operations() = N*N*N as double;
 
@@ -24,14 +23,15 @@ public class SeqMatMultAdd1a extends Benchmark {
     //
     //
 
-    val a = new Array[double](N, N, (i:long,j:long)=>(i*j) as double);
-    val b = new Array[double](N, N, (i:long,j:long)=>(i-j) as double);
-    val c = new Array[double](N, N, (i:long,j:long)=>(i+j) as double);
+    val r = 0..(N-1)*0..(N-1);
+    val a = new Array[double](r, (p:Point)=>p(0)*p(1) as double);
+    val b = new Array[double](r, (p:Point)=>p(0)-p(1) as double);
+    val c = new Array[double](r, (p:Point)=>p(0)+p(1) as double);
 
     def once() {
-        for (i in 0L..(N-1))
-            for (j in 0L..(N-1))
-                for (k in 0L..(N-1))
+        for (var i:int=0; i<N; i++)
+            for (var j:int=0; j<N; j++)
+                for (var k:int=0; k<N; k++)
                     a(i,j) += b(i,k)*c(k,j);
         return a(10,10);
     }
@@ -41,7 +41,7 @@ public class SeqMatMultAdd1a extends Benchmark {
     //
     //
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new SeqMatMultAdd1a().execute();
     }
 }

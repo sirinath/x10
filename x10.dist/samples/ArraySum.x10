@@ -17,15 +17,15 @@ import x10.io.Console;
 public class ArraySum {
 
     var sum:Int;
-    val data:Rail[Int];
+    val data:Array[Int](1);
 
     public def this(n:Int) {
-	// Create a Rail with n elements (0..(n-1)), all initialized to 1.
-        data = new Rail[Int](n, 1);
+	// Create an Array of rank 1 with n elements (0..(n-1)), all initialized to 1.
+        data = new Array[Int](n, 1);
         sum = 0;
     }
 
-    def sum(a:Rail[Int], start:Long, last:Long) {
+    def sum(a:Array[Int](1), start:Int, last:Int) {
         var mySum: Int = 0;
         for (i in start..(last-1)) { 
         	mySum += a(i);
@@ -43,7 +43,7 @@ public class ArraySum {
         }
     }
     
-    public static def main(args:Rail[String]) {
+    public static def main(args: Array[String](1)) {
         var size:Int = 5*1000*1000;
         if (args.size >=1)
             size = Int.parse(args(0));
@@ -53,20 +53,23 @@ public class ArraySum {
         val P = [1,2,4];
 
         //warmup loop
+        val R = 0..(P.size-1);
         Console.OUT.println("Warming up.");
-        for (numThreads in P)
-            a.sum(numThreads);
+        for (i in R)
+            a.sum(P(i));
         
-        for (numThreads in P) {
-            Console.OUT.println("Starting with " + numThreads + " threads.");
+        for (i in R) {
+            Console.OUT.println("Starting with " + P(i) + " threads.");
             a.sum=0;
             var time: long = - System.nanoTime();
-            a.sum(numThreads);
+            a.sum(P(i));
             time += System.nanoTime();
-            Console.OUT.println("For p=" + numThreads
+            Console.OUT.println("For p=" + P(i) 
                     + " result: " + a.sum 
                     + ((size==a.sum)? " ok" : "  bad") 
                     + " (time=" + (time/(1000*1000)) + " ms)");
         }
+        
+        
     }
 }

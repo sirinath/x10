@@ -11,10 +11,6 @@
 
 package x10.util;
 
-import x10.array.Array;
-import x10.array.Region;
-import x10.array.RemoteArray;
-
 import x10.compiler.Native;
 
 /** A collection of functions useful in/around CUDA kernels.
@@ -65,8 +61,7 @@ public class CUDAUtilities {
         : RemoteArray[T]{self.rank==1, self.array.home==place}
     {
         if (place.isCUDA()) {
-//            return makeCUDAArray(place, numElements, init.raw());
-              throw new UnsupportedOperationException("TODO: port CUDA to Rails");
+            return makeCUDAArray(place, numElements, init.raw());
         } else {
             return (at (place) new RemoteArray(new Array[T](numElements, (p:Int)=>init(p)))) as RemoteArray[T]{self.rank==1, self.array.home==place};
         }

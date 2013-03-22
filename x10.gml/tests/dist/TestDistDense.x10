@@ -27,7 +27,7 @@ import x10.matrix.dist.DistDenseMatrix;
  */
 public class TestDistDense {
 	
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new TestDD(args);
 		testcase.run();
 	}
@@ -39,7 +39,7 @@ class TestDD {
 	public val N:Int;
 	public val K:Int;	
 
-    public def this(args:Rail[String]) {
+    public def this(args:Array[String](1)) {
 		M = args.size > 0 ?Int.parse(args(0)):4;
 		nzp = args.size > 1 ?Double.parse(args(1)):0.5;
 		N = args.size > 2 ?Int.parse(args(2)):M+1;

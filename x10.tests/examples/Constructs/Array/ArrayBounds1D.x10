@@ -10,7 +10,6 @@
  */
 
 import x10.util.Random;
-import x10.array.*;
 import harness.x10Test;
 
 /**
@@ -79,7 +78,7 @@ public class ArrayBounds1D extends x10Test {
         return x == y;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayBounds1D().execute();
     }
 }

@@ -16,13 +16,12 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 
 
 public class Arrays9g6f extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays9g6f().execute();
     }
 
@@ -30,7 +29,7 @@ public class Arrays9g6f extends x10Test {
 // file Arrays line 483
 
  static class Arrays43TestExp{
-  def check(seqPlaces: Rail[Place])  = new SparsePlaceGroup(seqPlaces);  }
+  def check(seqPlaces: Sequence[Place])  = new SparsePlaceGroup(seqPlaces);  }
 
  static class Hook {
    def run():Boolean = true;

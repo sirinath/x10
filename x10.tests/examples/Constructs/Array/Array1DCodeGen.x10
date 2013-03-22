@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 public class Array1DCodeGen extends x10Test {
 
@@ -70,7 +69,7 @@ public class Array1DCodeGen extends x10Test {
         return diff < 0 ? diff > -0.001 : diff < 0.001;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new Array1DCodeGen().execute();
     }
 }

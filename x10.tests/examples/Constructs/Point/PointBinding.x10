@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Must allow binding point components.
@@ -25,7 +24,7 @@ public class PointBinding extends x10Test {
         return (i == 1 && j == 2);
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PointBinding().execute();
     }
 }

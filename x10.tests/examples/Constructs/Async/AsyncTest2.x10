@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing complex async bodies.
@@ -19,22 +18,22 @@ import x10.array.*;
  */
 public class AsyncTest2 extends x10Test {
 
-    public def run(): boolean = {
-        val NP: int = Place.MAX_PLACES;
-        val A: DistArray[int]{rank==1} = DistArray.make[int](Dist.makeUnique());
-        finish
-            for ([k] in 0..(NP-1))
+	public def run(): boolean = {
+		val NP: int = Place.MAX_PLACES;
+		val A: DistArray[int]{rank==1} = DistArray.make[int](Dist.makeUnique());
+		finish
+			for ([k] in 0..(NP-1))
                async at(A.dist(k))
-                    ateach ([i] in A.dist)
+					ateach ([i] in A.dist)
                          atomic A(i) += i;
-        finish ateach ([i] in A.dist) { 
-            chk(A(i) == i*NP); 
-        }
+		finish ateach ([i] in A.dist) { 
+			chk(A(i) == i*NP); 
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    public static def main(Rail[String]) {
-        new AsyncTest2().execute();
-    }
+	public static def main(Array[String](1)) {
+		new AsyncTest2().execute();
+	}
 }

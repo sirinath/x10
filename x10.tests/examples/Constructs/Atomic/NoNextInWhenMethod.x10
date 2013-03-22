@@ -32,7 +32,7 @@ public class NoNextInWhenMethod extends x10Test {
 		Clock.advanceAll();
 	}
 
-	public static def main(Rail[String]){
+	public static def main(Array[String](1)){
 		new NoNextInWhenMethod().execute();
 	}
 }

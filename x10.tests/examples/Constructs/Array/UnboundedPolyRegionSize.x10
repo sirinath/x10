@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 /**
  *Check that an UnboundedRegionException is thrown when you attempt to compute
  *the size of an unbounded region.
@@ -27,7 +26,7 @@ class UnboundedPolyRegionSize extends x10Test {
     		return true;
     	}
     }
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new UnboundedPolyRegionSize().execute();
     }
 }

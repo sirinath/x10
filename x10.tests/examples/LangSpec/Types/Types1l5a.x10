@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Types1l5a extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types1l5a().execute();
     }
 
 
-// file Types line 3082
+// file Types line 3078
  static class Extra {
-  static def useArray(Rail[Extra]) {}
-  public static def main(argv:Rail[String]) {
+  static def useArray(Array[Extra]) {}
+  public static def main(argv:Array[String](1)) {
      val x : Extra = new Extra();
      //ERROR: useArray([x]);
      useArray([x as Extra]);

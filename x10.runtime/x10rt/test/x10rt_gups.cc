@@ -70,16 +70,6 @@ static ssize_t mygetline (char **lineptr, size_t *sz, FILE *f)
 #define SHM_W S_IWUSR
 #endif
 
-static void x10rt_aborting_probe (void)
-{
-    x10rt_error err = x10rt_probe();
-    if (err != X10RT_ERR_OK) {
-        if (x10rt_error_msg() != NULL)
-            std::cerr << "X10RT fatal error: " << x10rt_error_msg() << std::endl;
-        abort();
-    }
-}
-
 
 void *congruent_alloc (size_t size)
 {
@@ -374,6 +364,7 @@ static void do_main (uint64_t logLocalTableSize, uint64_t numUpdates) {
         if (here==place) {
             localTable[index] ^= update;
         } else {
+            //x10rt_remote_op(place, (x10rt_remote_ptr)&localTable[index], X10RT_OP_XOR, update);
             remote_op(place, (x10rt_remote_ptr)&localTable[index], X10RT_OP_XOR, update);
         }
     }
@@ -441,7 +432,7 @@ void runBenchmark (uint64_t logLocalTableSize,
     }
     do_main(logLocalTableSize, numUpdates);
     while (pongs_outstanding) {
-         x10rt_aborting_probe();
+         x10rt_probe();
     }
 } // }}}
 
@@ -455,19 +446,14 @@ void validate (void)
         x10rt_send_msg(&params);
     }
     do_validate();
-    while (pongs_outstanding) x10rt_aborting_probe();
+    while (pongs_outstanding) x10rt_probe();
 } // }}}
 
 
 // {{{ main
 int main(int argc, char **argv)
 {
-    x10rt_error init_err = x10rt_init(&argc, &argv);
-    if (init_err != X10RT_ERR_OK) {
-        if (x10rt_error_msg() != NULL)
-            std::cerr << "X10RT fatal initialization error:  " << x10rt_error_msg() << std::endl;
-        abort();
-    }
+    x10rt_init(&argc, &argv);
     MAIN_ID = x10rt_register_msg_receiver(&recv_main,NULL,NULL,NULL,NULL);
     PONG_ID = x10rt_register_msg_receiver(&recv_pong,NULL,NULL,NULL,NULL);
     VALIDATE_ID = x10rt_register_msg_receiver(&recv_validate,NULL,NULL,NULL,NULL);
@@ -512,7 +498,7 @@ int main(int argc, char **argv)
     uint64_t numUpdates = updates * tableSize;
 
     localTable = (uint64_t*) congruent_alloc(localTableSize*sizeof(uint64_t));
-    x10rt_register_mem(localTable, localTableSize*sizeof(uint64_t));
+    localTable = (uint64_t*) (size_t) x10rt_register_mem(localTable, localTableSize*sizeof(uint64_t));
 
     const char *remote_op_batch_ = getenv("X10_REMOTE_OP_BATCH");
     remote_op_batch = remote_op_batch_ == NULL ? 64 : strtoul(remote_op_batch_, NULL, 10);
@@ -557,7 +543,7 @@ int main(int argc, char **argv)
         finished = true;
     }
 
-    while (!finished) x10rt_aborting_probe();
+    while (!finished) x10rt_probe();
 
     x10rt_finalize();
 

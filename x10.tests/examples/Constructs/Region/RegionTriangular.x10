@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests upper and lower triangular regions.
@@ -45,7 +44,7 @@ public class RegionTriangular extends x10Test {
 		}
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new RegionTriangular().execute();
 	}
 }

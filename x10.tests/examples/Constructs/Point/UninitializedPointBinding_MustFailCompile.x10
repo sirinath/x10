@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Cannot bind components of an uninitialized point.
@@ -28,7 +27,7 @@ public class UninitializedPointBinding_MustFailCompile extends x10Test {
         return (i == 1 && j == 2); // ERR ERR: "i" may not have been initialized "j" may not have been initialized
     }
 
-    public static def main(args: Rail[String]): void = {
+    public static def main(args: Array[String](1)): void = {
         new UninitializedPointBinding_MustFailCompile().execute();
     }
 }

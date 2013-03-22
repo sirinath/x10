@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 
 /**
@@ -36,7 +35,7 @@ public class FlattenConditional3 extends x10Test {
             return b==0;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new FlattenConditional3().execute();
     }
 }

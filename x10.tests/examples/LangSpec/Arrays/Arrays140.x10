@@ -16,13 +16,12 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 
 
 public class Arrays140 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays140().execute();
     }
 
@@ -38,7 +37,7 @@ static def addInto(src: Array[Int], dest:Array[Int])
 }
  static  class Hook{
    def run() {
-     val a = new Array[Int](3, [1,2,3]);
+     val a = [1,2,3];
      val b = new Array[Int](a.region, (p:Point(1)) => 10*a(p) );
      Example.addInto(a, b);
      return b(0) == 11 && b(1) == 22 && b(2) == 33;

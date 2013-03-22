@@ -24,7 +24,7 @@ import x10.matrix.sparse.Compress2D;
  */
 
 public class TestCompress{
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new CompArrayTest(args);
 		testcase.run();
 	}
@@ -35,7 +35,7 @@ class CompArrayTest {
 	public val M:Int;
 	public val nzp:Double;
 
-    public def this(args:Rail[String]) {
+    public def this(args:Array[String](1)) {
 		M = args.size > 0 ?Int.parse(args(0)):32;
 		nzp = args.size > 1 ?Double.parse(args(1)):0.5;
 	}

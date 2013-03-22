@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Simple test for operator assignment of array elements.
@@ -39,7 +38,7 @@ public class ArrayOpAssign extends x10Test {
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayOpAssign().execute();
     }
 }

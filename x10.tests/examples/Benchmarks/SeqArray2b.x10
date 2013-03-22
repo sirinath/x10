@@ -9,13 +9,12 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.simplearray.Array;
-
 /**
  * Basic array, X10-style loop
  *
  * @author bdlucas
  */
+
 public class SeqArray2b extends Benchmark {
 
     //
@@ -30,15 +29,13 @@ public class SeqArray2b extends Benchmark {
     // the benchmark
     //
 
-    val a = new Array[double](N, N, 0.0);
+    val a = new Array[double](0..(N-1)*0..(N-1), (Point)=>0.0);
 
     def once() {
-        for (i in 0..N)
-            for (j in 0..N)
-                a(i,j) = (i+j) as double;
+        for ([i,j]:Point(2) in a)
+            a(i,j) = (i+j) as double;
         var sum:double = 0.0;
-        for (i in 0..N)
-            for (j in 0..N)
+        for ([i,j]:Point(2) in a)
             sum += a(i,j);
         return sum;
     }
@@ -47,7 +44,7 @@ public class SeqArray2b extends Benchmark {
     // boilerplate
     //
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new SeqArray2b().execute();
     }
 }

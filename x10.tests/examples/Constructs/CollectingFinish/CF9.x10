@@ -14,9 +14,11 @@ import harness.x10Test;
 /**
  * This is to test the collecting finish sum 
  * with nested collecting finish
- * 
  * @author Li Yan
+ * 
  */
+
+
 public class CF9 extends x10Test{
 
     public static class TotalsReducer1 implements Reducible[Totals2] {
@@ -38,7 +40,7 @@ public class CF9 extends x10Test{
             val finalResult : Totals2;
             finalResult = finish (b) {
                result = finish(b) {
-                 for (p in Place.places()) at (p) async {
+                 ateach(p in Dist.makeUnique()){
                       var case_ :Totals2 =new  Totals2(1,2);
                       for (var i:Int = 0; i < iteration; i++)
                       offer case_;
@@ -54,7 +56,7 @@ public class CF9 extends x10Test{
             return ret;
  
     }
-        public static def main(Rail[String]) {
+        public static def main(Array[String](1)) {
                 new CF9().execute();
         }
 

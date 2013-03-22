@@ -1,12 +1,9 @@
 /*
- *  This file is part of the X10 project (http://x10-lang.org).
+ * (c) Copyright IBM Corporation 2009
+ * 
+ * $Id$
  *
- *  This file is licensed to You under the Eclipse Public License (EPL);
- *  You may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *      http://www.opensource.org/licenses/eclipse-1.0.php
- *
- *  (C) Copyright IBM Corporation 2006-2013.
+ * This file is part of X10 Runtime on MPI layer implementation.
  */
 
 /* MPICH2 mpi.h wants to not have SEEK_SET etc defined for C++ bindings */
@@ -378,11 +375,7 @@ class x10rt_internal_state {
 
 static x10rt_internal_state     global_state;
 
-x10rt_error x10rt_net_preinit(char* connInfoBuffer, int connInfoBufferSize) {
-	return X10RT_ERR_UNSUPPORTED;
-}
-
-x10rt_error x10rt_net_init(int *argc, char ** *argv, x10rt_msg_type *counter) {
+void x10rt_net_init(int *argc, char ** *argv, x10rt_msg_type *counter) {
     assert(!global_state.finalized);
     assert(!global_state.init);
 
@@ -451,8 +444,6 @@ x10rt_error x10rt_net_init(int *argc, char ** *argv, x10rt_msg_type *counter) {
                 __FILE__, __LINE__);
         abort();
     }
-
-    return X10RT_ERR_OK;
 }
 
 void x10rt_net_register_msg_receiver(x10rt_msg_type msg_type, x10rt_handler *cb) {
@@ -513,18 +504,6 @@ x10rt_place x10rt_net_nhosts(void) {
     assert(global_state.init);
     assert(!global_state.finalized);
     return global_state.nprocs;
-}
-
-x10rt_place x10rt_net_ndead (void) {
-	return 0; // place failure is not handled by this implementation.
-}
-
-bool x10rt_net_is_place_dead (x10rt_place p) {
-	return false; // place failure is not handled by this implementation.
-}
-
-x10rt_error x10rt_net_get_dead (x10rt_place *dead_places, x10rt_place len) {
-	return X10RT_ERR_UNSUPPORTED; // place failure is not handled by this implementation.
 }
 
 x10rt_place x10rt_net_here(void) {
@@ -1034,22 +1013,19 @@ static void check_pending_receives() {
     }
 }
 
-void x10rt_net_register_mem (void *ptr, size_t)
-{
-    // nothing to do
-}
+x10rt_remote_ptr x10rt_net_register_mem (void *ptr, size_t)
+{ return (x10rt_remote_ptr)(size_t)ptr; }
 
 void x10rt_register_thread (void) { }
 
-x10rt_error x10rt_net_probe (void) {
+void x10rt_net_probe (void) {
     x10rt_net_probe_ex(false);
-    return X10RT_ERR_OK;
 }
 
-x10rt_error x10rt_net_blocking_probe (void) {
-    // TODO: make this blocking.  For now, just call probe.
-    x10rt_net_probe_ex(false);
-    return X10RT_ERR_OK;
+void x10rt_net_blocking_probe (void)
+{
+	// TODO: make this blocking.  For now, just call probe.
+	x10rt_net_probe_ex(false);
 }
 
 static void x10rt_net_probe_ex (bool network_only) {
@@ -1209,16 +1185,6 @@ void x10rt_net_alltoall (x10rt_team team, x10rt_place role,
     abort();
 }
 
-void x10rt_net_reduce (x10rt_team team, x10rt_place role,
-                        x10rt_place root, const void *sbuf, void *dbuf,
-                        x10rt_red_op_type op, 
-                        x10rt_red_type dtype,
-                        size_t count,
-                        x10rt_completion_handler *ch, void *arg)
-{
-    abort();
-}
-
 void x10rt_net_allreduce (x10rt_team team, x10rt_place role,
                           const void *sbuf, void *dbuf,
                           x10rt_red_op_type op, 
@@ -1229,4 +1195,3 @@ void x10rt_net_allreduce (x10rt_team team, x10rt_place role,
     abort();
 }
 
-const char *x10rt_net_error_msg (void) { return NULL; }

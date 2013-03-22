@@ -40,7 +40,7 @@ import x10.matrix.comm.DistDataArray;
  */
 
 public class TestCommu{
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new TestDistArrayCommu(args);
 		testcase.run();
 	}
@@ -75,7 +75,7 @@ class TestDistArrayCommu {
 	
 	public val checkTime:Array[Long](1) = new Array[Long](Place.MAX_PLACES);
 	
-	public def this(args:Rail[String]) {
+	public def this(args:Array[String](1)) {
 		val m = args.size > 0 ?Int.parse(args(0)):1024;
 		M = m;
 		iter = args.size > 1 ? Int.parse(args(1)):1;

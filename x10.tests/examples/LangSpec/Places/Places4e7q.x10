@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Places4e7q extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Places4e7q().execute();
     }
 
 
-// file Places line 975
+// file Places line 972
 
  static class Places13TestExp{
   def check(g:GlobalRef[Any]{here == g.home})  = g();  }

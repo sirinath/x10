@@ -3201,8 +3201,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         X10CPPContext_c c = (X10CPPContext_c) tr.context();
 
         emitter.enterClosure(c);
-        boolean oldPrintType = tr.printType(true);
-        boolean oldSemiColon = tr.appendSemicolon(true);
 
         ClosureDef closureDef = n.closureDef();
         CodeInstance<?> ci = closureDef.methodContainer().get();
@@ -3508,8 +3506,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             sw.write("))");
         }
 
-        tr.printType(oldPrintType);
-        tr.appendSemicolon(oldSemiColon);
         c.finalizeClosureInstance();
         emitter.exitClosure(c);
     }
@@ -3941,7 +3937,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		sw.newline(4); sw.begin(0);
 		sw.write(make_ref(type)+" "+tmp+"(");
 
-		sw.write("x10::lang::Rail"+chevrons(Emitter.translateType(T, true)));
+		sw.write("x10::array::Array"+chevrons(Emitter.translateType(T, true)));
 		sw.writeln("::_make("+c.arguments().size()+"));");
 		int count = 0;
 		for (Expr e : c.arguments()) {

@@ -301,12 +301,12 @@ import x10.io.SerialData;
 
 
     protected static class State[Key,Value] {
-        val content:Rail[Pair[Key,Value]];
+        val content:Array[Pair[Key,Value]](1);
 
         def this(map:HashMap[Key,Value]) {
             val size = map.size();
             val it = map.entriesIterator();
-            content = new Rail[Pair[Key,Value]](size,
+            content = new Array[Pair[Key,Value]](size,
               (p:Int) => {
                    val entry = it.next();
                    return Pair[Key,Value](entry.getKey(),entry.getValue());
@@ -321,7 +321,8 @@ import x10.io.SerialData;
     public def this(x:SerialData) {
         this();
         val state = x.data as State[K,V]; // Warning: This is an unsound cast because the object or the target type might have constraints and X10 currently does not perform constraint solving at runtime on generic parameters.
-	    for (pair in state.content) {
+	    for (p in state.content) {
+	        val pair = state.content(p);
             putInternal(pair.first, pair.second);
         }
     }

@@ -9,7 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;
 
 /**
  * This is one of a series of programs showing how to express
@@ -86,7 +85,7 @@ public class HeatTransfer_v4 {
         }
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         Console.OUT.println("HeatTransfer Tutorial example with n="+n+" and epsilon="+epsilon);
         Console.OUT.println("Initializing data structures");
         val s = new HeatTransfer_v4();

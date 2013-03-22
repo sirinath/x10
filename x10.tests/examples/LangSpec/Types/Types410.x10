@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types410 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types410().execute();
     }
 
 
-// file Types line 2303
+// file Types line 2301
 
  static class Types41TestExp{
   def check(test:Boolean)  = test ? 0 : "non-zero";  }

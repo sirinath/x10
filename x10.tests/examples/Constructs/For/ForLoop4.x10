@@ -9,9 +9,8 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import harness.x10Test;
-import x10.array.*;
 import x10.util.Box;
+import harness.x10Test;
 
 /**
  * Test for for loop with for (Point p:[1:N,1:N,1:N]) syntax.
@@ -65,7 +64,7 @@ public class ForLoop4 extends x10Test {
 		return true;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new ForLoop4().execute();
 	}
 }

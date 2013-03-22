@@ -37,7 +37,7 @@ class CollectingFinish2 extends x10Test {
         return (r == 10000);
     }
     
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new CollectingFinish2().execute();
     }
     

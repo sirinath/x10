@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test for ateach.
@@ -38,7 +37,7 @@ public class AtEach extends x10Test {
                 nplaces == Place.MAX_PLACES;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new AtEach().execute();
     }
 }

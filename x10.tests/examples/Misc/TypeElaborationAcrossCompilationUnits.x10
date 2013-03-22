@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.Region;
 
 /**
 Test that methods whose return types are deptypes are handled correctly when
@@ -29,7 +28,7 @@ public class TypeElaborationAcrossCompilationUnits extends x10Test {
 		return true;
 	}
 	
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new TypeElaborationAcrossCompilationUnits().execute();
 	}
 }

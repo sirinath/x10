@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Ensures long arrays are implemented.
@@ -25,7 +24,7 @@ public class Array3Long extends x10Test {
         return 42L == ia(1, 1);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array3Long().execute();
     }
 }

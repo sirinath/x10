@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Conditional and is evaluated, well, conditionally. So it must be
@@ -44,7 +43,7 @@ public class FlattenCondOr extends x10Test {
         return x;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new FlattenCondOr().execute();
     }
 }

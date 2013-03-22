@@ -39,7 +39,7 @@ public class AsyncInit2 extends x10Test {
     	test2();
         return true;
     }
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new AsyncInit2().execute();
     }
 }

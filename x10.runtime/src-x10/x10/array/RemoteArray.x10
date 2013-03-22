@@ -13,6 +13,8 @@ package x10.array;
 
 import x10.compiler.Global;
 import x10.compiler.Native;
+import x10.util.IndexedMemoryChunk;
+import x10.util.RemoteIndexedMemoryChunk;
 
 /**
  * A class that encapsulates sufficient information about a remote
@@ -24,8 +26,8 @@ import x10.compiler.Native;
  * <pre>
  * this.region.equals(at (array.home) (this.array)().region)
  * this.size == (at (array.home) (this.array)().size)
- * rawData.home == this.array.home;
- * at (rawData.home) { (this.rawData)() == (this.array)().raw() }
+ * rawData.home() == this.array.home;
+ * at (rawData.home()) { (this.rawData)() == (this.array)().raw() }
  * </pre>
  */
 public final class RemoteArray[T](
@@ -47,7 +49,7 @@ public final class RemoteArray[T](
      * Caches a remote reference to the backing storage for the remote array
      * to enable DMA operations to be initiated remotely.  
      */
-    val rawData:GlobalRef[Rail[T]];
+    val rawData:RemoteIndexedMemoryChunk[T];
 
     /**
      * The rank of the RemoteArray is equal to region.rank
@@ -65,28 +67,28 @@ public final class RemoteArray[T](
      */
     public def this(a:Array[T]{self!=null}) {
         property(a.region, a.size, GlobalRef[Array[T]](a));
-        rawData = new GlobalRef[Rail[T]](a.raw());
+        rawData = RemoteIndexedMemoryChunk.wrap(a.raw());
     }
     
     /**
      * Create a RemoteArray that uses the argument Region to specify how to
-     * view elements of the argument Rail.
+     * view elements of the argument RemoteIndexedMemoryChunk.
      * This constructor is semantically equivalent to the code sequence
      * <pre>
-     * at (raw.home) new RemoteArray[T](reg, raw())
+     * at (raw.home()) new RemoteArray[T](reg, raw())
      * </pre>
-     * if <code>raw.home</code> is a normal (non-CUDA) place. 
-     * If <code>raw.home.isCUDA()</code> is true, then this constructor
+     * if <code>raw.home()</code> is a normal (non-CUDA) place. 
+     * If <code>raw.home().isCUDA()</code> is true, then this constructor
      * simulates that semantics and provides an Array view on the chunk of
      * GPU memory represented by raw.
      */
-    public def this(reg:Region{self!=null}, raw:GlobalRef[Rail[T]]) {
+    public def this(reg:Region{self!=null}, raw:RemoteIndexedMemoryChunk[T]) {
         val arr:GlobalRef[Array[T]];
-        if (raw.home.isCUDA()) @Native("c++", "{}") {
+        if (raw.home().isCUDA()) @Native("c++", "{}") {
             // This block will never be executed; only here to placate the X10-level typechecker
             arr = GlobalRef[Array[T]](null);
         } else {
-            arr = at (raw.home) GlobalRef[Array[T]](new Array[T](reg, raw()) as Array[T]);
+            arr = at (raw.home()) GlobalRef[Array[T]](new Array[T](reg, raw()) as Array[T]);
         }
         property(reg, reg.size(), arr);
         rawData = raw;

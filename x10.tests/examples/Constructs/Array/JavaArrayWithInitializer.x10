@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * The x10-style initializer for java arrays should work.
@@ -38,7 +37,7 @@ public class JavaArrayWithInitializer extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new JavaArrayWithInitializer().execute();
     }
 }

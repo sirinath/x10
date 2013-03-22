@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Places_implicit_copy_from_at_example_1 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Places_implicit_copy_from_at_example_1().execute();
     }
 
 
-// file Places line 744
+// file Places line 741
  static  class Example {
  static def example() {
 

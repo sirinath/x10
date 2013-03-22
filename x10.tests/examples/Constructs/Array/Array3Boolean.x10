@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Ensures boolean arrays are implemented.
@@ -24,7 +23,7 @@ public class Array3Boolean extends x10Test {
         return ia(1, 1);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array3Boolean().execute();
     }
 }

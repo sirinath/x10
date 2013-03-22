@@ -9,9 +9,8 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;
-import x10.io.Console;
 import x10.util.Random;
+import x10.io.Console;
 
 /**
  * Calculation of an approximation to pi by using a Monte Carlo simulation
@@ -19,8 +18,8 @@ import x10.util.Random;
  * in the unit circle).
  */
 public class MontyPi {
-    public static def main(args:Rail[String]) {
-        if (args.size != 1L) {
+    public static def main(args:Array[String](1)) {
+        if (args.size != 1) {
             Console.OUT.println("Usage: MontyPi <number of points>");
             return;
         }

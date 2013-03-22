@@ -12,7 +12,6 @@
 //LIMITATION:
 //This check is not being done by the compiler currently.
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Dimensionality of array initializer must be checked.
@@ -34,7 +33,7 @@ public class DimCheck_MustFailCompile extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DimCheck_MustFailCompile().execute();
     }
 }

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
 Test that given
@@ -28,14 +27,16 @@ if buffDest is of type (:rank==2).
 @author vj
 **/
 public class Transitivity extends x10Test {
-    public def run(): boolean = {
-        val buffDest: Array[double]{rank==2} = new Array[double]((1..10)*(1..10));
-        var buffSrc: Array[double]{rank==buffDest.rank} = new Array[double]((1..10)*(1..10));
 
-        return true;
-    }
-    
-    public static def main(Rail[String]): void = {
-        new Transitivity().execute();
-    }
+	
+	public def run(): boolean = {
+		val buffDest: Array[double]{rank==2} = new Array[double]((1..10)*(1..10));
+		var buffSrc: Array[double]{rank==buffDest.rank} = new Array[double]((1..10)*(1..10));
+		
+		return true;
+	}
+	
+	public static def main(Array[String](1)): void = {
+		new Transitivity().execute();
+	}
 }

@@ -21,7 +21,7 @@ public class Future1 extends x10Test {
 		return x()+1 == 42;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new Future1().execute();
 	}
 }

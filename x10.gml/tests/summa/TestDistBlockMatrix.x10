@@ -29,7 +29,7 @@ import x10.matrix.distblock.summa.SummaMultTrans;
  */
 public class TestDistBlockMatrix{
 	
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new TestRunSumma(args);
 		testcase.run();
 	}
@@ -53,7 +53,7 @@ class TestRunSumma {
 	val dB:DistMap, dTransB:DistMap;
 	val dC:DistMap;
 	
-	public def this(args:Rail[String]) {
+	public def this(args:Array[String](1)) {
 		M = args.size > 0 ?Int.parse(args(0)):4;
 		K = args.size > 1 ?Int.parse(args(1)):6;
 		N = args.size > 2 ?Int.parse(args(2)):4;

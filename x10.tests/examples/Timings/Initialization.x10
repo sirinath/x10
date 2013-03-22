@@ -10,10 +10,9 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
- * Synthetic benchmark to time array initialization.
+ * Synthetic benchmark to time arary accesses.
  */
 public class Initialization extends x10Test {
 
@@ -60,7 +59,7 @@ public class Initialization extends x10Test {
 		return true;
 	}
 
-	public static def main(Rail[String]):void {
+	public static def main(Array[String](1)):void {
 		new Initialization().execute();
 	}
 }

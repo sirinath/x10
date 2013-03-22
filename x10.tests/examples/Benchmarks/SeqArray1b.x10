@@ -9,19 +9,19 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.simplearray.Array;
 
 /**
  * @author bdlucas
  */
+
 public class SeqArray1b extends Benchmark {
 
     //
     // parameters
     //
 
-    val N = 1000000L;
-    val M = 20L;
+    val N = 1000000;
+    val M = 20;
     def expected() = N*M as double;
     def operations() = N*M as double;
 
@@ -30,7 +30,7 @@ public class SeqArray1b extends Benchmark {
     // the benchmark
     //
 
-    val a = new Array[int](N+M, 1);
+    val a = new Array[int](0..(N+M-1), (Point(1))=>1);
 
     def once() {
         var sum: int = 0;
@@ -44,7 +44,7 @@ public class SeqArray1b extends Benchmark {
     // boilerplate
     //
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new SeqArray1b().execute();
     }
 }

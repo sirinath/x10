@@ -51,7 +51,7 @@ class StructToAnyAndBack extends x10Test {
         return res;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new StructToAnyAndBack().execute();
     }
 }

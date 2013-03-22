@@ -21,16 +21,16 @@ import harness.x10Test;
 
 public class Types250 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types250().execute();
     }
 
 
-// file Types line 1005
+// file Types line 1004
 
  static class Types21TypeTest{
   def check(n:Int)  { 
-     var checkycheck : x10.array.Array[Int]{self.rank==1 && self.size == n};  }}
+     var checkycheck : Array[Int]{self.rank==1 && self.size == n};  }}
 
  static class Hook {
    def run():Boolean = true;

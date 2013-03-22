@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * The test checks that information in the types of variables occuring in depclauses is used
@@ -28,7 +27,7 @@ public class Transitive extends x10Test {
 	    var c: Region{rank==2} = b;
 	    return true;
 	}
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new Transitive().execute();
 	}
 }

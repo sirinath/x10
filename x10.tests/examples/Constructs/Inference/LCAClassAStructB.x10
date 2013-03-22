@@ -26,11 +26,11 @@ public class LCAClassAStructB extends x10Test {
 	  val x = new A();
       val y = B();
 	// should succeed. LCA of A and B is Any
-      val z:Rail[Any] = [x,y];
+      val z:Array[Any] = [x,y];
 	  return true;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new LCAClassAStructB().execute();
 	}
 }

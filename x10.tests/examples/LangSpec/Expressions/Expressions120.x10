@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Expressions120 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions120().execute();
     }
 
 
-// file Expressions line 1725
+// file Expressions line 1724
 
  static class Expressions42TestExp{
   def check(x:Int)  = 3 instanceof Int{self==x};  }

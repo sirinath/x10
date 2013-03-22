@@ -24,7 +24,7 @@ public class FunInference2 extends x10Test {
      static def b(L : List[F])  = map(L, (x:F)=>x.s);
     public def run()=true;
 
-    public static def main(Rail[String]){
+    public static def main(Array[String]){
         new FunInference1().execute();
     }
 }

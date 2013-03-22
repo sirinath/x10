@@ -9,10 +9,10 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-package x10.lang;
+package x10.array;
 
 /**
- * <p>An implementation of PlaceGroup that simply uses a sorted Rail[Place] to
+ * <p>An implementation of PlaceGroup that simply uses a sorted Array[Place] to
  * represent the Places in the group.  This implementation is only suitable
  * when the PlaceGroup contains a fairly small number of places.
  * This can happen either becase the group is very sparse, or because the total 
@@ -36,15 +36,15 @@ public final class SparsePlaceGroup extends PlaceGroup {
   private val places:Rail[Place];
 
   /**
-   * Construct a SparsePlaceGroup from a Rail[Place].
-   * The argument rail must be a set and be sorted in order of increasing id;
+   * Construct a SparsePlaceGroup from a Sequence[Place].
+   * The argument sequence must be a set and be sorted in order of increasing id;
    * if this is not true then an IllegalArgumentException will be thrown.
    */
-  public def this(ps:Rail[Place]) {
-    places = new Rail[Place](ps);
-    for (i in 1..(places.size-1)) {
+  public def this(ps:Sequence[Place]) {
+    places = new Array[Place](ps.size(), (i:int)=>ps(i));
+    for ([i] in 1..(places.size-1)) {
         if (places(i).id <= places(i-1).id) {
-            throw new IllegalArgumentException("Argument rail was not sorted");
+            throw new IllegalArgumentException("Argument sequence was not sorted");
         }
     }
   }
@@ -54,25 +54,25 @@ public final class SparsePlaceGroup extends PlaceGroup {
    * @param p the place 
    */
   public def this(p:Place) {
-    places = new Rail[Place](1, p);
+    places = [p as Place];
   }
 
   public operator this(i:int):Place = places(i);
 
-  public def iterator() = places.iterator();
+  public def iterator() = places.values().iterator();
 
-  public def numPlaces() = places.size as Int;
+  public def numPlaces() = places.size;
 
   public def contains(id:int):Boolean {
-    for (p in places) {
-        if (p.id == id) return true;
+    for ([i] in places) {
+        if (places(i).id == id) return true;
     }
     return false;
   }
 
   public def indexOf(id:int):int {
-    for (i in places.range()) {
-        if (places(i).id == id) return i as Int;
+    for ([i] in places) {
+        if (places(i).id == id) return i;
     }
     return -1;
   }

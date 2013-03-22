@@ -18,7 +18,7 @@ import x10.matrix.distblock.DupVector;
  */
 public class TestDupVector{
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val n = (args.size > 0) ? Int.parse(args(0)):4;
 		val testcase = new TestRunDV(n);
 		testcase.run();

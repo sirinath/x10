@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 struct S58[T] implements (Int,Int)=>T {
   private val data:Array[T](2);
@@ -34,7 +33,7 @@ public class StructGenericInterfaceTest extends x10Test {
     return true;
   }
 
-  public static def main(Rail[String]) {
+  public static def main(Array[String](1)) {
     new StructGenericInterfaceTest().execute();
   }
 

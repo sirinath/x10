@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Accessing p[3] in a 2D point should cause an array
@@ -45,7 +44,7 @@ public class PointIndex extends x10Test {
         return sum == 0 && gotException;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointIndex().execute();
     }
 }

@@ -73,8 +73,7 @@ public class SummaSparseMultDense {
 							 Math.min(ps, b.grid.getMinRowSize()));
 		A = a; B=b; C=c;
 		//alpha = al;
-        if (MathTool.isZero(be)) beta = 0.0;
-        else beta  = be;
+		beta  = be;
 		//			
 		comhd = new CommHandle();
 		rowBsPsMap = a.grid.getRowBsPsMap();
@@ -179,7 +178,8 @@ public class SummaSparseMultDense {
 		//
 		//---------------------------------------------------
 
-		C.scale(beta); 
+		//Scaling the matrixesx
+		if (MathTool.isZero(beta)) C.scale(0.0); 
 
 		for (var kk:Int=0; kk<K; kk+=iwrk) {
 			iwrk = Math.min(panelSize, B.grid.rowBs(itRow)-ii);
@@ -247,8 +247,9 @@ public class SummaSparseMultDense {
 		//---------------------------------------------------
 		Debug.assure(A.N==B.N&&C.M==A.M&&C.N==B.M);
 		
+		//Scaling the matrixesx
 		/* TIMING */ st = Timer.milliTime();
-		C.scale(beta);
+		if (MathTool.isZero(beta))  C.scale(0.0D);
 		/* TIMING */ C.distBs(here.id()).calcTime += Timer.milliTime() - st;
 
 		//

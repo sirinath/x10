@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types400 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types400().execute();
     }
 
 
-// file Types line 2162
+// file Types line 2160
  
  static class ConsTy[T,U] {
    def upcast(t:T){T <: U} :U = t;

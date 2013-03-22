@@ -20,7 +20,7 @@ public class NQueensPar {
     val N:Int;
     val P:Int;
     var nSolutions:Int = 0;
-    val R:IntRange;
+    val R:Region(1){rect};
 
     def this(N:Int, P:Int) { 
        this.N=N;
@@ -42,7 +42,8 @@ public class NQueensPar {
         }
 
         def this(b:Board) {
-            this.q = new Rail[Int](b.q);
+            this.q = new Rail[Int](N);
+            Array.copy(b.q, q);
             this.fixed = b.fixed;
         }
 
@@ -60,7 +61,7 @@ public class NQueensPar {
 
         /** Search all positions for the current board. */
         def search() {
-            for (k in R) searchOne(k);
+            for ([k] in R) searchOne(k);
         }
 
         /**
@@ -99,7 +100,7 @@ public class NQueensPar {
         }
     }
 
-    public static def main(args:Rail[String])  {
+    public static def main(args:Array[String](1))  {
         val n = args.size > 0 ? Int.parse(args(0)) : 8;
         Console.OUT.println("N=" + n);
         //warmup

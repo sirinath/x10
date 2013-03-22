@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 import x10.util.concurrent.Future;
 
 /**
@@ -28,7 +27,7 @@ public class ArrayFuture extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]): void = {
+    public static def main(Array[String](1)): void = {
         new ArrayFuture().execute();
     }
 }

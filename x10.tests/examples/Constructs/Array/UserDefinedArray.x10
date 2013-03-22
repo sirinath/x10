@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing arrays with user-defined element types.
@@ -64,7 +63,7 @@ public class UserDefinedArray extends x10Test {
         return i0 + 1 == i1;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new UserDefinedArray().execute();
     }
 

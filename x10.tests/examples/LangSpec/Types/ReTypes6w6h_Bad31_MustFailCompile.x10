@@ -1,4 +1,4 @@
-/* Current test harness gets confused by packages, but it would be in package ReTypes6w6h_Bad32_MustFailCompile;
+/* Current test harness gets confused by packages, but it would be in package ReTypes6w6h_Bad31_MustFailCompile;
 */
 // Warning: This file is auto-generated from the TeX source of the language spec.
 // If you need it changed, work with the specification writers.
@@ -19,15 +19,14 @@ import harness.x10Test;
 
 
 
-public class ReTypes6w6h_Bad32_MustFailCompile extends x10Test {
+public class ReTypes6w6h_Bad31_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
-        new ReTypes6w6h_Bad32_MustFailCompile().execute();
+   public static def main(var args: Array[String](1)): void = {
+        new ReTypes6w6h_Bad31_MustFailCompile().execute();
     }
 
 
 // file Types line 311
-//OPTIONS: -STATIC_CHECKS
  static  class Example {
  static public def example() {
  p : Point{self!=null} = null; // ERR

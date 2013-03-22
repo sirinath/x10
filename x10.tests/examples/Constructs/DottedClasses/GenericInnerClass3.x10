@@ -22,7 +22,7 @@
 
 
 public class GenericInnerClass3[T] extends harness.x10Test {
-  public static def main(Rail[String]){
+  public static def main(Array[String](1)){
      val p = new GenericInnerClass3[Int](818);
      p.execute();
   }

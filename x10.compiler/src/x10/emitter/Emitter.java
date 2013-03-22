@@ -4107,13 +4107,21 @@ public class Emitter {
             String lhs = "this." + mangleToJava(field.name()) + " = ";
             String zero = null;
             if (xts.isStruct(type)) {
-                if (xts.isByte(type) || xts.isUByte(type)) {
+                if (xts.isUByte(type)) {
+                    zero = "(x10.core.UByte) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".UBYTE_ZERO";
+                } else if (xts.isUShort(type)) {
+                    zero = "(x10.core.UShort) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".USHORT_ZERO";
+                } else if (xts.isUInt(type)) {
+                    zero = "(x10.core.UInt) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".UINT_ZERO";
+                } else if (xts.isULong(type)) {
+                    zero = "(x10.core.ULong) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".ULONG_ZERO";
+                } else if (xts.isByte(type)) {
                     zero = "(byte) 0";
-                } else if (xts.isShort(type) || xts.isUShort(type)) {
+                } else if (xts.isShort(type)) {
                     zero = "(short) 0";
-                } else if (xts.isInt(type) || xts.isUInt(type)) {
+                } else if (xts.isInt(type)) {
                     zero = "0";
-                } else if (xts.isLong(type) || xts.isULong(type)) {
+                } else if (xts.isLong(type)) {
                     zero = "0L";
                 } else if (xts.isFloat(type)) {
                     zero = "0.0F";
@@ -4182,8 +4190,7 @@ public class Emitter {
                 w.write(".value");
                 w.write(")");
 
-                // LONG_RAIL: unsafe int cast
-                w.write("[(int)");
+                w.write("[");
                 c.print(c.arguments().get(0), w, tr);
                 w.write("]");
 
@@ -4203,8 +4210,7 @@ public class Emitter {
                 w.write(".value");
                 w.write(")");
 
-                // LONG_RAIL: unsafe int cast
-                w.write("[(int)");
+                w.write("[");
                 c.print(c.arguments().get(0), w, tr);
                 w.write("]");
 
@@ -4425,7 +4431,7 @@ public class Emitter {
                 "}\n" +
                 "\n" +
                 "// called by native runtime inside main x10 thread\n" +
-                "public void runtimeCallback(final x10.core.Rail<java.lang.String> args) #throws {\n" +
+                "public void runtimeCallback(final x10.array.Array<java.lang.String> args) #throws {\n" +
                     "// call the original app-main method\n" +
                     "#mainclass.main(args);\n" +
                 "}\n" +

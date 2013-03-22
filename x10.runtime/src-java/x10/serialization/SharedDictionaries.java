@@ -11,9 +11,9 @@
 
 package x10.serialization;
 
+import java.lang.reflect.Method;
+
 import x10.runtime.impl.java.Runtime;
-import x10.serialization.DeserializationDictionary.MasterDeserializationDictionary;
-import x10.serialization.SerializationDictionary.MasterSerializationDictionary;
 
 /**
  * Commonly serialized types whose serialization ids are
@@ -23,19 +23,23 @@ import x10.serialization.SerializationDictionary.MasterSerializationDictionary;
  * We start with an initial set of built-in types, that are extensible 
  * by the user on the command line by setting the property x10.ADDITIONAL_SHARED_TYPES.  
  * 
- * As the program executes, new shared ids are assigned dynamically to frequently
- * serialized types.
+ * TODO: Future work:
+ * The design is intended to support future dynamic optimization where the 
+ * serialization subsystem can use profiling to identify commonly 
+ * serialized types and use a multi-phase protocol to promote such
+ * types into the shared dictionary.
  */
-class SharedDictionaries implements SerializationConstants {
+class SharedDictionaries {
     
     private static boolean initialized = false;
-    private static MasterSerializationDictionary serializationDict = new MasterSerializationDictionary();
-    private static MasterDeserializationDictionary deserializationDict = new MasterDeserializationDictionary();
-    
-    private static short nextSharedId = FIRST_SHARED_ID;
+    private static SerializationDictionary serializationDict;
+    private static DeserializationDictionary deserializationDict;    
    
     private static synchronized void doInitialization() {
         if (initialized) return;
+        
+        serializationDict = new SerializationDictionary(SerializationConstants.FIRST_SHARED_ID);
+        deserializationDict = new DeserializationDictionary();
         
         String[] builtInTypes = new String[] {
                 /* Core class library: x10.lang */
@@ -136,35 +140,25 @@ class SharedDictionaries implements SerializationConstants {
         };
         
         for (String type : builtInTypes) {
-            assignIdToType(type, nextSharedId++);
+            processType(type);
         }
         
         String userTypeProp = System.getProperty("x10.ADDITIONAL_SHARED_TYPES");
         if (userTypeProp != null) {
             String[] userTypes = userTypeProp.split(":");
             for (String type : userTypes) {
-                assignIdToType(type, nextSharedId++);
+                processType(type);
             }
         }
         
         initialized = true;
     }
 
-    static SerializationDictionary getSerializationDictionary() {
-        if (!initialized) doInitialization();
-        return serializationDict;
-    }
-    
-    static DeserializationDictionary getDeserializationDictionary() {
-        if (!initialized) doInitialization();
-        return deserializationDict;
-    }
-
-    private static void assignIdToType(String type, short id) {
+    private static void processType(String type) {
         try {
             Class <?> clazz = Class.forName(type);
-            assert id < SerializationConstants.FIRST_DYNAMIC_ID : "Not enough shared serialization ids reserved!";
-            serializationDict.addEntry(clazz, id);
+            short id = serializationDict.getSerializationId(clazz, null, true);
+            assert id < SerializationConstants.FIRST_DYNAMIC_ID : "Not enough shared seraialization ids reserved!";
             deserializationDict.addEntry(id, type);
             if (Runtime.TRACE_SER) {
                 Runtime.printTraceMessage("Assigned shared serialization id "+id+" to "+type);
@@ -174,5 +168,22 @@ class SharedDictionaries implements SerializationConstants {
                 Runtime.printTraceMessage("Unable to load common type "+type+". It will not have a preassigned id");
             }
         }
+    }
+    
+    static short getSerializationId(Class<?> clazz, Object obj) {
+        if (!initialized) doInitialization();
+        return serializationDict.getSerializationId(clazz, obj, false);
+    }
+    
+    static Class<?> getClassForID(short sid) {
+        if (!initialized) doInitialization();
+        assert SerializationConstants.FIRST_SHARED_ID <= sid && sid < SerializationConstants.FIRST_DYNAMIC_ID;
+        return deserializationDict.getClassForID(sid);
+    }
+    
+    static Method getMethod(short sid) {
+        if (!initialized) doInitialization();
+        assert SerializationConstants.FIRST_SHARED_ID <= sid && sid < SerializationConstants.FIRST_DYNAMIC_ID;
+        return deserializationDict.getMethod(sid);
     }
 }

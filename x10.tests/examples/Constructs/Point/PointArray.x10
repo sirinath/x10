@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Creating an array of points and assigning to its elements should work.
@@ -28,7 +27,7 @@ public class PointArray extends x10Test {
         return (p(0)(0) == 1 && p(0)(1) == 2);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointArray().execute();
     }
 }

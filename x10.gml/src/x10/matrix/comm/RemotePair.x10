@@ -1,2 +1,3 @@
 package x10.matrix.comm;
-public type RemotePair=x10.util.Pair[RemoteArray[Int], RemoteArray[Double]];
+import x10.util.Pair;
+public type RemotePair    =Pair[RemoteArray[Int], RemoteArray[Double]];

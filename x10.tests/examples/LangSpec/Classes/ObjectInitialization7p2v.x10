@@ -21,7 +21,7 @@ import x10.compiler.*;
 
 public class ObjectInitialization7p2v extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization7p2v().execute();
     }
 

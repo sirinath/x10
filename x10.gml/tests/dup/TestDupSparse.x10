@@ -21,7 +21,7 @@ import x10.matrix.dist.DupSparseMatrix;
  */
 public class TestDupSparse {
 	
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new RunDupSparseTest(args);
 		testcase.run();
 	}
@@ -32,7 +32,7 @@ public class TestDupSparse {
 		public val K:Int;	
 		public val S:Double;
 
-		public def this(args:Rail[String]) {
+		public def this(args:Array[String](1)) {
 			M = args.size > 0 ?Int.parse(args(0)):50;
 			N = args.size > 1 ?Int.parse(args(1)):M+1;
 			K = args.size > 2 ?Int.parse(args(2)):M+2;

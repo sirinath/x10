@@ -36,7 +36,7 @@ public class UIntInstanceOf extends x10Test {
 	Console.OUT.println(m);
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UIntInstanceOf().execute();
     }
 }

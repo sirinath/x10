@@ -9,12 +9,11 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;
-
 /**
  * Intersect a rectangular region with a triangular region, construct
  * an array from it, and examine it.
  */
+
 class PolyIntersection1 extends TestRegion {
 
     public def run() {
@@ -77,7 +76,7 @@ class PolyIntersection1 extends TestRegion {
         "    5  . . . . 0 5 0 5 . . \n"+
         "    6  . . . . . 0 6 2 . . \n";
     
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PolyIntersection1().execute();
     }
 }

@@ -87,7 +87,7 @@ public class ArrayList[T] extends AbstractCollection[T] implements List[T] {
     
     public def isEmpty(): Boolean = size() == 0;
 
-    public def toRail() = a.toRail();
+    public def toArray() = a.toArray();
     public def toIndexedMemoryChunk() = a.toIndexedMemoryChunk();
 
     public def this() {
@@ -143,7 +143,7 @@ public class ArrayList[T] extends AbstractCollection[T] implements List[T] {
         return -1;
     }
 
-    public def moveSectionToRail(i:Int, j:Int) = a.moveSectionToRail(i,j);
+    public def moveSectionToArray(i:Int, j:Int) = a.moveSectionToArray(i,j);
 
     //
     // iterator

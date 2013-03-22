@@ -9,7 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;        
 
 /**
  * Basic distributions
@@ -42,7 +41,7 @@ class BlockDist extends TestDist {
         "    3  . 0 0 1 1 2 2 3 . . \n"+
         "    4  . 0 0 1 1 2 2 3 . . \n";
     
-    public static def main(var args: Rail[String]) {
+    public static def main(var args: Array[String](1)) {
         new BlockDist().execute();
     }
 }

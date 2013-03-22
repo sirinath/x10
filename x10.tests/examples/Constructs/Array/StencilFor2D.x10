@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Implementing a 5-point stencil operation using for loop
@@ -36,7 +35,7 @@ public class StencilFor2D extends x10Test {
         return true;
     }
     
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new StencilFor2D().execute();
     }
 

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Region r occuring in a distribution context is converted to r->here
@@ -30,7 +29,7 @@ public class ArrayOverRegion extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayOverRegion().execute();
     }
 }

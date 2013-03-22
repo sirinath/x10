@@ -21,17 +21,17 @@ import harness.x10Test;
 
 public class Classes230 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes230().execute();
     }
 
 
 // file Classes line 2018
  static class Poly {
-  public val coeff : Rail[Int];
-  public def this(coeff: Rail[Int]) { this.coeff = coeff;}
+  public val coeff : Array[Int](1);
+  public def this(coeff: Array[Int](1)) { this.coeff = coeff;}
   public static operator (a:Int) as ? = new Poly([a as Int]);
-  public static def main(Rail[String]):void {
+  public static def main(Array[String](1)):void {
      val three : Poly = 3 as Poly;
   }
 }

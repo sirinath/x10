@@ -21,17 +21,17 @@ import harness.x10Test;
 
 public class PlacesAtCopy extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new PlacesAtCopy().execute();
     }
 
 
-// file Places line 820
+// file Places line 817
  static class example {
 static def Example() {
 
 val c = new Cell[Int](5);
-val a : Rail[Cell[Int]] = [c,c as Cell[Int]];
+val a : Array[Cell[Int]](1) = [c,c as Cell[Int]];
 assert(a(0)() == 5 && a(1)() == 5);     // (A)
 c.set(6);                               // (B)
 assert(a(0)() == 6 && a(1)() == 6);     // (C)

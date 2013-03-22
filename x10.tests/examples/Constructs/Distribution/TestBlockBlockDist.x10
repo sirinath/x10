@@ -1,5 +1,4 @@
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests a Block,Block distribution of a three dimensional array over two axes.
@@ -46,12 +45,12 @@ public class TestBlockBlockDist extends x10Test {
             val place = dist(p);
             placeCounts(place.id)++;
         }
-        for (q in 0..(placeCounts.size-1)) {
-            chk(placeCounts(q) == dist(Place(q as Int)).size());
+        for ([q] in 0..(placeCounts.size-1)) {
+            chk(placeCounts(q) == dist(Place(q)).size());
         }
     } 
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String]) {
         new TestBlockBlockDist().execute();
     }
 }

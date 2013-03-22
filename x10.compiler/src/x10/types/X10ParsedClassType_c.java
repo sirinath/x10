@@ -180,9 +180,7 @@ implements X10ParsedClassType
             	// [DC] ta == null can happen if the type is used to access a static member
             	// don't add substitutions in this case
                 if (ta != null) {
-                    if (ta.size() != tp.size()) {
-                        throw new InternalCompilerError("Mismatch in number of type arguments ("+ta+") and type parameters ("+tp+") for "+cdef);
-                    }
+                	assert ta.size() == tp.size();
                 //if (!tp.isEmpty() && !ta.isEmpty()) {
                     typeArguments.addAll(ta);
                     typeParameters.addAll(tp);
@@ -192,9 +190,7 @@ implements X10ParsedClassType
                     break;
             }
             //if (typeArguments.isEmpty()) typeParameters = new ArrayList<ParameterType>();
-            if (typeArguments.size() != typeParameters.size()) {
-                throw new InternalCompilerError("Mismatch in number of type arguments ("+typeArguments+") and type parameters ("+typeParameters+")");
-            }
+            assert typeArguments.size() == typeParameters.size();
             cacheSubst = new TypeParamSubst((TypeSystem) ts, typeArguments, typeParameters);
         }
         return cacheSubst;

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Cannot bind point components in array declaration.
@@ -34,7 +33,7 @@ public class ArrayPointBinding_MustFailCompile extends x10Test {
         return (i(0) == 1 && j(1) == 4);  
     }
 
-    public static def main(args: Rail[String]): void = {
+    public static def main(args: Array[String](1)): void = {
         new ArrayPointBinding_MustFailCompile().execute();
     }
 }

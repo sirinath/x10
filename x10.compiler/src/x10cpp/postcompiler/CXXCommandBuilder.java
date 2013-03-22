@@ -226,9 +226,7 @@ public class CXXCommandBuilder {
         cxxCmd.addAll(x10rt.libs);
 
         if (options.gpt) {
-            cxxCmd.add("-Wl,--no-as-needed");
             cxxCmd.add("-lprofiler");
-            cxxCmd.add("-Wl,--as-needed");
         }
         
         if (options.buildX10Lib != null) {

@@ -39,7 +39,7 @@ public class FinishCrossMethodMultiAsync extends x10Test{
         return value == 16;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new FinishCrossMethodMultiAsync().execute();
     }
     

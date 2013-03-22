@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Must allow binding components to an existing point.
@@ -28,7 +27,7 @@ public class PointRebinding extends x10Test {
         return (i == 1 && j == 2);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointRebinding().execute();
     }
 }

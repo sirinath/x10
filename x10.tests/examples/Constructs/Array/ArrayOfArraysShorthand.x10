@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test the syntax for creating an array of arrays.
@@ -32,7 +31,7 @@ public class ArrayOfArraysShorthand extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayOfArraysShorthand().execute();
     }
 }

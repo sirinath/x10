@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test for for loop with x10 for (point p: 1:N) syntax.
@@ -44,7 +43,7 @@ public class ForLoop3 extends x10Test {
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new ForLoop3().execute();
 	}
 }

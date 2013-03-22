@@ -13,6 +13,8 @@
 target_list 	= TestDistBlock TestDupBlock TestDistMult TestDistDupMult TestGridCast TestGridReduce TestSumma TestDistVector TestDupVector TestDistDupVectorMult
 
 target		= TestSumma
+#target		= TestDistSparse
+#target		= TestDist
 #target		= TestDistDupMult
 
 # build path
@@ -35,6 +37,12 @@ test_args =
 ###################################################
 default	: java
 run		: run_java
+
+#default	: $(target).x10
+#	x10c -d build -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -classpath ../../sandbox/:../../lib/managed_gml.jar -x10lib ../..//managed_gml.properties  TestDistBlock.x10 
+
+
+###################################################
 
 ###################################################
 # Including rules

@@ -343,8 +343,10 @@ static void ensure_init_congruent (size_t req_size) {
             // in particular, cygwin can fall in this trap
             // other platforms have yet to be investigated for possible support
 
-            if (x10aux::num_places == 1) {
+            if (x10rt_nplaces() == 1) {
                 // Because there is only a single place, we can just fall back to malloc
+                // Don't call x10rt_register_mem because on most transports, it is
+                // unimplemented and unhelpfully returns 0 to indicate that.
                 obj = x10aux::alloc_internal(size, false);
             } else {
                 // In a multi-place run, we have to return the same virtual address in all
@@ -434,8 +436,7 @@ static void ensure_init_congruent (size_t req_size) {
     #endif
 
     // register all congruent memory with x10rt so that remote ops can be used
-    x10aux::register_mem(obj, size);
-    congruent_base = static_cast<unsigned char*>(obj);
+    congruent_base = static_cast<unsigned char*>(reinterpret_cast<void*>(x10rt_register_mem(obj, size)));
     congruent_cursor = congruent_base;
     
 }

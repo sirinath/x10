@@ -2,7 +2,11 @@
 <!DOCTYPE project [<!ENTITY buildfile SYSTEM "./build-user.xml">]>
 <project name="x10.runtime" default="dist" basedir=".">
     &buildfile;
-    <property name="bdwgc.version" value="7.2d"/>
+    <condition property="bdwgc.version" value="7.2d" else="7.1">
+      <or>
+        <os family="mac"/>
+      </or>
+    </condition>
     <property name="x10.home" value="${basedir}/.."/>
     <property name="x10.dist.location" value="${x10.home}/x10.dist"/>
     <property name="x10.constraints.location" location="${x10.home}/x10.constraints"/>
@@ -59,7 +63,7 @@
     <target name="init">
         <mkdir dir="${build}"/>
         <mkdir dir="${gen}"/>
-        <javac destdir="${build}" source="1.6" target="1.6" debug="on" nowarn="on">
+        <javac destdir="${build}" source="1.5" target="1.5" debug="on" nowarn="on">
             <src path="${x10.common.location}/contrib/ant"/>
             <include name="Ejc.java"/>
             <include name="IfTask.java"/>
@@ -311,7 +315,7 @@
         <java classname="x10c.util.MakeFun" classpath="${x10.dist.location}/lib/x10c.jar" fork="true" dir="${gen}"/>
     </target>
     <target name="build-java" depends="init,gen-xrx,gen-xrj">
-        <ejc destdir="${build}" source="1.6" target="1.6" debug="on" nowarn="on">
+        <ejc destdir="${build}" source="1.5" target="1.5" debug="on" nowarn="on">
             <src path="${src}"/>
             <size value="50" when="more"/>
             <classpath>
@@ -323,7 +327,7 @@
         </ejc>
     </target>
     <target name="build-x10-x10rt" depends="init">
-        <ejc destdir="${build}" source="1.6" target="1.6" debug="on" nowarn="on">
+        <ejc destdir="${build}" source="1.5" target="1.5" debug="on" nowarn="on">
             <src path="${src}/x10/x10rt"/>
             <size value="50" when="more"/>
             <classpath>
@@ -360,7 +364,7 @@
     </target>
     <target name="build-xrx" depends="init,gen-xrx,build-java">
         <!--
-        <ejc destdir="${build}" source="1.6" target="1.6" debug="on" nowarn="on">
+        <ejc destdir="${build}" source="1.5" target="1.5" debug="on" nowarn="on">
             <src path="${gen}"/>
             <size value="50" when="more"/>
             <classpath>
@@ -465,7 +469,6 @@
                     <istrue value="${CROSS_COMPILE_BGP}" />
                   </conditions>
                   <then>
-                    <echo message="Configuring BDWGC for BGP cross compile"/>
                     <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                       <env key="CXX" value="/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-g++"/>
                       <env key="CC" value="/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc"/>
@@ -487,7 +490,6 @@
                         </or>
                       </conditions>
                       <then>
-                        <echo message="Configuring BDWGC for PPC linux"/>
                         <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                           <arg value="${bdwgc.dir}/src/configure" />
                           <arg value="-enable-threads=posix" />
@@ -499,9 +501,7 @@
                         </exec>
                       </then>
                       <else>
-                        <echo message="Configuring BDWGC for generic linux"/>
                         <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
-                          <env key="CONFIG_SHELL" value="/bin/bash" />
                           <arg value="${bdwgc.dir}/src/configure" />
                           <arg value="-enable-threads=posix" />
                           <arg value="-enable-thread-local-alloc" />
@@ -520,7 +520,6 @@
                 <os family="mac"/>
               </conditions>
               <then>
-                <echo message="Configuring BDWGC for mac"/>
                 <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                   <arg value="${bdwgc.dir}/src/configure" />
                   <arg value="-enable-threads=posix" />
@@ -540,7 +539,6 @@
                 <os family="unix" name="aix"/>
               </conditions>
               <then>
-                <echo message="Configuring BDWGC for aix"/>
                 <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                   <env key="OBJECT_MODE" value="32_64" />
                   <env key="CFLAGS" value="-Wa,-mppc64 -Wa,-a64 -maix64 -D__ppc64__" />
@@ -559,7 +557,6 @@
                 <os family="windows"/>
               </conditions>
               <then>
-                <echo message="Configuring BDWGC for windows"/>
                 <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                   <arg value="${bdwgc.dir}/src/configure" />
                   <arg value="-enable-threads=posix" />
@@ -575,7 +572,6 @@
                 <os family="unix" name="freebsd"/>
               </conditions>
               <then>
-                <echo message="Configuring BDWGC for freebsd"/>
                 <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                   <arg value="${bdwgc.dir}/src/configure" />
                   <arg value="-enable-threads=posix" />
@@ -586,12 +582,10 @@
                 </exec>
               </then>
             </if>
-            <echo message="Running make"/>
             <exec executable="${make.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                 <env key="OBJECT_MODE" value="32_64" />
                 <arg value="-j${available.procs}" />
             </exec>
-            <echo message="Running make install"/>
             <exec executable="${make.exe}" dir="${bdwgc.dir}/src" failonerror="true">
                 <env key="OBJECT_MODE" value="32_64" />
                 <arg value="install" />
@@ -629,6 +623,34 @@
                 <arg value="xzf" />
                 <arg value="${bdwgc.platform.dir}/${bdwgc.tar}" />
             </exec>
+
+	    <!-- Patches to apply for bdwgc version 7.1 -->
+	    <if>
+	      <conditions>
+		<equals arg1="${bdwgc.version}" arg2="7.1" />
+	      </conditions>
+	      <then>
+		<if>
+		  <conditions>
+                    <os family="unix" name="aix"/>
+		  </conditions>
+		  <then>
+                    <patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fixPPCHeaderFiles.patch.txt"
+			   dir="${bdwgc.dir}/src" strip="0" />
+                    <patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/linkerHackConfigure.patch.txt"
+			   dir="${bdwgc.dir}/src" strip="0" />
+		  </then>
+		</if>
+		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/enableRTSignals.patch.txt"
+                       dir="${bdwgc.dir}/src" strip="0" />
+		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/pthread_support.patch.txt"
+                       dir="${bdwgc.dir}/src" strip="0" />
+		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/bluegeneStackHeuristic.patch.txt"
+                       dir="${bdwgc.dir}/src" strip="0" />
+		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/unsigned_char.patch.txt"
+                       dir="${bdwgc.dir}/src" strip="0" />
+	      </then>
+	    </if>
 
 	    <!-- Patches to apply for bdwgc version 7.2d -->
 	    <if>

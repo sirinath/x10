@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Minimal test for dists.
@@ -28,7 +27,7 @@ public class DistributionTest1 extends x10Test {
             (R.max(1) - R.min(1) + 1 == 101));
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DistributionTest1().execute();
     }
 }

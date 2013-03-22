@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 import x10.util.ArrayList;
 
 /**
@@ -88,10 +87,10 @@ public class BlockDistWithPlaceGroup extends x10Test {
                 }
             }
         } while (places.size() == 0);
-        return new SparsePlaceGroup(places.toRail());
+        return new SparsePlaceGroup(places.toArray().sequence());
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new BlockDistWithPlaceGroup().execute();
     }
 }

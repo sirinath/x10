@@ -510,11 +510,8 @@ void insertNewMessage(MSGTYPE mt, x10rt_msg_params *p, void *dataPtr, x10rt_copy
 /******************************************************
  *  Main API calls.  See x10rt_net.h for documentation
 *******************************************************/
-x10rt_error x10rt_net_preinit(char* connInfoBuffer, int connInfoBufferSize) {
-	return X10RT_ERR_UNSUPPORTED;
-}
 
-x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
+void x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 {
 	// determine the number of places (processes) to create, using an environment variable
 	char* NPROCS = getenv(X10_NPLACES);
@@ -582,8 +579,6 @@ x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 			break; // out of the spawning for loop
 		}
 	}
-
-    return X10RT_ERR_OK;
 }
 
 void x10rt_net_register_msg_receiver (x10rt_msg_type msg_type, x10rt_handler *cb)
@@ -650,16 +645,9 @@ void x10rt_net_register_get_receiver (x10rt_msg_type msg_type, x10rt_finder *cb1
 	#endif
 }
 
-x10rt_place x10rt_net_ndead (void) {
-	return 0; // place failure is not handled by this implementation.
-}
-
-bool x10rt_net_is_place_dead (x10rt_place p) {
-	return false; // place failure is not handled by this implementation.
-}
-
-x10rt_error x10rt_net_get_dead (x10rt_place *dead_places, x10rt_place len) {
-	return X10RT_ERR_UNSUPPORTED; // place failure is not handled by this implementation.
+void x10rt_net_internal_barrier (void)
+{
+    abort(); // FUNCTION IS ON DEATH ROW
 }
 
 x10rt_place x10rt_net_nhosts (void)
@@ -704,10 +692,11 @@ void x10rt_net_remote_ops (x10rt_remote_op_params *ops, size_t numOps)
 	abort();
 }
 
-void x10rt_net_register_mem (void *ptr, size_t)
+x10rt_remote_ptr x10rt_net_register_mem (void *ptr, size_t)
 {
     // assume remote ops will be handled by regular x10rt_send_msg so
     // no special work to do here
+    return (x10rt_remote_ptr)(size_t)ptr;
 }
 
 void x10rt_net_send_put (x10rt_msg_params *p, void *buf, x10rt_copy_sz len)
@@ -719,7 +708,7 @@ void x10rt_net_send_put (x10rt_msg_params *p, void *buf, x10rt_copy_sz len)
 	insertNewMessage(PUT, p, buf, len, NULL);
 }
 
-x10rt_error x10rt_net_probe (void)
+void x10rt_net_probe (void)
 {
 	// the receiving side calls this regularly, to see if messages have come in to be processed.  This is
 	// a thread that's part of the receiving end, and this is the thread that will begin execution of the function registered
@@ -744,7 +733,7 @@ x10rt_error x10rt_net_probe (void)
 
 			if (pthread_mutex_unlock(&myPlace->messageQueueLock) != 0) error("Unable to unlock the message queue after finding it empty");
 			sched_yield(); // to help prevent the constant probes from preventing anything else from getting done.
-            return X10RT_ERR_OK;
+			return;
 		}
 
 		x10StandaloneMessageQueueEntry *entry = (x10StandaloneMessageQueueEntry *)(myPlace->dataBuffer + myPlace->messageQueueHead);
@@ -770,7 +759,7 @@ x10rt_error x10rt_net_probe (void)
 				#endif
 
 				if (pthread_mutex_unlock(&myPlace->messageQueueLock) != 0) error("Unable to unlock the message queue after finding it empty");
-                return X10RT_ERR_OK;
+				return;
 			}
 
 			entrySize = getTotalLength(entry);
@@ -873,7 +862,7 @@ x10rt_error x10rt_net_probe (void)
 
 			// this message was not the previous head.  We're done.
 			if (pthread_mutex_unlock(&myPlace->messageQueueLock) != 0) error("Unable to unlock the message queue after processing a message");
-            return X10RT_ERR_OK;
+			return;
 		}
 
 		// skip the head along to the next used message position
@@ -893,7 +882,7 @@ x10rt_error x10rt_net_probe (void)
 					fflush(stdout);
 				#endif
 				if (pthread_mutex_unlock(&myPlace->messageQueueLock) != 0) error("Unable to unlock the message queue after finding it empty");
-                return X10RT_ERR_OK;
+				return;
 			}
 
 			entry = (x10StandaloneMessageQueueEntry *)(myPlace->dataBuffer + myPlace->messageQueueHead);
@@ -913,14 +902,12 @@ x10rt_error x10rt_net_probe (void)
 
 		// we still have the messageQueueLock locked here, for our loop back around
 	}
-
-    return X10RT_ERR_OK;
 }
 
-x10rt_error x10rt_net_blocking_probe (void)
+void x10rt_net_blocking_probe (void)
 {
 	// TODO: make this blocking.  For now, just call probe.
-	return x10rt_net_probe();
+	x10rt_net_probe();
 }
 
 void x10rt_net_finalize (void)
@@ -1010,16 +997,6 @@ void x10rt_net_alltoall (x10rt_team team, x10rt_place role,
     abort();
 }
 
-void x10rt_net_reduce (x10rt_team team, x10rt_place role,
-                        x10rt_place root, const void *sbuf, void *dbuf,
-                        x10rt_red_op_type op, 
-                        x10rt_red_type dtype,
-                        size_t count,
-                        x10rt_completion_handler *ch, void *arg)
-{
-	abort();
-}
-
 void x10rt_net_allreduce (x10rt_team team, x10rt_place role,
                           const void *sbuf, void *dbuf,
                           x10rt_red_op_type op, 
@@ -1030,4 +1007,3 @@ void x10rt_net_allreduce (x10rt_team team, x10rt_place role,
     abort();
 }
 
-const char *x10rt_net_error_msg (void) { return NULL; }

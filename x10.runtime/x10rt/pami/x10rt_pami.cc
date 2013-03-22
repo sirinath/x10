@@ -36,7 +36,6 @@
 #define X10RT_PAMI_SCATTER_ALG "X10RT_PAMI_SCATTER_ALG"
 #define X10RT_PAMI_ALLTOALL_ALG "X10RT_PAMI_ALLTOALL_ALG"
 #define X10RT_PAMI_ALLTOALL_CHUNKS "X10RT_PAMI_ALLTOALL_CHUNKS"
-#define X10RT_PAMI_REDUCE_ALG "X10RT_PAMI_REDUCE_ALG"
 #define X10RT_PAMI_ALLREDUCE_ALG "X10RT_PAMI_ALLREDUCE_ALG"
 #define X10RT_PAMI_ALLGATHER_ALG "X10RT_PAMI_ALLGATHER_ALG"
 
@@ -159,7 +158,6 @@ struct x10rt_pami_state
 #endif
 	pami_extension_t async_extension; // for async progress
 	bool blockingSend; // flag based on X10RT_PAMI_BLOCKING_SEND
-	char errorMessageBuffer[1200]; // buffer to hold the most recent error message
 } state;
 
 static void local_msg_dispatch (pami_context_t context, void* cookie, const void* header_addr, size_t header_size,
@@ -196,19 +194,20 @@ pami_result_t x10rt_PAMI_Context_advance(pami_context_t context, size_t maximum)
  */
 void error(const char* msg, ...)
 {
+	char buffer[1200];
 	va_list ap;
 	va_start(ap, msg);
-	vsnprintf(state.errorMessageBuffer, sizeof(state.errorMessageBuffer), msg, ap);
+	vsnprintf(buffer, sizeof(buffer), msg, ap);
 	va_end(ap);
-	strcat(state.errorMessageBuffer, "  ");
-	int blen = strlen(state.errorMessageBuffer);
-	PAMI_Error_text(state.errorMessageBuffer+blen, 1199-blen);
-	fprintf(stderr, "X10 PAMI error: %s\n", state.errorMessageBuffer);
+	strcat(buffer, "  ");
+	int blen = strlen(buffer);
+	PAMI_Error_text(buffer+blen, 1199-blen);
+	fprintf(stderr, "X10 PAMI error: %s\n", buffer);
 	if (errno != 0)
 		fprintf(stderr, "X10 PAMI errno: %s\n", strerror(errno));
 
 	fflush(stderr);
-	exit(EXIT_FAILURE); // TODO - support the non-exit on error mode
+	exit(EXIT_FAILURE);
 }
 
 bool checkBoolEnvVar(char* value)
@@ -222,9 +221,9 @@ void queryAvailableAlgorithms(x10rt_pami_team* team, pami_xfer_type_t collective
 	pami_result_t status = PAMI_ERROR;
 
 	// figure out how many different algorithms are available
-	size_t num_algorithms[2] = {0,0}; // [0]=always works, and [1]=sometimes works lists
+	size_t num_algorithms[2]; // [0]=always works, and [1]=sometimes works lists
 	status = PAMI_Geometry_algorithms_num(team->geometry, collective, num_algorithms);
-	if (status != PAMI_SUCCESS || (num_algorithms[0]==0 && num_algorithms[1]==0)) error("Unable to query the algorithm counts for collective %i. num_algorithms[0]=%u, [1]=%u, Status=%i", collective, num_algorithms[0], num_algorithms[1], status);
+	if (status != PAMI_SUCCESS || num_algorithms[0]==0) error("Unable to query the algorithm counts");
 
 	// query what the different algorithms are
 	pami_algorithm_t *always_works_alg = (pami_algorithm_t*)alloca(sizeof(pami_algorithm_t)*num_algorithms[0]);
@@ -233,7 +232,7 @@ void queryAvailableAlgorithms(x10rt_pami_team* team, pami_xfer_type_t collective
 	pami_metadata_t *must_query_md = (pami_metadata_t*)alloca(sizeof(pami_metadata_t)*num_algorithms[1]);
 	status = PAMI_Geometry_algorithms_query(team->geometry, collective, always_works_alg,
 			always_works_md, num_algorithms[0], must_query_alg, must_query_md, num_algorithms[1]);
-	if (status != PAMI_SUCCESS) error("Unable to query the supported algorithms for collective %i. num_algorithms[0]=%u, [1]=%u, Status=%i", collective, num_algorithms[0], num_algorithms[1], status);
+	if (status != PAMI_SUCCESS) error("Unable to query the supported algorithms");
 
 	if (indexToUse >= num_algorithms[0]+num_algorithms[1])
 		error("You requested index %i for collective algorithm %i, which is more than the number available", indexToUse, collective);
@@ -270,9 +269,6 @@ void determineCollectiveAlgorithms(x10rt_pami_team* team)
 	}
 	else
 		queryAvailableAlgorithms(team, PAMI_XFER_ALLTOALL, userChoiceInt);
-
-	userChoice = getenv(X10RT_PAMI_REDUCE_ALG);
-	queryAvailableAlgorithms(team, PAMI_XFER_REDUCE, userChoice?atoi(userChoice):0);
 
 	userChoice = getenv(X10RT_PAMI_ALLREDUCE_ALG);
 	queryAvailableAlgorithms(team, PAMI_XFER_ALLREDUCE, userChoice?atoi(userChoice):0);
@@ -891,13 +887,18 @@ static void team_destroy_complete (pami_context_t context, void* cookie, pami_re
 }
 
 
-x10rt_error x10rt_net_preinit(char* connInfoBuffer, int connInfoBufferSize) {
-	return X10RT_ERR_UNSUPPORTED;
-}
-
-x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
+/** Initialize the X10RT API logical layer.
+ *
+ * \see #x10rt_lgl_init
+ *
+ * \param argc As in x10rt_lgl_init.
+ *
+ * \param argv As in x10rt_lgl_init.
+ *
+ * \param counter As in x10rt_lgl_init.
+ */
+void x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 {
-	// TODO - return proper error codes upon failure, in place of calling the error() method.
 	pami_result_t   status = PAMI_ERROR;
 	setenv("MP_MSG_API", "X10", 0);
 	const char *name = getenv("MP_MSG_API");
@@ -978,9 +979,8 @@ x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 		fprintf(stderr, "Hello from process %u of %u\n", state.myPlaceId, state.numPlaces);
 	#endif
 
-#if !defined(__bgq__)
 	state.hfi_update = NULL;
-#if defined(_POWER)
+#if defined(_POWER) && !defined(__bgq__)
 	// see if HFI should be used
 	if (!checkBoolEnvVar(getenv(X10RT_PAMI_DISABLE_HFI)))
 	{
@@ -1000,8 +1000,7 @@ x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 				fprintf(stderr, "HFI present but disabled at place %u because PAMI_Extension_open status=%u\n", state.myPlaceId, status);
 		}
 	}
-#endif // power CPU
-#endif // not BlueGeneQ
+#endif
 
 	// create the world geometry
 	if (pthread_mutex_init(&state.stateLock, NULL) != 0) error("Unable to initialize the team lock");
@@ -1019,14 +1018,8 @@ x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 		state.blockingSend = true;
 	else
 		state.blockingSend = false;
-
-	return X10RT_ERR_OK;
 }
 
-const char *x10rt_net_error_msg (void)
-{
-	return state.errorMessageBuffer;
-}
 
 void x10rt_net_register_msg_receiver (x10rt_msg_type msg_type, x10rt_handler *callback)
 {
@@ -1090,18 +1083,6 @@ void x10rt_net_register_get_receiver (x10rt_msg_type msg_type, x10rt_finder *fin
 	#ifdef DEBUG
 		fprintf(stderr, "Place %u registered GET message handler %u\n", state.myPlaceId, msg_type);
 	#endif
-}
-
-x10rt_place x10rt_net_ndead (void) {
-	return 0; // place failure is not handled by this implementation.
-}
-
-bool x10rt_net_is_place_dead (x10rt_place p) {
-	return false; // place failure is not handled by this implementation.
-}
-
-x10rt_error x10rt_net_get_dead (x10rt_place *dead_places, x10rt_place len) {
-	return X10RT_ERR_UNSUPPORTED; // place failure is not handled by this implementation.
 }
 
 x10rt_place x10rt_net_nhosts (void)
@@ -1409,9 +1390,8 @@ void x10rt_net_send_get (x10rt_msg_params *p, void *buf, x10rt_copy_sz len)
 
 /** Handle any oustanding message from the network by calling the registered callbacks.  \see #x10rt_lgl_probe
  */
-x10rt_error x10rt_net_probe()
+void x10rt_net_probe()
 {
-	// TODO - return proper error codes upon failure, in place of calling the error() method.
 	pami_result_t status = PAMI_ERROR;
 	if (state.numParallelContexts)
 	{
@@ -1423,7 +1403,7 @@ x10rt_error x10rt_net_probe()
 	else
 	{
 		status = PAMI_Context_trylock(state.context[0]);
-		if (status == PAMI_EAGAIN) return X10RT_ERR_OK; // context is already in use
+		if (status == PAMI_EAGAIN) return; // context is already in use
 		if (status != PAMI_SUCCESS) error ("Unable to lock the PAMI context");
 
 		do { status = x10rt_PAMI_Context_advance(state.context[0], 1);
@@ -1432,13 +1412,12 @@ x10rt_error x10rt_net_probe()
 
 		if (PAMI_Context_unlock(state.context[0]) != PAMI_SUCCESS) error ("Unable to unlock the PAMI context");
 	}
-	return X10RT_ERR_OK;
 }
 
-x10rt_error x10rt_net_blocking_probe (void)
+void x10rt_net_blocking_probe (void)
 {
 	// TODO: make this blocking.  For now, just call probe.
-	return x10rt_net_probe();
+	x10rt_net_probe();
 }
 
 /** Shut down the network layer.  \see #x10rt_lgl_finalize
@@ -1630,7 +1609,7 @@ void x10rt_net_remote_ops (x10rt_remote_op_params *ops, size_t numOps)
 		error("Unable to execute the remote operation");
 }
 
-void x10rt_net_register_mem (void *ptr, size_t len)
+x10rt_remote_ptr x10rt_net_register_mem (void *ptr, size_t len)
 {
 	pami_result_t status = PAMI_ERROR;
 	pami_memregion_t registration;
@@ -1651,6 +1630,7 @@ void x10rt_net_register_mem (void *ptr, size_t len)
 	#ifdef DEBUG
 		fprintf(stderr, "Place %u registered %lu bytes at %p for remote operations\n", state.myPlaceId, len, ptr);
 	#endif
+	return (x10rt_remote_ptr)ptr;
 }
 
 void x10rt_net_team_new (x10rt_place placec, x10rt_place *placev,
@@ -2174,61 +2154,6 @@ void x10rt_net_alltoall (x10rt_team team, x10rt_place role, const void *sbuf, vo
 		memcpy(((char*)dbuf)+(blockSize*role), ((char*)sbuf)+(blockSize*role), blockSize);
 	*/
 	}
-}
-
-void x10rt_net_reduce (x10rt_team team, x10rt_place role,
-                        x10rt_place root, const void *sbuf, void *dbuf,
-                        x10rt_red_op_type op, 
-                        x10rt_red_type dtype,
-                        size_t count,
-                        x10rt_completion_handler *ch, void *arg)
-{
-	pami_result_t status = PAMI_ERROR;
-	pami_context_t context;
-	if (state.numParallelContexts)
-		context = getConcurrentContext();
-	else
-	{
-		context = state.context[0];
-		status = PAMI_Context_lock(context);
-		if (status != PAMI_SUCCESS) error("Unable to lock the context to send a message");
-	}
-
-	// Issue the collective
-	x10rt_pami_team_callback *tcb = (x10rt_pami_team_callback *)malloc(sizeof(x10rt_pami_team_callback));
-	if (tcb == NULL) error("Unable to allocate memory for a reduce callback header");
-	tcb->tcb = ch;
-	tcb->arg = arg;
-	memset(&tcb->operation, 0, sizeof (tcb->operation));
-	tcb->operation.cb_done = collective_operation_complete;
-	tcb->operation.cookie = tcb;
-	tcb->operation.algorithm = state.teams[team].algorithm[PAMI_XFER_REDUCE];
-	tcb->operation.cmd.xfer_reduce.sndbuf = (char*)sbuf;
-	tcb->operation.cmd.xfer_reduce.stype = DATATYPE_CONVERSION_TABLE[dtype];
-	tcb->operation.cmd.xfer_reduce.stypecount = count;
-	tcb->operation.cmd.xfer_reduce.rcvbuf = (char*)dbuf;
-	tcb->operation.cmd.xfer_reduce.rtype = DATATYPE_CONVERSION_TABLE[dtype];
-	tcb->operation.cmd.xfer_reduce.rtypecount = count;
-	if (dtype == X10RT_RED_TYPE_DBL_S32)
-	{   // operations on LOC datatypes are different from regular types
-		if (OPERATION_CONVERSION_TABLE[op] == PAMI_DATA_MAX)
-			tcb->operation.cmd.xfer_reduce.op = PAMI_DATA_MAXLOC;
-		else if (OPERATION_CONVERSION_TABLE[op] == PAMI_DATA_MIN)
-			tcb->operation.cmd.xfer_reduce.op = PAMI_DATA_MINLOC;
-		else
-			error("Unknown operation type %i", op);
-	}
-	else
-		tcb->operation.cmd.xfer_reduce.op = OPERATION_CONVERSION_TABLE[op];
-	tcb->operation.cmd.xfer_reduce.data_cookie = NULL;
-	tcb->operation.cmd.xfer_reduce.commutative = 1;
-	#ifdef DEBUG
-		fprintf(stderr, "Place %u executing reduce, with type=%u and op=%u\n", state.myPlaceId, dtype, op);
-	#endif
-	status = PAMI_Collective(context, &tcb->operation);
-	if (status != PAMI_SUCCESS) error("Unable to issue a reduce on team %u", team);
-	if (!state.numParallelContexts)
-		PAMI_Context_unlock(context);
 }
 
 void x10rt_net_allreduce (x10rt_team team, x10rt_place role, const void *sbuf, void *dbuf,

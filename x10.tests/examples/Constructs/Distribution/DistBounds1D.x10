@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * DistArray bounds test - 1D.
@@ -84,7 +83,7 @@ public class DistBounds1D extends x10Test {
         return x == y;
     }
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String](1)) {
         new DistBounds1D().execute();
     }
 
