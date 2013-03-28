@@ -1,0 +1,20 @@
+Release 2.3.1.1
+
+This is a minor release of X10 that fixes the appended list of issues 
+reported with X10 2.3.1.  For details on X10 2.3.1, please see the
+X10 2.3.1 Release notes in the X10 2.3.1 Release.
+
+XTENLANG-3191. post-compilation error with properties of unsigned types
+XTENLANG-3192. fix for missing typedef only .x10 files in jar file. 
+XTENLANG-3194. Enable building X10 on FX10
+XTENLANG-3195. x10c doesn't accept relative path with -x10lib option
+XTENLANG-3196. Update to commons-math3-3.1.1.jar
+
+The additional change sets with no associated JIRA issue are also included
+in the 2.3.1.1 release of X10
+
+  r24981,r24988,r24989,r24992 (fixes to x10.in to enable -np,-host,-hostfile options)
+  r25029 (fix for PAMI build of BG/Q)
+  r25141 (remove preloading related stuff from runjava.in)
+  r25176 and 25177 (fixes to PAMI for BlueGene/Q)
+  r25189 (change Java source and target versions to 1.6)
