@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types340 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types340().execute();
     }
 
 
-// file Types line 1245
+// file Types line 1244
  static struct Position(x: Int, y: Int) {}
  static struct Line(start: Position, end: Position){start != end}
   {}

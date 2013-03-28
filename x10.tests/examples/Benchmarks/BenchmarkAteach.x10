@@ -9,7 +9,6 @@
  *  (C) Copyright Australian National University 2010.
  */
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests base performance of finish/ateach
@@ -32,7 +31,7 @@ public class BenchmarkAteach extends x10Test {
         return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new BenchmarkAteach().execute();
 	}
 

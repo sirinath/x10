@@ -21,13 +21,12 @@ import harness.x10Test;
 
 public class ReTypes6w6h extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ReTypes6w6h().execute();
     }
 
 
 // file Types line 311
-//OPTIONS: -STATIC_CHECKS
  static  class Example {
  static public def example() {
 // ERROR: p : Point{self!=null} = null;

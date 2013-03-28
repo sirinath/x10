@@ -11,8 +11,6 @@
 
 package x10.x10rt;
 
-import x10.x10rt.net.Sockets;
-
 public class X10RT {
     private enum State { UNINITIALIZED, INITIALIZED, RUNNING, TEARING_DOWN, TORN_DOWN };
 
@@ -20,10 +18,11 @@ public class X10RT {
     private static int here;
     private static int numPlaces;
     static boolean forceSinglePlace = false;
-    public static Sockets javaSockets = null;
     
     public static boolean X10_EXITING_NORMALLY = false;
+
     static final boolean REPORT_UNCAUGHT_USER_EXCEPTIONS = true;
+    
     public static final boolean VERBOSE = false;
     
     /**
@@ -32,7 +31,7 @@ public class X10RT {
      * related class can be successfully invoked.
      */
     public static synchronized String init_library() {
-    	if (state != State.UNINITIALIZED) return null; // already initialized
+    	if (state != State.UNINITIALIZED) return null;
 
         // load libraries
         String property = System.getProperty("x10.LOAD");
@@ -42,16 +41,10 @@ public class X10RT {
                 System.loadLibrary(libs[i]);
         }
 
-        String libName = System.getProperty("X10RT_IMPL", "sockets");
+        String libName = System.getProperty("X10RT_IMPL", "x10rt_sockets");
         if (libName.equals("disabled")) {
             forceSinglePlace = true;
-        } 
-        else if (libName.equalsIgnoreCase("JavaSockets")) {
-      	  	X10RT.javaSockets = new Sockets();
-      	  	return X10RT.javaSockets.getLocalConnectionInfo();
-        }
-        else {
-            libName = "x10rt_" + libName;
+        } else {
             try {
                 System.loadLibrary(libName);
             } catch (UnsatisfiedLinkError e) {
@@ -88,55 +81,25 @@ public class X10RT {
      * myPlace is which place this runtime is in the whole computation.
      * connectionInfo is an array the size of nplaces, and contains the connection string for each
      * remote place.  The connection string for myPlace may be null.
-     * 
-     * This method returns true if the runtime was successfully initialized.
-     * If false is returned, the caller should call this method again until true is returned.
      */
-    public static synchronized boolean connect_library(int myPlace, String[] connectionInfo) {
-    	if (state != State.INITIALIZED) return true; // already initialized
-
-    	int errcode;
-    	if (X10RT.javaSockets != null)
-    		errcode = X10RT.javaSockets.establishLinks(myPlace, connectionInfo);
-    	else
-    		errcode = x10rt_init(myPlace, connectionInfo);
-        if (errcode != 0) {
-            System.err.println("Failed to initialize X10RT.");
-            x10rt_finalize();
-            return false;
-        }
+    public static synchronized void connect_library(int myPlace, String[] connectionInfo) {
+    	if (state != State.INITIALIZED) return;
+    	x10rt_init(0, null); // TODO: fill in properly, using the arguments
         TeamSupport.initialize();
         here = myPlace;
         numPlaces = connectionInfo.length;
         x10.runtime.impl.java.Runtime.MAX_PLACES = numPlaces;
         state = State.RUNNING;
-        return true;
     }
 
     
-    /*
-     * This method returns true if the runtime was successfully initialized.
-     * If false is returned, the caller should call this method again until true is returned.
-     */
-    public static synchronized boolean init() {
-      if (state != State.UNINITIALIZED) return true; // already initialized
+    public static synchronized void init() {
+      if (state != State.UNINITIALIZED) return;
 
-      String libName = System.getProperty("X10RT_IMPL", "sockets");
+      String libName = System.getProperty("X10RT_IMPL", "x10rt_sockets");
       if (libName.equals("disabled")) {
           forceSinglePlace = true;
-      } 
-      else if (libName.equalsIgnoreCase("JavaSockets")) {
-    	  X10RT.javaSockets = new Sockets();
-    	  X10RT.javaSockets.establishLinks();
-    	  //TeamSupport.initialize();
-          here = X10RT.javaSockets.x10rt_here();
-          numPlaces = X10RT.javaSockets.x10rt_nplaces();
-          x10.runtime.impl.java.Runtime.MAX_PLACES = numPlaces;
-          state = State.RUNNING;
-    	  return true;
-      }
-      else {
-          libName = "x10rt_" + libName;
+      } else {
           try {
               System.loadLibrary(libName);
           } catch (UnsatisfiedLinkError e) {
@@ -155,12 +118,7 @@ public class X10RT {
           //       X10RT instead of doing it in the class initializer.  
     	  // bherta: fix in progress, via the init_library() and connect_library() methods above
 
-          int err = x10rt_init(0, null);
-          if (err != 0) {
-//              System.err.println("Failed to initialize X10RT.");
-              x10rt_finalize();
-              return false;
-          }
+          x10rt_init(0, null);
 
           TeamSupport.initialize();
 
@@ -187,34 +145,23 @@ public class X10RT {
       }
       x10.runtime.impl.java.Runtime.MAX_PLACES = numPlaces;
       state = State.RUNNING;
-      return true;
     }
 
     /**
      * This is a non-blocking call.
      * Checks network for incoming messages and returns.
      */
-    public static int probe() {
+    public static void probe() {
         assert isBooted();
-        if (javaSockets != null)
-        	return javaSockets.x10rt_probe();
-        else if (!forceSinglePlace)
-        	return x10rt_probe();
-        else
-        	return 0;
+        if (!forceSinglePlace) x10rt_probe();
     }
 
     /**
      * This is a blocking call.
      */
-    public static int blockingProbe() {
+    public static void blockingProbe() {
         assert isBooted();
-        if (javaSockets != null)
-        	return javaSockets.x10rt_blocking_probe();
-        else if (!forceSinglePlace)
-        	return x10rt_blocking_probe();
-        else 
-        	return 0;
+        if (!forceSinglePlace) x10rt_blocking_probe();
     }
 
     /**
@@ -243,13 +190,7 @@ public class X10RT {
      * To be called once XRX is ready to process incoming asyncs.
      */
     public static void registration_complete() {
-        if (!forceSinglePlace && javaSockets == null)
-        	x10rt_registration_complete();
-    }
-    
-    public static void registerHandlers() {
-    	if (!forceSinglePlace && javaSockets == null)
-    		x10.x10rt.MessageHandlers.registerHandlers();
+        if (!forceSinglePlace) x10rt_registration_complete();
     }
 
     /*
@@ -277,7 +218,7 @@ public class X10RT {
      * to be exposed at the Java level (as opposed to being used
      * in the native code backing the native methods of MessageHandlers.
      */
-    private static native int x10rt_probe();
+    private static native void x10rt_probe();
     
-    private static native int x10rt_blocking_probe();
+    private static native void x10rt_blocking_probe();
 }

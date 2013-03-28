@@ -191,10 +191,10 @@ public final class Runtime {
         val lock = new Lock(); // master lock for all thread pool adjustments
 
         // every x10 thread (including promoted native threads)
-        val workers = new Rail[Worker](MAX_THREADS);
+        val workers = new Array[Worker](MAX_THREADS);
 
         // parked x10 threads (parkedCount == spareCount + idleCount)
-        val parkedWorkers = new Rail[Worker](MAX_THREADS);
+        val parkedWorkers = new Array[Worker](MAX_THREADS);
 
         var count:Int = 0; // count every x10 threads (including promoted native threads)
         var spareCount:Int = 0; // spare thread count
@@ -626,47 +626,51 @@ public final class Runtime {
      * @param body Main activity
      */
     public static def start(body:()=>void):void {
-        // initialize thread pool for the current process
-        // initialize runtime
-        x10rtInit();
+        try {
+            // initialize thread pool for the current process
+            // initialize runtime
+            x10rtInit();
 
-        if (hereInt() == 0) {
-            val rootFinish = new FinishState.Finish(pool.latch);
-            // in place 0 schedule the execution of the main activity
-            executeLocal(new Activity(body, rootFinish));
+            if (hereInt() == 0) {
+                val rootFinish = new FinishState.Finish(pool.latch);
+                // in place 0 schedule the execution of the main activity
+                executeLocal(new Activity(body, rootFinish));
 
-            // wait for thread pool to die
-            // (happens when main activity terminates)
-            pool(NTHREADS);
+                // wait for thread pool to die
+                // (happens when main activity terminates)
+                pool(NTHREADS);
 
-            // we need to call waitForFinish here to see the exceptions thrown by main if any
-            try {
-                rootFinish.waitForFinish();
-            } finally {
-                // root finish has terminated, kill remote processes if any
-                if (Place.MAX_PLACES >= 1024) {
-                    val cl1 = ()=> @x10.compiler.RemoteInvocation("start_1") {
-                        val h = hereInt();
-                        val cl = ()=> @x10.compiler.RemoteInvocation("start_2") {pool.latch.release();};
-                        for (var j:Int=Math.max(1, h-31); j<h; ++j) {
-                            x10rtSendMessage(j, cl, null);
+                // we need to call waitForFinish here to see the exceptions thrown by main if any
+                try {
+                    rootFinish.waitForFinish();
+                } finally {
+                    // root finish has terminated, kill remote processes if any
+                    if (Place.MAX_PLACES >= 1024) {
+                        val cl1 = ()=> @x10.compiler.RemoteInvocation("start_1") {
+                            val h = hereInt();
+                            val cl = ()=> @x10.compiler.RemoteInvocation("start_2") {pool.latch.release();};
+                            for (var j:Int=Math.max(1, h-31); j<h; ++j) {
+                                x10rtSendMessage(j, cl, null);
+                            }
+                            pool.latch.release();
+                        };
+                        for(var i:Int=Place.MAX_PLACES-1; i>0; i-=32) {
+                            x10rtSendMessage(i, cl1, null);
                         }
-                        pool.latch.release();
-                    };
-                    for(var i:Int=Place.MAX_PLACES-1; i>0; i-=32) {
-                        x10rtSendMessage(i, cl1, null);
-                    }
-                } else {
-                    val cl = ()=> @x10.compiler.RemoteInvocation("start_3") {pool.latch.release();};
-                    for (var i:Int=Place.MAX_PLACES-1; i>0; --i) {
-                        x10rtSendMessage(i, cl, null);
+                    } else {
+                        val cl = ()=> @x10.compiler.RemoteInvocation("start_3") {pool.latch.release();};
+                        for (var i:Int=Place.MAX_PLACES-1; i>0; --i) {
+                            x10rtSendMessage(i, cl, null);
+                        }
                     }
                 }
+            } else {
+                // wait for thread pool to die
+                // (happens when a kill signal is received from place 0)
+                pool(NTHREADS);
             }
-        } else {
-            // wait for thread pool to die
-            // (happens when a kill signal is received from place 0)
-            pool(NTHREADS);
+        } finally {
+            GlobalCounters.printStats();
         }
     }
 
@@ -795,12 +799,9 @@ public final class Runtime {
     }
 
     /**
-      * Used in codegen at the root of an at closure, upon catching something that is not below Exception or Error.
-      * Has a return type to avoid post compile errors.  The function never returns but it may still
-      * be called like this: return wrapAtChecked[Int](e).  That will satisfy the checking for return
-      * statements in the calling function.
+      * Used in codegen at the root of an at closure, upon catching something that is not below Error
       */
-    public static def wrapAtChecked[T] (caught:CheckedThrowable) : T {
+    public static def wrapAtChecked (caught:CheckedThrowable) : void {
         // Only wrap if necessary
         if (caught instanceof Exception) throw caught as Exception;
         if (caught instanceof Error) throw caught as Error;

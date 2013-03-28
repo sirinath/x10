@@ -21,7 +21,7 @@ public class MultipleExceptions(exceptions:Rail[Exception]) extends Exception {
     public property exceptions():Rail[Exception] = exceptions;
 
     public def this(stack:Stack[Exception]) {
-        property(stack.toRail());
+        property(stack.toArray());
     }
 
     public def this() {
@@ -29,11 +29,11 @@ public class MultipleExceptions(exceptions:Rail[Exception]) extends Exception {
     }
 
     public def this(t:Exception) {
-        property(new Rail[Exception](1, t));
+        property(new Array[Exception](1, t));
     }
 
     public def printStackTrace(): void {
-        for (t in exceptions) {
+        for (t in exceptions.values()) {
             t.printStackTrace();
         }
     }

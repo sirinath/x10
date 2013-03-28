@@ -16,13 +16,12 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 
 
 public class Arrays520 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays520().execute();
     }
 
@@ -30,7 +29,7 @@ public class Arrays520 extends x10Test {
 // file Arrays line 828
  static  class Example {
  static def example() {
-val a = new Array[Int](4, (i:int)=>i+1);
+val a = [1,2,3,4];
 val sum = a.reduce((a:Int,b:Int)=>a+b, 0);
 assert(sum == 10); // 10 == 1+2+3+4
 }}

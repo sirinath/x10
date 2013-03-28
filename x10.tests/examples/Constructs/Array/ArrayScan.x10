@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * @author bdlucas
@@ -37,7 +36,7 @@ public class ArrayScan extends TestArray {
         return status();
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayScan().execute();
     }
 

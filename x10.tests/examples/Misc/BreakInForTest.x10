@@ -23,6 +23,8 @@ import harness.x10Test;
 public class BreakInForTest extends x10Test {
 
     public static N: int = 100;
+    val R = 0..N;
+    val D = Dist.make(R);
     var n1: int = 91;
     var n2: int = 27;
 
@@ -31,14 +33,14 @@ public class BreakInForTest extends x10Test {
             if ((i+1) % n1 == 0) continue;
             if ((i+1) % n2 == 0) break;
         }
-        for (i in 0..N) {
+        for (val [i]: Point in D) {
             if ((i+1) % n1 == 0) continue;
             if ((i+1) % n2 == 0) break;
         }
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new BreakInForTest().execute();
     }
 }

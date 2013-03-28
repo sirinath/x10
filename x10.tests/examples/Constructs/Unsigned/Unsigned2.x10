@@ -26,7 +26,7 @@ public class Unsigned2 extends x10Test {
         val w: uint = 0x80000000u;
         x10.io.Console.OUT.println(y.toString());
         x10.io.Console.OUT.println(y as int);
-        val z: uint = 1u;
+        val z: uint = 1;
         x10.io.Console.OUT.println(z.toString());
         x10.io.Console.OUT.println(z as int);
         return (x as int) == 1
@@ -35,7 +35,7 @@ public class Unsigned2 extends x10Test {
             && (z as int) == 1;
     }
 
-    public static def main(Rail[String]) = {
+    public static def main(Array[String](1)) = {
         new Unsigned2().execute();
     }
 }

@@ -2119,7 +2119,13 @@ public class TypeSystem_c implements TypeSystem
     protected X10ClassType STRING_;
     protected X10ClassType EXCEPTION_;
 
-    //public Type JLIterable() { return load("java.lang.Iterable"); }
+    public Type JavaClass()   { 
+        if (CLASS_ != null) return CLASS_;
+        return CLASS_ = load("java.lang.Class"); 
+    }
+    public Type Cloneable() { return load("java.lang.Cloneable"); }
+    public Type JLIterable() { return load("java.lang.Iterable"); }
+    public Type Serializable() { return load("java.io.Serializable"); }
 
     protected NullType createJavaNull() {
 	return new NullType(this);
@@ -2576,13 +2582,6 @@ public class TypeSystem_c implements TypeSystem
         if (arrayType_ == null)
             arrayType_ = load("x10.array.Array");
         return arrayType_;
-    }
-
-    protected X10ClassType railType_ = null;
-    public X10ClassType Rail() {
-        if (railType_ == null)
-            railType_ = load("x10.lang.Rail");
-        return railType_;
     }
 
     protected X10ClassType remoteArrayType_ = null;
@@ -3173,6 +3172,7 @@ public class TypeSystem_c implements TypeSystem
         List<QName> l = new ArrayList<QName>(1);
         l.add(QName.make("x10.lang"));
         l.add(QName.make("x10.lang", TypeSystem.DUMMY_PACKAGE_CLASS_NAME.toString()));
+        l.add(QName.make("x10.array"));
         return l;
     }
 
@@ -4022,10 +4022,6 @@ public class TypeSystem_c implements TypeSystem
         return finalSubtype(t, Array());
     }
 
-    public boolean isRail(Type t) {
-        return finalSubtype(t, Rail());
-    }
-
     public static Type getArrayComponentType(Type t) {
         List<Type> ta = ((X10ClassType)Types.baseType(t)).typeArguments();
         assert (ta.size() == 1);
@@ -4034,16 +4030,6 @@ public class TypeSystem_c implements TypeSystem
     public boolean isArrayOf(Type t, Type p) {
         if (!isArray(t)) return false;
         return getArrayComponentType(t).typeEquals(p, createContext());
-    }
-
-    public static Type getRailComponentType(Type t) {
-        List<Type> ta = ((X10ClassType)Types.baseType(t)).typeArguments();
-        assert (ta.size() == 1);
-        return ta.get(0);
-    }
-    public boolean isRailOf(Type t, Type p) {
-        if (!isRail(t)) return false;
-        return getRailComponentType(t).typeEquals(p, createContext());
     }
 
     public boolean isRemoteArray(Type t) {
@@ -4073,10 +4059,6 @@ public class TypeSystem_c implements TypeSystem
 
     public X10ClassType Array(Type arg) {
         return Types.instantiate(Array(), arg);
-    }
-
-    public X10ClassType Rail(Type arg) {
-        return Types.instantiate(Rail(), arg);
     }
 
     public X10ClassType Settable(Type domain, Type range) {
@@ -4658,13 +4640,4 @@ public class TypeSystem_c implements TypeSystem
     		TypeSystem_c.internalConsistencyCheck(li.type());
     	}    	
     }
-
-
-    // Key thing here is to avoid loading java.lang.Iterable since that gives us a dependency
-    // on JRE class loading capability even when we're compiling native
-	@Override
-	public boolean typeIsJLIterable(Type classType) {
-		Type c = Types.baseType(classType); // chase typedefs
-		return c.fullName().toString().equals("java.lang.Iterable");
-	}
 }

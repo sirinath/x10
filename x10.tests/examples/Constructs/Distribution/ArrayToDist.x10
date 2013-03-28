@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests conversion of arrays to regions/dists.
@@ -50,7 +49,7 @@ public class ArrayToDist extends x10Test {
     static def f(i: int, j: int) = N * i + j;
     
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new ArrayToDist().execute();
     }
 

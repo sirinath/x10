@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Array Literal test. Same as ArrayLiteralTest except that the declared type of the array is more precise.
@@ -48,7 +47,7 @@ public class ArrayLiteralTest1_MustFailCompile extends x10Test {
 	static class A {}
 
 
-    public static def main(Rail[String]): void = {
+    public static def main(Array[String](1)): void = {
         new ArrayLiteralTest1_MustFailCompile().execute();
     }
 }

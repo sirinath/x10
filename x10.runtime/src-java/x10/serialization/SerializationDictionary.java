@@ -15,24 +15,34 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import x10.rtt.RuntimeType;
 
 /**
  * Used during serialization to maintain a mapping from Class to id.
  */
-abstract class SerializationDictionary implements SerializationConstants {
-
-    protected final Map<Class<?>,Short> dict;
-
-    public SerializationDictionary(Map<Class<?>,Short> myMap) {
-        dict = myMap;
+class SerializationDictionary implements SerializationConstants {
+    
+    protected HashMap<Class<?>,Short> dict = new HashMap<Class<?>,Short>();
+    
+    protected short nextId;
+    private final boolean isShared;
+    
+    public SerializationDictionary(short firstId) {
+        nextId = firstId;
+        isShared = firstId == FIRST_SHARED_ID;
     }
 
     short getSerializationId(Class<?> clazz, Object obj) {
+        if (!isShared) {
+            short sid = SharedDictionaries.getSerializationId(clazz, obj);
+            if (sid != NO_PREASSIGNED_ID) return sid;
+        }
+        return getSerializationId(clazz, obj, true);
+    }
+
+    short getSerializationId(Class<?> clazz, Object obj, boolean allocateIfAbsent) {
         if (obj instanceof RuntimeType<?>) {
             short sid = ((RuntimeType<?>)obj).$_get_serialization_id();
             if (sid <= MAX_HARDCODED_ID) {
@@ -40,14 +50,18 @@ abstract class SerializationDictionary implements SerializationConstants {
             }
         }
         Short id = dict.get(clazz);
-        return null == id ? NO_PREASSIGNED_ID : id.shortValue();
-    }
-
-    byte[] encode() throws IOException {
-        if (dict.size() == 0) {
-            return new byte[2]; // zero initialized, so 2 bytes of 0 is the short 0.
+        if (null == id) {
+            if (allocateIfAbsent) {
+                id = Short.valueOf(nextId++);
+                dict.put(clazz, id);
+            } else {
+                return SerializationConstants.NO_PREASSIGNED_ID;
+            }
         }
-        
+        return id.shortValue();
+    }
+    
+    byte[] encode() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
         dos.writeShort(dict.size());
@@ -58,62 +72,13 @@ abstract class SerializationDictionary implements SerializationConstants {
             dos.write(name.getBytes());
         }
         dos.close();
-
+        
         return baos.toByteArray();
     }
-
+    
+    
     @Override
     public String toString() {
         return dict.toString();
-    }
-
-    /**
-     * A SerializationDictionary that is used to maintain the set of globally known
-     * serialization ids.  It uses a ConcurrentHashMap as its backing storage because
-     * multiple threads may be concurrently reading/writing the dictionary.
-     */
-    static final class MasterSerializationDictionary extends SerializationDictionary {
-
-        public MasterSerializationDictionary() {
-            super(new ConcurrentHashMap<Class<?>, Short>());
-        }
-
-        void addEntry(Class<?> klazz, short id) {
-            assert !dict.containsKey(klazz) : "MasterSerializationDictionary.addEntry: duplicate key assignment";
-            assert !dict.containsValue(id) :  "MasterSerializationDictionary.addEntry: duplicate id assignment";
-            dict.put(klazz, id);
-        }
-    }
-
-    /**
-     * A SerializationDictionary that is used to maintain the set of serialization ids
-     * for a single message.  It uses a simple HashMap as its local store since it 
-     * will only be accessed by a single thread and also internally delegates
-     * to a parent dictionary (most likely a MasterSerializationDictionary) when asked for
-     * an id before assigning an id itself.
-     */
-    static final class LocalSerializationDictionary extends SerializationDictionary {
-        final SerializationDictionary parent;
-
-        protected short nextId;
-
-        public LocalSerializationDictionary(SerializationDictionary parent, short firstId) {
-            super(new HashMap<Class<?>,Short>());
-            this.parent = parent;
-            this.nextId = firstId;
-        }
-
-        short getSerializationId(Class<?> clazz, Object obj) {
-            if (parent != null) {
-                short sid = parent.getSerializationId(clazz, obj);
-                if (sid != NO_PREASSIGNED_ID) return sid;
-            }
-            short sid = super.getSerializationId(clazz, obj);
-            if (sid == NO_PREASSIGNED_ID) {
-                sid = Short.valueOf(nextId++);
-                dict.put(clazz, sid);           
-            }
-            return sid;
-        }
     }
 }

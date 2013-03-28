@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Array Initializer test.
@@ -29,7 +28,7 @@ public class ArrayInitializer1a extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]): void = {
+    public static def main(Array[String](1)): void = {
         new ArrayInitializer1a().execute();
     }
 }

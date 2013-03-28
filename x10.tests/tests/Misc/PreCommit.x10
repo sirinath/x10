@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 public class PreCommit extends x10Test {
 
@@ -96,7 +95,7 @@ public class PreCommit extends x10Test {
         return passed;
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 	new PreCommit().execute();
     }
 }

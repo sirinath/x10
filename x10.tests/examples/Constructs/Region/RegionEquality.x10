@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 public class RegionEquality extends x10Test {
 
@@ -23,7 +22,7 @@ public class RegionEquality extends x10Test {
         return R.equals(S);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
          new RegionEquality().execute();
     }
 }

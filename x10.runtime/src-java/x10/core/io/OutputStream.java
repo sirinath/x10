@@ -88,9 +88,9 @@ public class OutputStream extends Ref {
     
     // XTENLANG-2680
     // for !Emitter.manglePrimitivesAsShortName
-    public void write__0$1x10$lang$Byte$2(x10.core.Rail buf) {
+    public void write__0$1x10$lang$Byte$2(x10.array.Array buf) {
         try {
-            stream.write(buf.getByteArray());
+            stream.write(buf.raw().getByteArray());
         } catch (java.io.IOException e) {
             throw new x10.io.IOException(e.getMessage());
         }
@@ -114,10 +114,9 @@ public class OutputStream extends Ref {
     
     // XTENLANG-2680
     // for !Emitter.manglePrimitivesAsShortName
-    // LONG_RAIL: unsafe int cast
-    public void write__0$1x10$lang$Byte$2(x10.core.Rail buf, long off, long len) {
+    public void write__0$1x10$lang$Byte$2(x10.array.Array buf, int off, int len) {
         try {
-            stream.write(buf.getByteArray(), (int)off, (int)len);
+            stream.write(buf.raw().getByteArray(), off, len);
         } catch (java.io.IOException e) {
             throw new x10.io.IOException(e.getMessage());
         }

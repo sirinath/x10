@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Minimal test for regions.
@@ -29,7 +28,7 @@ public class RegionTest1 extends x10Test {
         return sum == 0;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new RegionTest1().execute();
     }
 }

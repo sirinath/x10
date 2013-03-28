@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing int[] method parameters and fields.
@@ -36,7 +35,7 @@ public class Array5 extends x10Test {
         return (new Array5(temp)).runtest();
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array5().execute();
     }
 }

@@ -18,7 +18,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Building arrays distributed accross places using the encapsulation approach 
@@ -54,7 +53,7 @@ public class EncapsulatedArray2D extends x10Test {
         return true;
     }
     
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new EncapsulatedArray2D().execute();
     }
 

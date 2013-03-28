@@ -9,8 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.Region;
-
 public class Temp {
     def m(a: Region{rank==3}): Region{rank==3} = a;
 }

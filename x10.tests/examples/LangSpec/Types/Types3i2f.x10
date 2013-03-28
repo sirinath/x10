@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types3i2f extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types3i2f().execute();
     }
 
 
-// file Types line 1968
+// file Types line 1966
  static  class Example{
  static def example() {
 val id : (x:Int) => Int{self==x}

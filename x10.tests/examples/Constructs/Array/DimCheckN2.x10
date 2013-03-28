@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * This must compile and run fine. Checks that the initializer may not specify
@@ -30,7 +29,7 @@ public class DimCheckN2 extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DimCheckN2().execute();
     }
 }

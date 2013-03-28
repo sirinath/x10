@@ -21,17 +21,17 @@ import harness.x10Test;
 
 public class Types320 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types320().execute();
     }
 
 
-// file Types line 1162
+// file Types line 1161
 
  static  class ConstraintsMayReferToValues {
  def thoseValues() {
      val n = 1;
-     var p : x10.array.Point{rank == n};
+     var p : Point{rank == n};
 }}
 
  static class Hook {

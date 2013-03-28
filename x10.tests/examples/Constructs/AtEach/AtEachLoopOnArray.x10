@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test for an ateach loop on an array.
@@ -31,7 +30,7 @@ public class AtEachLoopOnArray extends x10Test {
 	   return success;
     }
 
-	public static def main(Rail[String])  {
+	public static def main(Array[String](1))  {
 	    new AtEachLoopOnArray().execute();
 	}
 }

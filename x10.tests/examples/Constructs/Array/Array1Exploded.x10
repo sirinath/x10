@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests point (p[i,j]) notation.
@@ -44,7 +43,7 @@ public class Array1Exploded extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array1Exploded().execute();
     }
 }

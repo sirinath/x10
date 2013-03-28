@@ -21,12 +21,12 @@ import x10.util.*;
 
 public class Types270 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types270().execute();
     }
 
 
-// file Types line 1022
+// file Types line 1021
 
  static class TypeExamples {
   static type StringSet = Set[String];

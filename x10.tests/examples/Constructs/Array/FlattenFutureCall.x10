@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test for array reference flattening. Checks that after flattening
@@ -35,7 +34,7 @@ public class FlattenFutureCall extends x10Test {
         return x;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new FlattenFutureCall().execute();
     }
 }

@@ -19,10 +19,10 @@ import x10.compiler.Mutable;
 @NativeRep("c++", "x10::util::NativeVec<#T, ##size#-1#>", "x10::util::NativeVec<#T, ##size#-1#>", null)
 @Mutable public struct Vec[T] (@Native("c++","#this.size()")size:Int) {
 
-    private backing : Rail[T];
+    private backing : Array[T]{self.rank==1, self.size==this.size};
     private def this(s:Int) {T haszero} : Vec[T]{self.size==s} {
         property(s);
-        backing = new Rail[T](size);
+        backing = new Array[T](size);
     }
 
     @Native("java", "new x10.core.Vec<#U$box>(#U$rtt, #s)")

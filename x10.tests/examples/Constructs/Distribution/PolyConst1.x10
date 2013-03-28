@@ -9,13 +9,12 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;        
-
 /**
  * Constant distribution
  *
  * (Was ConstDist)
  */
+
 class PolyConst1 extends TestDist {
 
     public def run() {
@@ -43,7 +42,7 @@ class PolyConst1 extends TestDist {
         "a DistArray(Dist([0..9,0..9]->0))\n"+
         "b DistArray(Dist([0..9,0..9]->0))\n";
     
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PolyConst1().execute();
     }
 }

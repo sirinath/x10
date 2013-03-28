@@ -10,10 +10,9 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
- * Synthetic benchmark to time array accesses.
+ * Synthetic benchmark to time arary accesses.
  */
 public class IntArrayIndexing extends x10Test {
 
@@ -131,7 +130,7 @@ public class IntArrayIndexing extends x10Test {
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void {
+	public static def main(var args: Array[String](1)): void {
 		new IntArrayIndexing().execute();
 	}
 }

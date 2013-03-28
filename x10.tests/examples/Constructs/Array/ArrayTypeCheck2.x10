@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * @author vj
@@ -27,7 +26,7 @@ public class ArrayTypeCheck2 extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayTypeCheck2().execute();
     }
 }

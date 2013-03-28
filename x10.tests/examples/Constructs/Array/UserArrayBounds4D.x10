@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * User defined type array bounds test - 4D.
@@ -81,7 +80,7 @@ public class UserArrayBounds4D extends x10Test {
      */
     private static def iff(x: boolean, y: boolean)= x==y;
 
-    public static def main(Rail[String]){
+    public static def main(Array[String](1)){
         new UserArrayBounds4D().execute();
     }
 }

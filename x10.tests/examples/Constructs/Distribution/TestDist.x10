@@ -10,7 +10,6 @@
  */
 
 import x10.io.Printer;
-import x10.array.*;
 import x10.io.StringWriter;
 
 
@@ -93,15 +92,15 @@ abstract public class TestDist extends x10Test {
         }
 
         def pr(rank: int): void = {
-            var min: long = os.size;
-            var max: long = 0L;
-            for (var i: long = 0L; i<os.size; i++) {
+            var min: int = os.size;
+            var max: int = 0;
+            for (var i: int = 0; i<os.size; i++) {
                 if (os(i)!=null) {
                     if (i<min) min = i;
                     else if (i>max) max = i;
                 }
             }
-            for (var i: long = 0L; i<os.size; i++) {
+            for (var i: int = 0; i<os.size; i++) {
                 var o: Any = os(i);
                 if (o==null) {
                     if (rank==1)
@@ -236,7 +235,7 @@ abstract public class TestDist extends x10Test {
 
     // substitute for [a:b,c:d]
     def r(a: int, b: int, c: int, d: int): Region(2) {
-        return Region.makeRectangular([a,c], [b,d]) as Region(2);
+        return Region.makeRectangular([a,c], [b,d]);
     }
 
 }

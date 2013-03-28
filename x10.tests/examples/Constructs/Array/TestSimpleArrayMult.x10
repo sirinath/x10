@@ -14,7 +14,6 @@
 */
 
 import harness.x10Test;
-import x10.array.*;
 
 public class TestSimpleArrayMult extends x10Test {
 
@@ -59,7 +58,7 @@ public class TestSimpleArrayMult extends x10Test {
     }
 
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new TestSimpleArrayMult().execute();
        
     }

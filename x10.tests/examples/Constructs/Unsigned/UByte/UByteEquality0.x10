@@ -54,7 +54,7 @@ public class UByteEquality0 extends x10Test {
 	return r;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UByteEquality0().execute();
     }
 

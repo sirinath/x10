@@ -30,13 +30,13 @@ public class OutputStreamWriter extends Writer {
         @Native("c++", "(#this)->write(#v)")
         public native def write(v:Int): void; //throws IOException
         
-        @Native("java", "#this.write((#r).getByteArray())")
-        @Native("c++", "(#this)->write(#r)")
-        public native def write(r:Rail[Byte]): void; //throws IOException
+        @Native("java", "#this.write((#r).raw().getByteArray())")
+        @Native("c++", "(#this)->write((#r)->raw())")
+        public native def write(r:Array[Byte](1)): void; //throws IOException
         
-        @Native("java", "#this.write((#r).getByteArray(), #off, #len)")
-        @Native("c++", "(#this)->write(#r)")
-        public native def write(r:Rail[Byte], off:Long, len:Long): void; //throws IOException
+        @Native("java", "#this.write((#r).raw().getByteArray(), #off, #len)")
+        @Native("c++", "(#this)->write((#r)->raw())")
+        public native def write(r:Array[Byte](1), off:Int, len:Int): void; //throws IOException
     }
 
     val out: OutputStream;
@@ -56,12 +56,12 @@ public class OutputStreamWriter extends Writer {
     public def write(x: Byte): void //throws IOException 
     { out.write(x); }
     
-    public def write(buf:Rail[Byte]): void //throws IOException 
+    public def write(buf:Array[Byte](1)): void //throws IOException 
     {
         out.write(buf);
     }
 
-    public def write(buf:Rail[Byte], off: Long, len: Long): void //throws IOException 
+    public def write(buf:Array[Byte](1), off: Int, len: Int): void //throws IOException 
     {
         out.write(buf, off, len);
     }

@@ -9,7 +9,7 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.Array;
+
 import x10.io.Console;
 import x10.io.File;
 import x10.io.Marshal;
@@ -39,7 +39,7 @@ public class KMeansSPMD {
         }
     }
 
-    public static def main (args:Rail[String]) {here == Place.FIRST_PLACE } {
+    public static def main (args:Array[String](1)) {here == Place.FIRST_PLACE } {
 
         val opts = new OptionsParser(args, [
             Option("q","quiet","just print time taken"),

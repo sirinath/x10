@@ -169,7 +169,7 @@ public class CUDAKernelTest {
     }
 
 
-    public static def main (args:Rail[String]) {
+    public static def main (args:Array[String](1)) {
         val len = args.size==1 ? Int.parse(args(0)) : 1000;
 
         for (host in Place.places()) at (host) {

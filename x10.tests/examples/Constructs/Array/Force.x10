@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 
 /**
@@ -27,7 +26,7 @@ public class Force extends x10Test {
    
     public def run(): boolean = true;
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new Force().execute();
     }
 }

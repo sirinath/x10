@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types110_Bad37_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types110_Bad37_MustFailCompile().execute();
     }
 
 
-// file Types line 724
+// file Types line 723
 
  static class Bottle[T] {
   var contents : T;

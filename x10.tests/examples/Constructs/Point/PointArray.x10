@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Creating an array of points and assigning to its elements should work.
@@ -22,13 +21,13 @@ public class PointArray extends x10Test {
 
     public def run(): boolean = {
 
-        var p: Rail[Point] = new Rail[Point](1, (long)=>Point.make(0));
+        var p: Rail[Point] = new Rail[Point](1, (int)=>Point.make(0));
         p(0) = Point.make(1, 2);
 
         return (p(0)(0) == 1 && p(0)(1) == 2);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointArray().execute();
     }
 }

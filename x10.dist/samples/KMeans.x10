@@ -11,7 +11,6 @@
 
 import x10.io.Console;
 import x10.util.Random;
-import x10.array.*;
 
 /**
  * A KMeans object o can compute K means of a given set of 
@@ -141,7 +140,7 @@ public class KMeans(myDim:Int) {
         return redCluster;  
     }
   
-    public static def main (Rail[String]) {
+    public static def main (Array[String]) {
         val rnd = new Random(0);
         val points = new Array[ValVector](POINTS, 
                         (int)=>new Array[Float](DIM, (int)=>rnd.nextFloat()) as ValVector);

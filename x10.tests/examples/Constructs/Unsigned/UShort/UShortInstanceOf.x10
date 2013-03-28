@@ -37,7 +37,7 @@ public class UShortInstanceOf extends x10Test {
 	Console.OUT.println(m);
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UShortInstanceOf().execute();
     }
 }

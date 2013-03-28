@@ -21,16 +21,16 @@ import harness.x10Test;
 
 public class Types3d5j extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types3d5j().execute();
     }
 
 
-// file Types line 2675
+// file Types line 2673
  static  class Example {
-static def first[T](x:Rail[T]) = x(0);
+static def first[T](x:Array[T](1)) = x(0);
 static def example() {
-  val ss <: Rail[String] = ["X10", "Scala", "Thorn"];
+  val ss <: Array[String] = ["X10", "Scala", "Thorn"];
   val s1 = first(ss);
   assert s1.equals("X10");
 }

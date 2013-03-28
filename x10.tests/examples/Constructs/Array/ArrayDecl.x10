@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing miscellaneous array declarations and initializations.
@@ -73,7 +72,7 @@ public class ArrayDecl extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]):void = {
+    public static def main(Array[String](1)):void = {
         new ArrayDecl().execute();
     }
 }

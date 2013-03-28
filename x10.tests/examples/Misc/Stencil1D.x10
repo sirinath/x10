@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * A simple 1-D stencil example in X10. Uses multiple asyncs in a single place.
@@ -63,7 +62,7 @@ public class Stencil1D extends x10Test {
         })
     }
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String](1)) {
        var n: int = args.size > 0 ? Int.parse(args(0)) : 100;
        var p: int = args.size > 1 ? Int.parse(args(1)) : 2;
        val s = new Stencil1D(n, p); s.execute();

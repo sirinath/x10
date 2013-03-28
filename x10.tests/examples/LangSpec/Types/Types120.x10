@@ -21,18 +21,18 @@ import harness.x10Test;
 
 public class Types120 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types120().execute();
     }
 
 
-// file Types line 561
+// file Types line 560
  static struct Position {
   public val x:Double; public val y:Double; public val z:Double;
   def this(x:Double, y:Double, z:Double) {
      this.x = x; this.y = y; this.z = z;
   }
-  static def example(p: Position, q: Rail[Position]) {
+  static def example(p: Position, q: Array[Position]) {
      var r : Position = p;
   }
 }

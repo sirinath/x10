@@ -10,11 +10,11 @@
  */
 
 import harness.x10Test;
-import x10.array.Point;
 
 /**
  * @author bdlucas 12/2008
  */
+
 public class XTENLANG_241 extends x10Test {
 
     public operator - this: XTENLANG_241 = this;
@@ -31,7 +31,7 @@ public class XTENLANG_241 extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_241().execute();
     }
 }

@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types130 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types130().execute();
     }
 
 
-// file Types line 605
+// file Types line 604
  static interface Named {
   def name():String;
 }

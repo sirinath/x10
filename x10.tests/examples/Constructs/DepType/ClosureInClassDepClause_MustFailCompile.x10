@@ -22,7 +22,7 @@ public class ClosureInClassDepClause_MustFailCompile(p:()=>Int){p== // ERR ERR: 
 
     public def run() = true;
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureInClassDepClause_MustFailCompile(()=>3).execute();
     }
 }

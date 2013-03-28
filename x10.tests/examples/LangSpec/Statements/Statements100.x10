@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Statements100 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Statements100().execute();
     }
 
 
-// file Statements line 804
+// file Statements line 806
 
  static class Example {
-  public static def main(argv:Rail[String]) {
+  public static def main(argv:Array[String](1)) {
     val a = 1;
     assert a != 1 : "Changed my mind about a.";
   }

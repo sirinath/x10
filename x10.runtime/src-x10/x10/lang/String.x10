@@ -44,30 +44,28 @@ public final class String implements Comparable[String] {
     public native def this(String): String;
 
     /**
-     * Construct a String from a Rail[Byte].
+     * Construct a String from an Array[Byte].
      */
-    @Native("java", "new java.lang.String((#r).getByteArray())")
-    public native def this(r:Rail[Byte]): String;
+    @Native("java", "new java.lang.String((#r).raw().getByteArray())")
+    public native def this(r:Array[Byte]): String;
 
     /**
-     * Construct a String from a Rail[Byte], offset and length.
-     * LONG_RAIL: unsafe int cast
+     * Construct a String from an Array[Byte], offset and length.
      */
-    @Native("java", "new java.lang.String((#r).getByteArray(),(int)#offset,(int)#length)")
-    public native def this(r:Rail[Byte], offset:Long, length:Long): String;
+    @Native("java", "new java.lang.String((#r).raw().getByteArray(),#offset,#length)")
+    public native def this(r:Array[Byte], offset:Int, length:Int): String;
 
     /**
-     * Construct a String from a Rail[Char].
+     * Construct a String from an Array[Char].
      */
-    @Native("java", "new java.lang.String((#r).getCharArray())")
-    public native def this(r:Rail[Char]): String;
+    @Native("java", "new java.lang.String((#r).raw().getCharArray())")
+    public native def this(r:Array[Char]): String;
 
     /**
-     * Construct a String from a Rail[Char], offset and length.
-     * LONG_RAIL: unsafe int cast
+     * Construct a String from an Array[Char], offset and length.
      */
-    @Native("java", "new java.lang.String((#r).getCharArray(),(int)#offset,(int)#length)")
-    public native def this(r:Rail[Char], offset:Long, length:Long): String;
+    @Native("java", "new java.lang.String((#r).raw().getCharArray(),#offset,#length)")
+    public native def this(r:Array[Char], offset:Int, length:Int): String;
 
     /**
      * Return true if the given entity is a String, and this String is equal
@@ -145,21 +143,21 @@ public final class String implements Comparable[String] {
     public native def charAt(index: Int): Char;
 
     /**
-     * Converts this String to a Rail of Chars.
-     * @return a Rail of Chars whose length is the length of this String and
+     * Converts this String to an Array of Chars.
+     * @return an Array of Chars whose length is the length of this String and
      *         whose contents are initialized to contain the Chars in this String.
      * @see #bytes()
      */
-    @Native("java", "x10.runtime.impl.java.ArrayUtils.<x10.core.Char>makeRailFromJavaArray(x10.rtt.Types.CHAR, (#this).toCharArray())")
+    @Native("java", "x10.runtime.impl.java.ArrayUtils.<x10.core.Char>makeArrayFromJavaArray(x10.rtt.Types.CHAR, (#this).toCharArray())")
     @Native("c++", "(#this)->chars()")
     public native def chars():Rail[Char];
 
     /**
      * Encodes this String into a sequence of Bytes using the platform's default charset.
-     * @return the Rail of Bytes representing this String in the default charset.
+     * @return the Array of Bytes representing this String in the default charset.
      * @see #chars()
      */
-    @Native("java", "x10.runtime.impl.java.ArrayUtils.<x10.core.Byte>makeRailFromJavaArray(x10.rtt.Types.BYTE, (#this).getBytes())")
+    @Native("java", "x10.runtime.impl.java.ArrayUtils.<x10.core.Byte>makeArrayFromJavaArray(x10.rtt.Types.BYTE, (#this).getBytes())")
     @Native("c++", "(#this)->bytes()")
     public native def bytes():Rail[Byte];
 
@@ -360,10 +358,10 @@ public final class String implements Comparable[String] {
      * unlike in Java the splitting String is treated as a simple String
      * to be matched character by character (as in indexOf), not as 
      * a regular expression.
-     * Trailing empty strings are not included in the resulting Rail.
+     * Trailing empty strings are not included in the resulting Array.
      *
      * @param split the String to use as a delimiter.
-     * @return the Rail of Strings computed by splitting this String around matches of the delimiter.
+     * @return the Array of Strings computed by splitting this String around matches of the delimiter.
      */
     @Native("java", "x10.lang.StringHelper.split(#regex, #this)")
     @Native("c++", "x10::lang::StringHelper::split(#regex, #this)")
@@ -400,9 +398,9 @@ public final class String implements Comparable[String] {
      * @param args the arguments referenced by the format specifiers in the format string.
      * @return a formatted string.
      */
-    @Native("java", "x10.runtime.impl.java.StringUtils.format(#fmt,(java.lang.Object[]) (#args).value)")
+    @Native("java", "x10.runtime.impl.java.StringUtils.format(#fmt,(java.lang.Object[]) (#args).raw().value)")
     @Native("c++", "x10::lang::String::format(#fmt,#args)")
-    public native static def format(fmt: String, args:Rail[Any]): String;
+    public native static def format(fmt: String, args:Array[Any]): String;
 
 
     // FIXME: Locale sensitivity
@@ -568,7 +566,7 @@ public type String(s:String) = String{self==s};
 class StringHelper {
     static def split(delim:String, str:String):Rail[String] {
         if (delim.equals("")) {
-            return new Rail[String](str.length(), (i:long)=>str.substring(i as int, (i+1) as int));
+            return new Rail[String](str.length(), (i:int)=>str.substring(i, i+1));
         }
         val ans = new ArrayList[String]();
         var pos:int = 0;
@@ -581,6 +579,6 @@ class StringHelper {
         if (pos < str.length()) {
             ans.add(str.substring(pos, str.length()));
         }
-        return ans.toRail();
+        return ans.toArray();
     }
 }

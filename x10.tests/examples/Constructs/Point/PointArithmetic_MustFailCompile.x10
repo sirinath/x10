@@ -14,7 +14,6 @@
 //OPTIONS: -STATIC_CHECKS
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing point arithmetic operations.
@@ -90,7 +89,7 @@ public class PointArithmetic_MustFailCompile extends x10Test {
         d = r / p; // ERR
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointArithmetic_MustFailCompile().execute();
     }
 }

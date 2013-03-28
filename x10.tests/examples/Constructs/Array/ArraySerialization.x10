@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test serialization of arrays between places.
@@ -28,7 +27,7 @@ public class ArraySerialization extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new ArraySerialization().execute();
     }
 }

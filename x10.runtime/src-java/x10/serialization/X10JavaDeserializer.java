@@ -11,7 +11,6 @@
 
 package x10.serialization;
 
-import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -21,40 +20,25 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import x10.rtt.Types;
 import x10.runtime.impl.java.Runtime;
-import x10.serialization.DeserializationDictionary.LocalDeserializationDictionary;
 
 public final class X10JavaDeserializer implements SerializationConstants {
         
     // When a Object is deserialized record its position
-    private final ArrayList<Object> objectList = new ArrayList<Object>();
+    private List<Object> objectList;
+    DataInputStream in;
     private int counter = 0;
     
-    protected final DataInputStream in;
-    protected final DeserializationDictionary dict; 
+    private DeserializationDictionary dict; 
     
-    public X10JavaDeserializer(DataInputStream in, boolean readMessageDictionary) {
+    public X10JavaDeserializer(DataInputStream in) {
         this.in = in;
-        if (readMessageDictionary) {
-            dict = new LocalDeserializationDictionary(this, SharedDictionaries.getDeserializationDictionary());
-        } else {
-            if (Runtime.TRACE_SER) {
-                Runtime.printTraceMessage("\tMessage has no per-message serialization ids");                
-            }
-            dict = SharedDictionaries.getDeserializationDictionary();
-        }
-    }
-    
-    /**
-     * Specialized constructor for use by deep copy. 
-     * As much as possible, attempt to streamline the movement of serialized data when staying in the same place.
-     * @param js
-     */
-    public X10JavaDeserializer(X10JavaSerializer js) throws IOException { 
-        in = new DataInputStream(new ByteArrayInputStream(js.getDataBytes()));
-        dict = new LocalDeserializationDictionary(js.idDictionary, SharedDictionaries.getDeserializationDictionary());
+        objectList = new ArrayList<Object>();
+        dict = new DeserializationDictionary(this);
     }
 
     public DataInput getInpForHadoop() {

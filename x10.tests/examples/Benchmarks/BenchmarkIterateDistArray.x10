@@ -8,9 +8,7 @@
  *
  *  (C) Copyright Australian National University 2010-2011.
  */
-
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests performance of DistArray iteration
@@ -73,7 +71,7 @@ public class BenchmarkIterateDistArray(elementsPerPlace : Int) extends x10Test {
             for ([t] in 1..100) {
                 // iterate and update each element of the distributed array
                 finish for (place in a.dist.places()) async at (place) {
-                    val aLocal = a.getLocalPortion();
+                    val aLocal = a.getLocalPortion() as Rail[Int];
                     for ([i] in aLocal) {
                         aLocal(i) = i;
                     }

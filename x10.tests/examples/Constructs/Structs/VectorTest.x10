@@ -106,7 +106,7 @@ public class VectorTest extends x10Test {
         return counter;
     }
 
-    public static def main (args:Rail[String]) {
+    public static def main (args:Array[String]{rank==1}) {
         (new VectorTest()).execute();
     }
 

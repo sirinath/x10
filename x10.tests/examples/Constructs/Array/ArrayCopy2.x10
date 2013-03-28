@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test for arrays, regions and dists.
@@ -138,7 +137,7 @@ public class ArrayCopy2 extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayCopy2().execute();
     }
 

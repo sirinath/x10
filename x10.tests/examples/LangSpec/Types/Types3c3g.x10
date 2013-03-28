@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types3c3g extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types3c3g().execute();
     }
 
 
-// file Types line 928
+// file Types line 927
  static class ConstructorExample {
   static  class Cont[X]{}
   static  interface Inte[X]{

@@ -17,8 +17,15 @@
   
 extern "C" {
   // public static native void scale(int n,  double alpha, double[] x);
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_test
+  (JNIEnv *env, jobject obj) {
+
+	printf("This is jni test call\n"); fflush(stdout);
+  }
+
+  // public static native void scale(int n,  double alpha, double[] x);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_scale
-  (JNIEnv *env, jclass cls, jint n, jdouble alpha, jdoubleArray x) {
+  (JNIEnv *env, jobject obj, jint n, jdouble alpha, jdoubleArray x) {
 	jboolean isCopy;
 	jdouble* xmat = env->GetDoubleArrayElements(x, &isCopy);
 
@@ -32,7 +39,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void copy(int n, double[] x, double[] y);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_copy
-  (JNIEnv *env, jclass cls, jint n, jdoubleArray x, jdoubleArray y) {
+  (JNIEnv *env, jobject obj, jint n, jdoubleArray x, jdoubleArray y) {
 	jboolean isCopy;
 	jdouble* xmat = env->GetDoubleArrayElements(x, NULL);
 	jdouble* ymat = env->GetDoubleArrayElements(y, &isCopy);
@@ -47,7 +54,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native double dotProd(int n, double[] x, double[] y);
   JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_dotProd
-  (JNIEnv *env, jclass cls, jint n, jdoubleArray x, jdoubleArray y) {
+  (JNIEnv *env, jobject obj, jint n, jdoubleArray x, jdoubleArray y) {
 	jdouble* xmat = env->GetDoubleArrayElements(x, NULL);
 	jdouble* ymat = env->GetDoubleArrayElements(y, NULL);
 	return dot_prod(n, xmat, ymat);
@@ -56,7 +63,7 @@ extern "C" {
   //-------------------------------------------------------------
   //public static native double norm2(int n, double[] x);
   JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_norm2
-  (JNIEnv *env, jclass cls, jint n, jdoubleArray x) {
+  (JNIEnv *env, jobject obj, jint n, jdoubleArray x) {
 	jdouble* xmat = env->GetDoubleArrayElements(x, NULL);
 	return norm2(n, xmat);
   }
@@ -64,7 +71,7 @@ extern "C" {
   //-------------------------------------------------------------
   //public static native double absSum(int n, double[] x);
   JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_absSum
-  (JNIEnv *env, jclass cls, jint n, jdoubleArray x) {
+  (JNIEnv *env, jobject obj, jint n, jdoubleArray x) {
 	jdouble* xmat = env->GetDoubleArrayElements(x, NULL);
 	return abs_sum(n, xmat);
   }
@@ -76,7 +83,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void matvecMult(double[] A, double[] x, double[] y, ....)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMult
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray x, jdoubleArray y, jintArray dim, jdoubleArray scale, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray x, jdoubleArray y, jintArray dim, jdoubleArray scale, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -100,7 +107,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void symvecMult(double[] A, double[] x, double[] y, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_symvecMult
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray x, jdoubleArray y, jintArray dim, jdoubleArray scale) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray x, jdoubleArray y, jintArray dim, jdoubleArray scale) {
     jboolean isCopy;
 
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -123,7 +130,7 @@ extern "C" {
   //--------------------------------------------------------------
   // public static native void trivecMult(double[] A, double[] bx, int lda, int tranA);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_trivecMult
-  (JNIEnv *env, jclass cls, jdoubleArray A, jint uplo, jdoubleArray bx, jint lda, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jint uplo, jdoubleArray bx, jint lda, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -145,7 +152,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void matmatMult(double[] A, double[] B, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matmatMult
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jdoubleArray C, jintArray dim, jdoubleArray scale, jintArray trans) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray B, jdoubleArray C, jintArray dim, jdoubleArray scale, jintArray trans) {
 
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -171,7 +178,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void symmatMult(double[] A, double[] B, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_symmatMult
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jdoubleArray C, jintArray dim, jdoubleArray scale) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray B, jdoubleArray C, jintArray dim, jdoubleArray scale) {
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
@@ -193,7 +200,7 @@ extern "C" {
 
   // public static native void matsymMult(double[] A, double[] B, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matsymMult
-  (JNIEnv *env, jclass cls, jdoubleArray B, jdoubleArray A, jdoubleArray C, jintArray dim, jdoubleArray scale) {
+  (JNIEnv *env, jobject obj, jdoubleArray B, jdoubleArray A, jdoubleArray C, jintArray dim, jdoubleArray scale) {
 	jboolean isCopy;
 	jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -216,7 +223,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void matvecMult2(double[] A, double[] x, double[] y, int m, int n);
 /*   JNIEXPORT void JNICALL Java_x10_matrix_WrapBLAS_matvecMult2 */
-/*   (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray x, jdoubleArray y, jint m, jint n) { */
+/*   (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray x, jdoubleArray y, jint m, jint n) { */
 
 /* 	jboolean isCopy; */
 /* 	jdouble* amat = env->GetDoubleArrayElements(A, NULL); */
@@ -234,7 +241,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void trimatMult(double[] A, double[] B, int[] dim, int tranA);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_trimatMult
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jintArray dim, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray B, jintArray dim, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -254,7 +261,7 @@ extern "C" {
 
   // public static native void trimatMult(double[] A, double[] B, int[] dim, int tranA);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_mattriMult
-  (JNIEnv *env, jclass cls, jdoubleArray B, jdoubleArray A, jintArray dim, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray B, jdoubleArray A, jintArray dim, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -278,7 +285,7 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void trimatSolve(double[] A, double[] bx, int m, int n);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_trivecSolve
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray bx, jintArray dim, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray bx, jintArray dim, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -295,7 +302,7 @@ extern "C" {
   }
 
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_trimatSolve
-  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray BX, jintArray dim, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray BX, jintArray dim, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
@@ -313,7 +320,7 @@ extern "C" {
   }
 
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_mattriSolve
-  (JNIEnv *env, jclass cls, jdoubleArray BX, jdoubleArray A, jintArray dim, jint tranA) {
+  (JNIEnv *env, jobject obj, jdoubleArray BX, jdoubleArray A, jintArray dim, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * clocked ateach is not a valid construct
@@ -28,7 +27,7 @@ public class ClockedAtEach_MustFailCompile extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new ClockedAtEach_MustFailCompile().execute();
     }
 }

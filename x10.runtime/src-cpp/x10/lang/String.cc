@@ -18,9 +18,10 @@
 #include <x10aux/throw.h>
 
 #include <x10/lang/Char.h>
-#include <x10/lang/Rail.h>
 #include <x10/lang/String.h>
 #include <x10/lang/StringIndexOutOfBoundsException.h>
+
+#include <x10/array/Array.h>
 
 #include <cstdarg>
 #include <sstream>
@@ -66,17 +67,17 @@ String::_constructor(String* s) {
 }
 
 String*
-String::_make(x10::lang::Rail<x10_byte>* rail) {
-    return _make(rail, 0, rail->FMGL(size));
+String::_make(x10::array::Array<x10_byte>* array) {
+    return _make(array, 0, array->FMGL(size));
 }
 
 void
-String::_constructor(x10::lang::Rail<x10_byte>* rail, x10_int start, x10_int length) {
-    nullCheck(rail);
+String::_constructor(x10::array::Array<x10_byte>* array, x10_int start, x10_int length) {
+    nullCheck(array);
     x10_int i = 0;
     char *content= x10aux::alloc<char>(length+1);
     for (i=0; i<length; i++) {
-        content[i] = (char)(rail->raw[start + i]);
+        content[i] = (char)(array->raw()[start + i]);
     }
     content[i] = '\0';
     this->FMGL(content) = content;
@@ -84,17 +85,17 @@ String::_constructor(x10::lang::Rail<x10_byte>* rail, x10_int start, x10_int len
 }
 
 String*
-String::_make(x10::lang::Rail<x10_char>* rail) {
-    return _make(rail, 0, rail->FMGL(size));
+String::_make(x10::array::Array<x10_char>* array) {
+    return _make(array, 0, array->FMGL(size));
 }
 
 void
-String::_constructor(x10::lang::Rail<x10_char>* rail, x10_int start, x10_int length) {
-    nullCheck(rail);
+String::_constructor(x10::array::Array<x10_char>* array, x10_int start, x10_int length) {
+    nullCheck(array);
     x10_int i = 0;
     char *content= x10aux::alloc<char>(length+1);
     for (i=0; i<length; i++) {
-        content[i] = (char)(rail->raw[start + i].v);
+        content[i] = (char)(array->raw()[start + i].v);
     }
     content[i] = '\0';
     this->FMGL(content) = content;
@@ -252,20 +253,20 @@ x10_char String::charAt(x10_int i) {
 }
 
 
-x10::lang::Rail<x10_char>* String::chars() {
+x10::array::Array<x10_char>* String::chars() {
     x10_int sz = length();
-    x10::lang::Rail<x10_char>* rail = x10::lang::Rail<x10_char>::_make(sz);
+    x10::array::Array<x10_char>* array = x10::array::Array<x10_char>::_make(sz);
     for (int i = 0; i < sz; ++i)
-        rail->__set(i, (x10_char) FMGL(content)[i]);
-    return rail;
+        array->__set(i, (x10_char) FMGL(content)[i]);
+    return array;
 }
 
-x10::lang::Rail<x10_byte>* String::bytes() {
+x10::array::Array<x10_byte>* String::bytes() {
     x10_int sz = length();
-    x10::lang::Rail<x10_byte>* rail = x10::lang::Rail<x10_byte>::_make(sz);
+    x10::array::Array<x10_byte>* array = x10::array::Array<x10_byte>::_make(sz);
     for (int i = 0; i < sz; ++i)
-        rail->__set(i, FMGL(content)[i]);
-    return rail;
+        array->__set(i, FMGL(content)[i]); 
+    return array;
 }
 
 void String::_formatHelper(std::ostringstream &ss, char* fmt, Any* p) {
@@ -304,31 +305,24 @@ void String::_formatHelper(std::ostringstream &ss, char* fmt, Any* p) {
         dealloc(buf);
 }
 
-String* String::format(String* format, x10::lang::Rail<Any*>* parms) {
+String* String::format(String* format, x10::array::Array<Any*>* parms) {
     std::ostringstream ss;
     nullCheck(format);
     nullCheck(parms);
+    //size_t len = format->FMGL(content_length);
     char* orig = alloc_utils::strdup(format->c_str());
     char* fmt = orig;
     char* next = NULL;
-    for (x10_int i = 0; fmt != NULL; fmt = next) {
-        next = strchr(fmt+1, '%');
+    for (x10_int i = 0; fmt != NULL; ++i, fmt = next) {
+        next = strchr(fmt+1, '%'); // FIXME: this is only ok if we always null-terminate content
         if (next != NULL)
             *next = '\0';
         if (*fmt != '%') {
             ss << fmt;
+            --i;
         } else {
-            if (next == fmt+1) {
-                *next = '%';
-                next = strchr(next+1, '%');
-                if (next != NULL)
-                    *next = '\0';
-                _formatHelper(ss, fmt, NULL);
-            } else {
-                Any* p = parms->__apply(i);
-                _formatHelper(ss, fmt, p);
-                i += 1;
-            }
+            Any* p = parms->__apply(i);
+            _formatHelper(ss, fmt, p);
         }
         if (next != NULL)
             *next = '%';

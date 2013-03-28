@@ -64,24 +64,24 @@ public class Printer extends FilterWriter {
     	print(e==null? "null" : e.toString());
     }
 
-    public def printf(fmt: String): void { printfRail(fmt, new Rail[Any](0)); }
-    public def printf(fmt: String, o1: Any): void { printfRail(fmt, new Rail[Any](1, o1)); }
-    public def printf(fmt: String, o1: Any, o2: Any): void { printfRail(fmt, [o1 as Any,o2]); }
-    public def printf(fmt: String, o1: Any, o2: Any, o3: Any): void { printfRail(fmt, [o1 as Any,o2,o3]); }
+    public def printf(fmt: String): void { printfArray(fmt, new Array[Any](0)); }
+    public def printf(fmt: String, o1: Any): void { printfArray(fmt, [o1 as Any]); }
+    public def printf(fmt: String, o1: Any, o2: Any): void { printfArray(fmt, [o1 as Any,o2]); }
+    public def printf(fmt: String, o1: Any, o2: Any, o3: Any): void { printfArray(fmt, [o1 as Any,o2,o3]); }
     public def printf(fmt: String, o1: Any, o2: Any, o3: Any, o4: Any): void { 
-        printfRail(fmt, [o1,o2,o3,o4]); 
+        printfArray(fmt, [o1,o2,o3,o4]); 
     }
     public def printf(fmt: String, o1: Any, o2: Any, o3: Any, o4: Any, o5: Any): void { 
-       printfRail(fmt, [o1,o2,o3,o4,o5]); 
+       printfArray(fmt, [o1,o2,o3,o4,o5]); 
     }
     public def printf(fmt: String, o1: Any, o2: Any, o3: Any, o4: Any, o5: Any, o6: Any): void { 
-       printfRail(fmt, [o1,o2,o3,o4,o5,o6]); 
+       printfArray(fmt, [o1,o2,o3,o4,o5,o6]); 
     }
 
     public def printf(fmt: String, args: Rail[Any]): void { 
-        printfRail(fmt, args); 
+        printfArray(fmt, args); 
     }
-    public def printfRail(fmt: String, args: Rail[Any]): void { 
+    public def printfArray(fmt: String, args: Array[Any](1)): void { 
         print(String.format(fmt, args));
     }
         

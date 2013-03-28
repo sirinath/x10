@@ -29,7 +29,7 @@ public class MultiAsyncs extends x10Test{
 		return value == 3;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
         new MultiAsyncs().execute();
 	}
 }

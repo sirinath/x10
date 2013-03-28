@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Statements19 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Statements19().execute();
     }
 
 
-// file Statements.tex,  line 991
+// file Statements.tex,  line 993
 
  static class Statements19TestStmt{
   def check(B:Boolean)  {

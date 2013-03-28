@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test that coercions and overloading behave.
@@ -40,7 +39,7 @@ public class Overloading extends x10Test {
                     && r4.equals("dist");
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new Overloading().execute();
 	}
 }

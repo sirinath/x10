@@ -21,12 +21,12 @@ import x10.util.*;
 
 public class Types220 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types220().execute();
     }
 
 
-// file Types line 970
+// file Types line 969
  static class Types18TypeTest{
   def check()  { 
      var checkycheck : List[String{self!=null}]{self!=null};  }}

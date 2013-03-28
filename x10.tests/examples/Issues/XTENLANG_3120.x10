@@ -10,7 +10,7 @@ public class XTENLANG_3120 extends x10Test {
         new Bar();
         return true;
     }
-    public static def main (args : Rail[String]) {
+    public static def main (args : Array[String]) {
         (new XTENLANG_3120()).run();
     }
 }

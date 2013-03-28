@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Tests 2D distributions constructed from regions.
@@ -24,7 +23,7 @@ public class ConstructDist2D extends x10Test {
         return d.equals(Dist.makeConstant(e*e, here));
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ConstructDist2D().execute();
     }
 }

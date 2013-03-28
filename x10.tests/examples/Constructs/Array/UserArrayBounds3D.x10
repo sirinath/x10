@@ -10,7 +10,6 @@
  */
 
 import x10.util.Random;
-import x10.array.*;
 import harness.x10Test;
 
 /**
@@ -81,7 +80,7 @@ public class UserArrayBounds3D extends x10Test {
      */
     private static def iff(x: boolean, y: boolean)= x==y;
 
-    public static def main(Rail[String]){
+    public static def main(Array[String](1)){
         new UserArrayBounds3D().execute();
     }
 }

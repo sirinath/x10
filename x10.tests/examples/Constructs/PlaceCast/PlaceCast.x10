@@ -11,8 +11,6 @@
 
 import harness.x10Test;
 import x10.io.Console;
-import x10.array.*;
-
 public class PlaceCast extends x10Test {
     var nplaces: int = 0;
     private val root=GlobalRef[PlaceCast](this);
@@ -37,7 +35,7 @@ public class PlaceCast extends x10Test {
 	  return nplaces == 0;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
 	  new PlaceCast().execute();
     }
 

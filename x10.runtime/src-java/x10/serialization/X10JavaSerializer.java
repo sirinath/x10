@@ -19,20 +19,17 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import x10.io.CustomSerialization;
+import x10.rtt.RuntimeType;
 import x10.runtime.impl.java.Runtime;
-import x10.serialization.SerializationDictionary.LocalSerializationDictionary;
 
 public final class X10JavaSerializer implements SerializationConstants {
         
     protected final DataOutputStream out;
     protected final ByteArrayOutputStream b_out;
-    
-    protected byte[] dictBytes;
-    protected byte[] dataBytes;
-    
-    protected boolean messagePrepared = false;
     
     // When a Object is serialized record its position
     // N.B. use custom IdentityHashMap class, as standard one has poor performance on J9
@@ -44,65 +41,37 @@ public final class X10JavaSerializer implements SerializationConstants {
     public void addToGrefMap(x10.core.GlobalRef<?> gr, int weight) { grefMap.put(gr, weight); }
     public java.util.Map<x10.core.GlobalRef<?>, Integer> getGrefMap() { return grefMap; }
     
-    // per-message id dictionary
-    protected final LocalSerializationDictionary idDictionary;
-    
+    // Build up per-message id dictionary
+    protected SerializationDictionary idDictionary = new SerializationDictionary(FIRST_DYNAMIC_ID);
+
     public X10JavaSerializer() {
         this.b_out = new ByteArrayOutputStream();
         this.out = new DataOutputStream(this.b_out);
-        this.idDictionary = new LocalSerializationDictionary(SharedDictionaries.getSerializationDictionary(), FIRST_DYNAMIC_ID);
     }
 
     public DataOutput getOutForHadoop() {
         return out;
     }
     
-    public int numDataBytesWritten() {
+    public int numBytesWritten() {
         return b_out.size();
     }
     
-    public void prepareMessage(boolean dataOnly) throws IOException {
-        if (messagePrepared) return; // make it cheap to call prepareMessage multiple times
+    public byte[] toMessage() throws IOException {
         out.close();
-        
-        if (dataOnly) {
-            dictBytes = new byte[0];
-        } else {
-            if (Runtime.TRACE_SER) {
-                Runtime.printTraceMessage("Encoding per-message serialization ids: "+idDictionary);
-            }
-            dictBytes = idDictionary.encode();
+
+        if (Runtime.TRACE_SER) {
+            Runtime.printTraceMessage("Sending per-message serialization ids: "+idDictionary);
         }
-        dataBytes = b_out.toByteArray();
-        messagePrepared = true;
+
+        byte[] dictBytes = idDictionary.encode();
+        byte[] dataBytes = b_out.toByteArray();
+        byte[] message = new byte[dictBytes.length + dataBytes.length];
+        System.arraycopy(dictBytes, 0, message, 0, dictBytes.length);
+        System.arraycopy(dataBytes, 0, message, dictBytes.length, dataBytes.length);
+        return message;
     }
     
-    public boolean mustSendDictionary() { 
-        return idDictionary.dict.size() > 0;
-    }
-    
-    public byte[] getDictionaryBytes() {
-        if (Runtime.TRACE_SER && !messagePrepared) {
-            Runtime.printTraceMessage("Fatal error: getDictionaryBytes call before prepareMessage)");
-        }
-            
-        assert messagePrepared : "Must call prepareMessage before asking for dictBytes";
-        return dictBytes;
-    }
-    
-    public byte[] getDataBytes() {
-        if (Runtime.TRACE_SER && !messagePrepared) {
-            Runtime.printTraceMessage("Fatal error: getDataBytes call before prepareMessage)");
-        }
-            
-        assert messagePrepared : "Must call prepareMessage before asking for dataBytes";
-        return dataBytes;
-    }
-    
-    public int getTotalMessageBytes() {
-        return getDictionaryBytes().length + getDataBytes().length;
-    }
-        
     public short getSerializationId(Class<?> clazz, Object obj) {
         return idDictionary.getSerializationId(clazz, obj);
     }

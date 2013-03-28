@@ -10,7 +10,6 @@
  */
 
 import x10.util.Box;
-import x10.array.*;
 
 import harness.x10Test;
 
@@ -29,7 +28,7 @@ public class BoxArrayAssign extends x10Test {
         return true;
     }
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new BoxArrayAssign().execute();
     }
 

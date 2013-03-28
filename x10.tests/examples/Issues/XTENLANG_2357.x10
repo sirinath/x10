@@ -22,7 +22,7 @@ public class XTENLANG_2357(x:Int) extends x10Test {
 
     public def run() = true;
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_2357(5).execute();
     }
 

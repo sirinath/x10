@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 import x10.util.concurrent.Future;
 
@@ -50,7 +49,7 @@ public class ArrayReduce extends TestArray {
         return status();
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayReduce().execute();
     }
 

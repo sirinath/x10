@@ -142,7 +142,7 @@ public class UShortOps extends x10Test {
 	return r;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UShortOps().execute();
     }
 

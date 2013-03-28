@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types9j6e extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types9j6e().execute();
     }
 
 
-// file Types line 1832
+// file Types line 1830
  static class Generic {
   public static def inst[T](x:Any):Boolean = x instanceof T;
   // With -VERBOSE, the following line gets a warning

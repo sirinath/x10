@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Structs3q6l extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Structs3q6l().execute();
     }
 
@@ -29,10 +29,10 @@ public class Structs3q6l extends x10Test {
 // file Structs line 187
  static struct Horse(x:Int){
   static def example(){
-    val aa : Rail[Any] = ["a String" as Any, "another one"];
+    val aa : Array[Any](1) = ["a String" as Any, "another one"];
     aa(0) = Horse(8);
     aa(1) = 13;
-    val ah : Rail[Horse] = [Horse(7), Horse(13)];
+    val ah : Array[Horse](1) = [Horse(7), Horse(13)];
   }
 }
 

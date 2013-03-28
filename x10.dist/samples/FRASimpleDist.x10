@@ -20,12 +20,12 @@ import x10.util.Timer;
  */
 class LocalTable {
 
-    val a: Rail[long];
+    val a: Array[long](1);
     val mask: int;
 
     def this(size:int) {
         mask = size-1;
-        a = new Rail[long](size, (i:long)=>i);
+        a = new Array[long](size, (i:int)=>i as long);
     }
 
     public def update(ran:long) {
@@ -45,7 +45,7 @@ class FRASimpleDist {
     static def HPCC_starts(var n:long): long {
         var i:int;
         var j:int;
-        val m2 = new Rail[long](64);
+        val m2 = new Array[long](64);
         while (n < 0L) n += PERIOD;
         while (n > PERIOD) n -= PERIOD;
         if (n == 0L) return 0x1L;
@@ -90,7 +90,7 @@ class FRASimpleDist {
     }
 
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String](1)) {
         if ((Place.MAX_PLACES & (Place.MAX_PLACES-1)) > 0) {
             println("The number of places must be a power of 2.");
             return;
@@ -126,7 +126,7 @@ class FRASimpleDist {
             at (Place.place(i)) async {
                 val table = tables();
                 var err:int = 0;
-                for (j in table.a.range) 
+                for ([j] in table.a) 
                     if (table.a(j) != j as Long) err++;
                 println("Found " + err + " errors.");
             }

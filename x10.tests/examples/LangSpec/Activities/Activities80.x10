@@ -17,21 +17,21 @@
 
 import harness.x10Test;
 
- import x10.array.*;
+
 
 public class Activities80 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Activities80().execute();
     }
 
 
-// file Activities line 275
+// file Activities line 290
  static  class EquivCode {
  static def S(pt:Point) {}
  static def example(D:Dist) {
-for (place in D.places()) at (place) async {
-    for (p in D|here) async {
+for (place in D.places()) async at (place) {
+    for (p in D|here) {
         S(p);
     }
 }

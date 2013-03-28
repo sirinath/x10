@@ -27,7 +27,7 @@ public class ClockAsyncTest extends x10Test {
 
     public def run(): boolean {
 	  try {
-	    val clocks = new Rail[Clock](6, (i:int)=>Clock.make());
+	    val clocks = new Array[Clock](0..5, (Point)=>Clock.make());
 	    finish {
 	    	async clocked (clocks(0)){
 	    		Clock.advanceAll();
@@ -40,7 +40,7 @@ public class ClockAsyncTest extends x10Test {
 	  return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
 	   new ClockAsyncTest().execute();
     }
 }

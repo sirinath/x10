@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Activities90 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Activities90().execute();
     }
 
 
-// file Activities line 383
+// file Activities line 399
  static  class Redund[T] {
    val list = new ArrayList[T]();
    var size : Int = 0;

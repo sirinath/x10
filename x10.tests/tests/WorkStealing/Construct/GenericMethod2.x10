@@ -47,7 +47,7 @@ public class GenericMethod2 {
 		return passed;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
         val r = new GenericMethod2().run();
         if(r){
              x10.io.Console.OUT.println("++++++Test succeeded.");

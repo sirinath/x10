@@ -10,10 +10,6 @@
  *  (C) Copyright Australian National University 2011.
  */
 
-import x10.array.Dist;
-import x10.array.DistArray;
-import x10.array.Region;
-
 /**
  * A distributed version of NQueens. Runs over NUM_PLACES.
  * Identical to NQueensPar, except that work is distributed 
@@ -99,7 +95,7 @@ public class NQueensDist {
         }
     }
 
-    public static def main(args:Rail[String])  {
+    public static def main(args:Array[String](1))  {
         val n = args.size > 0 ? Int.parse(args(0)) : 8;
         Console.OUT.println("N=" + n);
         //warmup

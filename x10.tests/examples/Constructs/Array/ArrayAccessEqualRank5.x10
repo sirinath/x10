@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test that a can be accessed through point p if p ranges over b.dist
@@ -32,7 +31,7 @@ public class ArrayAccessEqualRank5 extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) = {
+    public static def main(Array[String](1)) = {
         new ArrayAccessEqualRank5().execute();
     }
 }

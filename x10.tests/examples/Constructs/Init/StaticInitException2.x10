@@ -36,7 +36,7 @@ public class StaticInitException2 extends x10Test {
               }
             }
           } catch (e:MultipleExceptions) {
-            if (e.exceptions().size != 1L) {
+            if (e.exceptions().size != 1) {
 	        Console.OUT.println("Got unexpected number of exceptions ("+e.exceptions().size+")");
                 ok() = false;
             }

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test ateach on the points of a DistArray using 
@@ -30,7 +29,7 @@ public class AtEach3 extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new AtEach3().execute();
     }
 }

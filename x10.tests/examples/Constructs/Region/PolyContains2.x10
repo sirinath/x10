@@ -9,13 +9,12 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;
-
 /**
  * Test triangular regions.
  *
  * (was RegionTriangular)
  */
+
 class PolyContains2 extends TestRegion {
 
     public def run() {
@@ -70,7 +69,7 @@ class PolyContains2 extends TestRegion {
         "    2  0 2 4 . . . . . . . \n"+
         "    3  0 3 6 9 . . . . . . \n";
     
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PolyContains2().execute();
     }
 }

@@ -449,6 +449,21 @@ public interface TypeSystem {
     Type Exception();
 
     /**
+     * <code>java.lang.Cloneable</code>
+     */
+    Type Cloneable();
+
+    /**
+     * <code>java.lang.Iterable</code>
+     */
+    Type JLIterable();
+
+    /**
+     * <code>java.io.Serializable</code>
+     */
+    Type Serializable();
+
+    /**
      * <code>java.lang.NullPointerException</code>
      */
     Type NullPointerException();
@@ -1046,10 +1061,6 @@ public interface TypeSystem {
      */
     X10ClassType Array();
 
-    /**
-     * Return the ClassType object for the x10.lang.Rail class.
-     */
-    X10ClassType Rail();
 
     /**
      * Return the ClassType object for the x10.array.DistArray class.
@@ -1063,15 +1074,9 @@ public interface TypeSystem {
 
     boolean isArray(Type t);
 
-    boolean isRail(Type t);
-
     public boolean isArrayOf(Type t, Type p);
 
-    public boolean isRailOf(Type t, Type p);
-
     X10ClassType Array(Type arg);
-
-    X10ClassType Rail(Type arg);
 
     X10ClassType Settable();
 
@@ -1292,6 +1297,4 @@ public interface TypeSystem {
 	X10ClassType System();
 
 	Type Profile();
-
-	boolean typeIsJLIterable(Type classType);
 }

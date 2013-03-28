@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing exploding syntax for local variables.
@@ -24,7 +23,7 @@ public class ExplodingLocalVarTest extends x10Test {
 		return x+y==4;
 		}
 
-	public static def main(Rail[String]){
+	public static def main(Array[String](1)){
 		new ExplodingLocalVarTest().execute();
 	}
 }

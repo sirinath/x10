@@ -115,7 +115,6 @@ import x10c.visit.StaticInitializer;
 import static x10.visit.X10PrettyPrinterVisitor.hasParams;
 import static x10.visit.X10PrettyPrinterVisitor.isBoxedType;
 import static x10.visit.X10PrettyPrinterVisitor.isIndexedMemoryChunk;
-import static x10.visit.X10PrettyPrinterVisitor.isRail;
 import static x10.visit.X10PrettyPrinterVisitor.isPrimitive;
 import static x10.visit.X10PrettyPrinterVisitor.isPrimitiveGenericMethod;
 import static x10.visit.X10PrettyPrinterVisitor.isSpecialType;
@@ -4183,8 +4182,7 @@ public class Emitter {
                 w.write(".value");
                 w.write(")");
 
-                // LONG_RAIL: unsafe int cast
-                w.write("[(int)");
+                w.write("[");
                 c.print(c.arguments().get(0), w, tr);
                 w.write("]");
 
@@ -4204,8 +4202,7 @@ public class Emitter {
                 w.write(".value");
                 w.write(")");
 
-                // LONG_RAIL: unsafe int cast
-                w.write("[(int)");
+                w.write("[");
                 c.print(c.arguments().get(0), w, tr);
                 w.write("]");
 
@@ -4218,7 +4215,7 @@ public class Emitter {
 
     public boolean isMethodInlineTarget(TypeSystem xts, Type ttype) {
         ttype = Types.baseType(ttype);
-        if (!(isIndexedMemoryChunk(ttype) || isRail(ttype))) {
+        if (!isIndexedMemoryChunk(ttype)) {
             return false;
         }
         if (!hasParams(ttype)) {
@@ -4426,7 +4423,7 @@ public class Emitter {
                 "}\n" +
                 "\n" +
                 "// called by native runtime inside main x10 thread\n" +
-                "public void runtimeCallback(final x10.core.Rail<java.lang.String> args) #throws {\n" +
+                "public void runtimeCallback(final x10.array.Array<java.lang.String> args) #throws {\n" +
                     "// call the original app-main method\n" +
                     "#mainclass.main(args);\n" +
                 "}\n" +

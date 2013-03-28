@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Simple tests for copyTo/copyFrom functionality
@@ -54,7 +53,7 @@ public class ArrayCopyTo extends x10Test {
        return !fail;    
     }
 
-    public static def main(var args: Rail[String]) {
+    public static def main(var args: Array[String](1)) {
         new ArrayCopyTo().execute();
     }
 

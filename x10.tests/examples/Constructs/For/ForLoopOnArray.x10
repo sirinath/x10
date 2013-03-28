@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Test for for loop on an array.
@@ -19,18 +18,18 @@ import x10.array.*;
  */
 public class ForLoopOnArray extends x10Test {
 
-    public static N: int = 3;
+	public static N: int = 3;
 
-    public def run(): boolean = {
-        val a = new Array[double](0..10, ([i]: Point): double => i as double);
+	public def run(): boolean = {
+		val a = new Array[double](0..10, ([i]: Point): double => i as double);
 
-        for (val [i]: Point in a.region) {
-            if (a(i) != i as Double) return false;
-        }
-        return true;
-    }
+		for (val [i]: Point in a.region) {
+			if (a(i) != i as Double) return false;
+		}
+		return true;
+	}
 
-    public static def main(var args: Rail[String]): void = {
-        new ForLoopOnArray().execute();
-    }
+	public static def main(var args: Array[String](1)): void = {
+		new ForLoopOnArray().execute();
+	}
 }

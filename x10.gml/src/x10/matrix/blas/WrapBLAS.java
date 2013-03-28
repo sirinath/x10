@@ -21,6 +21,7 @@ public class WrapBLAS {
 		System.loadLibrary("jblas");
 	}
 
+	public static native void test();
 	public static native void scale(int n,  double alpha, double[] x);
 	public static native void copy(int n, double[] x, double[] y);
 	public static native double dotProd(int n, double[] x, double[] y);

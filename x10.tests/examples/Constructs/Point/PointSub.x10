@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.array.*;
 
 /**
  * Testing point subtraction..
@@ -29,7 +28,7 @@ public class PointSub extends x10Test {
         return (a+q).equals(p);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointSub().execute();
     }
 }

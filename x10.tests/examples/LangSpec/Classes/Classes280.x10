@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Classes280 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes280().execute();
     }
 
@@ -32,7 +32,7 @@ public class Classes280 extends x10Test {
   def this(r:Int):MyRegion(r) {
     property(r);
   }
-  def this(diag:Rail[Int]):MyRegion(diag.size){
+  def this(diag:Array[Int](1)):MyRegion(diag.size){
     property(diag.size);
   }
   def mockUnion(r:MyRegion(rank)):MyRegion(rank) = this;

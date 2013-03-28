@@ -90,7 +90,7 @@ public class AllReduce extends x10Test {
         return res();
     }
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String]) {
         new AllReduce().execute();
     }
 
