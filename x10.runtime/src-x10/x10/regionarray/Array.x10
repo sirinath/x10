@@ -17,7 +17,6 @@ import x10.compiler.Inline;
 import x10.compiler.Native;
 import x10.compiler.NoInline;
 import x10.compiler.NoReturn;
-import x10.util.RailUtils;
 
 /**
  * <p>An array defines a mapping from {@link Point}s to data values of some type T.
@@ -705,8 +704,9 @@ public final class Array[T] (
             // In a rect region, every element in the backing raw Rail[T]
             // is included in the array, therefore we can optimize
             // the traversal and simply map on the Rail itself.
-            RailUtils.map(raw, dst.raw, op);
-            return dst; 
+            for (i in 0..(raw.size-1)) {
+                dst.raw(i) = op(raw(i));
+            }   
         } else {
             for (p in region) {
                 dst(p) = op(this(p));
@@ -771,12 +771,13 @@ public final class Array[T] (
      */
     public @Inline def map[S,U](dst:Array[S](this.rank), src:Array[U](this.rank), op:(T,U)=>S):Array[S](this.rank){self==dst} {
         // TODO: parallelize these loops.
-        if (rect && this.size == src.size) {
+        if (rect) {
             // In a rect array, every element in the backing raw Rail
             // is included in the array, therefore we can optimize
             // the traversal and simply map on the Rail itself.
-            RailUtils.map(this.raw, src.raw as Rail[U]{self.size==this.raw.size}, dst.raw, op);
-            return dst;
+            for (i in 0..(raw.size-1)) {
+                dst.raw(i) = op(raw(i), src.raw(i));
+            }   
         } else {
             for (p in region) {
                 dst(p) = op(this(p), src(p));
@@ -823,18 +824,22 @@ public final class Array[T] (
      * @see #scan((U,T)=>U,U)
      */
     public @Inline def reduce[U](op:(U,T)=>U, unit:U):U {
+        // TODO: once collecting finish is available,
+        //       use it to efficiently parallelize these loops.
+        var accum:U = unit;
         if (rect) {
             // In a rect array, every element in the backing raw Rail[T]
             // is included in the array, therefore we can optimize
             // the traversal and simply reduce on the Rail itself.
-            return RailUtils.reduce(raw, op, unit);
+            for (i in 0..(raw.size-1)) {
+                accum = op(accum, raw(i));
+            }          
         } else {
-            var accum:U = unit;
             for (p in region) {
                 accum = op(accum, this(p));
             }
-            return accum;
         }
+        return accum;
     }
     
     /**

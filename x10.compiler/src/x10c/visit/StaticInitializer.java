@@ -235,6 +235,11 @@ public class StaticInitializer extends ContextVisitor {
                 // add in the top
                 members.add(0, fdCond);
 
+                FieldDecl fdId = makeFieldVar4Id(CG, fName, classDef);
+                classDef.addField(fdId.fieldDef());
+                // add in the top
+                members.add(0, fdId);
+
                 if (fieldInfo.left != null) {
                     // interface case: add field declaration to the shadow class
                     FieldDef fd = fieldInfo.left.fieldDef();
@@ -244,7 +249,7 @@ public class StaticInitializer extends ContextVisitor {
                 }
 
                 // gen new initialize method
-                md = makeInitMethod(CG, fName, fieldInfo, fdExcept.fieldDef(), fdCond.fieldDef(), classDef);
+                md = makeInitMethod(CG, fName, fieldInfo, fdExcept.fieldDef(), fdCond.fieldDef(), fdId.fieldDef(), classDef);
             } else {
                 md = makeFakeInitMethod(CG, fName, fieldInfo, classDef);
             }
@@ -683,6 +688,23 @@ public class StaticInitializer extends ContextVisitor {
         return result;
     }
 
+    private FieldDecl makeFieldVar4Id(Position pos, Name fName, X10ClassDef classDef) {
+        // make FieldDef
+        Type type = xts.Short();
+        Name name = Name.make("fieldId$"+fName);
+        Flags flags = Flags.PRIVATE.Static();
+
+        FieldDef fd = xts.fieldDef(pos, Types.ref(classDef.asType()), flags, Types.ref(type), name); 
+        FieldInstance fi = xts.createFieldInstance(pos, Types.ref(fd));
+
+        // create the field declaration node
+        TypeNode tn = xnf.X10CanonicalTypeNode(pos, type);
+        FieldDecl result = xnf.FieldDecl(pos, xnf.FlagsNode(pos, flags), tn, xnf.Id(pos, name));
+        // associate fieldDef with fieldDecl
+        result = result.fieldDef(fd);
+        return result;
+    }
+
     private Expr getDefaultValue(Position pos, Type type) {
         if (type.isBoolean())
             return xnf.BooleanLit(pos, false).type(type);
@@ -707,7 +729,7 @@ public class StaticInitializer extends ContextVisitor {
     }
 
     private MethodDecl makeInitMethod(Position pos, Name fName, StaticFieldInfo fieldInfo,
-        FieldDef fdExcept, FieldDef fdCond, X10ClassDef classDef) {
+        FieldDef fdExcept, FieldDef fdCond, FieldDef fdId, X10ClassDef classDef) {
         // get MethodDef
         Name name = Name.make(initializerPrefix+fName);
         Type type = fieldInfo.fieldDef.type().get();
@@ -721,7 +743,7 @@ public class StaticInitializer extends ContextVisitor {
         List<Formal> formals = Collections.<Formal>emptyList();
 
         TypeNode returnType = xnf.X10CanonicalTypeNode(pos, type);
-        Block body = makeInitMethodBody(pos, fieldInfo, fdExcept, fdCond, classDef);
+        Block body = makeInitMethodBody(pos, fieldInfo, fdExcept, fdCond, fdId, classDef);
         MethodDecl result = xnf.X10MethodDecl(pos, xnf.FlagsNode(pos, Flags.STATIC), returnType, xnf.Id(pos, name),
                                               typeParamNodes, formals, null, null, Collections.<TypeNode>emptyList(), body);
         // associate methodDef with methodDecl
@@ -791,7 +813,7 @@ public class StaticInitializer extends ContextVisitor {
     }
     
     private Block makeInitMethodBody(Position pos, StaticFieldInfo initInfo, FieldDef fdExcept, FieldDef fdCond,
-                                     X10ClassDef classDef) {
+                                     FieldDef fdId, X10ClassDef classDef) {
 
         List<Stmt> stmts;
         TypeNode receiver = xnf.X10CanonicalTypeNode(pos, classDef.asType());
@@ -817,6 +839,8 @@ public class StaticInitializer extends ContextVisitor {
 
         // gen AtomicInteger.compareAndSet(UNINITIALIZED, INITIALIZING)
         Expr ifCond = genAtomicGuard(pos, receiver, fdCond);
+        FieldInstance fdidi = fdId.asInstance();
+        Expr fieldId = xnf.Field(pos, receiver, xnf.Id(pos, fdId.name())).fieldInstance(fdidi).type(fdidi.type());
 
         // make statement block of initialization
         stmts = new ArrayList<Stmt>();
