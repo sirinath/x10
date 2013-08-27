@@ -19,11 +19,11 @@ class XTENLANG_258 extends x10Test {
 
     public def run():boolean {
         val v: Rail[int] = new Rail[int](1);
-        v(0) += 1n;
+        v(0) += 1;
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_258().execute();
     }
 }

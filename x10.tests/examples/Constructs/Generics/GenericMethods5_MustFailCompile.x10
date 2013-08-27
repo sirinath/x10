@@ -23,12 +23,12 @@ public class GenericMethods5_MustFailCompile extends GenericTest {
 
     public def run() = {
 
-        m[String,long](1,"1"); // ERR
+        m[String,int](1,"1"); // ERR
 
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericMethods5_MustFailCompile().execute();
     }
 }

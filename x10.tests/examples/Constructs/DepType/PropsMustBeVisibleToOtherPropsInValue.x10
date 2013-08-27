@@ -24,10 +24,10 @@ public class PropsMustBeVisibleToOtherPropsInValue extends x10Test {
         }
     }
     public def run():boolean = {
-        Value2(4n);
+        Value2(4);
         return true;
     }
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PropsMustBeVisibleToOtherPropsInValue().execute();
     }
 }

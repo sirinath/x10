@@ -40,13 +40,12 @@ public class IntegrateSeq {
     return expr1 + expr2;
   }
  
-  public static def main(args:Rail[String]) {
-    val xMax = args.size > 0 ? Long.parse(args(0)) : 10;
+  public static def main(args:Array[String](1)) {
+    val xMax = args.size > 0 ? Int.parse(args(0)) : 10;
     var avgDur:Double = 0;
-    for (i in 0..9) {
-        val v = (i%2 == 0 ? xMax : xMax+1)-i%2;
+    for (var i:Int = 0; i < 10; ++i) {
         val startTime = System.nanoTime();
-        val area = computeArea(0, v);
+        val area = computeArea(0, xMax);
         val duration = ((System.nanoTime() - startTime) as Double)/1e9;
         avgDur += duration;
         Console.OUT.println("The area of (x*x + 1) * x from 0 to "+xMax+" is "+area);

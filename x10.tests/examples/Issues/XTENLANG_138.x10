@@ -17,16 +17,16 @@ import harness.x10Test;
 
 class XTENLANG_138 extends x10Test {
 
-    def f() = f(0n);
+    def f() = f(0);
 
-    def f(i:Int) = 0n;
+    def f(i:Int) = 0;
 
     public def run(): boolean {
         val v:Int = f();
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_138().execute();
     }
 }

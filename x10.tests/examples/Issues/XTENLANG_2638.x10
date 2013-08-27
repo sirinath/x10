@@ -13,16 +13,15 @@ import harness.x10Test;
 
 import x10.compiler.tests.*; // err markers
 import x10.util.*;
-import x10.regionarray.*;
 
 class XTENLANG_2638 extends x10Test
 {
     public def run () : Boolean
     {
-        val mShape = Region.make(1..100, 1..200);
+        val mShape = ((1..100) * (1..200)) as Region(2);
         val mDist:Dist(2) = Dist.makeBlock(mShape);
-        val mat = DistArray.make[int] (mDist, 1n);
-        val rhs = DistArray.make[int] (mDist, 2n);
+        val mat = DistArray.make[int] (mDist, 1);
+        val rhs = DistArray.make[int] (mDist, 2);
 
         finish for (place in mat.dist.places()) async
         {
@@ -39,7 +38,7 @@ class XTENLANG_2638 extends x10Test
         return true;
     }
 
-    public static def main (arg:Rail[String]) : void
+    public static def main (arg:Array[String](1)) : void
     {
         new XTENLANG_2638().execute();
     }

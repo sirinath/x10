@@ -15,7 +15,6 @@
 #include <x10aux/config.h>
 
 #include <x10/lang/Reference.h>
-#include <x10aux/basic_functions.h>
 
 #define X10_LANG_ANY_H_NODEPS
 #include <x10/lang/Any.h>
@@ -44,7 +43,7 @@ namespace x10 {
 
             virtual x10_int hashCode();
             
-            virtual String* toString() { return x10aux::identity_to_string(this); }
+            virtual String* toString();
             
             virtual const char* toNativeString();
 

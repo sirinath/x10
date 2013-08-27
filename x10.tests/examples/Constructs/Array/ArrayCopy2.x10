@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test for arrays, regions and dists.
@@ -53,7 +52,7 @@ public class ArrayCopy2 extends x10Test {
      * regions are equal.
      * Throws an error iff some assertion failed.
      */
-    public def arrayCopy(val A: DistArray[long], val B: DistArray[long](A.rank)) {
+    public def arrayCopy(val A: DistArray[int], val B: DistArray[int](A.rank)) {
 
         val D = A.dist;
         val E = B.dist;
@@ -99,13 +98,13 @@ public class ArrayCopy2 extends x10Test {
             }
 
         // ensure each A[i] was accessed exactly once
-        finish ateach (i:Point(D.rank) in D) chk(accessed_a(i) == 1n);
+        finish ateach (i:Point(D.rank) in D) chk(accessed_a(i) == 1);
 
         // ensure each B[i] was accessed exactly once
-        finish ateach (i:Point(E.rank) in E) chk(accessed_b(i) == 1n);
+        finish ateach (i:Point(E.rank) in E) chk(accessed_b(i) == 1);
     }
 
-    public static N: int = 3n;
+    public static N: int = 3;
 
     /**
      * For all combinations of dists of arrays B and A,
@@ -113,8 +112,8 @@ public class ArrayCopy2 extends x10Test {
      */
     public def run(): boolean = {
 
-        val R:Region(4) = Region.make(0..(N-1), 0..(N-1), 0..(N-1), 0..(N-1));
-        val TestDists = Region.make(0..(dist2.N_DIST_TYPES-1), 0..(dist2.N_DIST_TYPES-1));
+        val R:Region(4) = 0..(N-1)*0..(N-1)*0..(N-1)*0..(N-1);
+        val TestDists = 0..(dist2.N_DIST_TYPES-1)*0..(dist2.N_DIST_TYPES-1);
 
         for (distP[dX,dY]:Point(2) in TestDists) {
             val D= dist2.getDist(dX, R);
@@ -130,15 +129,15 @@ public class ArrayCopy2 extends x10Test {
 				       + D.region.equals(R));
 	    */
             chk(D.region.equals(E.region) && D.region.equals(R));
-            val A = DistArray.make[long](D);
-            val B = DistArray.make[long](E, (p[i,j,k,l]: Point) => { val x = ((i*N+j)*N+k)*N+l; x*x+1 });
+            val A = DistArray.make[int](D);
+            val B = DistArray.make[int](E, (p[i,j,k,l]: Point) => { val x = ((i*N+j)*N+k)*N+l; x*x+1 });
             arrayCopy(A, B);
             arrayEqual(A, B);  
         }
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayCopy2().execute();
     }
 
@@ -148,15 +147,15 @@ public class ArrayCopy2 extends x10Test {
      */
     static class dist2 {
 
-        static BLOCK: int = 0n;
-        static CONSTANT: int = 1n;
+        static BLOCK: int = 0;
+        static CONSTANT: int = 1;
         //static BLOCKCYCLIC: int = 1;
-	static N_DIST_TYPES=2n;
+	static N_DIST_TYPES=2;
         /**
          * Return a dist with region r, of type disttype
          */
-        public static def getDist(distType: Long, R: Region): Dist(R) = {
-            switch(distType as Int) {
+        public static def getDist(distType: Int, R: Region): Dist(R) = {
+            switch(distType) {
                 case BLOCK: return Dist.makeBlock(R,0) as Dist(R);
                 case CONSTANT: return (R->here) as Dist(R);
                 // case BLOCKCYCLIC: return Dist.makeBlockCyclic(R, 0,3) as Dist(R);

@@ -16,20 +16,20 @@ import harness.x10Test;
 public class JavaComparable1 extends x10Test {
 
     static class C[T] implements Comparable[T] {
-        public def compareTo(T) = 0n;
+        public def compareTo(T) = 0;
     }
 
     public def run(): Boolean = {
         val i = new Comparable[UInt]() {
-            public def compareTo(UInt) = 0n;
+            public def compareTo(UInt) = 0;
         };
-        val ir = i.compareTo(1UN);
+        val ir = i.compareTo(1U);
         val c = new C[UInt]();
-        val cr = c.compareTo(2UN);
+        val cr = c.compareTo(2U);
         return true;
     }
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String](1)) {
         new JavaComparable1().execute();
     }
 }

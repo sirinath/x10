@@ -10,14 +10,13 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.Region;
 
 /**
  * Check that a float literal can be cast as float.
  */
 public class MacroConstraint extends x10Test {
 	public def run()  {
-	    val v:Any = Region.make(0,5);
+	    val v:Any = (0..5) as Region;
 	    var result:boolean=true;
 	    val c = v instanceof Region(1);
 	    if (!c) {
@@ -44,7 +43,7 @@ public class MacroConstraint extends x10Test {
 	    return result;
 	}
 
-	public static def main(args: Rail[String]) {
+	public static def main(args: Array[String](1)) {
 		new MacroConstraint().execute();
 	}
 

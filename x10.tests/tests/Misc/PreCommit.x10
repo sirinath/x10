@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 public class PreCommit extends x10Test {
 
@@ -42,7 +41,7 @@ public class PreCommit extends x10Test {
         ct.quiet = true;
         result &= myExecute(ct);
         result &= myExecute(new ClosureTypeParameters1b());
-        result &= myExecute(new DepType(3n,9n));
+        result &= myExecute(new DepType(3,9));
         result &= myExecute(new BlockDistWithPlaceGroup());
         result &= myExecute(new ForLoop3());
         result &= myExecute(new Generics2());
@@ -96,7 +95,7 @@ public class PreCommit extends x10Test {
         return passed;
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 	new PreCommit().execute();
     }
 }

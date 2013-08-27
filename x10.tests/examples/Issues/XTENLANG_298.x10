@@ -18,11 +18,11 @@ import harness.x10Test;
 class XTENLANG_298 extends x10Test {
 
     
-    static class C(p:long) {
+    static class C(p:int) {
     	// The new initialization semantics guarantee that all properties
         // will be initialized before all the fields.
         val q=p; 
-        def this(p:long) {
+        def this(p:int) {
         	property(p);
         }
     }
@@ -34,7 +34,7 @@ class XTENLANG_298 extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_298().execute();
     }
 }

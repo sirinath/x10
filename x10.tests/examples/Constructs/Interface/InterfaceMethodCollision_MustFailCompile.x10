@@ -28,7 +28,7 @@ public class InterfaceMethodCollision_MustFailCompile extends x10Test {
 
   static @ERR interface IGloom extends IDoom, IBloom {} 
 
-  public static def main(Rail[String]) {
+  public static def main(Array[String]) {
     new InterfaceMethodCollision_MustFailCompile().execute();
   }
 }

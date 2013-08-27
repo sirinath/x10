@@ -5,25 +5,32 @@
  *  (C) Copyright Australian National University 2011.
  */
 
-import x10.compiler.Ifndef;
+import x10.io.Console;
 
 import x10.matrix.Matrix;
 import x10.matrix.Vector;
 import x10.matrix.distblock.DistVector;
 
+/**
+   <p>
+
+   <p>
+ */
 public class TestDistVector{
 
-    public static def main(args:Rail[String]) {
-		val n = (args.size > 0) ? Long.parse(args(0)):4;
+    public static def main(args:Array[String](1)) {
+		val n = (args.size > 0) ? Int.parse(args(0)):4;
 		val testcase = new DistVectorTest(n);
 		testcase.run();
 	}
 }
 
-class DistVectorTest {
-	public val M:Long;
 
-	public def this(m:Long) {
+class DistVectorTest {
+
+	public val M:Int;
+
+	public def this(m:Int) {
 		M = m;
 	}
 
@@ -31,7 +38,7 @@ class DistVectorTest {
 		Console.OUT.println("Starting distributed vector clone/add/sub/scaling tests on "+
 							M + "-vectors");
 		var ret:Boolean = true;
-	@Ifndef("MPI_COMMU") { // TODO Deadlocks!
+ 		// Set the matrix function
 		ret &= (testClone());
 		ret &= (testScale());
 		ret &= (testAdd());
@@ -41,7 +48,7 @@ class DistVectorTest {
 		ret &= (testCellMult());
 		ret &= (testCellDiv());
 		ret &= (testScatterGather());
-    }
+		
 		if (ret)
 			Console.OUT.println("DistVector test passed!");
 		else
@@ -106,10 +113,13 @@ class DistVectorTest {
 		Console.OUT.println("Starting distributed vector add-sub test");
 		val dm = DistVector.make(M).initRandom();
 		val dm1= DistVector.make(M).initRandom();
+		//sp.print("Input:");
 		val dm2= dm  + dm1;
+		//sp2.print("Add result:");
 		//
 		val dm_c  = dm2 - dm1;
 		val ret   = dm.equals(dm_c);
+		//sp_c.print("Another add result:");
 		if (ret)
 			Console.OUT.println("DistVector Add-sub test passed!");
 		else
@@ -121,8 +131,8 @@ class DistVectorTest {
 		Console.OUT.println("Starting distributed vector associative test");
 
 		val a = DistVector.make(M).init(1.0);
-		val b = DistVector.make(M).initRandom(1n, 10n);
-		val c = DistVector.make(M).initRandom(10n, 100n);
+		val b = DistVector.make(M).initRandom(1, 10);
+		val c = DistVector.make(M).initRandom(10, 100);
 		val c1 = a + b + c;
 		val c2 = a + (b + c);
 		val ret = c1.equals(c2);
@@ -152,8 +162,8 @@ class DistVectorTest {
 	public def testCellMult():Boolean {
 		Console.OUT.println("Starting distributed vector cellwise mult test");
 
-		val a = DistVector.make(M).initRandom(1n, 10n);
-		val b = DistVector.make(M).initRandom(10n, 100n);
+		val a = DistVector.make(M).initRandom(1, 10);
+		val b = DistVector.make(M).initRandom(10, 100);
 		val c = (a + b) * a;
 		val d = a * a + b * a;
 		val ret = c.equals(d);
@@ -169,8 +179,11 @@ class DistVectorTest {
 
 		val a = DistVector.make(M).init(1);
 		val b = DistVector.make(M).init(1);
+		//a.print();
 		val c = (a + b) * a;
+		//c.print();
 		val d =  c / (a + b);
+		//d.print();
 		val ret = d.equals(a);
 		if (ret)
 			Console.OUT.println("DistVector cellwise mult-div passed!");
@@ -195,4 +208,6 @@ class DistVectorTest {
 			Console.OUT.println("--------DistVector scatter-gather test failed!--------");
 		return ret;
 	}
-}
+
+	
+ }

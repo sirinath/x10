@@ -21,15 +21,15 @@ import harness.x10Test;
 public class InitStaticField3b extends x10Test {
 
 	static val a = null;
-	static val b = 1n;
+	static val b = 1;
 	static val c = "abc";
         
     static val d = null as Any;
 
-    static val f = 1n as Any;
-    static val g = 1n as Int;
-    static val h = 1n as Comparable[Int];
-    static val i = 1n as Arithmetic[Int];
+    static val f = 1 as Any;
+    static val g = 1 as Int;
+    static val h = 1 as Comparable[Int];
+    static val i = 1 as Arithmetic[Int];
     
     static val j = "abc" as Any;
     static val l = "abc" as String;
@@ -38,13 +38,13 @@ public class InitStaticField3b extends x10Test {
 
     public def run():Boolean {
         chk(a == null);
-        chk(b == 1n);
+        chk(b == 1);
         chk(c.equals("abc"));
         chk(d == null);
-        chk(f == 1n);
-        chk(g == 1n);
-        chk(h == 1n);
-        chk(i == 1n);
+        chk(f == 1);
+        chk(g == 1);
+        chk(h == 1);
+        chk(i == 1);
         chk(j.equals("abc"));
         chk(l.equals("abc"));
         chk(n.equals("abc"));
@@ -52,7 +52,7 @@ public class InitStaticField3b extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new InitStaticField3b().execute();
     }
 

@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Vars60 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Vars60().execute();
     }
 
@@ -29,8 +29,8 @@ public class Vars60 extends x10Test {
 // file Vars line 255
  static class VarsForBears{
 def check() {
-  val immut : Long = 3;
-  var mutab : Long = immut;
+  val immut : Int = 3;
+  var mutab : Int = immut;
   val use = immut + mutab;
 }}
 

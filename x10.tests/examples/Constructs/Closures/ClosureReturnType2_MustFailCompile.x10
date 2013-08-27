@@ -23,7 +23,7 @@ import x10.compiler.tests.*; // err markers
  * @author bdlucas 8/2008
  */
 
-public class ClosureReturnType2_MustFailCompile extends x10Test {
+public class ClosureReturnType2_MustFailCompile extends ClosureTest {
 
     def foo() = {}
 
@@ -32,7 +32,7 @@ public class ClosureReturnType2_MustFailCompile extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureReturnType2_MustFailCompile().execute();
     }
 }

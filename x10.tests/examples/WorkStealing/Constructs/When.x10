@@ -16,7 +16,7 @@ public class When extends x10Test{
     public def run():boolean {
         val b = new BoxedWBoolean();
         var r:Boolean = false;
-        for (1..1000) {
+        for (var i:Int=0; i<1000; i++) {
             finish {
                 async when (b.value);
                 atomic b.value = true;
@@ -28,7 +28,7 @@ public class When extends x10Test{
         return !r;
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
         new When().execute();
     }
 }

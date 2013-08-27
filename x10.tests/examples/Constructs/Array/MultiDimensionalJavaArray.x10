@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  *
@@ -25,9 +24,9 @@ public class MultiDimensionalJavaArray extends x10Test {
     public def run(): boolean = {
         val MIN = 0..99;
         val MAJ = 0..9;
-        val a = new Array[Array[Double](1)](Region.make(MIN), (Point) => new Array[Double](Region.make(MAJ)));
+        val a = new Array[Array[Double](1)](MIN, (Point) => new Array[Double](MAJ));
 
-        for (val [i,j]: Point(2) in Region.make(MIN)*Region.make(MAJ))
+        for (val [i,j]: Point(2) in MIN*MAJ)
             a(i)(j) = (i * j / PI);
 
 	val i = MIN.max/2;
@@ -39,7 +38,7 @@ public class MultiDimensionalJavaArray extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new MultiDimensionalJavaArray().execute();
     }
 }

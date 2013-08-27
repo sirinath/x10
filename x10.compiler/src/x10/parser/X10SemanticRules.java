@@ -794,17 +794,15 @@ public class X10SemanticRules implements Parser, ParseErrorCodes
         end_index = s.length();
 
         boolean isUnsigned = false;
-        boolean isLong = true;
-        long min = Long.MIN_VALUE;
+        long min = Integer.MIN_VALUE;
         while (end_index > 0) {
             char lastCh = s.charAt(end_index - 1);
             if (lastCh == 'u' || lastCh == 'U') isUnsigned = true;
             // todo: long need special treatment cause we have overflows
-            // for signed values that start with 0, we need to make them negative if they are above max value
-            if (lastCh == 'n' || lastCh == 'N') { isLong = false; min = Integer.MIN_VALUE; }
-            if (lastCh == 'y' || lastCh == 'Y') { isLong = false; min = Byte.MIN_VALUE; }
-            if (lastCh == 's' || lastCh == 'S') { isLong = false; min = Short.MIN_VALUE; }
-            if (lastCh != 'y' && lastCh != 'Y' && lastCh != 's' && lastCh != 'S' && lastCh != 'l' && lastCh != 'L' && lastCh != 'n' && lastCh != 'N' && lastCh != 'u' && lastCh != 'U') {
+            if (lastCh == 'l' || lastCh == 'L') isUnsigned = true; // for signed values that start with 0, we need to make them negative if they are above max value
+            if (lastCh == 'y' || lastCh == 'Y') min = Byte.MIN_VALUE;
+            if (lastCh == 's' || lastCh == 'S') min = Short.MIN_VALUE;
+            if (lastCh != 'y' && lastCh != 'Y' && lastCh != 's' && lastCh != 'S' && lastCh != 'l' && lastCh != 'L' && lastCh != 'u' && lastCh != 'U') {
                 break;
             }
             end_index--;
@@ -831,7 +829,7 @@ public class X10SemanticRules implements Parser, ParseErrorCodes
         }
 
         final long res = parseLong(s.substring(start_index, end_index), radix, pos);
-        if (!isUnsigned && !isLong && radix!=10 && res>=max) {
+        if (!isUnsigned && radix!=10 && res>=max) {
             // need to make this value negative
             // e.g., 0xffUY == 255, 0xffY== 255-256 = -1  , 0xfeYU==254, 0xfeY== 254-256 = -2
             return res+min*2;
@@ -2233,7 +2231,7 @@ public class X10SemanticRules implements Parser, ParseErrorCodes
     void rule_LiteralUShort() {
         setIntLit(IntLit.USHORT);
     }
-    // Production: Literal ::= IntLiteral
+    // Production: Literal ::= IntegerLiteral
     void rule_Literal0() {
         setIntLit(IntLit.INT);
     }
@@ -2241,7 +2239,7 @@ public class X10SemanticRules implements Parser, ParseErrorCodes
     void rule_Literal1() {
         setIntLit(IntLit.LONG);
     }
-    // Production: Literal ::= UnsignedIntLiteral
+    // Production: Literal ::= UnsignedIntegerLiteral
     void rule_Literal2() {
         setIntLit(IntLit.UINT);
     }
@@ -3314,7 +3312,6 @@ public class X10SemanticRules implements Parser, ParseErrorCodes
         List<Node> modifiers = checkMethodModifiers(MethodModifiersopt);
         Name opName = X10Binary_c.invBinaryMethodName(BinOp);
         if (opName == null) {
-        	// [DC] doesn't look like this can ever happen?
             syntaxError("Cannot override binary operator '"+BinOp+"'.", pos());
             opName = Name.make("invalid operator");
         }

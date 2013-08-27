@@ -17,8 +17,8 @@ import harness.x10Test;
 
 class XTENLANG_731 extends x10Test {
 
-	class A (x:Long) {
-		def this(x:Long){property(x);}
+	class A (x:Int) {
+		def this(x:Int){property(x);}
 		operator this()=x;
 	}
 
@@ -28,7 +28,7 @@ class XTENLANG_731 extends x10Test {
 	
 	}
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_731().execute();
     }
 }

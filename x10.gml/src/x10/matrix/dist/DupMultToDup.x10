@@ -11,6 +11,7 @@
 
 package x10.matrix.dist;
 
+import x10.io.Console;
 import x10.util.Timer;
 //
 import x10.matrix.MathTool;
@@ -29,9 +30,9 @@ import x10.matrix.blas.DenseMatrixBLAS;
 
 public class DupMultToDup {
 
-
+	//====================================================================
 	// Multiplication operations 
-
+	//====================================================================
 
 	/**
 	 * Multiplication method. All copies are updated.
@@ -45,7 +46,7 @@ public class DupMultToDup {
 		Debug.assure(C.M==A.M&&A.N==B.M&&B.N==C.N);
 		/* Timing */ val st= Timer.milliTime();
 		val dms = C.dupMs;
-		finish ateach(val [p]:Point in dms.dist) {
+		finish ateach (val [p]:Point in dms.dist) {
 			val mA = A.local();
 			val mB = B.local();
 			val mC = C.local();
@@ -70,7 +71,7 @@ public class DupMultToDup {
 		return C;
 	}
 
-
+	//------------------------------
 	/**
 	 * Multiplication method by using BLAS driver.All copies are updated
 	 */
@@ -99,11 +100,11 @@ public class DupMultToDup {
 		comp(A, B, C, false);
 		return C;
 	}
+	//--------------------------------
 
-
-
+	//-------------
 	// Transposed A
-
+	//-------------
 	/**
 	 * Multiplication method. All copies are updated.
 	 */
@@ -116,7 +117,7 @@ public class DupMultToDup {
 				
 		Debug.assure(C.M==A.N&&A.M==B.M&&B.N==C.N);
 		/* Timing */ val st= Timer.milliTime();
-		finish ateach(val [p]:Point in C.dupMs.dist) {
+		finish ateach (val [p]:Point in C.dupMs.dist) {
 			val mA = A.local();
 			val mB = B.local();
 			val mC = C.local();
@@ -140,6 +141,7 @@ public class DupMultToDup {
 		return C;
 	}
 
+	//------------------------------
 	/**
 	 * Multiplication method by using BLAS driver.All copies are updated
 	 */
@@ -170,12 +172,12 @@ public class DupMultToDup {
 		return C;
 	}
 
-
+	//--------------------------------
 	
 	
-
+	//-------------
 	// Transposed B
-
+	//-------------
 
 	/**
 	 * Multiplication method. All copies are updated.
@@ -189,7 +191,7 @@ public class DupMultToDup {
 				
 		Debug.assure(C.M==A.M&&A.N==B.N&&B.M==C.N);
 		/* Timing */ val st= Timer.milliTime();
-		finish ateach(val [p]:Point in C.dupMs.dist) {
+		finish ateach (val [p]:Point in C.dupMs.dist) {
 			val mA = A.local();
 			val mB = B.local();
 			val mC = C.local();
@@ -214,7 +216,7 @@ public class DupMultToDup {
 		return C;
 	}
 
-
+	//------------------------------
 	/**
 	 * Multiplication method by using BLAS driver. All copies are updated
 	 */
@@ -243,5 +245,5 @@ public class DupMultToDup {
 		compMultTrans(A, B, C, false);
 		return C;
 	}
-
+	//--------------------------------
 }

@@ -26,10 +26,10 @@ public class MultiAsyncs extends x10Test{
 		}
 
 		Console.OUT.println("MultiAsyncs: value = " + this.value);
-		return value == 3n;
+		return value == 3;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
         new MultiAsyncs().execute();
 	}
 }

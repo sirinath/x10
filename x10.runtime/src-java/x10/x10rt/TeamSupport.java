@@ -10,7 +10,7 @@
  */
 package x10.x10rt;
 
-import x10.core.Rail;
+import x10.core.IndexedMemoryChunk;
 import x10.lang.FinishState;
 import x10.lang.Place;
 
@@ -26,7 +26,7 @@ public class TeamSupport {
     private static final int RED_TYPE_DOUBLE = 8;
     private static final int RED_TYPE_FLOAT = 9;
     
-    private static int getTypeCode(Rail<?> chunk) {
+    private static int getTypeCode(IndexedMemoryChunk<?> chunk) {
         Object chunkRaw = chunk.getBackingArray();
         int typeCode = 0;
         if (chunkRaw instanceof byte[]) {
@@ -42,7 +42,7 @@ public class TeamSupport {
         } else if (chunkRaw instanceof float[]) {
             typeCode = RED_TYPE_FLOAT;
         } else {
-            throw new java.lang.UnsupportedOperationException("Unsupported type of src array "+chunk.$getParam(0).typeName()+" in nativeAllReduce");
+            throw new java.lang.UnsupportedOperationException("Unsupported type of src array "+chunk.T.typeName()+" in nativeAllReduce");
         }
         return typeCode;
     }
@@ -52,9 +52,13 @@ public class TeamSupport {
         throw new java.lang.UnsupportedOperationException("About to die in " + methodName);
     }
 
-    public static void nativeMake(Rail<x10.core.Int> places, int count, Rail<x10.core.Int> result) {
+    public static void nativeMake(IndexedMemoryChunk<Place> places, int count, IndexedMemoryChunk<x10.core.Int> result) {
         if (!X10RT.forceSinglePlace) {
-        int[] int_places = places.getIntArray();
+        Place[] np = (Place[])places.getBackingArray();
+        int[] int_places = new int[np.length];
+        for (int i=0; i<places.length; i++) {
+            int_places[i] = np[i].id;
+        }
         int[] nr = result.getIntArray();
 
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
@@ -94,8 +98,8 @@ public class TeamSupport {
         }
     }
         
-    public static void nativeScatter(int id, int role, int root, Rail<?> src, int src_off, 
-                                     Rail<?> dst, int dst_off, int count) {
+    public static void nativeScatter(int id, int role, int root, IndexedMemoryChunk<?> src, int src_off, 
+                                     IndexedMemoryChunk<?> dst, int dst_off, int count) {
         if (!X10RT.forceSinglePlace) {
         Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
@@ -113,8 +117,8 @@ public class TeamSupport {
         }
     }
         
-    public static void nativeBcast(int id, int role, int root, Rail<?> src, int src_off, 
-                                   Rail<?> dst, int dst_off, int count) {
+    public static void nativeBcast(int id, int role, int root, IndexedMemoryChunk<?> src, int src_off, 
+                                   IndexedMemoryChunk<?> dst, int dst_off, int count) {
         if (!X10RT.forceSinglePlace) {
         Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
@@ -132,8 +136,8 @@ public class TeamSupport {
         }
     }
     
-    public static void nativeAllToAll(int id, int role, Rail<?> src, int src_off, 
-                                      Rail<?> dst, int dst_off, int count) {
+    public static void nativeAllToAll(int id, int role, IndexedMemoryChunk<?> src, int src_off, 
+                                      IndexedMemoryChunk<?> dst, int dst_off, int count) {
         if (!X10RT.forceSinglePlace) {
         Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
@@ -150,28 +154,9 @@ public class TeamSupport {
         }
         }
     }
-
-    public static void nativeReduce(int id, int role, int root, Rail<?> src, int src_off, 
-                                       Rail<?> dst, int dst_off, int count, int op) {
-        if (!X10RT.forceSinglePlace) {
-        Object srcRaw = src.getBackingArray();
-        Object dstRaw = dst.getBackingArray();
-        
-        int typeCode = getTypeCode(src);
-        assert getTypeCode(dst) == typeCode : "Incompatible src and dst arrays";
-        
-        FinishState fs = ActivityManagement.activityCreationBookkeeping();
-
-        try {
-            nativeReduceImpl(id, role, root, srcRaw, src_off, dstRaw, dst_off, count, op, typeCode, fs);
-        } catch (UnsatisfiedLinkError e) {
-            aboutToDie("nativeReduce");
-        }
-        }
-    }
     
-    public static void nativeAllReduce(int id, int role, Rail<?> src, int src_off, 
-                                       Rail<?> dst, int dst_off, int count, int op) {
+    public static void nativeAllReduce(int id, int role, IndexedMemoryChunk<?> src, int src_off, 
+                                       IndexedMemoryChunk<?> dst, int dst_off, int count, int op) {
         if (!X10RT.forceSinglePlace) {
         Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
@@ -189,8 +174,8 @@ public class TeamSupport {
         }
     }
 
-    public static void nativeIndexOfMax(int id, int role, Rail<?> src,
-                                        Rail<?> dst) {
+    public static void nativeIndexOfMax(int id, int role, IndexedMemoryChunk<?> src,
+                                        IndexedMemoryChunk<?> dst) {
         if (!X10RT.forceSinglePlace) {
         double v = ((x10.util.Team.DoubleIdx[])src.getBackingArray())[0].value;
         double[] value = new double[] { v };
@@ -213,8 +198,8 @@ public class TeamSupport {
         }
     }
 
-    public static void nativeIndexOfMin(int id, int role, Rail<?> src,
-                                        Rail<?> dst) {
+    public static void nativeIndexOfMin(int id, int role, IndexedMemoryChunk<?> src,
+                                        IndexedMemoryChunk<?> dst) {
         if (!X10RT.forceSinglePlace) {
         double v = ((x10.util.Team.DoubleIdx[])src.getBackingArray())[0].value;
         double[] value = new double[] { v };
@@ -237,7 +222,7 @@ public class TeamSupport {
         }
     }
 
-    public static void nativeSplit(int id, int role, int color, int new_role, Rail<x10.core.Int> result) {
+    public static void nativeSplit(int id, int role, int color, int new_role, IndexedMemoryChunk<x10.core.Int> result) {
         if (!X10RT.forceSinglePlace) {
         int[] nr = result.getIntArray();
 
@@ -280,11 +265,7 @@ public class TeamSupport {
     private static native void nativeAllToAllImpl(int id, int role, Object srcRaw, int src_off, 
                                                   Object dstRaw, int dst_off,
                                                   int count, int typecode, FinishState fs);
-
-    private static native void nativeReduceImpl(int id, int role, int root, Object srcRaw, int src_off, 
-                                                   Object dstRaw, int dst_off,
-                                                   int count, int op, int typecode, FinishState fs);
-
+    
     private static native void nativeAllReduceImpl(int id, int role, Object srcRaw, int src_off, 
                                                    Object dstRaw, int dst_off,
                                                    int count, int op, int typecode, FinishState fs);

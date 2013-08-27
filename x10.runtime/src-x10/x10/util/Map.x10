@@ -12,7 +12,7 @@
 package x10.util;
 
 public interface Map[K,V]   {
-	public def containsKey(k: K): Boolean;
+	public def containsKey(k: K): boolean;
 
 	public def get(k: K): Box[V];
 
@@ -30,8 +30,6 @@ public interface Map[K,V]   {
 	
 	public def entries(): Set[Entry[K,V]];
 	
-	public def size(): Long;
-
 	public static interface Entry[Key,Val] {
 	    public def getKey(): Key;
 	    public def getValue(): Val;

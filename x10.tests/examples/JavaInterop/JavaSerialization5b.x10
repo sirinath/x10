@@ -16,27 +16,27 @@ import harness.x10Test;
 public class JavaSerialization5b extends x10Test {
 
     static class C1 {
-        val v = 1n;
+        val v = 1;
     }
 
     static class C2 {
-        val v:Any = 1n;
+        val v:Any = 1;
     }
 
     static class C3 {
-        val v = 1un;
+        val v = 1u;
     }
 
     static class C4 {
-        val v:Any = 1un;
+        val v:Any = 1u;
     }
 
     static class C5 {
-        val v = new java.lang.Integer(1n);
+        val v = new java.lang.Integer(1);
     }
 
     static class C6 {
-        val v:Any = new java.lang.Integer(1n);
+        val v:Any = new java.lang.Integer(1);
     }
 
     static def test1():void {
@@ -44,7 +44,7 @@ public class JavaSerialization5b extends x10Test {
         at (here.next()) {
             val v = c.v;
             chk("x10.lang.Int".equals(v.typeName()));
-            chk(v == 1n);
+            chk(v == 1);
         }
     }
 
@@ -53,7 +53,7 @@ public class JavaSerialization5b extends x10Test {
         at (here.next()) {
             val v = c.v;
             chk("x10.lang.Int".equals(v.typeName()));
-            chk(v == 1n);
+            chk(v == 1);
         }
     }
 
@@ -62,7 +62,7 @@ public class JavaSerialization5b extends x10Test {
         at (here.next()) {
             val v = c.v;
             chk("x10.lang.UInt".equals(v.typeName()));
-            chk(v == 1un);
+            chk(v == 1u);
         }
     }
 
@@ -71,7 +71,7 @@ public class JavaSerialization5b extends x10Test {
         at (here.next()) {
             val v = c.v;
             chk("x10.lang.UInt".equals(v.typeName()));
-            chk(v == 1un);
+            chk(v == 1u);
         }
     }
 
@@ -80,7 +80,7 @@ public class JavaSerialization5b extends x10Test {
         at (here.next()) {
             val v = c.v;
             chk("java.lang.Integer".equals(v.typeName()));
-            chk(v.equals(java.lang.Integer.valueOf(1n)));
+            chk(v.equals(java.lang.Integer.valueOf(1)));
         }
     }
 
@@ -89,7 +89,7 @@ public class JavaSerialization5b extends x10Test {
         at (here.next()) {
             val v = c.v;
             chk("java.lang.Integer".equals(v.typeName()));
-            chk(v.equals(java.lang.Integer.valueOf(1n)));
+            chk(v.equals(java.lang.Integer.valueOf(1)));
         }
     }
 
@@ -103,7 +103,7 @@ public class JavaSerialization5b extends x10Test {
         return true;
     }
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String](1)) {
         new JavaSerialization5b().execute();
     }
 

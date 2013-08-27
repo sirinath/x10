@@ -19,24 +19,24 @@ import harness.x10Test;
  */
 public class AsyncTest6 extends x10Test {
 
-    public static N: long = 20;
+    public static N: int = 20;
 
     public def run(): boolean = {
-        var s: long = 0;
-        for (i in 0..(N-1)) {
+        var s: int = 0;
+        for (var i: int = 0; i < N; i++) {
             finish async x10.io.Console.OUT.println("s="+s+" i="+i);
             s += i;
         }
 	chk(s == 190);
 
-        val y: long;
+        val y: int;
         finish async { async y = 3; }
         x10.io.Console.OUT.println("y="+y);
 	chk(y == 3);
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new AsyncTest6().execute();
     }
 }

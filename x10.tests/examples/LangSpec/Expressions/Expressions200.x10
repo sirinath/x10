@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Expressions200 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions200().execute();
     }
 
 
-// file Expressions line 1515
+// file Expressions line 1528
 
  static class Expressions32TestExp{
   def check()  = 54.321 as Int;  }

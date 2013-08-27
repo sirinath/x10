@@ -11,20 +11,18 @@
 
 package x10.x10rt;
 
-import x10.lang.GlobalRail;
-import x10.x10rt.SocketTransport.RETURNCODE;
-
 public class X10RT {
-    enum State { UNINITIALIZED, INITIALIZED, RUNNING, TEARING_DOWN, TORN_DOWN };
+    private enum State { UNINITIALIZED, INITIALIZED, RUNNING, TEARING_DOWN, TORN_DOWN };
 
-    static State state = State.UNINITIALIZED;
-    static int here;
-    static int numPlaces;
+    private static State state = State.UNINITIALIZED;
+    private static int here;
+    private static int numPlaces;
     static boolean forceSinglePlace = false;
-    public static SocketTransport javaSockets = null;
     
     public static boolean X10_EXITING_NORMALLY = false;
+
     static final boolean REPORT_UNCAUGHT_USER_EXCEPTIONS = true;
+    
     public static final boolean VERBOSE = false;
     
     /**
@@ -32,13 +30,8 @@ public class X10RT {
      * must be called before any other methods on this class or on any other X10RT 
      * related class can be successfully invoked.
      */
-    public static String init_library(final x10.runtime.impl.java.Runtime mainClass) {
-    	return init_library(mainClass, true);
-    }
-    
-    public static synchronized String init_library(final x10.runtime.impl.java.Runtime mainClass, boolean createThread) {
-    	if (state != State.UNINITIALIZED && 
-    			state != State.TORN_DOWN) return null; // already initialized
+    public static synchronized String init_library() {
+    	if (state != State.UNINITIALIZED) return null;
 
         // load libraries
         String property = System.getProperty("x10.LOAD");
@@ -48,46 +41,10 @@ public class X10RT {
                 System.loadLibrary(libs[i]);
         }
 
-        String libName = System.getProperty("X10RT_IMPL", "sockets");
-        if (libName.equals("disabled"))
+        String libName = System.getProperty("X10RT_IMPL", "x10rt_sockets");
+        if (libName.equals("disabled")) {
             forceSinglePlace = true;
-        else if (libName.equalsIgnoreCase("JavaSockets")) {
-      	  	X10RT.javaSockets = new SocketTransport();
-      	    state = State.INITIALIZED;
-      	    
-      	    // create a thread which can accept configuration connections, and exits once X10 is up
-      	    if (createThread) {
-	     	    new Thread("x10rt internally created worker thread") {
-		  			public void run() {
-		  				while (X10RT.state == x10.x10rt.X10RT.State.INITIALIZED) {
-		  					X10RT.javaSockets.x10rt_probe(true, 500);
-		  				}
-		  				// place 0 takes over the worker thread that called connect_library(..), but other
-		  				// places need a worker thread.  This becomes that worker thread.
-		  				if (X10RT.javaSockets.x10rt_here() > 0) {
-			  				x10.lang.Runtime.get$staticMonitor();
-			  				x10.lang.Runtime.get$STRICT_FINISH();
-			  				x10.lang.Runtime.get$NTHREADS();
-			  				x10.lang.Runtime.get$MAX_THREADS();
-			  				x10.lang.Runtime.get$STATIC_THREADS();
-			  				x10.lang.Runtime.get$WARN_ON_THREAD_CREATION();
-			  				x10.lang.Runtime.get$BUSY_WAITING();
-			  		        
-			  				// start and join main x10 thread
-			  				x10.lang.Runtime.Worker worker = new x10.lang.Runtime.Worker(0);
-			  				worker.body = mainClass;
-			  				worker.start();
-			  				try {
-			  					worker.join();
-			  				} catch (InterruptedException e) {}
-		  				}
-		  			}
-		  		}.start();
-      	    }      	    
-      	  	return X10RT.javaSockets.getLocalConnectionInfo();
-        }
-        else {
-            libName = "x10rt_" + libName;
+        } else {
             try {
                 System.loadLibrary(libName);
             } catch (UnsatisfiedLinkError e) {
@@ -124,75 +81,27 @@ public class X10RT {
      * myPlace is which place this runtime is in the whole computation.
      * connectionInfo is an array the size of nplaces, and contains the connection string for each
      * remote place.  The connection string for myPlace may be null.
-     * 
-     * This method returns true if the runtime was successfully initialized.
-     * If false is returned, the caller should call this method again until true is returned.
      */
-    public static synchronized boolean connect_library(int myPlace, String[] connectionInfo, boolean remoteStart) {
-    	if (state != State.INITIALIZED) return true; // already initialized
-
-        X10RT.here = myPlace;
-        if (connectionInfo == null)
-        	numPlaces = 1;
-        else
-        	numPlaces = connectionInfo.length;
-    
-    	int errcode;
-    	if (X10RT.javaSockets != null)
-    		errcode = X10RT.javaSockets.establishLinks(myPlace, connectionInfo, remoteStart);
-    	else {
-    		errcode = x10rt_init(myPlace, connectionInfo);
-    		TeamSupport.initialize();
-    	}
-        if (errcode != 0) {
-            System.err.println("Failed to initialize X10RT.");
-            x10rt_finalize();
-            return false;
-        }
+    public static synchronized void connect_library(int myPlace, String[] connectionInfo) {
+    	if (state != State.INITIALIZED) return;
+    	x10rt_init(0, null); // TODO: fill in properly, using the arguments
+        TeamSupport.initialize();
+        here = myPlace;
+        numPlaces = connectionInfo.length;
         x10.runtime.impl.java.Runtime.MAX_PLACES = numPlaces;
         state = State.RUNNING;
-        return true;
     }
 
     
-    /*
-     * This method returns true if the runtime was successfully initialized.
-     * If false is returned, the caller should call this method again until true is returned.
-     */
-    public static synchronized boolean init() {
-      if (state != State.UNINITIALIZED) return true; // already initialized
+    public static synchronized void init() {
+      if (state != State.UNINITIALIZED) return;
 
-      String libName = System.getProperty("X10RT_IMPL", "sockets");
+      String libName = System.getProperty("X10RT_IMPL", "x10rt_sockets");
       if (libName.equals("disabled")) {
           forceSinglePlace = true;
-      } 
-      else if (libName.equalsIgnoreCase("JavaSockets")) {
-    	  X10RT.javaSockets = new SocketTransport();
-    	  int ret = X10RT.javaSockets.establishLinks();
-    	  if (ret != RETURNCODE.X10RT_ERR_OK.ordinal()) {
-    		  forceSinglePlace = true;
-    		  System.err.println("Unable to establish links!  errorcode: "+ret+". Forcing single place execution");
-    	  }
-    	  else {
-    		  here = X10RT.javaSockets.x10rt_here();
-    		  numPlaces = X10RT.javaSockets.x10rt_nplaces();
-    	  }
-      }
-      else {
-          libName = "x10rt_" + libName;
+      } else {
           try {
               System.loadLibrary(libName);
-              int err = x10rt_init(0, null);
-              if (err != 0) {
-//                  System.err.println("Failed to initialize X10RT.");
-                  x10rt_finalize();
-                  return false;
-              }
-
-              TeamSupport.initialize();
-
-              here = x10rt_here();
-              numPlaces = x10rt_nplaces();
           } catch (UnsatisfiedLinkError e) {
               System.err.println("Unable to load "+libName+". Forcing single place execution");
               forceSinglePlace = true;
@@ -202,8 +111,20 @@ public class X10RT {
       if (forceSinglePlace) {
           here = 0;
           numPlaces = 1;
-      }
-      else {
+      } else {
+          // TODO: For now we are not trying to plumb the command line arguments from
+          //       the program's main method into X10RT.  We really can't easily do this
+          //       until we change this code to be run via an explicit static method in
+          //       X10RT instead of doing it in the class initializer.  
+    	  // bherta: fix in progress, via the init_library() and connect_library() methods above
+
+          x10rt_init(0, null);
+
+          TeamSupport.initialize();
+
+          here = x10rt_here();
+          numPlaces = x10rt_nplaces();
+
           // Add a shutdown hook to automatically teardown X10RT as part of JVM teardown
           Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
               public void run() {
@@ -211,10 +132,7 @@ public class X10RT {
                       state = State.TEARING_DOWN;
                       if (X10_EXITING_NORMALLY) {
                           if (VERBOSE) System.err.println("Normal exit; x10rt_finalize called");
-                          if (javaSockets != null)
-                        	  javaSockets.shutdown();
-                          else
-                        	  x10rt_finalize();
+                          x10rt_finalize();
                           if (VERBOSE) System.err.println("Normal exit; x10rt_finalize returned");
                       } else {
                           if (VERBOSE) System.err.println("Abnormal exit; skipping call to x10rt_finalize");
@@ -227,34 +145,23 @@ public class X10RT {
       }
       x10.runtime.impl.java.Runtime.MAX_PLACES = numPlaces;
       state = State.RUNNING;
-      return true;
     }
 
     /**
      * This is a non-blocking call.
      * Checks network for incoming messages and returns.
      */
-    public static int probe() {
+    public static void probe() {
         assert isBooted();
-        if (javaSockets != null)
-        	return javaSockets.x10rt_probe();
-        else if (!forceSinglePlace)
-        	return x10rt_probe();
-        else
-        	return 0;
+        if (!forceSinglePlace) x10rt_probe();
     }
 
     /**
      * This is a blocking call.
      */
-    public static int blockingProbe() {
+    public static void blockingProbe() {
         assert isBooted();
-        if (javaSockets != null)
-        	return javaSockets.x10rt_blocking_probe();
-        else if (!forceSinglePlace)
-        	return x10rt_blocking_probe();
-        else 
-        	return 0;
+        if (!forceSinglePlace) x10rt_blocking_probe();
     }
 
     /**
@@ -275,44 +182,6 @@ public class X10RT {
       return numPlaces;
     }
 
-    /**
-     * Return the number of dead places.
-     * @return the number of dead places.
-     */
-    public static int numDead() {
-    	assert isBooted();
-    	if (javaSockets != null) 
-    		return javaSockets.numDead();
-    	else if (!forceSinglePlace) 
-    		return x10rt_ndead();
-    	else
-    		return 0;
-    }
-
-    /**
-     * Returns true if the place is dead.
-     * @return true if the place is dead.
-     */
-    public static boolean isPlaceDead(int place) {
-    	assert isBooted();
-    	if (javaSockets != null) 
-    		return javaSockets.isPlaceDead(place);
-    	else if (!forceSinglePlace) 
-    		return x10rt_is_place_dead(place);
-    	else
-    		return false;
-    }
-
-    public static boolean supportsCollectives() {
-        assert isBooted();
-        if (forceSinglePlace || javaSockets != null)
-        	return false;
-        else
-        	// at this point, the emulated collectives are still available in native code.
-        	// TODO: benchmark emulated collectives in X10 vs native, and drop native if it's slower.
-        	return true;
-      }
-
     static boolean isBooted() {
       return state.compareTo(State.RUNNING) >= 0;
     }
@@ -321,56 +190,7 @@ public class X10RT {
      * To be called once XRX is ready to process incoming asyncs.
      */
     public static void registration_complete() {
-        if (!forceSinglePlace && javaSockets == null)
-        	x10rt_registration_complete();
-    }
-    
-    public static void registerHandlers() {
-    	if (!forceSinglePlace && javaSockets == null)
-    		x10.x10rt.MessageHandlers.registerHandlers();
-    }
-    
-    // library-mode alternative to the shutdown hook in init()
-    public static synchronized int disconnect() {
-    	state = State.TEARING_DOWN;
-    	int ret = 0;
-    	if (javaSockets != null)
-    		ret = javaSockets.shutdown();
-    	else
-    		ret = x10rt_finalize();
-    	state = State.TORN_DOWN;
-    	return ret;
-    }
-    
-    /*
-     * Support for remote operations
-     */
-    public static void remoteAdd(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteAdd not implemented for Managed X10");
-    }
-    public static void remoteAdd__1$u(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteAdd not implemented for Managed X10");
-    }
-
-    public static void remoteAnd(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteAnd not implemented for Managed X10");
-    }
-    public static void remoteAnd__1$u(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteAnd not implemented for Managed X10");
-    }
-
-    public static void remoteOr(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteOr not implemented for Managed X10");
-    }
-    public static void remoteOr__1$u(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteOr not implemented for Managed X10");
-    }
-
-    public static void remoteXor(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteXor not implemented for Managed X10");
-    }
-    public static void remoteXor__1$u(GlobalRail target, long idx, long val) {
-        throw new UnsupportedOperationException("remoteXor not implemented for Managed X10");
+        if (!forceSinglePlace) x10rt_registration_complete();
     }
 
     /*
@@ -391,10 +211,6 @@ public class X10RT {
      */
     private static native int x10rt_nplaces();
         
-    private static native int x10rt_ndead();
-    
-    private static native boolean x10rt_is_place_dead(int place);
-    
     private static native int x10rt_here();
     
     /*
@@ -402,7 +218,7 @@ public class X10RT {
      * to be exposed at the Java level (as opposed to being used
      * in the native code backing the native methods of MessageHandlers.
      */
-    private static native int x10rt_probe();
+    private static native void x10rt_probe();
     
-    private static native int x10rt_blocking_probe();
+    private static native void x10rt_blocking_probe();
 }

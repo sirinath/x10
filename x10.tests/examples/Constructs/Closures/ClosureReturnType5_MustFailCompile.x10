@@ -19,7 +19,7 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureReturnType5_MustFailCompile extends x10Test {
+public class ClosureReturnType5_MustFailCompile extends ClosureTest {
 
     def x() = 1;
 
@@ -29,7 +29,7 @@ public class ClosureReturnType5_MustFailCompile extends x10Test {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new ClosureReturnType5_MustFailCompile().execute();
     }
 }

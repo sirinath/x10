@@ -14,9 +14,11 @@ import harness.x10Test;
 /**
  * This is to test the collecting finish 
  * should cast the offer parameter
- * 
  * @author Li Yan
+ * 
  */
+
+
 public class CF10 extends x10Test{
 
     static class Blig implements Reducible[Any] {
@@ -40,7 +42,7 @@ public class CF10 extends x10Test{
             return ret;
  
     }
-        public static def main(args: Rail[String]) {
+        public static def main(args: Array[String](1)) {
                 new CF10().execute();
         }
 

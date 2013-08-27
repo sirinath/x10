@@ -21,9 +21,10 @@
 #include <x10/lang/Comparable.h>
 
 namespace x10 {
-    namespace lang {
-    	template<class T> class Rail;
+    namespace array { template<class T> class Array; }
     
+    namespace lang {
+
         class String : public X10Class {
             const char *FMGL(content);
             std::size_t FMGL(content_length);
@@ -66,21 +67,21 @@ namespace x10 {
                 return this_;
             }
 
-            static String* _make(x10::lang::Rail<x10_byte>* rail);
+            static String* _make(x10::array::Array<x10_byte>* array);
 
-            void _constructor(x10::lang::Rail<x10_byte>* rail, x10_int start, x10_int length);
-            static String* _make(x10::lang::Rail<x10_byte>* rail, x10_int start, x10_int length) {
+            void _constructor(x10::array::Array<x10_byte>* array, x10_int start, x10_int length);
+            static String* _make(x10::array::Array<x10_byte>* array, x10_int start, x10_int length) {
                 String* this_ = new (x10aux::alloc<String>()) String();
-                this_->_constructor(rail, start, length);
+                this_->_constructor(array, start, length);
                 return this_;
             }
 
-            static String* _make(x10::lang::Rail<x10_char>* rail);
+            static String* _make(x10::array::Array<x10_char>* array);
             
-            void _constructor(x10::lang::Rail<x10_char>* rail, x10_int start, x10_int length);
-            static String* _make(x10::lang::Rail<x10_char>* rail, x10_int start, x10_int length) {
+            void _constructor(x10::array::Array<x10_char>* array, x10_int start, x10_int length);
+            static String* _make(x10::array::Array<x10_char>* array, x10_int start, x10_int length) {
                 String* this_ = new (x10aux::alloc<String>()) String();
-                this_->_constructor(rail, start, length);
+                this_->_constructor(array, start, length);
                 return this_;
             }
 
@@ -128,9 +129,9 @@ namespace x10 {
             
             x10_char charAt(x10_int i);
 
-            x10::lang::Rail<x10_char>* chars();
+            x10::array::Array<x10_char>* chars();
 
-            x10::lang::Rail<x10_byte>* bytes();
+            x10::array::Array<x10_byte>* bytes();
 
             static const x10aux::serialization_id_t _serialization_id;
 
@@ -144,7 +145,7 @@ namespace x10 {
 
             virtual void _destructor();
 
-            static String* format(String* format, x10::lang::Rail<Any*>* parms);
+            static String* format(String* format, x10::array::Array<Any*>* parms);
 
             virtual x10_boolean equals(x10::lang::Any* p0);
 

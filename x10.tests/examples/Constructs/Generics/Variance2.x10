@@ -35,7 +35,7 @@ public class Variance2 extends x10Test {
                 return gx == ga && x == a;
         }
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new Variance2().execute();
 	}
 }

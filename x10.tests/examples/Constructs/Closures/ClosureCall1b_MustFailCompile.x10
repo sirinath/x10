@@ -1,3 +1,4 @@
+
 /*
  *  This file is part of the X10 project (http://x10-lang.org).
  *
@@ -37,13 +38,13 @@ public class ClosureCall1b_MustFailCompile extends x10Test {
     public def run(): boolean = {
 	val v = [T](t:T){T<:X} => t.name;
         val y = v(new Y());
-	chk(y.equals("Y"), "Y expected, obtained " + y);
+	assert y.equals("Y") : "Y expected, obtained " + y;
         val z = v(new Z());
-	chk(z.equals("Z"), "Z expected, obtained " + z);
-        return true;
+	assert z.equals("Z") : "Z expected, obtained " + z;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureCall1b_MustFailCompile().execute();
     }
 }

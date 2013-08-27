@@ -17,16 +17,16 @@
 
 import harness.x10Test;
 
-import x10.regionarray.*;
+
 
 public class Arrays510 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays510().execute();
     }
 
 
-// file Arrays line 807
+// file Arrays line 810
  static  class Example {
 def oneWayToReduce[T](a:Array[T], f:(T,T)=>T, unit:T):T {
   var r : T = unit;

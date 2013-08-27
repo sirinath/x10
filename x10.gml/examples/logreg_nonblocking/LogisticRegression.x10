@@ -6,6 +6,7 @@
 
 package logreg;
 
+import x10.io.Console;
 import x10.util.Timer;
 //
 import x10.matrix.Debug;
@@ -43,7 +44,7 @@ public class LogisticRegression {
 	//w = Rand(rows=D, cols=1, min=0.0, max=0.0);
 	val w:DenseMatrix(X.N,1);
 	
-
+	//==========================================
 	val prt_y:Grid; 
 	val dup_w:DupDenseMatrix(X.N, 1); 
 	//val dup_w_:DupDenseMatrix(X.N, 1); 
@@ -55,7 +56,7 @@ public class LogisticRegression {
 	val prt_ty:Grid;
 	val dst_ty:DistDenseMatrix(1, X.M);
 	
-
+	//===========================================
 	val eta0 = 0.0;
 	val eta1 = 0.25;
 	val eta2 = 0.75;
@@ -63,7 +64,7 @@ public class LogisticRegression {
 	val sigma2 = 0.5;
 	val sigma3 = 4.0;
 	val psi = 0.1; 	
-
+	//=============================================
 	public var paraRunTime:Long=0;
 	public var commUseTime:Long=0;
 	
@@ -280,7 +281,7 @@ public class LogisticRegression {
 		commUseTime += dup_w.getCommTime()+dst_y.getCommTime();
 	}
 	
-
+	//=======================================================
 	
 	private def compute_XmultB(result:DenseMatrix(X.M, 1), opB:DenseMatrix(X.N, 1)):void {
 		//o = X %*% w

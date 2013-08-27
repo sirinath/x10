@@ -27,12 +27,12 @@ public final class AtomicBoolean {
     private @Volatile var value:Int;
     
     public def this():AtomicBoolean {
-        value = 0n;
+        value = 0;
         // Memory model: acts like store of volatile field
         Fences.storeLoadBarrier();
     }
     public def this(v:Boolean):AtomicBoolean {
-        value = v ? 1n : 0n;
+        value = v ? 1 : 0;
         // Memory model: acts like store of volatile field
         Fences.storeLoadBarrier();
     }
@@ -42,12 +42,12 @@ public final class AtomicBoolean {
       // Memory model: acts like read of volatile field;
       Fences.loadStoreBarrier();
       Fences.storeLoadBarrier();
-      return value == 1n;
+      return value == 1;
    }
 
     @Native("java", "#this.set(#v)")
     public def set(v:Boolean):void {
-        value = v ? 1n : 0n;
+        value = v ? 1 : 0;
         // Memory model: acts like store of volatile field
         Fences.storeLoadBarrier();
     }

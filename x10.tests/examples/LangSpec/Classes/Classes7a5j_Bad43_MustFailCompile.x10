@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Classes7a5j_Bad43_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes7a5j_Bad43_MustFailCompile().execute();
     }
 
@@ -30,12 +30,12 @@ public class Classes7a5j_Bad43_MustFailCompile extends x10Test {
  // If example4() compiles, then the limitation in Classes7a5j_Bad43_MustFailCompile's section is
  // gone, so delete the whole subsection from the spec.
  static class Cls {
-  property concrete(a:Long) = 7;
+  property concrete(a:Int) = 7;
 }
  static interface Inf {
-  property nullary(): Long;
-  property topLevel(z:Long):Boolean;
-  property allThree(z:Long):Long;
+  property nullary(): Int;
+  property topLevel(z:Int):Boolean;
+  property allThree(z:Int):Int;
 }
  static class Example{
   def example1(Cls{self.concrete(3)==7}) = 1;

@@ -23,11 +23,11 @@ public class NewForStruct extends x10Test {
     }
 
     public def run() {
-        val m : Metajamjirrox  = new Metajamjirrox(1n);
+        val m : Metajamjirrox  = new Metajamjirrox(1);
     	return true;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
 	new NewForStruct().execute();
     }
 }

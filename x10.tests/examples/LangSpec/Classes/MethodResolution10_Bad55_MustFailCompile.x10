@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class MethodResolution10_Bad55_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new MethodResolution10_Bad55_MustFailCompile().execute();
     }
 
 
-// file Classes line 3298
+// file Classes line 3297
  // This depends on https://jira.codehaus.org/browse/XTENLANG-2696
  static class Res {
   public static  interface Surface {}
@@ -43,13 +43,13 @@ public class MethodResolution10_Bad55_MustFailCompile extends x10Test {
   public static  class C extends B {}
 
   def m(x:A) = 0;
-  def m(x:Long) = 1;
+  def m(x:Int) = 1;
   def m(x:Boolean) = 2;
   def m(x:Surface) = 3;
   def m(x:Deface) = 4;
 
   def example() {
-     assert m(100) == 1 : "Long";
+     assert m(100) == 1 : "Int";
      assert m(new C()) == 0 : "C";
      // An Ace is a Surface, unambiguous best choice
      assert m(new Ace()) == 3 : "Ace";
@@ -63,7 +63,7 @@ public class MethodResolution10_Bad55_MustFailCompile extends x10Test {
      // Direct matches always win.
      assert m(true) == 2 : "Boolean";
   }
-  public static def main(argv:Rail[String]) {(new Res()).example(); Console.OUT.println("That's all!");}
+  public static def main(argv:Array[String](1)) {(new Res()).example(); Console.OUT.println("That's all!");}
  public def claim() { val ace : Ace = here; assert m(ace)==3; }
  }
  static  class Hook{ def run(){ (new Res()).example(); return true;} }

@@ -23,20 +23,20 @@ public class CovariantOverride extends x10Test {
     }
 
     static class B extends A[UInt] {
-	def f() : Int = 2n;
+	def f() : Int = 2;
 	def g() : String = "efg";
-	def h() : UInt = 3un;
+	def h() : UInt = 3u;
     }
 
     public def run(): boolean = {
 	val b = new B();
-	chk(b.f() == 2n);
+	chk(b.f() == 2);
 	chk(b.g().equals("efg"));
-	chk(b.h() == 3un);
+	chk(b.h() == 3u);
 	return true;
     }
 
-    public static def main(Rail[String]) = {
+    public static def main(Array[String](1)) = {
         new CovariantOverride().execute();
     }
 }

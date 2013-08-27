@@ -17,13 +17,13 @@ import harness.x10Test;
 public class Unsigned4_MustFailCompile extends x10Test {
 
     public def run(): boolean = {
-        var a: int = 0n;
-        var b: uint = 1un;
+        var a: int = 0;
+        var b: uint = 1u;
         val c = a < b; // ShouldNotBeERR (Cannot compare signed versus unsigned values.) ERR (No valid method call found for call in given type.)  
         return c;
     }
 
-    public static def main(Rail[String]) = {
+    public static def main(Array[String](1)) = {
         new Unsigned4_MustFailCompile().execute();
     }
 }

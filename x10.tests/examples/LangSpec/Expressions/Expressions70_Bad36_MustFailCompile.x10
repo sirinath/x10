@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Expressions70_Bad36_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions70_Bad36_MustFailCompile().execute();
     }
 
@@ -29,8 +29,8 @@ public class Expressions70_Bad36_MustFailCompile extends x10Test {
 // file Expressions line 429
  static  class Example {
  static def exasmple() {
-  var x : Long;
-  val y : Long;
+  var x : Int;
+  val y : Int;
   x = 1;
   y = 2; // Correct; initializes y
   x = 3;

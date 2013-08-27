@@ -26,7 +26,7 @@ import harness.x10Test;
  * 9/2009 -- Closures are no longer permitted to take type parameters.
  */
 
-public class ClosureCall0b_MustFailCompile extends x10Test {
+public class ClosureCall0b_MustFailCompile extends ClosureTest {
 
     public def run(): boolean = {
 
@@ -37,7 +37,7 @@ public class ClosureCall0b_MustFailCompile extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureCall0b_MustFailCompile().execute();
     }
 }

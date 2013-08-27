@@ -4,7 +4,7 @@
  *  (C) Copyright IBM Corporation 2012.
  */
 
-import x10.compiler.Ifndef;
+import x10.io.Console;
 
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
@@ -21,21 +21,29 @@ import x10.matrix.distblock.DistBlockMatrix;
 import x10.matrix.distblock.summa.SummaMult;
 import x10.matrix.distblock.summa.SummaMultTrans;
 
+
+/**
+   <p>
+
+   <p>
+ */
 public class TestDistBlockMatrix{
-    public static def main(args:Rail[String]) {
+	
+    public static def main(args:Array[String](1)) {
 		val testcase = new TestRunSumma(args);
 		testcase.run();
 	}
 }
 
 class TestRunSumma {
-	public val M:Long;
-	public val K:Long;
-	public val N:Long;
-	public val bM:Long;
-	public val bN:Long;
+	public val M:Int;
+	public val K:Int;
+	public val N:Int;
+	public val bM:Int;
+	public val bN:Int;
 	public val nzd:Double;
-
+	
+	//-------------
 	//Matrix block partitioning
 	val gA:Grid;
 	val gB:Grid, gTransB:Grid;
@@ -45,12 +53,12 @@ class TestRunSumma {
 	val dB:DistMap, dTransB:DistMap;
 	val dC:DistMap;
 	
-	public def this(args:Rail[String]) {
-		M = args.size > 0 ? Long.parse(args(0)):4;
-		K = args.size > 1 ? Long.parse(args(1)):6;
-		N = args.size > 2 ? Long.parse(args(2)):4;
-		bM = args.size > 3 ? Long.parse(args(3)):2;
-		bN = args.size > 4 ? Long.parse(args(4)):2;
+	public def this(args:Array[String](1)) {
+		M = args.size > 0 ?Int.parse(args(0)):4;
+		K = args.size > 1 ?Int.parse(args(1)):6;
+		N = args.size > 2 ?Int.parse(args(2)):4;
+		bM = args.size > 3 ?Int.parse(args(3)):2;
+		bN = args.size > 4 ?Int.parse(args(4)):2;
 		nzd =  args.size > 5 ?Double.parse(args(5)):1.0;
 		
 		gA = new Grid(M, K, bM, bN);
@@ -69,7 +77,7 @@ class TestRunSumma {
 
     public def run (): void {
 		var ret:Boolean = true;
-	@Ifndef("MPI_COMMU") { // TODO Deadlocks!
+		// Set the matrix function
 		ret &= (testMult());
 		ret &= (testMultTrans());
 		ret &= (testSparseMult());
@@ -83,7 +91,6 @@ class TestRunSumma {
 			Console.OUT.println("Test passed!");
 		else
 			Console.OUT.println("----------------Test failed!----------------");
-    }
 	}
     
 	public def testMult():Boolean {
@@ -92,13 +99,17 @@ class TestRunSumma {
 				M, K, K, N, bM, bN);
 		Console.OUT.printf("distributed in (%dx%d) places\n", gdA.numRowPlaces, gdA.numColPlaces);
 		var ret:Boolean = true;
-		val a = DistBlockMatrix.makeDense(gA, dA).init((r:Long,c:Long)=>1.0*(r+c+1));
-		val b = DistBlockMatrix.makeDense(gB, dB).init((r:Long,c:Long)=>2.0*(r*c+1));
+		val a = DistBlockMatrix.makeDense(gA, dA).init((r:Int,c:Int)=>1.0*(r+c+1));
+		val b = DistBlockMatrix.makeDense(gB, dB).init((r:Int,c:Int)=>2.0*(r*c+1));
 		val c = DistBlockMatrix.makeDense(gC, dC);
 		SummaMult.mult(a, b, c, false);
+		//a.printMatrix();
+		//b.printMatrix();
+		//c.printMatrix();
 		val da= a.toDense() as DenseMatrix(a.M, a.N);
 		val db= b.toDense() as DenseMatrix(a.N, b.N);
 		val dc= da % db;
+		//dc.printMatrix();
 		ret &= dc.equals(c as Matrix(dc.M,dc.N));
 
 		if (ret)
@@ -114,15 +125,18 @@ class TestRunSumma {
 				M, K, K, N, bM, bN);
 		Console.OUT.printf("distributed in (%dx%d) places\n", gdA.numRowPlaces, gdA.numColPlaces);
 		var ret:Boolean = true;
-		val a = DistBlockMatrix.makeSparse(gA, dA, nzd).init((r:Long,c:Long)=>1.0*(r+c));
-		val b = DistBlockMatrix.makeSparse(gB, dB, nzd).init((r:Long,c:Long)=>1.0*(r+c));
+		val a = DistBlockMatrix.makeSparse(gA, dA, nzd).init((r:Int,c:Int)=>1.0*(r+c));
+		val b = DistBlockMatrix.makeSparse(gB, dB, nzd).init((r:Int,c:Int)=>1.0*(r+c));
 		val c = DistBlockMatrix.makeDense(gC, dC);
+		//a.printMatrix("A=");
+		//b.printMatrix("B=");
 		SummaMult.mult(a, b, c, false);
 		Debug.flushln("Done SUMMA mult");
-
+		//c.printMatrix("Summa result:");
 		val da= a.toDense() as DenseMatrix(a.M, a.N);
 		val db= b.toDense() as DenseMatrix(a.N, b.N);
 		val dc= da % db;
+		//dc.printMatrix("Verified result:");
 		ret &= dc.equals(c as Matrix(dc.M,dc.N));
 
 		if (ret)
@@ -183,7 +197,7 @@ class TestRunSumma {
 			Console.OUT.println("--------Distributed sparse block matrix SUMMA multTrans test failed!--------");
 		return ret;
 	}
-
+	//-------------------------------------------------------
 	public def testCylicDistMult():Boolean {
 		Console.OUT.println("Starting SUMMA on multiply dense block Matrix test using cylic distribution");
 		Console.OUT.printf("matrix (%dx%d) x (%dx%d) partitioned in (%dx%d) blocks ",
@@ -234,7 +248,7 @@ class TestRunSumma {
 			Console.OUT.println("--------Cylic distribution of dense block matrix SUMMA mult-trans test failed!--------");
 		return ret;
 	}
-
+	//-----------------------------------------------------------------
 	public def testRandomDistMult():Boolean {
 		Console.OUT.println("Starting SUMMA on mult dense block Matrix test using random distribution");
 		Console.OUT.printf("matrix (%dx%d) x (%dx%d) partitioned in (%dx%d) blocks ",
@@ -286,4 +300,7 @@ class TestRunSumma {
 			Console.OUT.println("--------Random distribution of dense block matrix SUMMA mult-trans test failed!--------");
 		return ret;
 	}
+	
+
+
 } 

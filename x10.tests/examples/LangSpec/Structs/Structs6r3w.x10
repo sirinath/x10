@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Structs6r3w extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Structs6r3w().execute();
     }
 
@@ -30,7 +30,7 @@ public class Structs6r3w extends x10Test {
 
  static class StructDefault {
   static  struct Example {
-    val i : Long;
+    val i : Int;
     def this() { i = 1; }
   }
   var ex : Example;

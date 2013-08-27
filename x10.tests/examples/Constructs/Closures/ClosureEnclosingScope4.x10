@@ -19,7 +19,7 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureEnclosingScope4 extends x10Test {
+public class ClosureEnclosingScope4 extends ClosureTest {
 
     val a = 1;
 
@@ -33,12 +33,12 @@ public class ClosureEnclosingScope4 extends x10Test {
             }
         }
 
-        chk(new C().new D().sum() == 11, "new C().new D().sum");
+        check("new C().new D().sum", new C().new D().sum(), 11);
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureEnclosingScope4().execute();
     }
 }

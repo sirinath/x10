@@ -28,10 +28,26 @@ public class NamedStructType<T> extends RuntimeType<T> implements X10JavaSeriali
     public NamedStructType() {
         super();
     }
-
+    
+    // not used
+//    protected NamedStructType(String typeName, Class<?> javaClass) {
+//        super(javaClass);
+//        this.typeName = typeName;
+//    }
+//
+//    protected NamedStructType(String typeName, Class<?> javaClass, Variance[] variances) {
+//        super(javaClass, variances);
+//        this.typeName = typeName;
+//    }
+//
+//    protected NamedStructType(String typeName, Class<?> javaClass, Type<?>[] parents) {
+//        super(javaClass, parents);
+//        this.typeName = typeName;
+//    }
+    
     // N.B. this is also used to implement readResolve() in place for Types.COMPARABLE
-    protected NamedStructType(String typeName, Class<?> javaClass, int numParams, Type<?>[] parents) {
-        super(javaClass, numParams, parents);
+    protected NamedStructType(String typeName, Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
+        super(javaClass, variances, parents);
         this.typeName = typeName;
     }
 
@@ -41,27 +57,27 @@ public class NamedStructType<T> extends RuntimeType<T> implements X10JavaSeriali
         if (useCache) {
             NamedStructType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, 0, null);
+                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, null, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedStructType<T>) type;
         } else {
-            return new NamedStructType<T>(typeName, javaClass, 0, null);
+            return new NamedStructType<T>(typeName, javaClass, null, null);
         }
     }
 
-    public static <T> NamedStructType/*<T>*/ make(String typeName, Class<?> javaClass, int numParams) {
+    public static <T> NamedStructType/*<T>*/ make(String typeName, Class<?> javaClass, Variance[] variances) {
         if (useCache) {
             NamedStructType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, numParams, null);
+                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, variances, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedStructType<T>) type;
         } else {
-            return new NamedStructType<T>(typeName, javaClass, numParams, null);
+            return new NamedStructType<T>(typeName, javaClass, variances, null);
         }
     }
 
@@ -69,27 +85,27 @@ public class NamedStructType<T> extends RuntimeType<T> implements X10JavaSeriali
         if (useCache) {
             NamedStructType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, 0, parents);
+                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, null, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedStructType<T>) type;
         } else {
-            return new NamedStructType<T>(typeName, javaClass, 0, parents);
+            return new NamedStructType<T>(typeName, javaClass, null, parents);
         }
     }
     
-    public static <T> NamedStructType/*<T>*/ make(String typeName, Class<?> javaClass, int numParams, Type<?>[] parents) {
+    public static <T> NamedStructType/*<T>*/ make(String typeName, Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
         if (useCache) {
             NamedStructType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, numParams, parents);
+                NamedStructType<?> type0 = new NamedStructType<T>(typeName, javaClass, variances, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedStructType<T>) type;
         } else {
-            return new NamedStructType<T>(typeName, javaClass, numParams, parents);
+            return new NamedStructType<T>(typeName, javaClass, variances, parents);
         }
     }
 
@@ -117,7 +133,7 @@ public class NamedStructType<T> extends RuntimeType<T> implements X10JavaSeriali
 
     public static X10JavaSerializable $_deserialize_body(NamedStructType nt, X10JavaDeserializer deserializer) throws IOException {
         RuntimeType.$_deserialize_body(nt, deserializer);
-        nt.typeName = deserializer.readString().intern();
+        nt.typeName = deserializer.readString();
         return nt;
     }
 }

@@ -12,6 +12,8 @@
 package x10.matrix.distblock;
 
 import x10.matrix.Debug;
+import x10.matrix.MathTool;
+
 import x10.matrix.block.Grid;
 
 /**
@@ -22,6 +24,7 @@ import x10.matrix.block.Grid;
  * <p> When number of blocks > number of places, blocks which are assigned to
  * the same place form a cluster. This class partitions blocks among places
  * in a grid map, same as the matrix is partitioned into blocks.
+ * 
  */
 public class BlockGrid{
 	public val dmap:DistMap;
@@ -30,6 +33,9 @@ public class BlockGrid{
 		dmap = dm;		
 	}
 	
+	//=================================================
+	//
+	//=================================================
 	/**
 	 * Partitioning all blocks among all places. All matrix blocks are specified 
 	 * by matrix partitioning of g.  The blocks are partitioned among all places
@@ -38,7 +44,8 @@ public class BlockGrid{
 	 * @param  g     the partitioning blocks
 	 * @return       the map of block IDs to place IDs.
 	 */
-	public static def make(g:Grid) = make(g, Math.sqrt(Place.MAX_PLACES) as Long, Place.MAX_PLACES);
+	public static def make(g:Grid) = make(g, Math.sqrt(Place.MAX_PLACES) as Int, Place.MAX_PLACES);
+		
 	
 	/**
 	 * Partition all blocks into clusters, in the same way as matrix is partitioned to blocks.
@@ -48,7 +55,7 @@ public class BlockGrid{
 	 * @param totalClusters    the total clusters used in partitioning blocks
 	 * @return                 the map of block IDs to place IDs.
 	 */	
-	public static def make(matgrid:Grid, maxRowClusters:Long, totalClusters:Long):BlockGrid {
+	public static def make(matgrid:Grid, maxRowClusters:Int, totalClusters:Int):BlockGrid {
 		val nbs   = matgrid.size;
 		val sqmap = DistMap.make(nbs);		
 		val nps   = Place.MAX_PLACES;
@@ -66,8 +73,8 @@ public class BlockGrid{
 		//FIX: dont know what the add call is supposed to accomplish? 
 		// the method is not defined on DistMap.
 		//This is not an efficient method, but not much hurt on performance
-		for (var cb:Long=0; cb<matgrid.numColBlocks; cb++) { 
-			for (var rb:Long=0; rb<matgrid.numRowBlocks; rb++) {
+		for (var cb:Int=0; cb<matgrid.numColBlocks; cb++) { 
+			for (var rb:Int=0; rb<matgrid.numRowBlocks; rb++) {
 				val pid = blcgrid.findBlock(rb, cb); 
 				val bid = matgrid.getBlockId(rb, cb);
 				//sqmap.add(bid, pid);
@@ -88,4 +95,5 @@ public class BlockGrid{
 	 * Partition blocks into (num_places, 1) clusters among all places for the given matrix partitioning.
 	 */
 	public static def makeVertical(g:Grid) = make(g, Place.MAX_PLACES, Place.MAX_PLACES);
+	
 }

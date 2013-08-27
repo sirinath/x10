@@ -33,7 +33,7 @@ public class AsyncOtherPlace extends x10Test{
         return result;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new AsyncOtherPlace().execute();
     }
     

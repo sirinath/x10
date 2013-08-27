@@ -9,6 +9,7 @@
  *  (C) Copyright IBM Corporation 2006-2011.
  */
 
+import x10.io.Console;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
@@ -30,23 +31,23 @@ import x10.matrix.dist.summa.SummaSparse;
  */
 public class SummaExample{
 	
-    public static def main(args:Rail[String]) {
-    	val m = args.size > 0 ? Long.parse(args(0)):21;
-    	val n = args.size > 1 ? Long.parse(args(1)):23;
-    	val k = args.size > 2 ? Long.parse(args(2)):25;	
+    public static def main(args:Array[String](1)) {
+    	val m = args.size > 0 ?Int.parse(args(0)):21;
+    	val n = args.size > 1 ?Int.parse(args(1)):23;
+    	val k = args.size > 2 ?Int.parse(args(2)):25;	
     	val p = args.size > 3 ? Double.parse(args(3)):0.5;
     	val testcase = new RunSummaExample(m, n, k, p);
 		testcase.run();
 	}
 
 
-    static class RunSummaExample(M:Long, N:Long, K:Long, nzd:Double) {
+    static class RunSummaExample(M:Int, N:Int, K:Int, nzd:Double) {
     	
     	public val pA:Grid;
     	public val pB:Grid;
     	public val pC:Grid;
     	
-    	public def this(m:Long, n:Long, k:Int, p:Double) {
+    	public def this(m:Int, n:Int, k:Int, p:Double) {
     		property(m, n, k, p);
     		
     		val numP = Place.numPlaces();//Place.MAX_PLACES;
@@ -67,19 +68,19 @@ public class SummaExample{
     		testSparseMultTrans();
     		
     	}
-
+    	//------------------------------------------------
   	
-
+    	//------------------------------------------------
     	public def testDenseMult():DistDenseMatrix {
     		val numP = Place.numPlaces();//Place.MAX_PLACES;
     		Console.OUT.printf("\nTest SUMMA dist dense matrix over %d places\n", numP);
     		val da = DistDenseMatrix.make(pA);
     		da.initRandom();
-            //Console.OUT.println("Input A\n" + da);
+    		//da.printMatrix("Input A");
     		
     		val db = DistDenseMatrix.make(pB);
     		db.initRandom();
-    		//Console.OUT.println("Input B\n" + db);
+    		//db.printMatrix("Input B");
     		
     		val dc = DistDenseMatrix.make(pC);
     		
@@ -89,41 +90,41 @@ public class SummaExample{
     		
     		return dc;
     	}
-
+    	//--------------------------------------------------------------------------------
     	
     	public def testDenseMultTrans():DistDenseMatrix {
     		val numP = Place.numPlaces();//Place.MAX_PLACES;
     		Console.OUT.printf("\nTest SUMMA dist dense matrix multTrans over %d places\n", numP);
     		val da = DistDenseMatrix.make(M, K);
     		da.initRandom();
-            //Console.OUT.println("Input A\n" + da);
+    		//da.printMatrix("Input A");
     		
     		val db = DistDenseMatrix.make(N, K);
     		db.initRandom();
-    		//Console.OUT.println("Input B\n" + db);
+    		//db.printMatrix("Input B");
     		
     		val dc = DistDenseMatrix.make(M, N);
     		
     		Debug.flushln("Start calling SUMMA Dense multTrans X10 routine");
     		SummaDense.multTrans(1, 0.0, da, db, dc);
     		Debug.flushln("SUMMA done");
-    		//Console.OUT.println("Summa result\n" + dc);
+    		//dc.printMatrix("Summa result");
     		
     		return dc;
     	}
     	
-
+    	//------------------------------------------------
     	public def testSparse():DistDenseMatrix {
     		val numP = Place.numPlaces();//Place.MAX_PLACES;
     		Console.OUT.printf("\nTest SUMMA dist sparse matrix over %d places and sparsity %f\n", 
     				numP, nzd);
     		val da = DistSparseMatrix.make(pA, nzd);
     		da.initRandom();
-    		//Console.OUT.println("Input A\n" + da);
+    		//da.printMatrix("Input A");
     		
     		val db = DistSparseMatrix.make(pB, nzd);
     		db.initRandom();
-    		//Console.OUT.println("Input B\n" + db);
+    		//db.printMatrix("Input B");
     		
     		val dc = DistDenseMatrix.make(pC);
     		
@@ -133,7 +134,7 @@ public class SummaExample{
     		
     		return dc;
     	}
-
+    	//--------------------------------------------------------------------------------
     	
     	public def testSparseMultTrans():DistDenseMatrix {
     		val numP = Place.numPlaces();//Place.MAX_PLACES;
@@ -152,6 +153,6 @@ public class SummaExample{
     		
     		return dc;
     	}
-
+    	//-----------------------------------------------------------------
     }
 }

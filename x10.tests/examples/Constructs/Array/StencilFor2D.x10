@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Implementing a 5-point stencil operation using for loop
@@ -21,8 +20,8 @@ public class StencilFor2D extends x10Test {
     
     public def run(): boolean = {
 
-        val R = Region.make(-1..256, -1..256);
-        val r = Region.make(0..255, 0..255);
+        val R = (-1..256)*(-1..256);
+        val r = (0..255)*(0..255);
         val north : Point(2) = [0, 1];
         val south : Point(2) = [0, -1];
         val west : Point(2) = [-1, 0];
@@ -36,7 +35,7 @@ public class StencilFor2D extends x10Test {
         return true;
     }
     
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new StencilFor2D().execute();
     }
 

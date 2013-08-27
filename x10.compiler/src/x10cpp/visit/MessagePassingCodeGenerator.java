@@ -202,7 +202,6 @@ import x10.ast.X10MethodDecl;
 import x10.ast.X10MethodDecl_c;
 import x10.ast.X10Special_c;
 import x10.ast.X10Unary_c;
-import x10.errors.Errors;
 import x10.errors.Warnings;
 import x10.extension.X10Ext;
 import x10.extension.X10Ext_c;
@@ -210,7 +209,6 @@ import x10.types.ClosureDef;
 import x10.types.ClosureInstance;
 import x10.types.ParameterType;
 
-import x10.types.ConstrainedType;
 import x10.types.FunctionType;
 import x10.types.ThisDef;
 import x10.types.X10ClassDef;
@@ -485,14 +483,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
     private void declareClass(X10ClassDef cd, ClassifiedStream h) {
         assert (cd != null);
         QName pkg = null;
-        if (cd.package_() != null) {
+        if (cd.package_() != null)
             pkg = cd.package_().get().fullName();
-        }
-        if (cd.isStruct() && pkg != null && pkg.startsWith(QName.make("x10.lang"))) {
-            if (cd.asType().isNumeric() || cd.asType().isBoolean()) {
-                return;  // Don't need forward class declaration for the structs that are mapped to C++ primitives by x10aux/config.h
-            }
-        }   
         if (pkg != null) {
             Emitter.openNamespaces(h, pkg);
             h.newline(0);
@@ -1106,12 +1098,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
         List<ClassMember> members = n.members();
 
-        boolean emittedUsingDecl = false;
-        if (!members.isEmpty()) {
-            emittedUsingDecl = generateUsingDeclsForInheritedMethods(context, currentClass, superClass, xts, h, members);
-        }
-        
-        generateITablesForClass(currentClass, context, xts, "virtual ", h, emittedUsingDecl);
+        generateITablesForClass(currentClass, context, xts, "virtual ", h);
         
         if (currentClass.isSubtype(xts.Mortal(), context)) {
             h.write("virtual x10_boolean _isMortal() { return true; }");
@@ -1119,6 +1106,10 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         }
 
         if (!members.isEmpty()) {
+            String className = Emitter.translateType(currentClass);
+
+            generateUsingDeclsForInheritedMethods(context, currentClass, superClass, xts, h, members);
+            
             ClassMember prev = null;
             for (ClassMember member : members) {
                 if ((member instanceof polyglot.ast.CodeDecl)
@@ -1184,7 +1175,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
     }
 
 	private void generateITablesForClass(X10ClassType currentClass, X10CPPContext_c context,
-	                                     TypeSystem xts, String maybeVirtual, ClassifiedStream h, boolean emittedUsingDecl) {
+	                                     TypeSystem xts, String maybeVirtual, ClassifiedStream h) {
 		X10ClassDef cd = currentClass.x10Def();
 		List<X10ClassType> allInterfaces = xts.allImplementedInterfaces(currentClass);
 		int numInterfaces = allInterfaces.size();
@@ -1204,7 +1195,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 			itableNum = 0;
 			for (Type interfaceType : allInterfaces) {
 				ITable itable = context.getITable((X10ClassType) Types.baseType(interfaceType));
-				itable.emitITableInitialization(currentClass, itableNum, this, h, sw, emittedUsingDecl, context);
+				itable.emitITableInitialization(currentClass, itableNum, this, h, sw);
 				itableNum += 1;
 			}
 
@@ -1256,7 +1247,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             itableNum = 0;
 	        for (Type interfaceType : allInterfaces) {
 	            ITable itable = context.getITable((X10ClassType) Types.baseType(interfaceType));
-	            itable.emitITableInitialization(currentClass, itableNum, this, h, sw, false, context);
+	            itable.emitITableInitialization(currentClass, itableNum, this, h, sw);
 	            itableNum += 1;
 	        }
 
@@ -1296,7 +1287,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	// The alternative to using "using" is to generate proxy methods that forward to the superclass
 	// method.  This results in slightly less efficient generated code, but more importantly is 
 	// significantly more complex to implement correctly.
-    private boolean generateUsingDeclsForInheritedMethods(X10CPPContext_c context, X10ClassType childClass,
+    private void generateUsingDeclsForInheritedMethods(X10CPPContext_c context, X10ClassType childClass,
                                                        X10ClassType superClass, TypeSystem xts, ClassifiedStream h,
                                                        List<ClassMember> members) {
         boolean didSomething = false;
@@ -1315,7 +1306,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             didSomething = generateUsingDeclsHelper(context, childClass, xts.Any(), h, didSomething, possibleNames);
         }
         if (didSomething) h.forceNewline();
-        return didSomething;
     }
 
 	private boolean generateUsingDeclsHelper(X10CPPContext_c context,
@@ -1328,28 +1318,21 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		    List<MethodInstance> parentImpls = superClass.methodsNamed(methName);
 		    if (!parentImpls.isEmpty()) {
 		        boolean emitUsing = false;
-		        if (childImpls.size() < parentImpls.size()) {
-		            // Parent has more implementations than the child, we there must be at least one we need to inherit with a using.
+		        if (childImpls.size() != parentImpls.size()) {
+		            // Number of implementation differs, so we can't have an exact signature match.
 		            emitUsing = true;
 		        } else {
-		            parentLoop: for (MethodInstance parentImpl : parentImpls) {
-		                childLoop: for (MethodInstance childImpl : childImpls) {
-		                    // Look for a childImpl with the same (baseType) signature as the parent.
-		                    if (childImpl.formalTypes().size() != parentImpl.formalTypes().size()) continue childLoop; // match failed, try next child
-		                    for (int i = 0; i<childImpl.formalTypes().size(); i++) {
-		                        Type ct = Types.baseType(childImpl.formalTypes().get(i));
-		                        Type pt = Types.baseType(parentImpl.formalTypes().get(i));
-		                        if (!ct.typeEquals(pt, context)) continue childLoop; // match failed; try next child
-		                    }
-		                    // Found a child that overrides the parent (baseType matches for all formal params).
-		                    continue parentLoop;
+		            // Same number of impls, now check for identical signatures.
+		            implLoop: for (MethodInstance childImpl : childImpls) {
+		                for (MethodInstance parentImpl : parentImpls) {
+		                    if (childImpl.isSameMethod(parentImpl, context)) continue implLoop;
 		                }
-		                // If we get to here, then there is a parentImpl that is not overriden by a childImpl
-		                // and therefore must be brought into scope in the child with a using declaration
+		                // If we get to here, then there is a childImpl that has a different signature than all parentImpls
 		                emitUsing = true;
-		                break parentLoop;                 
+		                break implLoop;                 
 		            }
-		        } 
+		        }
+		        
 		        if (emitUsing) {
 		            names.remove();
 		            if (superClass.isAny()) {
@@ -1389,7 +1372,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         sb.append("#include <x10aux/bootstrap.h>\n");
 		String mainTypeArgs = container;
         sb.append("extern \"C\" { int main(int ac, char **av) { return x10aux::template_main"+chevrons(mainTypeArgs)+"(ac,av); } }\n");
-        if (options.x10_config.DEBUG && options.x10_config.DEBUG_ENABLE_LINEMAPS)
+        if (options.x10_config.DEBUG)
 		{
 			sb.append("\n// Debugger stuff\n");
 			sb.append("#include<x10aux/place_local.h>\n");
@@ -2128,43 +2111,18 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    TypeSystem xts = (TypeSystem)context.typeSystem();
 
 	    boolean stackAllocate = false;
-	    String tmpName = null;
-	    long sizeProperty = -1;
 	    Type annotation = xts.StackAllocate();
 	    if (!((X10Ext) dec.ext()).annotationMatching(annotation).isEmpty()) {
-	        if (dec.type().type().isRail()) {
-	            Type rt = dec.type().type();
-                Map<String,Object> knownProperties = Emitter.exploreConstraints(context, rt);
-                Object sizeVal = knownProperties.get("size");
-                if (sizeVal != null) {
-                    sizeProperty = ((Number)sizeVal).longValue();
-                    if (sizeProperty >= 0) {
-                        stackAllocate = true;
-                    }
-                }
-	            if (!stackAllocate) {
-	                tr.job().compiler().errorQueue().enqueue(ErrorInfo.WARNING,
-	                                                         "Rail size not known at compile time; unable to StackAllocate.", dec.position());
-
-	            }
-	        } else {
-	            stackAllocate = true;
-	        }
+	        stackAllocate = true;
+	        //                System.err.println("@StackAllocate " + dec);
 	    }
 
+	    String tmpName = null;
 	    if (stackAllocate) {
-	        if (dec.type().type().isRail()) {
-	            tmpName = mangled_non_method_name(dec.name().id().toString());
-	            Type elemType = dec.type().type().toClass().typeArguments().get(0);
-	            sw.writeln("x10::lang::StackAllocatedRail<"+Emitter.translateType(elemType)+", "+sizeProperty+"> "+tmpName+"_mem("+sizeProperty+");");
-	            emitter.printHeader(dec, sw, tr, true);
-	            sw.write(" = &"+tmpName+"_mem;");
-	        } else {
-	            tmpName = "_StackAllocate_"+mangled_non_method_name(dec.name().id().toString());
-	            sw.writeln(Emitter.translateType(dec.type().type(), false)+" "+tmpName+";");
-	        }
-            assert context.getStackAllocName() == null;
-            context.setStackAllocName(tmpName);
+	        tmpName = "_StackAllocate_"+mangled_non_method_name(dec.name().id().toString());
+	        sw.writeln(Emitter.translateType(dec.type().type(), false)+" "+tmpName+";");
+	        assert context.getStackAllocName() == null;
+	        context.setStackAllocName(tmpName);
 	    } else {
             emitter.printHeader(dec, sw, tr, true);
         }
@@ -2179,11 +2137,9 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    
 	    if (stackAllocate) {
 	        context.setStackAllocName(null);
-	        if (sizeProperty == -1) {
-	            sw.writeln(";");
-	            emitter.printHeader(dec, sw, tr, true);
-	            sw.write("(&"+tmpName+")");
-	        }
+	        sw.writeln(";");
+	        emitter.printHeader(dec, sw, tr, true);
+	        sw.write("(&"+tmpName+")");
 	    }
 
 	    if (tr.appendSemicolon()) {
@@ -2840,7 +2796,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		LocalInstance var = n.localInstance();
 		// Make sure there is no mismatch between n.name() and var.name()
 		if (var.name() != n.name().id()) {
-		    assert var.name() == n.name().id() : "Name mismatch: "+var.name()+" != "+n.name().id();
+		    assert var.name() == n.name().id();
 		}
 		if (c.isInsideClosure())
 			c.saveEnvVariableInfo(var.name().toString(), var.lval());
@@ -2852,7 +2808,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		TypeSystem xts = (TypeSystem)context.typeSystem();
 		ConstructorInstance constructor = n.constructorInstance();
 		boolean stackAllocate = false;
-		boolean stackAllocateUninit = false;
         boolean embed = false;
 
         // Danger Will Robinson! Give programmer plenty of rope to hang themselves!!
@@ -2860,15 +2815,15 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         // the programmer asked us to and stack allocate the storage for the object.
         // If the programmer was incorrect about the lifetime of the object, then
         // the program will almost certainly crash in some unexpected way.
-        if (!((X10Ext) n.ext()).annotationMatching(xts.StackAllocate()).isEmpty()) {
+        Type annotation = xts.StackAllocate();
+        if (!((X10Ext) n.ext()).annotationMatching(annotation).isEmpty()) {
             stackAllocate = true;
+            //		        System.err.println("@StackAllocate " + n);
         }
-        if (!((X10Ext) n.ext()).annotationMatching(xts.StackAllocateUninitialized()).isEmpty()) {
-            stackAllocate = true;
-            stackAllocateUninit = true;
-        }
-        if (!((X10Ext) n.ext()).annotationMatching(xts.Embed()).isEmpty()) {
+        Type annotation2 = xts.Embed();
+        if (!((X10Ext) n.ext()).annotationMatching(annotation2).isEmpty()) {
             embed = true;
+            //              System.err.println("@StackAllocate " + n);
         }
 		
 		if (n.qualifier() != null)
@@ -2876,33 +2831,27 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		if (n.body() != null)
 			throw new InternalCompilerError("Anonymous innner classes should have been removed.");
 
-		if (!stackAllocateUninit) {
-		    if (stackAllocate) {
-		        if (n.objectType().type().isRail()) {
-		            sw.write(context.getStackAllocName()+"->"+CONSTRUCTOR+"(");
-		        } else {
-		            sw.write(context.getStackAllocName()+"."+CONSTRUCTOR+"(");
-		        }
-		    } else if (embed) {
-		        sw.write("&"+context.getEmbeddedFieldName()+";");
-		        sw.newline();
-		        sw.write(context.getEmbeddedFieldName()+"."+CONSTRUCTOR+"(");
-		    } else {
-		        sw.write(Emitter.translateType(n.objectType().type())+"::"+MAKE+"(");
-		    }
-
-		    sw.begin(0);
-		    for (Iterator<Expr> i = n.arguments().iterator(); i.hasNext(); ) {
-		        Expr e = i.next();
-		        n.print(e, sw, tr);
-		        if (i.hasNext()) {
-		            sw.write(",");
-		            sw.allowBreak(0, " ");
-		        }
-		    }
-		    sw.write(")");
-		    sw.end();
+		if (stackAllocate) {
+		    sw.write(context.getStackAllocName()+"."+CONSTRUCTOR+"(");
+		} else if (embed) {
+		    sw.write("&"+context.getEmbeddedFieldName()+";");
+		    sw.newline();
+		    sw.write(context.getEmbeddedFieldName()+"."+CONSTRUCTOR+"(");
+		} else {
+		    sw.write(Emitter.translateType(n.objectType().type())+"::"+MAKE+"(");
 		}
+		    
+		sw.begin(0);
+		for (Iterator<Expr> i = n.arguments().iterator(); i.hasNext(); ) {
+			Expr e = i.next();
+			n.print(e, sw, tr);
+			if (i.hasNext()) {
+				sw.write(",");
+				sw.allowBreak(0, " ");
+			}
+		}
+		sw.write(")");
+		sw.end();
 	}
 
 
@@ -2968,7 +2917,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	}
 
 	public void visit(NullLit_c n) {
-		sw.write("reinterpret_cast"+chevrons(Emitter.translateType(n.type(),true))+"(X10_NULL)");
+		sw.write("X10_NULL");
 	}
 
 	public void visit(StringLit_c n) {
@@ -3252,8 +3201,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         X10CPPContext_c c = (X10CPPContext_c) tr.context();
 
         emitter.enterClosure(c);
-        boolean oldPrintType = tr.printType(true);
-        boolean oldSemiColon = tr.appendSemicolon(true);
 
         ClosureDef closureDef = n.closureDef();
         CodeInstance<?> ci = closureDef.methodContainer().get();
@@ -3372,8 +3319,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         }
         env = prunned;
         
-        Configuration config = ((X10CPPCompilerOptions)tr.job().extensionInfo().getOptions()).x10_config;
-		if (config.DEBUG && config.DEBUG_ENABLE_LINEMAPS && !in_template_closure)
+		if (((X10CPPCompilerOptions)tr.job().extensionInfo().getOptions()).x10_config.DEBUG && !in_template_closure)
 		{
 			String key = ((StreamWrapper)sw).getStreamName(StreamWrapper.CC);
 			Map<String, LineNumberMap> fileToLineNumberMap = c.<Map<String, LineNumberMap>>findData(X10CPPTranslator.FILE_TO_LINE_NUMBER_MAP);
@@ -3451,6 +3397,13 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         sw.newline();
         sw.write("virtual const x10aux::RuntimeType *_type() const {"+
                   " return x10aux::getRTT"+chevrons(superType)+"(); }");
+        sw.newline(); sw.forceNewline();
+
+        sw.write(Emitter.translateType(xts.String(), true)+" toString() {");
+        sw.newline(4); sw.begin(0);
+        sw.write("return x10aux::makeStringLit(this->toNativeString());");
+        sw.end(); sw.newline();
+        sw.write("}");
         sw.newline(); sw.forceNewline();
 
         sw.write("const char* toNativeString() {");
@@ -3553,8 +3506,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             sw.write("))");
         }
 
-        tr.printType(oldPrintType);
-        tr.appendSemicolon(oldSemiColon);
         c.finalizeClosureInstance();
         emitter.exitClosure(c);
     }
@@ -3986,7 +3937,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		sw.newline(4); sw.begin(0);
 		sw.write(make_ref(type)+" "+tmp+"(");
 
-		sw.write("x10::lang::Rail"+chevrons(Emitter.translateType(T, true)));
+		sw.write("x10::array::Array"+chevrons(Emitter.translateType(T, true)));
 		sw.writeln("::_make("+c.arguments().size()+"));");
 		int count = 0;
 		for (Expr e : c.arguments()) {

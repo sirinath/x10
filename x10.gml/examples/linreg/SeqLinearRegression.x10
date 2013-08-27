@@ -5,6 +5,7 @@
  */
 package linreg;
 
+import x10.io.Console;
 import x10.util.Timer;
 //
 import x10.matrix.Debug;
@@ -26,7 +27,7 @@ import x10.matrix.sparse.SparseMultDenseToDense;
  */
 public class SeqLinearRegression{
 
-	public val iteration:Long;
+	public val iteration:Int;
 	public val w:Vector(V.N);
 	val lambda:Double;
 

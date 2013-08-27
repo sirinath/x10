@@ -16,12 +16,12 @@ import harness.x10Test;
  */
 public class StructEquality extends x10Test {
     public def run(): boolean = {
-        val v1 = V(1n);
-        val v2 = V(1n);
+        val v1 = V(1);
+        val v2 = V(1);
         return v1 == v2;
     }
 
-    public static def main(args: Rail[String]): void = {
+    public static def main(args: Array[String](1)): void = {
         new StructEquality().execute();
     }
 

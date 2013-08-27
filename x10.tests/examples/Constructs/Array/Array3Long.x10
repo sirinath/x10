@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Ensures long arrays are implemented.
@@ -19,13 +18,13 @@ import x10.regionarray.*;
 public class Array3Long extends x10Test {
 
     public def run(): boolean = {
-        val r  = Region.make(1..10, 1..10);
+        val r  = (1..10)*(1..10);
         val ia = new Array[Long](r, (x:Point)=>0L);
         ia(1, 1) = 42L;
         return 42L == ia(1, 1);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array3Long().execute();
     }
 }

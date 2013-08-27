@@ -12,25 +12,27 @@
 //LIMITATION:
 //This check is not being done by the compiler currently.
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
+ * This must compile and run fine. Checks that the initializer may not specify
+ * the arity of the region.
  *
  * @author vj 12 2006
  */
+
 public class DimCheckN4_MustFailCompile extends x10Test {
 
     def m(d: Dist(2)): void = {
-        val a1 = DistArray.make[int](d, (p[i,j,k]: Point(3)): int => { return i as int; }); // ERR (dimension mismatch)
-        val a2 = DistArray.make[int](d, (p[i,j,k]: Point(2)): int => { return i as int; }); // ERR
+        val a1 = DistArray.make[int](d, (p[i,j,k]: Point(3)): int => { return i; }); // ERR (dimension mismatch)
+        val a2 = DistArray.make[int](d, (p[i,j,k]: Point(2)): int => { return i; }); // ERR
     }
 
     public def run(): boolean = {
-        m(Region.make(0..2, 0..3) -> here);
+        m((0..2)*(0..3) -> here);
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DimCheckN4_MustFailCompile().execute();
     }
 }

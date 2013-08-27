@@ -9,8 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-//OPTIONS: -STATIC_CHECKS
-
 import harness.x10Test;
 
 /**
@@ -22,19 +20,19 @@ public class AssignmentIntegerLitteralToConstrainedShort_MustFailCompile extends
 
 	public def run2() = {
 		val constraint = 0s;
-		var i: short{self == constraint} = 0s;
+		var i: short{self == constraint} = 0;
     }
 	public def run3() = {
 		val constraint:short{self==0s} = 0s;
 		var i: short{self == constraint} = 0s;
     }
 	public def run(): boolean = {
-		val constraint: short = 0s;
-		var i: short{self == constraint} = 0s; // ERR: should fail because constraint: short, not short{self==0s}
+		val constraint: short = 0;
+		var i: short{self == constraint} = 0; // ERR: should fail because constraint: short, not short{self==0}
 		return false;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new AssignmentIntegerLitteralToConstrainedShort_MustFailCompile().execute();
 	}
 

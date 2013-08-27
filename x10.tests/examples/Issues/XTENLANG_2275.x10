@@ -10,13 +10,12 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * @author vj
  */
 public class XTENLANG_2275 extends x10Test {
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_2275().execute();
     }
 
@@ -24,7 +23,7 @@ public class XTENLANG_2275 extends x10Test {
     
     class ConstraintPropagationBug {
       def m() {
-        val i: Iterator[Point{self.rank==2}] = Region.make(1..1, 1..1).iterator(); // should compile
+        val i: Iterator[Point{self.rank==2}] = ((1..1)*(1..1)).iterator(); // should compile
       }
     }
 	}

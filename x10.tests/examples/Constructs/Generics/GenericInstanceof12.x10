@@ -20,7 +20,7 @@ import harness.x10Test;
 public class GenericInstanceof12 extends GenericTest {
 
     interface I[T] {
-        def m(T):long;
+        def m(T):int;
     }
 
     class A implements I[I[Super]] {
@@ -35,7 +35,7 @@ public class GenericInstanceof12 extends GenericTest {
         return !(a instanceof I[I[Sub]]) && a instanceof I[I[Super]] && !(a instanceof I[I[Any]]);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericInstanceof12().execute();
     }
 }

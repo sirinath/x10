@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class ReTypes9e4b extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ReTypes9e4b().execute();
     }
 
@@ -29,8 +29,8 @@ public class ReTypes9e4b extends x10Test {
 // file Types line 214
  static  class Example {
  static public def example() {
-val square : (x:Long)=>Long
-           = (x:Long)=>x*x;
+val square : (x:Int)=>Int
+           = (x:Int)=>x*x;
 assert square(5) == 25;
  } }
  static  class Hook{ def run() {Example.example(); return true;}}

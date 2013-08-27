@@ -24,7 +24,7 @@ import x10.compiler.Pinned;
         throw new UnsupportedOperationException("Cannot deserialize "+typeName());
     }
 
-    private var value:Int = 0n;
+    private var value:Int = 0;
 
     public operator this()=(i:Int):void { set(i); }
     public def set(i:Int):void {
@@ -35,9 +35,9 @@ import x10.compiler.Pinned;
 
     public def await():void {
         Runtime.ensureNotInAtomic();
-        if (value == 0n) {
+        if (value == 0) {
             lock();
-            while (value == 0n) super.await();
+            while (value == 0) super.await();
                 unlock();
             }
     }

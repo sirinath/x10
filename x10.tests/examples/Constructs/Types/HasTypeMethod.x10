@@ -18,10 +18,10 @@ import harness.x10Test;
  */
 public class HasTypeMethod extends x10Test {
 
-	def m(x:Long{self==1}) <: Long = x;
+	def m(x:Int{self==1}) <: Int = x;
 	public def run() = true;
 
-	public static def main(Rail[String])  {
+	public static def main(Array[String](1))  {
 		new HasTypeMethod().execute();
 	}
 }

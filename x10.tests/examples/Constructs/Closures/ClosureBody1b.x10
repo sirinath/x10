@@ -20,11 +20,11 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureBody1b extends x10Test {
+public class ClosureBody1b extends ClosureTest {
 
-    var x:long = 0;
+    var x:int = 0;
 
-    def x(x:long):void = {
+    def x(x:int):void = {
         this.x=x;
     }
 
@@ -35,12 +35,12 @@ public class ClosureBody1b extends x10Test {
         // block
         val g = ()=>{x(1);}; // void
         g();
-        chk(x() == 1, "x after g()");
+        check("x after g()", x(), 1);
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureBody1b().execute();
     }
 }

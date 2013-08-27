@@ -21,33 +21,33 @@ import x10.compiler.*;
 
 public class ObjectInitialization7p2v extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization7p2v().execute();
     }
 
 
-// file Classes line 2865
+// file Classes line 2864
  static class UseNoThisAccess {
   static  class IDed {
-    protected static val counts = [0 as Long,0];
-    protected var code : Long;
+    protected static val counts = [0 as Int,0];
+    protected var code : Int;
     val id: Float;
-    public def this(kind:Long) {
+    public def this(kind:Int) {
       code = kind;
       this.id = this.count(kind);
     }
-    protected static def kind2count(kind:Long) = ++counts(kind % 2);
-    @NoThisAccess def count(kind:Long) : Float = kind2count(kind);
+    protected static def kind2count(kind:Int) = ++counts(kind % 2);
+    @NoThisAccess def count(kind:Int) : Float = kind2count(kind);
   }
   static  class SubIDed extends IDed {
-    protected static val subcounts = [0 as Long, 0, 0];
+    protected static val subcounts = [0 as Int, 0, 0];
     public static val all = new x10.util.ArrayList[SubIDed]();
-    public def this(kind:Long) {
+    public def this(kind:Int) {
        super(kind);
     }
     @NoThisAccess
-    def count(kind:Long) : Float {
-       val subcount <: Long = ++subcounts(kind % 3);
+    def count(kind:Int) : Float {
+       val subcount <: Int = ++subcounts(kind % 3);
        val supercount <: Float = kind2count(kind);
        //ERROR: val badSuperCount = super.count(kind); //(A)
        //ERROR: code = kind;                           //(B)

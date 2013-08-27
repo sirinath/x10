@@ -32,11 +32,14 @@ namespace x10 {
             PlaceLocalHandle_Impl<T>* operator->() { return this; }
 
             void set(T newVal) {
+                assert(!FMGL(cached));
                 FMGL(localStorage) = newVal;
                 FMGL(cached) = true;
-                x10aux::place_local::put(FMGL(id), (void*)newVal);
+                T *tmp = x10aux::alloc<T>();
+                *tmp = newVal;
+                x10aux::place_local::registerData(FMGL(id), (void*)tmp);
             }
-
+            
 	        static PlaceLocalHandle_Impl<T> _alloc () {PlaceLocalHandle_Impl<T> t; return t;}
 
             static PlaceLocalHandle_Impl<T> _make() {
@@ -53,8 +56,8 @@ namespace x10 {
             
             T __apply() {
                 if (!FMGL(cached)) {
-                    T tmp = (T)(x10aux::place_local::get(FMGL(id)));
-                    FMGL(localStorage) = tmp;
+                    T *tmp = (T*)(x10aux::place_local::lookupData(FMGL(id)));
+                    FMGL(localStorage) = *tmp;
                     FMGL(cached) = true;
                 }
                 return FMGL(localStorage);

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test the shorthand syntax for an array initializer.
@@ -19,16 +18,16 @@ import x10.regionarray.*;
 public class IntArrayInitializerShorthand extends x10Test {
 
     public def run(): boolean {
-        val r = Region.make(1..10, 1..10);
-        val ia = new Array[int](r, ([i,j]:Point) => (i+j) as Int);
+        val r = (1..10)*(1..10);
+        val ia = new Array[int](r, ([i,j]:Point) => i+j);
 
         for (val p[i,j]: Point(2) in r)
-            chk(ia(p) == ((i+j) as int));
+            chk(ia(p) == i+j);
 
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new IntArrayInitializerShorthand().execute();
     }
 }

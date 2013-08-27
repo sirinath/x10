@@ -9,6 +9,7 @@
  *  (C) Copyright IBM Corporation 2006-2011.
  */
 
+import x10.io.Console;
 import x10.util.Timer;
 
 import x10.matrix.Matrix;
@@ -26,7 +27,7 @@ import x10.matrix.dist.summa.SummaSparse;
    <p>
  */
 public class DistSparseBench {
-	public static def main(args:Rail[String]) {
+	public static def main(args:Array[String](1)) {
 		val M = args.size > 0 ?Int.parse(args(0)):1000;
 		val K = args.size > 1 ?Int.parse(args(1)):1000;
 		val N = args.size > 2 ?Int.parse(args(2)):1000;
@@ -39,7 +40,7 @@ public class DistSparseBench {
 }
 
 class RunDistSparseBench{
-	public val M:Long, N:Long, K:Long, iter:Int, nzD:Double, pCmp:Double;
+	public val M:Int, N:Int, K:Int, iter:Int, nzD:Double, pCmp:Double;
 	public val testps:Int; lastps:Int;
 	public val nplace:Int = Place.MAX_PLACES;
 
@@ -53,7 +54,7 @@ class RunDistSparseBench{
 	val tB:DistSparseMatrix(btPart.M, btPart.N);
 	val C:DistDenseMatrix(cPart.M, cPart.N);
 	
-	public def this(m:Long, k:Int, n:Long, nzd:Double, it:Int, p:Int) {
+	public def this(m:Int, k:Int, n:Int, nzd:Double, it:Int, p:Int) {
 		M = m; N = n; K=k; iter=it; nzD =nzd; pCmp=nzD*nzD;
 		aPart = Grid.make(M, K);
 		bPart = Grid.make(K, N);

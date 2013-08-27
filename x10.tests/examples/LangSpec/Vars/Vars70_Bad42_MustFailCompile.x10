@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Vars70_Bad42_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Vars70_Bad42_MustFailCompile().execute();
     }
 
@@ -31,11 +31,11 @@ abstract static  class VarsForStars{
  abstract def cointoss(): Boolean;
  abstract def println(Any):void;
 def check() {
-  var muta : Long;
+  var muta : Int;
   // ERROR:  println(muta);
   muta = 4;
   val use2A = muta * 10;
-  val immu : Long;
+  val immu : Int;
   // ERROR: println(immu);
   if (cointoss())   {immu = 1;}
   else              {immu = use2A;}

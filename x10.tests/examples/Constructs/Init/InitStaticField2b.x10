@@ -22,14 +22,14 @@ public class InitStaticField2b extends x10Test {
 
     static val a = neverSucceed();
 
-    static val count = new Cell[Int](0n);
+    static val count = new Cell[Int](0);
 
     static def neverSucceed():Int {
     	count()++;
-    	if (Math.sin(42n) < 1000n) { // should always happen
+    	if (Math.sin(42) < 1000) { // should always happen
     		throw new Exception("I will try to break things.");
     	}
-    	return 1n;
+    	return 1;
     }
     
     public def run():Boolean {
@@ -64,14 +64,14 @@ public class InitStaticField2b extends x10Test {
         }
         
         // check atmost once semantics
-        if (count() != 1n) {
+        if (count() != 1) {
         	Console.OUT.println("BUG: initializer expression was evaluated multiple times in a place!");        	
         }
         
-        return ok && count() == 1n;
+        return ok && count() == 1;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new InitStaticField2b().execute();
     }
 

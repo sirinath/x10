@@ -19,19 +19,19 @@ import harness.x10Test;
  *
  * @author bdlucas 8/2008
  */
-public class ClosureConstraint5_MustFailCompile extends x10Test {
+public class ClosureConstraint5_MustFailCompile extends ClosureTest {
 
     public def run(): boolean = {
         
-        val g = (x:long,y:long){x==1 && y==-1} => x+y;
+        val g = (x:int,y:int){x==1 && y==-1} => x+y;
 
         g(1,1); // ERR
 
-        return true;
+        return result;
     }
 
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureConstraint5_MustFailCompile().execute();
     }
 }

@@ -14,7 +14,8 @@ package x10.util.concurrent;
 import x10.compiler.Global;
 import x10.compiler.Pinned;
 import x10.compiler.SuppressTransientError;
-import x10.util.GrowableRail;
+
+import x10.util.GrowableIndexedMemoryChunk;
 
 /**
  * The representation of an X10 future expression.
@@ -34,8 +35,8 @@ public class Future[T] implements ()=>T {
      */
     // This cant be Cell because I need to create it before I know the value
     // that will go in.
-    @SuppressTransientError transient private val exception = new GrowableRail[Exception]();
-    @SuppressTransientError transient private val result = new GrowableRail[T]();
+    @SuppressTransientError transient private val exception = new GrowableIndexedMemoryChunk[Exception]();
+    @SuppressTransientError transient private val result = new GrowableIndexedMemoryChunk[T]();
     transient private val eval:()=>T;
 
     public static def make[T](eval:()=> T) {
@@ -47,6 +48,8 @@ public class Future[T] implements ()=>T {
     def this(eval:()=>T) {
         this.eval = eval;
     }
+
+  //  @Global private def result() = at (root) root().result(0);
 
     /**
      * Return true if this activity has completed.
@@ -63,7 +66,7 @@ public class Future[T] implements ()=>T {
     }
     @Pinned private def forceLocal():T {
     	 latch.await();
-         if (exception.size() > 0) {
+         if (exception.length() > 0) {
              throw exception(0);
          }
          return result(0);

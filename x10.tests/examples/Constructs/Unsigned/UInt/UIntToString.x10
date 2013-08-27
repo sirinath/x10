@@ -29,14 +29,14 @@ public class UIntToString extends x10Test {
     }
 
     public def run(): boolean = {
-	val u = 1un;
+	val u = 1u;
 	val s1 = u.toString();
 	val s2 = toString(u);
 	val s3 = new A[UInt]().toString(u);
 	return (s1.equals("1") && s2.equals("1") && s3.equals("1"));
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UIntToString().execute();
     }
 }

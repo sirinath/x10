@@ -18,11 +18,11 @@ import harness.x10Test;
 public class PrimitiveToPrimitiveConstrained2 extends x10Test {
 	 
 	public def run(): boolean = {
-		var a: int = 4n;
-		return !(a instanceof int{self==3n});
+		var a: int = 4;
+		return !(a instanceof int{self==3});
 	}
 	
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new PrimitiveToPrimitiveConstrained2().execute();
 	}
 }

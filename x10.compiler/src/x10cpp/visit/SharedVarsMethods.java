@@ -66,6 +66,7 @@ public class SharedVarsMethods {
 	static final String CONSTRUCTOR = "_constructor";
 	static final String MAKE = "_make";
 	public static final String SERIALIZATION_ID_FIELD = "_serialization_id";
+	public static final String SERIALIZATION_MARKER = "x10aux::SERIALIZATION_MARKER";
     public static final String SERIALIZATION_BUFFER = "x10aux::serialization_buffer";
 	static final String SERIALIZE_METHOD = "_serialize";
 	static final String SERIALIZE_ID_METHOD = "_get_serialization_id";

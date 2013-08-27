@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test that coercions and overloading behave.
@@ -26,7 +25,7 @@ public class Overloading extends x10Test {
         public def g(r: Region) = "region";
 
 	public def run(): boolean = {
-                r: Region = Region.make(0,1);
+                r: Region = 0..1;
                 d: Dist = r->here;
 
                 val r1 = f(r);
@@ -40,7 +39,7 @@ public class Overloading extends x10Test {
                     && r4.equals("dist");
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new Overloading().execute();
 	}
 }

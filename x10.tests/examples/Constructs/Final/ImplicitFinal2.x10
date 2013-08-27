@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Testing new implicit final rule (lack thereof).
@@ -20,31 +19,31 @@ public class ImplicitFinal2 extends x10Test {
 
 	public def run(): boolean = {
 		var p: Point = [1, 2, 3];
-		var r: Region = Region.make(10,10);
+		var r: Region = 10..10;
 		var p1: Point = [1+1, 2+2, 3+3];
 		var d: Dist = r->here;
 		p = [1, 2, 4];
-		r = Region.make(10,11);
+		r = 10..11;
 		p1 = [1+1, 2+2, 4+4];
-		d = Region.make(0,1)->here;
+		d = 0..1->here;
 		var P: Point = [1, 2, 3];
-		var R: Region = Region.make(10,10);
+		var R: Region = 10..10;
 		var D: Dist = R->here;
 		P = p;
 		R = r;
 		D  = d;
-		var A: int = 1n;
-		A = A + 1n;
-		var Bb: int = 1n;
-		Bb = Bb + 1n;
-		var BB: int = 1n;
+		var A: int = 1;
+		A = A + 1;
+		var Bb: int = 1;
+		Bb = Bb + 1;
+		var BB: int = 1;
 		BB = BB + BB;
-		var c: int = 1n;
+		var c: int = 1;
 		c = Bb + c;
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new ImplicitFinal2().execute();
 	}
 }

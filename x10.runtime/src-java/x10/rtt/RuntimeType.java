@@ -26,9 +26,31 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
     private static final long serialVersionUID = 1L;
 
     public enum Variance {INVARIANT, COVARIANT, CONTRAVARIANT}
+    private static final Variance[][] invariants = {
+        null,
+        new Variance[] {Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+        new Variance[] {Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT,Variance.INVARIANT},
+    };
+    public static Variance[] INVARIANTS(int length) {
+        assert length >= 1;
+        if (length < invariants.length) {
+            return invariants[length];
+        }
+        Variance[] variances = new Variance[length];
+        java.util.Arrays.fill(variances, Variance.INVARIANT);
+        return variances;
+    }
     
     public Class<?> javaClass;
-    private int numParams;
+    private Variance[] variances;
     public Type<?>[] parents;
 
     // Just for allocation
@@ -36,21 +58,20 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
     }
     
     public RuntimeType(Class<?> javaClass) {
-        this(javaClass, 0, null);
+        this(javaClass, null, null);
     }
 
-    protected RuntimeType(Class<?> javaClass, int numParents) {
-        this(javaClass, numParents, null);
+    protected RuntimeType(Class<?> javaClass, Variance[] variances) {
+        this(javaClass, variances, null);
     }
 
     protected RuntimeType(Class<?> javaClass, Type<?>[] parents) {
-        this(javaClass, 0, parents);
+        this(javaClass, null, parents);
     }
     
-    protected RuntimeType(Class<?> javaClass, int numParams, Type<?>[] parents) {
+    protected RuntimeType(Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
         this.javaClass = javaClass;
-        assert numParams <= Byte.MAX_VALUE;
-        this.numParams = numParams;
+        this.variances = variances;
         this.parents = parents;
     }
   
@@ -62,7 +83,7 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
             if (type == null) {
                 RuntimeType<?> type0 = Types.getRTTForKnownType(javaClass);
                 if (type0 == null) {
-                    type0 = new RuntimeType<T>(javaClass, 0, null);
+                    type0 = new RuntimeType<T>(javaClass, null, null);
                 }
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
@@ -71,23 +92,23 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         } else {
             RuntimeType<?> type = Types.getRTTForKnownType(javaClass);
             if (type == null) {
-                type = new RuntimeType<T>(javaClass, 0, null);
+                type = new RuntimeType<T>(javaClass, null, null);
             }
             return (RuntimeType<T>) type;
         }
     }
 
-    public static <T> RuntimeType/*<T>*/ make(Class<?> javaClass, int numParams) {
+    public static <T> RuntimeType/*<T>*/ make(Class<?> javaClass, Variance[] variances) {
         if (useCache) {
             RuntimeType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, numParams, null);
+                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, variances, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (RuntimeType<T>) type;
         } else {
-            return new RuntimeType<T>(javaClass, numParams, null);
+            return new RuntimeType<T>(javaClass, variances, null);
         }
     }
 
@@ -95,27 +116,27 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         if (useCache) {
             RuntimeType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, 0, parents);
+                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, null, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (RuntimeType<T>) type;
         } else {
-            return new RuntimeType<T>(javaClass, 0, parents);
+            return new RuntimeType<T>(javaClass, null, parents);
         }
     }
     
-    public static <T> RuntimeType/*<T>*/ make(Class<?> javaClass, int numParams, Type<?>[] parents) {
+    public static <T> RuntimeType/*<T>*/ make(Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
         if (useCache) {
             RuntimeType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, numParams, parents);
+                RuntimeType<?> type0 = new RuntimeType<T>(javaClass, variances, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (RuntimeType<T>) type;
         } else {
-            return new RuntimeType<T>(javaClass, numParams, parents);
+            return new RuntimeType<T>(javaClass, variances, parents);
         }
     }
 
@@ -123,13 +144,17 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         return javaClass;
     }
     
-    // Note: function types override this
-    protected Variance getVariance(int i) {
-    	return Variance.INVARIANT;
+    // not used
+//    public Variance[] getVariances() {
+//        return variances;
+//    }
+    
+    private final Variance getVariance(int i) {
+        return variances[i];
     }
     
-    protected final int numParams() {
-        return numParams;
+    private final int numParams() {
+        return variances != null ? variances.length : 0;
     }
     
     public Type<?>[] getParents() {
@@ -595,8 +620,6 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
     public void $_serialize(X10JavaSerializer serializer) throws IOException {
         short sid = serializer.getSerializationId(javaClass, null);
         serializer.write(sid);
-        serializer.write((byte) numParams);
-        // TODO parents needed?
     }
 
     public static X10JavaSerializable $_deserializer(X10JavaDeserializer deserializer) throws IOException {
@@ -613,8 +636,6 @@ public class RuntimeType<T> implements Type<T>, X10JavaSerializable {
         short classId = deserializer.readShort();
         Class<?> clazz = deserializer.getClassForID(classId);
         rt.javaClass = clazz;
-        rt.numParams = deserializer.readByte();
-        // TODO parents needed?
         return rt;
     }
 }

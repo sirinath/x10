@@ -42,7 +42,7 @@ public class Return2 {
         return false;
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
         val r = new Return2().run();
         if(r){
              x10.io.Console.OUT.println("++++++Test succeeded.");

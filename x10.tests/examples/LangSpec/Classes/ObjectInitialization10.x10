@@ -21,16 +21,16 @@ import x10.compiler.*;
 
 public class ObjectInitialization10 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization10().execute();
     }
 
 
-// file Classes line 2794
+// file Classes line 2793
 
 final static  class C2 {
-  protected val a:Long; protected val b:Long; protected val c:Long;
-  protected var x:Long; protected var y:Long; protected var z:Long;
+  protected val a:Int; protected val b:Int; protected val c:Int;
+  protected var x:Int; protected var y:Int; protected var z:Int;
   def this() {
     a = 1;
     this.aplomb();

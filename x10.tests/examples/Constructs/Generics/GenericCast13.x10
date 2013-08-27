@@ -22,15 +22,15 @@ import harness.x10Test;
 public class GenericCast13 extends GenericTest {
 
     interface I[T] {
-        def m(T):long;
+        def m(T):int;
     }
 
     interface J[T] {
-        def m(T):long;
+        def m(T):int;
     }
 
-    class A implements I[long], J[String] {
-        public def m(long) = 0;
+    class A implements I[int], J[String] {
+        public def m(int) = 0;
         public def m(String) = 1;
     }
 
@@ -38,7 +38,7 @@ public class GenericCast13 extends GenericTest {
         
         var a:Any = new A();
 
-        var exceptions:long = 0;
+        var exceptions:int = 0;
 
         try {
             var i:I[String] = a as I[String]; // ERR: Warning: This is an unsound cast because X10 currently does not perform constraint solving at runtime for generic parameters.
@@ -47,7 +47,7 @@ public class GenericCast13 extends GenericTest {
         }
 
         try {
-            var j:J[long] = a as J[long]; // ERR: Warning: This is an unsound cast because X10 currently does not perform constraint solving at runtime for generic parameters.
+            var j:J[int] = a as J[int]; // ERR: Warning: This is an unsound cast because X10 currently does not perform constraint solving at runtime for generic parameters.
         } catch (ClassCastException) {
             exceptions++;
         }
@@ -55,7 +55,7 @@ public class GenericCast13 extends GenericTest {
         return exceptions==2;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericCast13().execute();
     }
 }

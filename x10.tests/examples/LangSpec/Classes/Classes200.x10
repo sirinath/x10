@@ -21,29 +21,29 @@ import harness.x10Test;
 
 public class Classes200 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes200().execute();
     }
 
 
-// file Classes line 1867
+// file Classes line 1869
  static  class Poly {
-   public val coeff : Rail[Long];
-   public def this(coeff: Rail[Long]) { this.coeff = coeff;}
+   public val coeff : Array[Int](1);
+   public def this(coeff: Array[Int](1)) { this.coeff = coeff;}
    public def degree() = coeff.size-1;
-   public def  a(i:Long) = (i<0 || i>this.degree()) ? 0L : coeff(i);
+   public def  a(i:Int) = (i<0 || i>this.degree()) ? 0 : coeff(i);
 
    public operator this + (p:Poly) =  new Poly(
-      new Rail[Long](
+      new Array[Int](
          Math.max(this.coeff.size, p.coeff.size),
-         (i:Long) => this.a(i) + p.a(i)
+         (i:Int) => this.a(i) + p.a(i)
       ));
-   public operator (n : Long) + this
-          = new Poly([n as Long]) + this;
+   public operator (n : Int) + this
+          = new Poly([n as Int]) + this;
 
-   public operator this + (n : Long) = new Poly([n as Long]) + this;
+   public operator this + (n : Int) = new Poly([n as Int]) + this;
    def makeSureItWorks() {
-      val x = new Poly([0L,1L]);
+      val x = new Poly([0,1]);
       val p <: Poly = x+x+x;
       val q <: Poly = 1+x;
       val r <: Poly = x+1;

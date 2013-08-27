@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Interfaces_static_val extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Interfaces_static_val().execute();
     }
 
@@ -34,9 +34,9 @@ public class Interfaces_static_val extends x10Test {
   abstract static  class Pushedness{}
  static   struct Pushy{}
  static   interface Pushing{}
-  static type Shove = Long;
+  static type Shove = Int;
   property text():String;
-  property prio():Long;
+  property prio():Int;
 }
  static class MessageButton(text:String)
   implements Pushable{self.prio()==Pushable.MAX_PRIO} {

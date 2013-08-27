@@ -17,11 +17,11 @@ import harness.x10Test;
  */
 public class CF4_MustFailCompile extends x10Test {
 
-    static struct Reducer implements Reducible[Long] {
+    static struct Reducer implements Reducible[Int] {
      	public  def zero()=0;
-     	public  operator this(a:Long,b:Long)=a+b;
+     	public  operator this(a:Int,b:Int)=a+b;
     }
-    def m() offers Long(6) : void {
+    def m() offers Int(6) : void {
     	offer 5; // ERR
     }
 	public def run() {
@@ -32,7 +32,7 @@ public class CF4_MustFailCompile extends x10Test {
 		return 6==x;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new CF4_MustFailCompile().execute();
 	}
 }

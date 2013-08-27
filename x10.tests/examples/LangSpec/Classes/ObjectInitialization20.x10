@@ -21,19 +21,19 @@ import harness.x10Test;
 
 public class ObjectInitialization20 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization20().execute();
     }
 
 
-// file Classes line 2939
- static class Overlord(x:Long) {
-  def this(x:Long) { property(x); }
+// file Classes line 2938
+ static class Overlord(x:Int) {
+  def this(x:Int) { property(x); }
 }//Overlord
- static class Overdone(y:Long) extends Overlord  {
-  val a : Long;
+ static class Overdone(y:Int) extends Overlord  {
+  val a : Int;
   val b =  y * 9000;
-  def this(r:Long) {
+  def this(r:Int) {
     super(r);                      // (1)
     x10.io.Console.OUT.println(r); // (2)
     val rp1 = r+1;

@@ -20,7 +20,7 @@
 #include <GL/glut.h>
 #endif
 
-#include <x10.regionarray/Array.h>
+#include <x10/array/Array.h>
 
 namespace x10 { namespace gl {
 

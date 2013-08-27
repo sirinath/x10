@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 import x10.util.ArrayList;
 
 /**
@@ -32,30 +31,30 @@ import x10.util.ArrayList;
  */
 public class BlockDistWithPlaceGroup extends x10Test {
 
-    public static COUNT = 200n;
-    public static L = 5n;
+    public static COUNT = 200;
+    public static L = 5;
 
     public def run(): boolean = {
         var passed:Boolean = true;
-        for (tries in 1n..COUNT) {
+        for ([tries] in 1..COUNT) {
             val lb1: int = ranInt(-L, L);
             val lb2: int = ranInt(-L, L);
             val ub1: int = ranInt(lb1, L);
             val ub2: int = ranInt(lb2, L);
-            val R = Region.make(lb1..ub1, lb2..ub2);
-            val totalPoints = (ub1-lb1+1n)*(ub2-lb2+1n);
-            val axisPoints = ub1-lb1+1n;
+            val R = (lb1..ub1) * (lb2..ub2);
+            val totalPoints = (ub1-lb1+1)*(ub2-lb2+1);
+            val axisPoints = ub1-lb1+1;
             val placeGroup = createRandPlaceGroup();
             val np = placeGroup.numPlaces();
 
-            val DBlock = Dist.makeBlock(R, 0n, placeGroup);
-            val p = axisPoints/np;
-            val q = axisPoints%np;
-            var offsWithinPlace:long = 0L;
-            var pn: long = 0L;
+            val DBlock = Dist.makeBlock(R, 0, placeGroup);
+            val p:int = axisPoints/np;
+            val q:int = axisPoints%np;
+            var offsWithinPlace: int = 0;
+            var pn: int = 0;
 
-            for (i in lb1..ub1) {
-                for (j in lb2..ub2) {
+            for ([i] in lb1..ub1) {
+                for ([j] in lb2..ub2) {
 	            if (!DBlock(i, j).equals(placeGroup(pn))) {
                         Console.OUT.println("FAIL: ");
                         Console.OUT.println("\tap = " + axisPoints + " lb1 = "+lb1+" ub1 = "+ub1+" lb2 = "+lb2+" ub2 = "+ub2+" totalPoints = "+totalPoints+" p = "+p+" q = "+q);
@@ -80,18 +79,18 @@ public class BlockDistWithPlaceGroup extends x10Test {
     def createRandPlaceGroup():PlaceGroup {
         val places = new ArrayList[Place]();
         do {
-            val THRESH: int = ranInt(10n, 90n);
+            val THRESH: int = ranInt(10, 90);
             for (p in Place.places()) {
-                val x:int = ranInt(0n, 99n);
+                val x:int = ranInt(0, 99);
                 if (x >= THRESH) {
                     places.add(p);
                 }
             }
-        } while (places.size() == 0L);
-        return new SparsePlaceGroup(places.toRail());
+        } while (places.size() == 0);
+        return new SparsePlaceGroup(places.toArray().sequence());
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new BlockDistWithPlaceGroup().execute();
     }
 }

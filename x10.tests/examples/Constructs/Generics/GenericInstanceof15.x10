@@ -21,13 +21,13 @@ public class GenericInstanceof15 extends GenericTest {
 
     interface I[T1,T2] {}
 
-    class A implements I[Long,Double] {}
+    class A implements I[Int,Double] {}
     
     public def run() = {
-        return new A() instanceof I[Long, Double];
+        return new A() instanceof I[Int, Double];
     }
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericInstanceof15().execute();
     }
 }

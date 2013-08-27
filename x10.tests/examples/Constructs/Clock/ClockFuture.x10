@@ -22,8 +22,8 @@ public class ClockFuture extends x10Test {
 
     private var clock_has_advanced: boolean;
 
-    public def m(): long = {
-	   var ret: long = 0;
+    public def m(): int = {
+	   var ret: int = 0;
 	   when (clock_has_advanced) {
 	      ret = 42;
 	   }
@@ -32,21 +32,21 @@ public class ClockFuture extends x10Test {
 
     public def run(): boolean = {
 	   clocked finish { 
-         val f  = Future.make[long] (()=> m());
+         val f  = Future.make[int] (()=> m());
          // x10.io.Console.OUT.print("1 ... ");
          // this next should not wait on the future
          Clock.advanceAll();
          // x10.io.Console.OUT.print("2 ... ");
          atomic { clock_has_advanced = true; }
          // x10.io.Console.OUT.print("3 ...");
-         var result: long = f();
+         var result: int = f();
          chk(result == 42);
          // x10.io.Console.OUT.println("4");
 	   }
        return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
 	   new ClockFuture().execute();
     }
 }

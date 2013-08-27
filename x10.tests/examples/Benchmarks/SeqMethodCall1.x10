@@ -37,7 +37,7 @@ public class SeqMethodCall1 extends Benchmark {
         val c:double = 1;
         val d:double = 2;
         val e:double = -2;
-        for (1..N) {
+        for (var i:int=0; i<N; i++) {
             sum += x.foo(a);
             sum += x.foo(b);
             sum += x.foo(c);
@@ -52,7 +52,7 @@ public class SeqMethodCall1 extends Benchmark {
     //
     //
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new SeqMethodCall1().execute();
     }
 }

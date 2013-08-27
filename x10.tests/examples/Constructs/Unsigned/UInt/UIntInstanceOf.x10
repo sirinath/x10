@@ -18,8 +18,8 @@ import harness.x10Test;
  */
 public class UIntInstanceOf extends x10Test {
     public def run(): boolean = {
-	val u1 = 1un;
-	val i1 = 1n;
+	val u1 = 1u;
+	val i1 = 1;
 	val l1 = 1l;
 	val b1 = 1y;
 
@@ -36,7 +36,7 @@ public class UIntInstanceOf extends x10Test {
 	Console.OUT.println(m);
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UIntInstanceOf().execute();
     }
 }

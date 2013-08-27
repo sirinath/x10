@@ -15,21 +15,22 @@ import harness.x10Test;
  * Purpose: Check you can cast a primitive to Any and back to a constrained type, 
  *  and the constraint is checked.
  * @author vcave
+ *  @author vj  -- Moved to X10 2.0 and renamed.
  **/
  public class CastInt5ToAnyAndInt3_MustFailCompile extends x10Test {
 
    public def run() {
       try {
-         val i = mth() as Int(3n); // ERR
+         val i = mth() as Int(3); // ERR
       } catch(e: ClassCastException) {
          return true;
       }
       return false;
    }
    
-   public def mth() = 5n as Any{self==5n};
+   public def mth() = 5 as Any{self==5};
    
-   public static def main(Rail[String]) {
+   public static def main(Array[String](1)) {
       new CastInt5ToAnyAndInt3_MustFailCompile().execute();
    }
 }

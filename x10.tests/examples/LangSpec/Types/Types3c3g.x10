@@ -21,23 +21,23 @@ import harness.x10Test;
 
 public class Types3c3g extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types3c3g().execute();
     }
 
 
-// file Types line 929
+// file Types line 927
  static class ConstructorExample {
   static  class Cont[X]{}
   static  interface Inte[X]{
      def meth():X;
    }
   public static def example() {
-    val a = new Cont[Long]();
-    val b = new Inte[Long](){public def meth()=3;};
-    type A = Cont[Long];
+    val a = new Cont[Int]();
+    val b = new Inte[Int](){public def meth()=3;};
+    type A = Cont[Int];
     val aa = new A();
-    type B = Inte[Long];
+    type B = Inte[Int];
     val bb = new B(){public def meth()=4;};
   }
 }

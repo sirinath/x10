@@ -11,16 +11,19 @@
 
 package x10.matrix.comm;
 
-import x10.regionarray.DistArray;
+import x10.io.Console;
+import x10.util.Timer;
+import x10.util.Pair;
 
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
+import x10.compiler.Uninitialized;
 
 import x10.matrix.Debug;
+//import x10.matrix.comm.mpi.UtilMPI;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 
 import x10.matrix.block.Grid;
@@ -49,23 +52,34 @@ import x10.matrix.block.SparseBlock;
  * <p>For more information on how to build different backends and runtime, 
  * run command "make help" at the root directory of GML library.
  */
-public class MatrixGather {
-    /**
-     * Gather data from distributed matrix blocks in all places to the dense
-     * block matrix at here.
+public class MatrixGather extends MatrixRemoteCopy {
+
+	//==============================================
+	// Constructor
+	//==============================================
+	public def this() {
+		super();
+	}
+
+	//==============================================
+	// Dense matrix block gather
+	//==============================================
+	/**
+	 * Gather data from distributed matrix blocks in all places to the dense blcok matrix
+	 * at here.
 	 *
 	 * @param src     source distributed matrix blocks
-	 * @param dst     target matrix block Rail 
+	 * @param dst     target matrix block array 
 	 */
 	public static def gather(
 			src:DistArray[DenseBlock](1), 
-			dst:Rail[DenseBlock]) : void {
+			dst:Array[DenseBlock](1)) : void {
 		
 		val nb = src.region.size();
 		Debug.assure(nb==dst.size, 
 			"Number blocks in dist and local array not match");
 		
-		finish for (var bid:Long=0; bid<nb; bid++) {
+		finish for (var bid:Int=0; bid<nb; bid++) {
 			val dstden = dst(bid).getMatrix();
 				
 			if (bid == here.id()) {
@@ -77,14 +91,18 @@ public class MatrixGather {
 			} else {
 
 				@Ifdef("MPI_COMMU") {
-					MatrixRemoteCopy.mpiCopy(src, bid, 0, dstden, 0, dstden.N);
+					mpiCopy(src, bid, 0, dstden, 0, dstden.N);
 				}
 				@Ifndef("MPI_COMMU") {
-					MatrixRemoteCopy.x10Copy(src, bid, 0, dstden, 0, dstden.N);
+					x10Copy(src, bid, 0, dstden, 0, dstden.N);
 				}
 			}
 		}
 	}
+
+	//------------------------------------------------------------
+	// Gather from single row blocks partitioning
+	//------------------------------------------------------------
 
 	/**
 	 * Gather single-row partitioning blocks in all places to a 
@@ -95,24 +113,24 @@ public class MatrixGather {
 			src:DistArray[DenseBlock](1), 
 			dst:DenseMatrix) : void {
 
-		Debug.assure(gp.numRowBlocks==1L || gp.N==1L,
+		Debug.assure(gp.numRowBlocks==1|| gp.N==1,
 			"Number of row block in partition must be 1 or matrix is a vector");
 
 		@Ifdef("MPI_COMMU") {
-			if (gp.N==1L)
-				mpiGatherVector(gp as Grid{gp.N==1L}, src, dst.d);
+			if (gp.N==1)
+				mpiGatherVector(gp as Grid{gp.N==1}, src, dst.d);
 			else
 				mpiGatherRowBs(gp, src, dst);
 		}
 		@Ifndef("MPI_COMMU") {
-			if (gp.N==1L)
-				x10GatherVector(gp as Grid{gp.N==1L}, src, dst.d);
+			if (gp.N==1)
+				x10GatherVector(gp as Grid{gp.N==1}, src, dst.d);
 			else
 				x10GatherRowBs(gp, src, dst);
 		}
 	}
 
-
+	//
 	/**
 	 * Gather matrix block from all places to dense matrix at haere
 	 * by calling mpi gather routine.
@@ -127,27 +145,27 @@ public class MatrixGather {
 			dstden:DenseMatrix): void {
 		
 		//Only one row block partition
-		val szlist = new Rail[Long](gp.numColBlocks,
-									(i:Long)=>gp.colBs(i)*gp.rowBs(0));
+		val szlist = new Array[Int](gp.numColBlocks,
+									(i:Int)=>gp.colBs(i)*gp.rowBs(0));
 		val root = here.id();
 		
 		@Ifdef("MPI_COMMU") {
 			finish 	{ 
-				for([p] in src.dist) {
+				for(val [p] :Point in src.dist) {
 					val datcnt = szlist(p);
 					if (p != root) {
-						at(src.dist(p)) async {
+						at (src.dist(p)) async {
 							val srcden = src(here.id()).getMatrix();
 							/*******************************************/
 							// Not working
-							//val tmpbuf= null; //fake
-							//val tmplst=null;//   //fake
+							//val tmpbuf:Array[Double](1)= null; //fake
+							//val tmplst:Array[Int](1)=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[Double](0); //fake
-							val tmplst = new Rail[Long](0);   //fake
+							val tmpbuf = new Array[Double](0); //fake
+							val tmplst = new Array[Int](0);   //fake
 							//Debug.flushln("P"+p+" starting non root gather :"+datcnt);
-                            WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
-                                tmpbuf, 0, tmplst, root);
+							WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
+			tmpbuf, 0, tmplst, root);
 						}
 					} 
 				}
@@ -171,9 +189,9 @@ public class MatrixGather {
 	 * Gather vector from distributed dense matrix (column=1)
 	 */
 	public static def mpiGatherVector(
-			gp:Grid{self.N==1L}, 
+			gp:Grid{self.N==1}, 
 			src:DistArray[DenseBlock](1),
-			dst:Rail[Double]): void {
+			dst:Array[Double](1)): void {
 				
 		//Only one row block partition
 		val szlist = gp.rowBs;
@@ -181,18 +199,18 @@ public class MatrixGather {
 
 		@Ifdef("MPI_COMMU") {
 			finish 	{
-				for([p] in src.dist) {
+				for(val [p] :Point in src.dist) {
 					val datcnt = szlist(p);
 					if (p != root) {
-						at(src.dist(p)) async {
+						at (src.dist(p)) async {
 							val srcden = src(here.id()).getMatrix();
 							/*******************************************/
 							// Not working
-							//val tmpbuf= null; //fake
-							//val tmplst=null;//   //fake
+							//val tmpbuf:Array[Double](1)= null; //fake
+							//val tmplst:Array[Int](1)=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[Double](0); //fake
-							val tmplst = new Rail[Long](0);   //fake
+							val tmpbuf = new Array[Double](0); //fake
+							val tmplst = new Array[Int](0);   //fake
 							//Debug.flushln("P"+p+" starting non root gather :"+datcnt);
 							WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
 												  tmpbuf, 0, tmplst, root);
@@ -224,25 +242,25 @@ public class MatrixGather {
 			dstden:DenseMatrix): void {
 
 		val root = here.id();
-		val dstbuf = new GlobalRail[Double](dstden.d as Rail[Double]{self!=null});
+		val dstbuf = new RemoteArray[Double](dstden.d  as Array[Double]{self!=null});
 
-		var startoffset:Long = 0;
-		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
+		var startoffset:Int = 0;
+		for (var cb:Int=0; cb<gp.numColBlocks; cb++) {
 			val pid = cb;			   
 			if (pid != root) {
 				//Copy remote to here copying, Go to remote and copy to here
 				val startrcvoff = startoffset;
-				at(src.dist(pid)) async {
+				at (src.dist(pid)) async {
 					val srcden = src(here.id()).dense;
-					Rail.asyncCopy[Double](srcden.d, 0, dstbuf, startrcvoff, 
+					Array.asyncCopy[Double](srcden.d, 0, dstbuf, startrcvoff, 
 											srcden.M*srcden.N);
 					//Debug.flushln("Async copy from from "+pid+" started");
 				} 
 			} else {
 				//Make local copying
-				var rcvoff:Long = startoffset;
+				var rcvoff:Int = startoffset;
 				val srcden = src(pid).dense;
-				Rail.copy[Double](srcden.d, 0, dstden.d, rcvoff, srcden.M*srcden.N);
+				Array.copy[Double](srcden.d, 0, dstden.d, rcvoff, srcden.M*srcden.N);
 			}
 			startoffset += gp.rowBs(0) * gp.colBs(pid);
 		}
@@ -262,12 +280,13 @@ public class MatrixGather {
 			dstden:DenseMatrix): void {
 
 		val root = here.id();
-		var coloff:Long=0;
-		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
+		var coloff:Int=0;
+		for (var cb:Int=0; cb<gp.numColBlocks; cb++) {
+
 			val colcnt = gp.colBs(cb);
 			
 			if (cb != root) {
-				MatrixRemoteCopy.x10Copy(src, cb, 0, dstden, coloff, colcnt); 
+				x10Copy(src, cb, 0, dstden, coloff, colcnt); 
 
 			} else {
 				//Make local copying
@@ -279,40 +298,44 @@ public class MatrixGather {
 	}
 	
 	public static def x10GatherVector(
-            gp:Grid{self.N==1L}, 
-            src:DistArray[DenseBlock](1),
-            dst:Rail[Double]):void {
+			gp:Grid{self.N==1}, 
+			src:DistArray[DenseBlock](1),
+			dst:Array[Double](1)): void {
 
 		val root = here.id();
-		var rowoff:Long=0;
-		for (var rb:Long=0; rb<gp.numRowBlocks; rb++) {
+		var rowoff:Int=0;
+		for (var rb:Int=0; rb<gp.numRowBlocks; rb++) {
+
 			val rowcnt = gp.rowBs(rb);
 			
 			if (rb != root) {
-				MatrixRemoteCopy.x10Copy(src, rb, 0, dst, rowoff, rowcnt); 
+				x10Copy(src, rb, 0, dst, rowoff, rowcnt); 
 
 			} else {
 				//Make local copying
 				val srcden = src(rb).getMatrix();
-				Rail.copy(srcden.d, 0L, dst, rowoff, rowcnt);
+				Array.copy(srcden.d, 0, dst, rowoff, rowcnt);
 			}
 			rowoff += rowcnt;
 		}
 	}
 
+	//============================================================
+	// Sparse matrix block gather
+	//============================================================
 	/**
 	 * Gather data from distributed sparse matrix blocks to the sparse blcok matrix
 	 * at here.
 	 *
 	 * @param src     source distributed sparsematrix blocks
-	 * @param dst     target sparse matrix block Rail 
+	 * @param dst     target sparse matrix block array 
 	 */
 	public static def gather(
 			src:DistArray[SparseBlock](1), 
-			dst:Rail[SparseBlock]) : void {
+			dst:Array[SparseBlock](1)) : void {
 		
 		val nb = src.region.size();
-		var szlist:Rail[Long];
+		var szlist:Array[Int](1);
 
 		Debug.assure(nb==dst.size, 
 					 "Number blocks in dist and local array mismatch");
@@ -321,7 +344,8 @@ public class MatrixGather {
 			szlist = mpiGatherSize(src);
 		}
 
-		finish for (var bid:Long=0; bid<nb; bid++) {
+		finish for (var bid:Int=0; bid<nb; bid++) {
+			
 			val dstspa = dst(bid).getMatrix();
 			if (bid == here.id()) {
 				val srcspa = src(bid).getMatrix();
@@ -330,11 +354,11 @@ public class MatrixGather {
 			} else {
 				val colcnt = dstspa.N;
 				@Ifdef("MPI_COMMU") {
-					MatrixRemoteCopy.mpiCopy(src, bid, 0, dstspa, 0, colcnt);
+					mpiCopy(src, bid, 0, dstspa, 0, colcnt);
 						//mpiCopy(src, bid, dstspa, 0, colcnt, szlist(bid));
 				}
 				@Ifndef("MPI_COMMU") {
-					MatrixRemoteCopy.x10Copy(src, bid, 0, dstspa, 0, colcnt);
+					x10Copy(src, bid, 0, dstspa, 0, colcnt);
 						//x10Copy(src, bid, dstspa, 0, colcnt);
 				}
 			}
@@ -342,21 +366,26 @@ public class MatrixGather {
 		}
 	}
 
+	//======================================================
 	// Gather block size 
-	protected static def mpiGatherSize(src:DistArray[SparseBlock](1)):Rail[Long] {
+
+	protected static def mpiGatherSize(src:DistArray[SparseBlock](1)):Array[Int](1) {
+
 		val root = here.id();
-		val rcvbuf = new Rail[Long](Place.MAX_PLACES);
+		val rcvbuf = new Array[Int](Place.MAX_PLACES);
 
 		@Ifdef("MPI_COMMU") {
 		//Collecting size
 		finish {
-			for([p] in src.dist) {
+			for(val [p] :Point in src.dist) {
 				if (p != root) {
-					at(src.dist(p)) async {
+					at (src.dist(p)) async {
 						val srcspa = src(here.id()).getMatrix();
-						val datasz = new Rail[Long](1, srcspa.getNonZeroCount());
-						val scvtmp = new Rail[Long](0);
-						val cnttmp = new Rail[Long](0);
+						val datasz = new Array[Int](1, srcspa.getNonZeroCount());
+						//val scvtmp:Array[Int](1) = null;
+						//val cnttmp:Array[Int](1) = null;
+						val scvtmp = new Array[Int](0);
+						val cnttmp = new Array[Int](0);
 						WrapMPI.world.gatherv(datasz, 0, 1, scvtmp, 0, cnttmp, root);
 					}
 				}
@@ -366,14 +395,19 @@ public class MatrixGather {
 				// Do NOT move this block into for loops
 				// MPI prrocess will hang
 				val srcspa = src(root).getMatrix();
-				val datasz = new Rail[Long](1, srcspa.getNonZeroCount());
-				val rcvcnt = new Rail[Long](Place.MAX_PLACES, 1L);
+				val datasz = new Array[Int](1, srcspa.getNonZeroCount());
+				val rcvcnt = new Array[Int](Place.MAX_PLACES, 1);
 				WrapMPI.world.gatherv(datasz, 0, 1, rcvbuf, 0, rcvcnt, root);
 			}
 		}
 		}
 		return rcvbuf;
 	}
+
+
+	//------------------------------------------------------------
+	// Gather sparse matrix block from single row blocks partitioning
+	//------------------------------------------------------------
 
 	/**
 	 * Gather single-row partitioning blocks in all places to a 
@@ -384,7 +418,7 @@ public class MatrixGather {
 			src:DistArray[SparseBlock](1), 
 			dst:SparseCSC) : void {
 
-		Debug.assure(gp.numRowBlocks==1L ||gp.N==1L, 
+		Debug.assure(gp.numRowBlocks==1||gp.N==1, 
 			"Number of row block in partition must be 1 or matrix is a vector");
 
 		@Ifdef("MPI_COMMU") {
@@ -395,32 +429,37 @@ public class MatrixGather {
 		}
 	}
 
+	//----------------------------------------------------------------
+
 	protected static def mpiGatherRowBs(
 			gp:Grid,
 			src:DistArray[SparseBlock](1),
 			dst:SparseCSC): void {
 		
 		@Ifdef("MPI_COMMU") {
+
 			val root = here.id();			
-			var nzcnt:Long = 0;
+			var datoff:Int = 0;
+			var nzcnt:Int = 0;
 			val szlist = mpiGatherSize(src);
 
+			//-----------------------------  
 			finish {
-				for([p] in src.dist) {
+				for(val [p] :Point in src.dist) {
 					nzcnt += szlist(p);
 					if (p != root) {
-						at(src.dist(p)) async {
+						at (src.dist(p)) async {
 							val srcspa = src(here.id()).getMatrix();
 							val datcnt = srcspa.getNonZeroCount();
-
+							//----------------------------------
 							// Not working
-							//val tmpidx = null; 
-							//val tmpval = null;
-							//val tmplst = null;
-
-							val tmpidx = new Rail[Long](0); 
-							val tmpval = new Rail[Double](0);
-							val tmplst = new Rail[Long](0);
+							//val tmpidx:Array[Int](1) = null; 
+							//val tmpval:Array[Double](1) = null;
+							//val tmplst:Array[Int](1) = null;
+							//-----------------------------------
+							val tmpidx = new Array[Int](0); 
+							val tmpval = new Array[Double](0);
+							val tmplst = new Array[Int](0);
 					
 							srcspa.initRemoteCopyAtSource();
 							WrapMPI.world.gatherv(srcspa.getIndex(), 0, datcnt, tmpidx, 0, tmplst, root);
@@ -445,16 +484,16 @@ public class MatrixGather {
 					WrapMPI.world.gatherv(srcspa.getValue(), 0, szlist(root), dst.getValue(), 0, szlist, root);
 
 					srcspa.finalizeRemoteCopyAtSource();
-
+					//--------------------------------------
 					//Cannot finalize all at one time.
 					//Because the empty line of previous block won't be shown
 					//by its next line index value's modification.
 					//dst.finalizeRemoteCopyAtDest();
-
+					//--------------------------------------
 				}
 				// Rebuilt index offset-length for all collected blocks.
-				var sttcol:Long=0;
-				for(var b:Long=0; b<gp.numColBlocks; b++) {
+				var sttcol:Int=0;
+				for(var b:Int=0; b<gp.numColBlocks; b++) {
 					dst.finalizeRemoteCopyAtDest(sttcol, gp.colBs(b), szlist(b));
 					sttcol += gp.colBs(b);
 				}
@@ -472,13 +511,14 @@ public class MatrixGather {
 			dstspa:SparseCSC): void {
 
 		val root = here.id();
-		var coloff:Long = 0;
+		var coloff:Int = 0;
 
-		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
+		for (var cb:Int=0; cb<gp.numColBlocks; cb++) {
+			
 			val colcnt = gp.colBs(cb);
 
 			if (cb != root) {
-				MatrixRemoteCopy.x10Copy(src, cb, 0, dstspa, coloff, colcnt);
+				x10Copy(src, cb, 0, dstspa, coloff, colcnt);
 			} else {
 				//Make local copying
 				val srcspa = src(cb).getMatrix();

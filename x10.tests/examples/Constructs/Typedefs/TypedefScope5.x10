@@ -24,7 +24,7 @@ public class TypedefScope5 extends TypedefTest {
     public def run(): boolean = {
         
         val foo = () => {
-            type T = long;
+            type T = int;
             a:T = 1;
             check("a", a, 1);
         };
@@ -33,7 +33,7 @@ public class TypedefScope5 extends TypedefTest {
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new TypedefScope5().execute();
     }
 }

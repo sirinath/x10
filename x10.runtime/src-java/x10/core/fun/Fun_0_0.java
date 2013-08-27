@@ -13,12 +13,15 @@ package x10.core.fun;
 
 import x10.rtt.FunType;
 import x10.rtt.RuntimeType;
+import x10.rtt.RuntimeType.Variance;
 
 public interface Fun_0_0<U> extends Fun {
     U $apply$G();
     
     public static final RuntimeType<Fun_0_0<?>> $RTT = FunType.<Fun_0_0<?>> make(
         Fun_0_0.class,
-        1
+        new Variance[] {
+            Variance.COVARIANT
+        }
     );
 }

@@ -33,10 +33,8 @@ final public class Boolean extends Struct implements java.lang.Comparable<Boolea
     public RuntimeType<?> $getRTT() {return $RTT;}
     public Type<?> $getParam(int i) {return null;}
     
-    public static final boolean TRUE = true;
-    public static final boolean FALSE = false;
-    public static boolean get$TRUE() { return true; }
-    public static boolean get$FALSE() { return false; }
+    public static final Boolean TRUE = new Boolean(true);
+    public static final Boolean FALSE = new Boolean(false);
 
     final boolean $value;
 
@@ -44,10 +42,8 @@ final public class Boolean extends Struct implements java.lang.Comparable<Boolea
         this.$value = value;
     }
 
-    private static final Boolean BOXED_TRUE = new Boolean(true);
-    private static final Boolean BOXED_FALSE = new Boolean(false);
     public static Boolean $box(boolean value) {
-        return value ? BOXED_TRUE : BOXED_FALSE;
+        return value ? TRUE : FALSE;
     }
 
     public static boolean $unbox(Boolean obj) {

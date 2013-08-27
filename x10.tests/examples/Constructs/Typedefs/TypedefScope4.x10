@@ -23,14 +23,14 @@ public class TypedefScope4 extends TypedefTest {
 
     public def run(): boolean = {
         
-        type T = long;
+        type T = int;
         a:T = 1;
         check("a", a, 1);
 
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new TypedefScope4().execute();
     }
 }

@@ -10,7 +10,6 @@
  */
 
 import x10.io.Printer;
-import x10.regionarray.*;
 import x10.io.StringWriter;
 
 
@@ -76,32 +75,32 @@ abstract public class TestDist extends x10Test {
 
         var os: Rail[Any] = new Rail[Any](10);
 
-        def set(i0: long, vue: double): void = {
+        def set(i0: int, vue: double): void = {
             os(i0) = new Box[double](vue);
         }
 
-        def set(i0: long, i1: long, vue: double): void = {
+        def set(i0: int, i1: int, vue: double): void = {
             if (os(i0)==null) os(i0) = new Grid();
             val grid = os(i0) as Grid;
             grid.set(i1, vue);
         }
 
-        def set(i0: long, i1: long, i2: long, vue: double): void = {
+        def set(i0: int, i1: int, i2: int, vue: double): void = {
             if (os(i0)==null) os(i0) = new Grid();
             val grid = os(i0) as Grid;
             grid.set(i1, i2, vue);
         }
 
-        def pr(rank: long): void = {
-            var min: long = os.size;
-            var max: long = 0L;
-            for (var i: long = 0L; i<os.size; i++) {
+        def pr(rank: int): void = {
+            var min: int = os.size;
+            var max: int = 0;
+            for (var i: int = 0; i<os.size; i++) {
                 if (os(i)!=null) {
                     if (i<min) min = i;
                     else if (i>max) max = i;
                 }
             }
-            for (var i: long = 0L; i<os.size; i++) {
+            for (var i: int = 0; i<os.size; i++) {
                 var o: Any = os(i);
                 if (o==null) {
                     if (rank==1)
@@ -115,7 +114,7 @@ abstract public class TestDist extends x10Test {
                         print("    " + i + "  ");
                     else if (rank>=3) {
                         print("    ");
-                        for (var j: long = 0; j<rank; j++)
+                        for (var j: int = 0; j<rank; j++)
                             print("-");
                         print(" " + i + "\n");
                     }
@@ -144,8 +143,8 @@ abstract public class TestDist extends x10Test {
     def prArray(test: String, r: Region, bump: boolean): Array[double]{rank==r.rank} = {
 
         val init1 = (pt: Point) => {
-            var v: long = 1;
-            for (var i: long = 0; i<pt.rank; i++)
+            var v: int = 1;
+            for (var i: int = 0; i<pt.rank; i++)
                 v *= pt(i);
             return v%10 as double;
         };
@@ -235,8 +234,8 @@ abstract public class TestDist extends x10Test {
     }
 
     // substitute for [a:b,c:d]
-    def r(a: long, b: long, c: long, d: long): Region(2) {
-        return Region.makeRectangular(a..b, c..d);
+    def r(a: int, b: int, c: int, d: int): Region(2) {
+        return Region.makeRectangular([a,c], [b,d]);
     }
 
 }

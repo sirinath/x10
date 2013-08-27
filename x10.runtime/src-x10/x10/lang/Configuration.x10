@@ -13,6 +13,8 @@ package x10.lang;
 
 import x10.compiler.Native;
 
+import x10.util.NoSuchElementException;
+
 /**
  */
 final class Configuration {
@@ -24,13 +26,16 @@ final class Configuration {
     private static DEFAULT_STATIC_THREADS: Boolean = false;
 
     @Native("java", "x10.runtime.impl.java.Runtime.loadenv()")
-    @Native("c++", "x10::lang::RuntimeNatives::loadenv()")
+    @Native("c++", "x10aux::loadenv()")
     static native def loadEnv():x10.util.HashMap[String,String];
 
     static def envOrElse(s:String, b:Boolean):Boolean {
-        val v = Runtime.env.getOrElse(s, null);
-        if (v == null) return b;
-        return !(v.equalsIgnoreCase("false") || v.equalsIgnoreCase("f") || v.equals("0"));
+        try {
+            val v = Runtime.env.getOrThrow(s);
+            return !(v.equalsIgnoreCase("false") || v.equalsIgnoreCase("f") || v.equals("0"));
+        } catch (NoSuchElementException) {
+        }
+        return b;
     }
 
     static def strict_finish():Boolean = envOrElse("X10_STRICT_FINISH", false);
@@ -42,24 +47,26 @@ final class Configuration {
     static def busy_waiting():Boolean = envOrElse("X10_BUSY_WAITING", false);
 
     static def nthreads():Int {
-        var v:Int = 0n;
+        var v:Int = 0;
         try {
-            v = Int.parse(Runtime.env.getOrElse("X10_NTHREADS", "0"));
+            v = Int.parse(Runtime.env.getOrThrow("X10_NTHREADS"));
+        } catch (NoSuchElementException) {
         } catch (NumberFormatException) {
         }
-        if (v <= 0) v = 1n;
+        if (v <= 0) v = 1;
         if (v > PLATFORM_MAX_THREADS) v = PLATFORM_MAX_THREADS;
         return v;
     }
 
     static def max_threads():Int {
-        var v:Int = 0n;
+        var v:Int = 0;
         try {
-           v = Int.parse(Runtime.env.getOrElse("X10_MAX_THREADS", "0"));
+           v = Int.parse(Runtime.env.getOrThrow("X10_MAX_THREADS"));
+       } catch (NoSuchElementException) {
        } catch (NumberFormatException) {
        }
        if (v <= 0) v = nthreads();
-       if (!static_threads() && v < 1000) v = 1000n;
+       if (!static_threads() && v < 1000) v = 1000;
        if (v > PLATFORM_MAX_THREADS) v = PLATFORM_MAX_THREADS;
        return v;
     }

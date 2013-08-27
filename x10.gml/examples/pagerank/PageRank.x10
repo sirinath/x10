@@ -5,12 +5,16 @@
  */
 package pagerank;
 
+import x10.io.Console;
 import x10.util.Timer;
-
+//
 import x10.matrix.Debug;
+//
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
+import x10.matrix.blas.DenseMatrixBLAS;
+//
 import x10.matrix.block.Grid;
 import x10.matrix.block.BlockMatrix;
 import x10.matrix.distblock.DistGrid;
@@ -19,6 +23,9 @@ import x10.matrix.distblock.DistMap;
 import x10.matrix.distblock.DistVector;
 import x10.matrix.distblock.DupVector;
 import x10.matrix.distblock.DistBlockMatrix;
+
+import x10.matrix.distblock.DistDupMult;
+//
 
 /**
  * Parallel Page Rank algorithm based on GML distributed block matrix.
@@ -39,12 +46,19 @@ import x10.matrix.distblock.DistBlockMatrix;
  * <p>[p_(1)]
  * <p>......
  * <p>[p_(numColBsG-1)]
+ * 
+ * 
+ * 
  */
 public class PageRank {
-	static val pN:Long = 1;
-	public val iteration:Long;
-	public val alpha:Double= 0.85;
 
+	//------------------
+	static val pN:Int = 1;
+	public val iteration:Int;
+	public val alpha:Double= 0.85;
+	//-----------------------------------
+	
+	//----------- Input matrix ----------
 	public val G:DistBlockMatrix{self.M==self.N};
 	public val P:DupVector(G.N);
 	public val E:Vector(G.N);
@@ -76,7 +90,7 @@ public class PageRank {
 		vGP	  = Vector.make(G.N);
 	}
 
-	public static def make(gN:Long, nzd:Double, it:Int, numRowBs:Int, numColBs:Int) {
+	public static def make(gN:Int, nzd:Double, it:Int, numRowBs:Int, numColBs:Int) {
 
 		//---- Distribution---
 		val numRowPs = Place.MAX_PLACES;
@@ -100,7 +114,7 @@ public class PageRank {
 	
 	
 	public def init():void {
-
+		//-----------------------------------------------
 		Debug.flushln("Start initialize input matrices");		
 		G.initRandom();
 		Debug.flushln("Dist sparse matrix initialization completes");		
@@ -121,7 +135,7 @@ public class PageRank {
 		tt = P.getCommTime();
 		Debug.flushln("Start parallel PageRank at "+tt);	
 		val st = Timer.milliTime();		
-		for (var i:Long=0; i<iteration; i++) {
+		for (var i:Int=0; i<iteration; i++) {
 			
 			GP.mult(G, P, false).scale(alpha);
 			
@@ -149,6 +163,7 @@ public class PageRank {
 	}
 
 	public def printInfo() {
+		//
 		val nzc:Float =  G.getTotalNonZeroCount() as Float;
 		val nzd:Float =  nzc / (G.M * G.N as Float);
 		Console.OUT.printf("Input Matrix G:(%dx%d), partition:(%dx%d) blocks, ",
@@ -164,4 +179,5 @@ public class PageRank {
 
 		Console.OUT.flush();
 	}
+
 }

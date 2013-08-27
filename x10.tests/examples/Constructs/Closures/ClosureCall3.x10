@@ -20,15 +20,15 @@ import x10.util.*;
  * @author vj
  */
 
-public class ClosureCall3 extends x10Test {
+public class ClosureCall3 extends ClosureTest {
 
     public def run(): boolean = {
-        val y = (x:Long)=> x;
-        val z :Long(1) = y(1);
-        return true;
+        val y = (x:Int)=> x;
+        val z :Int(1) = y(1);
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureCall3().execute();
     }
 }

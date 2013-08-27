@@ -16,24 +16,24 @@ import x10.io.Console;
  */
 public class ArraySum {
 
-    var sum:Long;
-    val data:Rail[Long];
+    var sum:Int;
+    val data:Array[Int](1);
 
-    public def this(n:Long) {
-	// Create a Rail with n elements (0..(n-1)), all initialized to 1.
-        data = new Rail[Long](n, 1);
+    public def this(n:Int) {
+	// Create an Array of rank 1 with n elements (0..(n-1)), all initialized to 1.
+        data = new Array[Int](n, 1);
         sum = 0;
     }
 
-    def sum(a:Rail[Long], start:Long, last:Long) {
-        var mySum: Long = 0;
+    def sum(a:Array[Int](1), start:Int, last:Int) {
+        var mySum: Int = 0;
         for (i in start..(last-1)) { 
         	mySum += a(i);
         }
         return mySum;
     }
 
-    def sum(numThreads:Long) {
+    def sum(numThreads:Int) {
         val mySize = data.size/numThreads;
         finish for (p in 0..(numThreads-1)) async {
             val mySum = sum(data, p*mySize, (p+1)*mySize);
@@ -43,30 +43,33 @@ public class ArraySum {
         }
     }
     
-    public static def main(args:Rail[String]) {
-        var size:Long = 5*1000*1000;
+    public static def main(args: Array[String](1)) {
+        var size:Int = 5*1000*1000;
         if (args.size >=1)
-            size = Long.parse(args(0));
+            size = Int.parse(args(0));
 
         Console.OUT.println("Initializing.");
         val a = new ArraySum(size);
         val P = [1,2,4];
 
         //warmup loop
+        val R = 0..(P.size-1);
         Console.OUT.println("Warming up.");
-        for (numThreads in P)
-            a.sum(numThreads);
+        for (i in R)
+            a.sum(P(i));
         
-        for (numThreads in P) {
-            Console.OUT.println("Starting with " + numThreads + " threads.");
+        for (i in R) {
+            Console.OUT.println("Starting with " + P(i) + " threads.");
             a.sum=0;
             var time: long = - System.nanoTime();
-            a.sum(numThreads);
+            a.sum(P(i));
             time += System.nanoTime();
-            Console.OUT.println("For p=" + numThreads
+            Console.OUT.println("For p=" + P(i) 
                     + " result: " + a.sum 
                     + ((size==a.sum)? " ok" : "  bad") 
                     + " (time=" + (time/(1000*1000)) + " ms)");
         }
+        
+        
     }
 }

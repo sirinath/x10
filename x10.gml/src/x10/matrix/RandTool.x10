@@ -11,19 +11,26 @@
 
 package x10.matrix;
 
+import x10.compiler.Inline;
 import x10.util.Random;
+import x10.util.Timer;
 import x10.lang.Math;
 
 /**
  * Provide random value generation methods which
  * can be used to generate random numbers in normal or unified distribution.
- * Note: not thread-safe
  */
 public class RandTool {
+
+	/**
+	 * 
+	 */
 	private static val tool:RandTool = new RandTool();
 
-	val randomGen = new Random(here.id());
-
+	var randomSeed:Long  = 0;
+	val randomGen:Random =  new Random(here.id());
+	
+	//-------------------------------------------------------------------
 	/**
 	 * Return the static Random type variable used to generate random values
 	 * in integer and double.
@@ -38,6 +45,7 @@ public class RandTool {
 		return tool.randomGen;
 	}
 
+	//
 	private def reSeed() : void{
 		val seed = tool.randomGen.nextLong() + here.id();// + Timer.milliTime();
 		tool.randomGen.init(seed);
@@ -49,14 +57,9 @@ public class RandTool {
 	public static def nextDouble():Double = tool.randomGen.nextDouble();
 
 	/**
-	 * Get a random integer
+	 * Get a random integer number
 	 */
 	public static def nextInt(upbound:Int):Int = tool.randomGen.nextInt(upbound);
-
-	/**
-	 * Get a random Long integer
-	 */
-	public static def nextLong(upbound:Long):Long = tool.randomGen.nextLong(upbound);
 
 
 	/**
@@ -85,7 +88,7 @@ public class RandTool {
 
 			// mean + std_deviation * p;
 			d = Math.floor((avg + avg/2.0*p) + 0.5) as Int ;
-			if (d < 1n) d = 1n;
+			if (d < 1) d = 1;
 			break;
 		}
 		//Console.OUT.println(" dst:"+d);
@@ -97,9 +100,11 @@ public class RandTool {
 	 * The mean is specified by avg within the range of [1, 2*avg]
 	 */
 	public static def nextUniRandDst(max:Double): Int {
-		val rg = RandTool.getRandGen();
+		val rg= RandTool.getRandGen();
 		//val max= (avg * 1.99 - 2) as Int;
-		val retval = 1n + Math.floor(rg.nextFloat()*max) as Int;
+		val retval:Int = 1+Math.floor(rg.nextFloat()*max) as Int;
 		return retval; 
 	}
+
+	//-------------------------------------------------------------------
 }

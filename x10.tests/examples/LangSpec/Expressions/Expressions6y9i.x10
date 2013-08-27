@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Expressions6y9i extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions6y9i().execute();
     }
 
 
-// file Expressions line 1338
+// file Expressions line 1351
  static class Person {
   static operator (f:Fop) as Person = new Person();
   static def asPerson(f:Fop) = new Person();

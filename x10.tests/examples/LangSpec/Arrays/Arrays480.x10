@@ -17,21 +17,21 @@
 
 import harness.x10Test;
 
-import x10.regionarray.*;
+
 
 public class Arrays480 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays480().execute();
     }
 
 
-// file Arrays line 750
+// file Arrays line 755
  static class Example{
 static def example() {
-val A = new Array[Long](11, (i:long)=>i);
+val A = new Array[Int](1..10, (p:Point(1))=>p(0) );
 assert A(3) == 3 && A(4) == 4 && A(10) == 10;
-val cube = (i:Long) => i*i*i;
+val cube = (i:Int) => i*i*i;
 A.map(A, cube);
 assert A(3) == 27 && A(4) == 64 && A(10) == 1000;
 } }

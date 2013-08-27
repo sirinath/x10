@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Expressions90 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions90().execute();
     }
 
@@ -30,7 +30,7 @@ public class Expressions90 extends x10Test {
  static  class ExampleOfConversionAndStuff {
  def example() {
 val n : Byte = 123 as Byte; // explicit
-val f : (Long)=>Boolean = (Long) => true;
+val f : (Int)=>Boolean = (Int) => true;
 val ok = f(n); // implicit
  } }
 

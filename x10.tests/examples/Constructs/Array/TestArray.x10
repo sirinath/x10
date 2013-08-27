@@ -10,7 +10,6 @@
  */
 
 import x10.io.Printer;
-import x10.regionarray.*;
 import x10.io.StringWriter;
 
 
@@ -69,59 +68,59 @@ abstract public class TestArray extends x10Test {
     	private val root = GlobalRef[Grid](this);
         transient var os: Rail[Any] = new Rail[Any](10);
 
-        @Pinned def set(i0: long, vue: double): void = {
+        @Pinned def set(i0: int, vue: double): void = {
             os(i0) = new Box[Double](vue);
         }
 
-        @Pinned def set(i0: long, i1: long, vue: double): void = {
+        @Pinned def set(i0: int, i1: int, vue: double): void = {
             if (os(i0)==null) os(i0) = new Grid();
             val grid = os(i0) as Grid;
             grid.set(i1, vue);
         }
 
-        @Pinned def set(i0: long, i1: long, i2: long, vue: double): void = {
+        @Pinned def set(i0: int, i1: int, i2: int, vue: double): void = {
             if (os(i0)==null) os(i0) = new Grid();
             val grid = os(i0) as Grid;
             grid.set(i1, i2, vue);
         }
 
         @Pinned def pr(rank: int): void = {
-            var min: long = os.size;
-            var max: long = 0L;
-            for (var i: long = 0L; i<os.size; i++) {
+            var min: int = os.size;
+            var max: int = 0;
+            for (var i: int = 0; i<os.size; i++) {
                 if (os(i)!=null) {
                     if (i<min) min = i;
                     else if (i>max) max = i;
                 }
             }
-            for (var i: long = 0L; i<os.size; i++) {
+            for (var i: int = 0; i<os.size; i++) {
                 var o: Any = os(i);
                 if (o==null) {
-                    if (rank==1n)
+                    if (rank==1)
                         out.print(".");
-                    else if (rank==2n) {
+                    else if (rank==2) {
                         if (min<=i && i<=max)
                             out.print("    " + i + "\n");
                     }
                 } else if (o instanceof Grid) {
-                    if (rank==2n)
+                    if (rank==2)
                         out.print("    " + i + "  ");
-                    else if (rank>=3n) {
+                    else if (rank>=3) {
                         out.print("    ");
-                        for (var j: int = 0n; j<rank; j++)
+                        for (var j: int = 0; j<rank; j++)
                             out.print("-");
                         out.print(" " + i + "\n");
                     }
-                    (o as Grid).pr(rank-1n);
+                    (o as Grid).pr(rank-1);
                 } else {
                     val d = (o as Box[double]).value;
                     out.print("" + (d as int));
                 }
 
-                if (rank==1n)
+                if (rank==1)
                     out.print(" ");
             }
-            if (rank==1n)
+            if (rank==1)
                 out.print("\n");
         }
     } // Grid
@@ -133,8 +132,8 @@ abstract public class TestArray extends x10Test {
     @Global def prArray(test: String, r: Region, bump: boolean): DistArray[double]{rank==r.rank} = {
 
         val init1 = (pt: Point) => {
-            var v: long = 1;
-            for (var i: int = 0n; i<pt.rank; i++)
+            var v: int = 1;
+            for (var i: int = 0; i<pt.rank; i++)
                 v *= pt(i);
             return v%10 as double;
         };
@@ -222,12 +221,12 @@ abstract public class TestArray extends x10Test {
                 grid.set(p(0), p(1), p(2), a2(p(0),p(1),p(2)));
             }
         }
-        grid.pr(a.rank as int);
+        grid.pr(a.rank);
     }
 
     @Global def prPoint(test: String, p: Point): void = {
-        var sum: long = 0;
-        for (var i: int = 0n; i<p.rank; i++)
+        var sum: int = 0;
+        for (var i: int = 0; i<p.rank; i++)
             sum += p(i);
         pr(test + " " + p + " sum=" + sum);
     }
@@ -261,8 +260,8 @@ abstract public class TestArray extends x10Test {
     }
 
     // substitute for [a:b,c:d]
-    def r(a: long, b: long, c: long, d: long): Region(2) {
-        return Region.makeRectangular(a..b, c..d);
+    def r(a: int, b: int, c: int, d: int): Region(2) {
+        return Region.makeRectangular([a,c], [b,d]);
     }
 
 }

@@ -27,7 +27,7 @@ public class NullableObjectEqualsPrimitive extends x10Test {
 		return !(res1 || res2);
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new NullableObjectEqualsPrimitive().execute();
 	}
 }

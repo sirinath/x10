@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Classes6d9u extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes6d9u().execute();
     }
 
 
-// file Classes line 2499
+// file Classes line 2498
  static class Colorized[T] {
   private var thing:T;
   private var color:String;
@@ -37,10 +37,10 @@ public class Classes6d9u extends x10Test {
   public def thing():T = thing;
   public def color():String = color;
   public static def example() {
-    val colLong  : Colorized[Long]
-                = new Colorized[Long](3, "green");
-    assert colLong.thing() == 3
-                && colLong.color().equals("green");
+    val colInt  : Colorized[Int]
+                = new Colorized[Int](3, "green");
+    assert colInt.thing() == 3
+                && colInt.color().equals("green");
     val colTrue : Colorized[Boolean]
                 = new Colorized[Boolean](true, "blue");
     assert colTrue.thing()

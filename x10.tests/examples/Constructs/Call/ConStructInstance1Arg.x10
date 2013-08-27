@@ -18,7 +18,7 @@ import harness.x10Test;
 public class ConStructInstance1Arg extends x10Test {
 	static struct A(i:Int) {
 
-		def m(A{self.i==2n}) {
+		def m(A{self.i==2}) {
 		}
 		def n(i:Int) {
 			val a = A(i);
@@ -29,14 +29,14 @@ public class ConStructInstance1Arg extends x10Test {
 	
 	public def run(): boolean {
 		try {
-			A(1n).n(3n);
+			A(1).n(3);
 			return false;
 		} catch (ClassCastException) {
 			return true;
 		}
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new ConStructInstance1Arg().execute();
 	}
 

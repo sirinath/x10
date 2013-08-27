@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test for for loop with x10 for (point p: 1:N) syntax.
@@ -19,32 +18,32 @@ import x10.regionarray.*;
  */
 public class ForLoop3 extends x10Test {
 
-	public static N: int = 100n;
+	public static N: int = 100;
 
 	public def run(): boolean = {
 		//Ensure iterator works in lexicographic order
-		var n: long = 0L;
-		var prev: long = -1L;
-		for (val p: Point in Region.make(0n, N-1n)->here) {
-			n += p(0n);
-			if (prev+1 != p(0n)) return false;
-			prev = p(0n);
+		var n: int = 0;
+		var prev: int = -1;
+		for (val p: Point in 0..(N-1)->here) {
+			n += p(0);
+			if (prev+1 != p(0)) return false;
+			prev = p(0);
 		}
-		if (n != N*(N-1n)/2L) return false;
+		if (n != N*(N-1)/2) return false;
 
 		// now iterate over a region
-		n = 0L;
-		prev = -1L;
-		for (val p: Point in Region.make(0n, N-1n)->here) {
-			n += p(0n);
-			if (prev+1 != p(0n)) return false;
-			prev = p(0n);
+		n = 0;
+		prev = -1;
+		for (val p: Point in 0..(N-1)->here) {
+			n += p(0);
+			if (prev+1 != p(0)) return false;
+			prev = p(0);
 		}
-		if (n != N*(N-1n)/2L) return false;
+		if (n != N*(N-1)/2) return false;
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new ForLoop3().execute();
 	}
 }

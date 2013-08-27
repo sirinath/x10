@@ -12,12 +12,12 @@
 
 public class WSArraySumTest {
     public def run():boolean {
-         val args = new Rail[String](0);
+         val args = new Array[String](0);
          ArraySum.main(args);
          return true;
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
         val r = new WSArraySumTest().run();
         if(r){
              x10.io.Console.OUT.println("++++++Test succeeded.");

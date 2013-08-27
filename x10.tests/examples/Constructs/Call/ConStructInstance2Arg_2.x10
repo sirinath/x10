@@ -19,24 +19,24 @@ import harness.x10Test;
 public class ConStructInstance2Arg_2 extends x10Test {
 	static struct A(i:Int) {
 
-		def m(q:A{self.i==2n},  i:Int(q.i)) {
+		def m(q:A{self.i==2},  i:Int(q.i)) {
 		}
 		def n(i:Int) {
 			val a = A(i);
 			// This call will compile only if -strictCalls is not set.
-			m(a, i+1n); // ERR
+			m(a, i+1); // ERR
 		}
 	}
 	public def run(): boolean {
 		try {
-			A(1n).n(2n);
+			A(1).n(2);
 			return false;
 		} catch (ClassCastException) {
 			return true;
 		}
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new ConStructInstance2Arg_2().execute();
 	}
 

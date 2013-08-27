@@ -20,11 +20,11 @@ import harness.x10Test;
 public class GenericInheritance07 extends GenericTest {
 
     interface I[T] {
-        def m(T):long;
+        def m(T):int;
     }
 
     interface J[T] {
-        def m(T):long;
+        def m(T):int;
     }
 
     class A[T] implements I[T], J[T] {
@@ -33,9 +33,9 @@ public class GenericInheritance07 extends GenericTest {
 
     public def run() = {
         
-        val a = new A[long]();
-        val i:I[long] = a;
-        val j:J[long] = a;
+        val a = new A[int]();
+        val i:I[int] = a;
+        val j:J[int] = a;
 
         genericCheck("a.m(0)", a.m(0), 0);
         genericCheck("i.m(0)", i.m(0), 0);
@@ -44,7 +44,7 @@ public class GenericInheritance07 extends GenericTest {
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericInheritance07().execute();
     }
 }

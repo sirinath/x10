@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Packages9e6r extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Packages9e6r().execute();
     }
 
@@ -31,7 +31,7 @@ public class Packages9e6r extends x10Test {
   static def m() = 1;
   static def m(Boolean) = 2;
   static def i() = 3;
-  static def m(i:Long) {
+  static def m(i:Int) {
     if (i > 10) {
       return i() + 1;
     }

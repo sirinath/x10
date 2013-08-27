@@ -25,7 +25,7 @@ public class NullToRegularType_MustFailCompile extends x10Test {
     public def run2(): Boolean
         = !(null instanceof X10DepTypeClassOneB);
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new NullToRegularType_MustFailCompile().execute();
     }
 }

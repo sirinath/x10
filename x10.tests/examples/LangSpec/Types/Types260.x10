@@ -21,16 +21,16 @@ import harness.x10Test;
 
 public class Types260 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types260().execute();
     }
 
 
-// file Types line 1008
+// file Types line 1006
  static  class Xmpl {
  def example() {
-type Vec(n:Long) = x10.regionarray.Array[Long]{self.rank==1, self.size == n};
-var example : Vec(78L);
+type Vec(n:Int) = Array[Int]{self.rank==1, self.size == n};
+var example : Vec(78);
 }}
 
  static class Hook {

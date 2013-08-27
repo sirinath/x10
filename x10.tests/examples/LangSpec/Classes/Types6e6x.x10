@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Types6e6x extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types6e6x().execute();
     }
 
 
-// file Classes line 2549
+// file Classes line 2548
  static interface Named { def name():String; }
  static class NameMap[T]{T <: Named} {
    val m = new HashMap[String, T]();

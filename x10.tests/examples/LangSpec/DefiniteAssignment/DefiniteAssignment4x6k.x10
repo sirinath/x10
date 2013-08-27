@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class DefiniteAssignment4x6k extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new DefiniteAssignment4x6k().execute();
     }
 
 
 // file DefiniteAssignment line 343
  static class C {
-  val f : Long;
+  val f : Int;
   val g : String;
   def this() {
      f = fless();

@@ -18,19 +18,19 @@ import harness.x10Test;
 public class NumericExpressionToPrimitiveDepType_2 extends x10Test {
 
 	public def run(): boolean = {
-		var j: int = -1n;
-		var i: int{self == 0n} = 0n;
+		var j: int = -1;
+		var i: int{self == 0} = 0;
 		try {
 			// j is incremented after the test is done;
-			i = (j++) as int{self == 0n};
+			i = (j++) as int{self == 0};
 		} catch (e: ClassCastException) {
-			return (j==0n) && (i==0n);
+			return (j==0) && (i==0);
 		}
 
 		return false;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new NumericExpressionToPrimitiveDepType_2().execute();
 	}
 

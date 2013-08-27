@@ -27,17 +27,17 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureTypeParameters1d extends x10Test {
+public class ClosureTypeParameters1d extends ClosureTest {
 
     public def run(): boolean = {
         
         class X[T] {val f = (x:T,y:T) => x.toString() + y.toString();}
-        chk(new X[long]().f(1,1).equals("11"));
+        check("new X[int].f(1,1)", new X[int]().f(1,1), "11");
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureTypeParameters1d().execute();
     }
 }

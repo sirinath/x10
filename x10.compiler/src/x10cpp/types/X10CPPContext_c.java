@@ -189,8 +189,12 @@ public class X10CPPContext_c extends Context {
             cd = supertypeDeclarationType();
         X10MethodDef md = currentCode() instanceof X10MethodDef ? (X10MethodDef) currentCode() : null;
         boolean genericClass = cd.typeParameters().size() != 0;
+        boolean staticMethod = md != null && md.flags().isStatic();
         boolean genericMethod = md != null && md.typeParameters().size() != 0;
-        return (!inStaticContext() && genericClass) || genericMethod;
+        //[DC] FIXME: what if we've in a static initialiser of a generic class
+        //should return false, but does return true?
+        //[IP] The above should also check for an initializer
+        return (!staticMethod && genericClass) || genericMethod;
     }
 
     public X10MethodDef currentMethod() {

@@ -26,16 +26,16 @@ public class AtCopy extends x10Test {
         var passed:Boolean = true;
 
         var h:Link = null;
-        for (i in 1n..10n) {
-             h = new Link(11n-i, h);
+        for ([i] in 1..10) {
+             h = new Link(11-i, h);
         }
 	val head = h;
-	passed &= validate(head, 1n);
+	passed &= validate(head, 1);
 
 	passed &= at (here) mutate(head);
-	passed &= validate(head, 1n);
+	passed &= validate(head, 1);
 	passed &= at (here.next()) mutate(head);
-	passed &= validate(head, 1n);
+	passed &= validate(head, 1);
 
         return passed;
     }
@@ -43,21 +43,21 @@ public class AtCopy extends x10Test {
     public def mutate(head:Link):Boolean {
 	var cur:Link = head;
         var passed:boolean = true;
-        passed &= validate(head, 1n);
-        var count:int = 0n;
+        passed &= validate(head, 1);
+        var count:int = 0;
         while (cur != null) {
-            cur.data += 100n;
+            cur.data += 100;
             cur = cur.ptr;
             count++;
         }
-        passed &= validate(head, 101n);
-	chk(count == 10n);
+        passed &= validate(head, 101);
+	chk(count == 10);
 	return passed;
     }
 
     public def validate(var cur:Link, var c:int):Boolean {
 	var passed:boolean = true;
-        var count:int = 0n;
+        var count:int = 0;
 	while (cur != null) {
             // Console.OUT.println("Checking "+here+". Expected "+c+" found "+cur.data+" count is "+count);
             if (cur.data != c) {
@@ -68,11 +68,11 @@ public class AtCopy extends x10Test {
             c++;
             count++;
         }
-	chk(count == 10n);
+	chk(count == 10);
         return passed;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new AtCopy().execute();
     }
 

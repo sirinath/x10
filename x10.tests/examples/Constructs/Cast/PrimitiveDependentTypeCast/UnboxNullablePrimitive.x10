@@ -23,7 +23,7 @@ import x10.util.Box;
         var res2: boolean = false;
         var res4: boolean = false;
 		
-      var ni: Box[int] = new Box[Int](4n);
+      var ni: Box[int] = new Box[Int](4);
 		var nn: Box[int] = null;
 		
 		// test 1 to primitive
@@ -42,9 +42,9 @@ import x10.util.Box;
 		
 		// test 2 to primitive constrained
 		try {
-			// (int(:self==3n)) <-- nullable<int>
+			// (int(:self==3)) <-- nullable<int>
 			// not null check when unboxing and deptype check
-         val case2a = ni.value as int(3n);
+         val case2a = ni.value as int(3);
 		} catch (e: ClassCastException) {
 			res2 = true;
 		}
@@ -53,7 +53,7 @@ import x10.util.Box;
 		try {
 			// (int(:self==3)) <-- nullable<int>
 			// not null check when unboxing and deptype check
-         val case2b = nn.value as int(3n);
+         val case2b = nn.value as int(3);
 		} catch (e: ClassCastException) {
 			res2 &= true;
 		} catch (e: NullPointerException ) {
@@ -65,7 +65,7 @@ import x10.util.Box;
 	}
 	
 
-   public static def main(Rail[String]) {
+   public static def main(Array[String](1)) {
 		new UnboxNullablePrimitive().execute();
 	}
 }

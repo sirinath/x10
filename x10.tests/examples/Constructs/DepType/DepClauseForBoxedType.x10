@@ -23,11 +23,11 @@ public class DepClauseForBoxedType extends x10Test {
     }
   
 	public def run(): boolean = {
-         var p: Prop = new Prop(1n,2n);
+         var p: Prop = new Prop(1,2);
 	     return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new DepClauseForBoxedType().execute();
 	}
  }

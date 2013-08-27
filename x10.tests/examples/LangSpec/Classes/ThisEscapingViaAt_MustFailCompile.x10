@@ -21,17 +21,17 @@ import harness.x10Test;
 
 public class ThisEscapingViaAt_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ThisEscapingViaAt_MustFailCompile().execute();
     }
 
 
-// file Classes line 2653
+// file Classes line 2652
  
 // This code violates this chapter's constraints
 // and thus will not compile in X10.
  static class Example {
-  val a: Long;
+  val a: Int;
   def this() {
     at(here.next()) {
       // Recall that 'this' is a copy of 'this' outside 'at'.

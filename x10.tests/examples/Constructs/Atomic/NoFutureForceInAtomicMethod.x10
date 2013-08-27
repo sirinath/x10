@@ -19,7 +19,7 @@ public class NoFutureForceInAtomicMethod extends x10Test {
 	
 	public def run(): boolean = {
         try {
-        	val f=Future.make[int](()=>0n);
+        	val f=Future.make[int](()=>0);
 			atomic 
 			  m(f);
 		} catch (IllegalOperationException) {
@@ -31,7 +31,7 @@ public class NoFutureForceInAtomicMethod extends x10Test {
 		return  f.force();
 	}
 
-	public static def main(Rail[String]){
+	public static def main(Array[String](1)){
 		new NoFutureForceInAtomicMethod().execute();
 	}
 }

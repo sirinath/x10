@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Testing int[] method parameters and fields.
@@ -26,17 +25,17 @@ public class Array5 extends x10Test {
     }
 
     private def runtest(): boolean = {
-        ia(0) = 42n;
-        return 42n == ia(0);
+        ia(0) = 42;
+        return 42 == ia(0);
     }
 
     public def run(): boolean = {
-        val temp = new Array[int](1, (long)=>0n);
-        temp(0) = 43n;
+        val temp = new Array[int](1, (int)=>0);
+        temp(0) = 43;
         return (new Array5(temp)).runtest();
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array5().execute();
     }
 }

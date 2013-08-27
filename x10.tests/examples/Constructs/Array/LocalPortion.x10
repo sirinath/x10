@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test of DistArray.getLocalPortion(), which works iff
@@ -26,7 +25,7 @@ public class LocalPortion extends x10Test {
             chk(localPortion.region.equals(Region.make(placeId,placeId)));
         }
 
-        val rectRegion = Region.make(1..10, 1..10);
+        val rectRegion = 1..10 * 1..10;
         val constantDistArray = DistArray.make[Int](Dist.makeConstant(rectRegion));
         finish for(place in constantDistArray.dist.places()) at(place) {
             val localPortion = constantDistArray.getLocalPortion();
@@ -63,7 +62,7 @@ public class LocalPortion extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new LocalPortion().execute();
     }
 }

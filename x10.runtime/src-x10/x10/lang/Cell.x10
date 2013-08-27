@@ -13,8 +13,7 @@ package x10.lang;
 
 /**
  * A mutable cell containing a value.
- * Typical usages are to put a struct on the heap, or to 
- * capture a mutable location in a closure.
+ * Can be used to put a struct on the heap, or to capture a mutable location in a closure.
  *
  * @param T the type of the stored value
  */
@@ -34,6 +33,11 @@ public final class Cell[T] {
 
     /**
      * Return a string representation of the Cell.
+     * When invoked by an activity at the same place as the Cell object, toString() contains
+     * the string representation of the current value stored in the Cell.  When invoked by an
+     * activity at a different place, an UnsupportedOperationException is raised.
+     *
+     * @return the String object being constructed by the StringBuilder
      */
     public def toString() {
         return "Cell(" + (value == null ? "null" : this.value.toString()) + ")";
@@ -42,6 +46,7 @@ public final class Cell[T] {
 
     /**
      * Return the value stored in the Cell.
+     * Will work even if the Cell reference is remote.
      *
      * @return the current value stored in the Cell.
      */
@@ -49,6 +54,7 @@ public final class Cell[T] {
 
     /**
      * Set the value stored in the Cell to the new value.
+     * Will work even if the Cell reference is remote.
      *
      * @param x the new value
      */
@@ -56,6 +62,7 @@ public final class Cell[T] {
 
     /**
      * Set the value stored in the Cell to the new value.
+     * Will work even if the Cell reference is remote.
      *
      * @param x the new value
      * @return the new value stored in the Cell.

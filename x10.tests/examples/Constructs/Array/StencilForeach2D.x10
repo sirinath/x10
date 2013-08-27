@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Implementing a 5-point stencil operation using a for ... async loop
@@ -20,8 +19,8 @@ import x10.regionarray.*;
 public class StencilForeach2D extends x10Test {
     
     public def run(): boolean = {
-        val R = Region.make(-1..256, -1..256);
-        val r = Region.make(0..255, 0..255);
+        val R = (-1..256)*(-1..256);
+        val r = (0..255)*(0..255);
         val north = [0, 1] as Point;
         val south = [0, -1] as Point;
         val west = [-1, 0] as Point;
@@ -35,7 +34,7 @@ public class StencilForeach2D extends x10Test {
         return true;
     }
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new StencilForeach2D().execute();
     }
 

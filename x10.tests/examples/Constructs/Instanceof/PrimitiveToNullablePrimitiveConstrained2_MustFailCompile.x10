@@ -19,9 +19,9 @@ import harness.x10Test;
 public class PrimitiveToNullablePrimitiveConstrained2_MustFailCompile extends x10Test {
 	 
 	public def run() =
-	    !(3n instanceof Box[Int(4n)]); // ERR
+	    !(3 instanceof Box[Int(4)]); // ERR
 	
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new PrimitiveToNullablePrimitiveConstrained2_MustFailCompile().execute();
 	}
 }

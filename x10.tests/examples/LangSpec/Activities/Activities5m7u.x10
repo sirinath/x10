@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Activities5m7u extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Activities5m7u().execute();
     }
 
 
-// file Activities line 673
+// file Activities line 689
  static  class Example {
 static def good() {
   val c = new Cell[Boolean](false);

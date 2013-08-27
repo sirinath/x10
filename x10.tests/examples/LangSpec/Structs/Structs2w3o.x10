@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class Structs2w3o extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Structs2w3o().execute();
     }
 
 
 // file Structs line 102
- static struct Ambig(x:Long) {
-  static def Ambig(x:Long) = "ambiguity please";
+ static struct Ambig(x:Int) {
+  static def Ambig(x:Int) = "ambiguity please";
   static def example() {
     val useMethod      = Ambig(1);
     val useConstructor = new Ambig(2);

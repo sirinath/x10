@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class Types9l9q extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types9l9q().execute();
     }
 
 
-// file Types line 1490
+// file Types line 1486
  static  class Example {
- static class Thing(p:Long){}
+ static class Thing(p:Int){}
 static def example(){
    var x : Thing{x.p==3} = null;
 }

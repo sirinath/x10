@@ -33,7 +33,7 @@ public class UShortCallStatic extends x10Test {
 	return (s0.equals("short = 0") && s1.equals("ushort = 1"));
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UShortCallStatic().execute();
     }
 }

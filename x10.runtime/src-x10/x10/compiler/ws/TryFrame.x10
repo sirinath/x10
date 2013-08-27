@@ -12,7 +12,7 @@ public abstract class TryFrame extends RegularFrame {
 
     @Ifdef("__CPP__")
     public def this(Int, o:TryFrame) {
-        super(-1n, o);
+        super(-1, o);
     }
 
     public def wrapResume(worker:Worker) {

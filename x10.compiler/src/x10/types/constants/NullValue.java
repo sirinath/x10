@@ -62,8 +62,4 @@ public final class NullValue extends ConstantValue {
     public String toString() {
         return "null";
     }
-    @Override
-    public boolean isNull() {
-        return true;
-    }
 }

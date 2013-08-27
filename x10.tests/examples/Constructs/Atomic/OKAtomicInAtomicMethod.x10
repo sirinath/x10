@@ -30,7 +30,7 @@ public class OKAtomicInAtomicMethod extends x10Test {
 		atomic ;
 	}
 
-	public static def main(Rail[String]){
+	public static def main(Array[String](1)){
 		new OKAtomicInAtomicMethod().execute();
 	}
 }

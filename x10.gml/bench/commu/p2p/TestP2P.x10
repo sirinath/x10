@@ -11,10 +11,11 @@
 
 //package commu.p2p;
 
+import x10.io.Console;
 import x10.util.Timer;
 
-public type DataPLH  =PlaceLocalHandle[Rail[Double]];
-public type DataDA   =DistArray[Rail[Double]](1);
+public type DataPLH  =PlaceLocalHandle[Array[Double](1){rail}];
+public type DataDA   =DistArray[Array[Double](1){rail}](1);
 
 /**
    This class contains benchmark test for P2P inter-place comummunication.
@@ -24,7 +25,7 @@ public type DataDA   =DistArray[Rail[Double]](1);
  */
 
 public class TestP2P{
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new TestArrayP2PCopy(args);
 		testcase.run();
 	}
@@ -35,19 +36,19 @@ class TestArrayP2PCopy {
 
 	public val vrfy:Boolean;
 	public val iter:Int;
-	public val dlen:Long;
-	public val M:Long;
-	public val N:Long;
+	public val dlen:Int;
+	public val M:Int;
+	public val N:Int;
 
 	public val np:Int = Place.MAX_PLACES;
 	public val checkTime:Array[Long](1);
 
-
+	//==============
 	val ddata:DataPLH;
 	val darray:DataDA;
 	
-
-    public def this(args:Rail[String]) {
+	//=================
+    public def this(args:Array[String](1)) {
 		M = args.size > 0 ?Int.parse(args(0)):500;
 		N = args.size > 1 ?Int.parse(args(1)):M;
 		dlen = M * N;
@@ -58,8 +59,8 @@ class TestArrayP2PCopy {
 
 		val m = dlen;
 		val d = Dist.makeUnique();
-		ddata  = DataPLH.make[Rail[Double]](d, ()=>(new Array[Double](m)));
-		darray = DistArray.make[Rail[Double]](d);
+		ddata  = DataPLH.make[Array[Double](1){rail}](d, ()=>(new Array[Double](m)));
+		darray = DistArray.make[Array[Double](1){rail}](d);
 		
 	}
 	
@@ -71,7 +72,7 @@ class TestArrayP2PCopy {
 		
 		//ret &= (testDistCopy());
 	}
-
+	//------------------------------------------------
 	public def testRemoteCapture():Boolean {
 		Console.OUT.println("\nTest remote capture of array over "+ np+" placaces");
 
@@ -82,9 +83,9 @@ class TestArrayP2PCopy {
 		val d  = Dist.makeUnique();
 		val src = ddata();
 		
-		for (var i:Long=0; i<iter; i++) {
+		for (var i:Int=0; i<iter; i++) {
 			val stt = Timer.nanoTime();
-			at(Place(1)) {
+			at (new Place(1)) {
 				//Implicit copy: dst, srcbuf, srcOff, dataCnt
 				darray(here.id()) = src;
 			}
@@ -102,13 +103,13 @@ class TestArrayP2PCopy {
 	}
 	
 	
-
+	//------------------------------------------------
 	public def testRemoteCopy():Boolean {
 		Console.OUT.println("\nTest async copy of array over "+ np+" placaces");
 		//val srcint = new Array[Int](dlen);
-		//val rmtbuf = new GlobalRail[Int](srcint as Array[Int]{self!=null});
-		val srcbuf = ddata();
-		val rmtbuf = new GlobalRail[Double](srcbuf as Array[Double]{self!=null});
+		//val rmtbuf = new RemoteArray[Int](srcint as Array[Int]{self!=null});
+		val srcbuf:Array[Double](1){rail} = ddata();
+		val rmtbuf = new RemoteArray[Double](srcbuf as Array[Double]{self!=null});
 
 		var ttt:Double = 0.0;
 		var tt:Double;
@@ -116,9 +117,9 @@ class TestArrayP2PCopy {
 		var minUT:Double=Double.MAX_VALUE;
 		var maxUT:Double=Double.MIN_VALUE;
 
-		for (var i:Long=0; i<iter; i++) {
+		for (var i:Int=0; i<iter; i++) {
 			val stt = Timer.nanoTime();
-			at(Place(1)) {
+			at (new Place(1)) {
 				//Implicit copy: rmtbut, dst, datalen
 				val dst = ddata();
 				//val dst = new Array[Int](datalen);

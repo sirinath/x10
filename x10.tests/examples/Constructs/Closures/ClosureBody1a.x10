@@ -20,18 +20,18 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureBody1a extends x10Test {
+public class ClosureBody1a extends ClosureTest {
 
     public def run(): boolean = {
         
         // expression
         val f = ()=>1+1;
-        chk(f() == 2l, "f()");
+        check("f()", f(), 2);
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureBody1a().execute();
     }
 }

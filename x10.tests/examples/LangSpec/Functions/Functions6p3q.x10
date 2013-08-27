@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Functions6p3q extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Functions6p3q().execute();
     }
 
@@ -29,7 +29,7 @@ public class Functions6p3q extends x10Test {
 // file Functions line 177
  static  class Whatever {
  var
- f : (a:Long{a!=0}, b:Long{b!=a}){b!=0} => Long{self != a}
+ f : (a:Int{a!=0}, b:Int{b!=a}){b!=0} => Int{self != a}
  = null;
 }
 

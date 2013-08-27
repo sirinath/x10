@@ -21,13 +21,13 @@ import harness.x10Test;
 
 public class Classes270 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes270().execute();
     }
 
 
 // file Classes line 2252
- static  class Pt(x:Long, y:Long){}
+ static  class Pt(x:Int, y:Int){}
  static class Line(a:Pt, b:Pt{a != b}) {}
 
  static class Hook {

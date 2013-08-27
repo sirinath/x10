@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Classes9q2w extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes9q2w().execute();
     }
 
 
 // file Classes line 612
- static class Ret(n:Long) {
-  static def met1(a:Long) : Ret{n==a} = new Ret(a);
-  static def met2(a:Long)             = new Ret(a);
+ static class Ret(n:Int) {
+  static def met1(a:Int) : Ret{n==a} = new Ret(a);
+  static def met2(a:Int)             = new Ret(a);
   static def use3(Ret{n==3}) {}
   static def example() {
      use3(met1(3));

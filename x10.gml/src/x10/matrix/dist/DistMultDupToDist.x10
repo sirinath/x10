@@ -1,3 +1,4 @@
+
 /*
  *  This file is part of the X10 project (http://x10-lang.org).
  *
@@ -11,15 +12,21 @@
 
 package x10.matrix.dist;
 
+import x10.io.Console;
 import x10.util.Timer;
 
 import x10.matrix.Debug;
+//
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.blas.DenseMatrixBLAS;
+//
+import x10.matrix.sparse.SparseCSC;
 import x10.matrix.sparse.SparseMultDenseToDense;
+
 import x10.matrix.dist.DistDenseMatrix;
 import x10.matrix.dist.DistSparseMatrix;
+
 import x10.matrix.dist.DupDenseMatrix;
 
 /**
@@ -29,7 +36,11 @@ import x10.matrix.dist.DupDenseMatrix;
  * A has 1-D partitioning in nx1 blocks, and B has dense
  * matrix replicated at all n places.
  */
+
 public class DistMultDupToDist {
+
+	//=====================================================================
+	// Distributed Sparse multiplies with duplicated dense
 	/**
 	 * DistSparseMatrix matrix A is partitioned in nx1 blocks, where n is number of
 	 * places. DupDenseMatrix B has dense matrix replicated in all
@@ -42,10 +53,11 @@ public class DistMultDupToDist {
 			plus:Boolean): DistDenseMatrix(C) {
 		
 		Debug.assure(A.M==C.M&&A.N==B.M&&B.N==C.N, "Matrix dimension mismatch");
-		Debug.assure(A.grid.numColBlocks==1L, "Matrix partition of A is not single column block partitioning");
-		Debug.assure(C.grid.numColBlocks==1L, "Output matrix partition is not single column block partitioning");
+		Debug.assure(A.grid.numColBlocks==1, "Matrix partition of A is not single column block partitioning");
+		Debug.assure(C.grid.numColBlocks==1, "Output matrix partition is not single column block partitioning");
 		
-		finish ateach([p] in C.dist) {
+		finish ateach (val [p]:Point in C.dist) {
+			//
 			val smA = A.getMatrix(p);
 			val dmB = B.getMatrix() as DenseMatrix{self.M==smA.N}; 
 			// as DenseMatrix(smA.N);
@@ -68,6 +80,7 @@ public class DistMultDupToDist {
 			B:DupDenseMatrix{self.M==A.N}, 
 			C:DistDenseMatrix(A.M,B.N))	= comp(A, B, C, false);
 
+	//========================================================================
 	/**
 	 * DistSparseMatrix matrix A is partitioned in nx1 blocks partition, 
 	 * where n is number of places. 
@@ -81,16 +94,19 @@ public class DistMultDupToDist {
 			plus:Boolean) : DistDenseMatrix(C) {
 				
 		Debug.assure(A.M==C.M&&A.N==B.N&&B.M==C.N, "Matrix dimension mismatch");
-		Debug.assure(A.grid.numColBlocks==1L, "Matrix A partition is not single column block partitioning");
-		Debug.assure(C.grid.numColBlocks==1L, "Output matrix partition is not single column block partitioning");
+		Debug.assure(A.grid.numColBlocks==1, "Matrix A partition is not single column block partitioning");
+		Debug.assure(C.grid.numColBlocks==1, "Output matrix partition is not single column block partitioning");
 
-		finish ateach([p] in C.dist) {
+		finish ateach (val [p]:Point in C.dist) {
 			val smA = A.getMatrix(p);
 			val dmB = B.getMatrix() as DenseMatrix{self.N == smA.N};
 			val dmC = C.getMatrix(p) as DenseMatrix(smA.M, dmB.M);
+			//smA.print("At place "+p+" Input CSC=");
+			//dmB.print("At place "+p+" Input Den=");
 			/* TIMING */ val stt = Timer.milliTime();
 			SparseMultDenseToDense.compMultTrans(smA, dmB, dmC, plus);
 			/* TIMING */ C.distBs(p).calcTime += Timer.milliTime() - stt;
+			//dmC.print("At place "+p+" CSC * Den=");
 		}
 		return C;
 	}
@@ -100,12 +116,14 @@ public class DistMultDupToDist {
 			B:DupDenseMatrix{self.N==A.N}, 
 			C:DistDenseMatrix(A.M,B.M))	= compMultTrans(A, B, C, false);
 
+
 	/**
 	 * DistSparseMatrix matrix A is partitioned in 1xn blocks partition, 
 	 * where n is number of places. 
 	 * DupDenseMatrix B has dense matrix replicated in all
 	 * n places. The multiplication requires A transposed to perform
 	 * matrix multiplication in all places.
+	 *
 	 */
 	public static def compTransMult(
 			A:DistSparseMatrix, 
@@ -114,20 +132,28 @@ public class DistMultDupToDist {
 			plus:Boolean) : DistDenseMatrix(C) {
 				
 		Debug.assure(A.N==C.M&&A.M==B.M&&B.N==C.N, "Matrix dimension mismatch");
-		Debug.assure(A.grid.numRowBlocks==1L, "Matrix A partition is not single row block partitioning");
-		Debug.assure(C.grid.numRowBlocks==1L, "Output matrix partition is not single row block partitioning");
+		Debug.assure(A.grid.numRowBlocks==1, "Matrix A partition is not single row block partitioning");
+		Debug.assure(C.grid.numRowBlocks==1, "Output matrix partition is not single row block partitioning");
 
-		finish ateach(val [p]:Point in C.dist) {
+		finish ateach (val [p]:Point in C.dist) {
+			
 			val smA = A.local();
 			val dmB = B.local() as DenseMatrix{self.M == smA.M};
 			val dmC = C.local() as DenseMatrix(smA.N, dmB.N);
+			//smA.print("At place "+p+" Input CSC=");
+			//dmB.print("At place "+p+" Input Den=");
 			/* TIMING */ val stt = Timer.milliTime();
 			SparseMultDenseToDense.compTransMult(smA, dmB, dmC, plus);
 			/* TIMING */ C.distBs(p).calcTime += Timer.milliTime() - stt;
+			//dmC.print("At place "+p+" CSC * Den=");
 		}
 		return C;
 	}
 
+
+
+	//=======================================================================
+	//=======================================================================
 	/**
 	 * DistDenseMatrix matrix A is partitioned in nx1 blocks, where n is number of
 	 * places. DupDenseMatrix B has dense matrix replicated in all
@@ -140,13 +166,15 @@ public class DistMultDupToDist {
 			plus:Boolean ) : DistDenseMatrix(C) {
 	  
 		Debug.assure(A.M==C.M&&A.N==B.M&&B.N==C.N, "Matrix dimension mismatch");
-		Debug.assure(A.grid.numColBlocks==1L, "Matrix input A is not 1-column block partitioning");
-		Debug.assure(C.grid.numColBlocks==1L, "Matrix output is not 1-column block partitioning");
+		Debug.assure(A.grid.numColBlocks==1, "Matrix input A is not 1-column block partitioning");
+		Debug.assure(C.grid.numColBlocks==1, "Matrix output is not 1-column block partitioning");
 		
-		finish ateach([p] in C.dist) {
+		finish ateach (val [p]:Point in C.dist) {
+
 			val dmA = A.getMatrix(p);
 			val dmB = B.getMatrix() as DenseMatrix(dmA.N);
 			val dmC = C.getMatrix(p) as DenseMatrix(dmA.M, dmB.N);
+			//
 			/* TIMING */ val stt = Timer.milliTime();
 			DenseMatrixBLAS.comp(dmA, dmB, dmC, plus);
 			/* TIMING */ C.distBs(p).calcTime += Timer.milliTime() - stt;
@@ -159,6 +187,7 @@ public class DistMultDupToDist {
 			B:DupDenseMatrix{self.M==A.N}, 
 			C:DistDenseMatrix(A.M,B.N))	= comp(A, B, C, false);
 
+	//========================================================================
 	/**
 	 * DistDenseMatrix matrix A is partitioned in nx1 blocks, where n is number of
 	 * places. DupDenseMatrix B has dense matrix replicated in all
@@ -171,10 +200,11 @@ public class DistMultDupToDist {
 			plus:Boolean) : DistDenseMatrix(C) {
 										
 		Debug.assure(A.M==C.M&&A.N==B.N&&B.M==C.N, "Matrix dimension mismatch");
-		Debug.assure(A.grid.numColBlocks==1L, "Matrix input A is not 1-column block partitioning");
-		Debug.assure(C.grid.numColBlocks==1L, "Matrix output is not 1-column block partitioning");
+		Debug.assure(A.grid.numColBlocks==1, "Matrix input A is not 1-column block partitioning");
+		Debug.assure(C.grid.numColBlocks==1, "Matrix output is not 1-column block partitioning");
 		
-        finish ateach([p] in C.dist) {
+		finish ateach (val [p]:Point in C.dist) {
+			
 			val dmA = A.getMatrix(p);
 			val dmB = B.getMatrix() as DenseMatrix{self.N==dmA.N};
 			val dmC = C.getMatrix(p) as DenseMatrix(dmA.M, dmB.M);
@@ -191,11 +221,13 @@ public class DistMultDupToDist {
 			B:DupDenseMatrix{self.N==A.N}, 
 			C:DistDenseMatrix(A.M,B.M))	= compMultTrans(A, B, C, false);
 
+	//========================================================================
 	/**
 	 * DistDenseMatrix matrix A is partitioned in 1xn blocks, where n is number of
 	 * places. DupDenseMatrix B has dense matrix replicated in all
 	 * n places. A is transposed in performing multiplication in parallel at all
 	 * places
+	 *
 	 */
 	public static def compTransMult(
 			A:DistDenseMatrix, 
@@ -204,10 +236,11 @@ public class DistMultDupToDist {
 			plus:Boolean) : DistDenseMatrix(C) {
 				
 		Debug.assure(A.N==C.M&&A.M==B.M&&B.N==C.N, "Matrix dimension mismatch");
-		Debug.assure(A.grid.numRowBlocks==1L, "Matrix input A is not 1-row block partitioning");
-		Debug.assure(C.grid.numRowBlocks==1L, "Matrix output is not 1-row block partitioning");
+		Debug.assure(A.grid.numRowBlocks==1, "Matrix input A is not 1-row block partitioning");
+		Debug.assure(C.grid.numRowBlocks==1, "Matrix output is not 1-row block partitioning");
 		
-		finish ateach(val [p]:Point in C.dist) {
+		finish ateach (val [p]:Point in C.dist) {
+			
 			val dmA = A.local();
 			val dmB = B.local() as DenseMatrix{self.M==dmA.M};
 			val dmC = C.local() as DenseMatrix(dmA.N, dmB.N);
@@ -218,4 +251,5 @@ public class DistMultDupToDist {
 		}
 		return C;
 	}
+
 }

@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test for ateach.
@@ -18,8 +17,8 @@ import x10.regionarray.*;
  * @author kemal, 12/2004
  */
 public class AtEach extends x10Test {
-    private val root = GlobalRef[AtEach](this);
-    transient var nplaces: long = 0L;
+	private val root = GlobalRef[AtEach](this);
+    transient var nplaces: int = 0;
 
     public def run(): boolean = {
         val d: Dist = Dist.makeUnique();
@@ -28,17 +27,17 @@ public class AtEach extends x10Test {
         finish ateach (p in d) {
             // remember if here and d[p] disagree
             // at any activity at any place
-            disagree(p) |= ((here != d(p)) ? 1n : 0n);
+            disagree(p) |= ((here != d(p)) ? 1 : 0);
             async at(root){atomic {root().nplaces++;}}
         }
         // ensure that d[i] agreed with here in
         // all places
         // and that an activity ran in each place
-        return disagree.reduce(((x:Int,y:Int) => x+y),0n) == 0n &&
+        return disagree.reduce(((x:Int,y:Int) => x+y),0) == 0 &&
                 nplaces == Place.MAX_PLACES;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new AtEach().execute();
     }
 }

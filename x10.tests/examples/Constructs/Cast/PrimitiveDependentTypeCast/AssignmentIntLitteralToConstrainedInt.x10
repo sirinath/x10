@@ -20,8 +20,8 @@ public class AssignmentIntLitteralToConstrainedInt extends x10Test {
 	public def run(): boolean = {
 		
 		try { 
-			var i: int{self == 0n} = 0n;
-			i = 0n;
+			var i: int{self == 0} = 0;
+			i = 0;
          
 		}catch (e: Exception) {
 			return false;
@@ -30,7 +30,7 @@ public class AssignmentIntLitteralToConstrainedInt extends x10Test {
 		return true;
 	}
 
-   public static def main(Rail[String]){
+   public static def main(Array[String](1)){
 		new AssignmentIntLitteralToConstrainedInt().execute();
 	}
 

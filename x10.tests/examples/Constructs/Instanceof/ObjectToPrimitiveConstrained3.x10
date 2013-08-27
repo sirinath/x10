@@ -20,11 +20,11 @@ import x10.util.Box;
 public class ObjectToPrimitiveConstrained3 extends x10Test {
 	 
 	public def run(): boolean = {
-		var primitive:Box[Int]  = new Box[Int](3n);
-		return !(primitive.value instanceof Int(4n));
+		var primitive:Box[Int]  = new Box[Int](3);
+		return !(primitive.value instanceof Int(4));
 	}
 	
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new ObjectToPrimitiveConstrained3().execute();
 	}
 }

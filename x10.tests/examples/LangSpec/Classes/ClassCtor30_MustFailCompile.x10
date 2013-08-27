@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class ClassCtor30_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ClassCtor30_MustFailCompile().execute();
     }
 
@@ -30,8 +30,8 @@ public class ClassCtor30_MustFailCompile extends x10Test {
 
  
 // THIS CODE DOES NOT COMPILE
- static class Cfail(x:Long) {
-  val d: Long;
+ static class Cfail(x:Int) {
+  val d: Int;
   static def example() {
     val wrong = new Cfail(40);
   }

@@ -11,6 +11,7 @@
 
 package x10.matrix.block;
 
+import x10.io.Console;
 import x10.util.StringBuilder;
 
 import x10.matrix.Debug;
@@ -18,28 +19,30 @@ import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.VerifyTools;
 
-public type DenseBlockMatrix(M:Long)=DenseBlockMatrix{self.M==M};
-public type DenseBlockMatrix(M:Long, N:Long)=DenseBlockMatrix{self.M==M, self.N==N};
+public type DenseBlockMatrix(M:Int)=DenseBlockMatrix{self.M==M};
+public type DenseBlockMatrix(M:Int, N:Int)=DenseBlockMatrix{self.M==M, self.N==N};
 public type DenseBlockMatrix(C:DenseBlockMatrix)=DenseBlockMatrix{self==C};
 
 
 /**
  * OBSOLETE. Use BlockMatrix.
  * 
- * Dense block matrix is constructed by using a Rail of dense blocks, and
+ * Dense block matrix is constructed by using an array or dense blocks, and
  * grid partition specifies how each block is mapped to the overall dense matrix.
  * 
  */
 public class DenseBlockMatrix(grid:Grid) extends Matrix  {
-	public val listBs:Rail[DenseBlock];
 
+	public val listBs:Array[DenseBlock](1);
+   
+	//================================================================
 	/**
 	 * Construt dense-block matrix instance.
 	 *
 	 * @param  gp     Grid partition
-	 * @param  blkMs  Matrix blocks
+	 * @param  blkMs  Matrix block array
 	 */
-	public def this(gp:Grid, blkMs:Rail[DenseBlock]) {
+	public def this(gp:Grid, blkMs:Array[DenseBlock](1)) {
 		super(gp.M, gp.N);
 		property(gp);
 		listBs = blkMs;
@@ -53,10 +56,10 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	public def this(gp:Grid) {
 		super(gp.M, gp.N);
 		property(gp);
-		listBs = new Rail[DenseBlock](gp.numRowBlocks* gp.numColBlocks);
+		listBs = new Array[DenseBlock](gp.numRowBlocks* gp.numColBlocks);
 	}
 
-
+	//================================================================
 
 	/**
 	 * Create an instance of dense-block matrix, and allocate memory space
@@ -83,15 +86,17 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		return dbm;
 	}
 
+	//================================================================
+
 	/**
 	 * Allocate all dense blocks in the grid partitioning
 	 *
 	 */
 	public def alloc():void {
 		//finish ateach([p] :Point in this.dist) {
-		for(var c:Long=0; c<grid.numColBlocks; c++) {
-			for (var r:Long=0; r<grid.numRowBlocks; r++) {
-				val p = grid.getBlockId(r, c);
+		for(var c:Int=0; c<grid.numColBlocks; c++) {
+			for (var r:Int=0; r<grid.numRowBlocks; r++) {
+				val p:Int = grid.getBlockId(r, c);
 				listBs(p) = DenseBlock.make(this.grid, r, c);
 			}
 		}
@@ -103,7 +108,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * An exception is thrown.
 	 * 
 	 */
-	public def alloc(m:Long, n:Long):DenseBlockMatrix(m,n) {
+	public def alloc(m:Int, n:Int):DenseBlockMatrix(m,n) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -113,27 +118,29 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 */
 	public def clone():DenseBlockMatrix(M,N) {
 		val nbm = new DenseBlockMatrix(this.grid);
-		for (p in 0..(listBs.size-1)) {
+		for(val [p] :Point in listBs) {
 			nbm.listBs(p) = this.listBs(p).clone();//getMatrix(p).clone();
 		}
 		return nbm as DenseBlockMatrix(M,N);
 	}
-
+	//================================================================
 
 	/**
 	 * Initialize dense block matrix with a constant value
 	 *
 	 */
 	public def init(ival:Double):DenseBlockMatrix(this) {
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			listBs(p).init(ival);
 		}
 		return this;
 	}
 	
-	public def init(f:(Long, Long)=>Double):DenseBlockMatrix(this) {
-		for (var cb:Long=0; cb<grid.numColBlocks; cb++)
-			for (var rb:Long=0; rb<grid.numRowBlocks; rb++ ) {
+	public def init(f:(Int, Int)=>Double):DenseBlockMatrix(this) {
+		var roff:Int=0;
+		var coff:Int=0;
+		for (var cb:Int=0; cb<grid.numColBlocks; cb++)
+			for (var rb:Int=0; rb<grid.numRowBlocks; rb++ ) {
 				listBs(grid.getBlockId(rb, cb)).init(f);
 			}		
 		return this;
@@ -144,14 +151,14 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * 
 	 */
 	public def initRandom():DenseBlockMatrix(this) {
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			listBs(p).initRandom();
 		}
 		return this;
 	}
 	
-	public def initRandom(lo:Long, up:Long):DenseBlockMatrix(this) {
-		for (p in 0..(listBs.size-1)) {
+	public def initRandom(lo:Int, up:Int):DenseBlockMatrix(this) {
+		for (val [p] :Point in listBs) {
 			listBs(p).initRandom(lo, up);
 		}
 		return this;
@@ -162,31 +169,32 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def reset():void {
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			listBs(p).getMatrix().reset();
 		}
 	}
 
-
+	//================================================================
 	// Data copy 
-
+	//================================================================	
 	/**
 	 * Copy element values to the target matrix of the same dimension.
 	 *
 	 * @param dst  -- the target dense matrix.		
 	 */
 	public def copyTo(dst:DenseMatrix(M,N)):void {
-		var dstcolidx:Long=0;
+		var dstcolidx:Int=0;
 		// Iterate all blocks columnwise
-		for (var cb:Long=0; cb < grid.numColBlocks; cb++) {
-			var dstblkidx:Long = dstcolidx;
+		for (var cb:Int=0; cb < grid.numColBlocks; cb++) {
+			var dstblkidx:Int = dstcolidx;
 
-			for (var rb:Long=0; rb<grid.numRowBlocks; rb++) {
+			for (var rb:Int=0; rb<grid.numRowBlocks; rb++) {
+
 				val src = listBs(grid.getBlockId(rb, cb)).getMatrix();
-				var srcoff:Long = 0;
-				var dstoff:Long = dstblkidx;
-				for (var col:Long=0; col<src.N; col++, srcoff+=src.M, dstoff+=dst.M)
-					Rail.copy[Double](src.d, srcoff, dst.d, dstoff, src.M);
+				var srcoff:Int = 0;
+				var dstoff:Int = dstblkidx;
+				for (var col:Int=0; col<src.N; col++, srcoff+=src.M, dstoff+=dst.M)
+					Array.copy[Double](src.d, srcoff, dst.d, dstoff, src.M);
 				dstblkidx += src.M;
 			}
 
@@ -197,8 +205,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	public def copyTo(that:DenseBlockMatrix(M,N)):void {
 		Debug.assure(this.grid.equals(that.grid), "Data partitioning is not compatible");
 		
-		for (p in 0..(listBs.size-1)) {
-			this.listBs(p).copyTo(that.listBs(p));
+		for (val [b] : Point in this.listBs) {
+			this.listBs(b).copyTo(that.listBs(b));
 		}		
 	}
 
@@ -219,18 +227,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param dm 	 the source dense matrix 
 	 */
     public def copyFrom(dm:DenseMatrix(M,N)):void {
-		var srcoff:Long=0;
-		var srccol:Long = 0;
+		var srcoff:Int=0;
+		var srccol:Int = 0;
 						   
 		// Iterate all blocks columnwise
-		for (var cb:Long=0; cb < grid.numColBlocks; cb++) {
-			for (var col:Long=0; col<grid.colBs(cb); col++, srccol++)
+		for (var cb:Int=0; cb < grid.numColBlocks; cb++) {
+			for (var col:Int=0; col<grid.colBs(cb); col++, srccol++)
 				
-				for (var rb:Long=0; rb<grid.numRowBlocks; rb++) {
+				for (var rb:Int=0; rb<grid.numRowBlocks; rb++) {
 					val dst = listBs(grid.getBlockId(rb, cb)).dense;
-					val dstoff = col*dst.M;
+					var dstoff:Int = col*dst.M;
 
-					Rail.copy[Double](dm.d, srcoff, dst.d, dstoff, dst.M);
+					Array.copy[Double](dm.d, srcoff, dst.d, dstoff, dst.M);
 					srcoff += dst.M;
 			}
 		}
@@ -248,23 +256,26 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		return dm;
 	}
 
-
+	//================================================================
 	// Data access methods 
+	//================================================================	
 
 	/**
-	 *  Return the matrix block for the given index
+	 *  Return the matrix instance of matrix block at index of array
 	 *
-	 * @param  i  index of matrix block
+	 * @param  i  index of matrix block in array
 	 */
-	public def getMatrix(i:Long) <: Matrix = this.listBs(i).getMatrix();
+	public def getMatrix(i:Int) <: Matrix = this.listBs(i).getMatrix();
 
+	//---------
+ 
 	/**
 	 *  Return element value in matrix. override the method in super class.
 	 *
 	 * @param  r  the r-th rows in the matrix
 	 * @param  c  the c-th columns in the matrix
 	 */
-	public operator this(r:Long, c:Long):Double {
+	public operator this(r:Int, c:Int):Double {
 		val loc = grid.find(r, c);
 		val bid = grid.getBlockId(loc(0), loc(1));
 		return listBs(bid).dense(loc(2), loc(3));
@@ -276,24 +287,34 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param  r  the index of rows in the matrix
 	 * @param  c  the index of columns in the matrix
 	 */
-	public  operator this(x:Long,y:Long)=(v:Double):Double {
+	public  operator this(x:Int,y:Int)=(v:Double):Double {
 		val loc = grid.find(x, y);
 		val bid = grid.getBlockId(loc(0), loc(1));
 		listBs(bid).dense(loc(2), loc(3))=v;
 		return v;
 	}
 
+ 	//====================================================================
+	// Cellwise operation
+	//====================================================================
+
 	/**
 	 * Raise each cell in the matrix by the factor of a:Double.
 	 *
 	 * @param  a  	 the scaling factor
 	 */
-	public def scale(a:Double) {
-		for (p in 0..(listBs.size-1)) {
-			listBs(p).dense.scale(a);
+	public  def scale(a:Double) {
+		for (val [b] : Point in listBs) {
+			listBs(b).dense.scale(a);
 		}
 		return this;
 	}
+
+	public def scale(a:Int) = scale(a as Double);
+
+	//-------------------------
+	// Cellwise addition
+	//-------------------------
 
     /**
      * Perform cell-wise addition: this += x. Current implementation is
@@ -305,8 +326,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (likeMe(x))
 			return cellAdd(x as DenseBlockMatrix(M,N));
 
-		for (var c:Long=0; c<N; c++) {
-			for (var r:Long=0; r<M; r++) {
+		for (var c:Int=0; c<N; c++) {
+			for (var r:Int=0; r<M; r++) {
 				this(r, c) = this(r, c) + x(r, c);
 			}
 		}
@@ -317,18 +338,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * x = this * x
 	 */
 	protected def cellAddTo(x:DenseMatrix(M,N)) {
-		var sttcol:Long=0;
-		for (var cb:Long=0; cb<grid.numColBlocks; cb++) {
+		var sttcol:Int=0;
+		for (var cb:Int=0; cb<grid.numColBlocks; cb++) {
 			// Iterate all blocks
-			var dst_sttidx:Long = sttcol;
-			for (var rb:Long=0; rb<grid.numRowBlocks; rb++) {
+			var dst_sttidx:Int = sttcol;
+			for (var rb:Int=0; rb<grid.numRowBlocks; rb++) {
 				//Iterate all blocks in one column
 				val blkden = listBs(grid.getBlockId(rb, cb)).getMatrix();
-				var src_sttidx:Long = 0;
+				var src_sttidx:Int = 0;
 				
-				for (var c:Long=0; c<blkden.N; c++) {
-					var srcidx:Long = src_sttidx;
-					var dstidx:Long = dst_sttidx;
+				for (var c:Int=0; c<blkden.N; c++) {
+					var srcidx:Int = src_sttidx;
+					var dstidx:Int = dst_sttidx;
 					for (; srcidx<src_sttidx+blkden.M; srcidx++, dstidx++) 
 						x.d(dstidx) += blkden(srcidx);
 					src_sttidx += blkden.M;
@@ -350,7 +371,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 			Debug.exit("Dense block matrix add fails - matrix type not match");
 		
 		//Debug.flushln("Here ");
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).dense;
 			val src = x.listBs(p).getMatrix() as DenseMatrix(dst.M, dst.N);
 			dst.cellAdd(src);
@@ -363,14 +384,14 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * Cell-wise add this = this + double
 	 */
 	public def cellAdd(d:Double):DenseBlockMatrix(this) {
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).dense;
 			dst.cellAdd(d);
 		}		
 		return this;
 	}
 	
-
+	//-----------------------
     /**
      * Cell-wise subtraction: this -= x
 	 *
@@ -380,8 +401,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (likeMe(x))
 			return cellSub(x as DenseBlockMatrix(M,N));
 
-		for (var c:Long=0; c<N; c++) {
-			for (var r:Long=0; r<M; r++) {
+		for (var c:Int=0; c<N; c++) {
+			for (var r:Int=0; r<M; r++) {
 				this(r, c) = this(r, c) - x(r, c);
 			}
 		}
@@ -392,18 +413,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * x = x - this 
 	 */
 	public def cellSubFrom(x:DenseMatrix(M,N)):DenseMatrix(x) {
-		var sttcol:Long=0;
-		for (var cb:Long=0; cb<grid.numColBlocks; cb++) {
+		var sttcol:Int=0;
+		for (var cb:Int=0; cb<grid.numColBlocks; cb++) {
 			// Iterate all blocks
-			var dst_sttidx:Long = sttcol;
-			for (var rb:Long=0; rb<grid.numRowBlocks; rb++) {
+			var dst_sttidx:Int = sttcol;
+			for (var rb:Int=0; rb<grid.numRowBlocks; rb++) {
 				//Iterate all blocks in one column
 				val blkden = listBs(grid.getBlockId(rb, cb)).getMatrix();
-				var src_sttidx:Long = 0;
+				var src_sttidx:Int = 0;
 				
-				for (var c:Long=0; c<blkden.N; c++) {
-					var srcidx:Long = src_sttidx;
-					var dstidx:Long = dst_sttidx;
+				for (var c:Int=0; c<blkden.N; c++) {
+					var srcidx:Int = src_sttidx;
+					var dstidx:Int = dst_sttidx;
 					for (; srcidx<src_sttidx+blkden.M; srcidx++, dstidx++) 
 						x.d(dstidx) -= blkden(srcidx);
 					src_sttidx += blkden.M;
@@ -424,7 +445,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (! likeMe(that)) 
 			Debug.exit("Dense block matrix substract fails - matrices not match");
 		
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).dense;
 			val src = that.listBs(p).dense as DenseMatrix(dst.M, dst.N);
 			dst.cellSub(src);
@@ -436,14 +457,14 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * Cell-wise add this = double - this
 	 */
 	public def cellSubFrom(d:Double):DenseBlockMatrix(this) {
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).dense;
 			dst.cellSubFrom(d);
 		}		
 		return this;
 	}
 
-
+	//---------------
 
     /**
      * Cell-wise multiplication, return this = this &#42 x
@@ -454,8 +475,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (likeMe(x))
 			return cellMult(x as DenseBlockMatrix(M,N));
 
-		for (var c:Long=0; c<N; c++) {
-			for (var r:Long=0; r<M; r++) {
+		for (var c:Int=0; c<N; c++) {
+			for (var r:Int=0; r<M; r++) {
 				this(r, c) = this(r, c) * x(r, c);
 			}
 		}
@@ -466,18 +487,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * x = x &#42 this 
 	 */
 	public def cellMultTo(x:DenseMatrix(M,N)):DenseMatrix(x) {
-		var sttcol:Long=0;
-		for (var cb:Long=0; cb<grid.numColBlocks; cb++) {
+		var sttcol:Int=0;
+		for (var cb:Int=0; cb<grid.numColBlocks; cb++) {
 			// Iterate all blocks
-			var dst_sttidx:Long = sttcol;
-			for (var rb:Long=0; rb<grid.numRowBlocks; rb++) {
+			var dst_sttidx:Int = sttcol;
+			for (var rb:Int=0; rb<grid.numRowBlocks; rb++) {
 				//Iterate all blocks in one column
 				val blkden = listBs(grid.getBlockId(rb, cb)).getMatrix();
-				var src_sttidx:Long = 0;
+				var src_sttidx:Int = 0;
 				
-				for (var c:Long=0; c<blkden.N; c++) {
-					var srcidx:Long = src_sttidx;
-					var dstidx:Long = dst_sttidx;
+				for (var c:Int=0; c<blkden.N; c++) {
+					var srcidx:Int = src_sttidx;
+					var dstidx:Int = dst_sttidx;
 					for (; srcidx<src_sttidx+blkden.M; srcidx++, dstidx++) 
 						x.d(dstidx) *= blkden(srcidx);
 					src_sttidx += blkden.M;
@@ -498,7 +519,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (! likeMe(x)) 
 			Debug.exit("Dense block matrix cell mult fails - matrices not match");
 		
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).dense;
 			val src = x.listBs(p).dense as DenseMatrix(dst.M, dst.N);
 			dst.cellMult(src);
@@ -506,9 +527,9 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		return this;
 	}
 
-
+	//---------------------------------------
 	// Cellwise division
-
+	//---------------------------------------
     /**
      * Cell-wise division, return this = this / x
      */
@@ -516,8 +537,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (likeMe(x))
 			return cellDiv(x as DenseBlockMatrix(M,N));
 
-		for (var c:Long=0; c<N; c++) {
-			for (var r:Long=0; r<M; r++) {
+		for (var c:Int=0; c<N; c++) {
+			for (var r:Int=0; r<M; r++) {
 				this(r, c) = this(r, c) / x(r, c);
 			}
 		}	
@@ -528,18 +549,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * x = this / x 
 	 */
     public def cellDivBy(x:DenseMatrix(M,N)):DenseMatrix(x) {
-		var sttcol:Long=0L;
-		for (var cb:Long=0; cb<grid.numColBlocks; cb++) {
+		var sttcol:Int=0;
+		for (var cb:Int=0; cb<grid.numColBlocks; cb++) {
 			// Iterate all blocks
-			var dst_sttidx:Long = sttcol;
-			for (var rb:Long=0; rb<grid.numRowBlocks; rb++) {
+			var dst_sttidx:Int = sttcol;
+			for (var rb:Int=0; rb<grid.numRowBlocks; rb++) {
 				//Iterate all blocks in one column
 				val blkden = listBs(grid.getBlockId(rb, cb)).getMatrix();
-				var src_sttidx:Long = 0L;
+				var src_sttidx:Int = 0;
 				
-				for (var c:Long=0; c<blkden.N; c++) {
-					var srcidx:Long = src_sttidx;
-					var dstidx:Long = dst_sttidx;
+				for (var c:Int=0; c<blkden.N; c++) {
+					var srcidx:Int = src_sttidx;
+					var dstidx:Int = dst_sttidx;
 					for (; srcidx<src_sttidx+blkden.M; srcidx++, dstidx++) 
 						x.d(dstidx) = blkden(srcidx)/x.d(dstidx);
 					src_sttidx += blkden.M;
@@ -560,7 +581,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		if (! likeMe(x)) 
 			Debug.exit("Dense block matrix cell divide fails - matrices not match");
 		
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			val dst = listBs(p).dense;
 			val src = x.listBs(p).dense as DenseMatrix(dst.M, dst.N);
 			dst.cellDiv(src);
@@ -569,9 +590,9 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		return this;
 	}
 
-
+	//====================================================================
 	// Matrix multiplication 
-
+	//====================================================================
 
     /**
      * Block matrix multiplication has not been implementated yet. 
@@ -608,9 +629,9 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		Debug.exit("Not implemented yet");
 		return this;		
     }
-
-	// Operator overload
-
+	//====================================================================
+	// Operator overlead
+	//====================================================================
 	public operator - this = clone().scale(-1.0) as DenseBlockMatrix(M,N);
 	public operator (v:Double) + this = this.clone().cellAdd(v) as DenseBlockMatrix(M,N);
 	public operator this + (v:Double) = this.clone().cellAdd(v) as DenseBlockMatrix(M,N);
@@ -622,15 +643,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	//public operator (v:Double) / this = this.clone().cellDivBy(v) as DenseBlockMatrix(M,N);
 	
 	public operator this * (alpha:Double) = this.clone().scale(alpha) as DenseBlockMatrix(M,N);
+	public operator this * (alpha:Int)    = this.clone().scale(alpha as Double) as DenseBlockMatrix(M,N);
 	public operator (alpha:Double) * this = this * alpha;
+	public operator (alpha:Int) * this    = this * (alpha as Double);
 
 	public operator this + (that:DenseBlockMatrix(M,N)) = this.clone().cellAdd(that) as DenseBlockMatrix(M,N);
 	public operator this - (that:DenseBlockMatrix(M,N)) = this.clone().cellSub(that) as DenseBlockMatrix(M,N);
 	public operator this * (that:DenseBlockMatrix(M,N)) = this.clone().cellMult(that) as DenseBlockMatrix(M,N);
 	public operator this / (that:DenseBlockMatrix(M,N)) = this.clone().cellDiv(that) as DenseBlockMatrix(M,N);
 
-
+	//====================================================================
 	// Utils
+	//====================================================================
 
 	/**
 	 * Transpose matrix
@@ -640,8 +664,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		Debug.assure(grid.numRowBlocks==dbm.grid.numColBlocks &&
 					 grid.numColBlocks==dbm.grid.numRowBlocks);
 		
-		for (var c:Long=0; c<grid.numColBlocks; c++) {
-			for (var r:Long=0; r<grid.numRowBlocks; r++) {
+		for (var c:Int=0; c<grid.numColBlocks; c++) {
+			for (var r:Int=0; r<grid.numRowBlocks; r++) {
 				val src = listBs(grid.getBlockId(r, c)).dense;
 				val dst = dbm.listBs(dbm.grid.getBlockId(c, r)).dense 
 					as DenseMatrix(src.N, src.M);
@@ -651,6 +675,9 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		}
 	}
 
+	//---------------------------------------------------
+
+	//================================================================
 	public def getCalcTime():Long = this.listBs(here.id()).calcTime;
 	public def getCommTime():Long = this.listBs(here.id()).commTime;
 	
@@ -678,10 +705,26 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	public def toString():String {
 		val output = new StringBuilder();
 		output.add("---------- Dense-block Matrix ["+M+"x"+N+"] ----------\n");
-		for (p in 0..(listBs.size-1)) {
+		for (val [p] :Point in listBs) {
 			output.add( "--- Dense block("+p+") ---\n"+listBs(p).toString());
 		}
 		output.add("----------------------------------------------------\n");
 		return output.toString();
 	}
+	
+	//-------------------------
+	public def printBlock() { printBlock("");}
+	public def printBlock(msg:String) {
+		Console.OUT.print(msg);
+		Console.OUT.print(this.toString());
+		Console.OUT.flush();
+	}
+	//
+	public def debugPrintBlock() { debugPrintBlock(""); }
+	public def debugPrintBlock(msg:String) {
+		if (Debug.disable) return;
+		val dbstr:String = msg + this.toString();
+		Debug.println(dbstr);
+	}
+
 }

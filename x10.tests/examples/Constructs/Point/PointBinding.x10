@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Must allow binding point components.
@@ -22,10 +21,10 @@ public class PointBinding extends x10Test {
 
     public def run(): boolean = {
         val p[i,j]: Point = Point.make(1, 2);
-        return (i == 1L && j == 2L);
+        return (i == 1 && j == 2);
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PointBinding().execute();
     }
 }

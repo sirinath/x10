@@ -103,7 +103,7 @@ for i in \
 	x10.tests \
 	x10.wala
 do
-    svn $svn_command -q https://svn.code.sourceforge.net/p/x10/code/tags/$X10_TAG/$i
+    svn $svn_command -q https://x10.svn.sourceforge.net/svnroot/x10/tags/$X10_TAG/$i
 done
 )
 
@@ -112,8 +112,8 @@ echo "The distribution is now exported to the directory $workdir"
 if [[ -z "$SKIP_X10_BUILD" ]]; then
     echo "Building distribution"
     cd $distdir/x10.dist
-    ant -Doptimize=true -Dx10.version=$X10_VERSION testtar
-    ant -Doptimize=true -Dx10.version=$X10_VERSION srctar
+    ant -Doptimize=true -Dtar.version=$X10_VERSION testtar
+    ant -Doptimize=true -Dtar.version=$X10_VERSION srctar
     ant $EXTRA_X10RT_BUILD_ARG -Doptimize=true dist
     if [[ -z "$SKIP_DEBUG_BUILD" ]]; then
         ant -Ddebug=true dist-cpp

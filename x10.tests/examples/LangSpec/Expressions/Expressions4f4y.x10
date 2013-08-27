@@ -17,19 +17,19 @@
 
 import harness.x10Test;
 
- import x10.regionarray.*;
+
 
 public class Expressions4f4y extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions4f4y().execute();
     }
 
 
-// file Expressions line 1662
+// file Expressions line 1675
  static  class Example { def example() {
 
-val a = new Array[String](Region.make(2..3, 4..5), "hi!");
+val a = new Array[String]((2..3) * (4..5), "hi!");
 a([2,4]) = "converted!";
 } }
 

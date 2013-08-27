@@ -39,7 +39,7 @@ public class UShortOverride3 extends x10Test {
 	return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UShortOverride3().execute();
     }
 }

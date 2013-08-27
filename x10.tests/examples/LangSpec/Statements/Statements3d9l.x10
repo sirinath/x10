@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Statements3d9l extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Statements3d9l().execute();
     }
 
 
-// file Statements line 689
+// file Statements line 690
  static  class Example {
-static def sum(a:x10.util.List[Long]):Long {
-  var s : Long = 0;
+static def sum(a:x10.util.List[Int]):Int {
+  var s : Int = 0;
   for(x in a) s += x;
   return s;
 }

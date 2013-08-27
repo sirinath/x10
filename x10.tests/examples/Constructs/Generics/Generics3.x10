@@ -20,11 +20,11 @@ public class Generics3 extends x10Test {
         class Get[T] { val x: T; def this(y: T) = { x = y; } def get(): T = x; }
 
 	public def run(): boolean = {
-                val a:long = new Get[long](0).get();
+                val a: int = new Get[int](0).get();
 		return a == 0;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new Generics3().execute();
 	}
 }

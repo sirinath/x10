@@ -28,13 +28,13 @@ public class TypedefIterated02 extends TypedefTest {
         type A[T] = X[T,String]; // = T
         type B = int;
         type C = A[B]; // = X[B,String] = B = int
-        var c:C = 0n;
+        var c:C = 0;
         type D = A[A[B]]; // = X[A[B],String] = A[B] = X[B,String] = B = int
-        var d:D = 0n;
+        var d:D = 0;
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new TypedefIterated02().execute();
     }
 }

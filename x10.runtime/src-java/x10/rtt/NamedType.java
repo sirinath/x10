@@ -28,10 +28,10 @@ public class NamedType<T> extends RuntimeType<T> implements X10JavaSerializable 
     public NamedType() {
         super();
     }
-
+    
     // N.B. this is also used to implement readResolve() in place for Types.COMPARABLE
-    protected NamedType(String typeName, Class<?> javaClass, int numParams, Type<?>[] parents) {
-        super(javaClass, numParams, parents);
+    protected NamedType(String typeName, Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
+        super(javaClass, variances, parents);
         this.typeName = typeName;
     }
 
@@ -41,27 +41,27 @@ public class NamedType<T> extends RuntimeType<T> implements X10JavaSerializable 
         if (useCache) {
             NamedType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, 0, null);
+                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, null, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedType<T>) type;
         } else {
-            return new NamedType<T>(typeName, javaClass, 0, null);
+            return new NamedType<T>(typeName, javaClass, null, null);
         }
     }
 
-    public static <T> NamedType/*<T>*/ make(String typeName, Class<?> javaClass, int numParams) {
+    public static <T> NamedType/*<T>*/ make(String typeName, Class<?> javaClass, Variance[] variances) {
         if (useCache) {
             NamedType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, numParams, null);
+                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, variances, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedType<T>) type;
         } else {
-            return new NamedType<T>(typeName, javaClass, numParams, null);
+            return new NamedType<T>(typeName, javaClass, variances, null);
         }
     }
 
@@ -69,27 +69,27 @@ public class NamedType<T> extends RuntimeType<T> implements X10JavaSerializable 
         if (useCache) {
             NamedType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, 0, parents);
+                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, null, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedType<T>) type;
         } else {
-            return new NamedType<T>(typeName, javaClass, 0, parents);
+            return new NamedType<T>(typeName, javaClass, null, parents);
         }
     }
     
-    public static <T> NamedType/*<T>*/ make(String typeName, Class<?> javaClass, int numParams, Type<?>[] parents) {
+    public static <T> NamedType/*<T>*/ make(String typeName, Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
         if (useCache) {
             NamedType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, numParams, parents);
+                NamedType<?> type0 = new NamedType<T>(typeName, javaClass, variances, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (NamedType<T>) type;
         } else {
-            return new NamedType<T>(typeName, javaClass, numParams, parents);
+            return new NamedType<T>(typeName, javaClass, variances, parents);
         }
     }
 
@@ -112,7 +112,7 @@ public class NamedType<T> extends RuntimeType<T> implements X10JavaSerializable 
 
     public static X10JavaSerializable $_deserialize_body(NamedType nt, X10JavaDeserializer deserializer) throws IOException {
         RuntimeType.$_deserialize_body(nt, deserializer);
-        nt.typeName = deserializer.readString().intern();
+        nt.typeName = deserializer.readString();
         return nt;
     }
 }

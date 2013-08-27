@@ -65,7 +65,7 @@
                     if (valid && dot > token.getStartOffset())
                     {
                         token.setEndOffset(dot - 1);
-                        token.setKind(X10Parsersym.TK_LongLiteral);
+                        token.setKind(X10Parsersym.TK_IntegerLiteral);
                         lexStream.getIPrsStream().makeToken(dot, dot, X10Parsersym.TK_DOT);
                         if (dot < end)
                         {
@@ -166,11 +166,11 @@
     SlComment
     MlComment
     DocComment
-    IntLiteral
+    IntegerLiteral
     LongLiteral
     ByteLiteral
     ShortLiteral
-    UnsignedIntLiteral
+    UnsignedIntegerLiteral
     UnsignedLongLiteral
     UnsignedByteLiteral
     UnsignedShortLiteral
@@ -306,9 +306,9 @@
                     makeToken($_CharacterLiteral);
           $EndAction
         ./
-    Token ::= IntLiteral
+    Token ::= IntegerLiteral
         /.$BeginAction
-                    makeToken($_IntLiteral);
+                    makeToken($_IntegerLiteral);
           $EndAction
         ./
     Token ::= LongLiteral
@@ -326,9 +326,9 @@
                     makeToken($_ShortLiteral);
           $EndAction
         ./
-    Token ::= UnsignedIntLiteral
+    Token ::= UnsignedIntegerLiteral
         /.$BeginAction
-                    makeToken($_UnsignedIntLiteral);
+                    makeToken($_UnsignedIntegerLiteral);
           $EndAction
         ./
     Token ::= UnsignedLongLiteral
@@ -657,21 +657,16 @@
     IntegerLiteral -> Integer
                     | '0' LetterXx HexDigits
 
-    IntLiteral ::= IntegerLiteral LetterNn
-
-    LongLiteral -> IntegerLiteral
-                 | IntegerLiteral LetterLl
+    LongLiteral ::= IntegerLiteral LetterLl
 
     ByteLiteral ::= IntegerLiteral LetterYy
 
     ShortLiteral ::= IntegerLiteral LetterSs
     
-    UnsignedIntLiteral -> IntegerLiteral LetterUu LetterNn
-                        | IntegerLiteral LetterNn LetterUu
+    UnsignedIntegerLiteral ::= IntegerLiteral LetterUu
 
     UnsignedLongLiteral -> IntegerLiteral LetterUu LetterLl
                          | IntegerLiteral LetterLl LetterUu
-                         | IntegerLiteral LetterUu
 
     UnsignedByteLiteral -> IntegerLiteral LetterUu LetterYy
                          | IntegerLiteral LetterYy LetterUu
@@ -775,9 +770,6 @@
 
     LetterDd -> 'D'
               | 'd'
-
-    LetterNn -> 'N'
-              | 'n'
 
     LetterLl -> 'L'
               | 'l'
@@ -884,7 +876,7 @@
 
      --- X10 Tokens
 
-     Token ::= LongLiteralAndRange
+     Token ::= IntLiteralAndRange
  
      Token ::= '.' '.'
           /.$BeginAction
@@ -1007,9 +999,9 @@
         ./
 
 
-    LongLiteralAndRange ::= Integer '.' '.'
+    IntLiteralAndRange ::= Integer '.' '.'
          /.$BeginAction
-                     makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), $_LongLiteral);
+                     makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), $_IntegerLiteral);
                      makeToken(getToken(2), getToken(3), $_RANGE);
            $EndAction
          ./

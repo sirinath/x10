@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test for an ateach loop on an array.
@@ -23,7 +22,7 @@ public class AtEachLoopOnArray extends x10Test {
 
     public def run(): boolean = {
 	   val A: DistArray[double](1) =
-	       DistArray.make[double](Region.make(0,10)->here, ([i]: Point): double => i as double);
+	       DistArray.make[double](0..10->here, ([i]: Point): double => i as double);
 	
 	   finish ateach ([i]: Point(1) in A)
 	       if (A(i) != i as Double)
@@ -31,7 +30,7 @@ public class AtEachLoopOnArray extends x10Test {
 	   return success;
     }
 
-	public static def main(Rail[String])  {
+	public static def main(Array[String](1))  {
 	    new AtEachLoopOnArray().execute();
 	}
 }

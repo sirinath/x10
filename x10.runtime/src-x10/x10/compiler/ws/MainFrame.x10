@@ -10,7 +10,7 @@ abstract public class MainFrame extends RegularFrame {
 
     @Ifdef("__CPP__")
     public def this(Int, o:MainFrame) {
-        super(-1n, o);
+        super(-1, o);
     }
 
     public abstract def fast(worker:Worker):void;

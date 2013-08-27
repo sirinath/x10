@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Expressions1i5k extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions1i5k().execute();
     }
 
 
 // file Expressions line 867
  static  class Example{
- def example( something: ()=>Long, something_else: ()=>Long,
-   any_code_at_all: () => Long) {
+ def example( something: ()=>Int, something_else: ()=>Int,
+   any_code_at_all: () => Int) {
 val a = something();
 val b = something_else();
 val eq1 = (a == b);

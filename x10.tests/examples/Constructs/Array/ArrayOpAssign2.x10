@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Simple test for operator assignment of array elements.
@@ -19,13 +18,13 @@ import x10.regionarray.*;
 
 public class ArrayOpAssign2 extends x10Test {
 
-    var i: long = 1;
-    var j: long = 1;
+    var i: int = 1;
+    var j: int = 1;
 
     public def run(): boolean = {
 
-        val R = Region.make(1..10, 1..10);
-        var ia: Array[long](2) = new Array[long](R, (Point)=>0);
+        val R = (1..10)*(1..10);
+        var ia: Array[int](2) = new Array[int](R, (Point)=>0);
 
         ia(i, j) = 1;
 
@@ -42,7 +41,7 @@ public class ArrayOpAssign2 extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayOpAssign2().execute();
     }
 }

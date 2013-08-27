@@ -188,15 +188,7 @@ public class Desugarer extends ContextVisitor {
     private Expr getLiteral(Position pos, Type type, long val) {
         type = Types.baseType(type);
         Expr lit = null;
-        if (ts.isByte(type)) {
-            lit = nf.IntLit(pos, IntLit.BYTE, val);
-        } else if (ts.isUByte(type)) {
-            lit = nf.IntLit(pos, IntLit.UBYTE, val);
-        } else if (ts.isShort(type)) {
-            lit = nf.IntLit(pos, IntLit.SHORT, val);
-        } else if (ts.isUShort(type)) {
-            lit = nf.IntLit(pos, IntLit.USHORT, val);
-        } else if (ts.isInt(type)) {
+        if (ts.isIntOrLess(type)) {
             lit = nf.IntLit(pos, IntLit.INT, val);
         } else if (ts.isLong(type)) {
             lit = nf.IntLit(pos, IntLit.LONG, val);
@@ -959,8 +951,7 @@ public class Desugarer extends ContextVisitor {
         c.visit(new ClosureCaptureVisitor(this.context(), c.closureDef()));
         //if (!c.closureDef().capturedEnvironment().isEmpty())
         //    System.out.println(c+" at "+c.position()+" captures "+c.closureDef().capturedEnvironment());
-        boolean checked = !ts.isSubtype(Types.baseType(e.type()), t, context);
-        Expr cast = nf.X10Cast(pos, tn, e, checked ? Converter.ConversionType.CHECKED : Converter.ConversionType.UNCHECKED).type(t);
+        Expr cast = nf.X10Cast(pos, tn, e, Converter.ConversionType.CHECKED).type(t);
         MethodInstance ci = c.closureDef().asType().applyMethod();
         return nf.ClosureCall(pos, c, Collections.singletonList(cast)).closureInstance(ci).type(ot);
     }

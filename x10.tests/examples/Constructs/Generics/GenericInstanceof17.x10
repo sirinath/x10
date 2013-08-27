@@ -20,13 +20,13 @@ import harness.x10Test;
 public class GenericInstanceof17 extends GenericTest {
 
     class A[T1, T2] {}
-    class D extends A[Long, Double] {}
+    class D extends A[Int, Double] {}
     
     public def run() = {
-        return new D() instanceof A[Long, Double];
+        return new D() instanceof A[Int, Double];
     }
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericInstanceof17().execute();
     }
 }

@@ -26,12 +26,12 @@ public class NotInstanceof2_Method extends x10Test {
 	
 	private def getDifferentType():Any =  new OtherClass(1);
 	
-	public static def main(Rail[String]) = {
+	public static def main(Array[String](1)) = {
 		new NotInstanceof2_Method().execute();
 	}
 		 
-	 public class OtherClass (p:long) {
-		public def this(p:long)= {
+	 public class OtherClass (p:int) {
+		public def this(p:int)= {
                     property(p);
 		}
 	 }

@@ -10,23 +10,22 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
-struct S58[T] implements (Long,Long)=>T {
+struct S58[T] implements (Int,Int)=>T {
   private val data:Array[T](2);
 
   public def this(array:Array[T](2)) {
     data = array;
   }
 
-  public operator this(i:Long, j:Long) = data(i, j);
+  public operator this(i:Int, j:Int) = data(i, j);
 }
 
 public class StructGenericInterfaceTest extends x10Test {
   public def run(): boolean {
-    val r = Region.make(1..5, 1..5);
-    val a = new Array[Long](r, (p:Point(2)) => p(0)+p(1));
-    val s = S58[Long](a);
+    val r = (1..5)*(1..5);
+    val a = new Array[Int](r, (p:Point(2)) => p(0)+p(1));
+    val s = S58[Int](a);
 
     chk(s(1,1) == 2);
     chk(s(4,4) == 8);
@@ -34,7 +33,7 @@ public class StructGenericInterfaceTest extends x10Test {
     return true;
   }
 
-  public static def main(Rail[String]) {
+  public static def main(Array[String](1)) {
     new StructGenericInterfaceTest().execute();
   }
 

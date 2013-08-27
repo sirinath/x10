@@ -29,9 +29,9 @@ public class InputStreamReader extends Reader {
         @Native("c++", "(#this)->read()")
         public native def read(): Int; //throws IOException;
 
-        @Native("java", "#this.read((#r).getByteArray(), #off, #len)")
-        @Native("c++", "(#this)->read(#r,#off,#len)")
-        public native def read(r:Rail[Byte], off: Long, len: Long): void; //throws IOException;
+        @Native("java", "#this.read((#r).raw().getByteArray(), #off, #len)")
+        @Native("c++", "(#this)->read((#r)->raw(),#off,#len)")
+        public native def read(r:Rail[Byte], off: Int, len: Int): void; //throws IOException;
 
         @Native("java", "#this.available()")
         @Native("c++", "(#this)->available()")
@@ -66,11 +66,11 @@ public class InputStreamReader extends Reader {
     public def read(): Byte //throws IOException 
     {
         val n: Int = stream.read();
-        if (n == -1n) throw new EOFException();
+        if (n == -1) throw new EOFException();
         return n as Byte;
     }
     
-    public def read(r:Rail[Byte], off:Long, len:Long): void //throws IOException 
+    public def read(r:Rail[Byte], off:Int, len:Int): void //throws IOException 
     { stream.read(r,off,len); }
 
     public def available(): Int //throws IOException 

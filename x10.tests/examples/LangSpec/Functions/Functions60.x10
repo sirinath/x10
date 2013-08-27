@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Functions60 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Functions60().execute();
     }
 
@@ -34,8 +34,8 @@ public class Functions60 extends x10Test {
   absent
 }
  static def checkery() {
-xs: List[Long] = new ArrayList[Long]();
-x: Long = find((x: Long) => x>0, xs, 0);
+xs: List[Int] = new ArrayList[Int]();
+x: Int = find((x: Int) => x>0, xs, 0);
 }}
 
  static class Hook {

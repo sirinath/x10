@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class Statements80 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Statements80().execute();
     }
 
 
 // file Statements line 550
  static  class Example {
- def example(var n:Long) {
+ def example(var n:Int) {
   while (n > 1) {
      n = (n % 2 == 1) ? 3*n+1 : n/2;
   }

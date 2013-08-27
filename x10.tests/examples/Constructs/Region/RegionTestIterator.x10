@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Testing the standard region iterator.
@@ -20,11 +19,11 @@ public class RegionTestIterator extends x10Test {
 
     public def run(): boolean = {
 
-        val r = Region.make(0, 100);
+        val r = 0..100;
         val reg = r*r;
 
-        var sum:long = 0;
-        var numPts:long = 0;
+        var sum:int = 0;
+        var numPts:int = 0;
         for ([i,j]:Point in reg) {
             sum += i - j;
             numPts++;
@@ -33,7 +32,7 @@ public class RegionTestIterator extends x10Test {
         return sum == 0 && numPts == (101*101);
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new RegionTestIterator().execute();
     }
 }

@@ -21,33 +21,33 @@ import harness.x10Test;
 
 public class ObjectInitialization60 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization60().execute();
     }
 
 
-// file Classes line 3241
+// file Classes line 3240
  static  class Supertype[T]{}
  static  interface SuperInterface[T]{}
  static class Example (
-   prop : Long,
-   proq : Long{prop != proq},                    // (A)
-   pror : Long
+   prop : Int,
+   proq : Int{prop != proq},                    // (A)
+   pror : Int
    )
    {prop != 0}                                  // (B)
-   extends Supertype[Long{self != prop}]         // (C)
-   implements SuperInterface[Long{self != prop}] // (D)
+   extends Supertype[Int{self != prop}]         // (C)
+   implements SuperInterface[Int{self != prop}] // (D)
 {
    property def propmeth() = (prop == pror);    // (E)
    staticField
-      : Cell[Long{self != 0}]                    // (F)
-      = new Cell[Long{self != 0}](1);            // (G)
+      : Cell[Int{self != 0}]                    // (F)
+      = new Cell[Int{self != 0}](1);            // (G)
    var instanceField
-      : Long {self != prop}                      // (H)
-      = (prop + 1) as Long{self != prop};        // (I)
+      : Int {self != prop}                      // (H)
+      = (prop + 1) as Int{self != prop};        // (I)
    def this(
-      a : Long{a != 0},
-      b : Long{b != a}                           // (J)
+      a : Int{a != 0},
+      b : Int{b != a}                           // (J)
       )
       {a != b}                                  // (K)
       : Example{self.prop == a && self.proq==b} // (L)
@@ -55,7 +55,7 @@ public class ObjectInitialization60 extends x10Test {
       super();                                  // (M)
       property(a,b,a);                          // (N)
       // fields initialized here
-      instanceField = b as Long{self != prop};   // (O)
+      instanceField = b as Int{self != prop};   // (O)
    }
 
    def someMethod() =

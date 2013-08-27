@@ -16,20 +16,20 @@ import harness.x10Test;
  * to the use of the type.
  */
 public class FieldPropFromThis extends x10Test {
-	class  Foo(i:int(0n)) {
+	class  Foo(i:int(0)) {
 		public def this():Foo {
-			property(0n);
+			property(0);
 		}
 	}
 	
 	                   
 	public def run(): boolean = {
 		var f: Foo = new Foo();
-		var s: int(0n) = f.i;
+		var s: int(0) = f.i;
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new FieldPropFromThis().execute();
 	}
 

@@ -14,7 +14,7 @@ import x10.util.*;
 import harness.x10Test;
 
 public class GenericInnerClass3b extends x10Test {
-  public static def main(Rail[String]){
+  public static def main(Array[String](1)){
      val p = new GenericInnerClass3b();
      p.execute();
   }
@@ -35,6 +35,6 @@ class YogOuter[T] {
    }
 
    class YogInner extends YogOuter[Int] {
-      def this() {super(12321n);}
+      def this() {super(12321);}
    }
 }

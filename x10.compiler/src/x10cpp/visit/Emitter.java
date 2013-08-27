@@ -18,7 +18,6 @@ import static x10cpp.visit.SharedVarsMethods.DESERIALIZATION_BUFFER;
 import static x10cpp.visit.SharedVarsMethods.DESERIALIZER_METHOD;
 import static x10cpp.visit.SharedVarsMethods.DESERIALIZE_BODY_METHOD;
 import static x10cpp.visit.SharedVarsMethods.DESERIALIZE_METHOD;
-import static x10cpp.visit.SharedVarsMethods.MAKE;
 import static x10cpp.visit.SharedVarsMethods.SAVED_THIS;
 import static x10cpp.visit.SharedVarsMethods.SERIALIZATION_BUFFER;
 import static x10cpp.visit.SharedVarsMethods.SERIALIZATION_ID_FIELD;
@@ -31,7 +30,6 @@ import static x10cpp.visit.SharedVarsMethods.make_ref;
 import static x10cpp.visit.SharedVarsMethods.make_captured_lval;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -91,7 +89,6 @@ import x10.types.X10ClassType;
 import x10.types.X10ConstructorDef;
 import x10.types.X10FieldDef;
 import x10.types.X10FieldInstance;
-import x10.types.X10FieldInstance_c;
 
 import x10.types.X10LocalDef;
 import x10.types.X10MethodDef;
@@ -268,13 +265,8 @@ public class Emitter {
 	    return full;
 	}
 
-	/** Examines the type's constraints to determine any variable -> value mappings that exist. */
-	public static Map<String,Object> exploreConstraints(Context context, Type type_) {
-		if (!(type_ instanceof ConstrainedType)) {
-			return Collections.<String,Object>emptyMap();
-		}
-		HashMap<String,Object> r = new HashMap<String,Object>();
-		ConstrainedType type = (ConstrainedType)type_;
+	private static HashMap<String,String> exploreConstraints(Context context, ConstrainedType type) {
+		HashMap<String,String> r = new HashMap<String,String>();
 		CConstraint cc = type.getRealXClause();
 		 // FIXME: [DC] context.constraintProjection ought not to eliminate information but it seems to?
 		CConstraint projected = cc; //context.constraintProjection(cc);
@@ -293,7 +285,7 @@ public class Emitter {
 			// resolve to another variable, keep going
 			XVar closed_xvar = projected.bindingForVar(xvar);
 			if (closed_xvar!=null && closed_xvar instanceof XLit) {
-				r.put(property_name, ((XLit)closed_xvar).val());
+				r.put(property_name, closed_xvar.toString());
 			}
 		}
 		return r;
@@ -330,8 +322,8 @@ public class Emitter {
 		if (type.isVoid()) {
 			return "void";
 		}
-		Map<String,Object> propertyKnowledge = null;
-		if (ctx!=null && type instanceof ConstrainedType) propertyKnowledge = exploreConstraints(ctx, type);
+		HashMap<String,String> propertyKnowledge = null;
+		if (ctx!=null && type instanceof ConstrainedType) propertyKnowledge = exploreConstraints(ctx, (ConstrainedType)type);
 		// TODO: handle closures
 //		if (((X10TypeSystem) type.typeSystem()).isClosure(type))
 //			return translateType(((X10Type) type).toClosure().base(), asRef);
@@ -992,8 +984,6 @@ public class Emitter {
         X10CPPContext_c context = (X10CPPContext_c) tr.context();
         Type parent = type.superClass();
         boolean customSerialization = type.isSubtype(ts.CustomSerialization(), context);
-        boolean unserializable = type.isSubtype(ts.Unserializable(), context);
-
         ClassifiedStream w = sw.body();
         ClassifiedStream h = sw.header();
         h.forceNewline();
@@ -1002,185 +992,127 @@ public class Emitter {
         String klass = translateType(type);
 
         String template = context.inTemplate() ? "template " : "";
-        
-        if (unserializable) {
-            h.write("virtual ");
-            h.write("void "+SERIALIZE_BODY_METHOD+"("+SERIALIZATION_BUFFER+"& buf) {");
-            h.newline(4); h.begin(0);
-            h.write("x10aux::throwUnsupportedOperationException(\"Can't serialize "+type.fullName().toString()+"\");");
-            h.end(); h.newline();
-            h.write("}"); h.newline();
-            h.forceNewline();
 
+        if (!type.flags().isAbstract()) {
+            // _serialization_id
+            h.write("public: static const x10aux::serialization_id_t "+SERIALIZATION_ID_FIELD+";"); h.newline();
+            h.forceNewline();
+            printTemplateSignature(ct.x10Def().typeParameters(), w);
+            w.write("const x10aux::serialization_id_t "+klass+"::"+SERIALIZATION_ID_FIELD+" = ");
+            w.newline(4);
+            w.write("x10aux::DeserializationDispatcher::addDeserializer(");
+            w.write(klass+"::"+DESERIALIZER_METHOD+", x10aux::CLOSURE_KIND_NOT_ASYNC);");
+            w.newline(); w.forceNewline();
+        }
+
+        // _serialize_id()
+        if (!type.flags().isAbstract()) {
+            h.write("public: ");
             if (!type.flags().isFinal())
                 h.write("virtual ");
             h.write("x10aux::serialization_id_t "+SERIALIZE_ID_METHOD+"() {");
             h.newline(4); h.begin(0);
-            h.write("x10aux::throwUnsupportedOperationException(\"Can't serialize "+type.fullName().toString()+"\");");
+            h.write(" return "+SERIALIZATION_ID_FIELD+";"); h.end(); h.newline();
+            h.write("}"); h.newline();
+            h.forceNewline();
+        }
+
+        if (customSerialization && !((X10ClassDef)ct.def()).hasDeserializationConstructor(context)) {
+            h.writeln("// autogenerated custom deserialization");
+            h.writeln("void "+CONSTRUCTOR+"("+translateType(ts.SerialData(), true)+" sd) {");
+            h.newline(4); h.begin(0);
+            h.write(translateType(parent)+"::"+CONSTRUCTOR+"(sd);");
             h.end(); h.newline();
             h.write("}"); h.newline();
             h.forceNewline();
-        } else {
-            if (!type.flags().isAbstract()) {
-                // _serialization_id
-                h.write("public: static const x10aux::serialization_id_t "+SERIALIZATION_ID_FIELD+";"); h.newline();
-                h.forceNewline();
-                printTemplateSignature(ct.x10Def().typeParameters(), w);
-                w.write("const x10aux::serialization_id_t "+klass+"::"+SERIALIZATION_ID_FIELD+" = ");
-                w.newline(4);
-                w.write("x10aux::DeserializationDispatcher::addDeserializer(");
-                w.write(klass+"::"+DESERIALIZER_METHOD+", x10aux::CLOSURE_KIND_NOT_ASYNC);");
-                w.newline(); w.forceNewline();
-            }
+        }
+        
+        // _serialize_body()
+        h.write("public: ");
+        h.write("virtual ");
+        h.write("void "+SERIALIZE_BODY_METHOD+"("+SERIALIZATION_BUFFER+"& buf);");
+        h.newline(0); h.forceNewline();
 
-            // _serialize_id()
-            if (!type.flags().isAbstract()) {
-                h.write("public: ");
-                if (!type.flags().isFinal())
-                    h.write("virtual ");
-                h.write("x10aux::serialization_id_t "+SERIALIZE_ID_METHOD+"() {");
-                h.newline(4); h.begin(0);
-                h.write(" return "+SERIALIZATION_ID_FIELD+";"); h.end(); h.newline();
-                h.write("}"); h.newline();
-                h.forceNewline();
-            }
-
-            if (customSerialization && !((X10ClassDef)ct.def()).hasDeserializationConstructor(context)) {
-                h.writeln("// autogenerated custom deserialization");
-                h.writeln("void "+CONSTRUCTOR+"("+translateType(ts.Deserializer(), true)+" ds) {");
-                h.newline(4); h.begin(0);
-                h.write(translateType(parent)+"::"+CONSTRUCTOR+"(ds);");
-                h.end(); h.newline();
-                h.write("}"); h.newline();
-                h.forceNewline();
-            }
-
-
-            // _serialize_body()
-            h.write("public: ");
-            h.write("virtual ");
-            h.write("void "+SERIALIZE_BODY_METHOD+"("+SERIALIZATION_BUFFER+"& buf);");
-            h.newline(0); h.forceNewline();
-
-            printTemplateSignature(ct.x10Def().typeParameters(), w);
-            w.write("void "+klass+"::"+SERIALIZE_BODY_METHOD+
+        printTemplateSignature(ct.x10Def().typeParameters(), w);
+        w.write("void "+klass+"::"+SERIALIZE_BODY_METHOD+
                     "("+SERIALIZATION_BUFFER+"& buf) {");
-            w.newline(4); w.begin(0);
-            if (customSerialization) {
-                w.writeln("/* NOTE: Implements x10.io.CustomSerialization */");
-                w.writeln("x10::io::Serializer* x10_buf = x10::io::Serializer::"+MAKE+"(&buf);");
-                w.writeln("this->serialize(x10_buf);");
-                w.writeln("buf.write(x10aux::deserialization_buffer::CUSTOM_SERIALIZATION_END);");
-            } else {
-                if (parent != null && parent.isClass()) {
-                    w.write(translateType(parent)+"::"+SERIALIZE_BODY_METHOD+"(buf);");
-                    w.newline();
-                }
-                for (int i = 0; i < type.fields().size(); i++) {
-                    if (i != 0)
-                        w.newline();
-                    FieldInstance f = (FieldInstance) type.fields().get(i);
-                    if (f instanceof X10FieldInstance && !query.ifdef(((X10FieldInstance) f).x10Def())) continue;
-                    if (f.flags().isStatic() || query.isSyntheticField(f.name().toString()))
-                        continue;
-                    if (f.flags().isTransient()) // don't serialize transient fields
-                        continue;
-                    String fieldName = mangled_field_name(f.name().toString());
-                    w.write("buf.write(this->"+fieldName+");"); w.newline();
-                }
+        w.newline(4); w.begin(0);
+        if (customSerialization) {
+            w.writeln("/* NOTE: Implements x10.io.CustomSerialization */");
+            w.writeln("buf.write(this->serialize());");
+        } else {
+            if (parent != null && parent.isClass()) {
+                w.write(translateType(parent)+"::"+SERIALIZE_BODY_METHOD+"(buf);");
+                w.newline();
             }
-            w.end(); w.newline();
-            w.write("}");
-            w.newline(); w.forceNewline();
-
-            if (!type.flags().isAbstract()) {
-                // _deserializer()
-                h.write("public: static ");
-                h.write(make_ref("x10::lang::Reference")+" "+DESERIALIZER_METHOD+"("+DESERIALIZATION_BUFFER+"& buf);");
-                h.newline(); h.forceNewline();
-                printTemplateSignature(ct.x10Def().typeParameters(), sw);
-                sw.write(make_ref("x10::lang::Reference")+" "+klass+"::"+DESERIALIZER_METHOD+"("+DESERIALIZATION_BUFFER+"& buf) {");
-                sw.newline(4); sw.begin(0);
-                sw.writeln(make_ref(klass)+" this_ = "+
-                        "new (memset(x10aux::alloc"+chevrons(klass)+"(), 0, sizeof("+klass+"))) "+klass+"();");
-                sw.writeln("buf.record_reference(this_);");
-                sw.writeln("this_->"+DESERIALIZE_BODY_METHOD+"(buf);");
-                sw.write("return this_;");
-                sw.end(); sw.newline();
-                sw.writeln("}"); sw.forceNewline();
-            }
-
-            // _deserialize_body()
-            h.write("public: ");
-            h.write("void "+DESERIALIZE_BODY_METHOD+"("+DESERIALIZATION_BUFFER+"& buf);"); h.newline(0);
-            printTemplateSignature(ct.x10Def().typeParameters(), w);
-            w.write("void "+klass+"::"+DESERIALIZE_BODY_METHOD+"("+DESERIALIZATION_BUFFER+"& buf) {");
-            w.newline(4); w.begin(0);
-            if (customSerialization) {
-                w.writeln("/* NOTE: Implements x10.io.CustomSerialization */");
-                w.writeln("x10::io::Deserializer* x10_buf = x10::io::Deserializer::"+MAKE+"(&buf);");
-                w.writeln(CONSTRUCTOR+"(x10_buf);");
-                w.writeln("x10aux::serialization_id_t tmp = buf.read<x10aux::serialization_id_t>();");
-                w.writeln("if (tmp != x10aux::deserialization_buffer::CUSTOM_SERIALIZATION_END) { x10aux::raiseSerializationProtocolError(); }");
-            } else {
-                if (parent != null && parent.isClass()) {
-                    w.write(translateType(parent)+"::"+DESERIALIZE_BODY_METHOD+"(buf);");
+            for (int i = 0; i < type.fields().size(); i++) {
+                if (i != 0)
                     w.newline();
-                }
-                List<FieldInstance> specialTransients = null;
-                for (int i = 0; i < type.fields().size(); i++) {
-                    if (i != 0)
-                        w.newline();
-                    FieldInstance f = (FieldInstance) type.fields().get(i);
-                    if (f instanceof X10FieldInstance && !query.ifdef(((X10FieldInstance) f).x10Def())) continue;
-                    if (f.flags().isStatic() || query.isSyntheticField(f.name().toString()))
-                        continue;
-                    if (f.flags().isTransient()) {
-                        if (!((X10FieldInstance_c)f).annotationsMatching(ts.TransientInitExpr()).isEmpty()) {
-                            if (specialTransients == null) {
-                                specialTransients = new ArrayList<FieldInstance>();
-                            }
-                            specialTransients.add(f);
-                        }
-                       continue;
-                    }
-                    String fieldName = mangled_field_name(f.name().toString());
-                    w.write(fieldName+" = buf.read"+chevrons(translateType(f.type(),true))+"();");
-                }
-                if (specialTransients != null) {
-                    w.newline();
-                    w.writeln("/* fields with @TransientInitExpr annotations */");
-                    for (FieldInstance f:specialTransients) {
-                        Expr initExpr = getInitExpr(((X10FieldInstance_c)f).annotationsMatching(ts.TransientInitExpr()).get(0));
-                        if (initExpr != null) {
-                            String fieldName = mangled_field_name(f.name().toString());
-                            w.write(fieldName+" = ");
-                            tr.printAst(initExpr, sw);
-                            w.writeln(";");
-                        }
-                    }
-                }               
-            }
-
-            w.end(); w.newline();
-            w.write("}");
-            w.newline();
-            w.forceNewline();
-        }
-    }
-
-    private Expr getInitExpr(Type at) {
-        at = Types.baseType(at);
-        if (at instanceof X10ClassType) {
-            X10ClassType act = (X10ClassType) at;
-            if (0 < act.propertyInitializers().size()) {
-                return act.propertyInitializer(0);
+                FieldInstance f = (FieldInstance) type.fields().get(i);
+                if (f instanceof X10FieldInstance && !query.ifdef(((X10FieldInstance) f).x10Def())) continue;
+                if (f.flags().isStatic() || query.isSyntheticField(f.name().toString()))
+                    continue;
+                if (f.flags().isTransient()) // don't serialize transient fields
+                    continue;
+                String fieldName = mangled_field_name(f.name().toString());
+                w.write("buf.write(this->"+fieldName+");"); w.newline();
             }
         }
-        return null;
+        w.end(); w.newline();
+        w.write("}");
+        w.newline(); w.forceNewline();
+
+        if (!type.flags().isAbstract()) {
+            // _deserializer()
+            h.write("public: static ");
+            h.write(make_ref("x10::lang::Reference")+" "+DESERIALIZER_METHOD+"("+DESERIALIZATION_BUFFER+"& buf);");
+            h.newline(); h.forceNewline();
+            printTemplateSignature(ct.x10Def().typeParameters(), sw);
+            sw.write(make_ref("x10::lang::Reference")+" "+klass+"::"+DESERIALIZER_METHOD+"("+DESERIALIZATION_BUFFER+"& buf) {");
+            sw.newline(4); sw.begin(0);
+            sw.writeln(make_ref(klass)+" this_ = "+
+                       "new (memset(x10aux::alloc"+chevrons(klass)+"(), 0, sizeof("+klass+"))) "+klass+"();");
+            sw.writeln("buf.record_reference(this_);");
+            sw.writeln("this_->"+DESERIALIZE_BODY_METHOD+"(buf);");
+            sw.write("return this_;");
+            sw.end(); sw.newline();
+            sw.writeln("}"); sw.forceNewline();
+        }
+
+        // _deserialize_body()
+        h.write("public: ");
+        h.write("void "+DESERIALIZE_BODY_METHOD+"("+DESERIALIZATION_BUFFER+"& buf);"); h.newline(0);
+        printTemplateSignature(ct.x10Def().typeParameters(), w);
+        w.write("void "+klass+"::"+DESERIALIZE_BODY_METHOD+"("+DESERIALIZATION_BUFFER+"& buf) {");
+        w.newline(4); w.begin(0);
+        if (customSerialization) {
+            w.writeln("/* NOTE: Implements x10.io.CustomSerialization */");
+            w.writeln(translateType(ts.SerialData(), true)+ "val_ = buf.read"+chevrons(translateType(ts.SerialData(), true))+"();");
+            w.writeln(CONSTRUCTOR+"(val_);");
+        } else {
+            if (parent != null && parent.isClass()) {
+                w.write(translateType(parent)+"::"+DESERIALIZE_BODY_METHOD+"(buf);");
+                w.newline();
+            }
+            for (int i = 0; i < type.fields().size(); i++) {
+                if (i != 0)
+                    w.newline();
+                FieldInstance f = (FieldInstance) type.fields().get(i);
+                if (f instanceof X10FieldInstance && !query.ifdef(((X10FieldInstance) f).x10Def())) continue;
+                if (f.flags().isStatic() || query.isSyntheticField(f.name().toString()))
+                    continue;
+                if (f.flags().isTransient()) // don't serialize transient fields of classes
+                    continue;
+                String fieldName = mangled_field_name(f.name().toString());
+                w.write(fieldName+" = buf.read"+chevrons(translateType(f.type(),true))+"();");
+            }
+        }
+        w.end(); w.newline();
+        w.write("}");
+        w.newline();
+        w.forceNewline();
     }
 
-    
     void generateStructSerializationMethods(ClassType type, StreamWrapper sw) {
         X10ClassType ct = (X10ClassType) type.toClass();
         TypeSystem ts = (TypeSystem) type.typeSystem();

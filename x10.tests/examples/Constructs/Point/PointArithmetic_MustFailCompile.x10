@@ -14,7 +14,6 @@
 //OPTIONS: -STATIC_CHECKS
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Testing point arithmetic operations.
@@ -23,14 +22,14 @@ import x10.regionarray.*;
  */
 public class PointArithmetic_MustFailCompile extends x10Test {
 
-    public static DIM: long = 5;
+    public static DIM: int = 5;
 
     public def run(): boolean = {
 
-        var sum: long = 0;
-        val p = [2 as long, 2, 2, 2, 2] as Point(DIM);
-        val q = [1 as long, 1, 1, 1, 1] as Point(DIM);
-        var c: long = 2;
+        var sum: int = 0;
+        val p = [2, 2, 2, 2, 2] as Point(DIM);
+        val q = [1, 1, 1, 1, 1] as Point(DIM);
+        var c: int = 2;
 
         // Now test that the dimensionality is properly checked
 
@@ -55,7 +54,7 @@ public class PointArithmetic_MustFailCompile extends x10Test {
     }
     def test() {
         val r = [1, 2, 3, 4] as Point;
-        val p = [2 as long, 2, 2, 2] as Point;
+        val p = [2, 2, 2, 2] as Point;
 
         var a: Point;
         var s: Point;
@@ -73,7 +72,7 @@ public class PointArithmetic_MustFailCompile extends x10Test {
     }
     def test2() {
         val r:Point = [1, 2, 3, 4] as Point;
-        val p:Point = [2 as long, 2, 2, 2] as Point;
+        val p:Point = [2, 2, 2, 2] as Point;
 
         var a: Point;
         var s: Point;
@@ -90,7 +89,7 @@ public class PointArithmetic_MustFailCompile extends x10Test {
         d = r / p; // ERR
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointArithmetic_MustFailCompile().execute();
     }
 }

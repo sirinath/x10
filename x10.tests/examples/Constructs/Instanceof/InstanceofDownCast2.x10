@@ -23,11 +23,11 @@ public class InstanceofDownCast2 extends x10Test {
 		instanceof X10DepTypeSubClassOneB{p==2&&a==2});
 	}
 
-	private def getX10DepTypeSubClassOneB(var c1: long, var c2: long): Any = {
+	private def getX10DepTypeSubClassOneB(var c1: int, var c2: int): Any = {
 		return new X10DepTypeSubClassOneB(c1, c2);
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new InstanceofDownCast2().execute();
 	}
 }

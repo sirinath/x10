@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class MethodResolution_disamb_b extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new MethodResolution_disamb_b().execute();
     }
 
 
-// file Classes line 3745
+// file Classes line 3743
 
  static class Ambig {
-  public val f : (Long)=>Long =  (x:Long) => x*x;
+  public val f : (Int)=>Int =  (x:Int) => x*x;
   public def f(y:int) = y+1;
   public def example() {
       val v = this.f(10);

@@ -9,8 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-//OPTIONS: -STATIC_CHECKS
-
 import harness.x10Test;
 
 /**
@@ -23,7 +21,7 @@ public class AssignmentIntLitteralToConstrainedInt_MustFailCompile extends x10Te
 	public def run(): boolean = {
 		
 		try { 
-         val j = 1n as Int(0n); // ERR
+         val j = 1 as Int(0); // ERR
 		}catch (e: Exception) {
 			return false;
 		}
@@ -31,7 +29,7 @@ public class AssignmentIntLitteralToConstrainedInt_MustFailCompile extends x10Te
 		return true;
 	}
 
-   public static def main( Rail[String]) {
+   public static def main( Array[String](1)) {
 		new AssignmentIntLitteralToConstrainedInt_MustFailCompile().execute();
 	}
 

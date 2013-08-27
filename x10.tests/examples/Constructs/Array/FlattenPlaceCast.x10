@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * 
@@ -21,8 +20,8 @@ public class FlattenPlaceCast extends x10Test {
     val d: DistArray[Place](1);
 
     public def this() {
-        a = DistArray.make[Test](Region.make(1..10, 1..10) -> here, (Point)=>new Test());
-        d = DistArray.make[Place](Region.make(1, 10) -> here, (Point)=>here);
+        a = DistArray.make[Test](1..10*1..10 -> here, (Point)=>new Test());
+        d = DistArray.make[Place](1..10 -> here, (Point)=>here);
     }
    
     static class Test {
@@ -36,7 +35,7 @@ public class FlattenPlaceCast extends x10Test {
         return !(x instanceof Test{x.root.home == d1next}) && (x instanceof Test{x.root.home == here});
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new FlattenPlaceCast().execute();
     }
     

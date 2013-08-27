@@ -17,17 +17,17 @@ import harness.x10Test;
 
 public class XTENLANG_259 extends x10Test implements (int)=>int {
 
-    public operator this(i:int) = 0n;
+    public operator this(i:int) = 0;
     public operator this(i:int)=(v:int) {}
         
     public def run() {
-        this(0n) = this(0n) + 1n;
-        this(0n)++;
-        this(0n)--;
+        this(0) = this(0) + 1;
+        this(0)++;
+        this(0)--;
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_259().execute();
     }
 }

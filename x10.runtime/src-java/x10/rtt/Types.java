@@ -291,8 +291,6 @@ public class Types {
                     return UNSUPPORTED_OPERATION_EXCEPTION;
                 } else if (java.util.NoSuchElementException.class.equals(javaClass)) {
                     return NO_SUCH_ELEMENT_EXCEPTION;
-                } else if (java.lang.NegativeArraySizeException.class.equals(javaClass)) {
-                    return NEGATIVE_ARRAY_SIZE_EXCEPTION;
                 } else if (java.lang.ArrayIndexOutOfBoundsException.class.equals(javaClass)) {
                     return ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
                 } else if (java.lang.StringIndexOutOfBoundsException.class.equals(javaClass)) {
@@ -342,7 +340,7 @@ public class Types {
     public static final RuntimeType<Comparable> COMPARABLE = new NamedType<Comparable>(
         "x10.lang.Comparable",
         Comparable.class,
-        1,
+        RuntimeType.INVARIANTS(1),
         null
     ) {
         // make sure deserialized RTT object is not duplicated
@@ -354,7 +352,7 @@ public class Types {
     public static final RuntimeType<java.lang.Throwable> CHECKED_THROWABLE = new NamedType<java.lang.Throwable>(
 	"x10.lang.CheckedThrowable",
 	java.lang.Throwable.class,
-	0,
+	null,
 	new Type[] { ANY }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -365,7 +363,7 @@ public class Types {
     public static final RuntimeType<java.lang.Exception> CHECKED_EXCEPTION = new NamedType<java.lang.Exception>(
 	"x10.lang.CheckedException",
 	java.lang.Exception.class,
-	0,
+	null,
 	new Type[] { CHECKED_THROWABLE }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -376,7 +374,7 @@ public class Types {
     public static final RuntimeType<java.lang.RuntimeException> EXCEPTION = new NamedType<java.lang.RuntimeException>(
 	"x10.lang.Exception",
 	java.lang.RuntimeException.class,
-	0,
+	null,
 	new Type[] { CHECKED_EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -387,7 +385,7 @@ public class Types {
     public static final RuntimeType<java.lang.NullPointerException> NULL_POINTER_EXCEPTION = new NamedType<java.lang.NullPointerException>(
 	"x10.lang.NullPointerException",
 	java.lang.NullPointerException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -398,7 +396,7 @@ public class Types {
     public static final RuntimeType<java.lang.ClassCastException> CLASS_CAST_EXCEPTION = new NamedType<java.lang.ClassCastException>(
 	"x10.lang.ClassCastException",
 	java.lang.ClassCastException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -409,7 +407,7 @@ public class Types {
     public static final RuntimeType<java.lang.IndexOutOfBoundsException> INDEX_OUT_OF_BOUNDS_EXCEPTION = new NamedType<java.lang.IndexOutOfBoundsException>(
 	"x10.lang.IndexOutOfBoundsException",
 	java.lang.IndexOutOfBoundsException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -417,21 +415,10 @@ public class Types {
 	    return INDEX_OUT_OF_BOUNDS_EXCEPTION;
 	}
     };
-    public static final RuntimeType<java.lang.NegativeArraySizeException> NEGATIVE_ARRAY_SIZE_EXCEPTION = new NamedType<java.lang.NegativeArraySizeException>(
-	"x10.lang.NegativeArraySizeException",
-	java.lang.NegativeArraySizeException.class,
-	0,
-	new Type[] { EXCEPTION }
-    ) {
-	// make sure deserialized RTT object is not duplicated
-	private Object readResolve() throws java.io.ObjectStreamException {
-	    return NEGATIVE_ARRAY_SIZE_EXCEPTION;
-	}
-    };
     public static final RuntimeType<java.lang.ArrayIndexOutOfBoundsException> ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION = new NamedType<java.lang.ArrayIndexOutOfBoundsException>(
 	"x10.lang.ArrayIndexOutOfBoundsException",
 	java.lang.ArrayIndexOutOfBoundsException.class,
-	0,
+	null,
 	new Type[] { INDEX_OUT_OF_BOUNDS_EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -442,7 +429,7 @@ public class Types {
     public static final RuntimeType<java.lang.StringIndexOutOfBoundsException> STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION = new NamedType<java.lang.StringIndexOutOfBoundsException>(
 	"x10.lang.StringIndexOutOfBoundsException",
 	java.lang.StringIndexOutOfBoundsException.class,
-	0,
+	null,
 	new Type[] { INDEX_OUT_OF_BOUNDS_EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -453,7 +440,7 @@ public class Types {
     public static final RuntimeType<java.lang.ArithmeticException> ARITHMETIC_EXCEPTION = new NamedType<java.lang.ArithmeticException>(
 	"x10.lang.ArithmeticException",
 	java.lang.ArithmeticException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -464,7 +451,7 @@ public class Types {
     public static final RuntimeType<java.lang.IllegalStateException> ILLEGAL_STATE_EXCEPTION = new NamedType<java.lang.IllegalStateException>(
         "x10.lang.IllegalStateException",
         java.lang.IllegalStateException.class,
-    	0,
+        null,
         new Type[] { EXCEPTION }
     ) {
         // make sure deserialized RTT object is not duplicated
@@ -475,7 +462,7 @@ public class Types {
     public static final RuntimeType<java.lang.IllegalArgumentException> ILLEGAL_ARGUMENT_EXCEPTION = new NamedType<java.lang.IllegalArgumentException>(
 	"x10.lang.IllegalArgumentException",
 	java.lang.IllegalArgumentException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -486,7 +473,7 @@ public class Types {
     public static final RuntimeType<java.lang.NumberFormatException> NUMBER_FORMAT_EXCEPTION = new NamedType<java.lang.NumberFormatException>(
 	"x10.lang.NumberFormatException",
 	java.lang.NumberFormatException.class,
-	0,
+	null,
 	new Type[] { ILLEGAL_ARGUMENT_EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -497,7 +484,7 @@ public class Types {
     public static final RuntimeType<java.lang.UnsupportedOperationException> UNSUPPORTED_OPERATION_EXCEPTION = new NamedType<java.lang.UnsupportedOperationException>(
 	"x10.lang.UnsupportedOperationException",
 	java.lang.UnsupportedOperationException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -508,7 +495,7 @@ public class Types {
     public static final RuntimeType<java.util.NoSuchElementException> NO_SUCH_ELEMENT_EXCEPTION = new NamedType<java.util.NoSuchElementException>(
 	"x10.util.NoSuchElementException",
 	java.util.NoSuchElementException.class,
-	0,
+	null,
 	new Type[] { EXCEPTION }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -519,7 +506,7 @@ public class Types {
     public static final RuntimeType<java.lang.Error> ERROR = new NamedType<java.lang.Error>(
 	"x10.lang.Error",
 	java.lang.Error.class,
-	0,
+	null,
 	new Type[] { CHECKED_THROWABLE }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -530,7 +517,7 @@ public class Types {
     public static final RuntimeType<java.lang.AssertionError> ASSERTION_ERROR = new NamedType<java.lang.AssertionError>(
 	"x10.lang.AssertionError",
 	java.lang.AssertionError.class,
-	0,
+	null,
 	new Type[] { ERROR }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -541,7 +528,7 @@ public class Types {
     public static final RuntimeType<java.lang.StackOverflowError> STACK_OVERFLOW_ERROR = new NamedType<java.lang.StackOverflowError>(
 	"x10.lang.StackOverflowError",
 	java.lang.StackOverflowError.class,
-	0,
+	null,
 	new Type[] { ERROR }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -552,7 +539,7 @@ public class Types {
     public static final RuntimeType<java.lang.OutOfMemoryError> OUT_OF_MEMORY_ERROR = new NamedType<java.lang.OutOfMemoryError>(
 	"x10.lang.OutOfMemoryError",
 	java.lang.OutOfMemoryError.class,
-	0,
+	null,
 	new Type[] { ERROR }
     ) {
 	// make sure deserialized RTT object is not duplicated
@@ -563,7 +550,7 @@ public class Types {
     public static final RuntimeType<java.lang.InternalError> INTERNAL_ERROR = new NamedType<java.lang.InternalError>(
         "x10.lang.InternalError",
         java.lang.InternalError.class,
-    	0,
+        null,
         new Type[] { ERROR }
     ) {
         // make sure deserialized RTT object is not duplicated
@@ -584,18 +571,18 @@ public class Types {
     public static final RuntimeType<x10.core.UShort> USHORT = new UShortType();
     public static final RuntimeType<x10.core.UInt> UINT = new UIntType();
     public static final RuntimeType<x10.core.ULong> ULONG = new ULongType();
-    public static final x10.core.Boolean BOOLEAN_ZERO = x10.core.Boolean.$box(false);
+    public static final x10.core.Boolean BOOLEAN_ZERO = x10.core.Boolean.FALSE;
     public static final x10.core.Char CHAR_ZERO = x10.core.Char.$box((char)0);
     public static final x10.core.Byte BYTE_ZERO = x10.core.Byte.$box(0);
     public static final x10.core.Short SHORT_ZERO = x10.core.Short.$box(0);
     public static final x10.core.Int INT_ZERO = x10.core.Int.$box(0);
-    public static final x10.core.Long LONG_ZERO = x10.core.Long.$box(0L);
+    public static final x10.core.Long LONG_ZERO = x10.core.Long.$box(0l);
     public static final x10.core.Float FLOAT_ZERO = x10.core.Float.$box(0.0F);
     public static final x10.core.Double DOUBLE_ZERO = x10.core.Double.$box(0.0);
-    public static final x10.core.UByte UBYTE_ZERO = x10.core.UByte.$box(0);
-    public static final x10.core.UShort USHORT_ZERO = x10.core.UShort.$box(0);
+    public static final x10.core.UByte UBYTE_ZERO = x10.core.UByte.$box((byte)0);
+    public static final x10.core.UShort USHORT_ZERO = x10.core.UShort.$box((short)0);
     public static final x10.core.UInt UINT_ZERO = x10.core.UInt.$box(0);
-    public static final x10.core.ULong ULONG_ZERO = x10.core.ULong.$box(0L);
+    public static final x10.core.ULong ULONG_ZERO = x10.core.ULong.$box((long)0);
 
     public static final RuntimeType<String> STRING = new StringType();
 
@@ -848,7 +835,8 @@ public class Types {
             if (rtt == CHAR) return CHAR_ZERO;
             if (rtt == BOOLEAN) return BOOLEAN_ZERO;
             // N.B. to enable following special paths, make corresponding $RTTs singleton
-            // N.B. since GlobalRef has their own zero value constructor, special paths are no longer needed
+            // N.B. since GlobalRef and IndexedMemoryChunk have their own zero value constructor, special paths are no longer needed
+//            if (rtt == x10.core.IndexedMemoryChunk.$RTT) return new x10.core.IndexedMemoryChunk(actualTypeArguments[0], (java.lang.System) null);
 //            if (rtt == x10.core.GlobalRef.$RTT) return new x10.core.GlobalRef(actualTypeArguments[0], (java.lang.System) null);
             // for user-defined structs, call zero value constructor
             try {

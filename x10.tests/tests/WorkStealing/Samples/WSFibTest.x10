@@ -16,7 +16,7 @@ public class WSFibTest {
         return (res == 10946);
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
         val r = new WSFibTest().run();
         if(r){
              x10.io.Console.OUT.println("++++++Test succeeded.");

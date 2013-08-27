@@ -19,12 +19,12 @@ class XTENLANG_231 extends x10Test {
 
     public def run(): boolean {
         3.hashCode();
-        val i:Int = 10n;
+        val i:Int = 10;
         i.hashCode();
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_231().execute();
     }
 }

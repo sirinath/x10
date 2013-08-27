@@ -20,7 +20,7 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureEnclosingScope1c extends x10Test {
+public class ClosureEnclosingScope1c extends ClosureTest {
 
     val  a = 1;
 
@@ -33,12 +33,13 @@ public class ClosureEnclosingScope1c extends x10Test {
             def foo() = (()=>a+b+c)();
         }
 
-        chk(new C().foo() ==  3, "new C().foo()");
+        check("new C().foo()", new C().foo(), 3);
 
-        return true;
+
+        return result;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new ClosureEnclosingScope1c().execute();
     }
 }

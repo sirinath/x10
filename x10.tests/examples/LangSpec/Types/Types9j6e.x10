@@ -21,18 +21,18 @@ import harness.x10Test;
 
 public class Types9j6e extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types9j6e().execute();
     }
 
 
-// file Types line 1834
+// file Types line 1830
  static class Generic {
   public static def inst[T](x:Any):Boolean = x instanceof T;
   // With -VERBOSE, the following line gets a warning
   public static def cast[T](x:Any):T       = x as T;
 }
- static class Pea(p:Long) {}
+ static class Pea(p:Int) {}
  static class Example{
   static def example() {
      val pea : Pea = new Pea(1);

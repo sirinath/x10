@@ -11,6 +11,7 @@
 
 //package commu.p2p;
 
+import x10.io.Console;
 import x10.util.Timer;
 
 import x10.matrix.Matrix;
@@ -32,7 +33,7 @@ import x10.matrix.comm.MatrixRemoteCopy;
  */
 
 public class TestMatP2P{
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
 		val testcase = new TestMatP2PCopy(args);
 		testcase.run(); 
 	}
@@ -43,14 +44,14 @@ class TestMatP2PCopy {
 
 	public val vrfy:Boolean;
 	public val iter:Int;
-	public val M:Long;
-	public val N:Long;
+	public val M:Int;
+	public val N:Int;
 
 	public val numplace:Int;
 	public val checkTime:Array[Long](1);
+	//==============
 
-
-    public def this(args:Rail[String]) {
+    public def this(args:Array[String](1)) {
 		M = args.size > 0 ?Int.parse(args(0)):50;
 		N = args.size > 1 ?Int.parse(args(1)):M;
 		iter = args.size > 2 ? Int.parse(args(2)):1;
@@ -76,23 +77,23 @@ class TestMatP2PCopy {
 				Console.OUT.println("--------Test of Matrix P2P copy failed!--------");
 		}
 	}
-
-
+	//------------------------------------------------
+	//------------------------------------------------
 	public def testAsyncCopy():Boolean {
 		val cnt = M * N;
-		val srcbuf = new Array[Double](cnt);
+		val srcbuf:Array[Double](1){rail} = new Array[Double](cnt);
 		Console.OUT.println("\nTest async copy of dup matrix over "+ numplace+" placaces");
 	
-		val rmtbuf = new GlobalRail[Double](srcbuf as Array[Double]{self!=null});
+		val rmtbuf = new RemoteArray[Double](srcbuf as Array[Double]{self!=null});
 		val dupMs = DupDenseMatrix.make(M,N).dupMs;
 		
 		var ttt:Double = 0.0;
 		var minUT:Double=Double.MAX_VALUE;
 		var maxUT:Double=Double.MIN_VALUE;
 		
-		for (var i:Long=0; i<iter; i++) {
+		for (var i:Int=0; i<iter; i++) {
 			val stt = Timer.nanoTime();
-			at(Place(1)) {
+			at (new Place(1)) {
 				//Implicit copy: dst, srcbuf, srcOff, dataCnt
 				val dst = dupMs(here.id());
 				finish Array.asyncCopy[Double](rmtbuf, 0, dst.d, 0, cnt);
@@ -112,7 +113,7 @@ class TestMatP2PCopy {
 		return true;
 	}
 	
-
+	//------------------------------------------------
 	public def testDupCopy():Boolean {
 		var ret:Boolean = true;
 		Console.OUT.println("\nTest P2P copy of dup matrix over "+ numplace+" placaces");
@@ -126,7 +127,7 @@ class TestMatP2PCopy {
 		var maxUT:Double=Double.MIN_VALUE;
 		
 		val src = dupDA.local();
-		for (var i:Long=0; i<iter; i++) {
+		for (var i:Int=0; i<iter; i++) {
 			val st = Timer.nanoTime();
 			MatrixRemoteCopy.copy(src, 0, dupDA.dupMs, 1, 0, src.N); 
 			//dupDA.comm.copy(, dupDA.dupMs, p);
@@ -154,7 +155,7 @@ class TestMatP2PCopy {
 		
 	}
 
-
+	//------------------------------------------------
 	public def testDistCopy():Boolean {
 		var ret:Boolean = true;
 		Console.OUT.println("\nTest P2P copy of dist block matrix over "+ numplace+" placaces");
@@ -169,7 +170,7 @@ class TestMatP2PCopy {
 		var minUT:Double=Double.MAX_VALUE;
 		var maxUT:Double=Double.MIN_VALUE;
 		
-		for (var i:Long=0; i<iter; i++) {
+		for (var i:Int=0; i<iter; i++) {
 			val st = Timer.nanoTime();
 			val srcden:DenseMatrix = blkDA.getMatrix(here.id());
 			MatrixRemoteCopy.copy(srcden, 0, dstDA.distBs, 1, 0, srcden.N); 

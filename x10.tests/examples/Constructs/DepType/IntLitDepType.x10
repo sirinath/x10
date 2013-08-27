@@ -16,11 +16,11 @@ import harness.x10Test;
  */
 public class IntLitDepType extends x10Test {
 	public def run(): boolean = {
-		var f: int(1n) = 1n;
+		var f: int(1) = 1;
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new IntLitDepType().execute();
 	}
 

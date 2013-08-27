@@ -11,19 +11,23 @@
 
 package x10.matrix.comm;
 
-import x10.regionarray.DistArray;
+import x10.io.Console;
+import x10.util.Timer;
+import x10.util.Pair;
+
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
+import x10.compiler.Uninitialized;
 
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 
 import x10.matrix.block.Grid;
 import x10.matrix.block.DenseBlock;
 import x10.matrix.block.SparseBlock;
+
 
 /**
  * This class provide scatter communication for distributed matrix. 
@@ -44,7 +48,18 @@ import x10.matrix.block.SparseBlock;
  * <p>For more information on how to build different backends and runtime, 
  * run command "make help" at the root directory of GML library.
  */
-public class MatrixScatter {
+public class MatrixScatter extends MatrixRemoteCopy {
+
+	//==============================================
+	// Constructor
+	//==============================================
+	public def this() {
+		super();
+	}
+
+	//==============================================
+	// Dense matrix block scatter
+	//==============================================
 	/**
 	 * Scatter data from matrix blocks from here to distributed blocks in all places.
 	 * A local block in the array is sent to a distributed block, which is corresponding
@@ -54,19 +69,26 @@ public class MatrixScatter {
 	 * @param dst     target distributed matrix blocks 
 	 */
 	public static def scatter(
-			src:Rail[DenseBlock], 
+			src:Array[DenseBlock](1), 
 			dst:DistArray[DenseBlock](1)) : void {
 		
 		val nb = dst.region.size();
 		Debug.assure(nb==src.size, 
 			"Number blocks in dist and local array mismatch");
 		
-		finish for (var bid:Long=0; bid<nb; bid++) {
+		finish for (var bid:Int=0; bid<nb; bid++) {
 			val srcden = src(bid).getMatrix();
 			//Debug.flushln("Scatter: copy to block:"+bid);
-			MatrixRemoteCopy.copy(srcden, 0, dst, bid, 0, srcden.N);
+			copy(srcden, 0, dst, bid, 0, srcden.N);
 		}
 	}
+
+
+	//======================================================
+
+	//------------------------------------------------------------
+	// Scatter from single row blocks partitioning
+	//------------------------------------------------------------
 
 	/**
 	 * Scatter data of dense matrix in a continuous memory space into distributed 
@@ -85,22 +107,23 @@ public class MatrixScatter {
 			src:DenseMatrix, 
 			dst:DistArray[DenseBlock](1)) : void {
 
-        Debug.assure(gp.numRowBlocks==1L ||gp.N==1L, 
+		Debug.assure(gp.numRowBlocks==1||gp.N==1, 
 			"Number of row block in partition must be 1 or matrix is a vector");
 
 		@Ifdef("MPI_COMMU") {
-			if (gp.N==1L) 
-				mpiScatterVector(gp as Grid{gp.N==1L}, src.d, dst);
+			if (gp.N==1) 
+				mpiScatterVector(gp as Grid{gp.N==1}, src.d, dst);
 			else
 				mpiScatterRowBs(gp, src, dst);
 		}
 		@Ifndef("MPI_COMMU") {
-			if (gp.N==1L)
-				x10ScatterVector(gp as Grid{gp.N==1L}, src.d, dst);
+			if (gp.N==1)
+				x10ScatterVector(gp as Grid{gp.N==1}, src.d, dst);
 			else
 				x10ScatterRowBs(gp, src, dst);
 		}
 	}
+
 	
 	/**
 	 * Scatter dense matrix at here to distributed dense blocks, partitioned 
@@ -118,21 +141,21 @@ public class MatrixScatter {
 		@Ifdef("MPI_COMMU") {
 
 		//Only one row block partition
-			val szlist = new Rail[Long](gp.numColBlocks, (i:Long)=>gp.colBs(i)*gp.rowBs(0));
+			val szlist = new Array[Int](gp.numColBlocks, (i:Int)=>gp.colBs(i)*gp.rowBs(0));
 			val root = here.id();
 			finish 	{ 
-				for([p] in dst.dist) {
+				for(val [p] :Point in dst.dist) {
 					val datcnt = szlist(p);
 					if (p != root) {
-						at(dst.dist(p)) async {
+						at (dst.dist(p)) async {
 							val dstden = dst(here.id()).getMatrix();
 							/*******************************************/
 							// Not working
-							//val tmpbuf= null; //fake
-							//val tmplst=null;//   //fake
+							//val tmpbuf:Array[Double](1)= null; //fake
+							//val tmplst:Array[Int](1)=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[Double](0); //fake
-							val tmplst = new Rail[Long](0);   //fake
+							val tmpbuf = new Array[Double](0); //fake
+							val tmplst = new Array[Int](0);   //fake
 							//Debug.flushln("P"+p+" starting non root scatter :"+datcnt);
 							WrapMPI.world.scatterv(tmpbuf, tmplst, dstden.d, datcnt, root);
 						}
@@ -161,8 +184,8 @@ public class MatrixScatter {
 	 * @param dst			destination dense blocks distributed among all blocks.
 	 */
 	public static def mpiScatterVector(
-			gp:Grid{self.N==1L}, 
-			src:Rail[Double], 
+			gp:Grid{self.N==1}, 
+			src:Array[Double](1), 
 			dst:DistArray[DenseBlock](1)): void {
 
 		@Ifdef("MPI_COMMU") {
@@ -170,18 +193,18 @@ public class MatrixScatter {
 			val szlist = gp.rowBs;
 			val root = here.id();
 			finish 	{ 
-				for([p] in dst.dist) {
+				for(val [p] :Point in dst.dist) {
 					val datcnt = szlist(p);
 					if (p != root) {
-						at(dst.dist(p)) async {
+						at (dst.dist(p)) async {
 							val dstden = dst(here.id()).getMatrix();
 							/*******************************************/
 							// Not working
-							//val tmpbuf= null; //fake
-							//val tmplst=null;//   //fake
+							//val tmpbuf:Array[Double](1)= null; //fake
+							//val tmplst:Array[Int](1)=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[Double](0); //fake
-							val tmplst = new Rail[Long](0);   //fake
+							val tmpbuf = new Array[Double](0); //fake
+							val tmplst = new Array[Int](0);   //fake
 							//Debug.flushln("P"+p+" starting non root scatter :"+datcnt);
 							WrapMPI.world.scatterv(tmpbuf, tmplst, dstden.d, datcnt, root);
 						}
@@ -215,13 +238,13 @@ public class MatrixScatter {
 			dst:DistArray[DenseBlock](1)): void {
 
 		val root = here.id();
-		var coloff:Long=0;
-		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
+		var coloff:Int=0;
+		for (var cb:Int=0; cb<gp.numColBlocks; cb++) {
 
 			val colcnt = gp.colBs(cb);
 			
 			if (cb != root) {
-				MatrixRemoteCopy.x10Copy(srcden, coloff, dst, cb, 0L, colcnt); 
+				x10Copy(srcden, coloff, dst, cb, 0, colcnt); 
 
 			} else {
 				//Make local copying
@@ -236,28 +259,32 @@ public class MatrixScatter {
 	 * Scatter 1-column dense matrix (vector) to distributed dense blocks.
 	 */
 	public static def x10ScatterVector(
-			gp:Grid{self.N==1L}, 
-			src:Rail[Double],	
+			gp:Grid{self.N==1}, 
+			src:Array[Double](1),	
 			dst:DistArray[DenseBlock](1)): void {
 
 		val root = here.id();
-		var rowoff:Long=0;
-		for (var rb:Long=0; rb<gp.numRowBlocks; rb++) {
+		var rowoff:Int=0;
+		for (var rb:Int=0; rb<gp.numRowBlocks; rb++) {
 
 			val rowcnt = gp.rowBs(rb);
 			
 			if (rb != root) {
-				MatrixRemoteCopy.x10Copy(src, rowoff, dst, rb, 0L, rowcnt); 
+				x10Copy(src, rowoff, dst, rb, 0, rowcnt); 
 
 			} else {
 				//Make local copying
 				val dstden = dst(root).getMatrix();
-				Rail.copy(src, rowoff, dstden.d, 0L, rowcnt);
+				Array.copy(src, rowoff, dstden.d, 0, rowcnt);
 			}
 			rowoff += rowcnt;
 		}
 	}
 
+
+	//============================================================
+	// Sparse matrix block scatter
+	//============================================================
 	/**
 	 * Scatter data from sparse blocks at here to distributed sparse blocks
 	 *
@@ -265,19 +292,25 @@ public class MatrixScatter {
 	 * @param dst     target distributed sparse matrix block array 
 	 */
 	public static def scatter(
-			src:Rail[SparseBlock], 
+			src:Array[SparseBlock](1), 
 			dst:DistArray[SparseBlock](1)) : void {
 		
 		val nb = dst.region.size();
+		var szlist:Array[Int](1);
 
 		Debug.assure(nb==src.size, 
 			"Number blocks in dist and local array mismatch");
 
-		finish for (var bid:Long=0; bid<nb; bid++) {
+		finish for (var bid:Int=0; bid<nb; bid++) {
+			
 			val srcspa = src(bid).getMatrix();
-			MatrixRemoteCopy.copy(srcspa, 0L, dst, bid, 0L, srcspa.N);
+			copy(srcspa, 0, dst, bid, 0, srcspa.N);
 		}
 	}
+
+	//------------------------------------------------------------
+	// Scatter sparse matrix block from single row blocks partitioning
+	//------------------------------------------------------------
 
 	/**
 	 * Scatter single-row partitioning blocks in all places to a 
@@ -288,7 +321,7 @@ public class MatrixScatter {
 			src:SparseCSC, 
 			dst:DistArray[SparseBlock](1)) : void {
 
-		Debug.assure(gp.numRowBlocks==1L || gp.N==1L, 
+		Debug.assure(gp.numRowBlocks==1 || gp.N==1, 
 					 "Number of row block in partition must be 1, or matrix is a vector");
 		// Test sparse block storage 
 		@Ifdef("MPI_COMMU") {
@@ -299,11 +332,12 @@ public class MatrixScatter {
 		}
 	}
 
-    protected static def compNonZeroBs(gp:Grid, src:SparseCSC):Rail[Long] {
-        val nzl = new Rail[Long](gp.size);
-        var sttcol:Long = 0L;
-		var colcnt:Long = gp.getColSize(0);
-		for (var cb:Long=0; cb<nzl.size; cb++) {
+	protected static def compNonZeroBs(gp:Grid, src:SparseCSC):Array[Int](1) {
+
+		val nzl = new Array[Int](gp.size);
+		var sttcol:Int = 0;
+		var colcnt:Int = gp.getColSize(0);
+		for (var cb:Int=0; cb<nzl.size; cb++) {
 			colcnt = gp.getColSize(cb);
 			nzl(cb) = src.countNonZero(sttcol, colcnt);
 			sttcol+=colcnt;
@@ -311,6 +345,7 @@ public class MatrixScatter {
 		return nzl;
 
 	}
+	//----------------------------------------------------------------
 
 	protected static def mpiScatterRowBs(
 			gp:Grid, 
@@ -320,26 +355,26 @@ public class MatrixScatter {
 		@Ifdef("MPI_COMMU") {
 
 		val root = here.id();			
-		var sttcol:Long = 0;
-		var datoff:Long = 0;
+		var sttcol:Int = 0;
+		var datoff:Int = 0;
 		val nzlist = compNonZeroBs(gp, srcspa);
 		
 		finish {
-			for([p] in dst.dist) {
+			for(val [p] :Point in dst.dist) {
 				if (p != root) {
 					val datcnt = nzlist(p);
-					at(dst.dist(p)) async {
+					at (dst.dist(p)) async {
 						//Need: dst, root, datcnt
 						val dstspa = dst(here.id()).getMatrix();
-
+						//----------------------------------
 						// Not working
-						//val rcvidx = null; 
-						//val rcvval = null;
-						//val szl = null;
-
-						val tmpidx = new Rail[Long](0); 
-						val tmpval = new Rail[Double](0);
-						val tmplst = new Rail[Long](0);
+						//val rcvidx:Array[Int](1) = null; 
+						//val rcvval:Array[Double](1) = null;
+						//val szl:Array[Int](1) = null;
+						//-----------------------------------
+						val tmpidx = new Array[Int](0); 
+						val tmpval = new Array[Double](0);
+						val tmplst = new Array[Int](0);
 					
 						//++++++++++++++++++++++++++++++++++++++++++++
 						//Do NOT call getIndex()/getValue() before init
@@ -350,6 +385,7 @@ public class MatrixScatter {
 						WrapMPI.world.scatterv(tmpval, tmplst, 
 									 dstspa.getValue(), datcnt, root);
 						dstspa.finalizeRemoteCopyAtDest();
+						//dstspa.print("Recv scatter block data");
 					}
 				} 
 			}
@@ -394,12 +430,14 @@ public class MatrixScatter {
 										 dst:DistArray[SparseBlock](1)): void {
 
 		val root = here.id();
-		var coloff:Long = 0;
-		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
+		var coloff:Int = 0;
+
+		for (var cb:Int=0; cb<gp.numColBlocks; cb++) {
+			
 			val colcnt = gp.colBs(cb);
 
 			if (cb != root) {
-				MatrixRemoteCopy.x10Copy(srcspa, coloff, dst, cb, 0L, colcnt);
+				x10Copy(srcspa, coloff, dst, cb, 0, colcnt);
 			} else {
 				//Make local copying
 				val dstspa = dst(root).getMatrix();

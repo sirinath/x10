@@ -27,7 +27,7 @@ abstract class GenericTest extends x10Test {
 
     var result:boolean = true;
 
-    def genericCheck(test:String, actual:long, expected:long) = {
+    def genericCheck(test:String, actual:Int, expected:Int) = {
 
         var result:boolean = actual == expected;
 

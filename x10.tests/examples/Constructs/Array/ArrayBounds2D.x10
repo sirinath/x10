@@ -10,7 +10,6 @@
  */
 
 import x10.util.Random;
-import x10.regionarray.*;
 import harness.x10Test;
 
 /**
@@ -28,11 +27,11 @@ public class ArrayBounds2D extends x10Test {
 
     public def run(): boolean = {
 
-        val COUNT: int = 100n;
-        val L: int = 10n;
-        val K: int = 3n;
+        val COUNT: int = 100;
+        val L: int = 10;
+        val K: int = 3;
 
-        for(var n: int = 0n; n < COUNT; n++) {
+        for(var n: int = 0; n < COUNT; n++) {
             var i: int = ranInt(-L-K, L+K);
             var j: int = ranInt(-L-K, L+K);
             var lb1: int = ranInt(-L, L);
@@ -52,7 +51,7 @@ public class ArrayBounds2D extends x10Test {
     private static def arrayAccess(var lb1: int, var ub1: int, var lb2: int, var ub2: int, var i: int, var j: int): boolean = {
 
         //pr(lb1+" "+ub1+" "+lb2+" "+ub2+" "+i+" "+j);
-        val a = new Array[int](Region.make(lb1..ub1, lb2..ub2), (Point)=>0n);
+        val a = new Array[int]((lb1..ub1)*(lb2..ub2), (Point)=>0);
         var withinBounds: boolean = true;
 
         try {
@@ -82,7 +81,7 @@ public class ArrayBounds2D extends x10Test {
         return x == y;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayBounds2D().execute();
     }
 }

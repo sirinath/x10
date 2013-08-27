@@ -9,7 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.*;
 
 /**
  * Basic array, c-style loop.
@@ -30,15 +29,15 @@ public class SeqArray2a extends Benchmark {
     // the benchmark
     //
 
-    val a = new Array_2[double](N, N);
+    val a = new Array[double](0..(N-1)*0..(N-1), (Point)=>0.0);
 
     def once() {
-        for (i in 0..(N-1))
-            for (j in 0..(N-1))
+        for (var i:int=0; i<N; i++)
+            for (var j:int=0; j<N; j++)
                 a(i,j) = (i+j) as double;
         var sum:double = 0.0;
-        for (i in 0..(N-1))
-            for (j in 0..(N-1))
+        for (var i:int=0; i<N; i++)
+            for (var j:int=0; j<N; j++)
                 sum += a(i,j);
         return sum;
     }
@@ -47,7 +46,7 @@ public class SeqArray2a extends Benchmark {
     // boilerplate
     //
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new SeqArray2a().execute();
     }
 }

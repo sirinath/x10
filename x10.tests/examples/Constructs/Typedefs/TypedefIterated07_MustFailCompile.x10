@@ -26,12 +26,12 @@ public class TypedefIterated07_MustFailCompile extends TypedefTest {
     public def run(): boolean = {
 
         type A = A(0); // ERR
-        type A(i:long) = A;
+        type A(i:int) = A;
 
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new TypedefIterated07_MustFailCompile().execute();
     }
 }

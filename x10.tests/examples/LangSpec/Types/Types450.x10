@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class Types450 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types450().execute();
     }
 
 
-// file Types line 2313
+// file Types line 2309
  static  class Examplerator {
-def f(a:Long) {
+def f(a:Int) {
   if (a == 0) return 0;
   else return "non-zero";
 }

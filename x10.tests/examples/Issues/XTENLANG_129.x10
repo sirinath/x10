@@ -21,15 +21,15 @@ class XTENLANG_129 extends x10Test {
         def this(rank:int) = property(rank);
     }
     
-    static def z(): R{rank==1n} { throw new Exception(); }
+    static def z(): R{rank==1} { throw new Exception(); }
     
-    val w: (int)=>R{rank==1n} = (int)=>z();
+    val w: (int)=>R{rank==1} = (int)=>z();
 
     public def run(): boolean {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_129().execute();
     }
 }

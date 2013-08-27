@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class MethodResolution_disamb_a extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new MethodResolution_disamb_a().execute();
     }
 
 
-// file Classes line 3722
+// file Classes line 3721
  static class Xhaver {
-  private var x: Long = 0;
+  private var x: Int = 0;
   public def x() = x;
   public def bumpX() { x ++; }
 }

@@ -12,7 +12,8 @@
 package x10.util.concurrent;
 
 import x10.compiler.Pinned;
-import x10.util.GrowableRail;
+import x10.io.SerialData;
+import x10.util.Stack;
 
 /**
  * Lock with wait/notify capabilities.
@@ -21,12 +22,20 @@ import x10.util.GrowableRail;
 @Pinned public class Monitor extends Lock {
     public def this() { super(); }
 
+    public def serialize():SerialData {
+        throw new UnsupportedOperationException("Cannot serialize "+typeName());
+    }
+
+    private def this(SerialData) {
+        throw new UnsupportedOperationException("Cannot deserialize "+typeName());
+    }
+
     static type Worker = Runtime.Worker;
 
     /**
      * Parked workers
      */
-    private val workers = new GrowableRail[Worker]();
+    private val workers = new Stack[Worker]();
 
     /**
      * Await notification
@@ -36,7 +45,7 @@ import x10.util.GrowableRail;
     public def await():void {
         Runtime.increaseParallelism(); // likely to be blocked for a while
         val worker = Runtime.worker();
-        workers.add(worker);
+        workers.push(worker);
         while (workers.contains(worker)) {
             super.unlock();
             Worker.park();
@@ -49,10 +58,10 @@ import x10.util.GrowableRail;
      * Must be called while holding the lock
      */
     public def release():void {
-        val size = workers.size() as Int;
+        val size = workers.size();
         if (size > 0) {
             Runtime.decreaseParallelism(size);
-            for (var i:Int = 0n; i<size; i++) workers.removeLast().unpark();
+            for (var i:Int = 0; i<size; i++) workers.pop().unpark();
         }
         super.unlock();
     }

@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Statements40 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Statements40().execute();
     }
 
@@ -33,7 +33,7 @@ public class Statements40 extends x10Test {
   static def call() {
      x10.io.Console.OUT.println("call!");}
   def example() {
-     var a : Long = 0;
+     var a : Int = 0;
      a = 1; // assignment
      new StmtEx(); // allocation
      call(); // call

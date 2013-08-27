@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Check that if D is of type Dist(R), and E of type Dist(R2), and R and R2
@@ -19,8 +18,8 @@ import x10.regionarray.*;
  */
 public class PropertyPropagationTest extends x10Test {
     public def run(): boolean = {
-        val R = Region.make(1..10, 1..10);
-        val R2 = Region.make(1..101, 1..101);
+        val R = (1..10)*(1..10);
+        val R2 = (1..101)*(1..101);
         val D = Dist.makeBlock(R);
         val E = Dist.makeBlock(R2);
         // val F = D || E; removed because || removed on Dist.
@@ -29,7 +28,7 @@ public class PropertyPropagationTest extends x10Test {
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PropertyPropagationTest().execute();
     }
 }

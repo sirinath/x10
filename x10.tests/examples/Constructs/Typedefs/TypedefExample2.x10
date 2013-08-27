@@ -26,7 +26,7 @@ public class TypedefExample2 extends TypedefTest {
         type A = Int;
         type B = String;
         type C = String;
-        a: A = 3n;
+        a: A = 3;
         b: B = new C("Hi");
         c: C = b + ", Mom!";
 
@@ -37,7 +37,7 @@ public class TypedefExample2 extends TypedefTest {
 
 
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new TypedefExample2().execute();
     }
 }

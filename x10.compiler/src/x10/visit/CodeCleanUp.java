@@ -29,7 +29,6 @@ import polyglot.ast.Return;
 import polyglot.ast.Stmt;
 import polyglot.ast.SwitchBlock;
 import polyglot.ast.Throw;
-import polyglot.ast.Try;
 import polyglot.frontend.Job;
 import polyglot.types.Name;
 import polyglot.types.TypeSystem;
@@ -107,18 +106,6 @@ public class CodeCleanUp extends ContextVisitor {
             return sinkEval((StmtExpr)((Eval)n).expr(), n.position());
         }
         
-        if (n instanceof StmtExpr) {
-            StmtExpr ste = (StmtExpr)n;
-            if (ste.statements().isEmpty()) {
-                // Simplify StmtExpr({}, E) to just E
-                return ste.result();
-            }
-        }
-        
-        if (n instanceof Return && ((Return) n).expr() instanceof StmtExpr) {
-            return sinkReturn((Return)n);
-        }
-        
         if (!(n instanceof Block) || n instanceof SwitchBlock) {
             return n;
         }
@@ -154,16 +141,6 @@ public class CodeCleanUp extends ContextVisitor {
         return b;
     }
 
-    //Return(StmtExpr(Block(S), e)) ==> Block(S, return e)
-    private Block sinkReturn(Return oldRet) {
-        StmtExpr stExpr = (StmtExpr)oldRet.expr();
-        List<Stmt> statements = new ArrayList<Stmt>(stExpr.statements());
-        Return newRet= nf.Return(oldRet.position(), stExpr.result());
-        statements.add(newRet);
-        return nf.Block(oldRet.position(), statements);
-    }
-    
-    
     /**
      * Turns a Block into a list of Stmts.
      **/
@@ -176,7 +153,8 @@ public class CodeCleanUp extends ContextVisitor {
                 boolean innerIsStmtSeq = stmt instanceof StmtSeq;
                 Block inner = (Block) stmt;
                 if ((!bIsStmtSeq || innerIsStmtSeq) && ((X10Ext) inner.ext()).annotations().isEmpty()) {
-                    // Alpha-rename local decls in the block that we're flattening.
+                    // Alpha-rename local decls in the block that we're
+                    // flattening.
                     if (report) System.out.println("Cleaning up a block" + inner.position());
                     if (reportStats) blockCount++;
                     if (!innerIsStmtSeq) inner = (Block) inner.visit(alphaRenamer);
@@ -234,16 +212,10 @@ public class CodeCleanUp extends ContextVisitor {
             Block block = (Block) stmt;
             List<Stmt> statements = block.statements();
             Stmt last = statements.get(statements.size()-1);
-            if (last instanceof Branch) {
+            if (last != null && last instanceof Branch) {
                 Branch branch = (Branch) last;
-                return branch.kind() == Branch.BREAK && branch.labelNode() != null && branch.labelNode().id().equals(label);
-            } else if (last instanceof Try) {
-                Block tb  = ((Try)last).tryBlock();
-                Stmt inner_last = tb.statements().get(tb.statements().size()-1);
-                if (inner_last instanceof Branch) {
-                    Branch branch = (Branch) inner_last;
-                    return branch.kind() == Branch.BREAK && branch.labelNode() != null && branch.labelNode().id().equals(label);
-                }
+                if (branch.kind() == Branch.BREAK && branch.labelNode() != null && branch.labelNode().id().equals(label))
+                    return true;
             }
         }
         return false;
@@ -252,17 +224,7 @@ public class CodeCleanUp extends ContextVisitor {
     private Block removeBreakLast(Labeled labeled) {
         List<Stmt> osts = ((Block) labeled.statement()).statements();
         List<Stmt> statements = new ArrayList<Stmt>(osts);
-        Stmt last = statements.get(statements.size()-1);
-        if (last instanceof Branch) {
-            statements.remove(statements.size()-1);
-        } else if (last instanceof Try) {
-            Try t = ((Try)last);
-            List<Stmt> old_tbstmts = t.tryBlock().statements();
-            List<Stmt> tbstmts = new ArrayList<Stmt>(old_tbstmts);
-            tbstmts.remove(tbstmts.size()-1);
-            last = t.tryBlock(xnf.Block(((Try)last).tryBlock().position(), tbstmts));
-            statements.set(statements.size()-1, last);
-        }
+        statements.remove(statements.size() - 1);
         return xnf.Block(labeled.position(), statements);
     }
 

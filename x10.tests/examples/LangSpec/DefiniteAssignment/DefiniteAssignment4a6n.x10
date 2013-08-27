@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class DefiniteAssignment4a6n extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new DefiniteAssignment4a6n().execute();
     }
 
@@ -29,7 +29,7 @@ public class DefiniteAssignment4a6n extends x10Test {
 // file DefiniteAssignment line 129
  static  class Example {
  def example() {
-val a : Long;
+val a : Int;
 finish {
   async {
     a = 1;

@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class DefiniteAssignment3x6i_Bad34_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new DefiniteAssignment3x6i_Bad34_MustFailCompile().execute();
     }
 
@@ -29,7 +29,7 @@ public class DefiniteAssignment3x6i_Bad34_MustFailCompile extends x10Test {
 // file DefiniteAssignment line 105
  static  class Example{
 def example(flag:Boolean) {
-  var x : Long;
+  var x : Int;
   if (flag) x = 1;
   if (!flag) x = 2;
  assert x < 3; // ERR

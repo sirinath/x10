@@ -153,7 +153,7 @@ public class IntLit_c extends NumLit_c implements IntLit
 
     public String toString() {
         if (kind() == UINT) {
-            return Long.toString(value & 0xffffffffL) + "UN";
+            return Long.toString(value & 0xffffffffL) + "U";
         }
         else if (kind() == LONG) {
             return Long.toString(value) + "L";
@@ -180,8 +180,6 @@ public class IntLit_c extends NumLit_c implements IntLit
             	s += "S";
             } else if (kind() == USHORT) {
             	s += "US";
-            } else if (kind() == INT) {
-                s += "N";
             }
             return s;
         }

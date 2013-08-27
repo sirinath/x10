@@ -94,9 +94,7 @@ bool RuntimeType::concreteInstanceOf (const Reference* other) const {
     return other->_type()->equals(this);
 }
 
-void RuntimeType::initializeForMultiThreading() {
-    initRTTLock = new (system_alloc<reentrant_lock>())reentrant_lock();
-}
+
 
 bool RuntimeType::initStageOne(const RuntimeType *canonical_) {
 
@@ -106,25 +104,22 @@ bool RuntimeType::initStageOne(const RuntimeType *canonical_) {
     // a thread asks for an RTT, it gets a fully initialized RTT before it starts
     // operating on it and we don't get a race with multiple threads partially
     // initializing an RTT.
-    // 
-    // NOTE: Lock == NULL ===> single threaded C++ static initialization
-    if (NULL != initRTTLock) {
-        initRTTLock->lock();
+    while (NULL == initRTTLock) {
+        reentrant_lock* tmpLock = new (system_alloc<reentrant_lock>())reentrant_lock();
+        x10aux::atomic_ops::store_load_barrier();
+        atomic_ops::compareAndSet_ptr((volatile void**)(&initRTTLock), NULL, tmpLock);
     }
+    const_cast<reentrant_lock*>(initRTTLock)->lock();
 
     if (canonical != NULL) {
         if (isInitialized) {
-            if (NULL != initRTTLock) {
-                initRTTLock->unlock();
-            }
+            const_cast<reentrant_lock*>(initRTTLock)->unlock();
             return true; // another thread finished the job while this thread was blocked on initRTTLock.
         }
         // We should only get here if there is a cyclic intialization in progress.
         // We don't have a 100% foolproof way to be sure that is what is happening, so
         // just hope that is what is happening and return.
-        if (NULL != initRTTLock) {
-            initRTTLock->unlock();
-        }
+        const_cast<reentrant_lock*>(initRTTLock)->unlock();
         return true;
     }
     
@@ -176,9 +171,7 @@ void RuntimeType::initStageTwo(const char* baseName_,
     isInitialized = true; // must come after the store_load_barrier
 
     // Unlock paired with lock operation at entry to initStageOne.
-    if (NULL != initRTTLock) {
-        initRTTLock->unlock();
-    }
+    const_cast<reentrant_lock *>(initRTTLock)->unlock();
 }
     
 void RuntimeType::initBooleanType() {
@@ -302,6 +295,6 @@ const char *RuntimeVoidFunType::name() const {
 }
 
 
-x10aux::reentrant_lock* RuntimeType::initRTTLock;
+volatile x10aux::reentrant_lock* RuntimeType::initRTTLock;
 
 // vim:tabstop=4:shiftwidth=4:expandtab

@@ -19,12 +19,12 @@ import harness.x10Test;
  public class CastInt3ToAny3AndBack extends x10Test {
 
    public def run(): boolean = {      
-      var obj: Any(3n) = 3n;
-      val i = obj as Int(3n);
+      var obj: Any(3) = 3;
+      val i = obj as Int(3);
       return true;
    }
 
-   public static def main(Rail[String]) {
+   public static def main(Array[String](1)) {
       new CastInt3ToAny3AndBack().execute();
    }
 }

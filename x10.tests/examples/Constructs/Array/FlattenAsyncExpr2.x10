@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 
 /**
@@ -26,7 +25,7 @@ public class FlattenAsyncExpr2 extends x10Test {
     val a: DistArray[int](1);
 
     public def this(): FlattenAsyncExpr2 = {
-        a = DistArray.make[int](Region.make(1,10) -> here, ([j]: Point): int => { return (2*j) as int;});
+        a = DistArray.make[int](1..10 -> here, ([j]: Point): int => { return 2*j;});
     }
 
     static def m(x: int) = x;
@@ -34,13 +33,13 @@ public class FlattenAsyncExpr2 extends x10Test {
     
     public def run(): boolean = {
         finish async at(a.dist(1)) {
-            m(50000n);
-            atomic { a(1) = (a(1)^2n);}
+            m(50000);
+            atomic { a(1) = (a(1)^2);}
         }
-        return a(1)== (2n^2n);
+        return a(1)== (2^2);
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new FlattenAsyncExpr2().execute();
     }
 }

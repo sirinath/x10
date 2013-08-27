@@ -21,21 +21,21 @@ import harness.x10Test;
 
 public class Classes6a1j extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes6a1j().execute();
     }
 
 
-// file Classes line 1723
+// file Classes line 1725
  static  class Whatever {
 
-static  class Trace(n:Long){
+static  class Trace(n:Int){
   public static operator !(f:Trace)
       = new Trace(10 * f.n + 1);
   public operator -this = new Trace (10 * this.n + 2);
 }
 static  class Brace extends Trace{
-  def this(n:Long) { super(n); }
+  def this(n:Int) { super(n); }
   public operator -this = new Brace (10 * this.n + 3);
   static def example() {
      val t = new Trace(1);

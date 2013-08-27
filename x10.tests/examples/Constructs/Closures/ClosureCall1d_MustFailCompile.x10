@@ -25,7 +25,7 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureCall1d_MustFailCompile extends x10Test {
+public class ClosureCall1d_MustFailCompile extends ClosureTest {
 
     class V           {public static val name = "V";}
     class W extends V {public static val name = "W";}
@@ -36,12 +36,12 @@ public class ClosureCall1d_MustFailCompile extends x10Test {
     public def run(): boolean = {
 
         val d = ([T,U](t:T,u:U){T<:X && U<:X} => T.name + U.name)(new Y(), new Z());
-        chk(d.equals("YZ"), "d");
+        check("d", d, "YZ");
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureCall1d()_MustFailCompile.execute();
     }
 }

@@ -21,20 +21,20 @@ import harness.x10Test;
 
 public class Structs40 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Structs40().execute();
     }
 
 
 // file Structs line 420
  static class Class2Struct {
-  val a : Long;
-  def this(a:Long) { this.a = a; }
+  val a : Int;
+  def this(a:Int) { this.a = a; }
   def m() = a;
 }
  static struct Struct2Class {
-  val a : Long;
-  def this(a:Long) { this.a = a; }
+  val a : Int;
+  def this(a:Int) { this.a = a; }
   def m() = a;
 }
 

@@ -27,11 +27,7 @@ namespace x10aux {
     class ReferenceLogger {
     public:
         static ReferenceLogger* it;
-#ifndef ENABLE_CROSS_COMPILE_FX10
     private:
-#else
-    public:
-#endif
         class Bucket {
         public:
             void *_reference;

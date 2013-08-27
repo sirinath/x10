@@ -114,7 +114,7 @@ import x10c.visit.StaticInitializer;
 // static methods
 import static x10.visit.X10PrettyPrinterVisitor.hasParams;
 import static x10.visit.X10PrettyPrinterVisitor.isBoxedType;
-import static x10.visit.X10PrettyPrinterVisitor.isRail;
+import static x10.visit.X10PrettyPrinterVisitor.isIndexedMemoryChunk;
 import static x10.visit.X10PrettyPrinterVisitor.isPrimitive;
 import static x10.visit.X10PrettyPrinterVisitor.isPrimitiveGenericMethod;
 import static x10.visit.X10PrettyPrinterVisitor.isSpecialType;
@@ -1932,45 +1932,47 @@ public class Emitter {
         return false;
     }
 
-	// not used
-//    private void generateBridgeMethodsForGenerics(X10ClassDef cd) {
-//	    if (cd.flags().isInterface()) {
-//	        return;
-//	    }
-//
-//	    X10ClassType ct = cd.asType();
-//	    for (MethodDef md : cd.methods()) {
-//	        List<MethodInstance> methods = getInstantiatedMethods(ct, md.asInstance());
-//	        for (MethodInstance mi : methods) {
-//	            printBridgeMethod(ct, md.asInstance(), mi.def(), false);
-//	        }
-//	    }
-//	    
-//	    List<MethodInstance> inheriteds = new ArrayList<MethodInstance>();
-//        List<MethodInstance> overrides = new ArrayList<MethodInstance>();
-//	    getInheritedMethods(ct, inheriteds, overrides);
-//	    for (MethodInstance mi : inheriteds) {
-//	        if (isInstantiated(mi.def().returnType().get(), mi.returnType())) {
-//	            printBridgeMethodForInheritedMethod(ct, mi);
-//	            continue;
-//	        }
-//	        for (int i = 0; i < mi.formalTypes().size(); ++ i) {
-//	            if (
-//	                    isPrimitive(mi.formalTypes().get(i)) &&
-//	                    isInstantiated(mi.def().formalTypes().get(i).get(), mi.formalTypes().get(i))
-//	            ) {
-//	                printBridgeMethodForInheritedMethod(ct, mi);
-//	                break;
-//	            }
-//	        }
-//	        List<MethodInstance> implMethods = new ArrayList<MethodInstance>();
-//	        List<Type> interfaces = ct.interfaces();
-//	        getImplMethods(mi, implMethods, interfaces);
-//	        for (MethodInstance mi2 : implMethods) {
-//	            printBridgeMethod(ct, mi, mi2.def(), false);
-//	        }
-//	    }
-//	}
+    /*
+     * The word 'instantiated' means the instantiation of type parameter (e.g. T) with concrete type (e.g. Int). 
+     */
+    private void generateBridgeMethodsForGenerics(X10ClassDef cd) {
+	    if (cd.flags().isInterface()) {
+	        return;
+	    }
+
+	    X10ClassType ct = cd.asType();
+	    for (MethodDef md : cd.methods()) {
+	        List<MethodInstance> methods = getInstantiatedMethods(ct, md.asInstance());
+	        for (MethodInstance mi : methods) {
+	            printBridgeMethod(ct, md.asInstance(), mi.def(), false);
+	        }
+	    }
+	    
+	    List<MethodInstance> inheriteds = new ArrayList<MethodInstance>();
+        List<MethodInstance> overrides = new ArrayList<MethodInstance>();
+	    getInheritedMethods(ct, inheriteds, overrides);
+	    for (MethodInstance mi : inheriteds) {
+	        if (isInstantiated(mi.def().returnType().get(), mi.returnType())) {
+	            printBridgeMethodForInheritedMethod(ct, mi);
+	            continue;
+	        }
+	        for (int i = 0; i < mi.formalTypes().size(); ++ i) {
+	            if (
+	                    isPrimitive(mi.formalTypes().get(i)) &&
+	                    isInstantiated(mi.def().formalTypes().get(i).get(), mi.formalTypes().get(i))
+	            ) {
+	                printBridgeMethodForInheritedMethod(ct, mi);
+	                break;
+	            }
+	        }
+	        List<MethodInstance> implMethods = new ArrayList<MethodInstance>();
+	        List<Type> interfaces = ct.interfaces();
+	        getImplMethods(mi, implMethods, interfaces);
+	        for (MethodInstance mi2 : implMethods) {
+	            printBridgeMethod(ct, mi, mi2.def(), false);
+	        }
+	    }
+	}
 
     /*
      * 'inheriteds' will include all visible methods that are inherited from super classes to ct.
@@ -2131,9 +2133,6 @@ public class Emitter {
         return methods;
     }
 
-    /*
-     * The word 'instantiated' means the instantiation of type parameter (e.g. T) with concrete type (e.g. Int). 
-     */
     private static boolean isInstantiated(Type sup, Type t) {
         return sup.isParameterType() && !t.isParameterType();
     }
@@ -2236,11 +2235,6 @@ public class Emitter {
             return true;
         }
         return false;
-    }
-
-    // if this returns true for containerType of a method, the method is called through interface thus requires RTT for self dispatch.  
-    public static boolean isInterfaceOrFunctionType(TypeSystem xts, Type containerType) {
-        return xts.isInterfaceType(containerType) || xts.isExactlyFunctionType(containerType);
     }
 
     private void printBridgeMethod(ClassType ct, MethodInstance impl, MethodDef def, boolean isCovariantOverride) {
@@ -2381,8 +2375,11 @@ public class Emitter {
 	    TypeSystem xts = tr.typeSystem();
 	    boolean isInterface2 = false;
 	    ContainerType st2 = impl.container();
-	    if (isInterfaceOrFunctionType(xts, st2)) {
-	    	isInterface2 = true;
+	    Type bst = Types.baseType(st2);
+        if (st2.isClass()) {
+	        if (xts.isInterfaceType(bst) || (xts.isFunctionType(bst) && bst.toClass().isAnonymous())) {
+	            isInterface2 = true;
+	        }
 	    }
 
         // call
@@ -2519,36 +2516,35 @@ public class Emitter {
     	    w.newline();
     }
 
-    // not used
-//    private void generateBridgeMethodsForCovariantOverride(X10ClassDef cd) {
-//        if (cd.flags().isInterface()) {
-//            return;
-//        }
-//    
-//        X10ClassType ct = cd.asType();
-//        for (MethodDef md : cd.methods()) {
-//            List<MethodInstance> methods = getCovarientOverriddenMethods(ct, md.asInstance());
-//            for (MethodInstance mi : methods) {
-//                printBridgeMethod(ct, md.asInstance(), mi.def(), true);
+    private void generateBridgeMethodsForCovariantOverride(X10ClassDef cd) {
+        if (cd.flags().isInterface()) {
+            return;
+        }
+    
+        X10ClassType ct = cd.asType();
+        for (MethodDef md : cd.methods()) {
+            List<MethodInstance> methods = getCovarientOverriddenMethods(ct, md.asInstance());
+            for (MethodInstance mi : methods) {
+                printBridgeMethod(ct, md.asInstance(), mi.def(), true);
+            }
+        }
+        
+        List<MethodInstance> inheriteds = new ArrayList<MethodInstance>();
+        List<MethodInstance> overrides = new ArrayList<MethodInstance>();
+        getInheritedMethods(ct, inheriteds, overrides);
+        for (MethodInstance mi : inheriteds) {
+//            if (isCovariantOverride(mi.def().returnType().get(), mi.returnType())) {
+//                printBridgeMethodForInheritedMethod(ct, mi);
+//                continue;
 //            }
-//        }
-//        
-//        List<MethodInstance> inheriteds = new ArrayList<MethodInstance>();
-//        List<MethodInstance> overrides = new ArrayList<MethodInstance>();
-//        getInheritedMethods(ct, inheriteds, overrides);
-//        for (MethodInstance mi : inheriteds) {
-////            if (isCovariantOverride(mi.def().returnType().get(), mi.returnType())) {
-////                printBridgeMethodForInheritedMethod(ct, mi);
-////                continue;
-////            }
-//            List<MethodInstance> implMethods = new ArrayList<MethodInstance>();
-//            List<Type> interfaces = ct.interfaces();
-//            getImplMethodsForCovariantOverride(mi, implMethods, interfaces);
-//            for (MethodInstance mi2 : implMethods) {
-//                printBridgeMethod(ct, mi, mi2.def(), true);
-//            }
-//        }
-//    }
+            List<MethodInstance> implMethods = new ArrayList<MethodInstance>();
+            List<Type> interfaces = ct.interfaces();
+            getImplMethodsForCovariantOverride(mi, implMethods, interfaces);
+            for (MethodInstance mi2 : implMethods) {
+                printBridgeMethod(ct, mi, mi2.def(), true);
+            }
+        }
+    }
     
     // Fix for XTENLANG-3035
     // old and buggy code
@@ -3250,10 +3246,9 @@ public class Emitter {
 		return true;
 	}
 
-	private Type actualType(Type type) {
+	private static Type actualType(Type type) {
 	    if (type instanceof ConstrainedType) {
 	        ConstrainedType ct = (ConstrainedType) type;
-	        Type baseType = ct.baseType().get();
 	        XVar selfVarBinding = ct.constraint().get().selfVarBinding();
                 if (selfVarBinding != null && selfVarBinding instanceof Typed) {
                     // x10.lang.Object{self=="abc"} -> x10.lang.String
@@ -3263,14 +3258,10 @@ public class Emitter {
                     if (actualType instanceof ConstrainedType) {
                         actualType = ((ConstrainedType) actualType).baseType().get();
                     }
-                    // XTENLANG-3208 fix regressions with inlined typedef. see SelfArrayReference_7, NestedArray_2, etc.
-                    if (actualType.isSubtype(baseType, tr.context()))
-                    	return actualType;
-                    else
-                    	return baseType;
+                    return actualType;
                 }
                 else {
-                    return baseType;
+                    return ct.baseType().get();
                 }
 	    }
 	    return type;
@@ -3447,33 +3438,53 @@ public class Emitter {
             // Option for non-closures
             w.write("\"" + def.asType() + "\", ");
         }
-//        w.write("/* base class */");
+        w.write("/* base class */");
         printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
         w.write(".class");
         
         if (def.variances().size() > 0) {
-        	// variance has been removed from the language. just record number of type perameters.
-            w.write(", " + def.variances().size());
-        }
-        
-        TypeSystem xts = tr.typeSystem();
-        boolean needParents = def.superType() != null || isStruct;
-        if (!needParents) {
-            for (int i = 0 ; i < def.interfaces().size(); ++i) {
-                Type type = def.interfaces().get(i).get();
-                // we don't need to add Types.ANY as parents because everything is subtype of Any
-                if (xts.isAny(type)) continue;
-                needParents = true;
-                break;
+            boolean allInvariants = true;
+            for (int i = 0; i < def.variances().size(); ++i) {
+                if (def.variances().get(i) != ParameterType.Variance.INVARIANT) {
+                    allInvariants = false;
+                    break;
+                }
+            }
+            if (allInvariants) {
+                // use cached one to avoid creating array of Variance repeatedly
+                w.write(", ");
+                w.newline();
+                w.write("/* variances */ x10.rtt.RuntimeType.INVARIANTS(" + def.variances().size() + ")");
+            }
+            else {
+                for (int i = 0; i < def.variances().size(); ++i) {
+                    w.write(", ");
+                    w.newline();
+                    if (i == 0) w.write("/* variances */ new x10.rtt.RuntimeType.Variance[] {");
+                    ParameterType.Variance v = def.variances().get(i);
+                    switch (v) {
+                    case INVARIANT:
+                        w.write("x10.rtt.RuntimeType.Variance.INVARIANT");
+                        break;
+                    case COVARIANT:
+                        w.write("x10.rtt.RuntimeType.Variance.COVARIANT");
+                        break;
+                    case CONTRAVARIANT:
+                        w.write("x10.rtt.RuntimeType.Variance.CONTRAVARIANT");
+                        break;
+                    }
+                    if (i == def.variances().size() - 1) w.write("}");
+                }
             }
         }
-        if (needParents) {
+        w.newline();
+        
+        TypeSystem xts = tr.typeSystem();
+        if (def.interfaces().size() > 0 || def.superType() != null) {
             w.write(", ");
-//            w.newline();
-//            w.write("/* parents */ ");
-            w.write("new x10.rtt.Type[] {");
+            w.write("/* parents */ new x10.rtt.Type[] {");
             boolean needComma = false;
-            for (int i = 0 ; i < def.interfaces().size(); ++i) {
+            for (int i = 0 ; i < def.interfaces().size(); i ++) {
                 Type type = def.interfaces().get(i).get();
                 // we don't need to add Types.ANY as parents because everything is subtype of Any
                 if (xts.isAny(type)) continue;
@@ -3742,17 +3753,78 @@ public class Emitter {
         return cd;
     }
 
-    public void generateCustomSerializer2(X10ClassDef def, X10ClassDecl_c n) {
-        X10CompilerOptions opts = (X10CompilerOptions) tr.job().extensionInfo().getOptions();
-        w.writeln("// custom serialization support");
+	public void generateCustomSerializer(X10ClassDef def, X10ClassDecl_c n) {
+	    X10CompilerOptions opts = (X10CompilerOptions) tr.job().extensionInfo().getOptions();
+	    String fieldName = X10PrettyPrinterVisitor.SERIAL_DATA_FIELD_NAME;
+	    w.write("// custom serializer");
+	    w.newline();
+        w.write("private transient x10.io.SerialData " + fieldName + ";");
+        w.newline();
+        w.write("private Object writeReplace() { ");
+        if (!opts.x10_config.NO_TRACES && !opts.x10_config.OPTIMIZE) {
+            w.write("if (" + X10PrettyPrinterVisitor.X10_RUNTIME_IMPL_JAVA_RUNTIME + ".TRACE_SER) { ");
+            w.write("java.lang.System.out.println(\"Serializer: serialize() of \" + this + \" calling\"); ");
+            w.write("} ");
+        }
+        w.write(fieldName + " = serialize(); ");
+        if (!opts.x10_config.NO_TRACES && !opts.x10_config.OPTIMIZE) {
+            w.write("if (" + X10PrettyPrinterVisitor.X10_RUNTIME_IMPL_JAVA_RUNTIME + ".TRACE_SER) { ");
+            w.write("java.lang.System.out.println(\"Serializer: serialize() of \" + this + \" returned \" + " + fieldName + "); ");
+            w.write("} ");
+        }
+        w.write("return this; }");
+        w.newline();
+        w.write("private Object readResolve() { return ");
+	if (X10PrettyPrinterVisitor.generateFactoryMethod) {
+	    printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
+	    w.write(".");
+	    w.write(X10PrettyPrinterVisitor.CREATION_METHOD_NAME);
+	} else {
+	    assert X10PrettyPrinterVisitor.generateOnePhaseConstructor;
+	    w.write("new ");
+	    printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
+	}
+        w.write("(");
+        for (ParameterType type : def.typeParameters()) {
+        	w.write(mangleParameterType(type) + ", ");
+        }
+        w.write(fieldName + "); }");
+        w.newline();
+        w.write("private void writeObject(java.io.ObjectOutputStream oos) throws java.io.IOException {");
+        w.newline();
+        for (ParameterType type : def.typeParameters()) {
+        	w.write("oos.writeObject(" + mangleParameterType(type) + ");");
+            w.newline();
+        }
+        w.write("oos.writeObject(" + fieldName + "); }");
+        w.newline();
+        w.write("private void readObject(java.io.ObjectInputStream ois) throws java.io.IOException, java.lang.ClassNotFoundException {");
+        w.newline();
+        for (ParameterType type : def.typeParameters()) {
+        	w.write(mangleParameterType(type) + " = (" + X10PrettyPrinterVisitor.X10_RTT_TYPE + ") ois.readObject();");
+            w.newline();
+        }
+        w.write(fieldName + " = (x10.io.SerialData) ois.readObject(); }");
+        w.newline();
+
+        /*
+        if (!hasCustomSerializer(def)) {
+            w.write("// default custom serializer");
+            w.newline();
+//            w.write("public x10.io.SerialData serialize() { return new x10.io.SerialData(null, super.serialize()); }");
+            w.write("public x10.io.SerialData serialize() { return super.serialize(); }");
+            w.newline();
+        }
+        */
+
         if (!def.hasDeserializationConstructor(tr.context())) {
             w.write("// default deserialization constructor");
             w.newline();
             w.write("public " + def.name().toString() + "(");
             for (ParameterType type : def.typeParameters()) {
-                w.write("final x10.rtt.Type " + mangleParameterType(type) + ", ");
+            	w.write("final x10.rtt.Type " + mangleParameterType(type) + ", ");
             }
-            w.write("final x10.io.Deserializer ds) { ");
+            w.write("final x10.io.SerialData a) { ");
 
             // call super deserialization constructor
             Ref<? extends Type> superType0Ref = def.superType();
@@ -3768,29 +3840,30 @@ public class Emitter {
                 if (superType.typeArguments() != null) {
                     for (Type type : superType.typeArguments()) {
                         // pass rtt of the type
-                        // TODO mangle typa variable
+                    	// TODO mangle typa variable
                         new RuntimeTypeExpander(this, type).expand();
                         w.write(", ");
                     }
                 }
-                w.write("ds); ");
+//                w.write("a.superclassData); ");
+                w.write("a); ");
             }
-
+            
             // initialize rtt
             for (ParameterType type : def.typeParameters()) {
-                w.write("this." + mangleParameterType(type) + " = " + mangleParameterType(type) + "; ");                    
+            	w.write("this." + mangleParameterType(type) + " = " + mangleParameterType(type) + "; ");            		
             }
-
+            
             // copy the rest of default (standard) constructor to initialize properties and fields
             X10ConstructorDecl ctor = hasDefaultConstructor(n);
             // we must have default constructor to initialize properties
-            //	          assert ctor != null;
+//          assert ctor != null;
             /*
-	            if (ctor == null) {
-	                ctor = createDefaultConstructor(def, (X10NodeFactory_c) tr.nodeFactory(), n);
-	                // TODO apply FieldInitializerMover
-	            }
-             */
+            if (ctor == null) {
+                ctor = createDefaultConstructor(def, (X10NodeFactory_c) tr.nodeFactory(), n);
+                // TODO apply FieldInitializerMover
+            }
+            */
             if (ctor != null) {
                 // initialize properties and call field initializer
                 Block_c body = (Block_c) ctor.body();
@@ -3830,31 +3903,40 @@ public class Emitter {
             w.writeln("} ");
         }
 
-        w.writeln("x10.io.Deserializer $ds = new x10.io.Deserializer($deserializer);");
+        ArrayList<String> params = new ArrayList<String>();
+        w.writeln("x10.io.SerialData " +  fieldName +  " = (x10.io.SerialData) $deserializer.readRef();");
+        for (ParameterType at : def.typeParameters()) {
+            w.write(X10PrettyPrinterVisitor.X10_RTT_TYPE + " ");
+            printType(at, PRINT_TYPE_PARAMS | BOX_PRIMITIVES);
+            w.writeln(" = (" + X10PrettyPrinterVisitor.X10_RTT_TYPE + ") $deserializer.readRef();");
+            params.add(mangleParameterType(at));
+        }
 
         // XTENLANG-2974
         // N.B. we cannot reinstantiating $_obj since it may have already been serialized (and thus registered).
-        //	        w.write("$_obj = (");
-        //	        printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
-        //	        w.write(") ");
-        //	        if (X10PrettyPrinterVisitor.generateFactoryMethod) {
-        //	            printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
-        //	            w.write(".");
-        //	            w.write(X10PrettyPrinterVisitor.CREATION_METHOD_NAME);
-        //	        } else {
-        //	            assert X10PrettyPrinterVisitor.generateOnePhaseConstructor;
-        //	            w.write("new ");
-        //	            printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
-        //	        }
-        //	        String paramNames = "";
-        //	        for (String param : params) {
-        //	            paramNames = paramNames + param + ", ";
-        //	        }
-        //	        w.writeln("(" + paramNames + fieldName + ");");
+//        w.write("$_obj = (");
+//        printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
+//        w.write(") ");
+//        if (X10PrettyPrinterVisitor.generateFactoryMethod) {
+//            printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
+//            w.write(".");
+//            w.write(X10PrettyPrinterVisitor.CREATION_METHOD_NAME);
+//        } else {
+//            assert X10PrettyPrinterVisitor.generateOnePhaseConstructor;
+//            w.write("new ");
+//            printType(def.asType(), BOX_PRIMITIVES | NO_QUALIFIER);
+//        }
+//        String paramNames = "";
+//        for (String param : params) {
+//            paramNames = paramNames + param + ", ";
+//        }
+//        w.writeln("(" + paramNames + fieldName + ");");
         // set type objects to the fields of $_obj and initialize $_obj by calling $init(SerialData). 
-        w.writeln("$_obj." + X10PrettyPrinterVisitor.CONSTRUCTOR_METHOD_NAME(def) + "($ds);");
-        w.writeln("short $marker = $deserializer.readShort();");
-        w.writeln("if ($marker != x10.serialization.SerializationConstants.CUSTOM_SERIALIZATION_END) { x10.serialization.X10JavaDeserializer.raiseSerializationProtocolError(); }");
+        for (String param : params) {
+            w.writeln("$_obj." + param + " = " + param + ";");
+        }
+        w.writeln("$_obj." + X10PrettyPrinterVisitor.CONSTRUCTOR_METHOD_NAME(def) + "(" + fieldName + ");");
+        
         w.writeln("return $_obj;");
         w.end();
         w.newline();
@@ -3865,35 +3947,26 @@ public class Emitter {
         w.writeln("public static " + X10_JAVA_SERIALIZABLE_CLASS + " " + DESERIALIZER_METHOD + "(" + X10_JAVA_DESERIALIZER_CLASS + " $deserializer) throws java.io.IOException {");
         w.newline(4);
         w.begin(0);
-        if (def.flags().isAbstract()) {
-            w.write("throw new UnsupportedOperationException(\"Can't instantiate an abstract class\");");
-        } else {
-            w.writeln("int $obj_id = $deserializer.record_reference(null); /* Get id eagerly so that ordering in object map is stable (needed for repeated reference mechanism) */");
+        w.write(mangleToJava(def.name()) + " $_obj = new " + mangleToJava(def.name()) + "(");
+        if (X10PrettyPrinterVisitor.supportConstructorSplitting
+            // XTENLANG-2830
+            /*&& !ConstructorSplitterVisitor.isUnsplittable(Types.baseType(def.asType()))*/
+            && !def.flags().isInterface()) {
+            w.write("(" + X10PrettyPrinterVisitor.CONSTRUCTOR_FOR_ALLOCATION_DUMMY_PARAM_TYPE + ") null");
+            // N.B. in custom deserializer, initialize type params with null
             for (ParameterType typeParam : def.typeParameters()) {
-                w.write(X10PrettyPrinterVisitor.X10_RTT_TYPE + " ");
-                printType(typeParam, PRINT_TYPE_PARAMS | BOX_PRIMITIVES);
-                w.writeln(" = (" + X10PrettyPrinterVisitor.X10_RTT_TYPE + ") $deserializer.readRef();");
+                w.write(", (" + X10PrettyPrinterVisitor.X10_RTT_TYPE + ") null");
             }
-            w.write(mangleToJava(def.name()) + " $_obj = new " + mangleToJava(def.name()) + "(");
-            if (X10PrettyPrinterVisitor.supportConstructorSplitting
-                    // XTENLANG-2830
-                    /*&& !ConstructorSplitterVisitor.isUnsplittable(Types.baseType(def.asType()))*/
-                    && !def.flags().isInterface()) {
-                w.write("(" + X10PrettyPrinterVisitor.CONSTRUCTOR_FOR_ALLOCATION_DUMMY_PARAM_TYPE + ") null");
-                for (ParameterType typeParam : def.typeParameters()) {
-                    w.write(", (" + X10PrettyPrinterVisitor.X10_RTT_TYPE + ") "+mangleParameterType(typeParam));
-                }
-                w.write(");");
-                w.newline();
-            } else {
-                for (ParameterType typeParam : def.typeParameters()) {
-                    w.write(mangleParameterType(typeParam)+", ");
-                }
-                w.writeln("(x10.io.Deserializer) null);");
+            w.write(");");
+            w.newline();
+        } else {
+            for (int i = 0; i < def.typeParameters().size(); i++) {
+                w.write("null, ");
             }
-            w.writeln("$deserializer.update_reference($obj_id, $_obj); /* Update entry in object map with the actual object before deserializing body */");
-            w.writeln("return " + DESERIALIZE_BODY_METHOD + "($_obj, $deserializer);");
+            w.writeln("(x10.io.SerialData) null);");
         }
+        w.writeln("$deserializer.record_reference($_obj);");
+        w.writeln("return " + DESERIALIZE_BODY_METHOD + "($_obj, $deserializer);");
         w.end();
         w.newline();
         w.writeln("}");
@@ -3908,20 +3981,21 @@ public class Emitter {
             w.write("java.lang.System.out.println(\" CustomSerialization : " + SERIALIZE_METHOD + " of \" + this + \" calling\"); ");
             w.writeln("} ");
         }
+
+        w.writeln(fieldName + " = serialize(); ");
+        w.writeln("$serializer.write(" + fieldName + ");");
         for (ParameterType at : def.typeParameters()) {
             w.writeln("$serializer.write(" + mangleParameterType(at) + ");");
         }
-        w.writeln("serialize(new "+X10PrettyPrinterVisitor.SERIALIZER+"($serializer)); ");
-        w.writeln("$serializer.write(x10.serialization.SerializationConstants.CUSTOM_SERIALIZATION_END);");
         w.end();
         w.newline();
         w.writeln("}");
         w.newline();
 
-        // XTENLANG-2974 generate dummy $init(Deserializer) for non-splittable type to simplify above _deserialize_body method.
+        // XTENLANG-2974 generate dummy $init(SerialData) for non-splittable type to simplify above _deserialize_body method.
         if (!X10PrettyPrinterVisitor.isSplittable(def.asType())) {
             w.writeln("// dummy 2nd-phase constructor for non-splittable type");
-            w.writeln("public void " + X10PrettyPrinterVisitor.CONSTRUCTOR_METHOD_NAME(def) + "(" + X10PrettyPrinterVisitor.DESERIALIZER +  " $ds) {");
+            w.writeln("public void " + X10PrettyPrinterVisitor.CONSTRUCTOR_METHOD_NAME(def) + "(" + X10PrettyPrinterVisitor.SERIAL_DATA +  " " + fieldName + ") {");
             w.newline(4);
             w.begin(0);
             w.write("throw new ");
@@ -3933,7 +4007,7 @@ public class Emitter {
             w.newline();
         }
 
-    }
+	}
 
     private ClassType Thread_;
     private ClassType Thread() {
@@ -4033,13 +4107,21 @@ public class Emitter {
             String lhs = "this." + mangleToJava(field.name()) + " = ";
             String zero = null;
             if (xts.isStruct(type)) {
-                if (xts.isByte(type) || xts.isUByte(type)) {
+                if (xts.isUByte(type)) {
+                    zero = "(x10.core.UByte) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".UBYTE_ZERO";
+                } else if (xts.isUShort(type)) {
+                    zero = "(x10.core.UShort) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".USHORT_ZERO";
+                } else if (xts.isUInt(type)) {
+                    zero = "(x10.core.UInt) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".UINT_ZERO";
+                } else if (xts.isULong(type)) {
+                    zero = "(x10.core.ULong) " + X10PrettyPrinterVisitor.X10_RTT_TYPES + ".ULONG_ZERO";
+                } else if (xts.isByte(type)) {
                     zero = "(byte) 0";
-                } else if (xts.isShort(type) || xts.isUShort(type)) {
+                } else if (xts.isShort(type)) {
                     zero = "(short) 0";
-                } else if (xts.isInt(type) || xts.isUInt(type)) {
+                } else if (xts.isInt(type)) {
                     zero = "0";
-                } else if (xts.isLong(type) || xts.isULong(type)) {
+                } else if (xts.isLong(type)) {
                     zero = "0L";
                 } else if (xts.isFloat(type)) {
                     zero = "0.0F";
@@ -4108,8 +4190,7 @@ public class Emitter {
                 w.write(".value");
                 w.write(")");
 
-                // LONG_RAIL: unsafe int cast
-                w.write("[(int)");
+                w.write("[");
                 c.print(c.arguments().get(0), w, tr);
                 w.write("]");
 
@@ -4129,8 +4210,7 @@ public class Emitter {
                 w.write(".value");
                 w.write(")");
 
-                // LONG_RAIL: unsafe int cast
-                w.write("[(int)");
+                w.write("[");
                 c.print(c.arguments().get(0), w, tr);
                 w.write("]");
 
@@ -4143,7 +4223,7 @@ public class Emitter {
 
     public boolean isMethodInlineTarget(TypeSystem xts, Type ttype) {
         ttype = Types.baseType(ttype);
-        if (!isRail(ttype)) {
+        if (!isIndexedMemoryChunk(ttype)) {
             return false;
         }
         if (!hasParams(ttype)) {
@@ -4351,7 +4431,7 @@ public class Emitter {
                 "}\n" +
                 "\n" +
                 "// called by native runtime inside main x10 thread\n" +
-                "public void runtimeCallback(final x10.core.Rail<java.lang.String> args) #throws {\n" +
+                "public void runtimeCallback(final x10.array.Array<java.lang.String> args) #throws {\n" +
                     "// call the original app-main method\n" +
                     "#mainclass.main(args);\n" +
                 "}\n" +

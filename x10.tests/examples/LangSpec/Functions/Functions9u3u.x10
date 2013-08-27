@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Functions9u3u extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Functions9u3u().execute();
     }
 
@@ -30,12 +30,12 @@ public class Functions9u3u extends x10Test {
 
  // OK, we want to do the negative tests, but they don't work properly.
  static  class Lambda {
-    var a : Long = 0;
+    var a : Int = 0;
     val b = 0;
-    def m(var c : Long, val d : Long) {
-       var e : Long = 0;
-       val f : Long = 0;
-       val closure = (var i: Long, val j: Long) => {
+    def m(var c : Int, val d : Int) {
+       var e : Int = 0;
+       val f : Int = 0;
+       val closure = (var i: Int, val j: Int) => {
      	  // return a + b + d + f + j + this.a + Lambda.this.a;
            // ERROR: return c;
            // ERROR: return e;

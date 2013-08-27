@@ -11,7 +11,6 @@
 
 import x10.io.Console;
 import harness.x10Test;
-import x10.regionarray.*;
 
 // MANAGED_X10_ONLY
 
@@ -34,7 +33,7 @@ class RootException11b extends x10Test {
     }
 
     static class MyException9 extends Exception {
-        val exceptions = new Array[Exception](Region.make(1..2, 3..4, 5..6), new Exception());
+        val exceptions = new Array[Exception]((1..2) * (3..4) * (5..6), new Exception());
     }
 
     public def test0() {
@@ -137,7 +136,7 @@ class RootException11b extends x10Test {
         return true;
     }
 
-    public static def main(args: Rail[String]):void {
+    public static def main(args: Array[String](1)):void {
         new RootException11b().execute();
     }
 

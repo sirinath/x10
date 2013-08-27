@@ -19,8 +19,6 @@
 
 #include <x10/lang/String.h>
 
-#include <x10/lang/Rail.h>
-
 namespace x10 {
 
     namespace io {
@@ -32,8 +30,6 @@ namespace x10 {
         private:
 
             x10::lang::String* path;
-
-            virtual x10_boolean mkdirs(const char *s);
 
         public:
 
@@ -76,16 +72,6 @@ namespace x10 {
             virtual x10_boolean setLastModified(x10_long t);
 
             virtual x10_long length();
-
-            virtual x10_boolean del();
-
-            virtual x10::lang::Rail<x10::lang::String*>* list();
-
-            virtual x10_boolean mkdir();
-
-            virtual x10_boolean mkdirs();
-
-            virtual x10_boolean renameTo(File__NativeFile* dest);
 
         };
     }

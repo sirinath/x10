@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Ensures short arrays are implemented.
@@ -18,13 +17,13 @@ import x10.regionarray.*;
 public class Array3Short extends x10Test {
 
     public def run(): boolean = {
-        val r = Region.make(1..10, 1..10);
+        val r = (1..10)*(1..10);
         val ia = new Array[Short](r, (x:Point)=>(0 as Short));
         ia(1, 1) = 42 as Short;
         return (42s == ia(1, 1));
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new Array3Short().execute();
     }
 }

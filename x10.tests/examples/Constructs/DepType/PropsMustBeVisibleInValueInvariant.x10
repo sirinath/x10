@@ -24,10 +24,10 @@ public class PropsMustBeVisibleInValueInvariant extends x10Test {
         }
     }
     public def run() = {
-        Value2(4n);
+        Value2(4);
         return true;
     }
-    public static def main(Rail[String]): void = {
+    public static def main(Array[String](1)): void = {
         new PropsMustBeVisibleInValueInvariant().execute();
     }
 }

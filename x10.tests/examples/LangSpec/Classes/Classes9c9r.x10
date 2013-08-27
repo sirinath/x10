@@ -21,20 +21,20 @@ import harness.x10Test;
 
 public class Classes9c9r extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes9c9r().execute();
     }
 
 
 // file Classes line 442
- static class Init(n:Long) {
-  val a = new Rail[String](n, "");
-  def this(n:Long) { property(n); }
+ static class Init(n:Int) {
+  val a = new Array[String](0..n, "");
+  def this(n:Int) { property(n); }
 }
  static class Outit {
-  val n : Long;
-  //ERROR: val a = new Rail[String](n, "");
-  def this(m:Long) { this.n = m; }
+  val n : Int;
+  //ERROR: val a = new Array[String](0..n, "");
+  def this(m:Int) { this.n = m; }
 }
 
  static class Hook {

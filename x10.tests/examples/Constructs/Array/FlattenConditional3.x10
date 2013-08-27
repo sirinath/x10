@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 
 /**
@@ -22,21 +21,21 @@ public class FlattenConditional3 extends x10Test {
     var a: Array[int](2);
 
     public def this(): FlattenConditional3 = {
-        a = new Array[int](Region.make(1..10, 1..10), ([i,j]: Point) => { return (i+j) as int;});
+        a = new Array[int]((1..10)*(1..10), ([i,j]: Point) => { return i+j;});
     }
     
     def m(var a: int): int = {
-        if (a == 2n) throw new Exception();
+        if (a == 2) throw new Exception();
         return a;
     }
     
     public def run(): boolean = {
-    var b: int = 0n;
-        if (a(2, 2) == 0n) b=1n;
-            return b==0n;
+    var b: int = 0;
+        if (a(2, 2) == 0) b=1;
+            return b==0;
     }
 
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new FlattenConditional3().execute();
     }
 }

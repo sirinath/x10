@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * An ateach statement cannot occur in a when statement.
@@ -24,7 +23,7 @@ public class NoAtEachInWhen extends x10Test {
 			b=true;
 			try { 
 		      when (b==true) 
-		        ateach (p in Region.make(1,10) -> here) 
+		        ateach (p in 1..10 -> here) 
 		           Console.OUT.println("Cannot reach this point.");
 			} catch (IllegalOperationException) {
 				return true;
@@ -33,7 +32,7 @@ public class NoAtEachInWhen extends x10Test {
 		  return false;
 	}
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new NoAtEachInWhen().execute();
 	}
 }

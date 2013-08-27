@@ -17,16 +17,16 @@
 
 import harness.x10Test;
 
- import x10.regionarray.*;
+
 
 public class Arrays30 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays30().execute();
     }
 
 
-// file Arrays line 61
+// file Arrays line 47
  static  class Example{
  def example() {
 val p : Point = [1,2,3];

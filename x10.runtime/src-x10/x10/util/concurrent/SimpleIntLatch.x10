@@ -12,26 +12,35 @@
 package x10.util.concurrent;
 
 import x10.compiler.Pinned;
+import x10.io.SerialData;
 
 @Pinned public class SimpleIntLatch extends Lock {
     public def this() { super(); }
 
+    public def serialize():SerialData {
+        throw new UnsupportedOperationException("Cannot serialize "+typeName());
+    }
+
+    private def this(SerialData) {
+        throw new UnsupportedOperationException("Cannot deserialize "+typeName());
+    }
+
     static type Worker = Runtime.Worker;
 
     private var worker:Worker = null;
-    private var value:Int = 0n;
+    private var value:Int = 0;
 
     // can only be called once
     public def await():void {
-        if (value != 0n) return;
+        if (value != 0) return;
         lock();
-        if (value != 0n) {
+        if (value != 0) {
             unlock();
             return;
         }
         Runtime.increaseParallelism(); // likely to be blocked for a while
         worker = Runtime.worker();
-        while (value == 0n) {
+        while (value == 0) {
             unlock();
             Worker.park();
             lock();
@@ -44,7 +53,7 @@ import x10.compiler.Pinned;
         lock();
         value = v;
         if (worker != null) {
-            Runtime.decreaseParallelism(1n);
+            Runtime.decreaseParallelism(1);
             worker.unpark();
         }
         unlock();

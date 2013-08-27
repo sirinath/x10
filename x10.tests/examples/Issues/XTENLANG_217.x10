@@ -25,14 +25,14 @@ class XTENLANG_217 extends x10Test {
     val a = new A();
     
     def foo() {
-        a(0n) = 0.0;
+        a(0) = 0.0;
     }
 
     public def run(): boolean {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_217().execute();
     }
 }

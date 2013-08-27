@@ -1,4 +1,4 @@
-/* Current test harness gets confused by packages, but it would be in package expsome_Arrays38;
+/* Current test harness gets confused by packages, but it would be in package expsome_Arrays42;
 */
 // Warning: This file is auto-generated from the TeX source of the language spec.
 // If you need it changed, work with the specification writers.
@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class Arrays1j6q extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays1j6q().execute();
     }
 
 
-// file Arrays line 471
+// file Arrays line 480
 
- static class Arrays38TestExp{
+ static class Arrays42TestExp{
   def check(somePlace:Place)  = new SparsePlaceGroup(somePlace);  }
 
  static class Hook {

@@ -9,11 +9,11 @@
  *  (C) Copyright IBM Corporation 2006-2010.
  */
 
-import x10.array.Array_1;
 
 /**
  * @author bdlucas
  */
+
 public class SeqArray1b extends Benchmark {
 
     //
@@ -30,12 +30,12 @@ public class SeqArray1b extends Benchmark {
     // the benchmark
     //
 
-    val a = new Array_1[int](N+M, 1n);
+    val a = new Array[int](0..(N+M-1), (Point(1))=>1);
 
     def once() {
-        var sum: int = 0n;
-        for (k in 0..(M-1))
-            for (i in 0..(N-1))
+        var sum: int = 0;
+        for (var k:int=0; k<M; k++)
+            for (var i:int=0; i<N; i++)
                 sum += a(i+k);
         return sum as double;
     }
@@ -44,7 +44,7 @@ public class SeqArray1b extends Benchmark {
     // boilerplate
     //
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new SeqArray1b().execute();
     }
 }

@@ -21,7 +21,7 @@ import harness.x10Test;
 
 public class Types140 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types140().execute();
     }
 
@@ -32,14 +32,14 @@ public class Types140 extends x10Test {
    def name():String;
  }
  static  interface Mobile {
-   def move(howFar:Long):void;
+   def move(howFar:Int):void;
  }
  static  interface Person extends Named, Mobile {}
  static  interface NamedPoint extends Named, Mobile{}
  static class Kim implements Person {
-   var pos : Long = 0;
+   var pos : Int = 0;
    public def name() = "Kim (" + pos + ")";
-   public def move(dPos:Long) { pos += dPos; }
+   public def move(dPos:Int) { pos += dPos; }
 }
 
  static class Hook {

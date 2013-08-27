@@ -1960,25 +1960,20 @@ public class TypeSystem_c implements TypeSystem
     public Type JavaFloat()   { return JAVA_FLOAT_; }
     public Type JavaDouble()  { return JAVA_DOUBLE_; }
 
-    public X10ClassType load(String name) {
-        return load(name, false);
-    }
     
-    public X10ClassType load(String name, boolean isOptional) {
+    public X10ClassType load(String name) {
         QName qualName = QName.make(name);
         try {
             return (X10ClassType) forName(qualName);
         }
         catch (SemanticException e) {
-            if (!isOptional) { 
-                extensionInfo().compiler().errorQueue().enqueue(
-                                                                ErrorInfo.INTERNAL_ERROR,
-                                                                "Cannot load X10 runtime class \"" + name
-                                                                + "\".  Is the X10 runtime library in your classpath or sourcepath?");
-                Goal goal = extensionInfo().scheduler().currentGoal();
-                if (goal != null)
-                    goal.fail();
-            }
+            extensionInfo().compiler().errorQueue().enqueue(
+                                                    ErrorInfo.INTERNAL_ERROR,
+                                                    "Cannot load X10 runtime class \"" + name
+                                                            + "\".  Is the X10 runtime library in your classpath or sourcepath?");
+            Goal goal = extensionInfo().scheduler().currentGoal();
+            if (goal != null)
+                goal.fail();
             return createFakeClass(qualName, e);
         }
     }
@@ -2124,7 +2119,13 @@ public class TypeSystem_c implements TypeSystem
     protected X10ClassType STRING_;
     protected X10ClassType EXCEPTION_;
 
-    //public Type JLIterable() { return load("java.lang.Iterable"); }
+    public Type JavaClass()   { 
+        if (CLASS_ != null) return CLASS_;
+        return CLASS_ = load("java.lang.Class"); 
+    }
+    public Type Cloneable() { return load("java.lang.Cloneable"); }
+    public Type JLIterable() { return load("java.lang.Iterable"); }
+    public Type Serializable() { return load("java.io.Serializable"); }
 
     protected NullType createJavaNull() {
 	return new NullType(this);
@@ -2266,6 +2267,13 @@ public class TypeSystem_c implements TypeSystem
         return AtomicInteger_;
     }
 
+    protected X10ClassType IndexedMemoryChunk_;
+    public X10ClassType IndexedMemoryChunk() {
+        if (IndexedMemoryChunk_ == null)
+            IndexedMemoryChunk_ = load("x10.util.IndexedMemoryChunk");
+        return IndexedMemoryChunk_;
+    }
+
     protected X10ClassType GLOBAL_REF_;
     public X10ClassType GlobalRef() {
         if (GLOBAL_REF_ == null)
@@ -2361,7 +2369,7 @@ public class TypeSystem_c implements TypeSystem
             iterableType_ = load("x10.lang.Iterable"); // java file
         return iterableType_;
     }
-    
+
     protected X10ClassType customSerializationType_;
     public X10ClassType CustomSerialization() {
         if (customSerializationType_ == null)
@@ -2369,25 +2377,11 @@ public class TypeSystem_c implements TypeSystem
         return customSerializationType_;
     }
 
-    protected X10ClassType unserializableType_;
-    public X10ClassType Unserializable() {
-        if (unserializableType_ == null)
-            unserializableType_ = load("x10.io.Unserializable"); // java file
-        return unserializableType_;
-    }
-    
-    protected X10ClassType serializerType_;
-    public X10ClassType Serializer() {
-        if (serializerType_ == null)
-            serializerType_ = load("x10.io.Serializer"); // java file
-        return serializerType_;
-    }
-
-    protected X10ClassType deserializerType_;
-    public X10ClassType Deserializer() {
-        if (deserializerType_ == null)
-            deserializerType_ = load("x10.io.Deserializer"); // java file
-        return deserializerType_;
+    protected X10ClassType serialDataType_;
+    public X10ClassType SerialData() {
+        if (serialDataType_ == null)
+            serialDataType_ = load("x10.io.SerialData"); // java file
+        return serialDataType_;
     }
 
     protected X10ClassType reducibleType_;
@@ -2516,28 +2510,21 @@ public class TypeSystem_c implements TypeSystem
     protected X10ClassType regionType_;
     public X10ClassType Region() {
         if (regionType_ == null)
-            regionType_ = load("x10.regionarray.Region", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE); // java file
+            regionType_ = load("x10.array.Region"); // java file
         return regionType_;
-    }
-    
-    protected X10ClassType iterationSpaceType_;
-    public X10ClassType IterationSpace() {
-        if (iterationSpaceType_ == null)
-            iterationSpaceType_ = load("x10.array.IterationSpace", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE); // java file
-        return iterationSpaceType_;
     }
 
     protected X10ClassType pointType_;
     public X10ClassType Point() {
         if (pointType_ == null)
-            pointType_ = load("x10.lang.Point");
+            pointType_ = load("x10.array.Point");
         return pointType_;
     }
 
     protected X10ClassType distributionType_;
     public X10ClassType Dist() {
         if (distributionType_ == null)
-            distributionType_ = load("x10.regionarray.Dist", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE); // java file
+            distributionType_ = load("x10.array.Dist"); // java file
         return distributionType_;
     }
 
@@ -2590,60 +2577,25 @@ public class TypeSystem_c implements TypeSystem
         return remoteInvocationType_;
     }
 
-    protected X10ClassType regionArrayType_ = null;
-    public X10ClassType RegionArray() {
-        if (regionArrayType_ == null)
-            regionArrayType_ = load("x10.regionarray.Array", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE);
-        return regionArrayType_;
-    }
-
-    protected X10ClassType railType_ = null;
-    public X10ClassType Rail() {
-        if (railType_ == null)
-            railType_ = load("x10.lang.Rail");
-        return railType_;
-    }
-    
     protected X10ClassType arrayType_ = null;
     public X10ClassType Array() {
         if (arrayType_ == null)
-            arrayType_ = load("x10.array.Array", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE);
+            arrayType_ = load("x10.array.Array");
         return arrayType_;
-    }
-
-    protected X10ClassType distArrayType_ = null;
-    public X10ClassType DistArray() {
-        if (distArrayType_ == null)
-            distArrayType_ = load("x10.array.DistArray", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE);
-        return distArrayType_;
     }
 
     protected X10ClassType remoteArrayType_ = null;
     public X10ClassType RemoteArray() {
         if (remoteArrayType_ == null)
-            remoteArrayType_ = load("x10.regionarray.RemoteArray", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE);
+            remoteArrayType_ = load("x10.array.RemoteArray");
         return remoteArrayType_;
     }
 
-    protected X10ClassType globalRailType_ = null;
-    public X10ClassType GlobalRail() {
-        if (globalRailType_ == null)
-        	globalRailType_ = load("x10.lang.GlobalRail");
-        return globalRailType_;
-    }
-
-    protected X10ClassType cudaConstantRail_ = null;
-    public X10ClassType CUDAConstantRail() {
-        if (cudaConstantRail_ == null)
-        	cudaConstantRail_ = load("x10.lang.CUDAConstantRail");
-        return cudaConstantRail_;
-    }
-
-    protected X10ClassType regionDistArrayType_ = null;
-    public X10ClassType RegionDistArray() {
-        if (regionDistArrayType_ == null)
-            regionDistArrayType_ = load("x10.regionarray.DistArray", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE);
-        return regionDistArrayType_;
+    protected X10ClassType distArrayType_ = null;
+    public X10ClassType DistArray() {
+        if (distArrayType_ == null)
+            distArrayType_ = load("x10.array.DistArray");
+        return distArrayType_;
     }
     
     protected X10ClassType intRangeType_ = null;
@@ -2767,13 +2719,6 @@ public class TypeSystem_c implements TypeSystem
         return stackAllocateType_;
     }
 
-    protected X10ClassType stackAllocateUninitializedType_;
-    public X10ClassType StackAllocateUninitialized() {
-        if (stackAllocateUninitializedType_ == null)
-            stackAllocateUninitializedType_ = load("x10.compiler.StackAllocateUninitialized");
-        return stackAllocateUninitializedType_;
-    }
-
     protected X10ClassType inlineOnlyType_;
     public X10ClassType InlineOnly() {
         if (inlineOnlyType_ == null)
@@ -2821,13 +2766,6 @@ public class TypeSystem_c implements TypeSystem
         if (suppressTransientErrorType_ == null)
             suppressTransientErrorType_ = load("x10.compiler.SuppressTransientError");
         return suppressTransientErrorType_;
-    }
-
-    protected X10ClassType transientInitExprType_;
-    public X10ClassType TransientInitExpr() {
-        if (transientInitExprType_ == null)
-            transientInitExprType_ = load("x10.compiler.TransientInitExpr");
-        return transientInitExprType_;
     }
 
     
@@ -2980,7 +2918,7 @@ public class TypeSystem_c implements TypeSystem
     protected X10ClassType javaInteropType_ = null;
     public X10ClassType JavaInterop() {
         if (javaInteropType_ == null)
-            javaInteropType_ = load("x10.interop.Java", ((X10CompilerOptions)extensionInfo().getOptions()).x10_config.APGAS_LIB_MODE);
+            javaInteropType_ = load("x10.interop.Java");
         return javaInteropType_;
     }
 
@@ -3234,6 +3172,7 @@ public class TypeSystem_c implements TypeSystem
         List<QName> l = new ArrayList<QName>(1);
         l.add(QName.make("x10.lang"));
         l.add(QName.make("x10.lang", TypeSystem.DUMMY_PACKAGE_CLASS_NAME.toString()));
+        l.add(QName.make("x10.array"));
         return l;
     }
 
@@ -3693,7 +3632,6 @@ public class TypeSystem_c implements TypeSystem
             final XVar[] x = xs.toArray(new XVar[ys.size()]);
 
             mi = new X10TypeEnv_c(context).fixThis((MethodInstance) mi, y, x);
-            mi = env(context).expandPropertyInMethod(mi);
 
             if (mi.typeParameters().size() != typeParams.size()) {
                 continue;
@@ -3728,8 +3666,7 @@ public class TypeSystem_c implements TypeSystem
                 throw new InternalCompilerError("Unexpected exception while translating a method instance", e);
             }
             TypeParamSubst tps = new TypeParamSubst(this, typeParams, mi.x10Def().typeParameters());
-            List<Type> subst_formal_types = tps.reinstantiate(mi.formalTypes());
-            if (CollectionUtil.allElementwise(formalTypes, subst_formal_types, new TypeEquals(context))) {
+            if (CollectionUtil.allElementwise(formalTypes, tps.reinstantiate(mi.formalTypes()), new TypeEquals(context))) {
                 l.add(mi);
             }
         }
@@ -3748,8 +3685,6 @@ public class TypeSystem_c implements TypeSystem
         final XVar[] x = xs.toArray(new XVar[ys.size()]);
 
         mi = new X10TypeEnv_c(context).fixThis( mi, y, x);
-        mi = env(context).expandPropertyInMethod(mi);
-        
         XVar placeTerm = Types.getPlaceTerm(mi);
 
         context = context.pushBlock();
@@ -3799,7 +3734,7 @@ public class TypeSystem_c implements TypeSystem
    // public void checkOverride(ClassType ct, MethodInstance mi0, MethodInstance mj0, Context context) throws SemanticException {
    //     env(context).checkOverride(ct, mi0, mj0);
    // }
-    public X10TypeEnv_c env(Context context) {
+    public X10TypeEnv env(Context context) {
         return new X10TypeEnv_c(context == null ? emptyContext() : context);
     }
     
@@ -4083,34 +4018,8 @@ public class TypeSystem_c implements TypeSystem
         return new Context(this);
     }
 
-    public boolean isRegionArray(Type t) {
-        return finalSubtype(t, RegionArray());
-    }
-
-    public boolean isRail(Type t) {
-        return finalSubtype(t, Rail());
-    }
-    
-    public boolean isArray(Type me) {
-        if (hasSameClassDef(me, Array())) {
-            return true;
-        } else if (me.isClass()) {
-            Type parent = me.toClass().superClass();
-            return parent != null && isArray(parent);
-        } else {
-            return false;
-        }
-    }
-    
-    public boolean isDistArray(Type me) {
-        if (hasSameClassDef(me, DistArray())) {
-            return true;
-        } else if (me.isClass()) {
-            Type parent = me.toClass().superClass();
-            return parent != null && isDistArray(parent);
-        } else {
-            return false;
-        }
+    public boolean isArray(Type t) {
+        return finalSubtype(t, Array());
     }
 
     public static Type getArrayComponentType(Type t) {
@@ -4118,31 +4027,13 @@ public class TypeSystem_c implements TypeSystem
         assert (ta.size() == 1);
         return ta.get(0);
     }
-    public boolean isRegionArrayOf(Type t, Type p) {
-        if (!isRegionArray(t)) return false;
+    public boolean isArrayOf(Type t, Type p) {
+        if (!isArray(t)) return false;
         return getArrayComponentType(t).typeEquals(p, createContext());
-    }
-
-    public static Type getRailComponentType(Type t) {
-        List<Type> ta = ((X10ClassType)Types.baseType(t)).typeArguments();
-        assert (ta.size() == 1);
-        return ta.get(0);
-    }
-    public boolean isRailOf(Type t, Type p) {
-        if (!isRail(t)) return false;
-        return getRailComponentType(t).typeEquals(p, createContext());
     }
 
     public boolean isRemoteArray(Type t) {
         return finalSubtype(t, RemoteArray());
-    }
-
-    public boolean isGlobalRail(Type t) {
-        return finalSubtype(t, GlobalRail());
-    }
-
-    public boolean isCUDAConstantRail(Type t) {
-        return finalSubtype(t, CUDAConstantRail());
     }
 
     public boolean isRemoteArrayOf(Type t, Type p) {
@@ -4166,14 +4057,6 @@ public class TypeSystem_c implements TypeSystem
         return false;
     }
 
-    public X10ClassType RegionArray(Type arg) {
-        return Types.instantiate(RegionArray(), arg);
-    }
-
-    public X10ClassType Rail(Type arg) {
-        return Types.instantiate(Rail(), arg);
-    }
-
     public X10ClassType Array(Type arg) {
         return Types.instantiate(Array(), arg);
     }
@@ -4182,23 +4065,23 @@ public class TypeSystem_c implements TypeSystem
         return Types.instantiate(Settable(), domain, range);
     }
 
-    public boolean isX10RegionArray(Type me) {
-        if (finalSubtype(me, RegionArray())) {
+    public boolean isX10Array(Type me) {
+        if (finalSubtype(me, Array())) {
             return true;
         } else if (me.isClass()) {
             Type parent = me.toClass().superClass();
-            return parent != null && isX10RegionArray(parent);
+            return parent != null && isX10Array(parent);
         } else {
             return false;
         }
     }
 
-    public boolean isX10RegionDistArray(Type me) {
-        if (finalSubtype(me, RegionDistArray())) {
+    public boolean isX10DistArray(Type me) {
+        if (finalSubtype(me, DistArray())) {
             return true;
         } else if (me.isClass()) {
             Type parent = me.toClass().superClass();
-            return parent != null && isX10RegionDistArray(parent);
+            return parent != null && isX10DistArray(parent);
         } else {
             return false;
         }
@@ -4250,6 +4133,10 @@ public class TypeSystem_c implements TypeSystem
         return finalSubtype(me,String());
     }
 
+    public boolean isIndexedMemoryChunk(Type me) {
+        return finalSubtype(me,IndexedMemoryChunk());
+    }
+
     public boolean isRuntime(Type me) {
         return finalSubtype(me,Runtime());
     }
@@ -4269,13 +4156,13 @@ public class TypeSystem_c implements TypeSystem
     public boolean isRegion(Type me) {
         return emptyContextSubtype(me,Region());
     }
-    
-    public boolean isIterationSpace(Type me) {
-        return emptyContextSubtype(me,IterationSpace());
-    }
 
     public boolean isDistribution(Type me) {
         return emptyContextSubtype(me,Dist());
+    }
+
+    public boolean isDistributedArray(Type me) {
+        return isX10DistArray(me);
     }
 
     public boolean isComparable(Type me) {
@@ -4753,15 +4640,4 @@ public class TypeSystem_c implements TypeSystem
     		TypeSystem_c.internalConsistencyCheck(li.type());
     	}    	
     }
-
-
-    // Key thing here is to avoid loading java.lang.Iterable since that gives us a dependency
-    // on JRE class loading capability even when we're compiling native
-	@Override
-	public boolean typeIsJLIterable(Type classType) {
-		Type c = Types.baseType(classType); // chase typedefs
-		return c.fullName().toString().equals("java.lang.Iterable");
-	}
-
-
 }

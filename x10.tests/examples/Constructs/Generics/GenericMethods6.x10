@@ -26,15 +26,15 @@ public class GenericMethods6 extends GenericTest {
         }
 
         val a1 = new A[String]();
-        genericCheck("a1.m[long](\"1\",1)", a1.m[long]("1",1), 1);
+        genericCheck("a1.m[int](\"1\",1)", a1.m[int]("1",1), 1);
 
-        val a2 = new A[long]();
+        val a2 = new A[int]();
         genericCheck("a2.m[String](1,\"1\")", a2.m[String](1,"1"), "1");
 
         return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericMethods6().execute();
     }
 }

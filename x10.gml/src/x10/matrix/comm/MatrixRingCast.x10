@@ -11,15 +11,18 @@
 
 package x10.matrix.comm;
 
-import x10.regionarray.DistArray;
+import x10.io.Console;
+import x10.util.Timer;
+
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
+import x10.compiler.Uninitialized;
 
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
+
 
 /**
  * Ring cast sends data from here to a number of places
@@ -33,7 +36,18 @@ import x10.matrix.sparse.SparseCSC;
  * multiply.
  *
  */
-public class MatrixRingCast {
+public class MatrixRingCast extends MatrixRemoteCopy {
+
+	//===========================
+	// Constructor
+	//===========================
+	public def this() {
+		super();
+	}
+	//==================================================
+	// RingCast: receive form previous one and send to one next in a ring 
+	//==================================================
+
 	/**
 	 * Broadcast the whole dense matrix at here to all places one by one 
 	 *
@@ -44,15 +58,17 @@ public class MatrixRingCast {
 		rcast(dmlist, sz);
 	}
 
+
+	//--------------------------------------------
 	/**
 	 * Broadcast data of dense matrix to all places.
 	 *
 	 * @param dmlist     distributed storage for copies of dense matrix
 	 * @param datCnt     number of data to broadcast 
 	 */
-	public static def rcast(dmlist:DistArray[DenseMatrix](1), datCnt:Long):void {
+	public static def rcast(dmlist:DistArray[DenseMatrix](1), datCnt:Int):void {
 		val pcnt = dmlist.dist.region.size();
-		val plist = new Rail[Long](pcnt, (i:Long)=>i);
+		val plist:Array[Int](1) = new Array[Int](pcnt, (i:Int)=>(i));
 		rcast(dmlist, datCnt, plist);
 	}
 
@@ -64,8 +80,8 @@ public class MatrixRingCast {
 	 * @param plist      the list of places in the ring cast
 	 */
 	public static def rcast(
-			dmlist:DistArray[DenseMatrix](1), datCnt:Long, 
-			plist:Rail[Long]) : void {
+			dmlist:DistArray[DenseMatrix](1), datCnt:Int, 
+			plist:Array[Int](1)) : void {
 
 		@Ifdef("MPI_COMMU") {
 			mpiRingCast(dmlist, datCnt, plist);
@@ -76,7 +92,8 @@ public class MatrixRingCast {
 			x10RingCast(dmlist, datCnt, plist);
 		}
 	}
-
+	//----------------------------------------------------------------
+	
 	/**
 	 * Send data of dense matrix from here to a list of places using
 	 * MPI send/recv routines. Note, the root place (place here) must be
@@ -90,8 +107,8 @@ public class MatrixRingCast {
 	 */
 	protected static def mpiRingCast(
 			dmlist:DistArray[DenseMatrix](1), 
-			datCnt:Long,
-			plist:Rail[Long]):void {
+			datCnt:Int,
+			plist:Array[Int](1)):void {
 		
 		@Ifdef("MPI_COMMU") {
 			// Check place list 
@@ -99,14 +116,15 @@ public class MatrixRingCast {
 
 			val root   = here.id();  //Implicitly copied to all places
 			finish {
+
 				//Debug.flushln("Start MPI ring cast from "+root+" to "+plist.toString());
 				val pltail = plist.size-1;
-				for (var p:Long=0; p < plist.size; p++) {
+				for (var p:Int=0; p < plist.size; p++) {
 					val nxtpid = (p==pltail)?plist(0):plist(p+1); //Implicitly carry to next place
-					val prepid = (p==0L)?plist(pltail):plist(p-1); //Implicitly carry to next place
+					val prepid = (p==0)?plist(pltail):plist(p-1); //Implicitly carry to next place
 					val curpid = plist(p);
 
-                    at(dmlist.dist(curpid)) async {
+					async at (dmlist.dist(curpid)) {
 						//Need: dmlist, root, nxtpid, prepid, datCnt
 						val mypid  = here.id();
 						val matden = dmlist(mypid);
@@ -126,19 +144,24 @@ public class MatrixRingCast {
 			}
 		}
 	}
+	
 
+	//======================================================================
+	// Sparse matrix
+	//======================================================================
 	/**
 	 * Broadcast columns of sparse matrix to all places.
 	 *
 	 * @param smlist     distributed storage for copies of SparseCSC sparse matrix
 	 * @param datCnt     count of nonzero data in the sparse matrix to broadcast 
 	 */
-	public static def rcast(smlist:DistArray[SparseCSC](1), datCnt:Long):void {
+	public static def rcast(smlist:DistArray[SparseCSC](1), datCnt:Int):void {
 		val pcnt = smlist.dist.region.size();
-		val plist = new Rail[Long](pcnt, (i:Long)=>i);
+		val plist:Array[Int](1) = new Array[Int](pcnt, (i:Int)=>(i));
 		rcast(smlist, datCnt, plist);
 	}
 
+	//-------------------------------------------------------------
 	/**
 	 * Broadcast the whole sparse matrix at here to all places 
 	 * 
@@ -158,8 +181,8 @@ public class MatrixRingCast {
 	 */
 	public static def rcast(
 			smlist:DistArray[SparseCSC](1), 
-			datCnt:Long, 
-			plist:Rail[Long]) : void {
+			datCnt:Int, 
+			plist:Array[Int](1)) : void {
 
 		@Ifdef("MPI_COMMU") {
 			mpiRingCast(smlist, datCnt, plist);
@@ -181,8 +204,8 @@ public class MatrixRingCast {
 	 */
 	protected static def mpiRingCast(
 			smlist:DistArray[SparseCSC](1), 
-			datCnt:Long,
-			plist:Rail[Long]):void {
+			datCnt:Int,
+			plist:Array[Int](1)):void {
 
 		@Ifdef("MPI_COMMU") {
 			// Check place list 
@@ -193,14 +216,15 @@ public class MatrixRingCast {
 
 			srcspa.initRemoteCopyAtSource();
 			finish {
+	
 				val pltail = plist.size-1;
-				for (var p:Long=0; p < plist.size; p++) {
-					val nxtpid = (p==pltail)?plist(0):plist(p+1); //Implicitly carry to next place
-					val prepid = (p==0L)?plist(pltail):plist(p-1); //Implicitly carry to next place
+				for (var p:Int=0; p < plist.size; p++) {
+					val nxtpid = (p==plist.size-1)?plist(0):plist(p+1); //Implicitly carry to next place
+					val prepid = (p==0)?plist(plist.size-1):plist(p-1); //Implicitly carry to next place
 					//val curpid = p;
 					val curpid = plist(p);
 
-                    at(smlist.dist(curpid)) async {
+					async at (smlist.dist(curpid)) {
 						//Need: dmlist, root, nxtpid, prepid, colOff, datCnt, datasz
 						val mypid  = here.id();
 						val matspa = smlist(mypid);
@@ -230,6 +254,8 @@ public class MatrixRingCast {
 		}
 	}
 
+	//-----------------------------------------------------
+
 	/**
 	 * Sending data of dense matrix from here to a list of places using X10 remote array copy.
 	 *
@@ -238,45 +264,49 @@ public class MatrixRingCast {
 	 * @param  plist      the list of place IDs, which must contain place id of here.
 	 */
 	protected static def x10RingCast(
-			dmlist:DistArray[DenseMatrix](1), datCnt:Long, 
-			plist:Rail[Long]):void {
+			dmlist:DistArray[DenseMatrix](1), datCnt:Int, 
+			plist:Array[Int](1)):void {
 		//Check place list 
 
-		if (plist.size == 0L) return;
+		if (plist.size == 0 ) return;
 		val root   = here.id();
 		val srcden = dmlist(root);	
 
-		val rmtbuf = new GlobalRail[Double](srcden.d as Rail[Double]{self!=null});
-		val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
+		val rmtbuf = new RemoteArray[Double](srcden.d as Array[Double]{self!=null});
+		val nplist = new Array[Int](plist.size-1, (i:Int)=>plist(i+1));
 
 		val nxtpid = plist(0);
-		at(dmlist.dist(nxtpid)) {
+		at (dmlist.dist(nxtpid)) {
 			//Need: rmtbuf, dmlist, colOff, offset, datasz, nplist, root
 			copyToHere(rmtbuf, dmlist, datCnt, nplist, root);
 		}
 	}
 
+	/**
+	 *
+	 */
 	private static def copyToHere(
-			srcbuf:GlobalRail[Double],
+			srcbuf:RemoteArray[Double],
 			dmlist:DistArray[DenseMatrix](1),
-			datCnt:Long,
-			plist:Rail[Long],
-			root:Long): void {
+			datCnt:Int,
+			plist:Array[Int](1),
+			root:Int): void {
 		
 		val mypid  = here.id();
 		val rcvden = dmlist(mypid);
 		//Copy data from source place
 		if (mypid != root && datCnt > 0) {
 			//Debug.flushln("Copy data to here at Place "+mypid);
-			finish Rail.asyncCopy[Double](srcbuf, 0L, rcvden.d, 0L, datCnt);
+			finish Array.asyncCopy[Double](srcbuf, 0, rcvden.d, 0, datCnt);
 		}
+		//rcvden.print("Matrix data at "+mypid+" plist:"+plist.toString());
 		
 		//Goto next place in the list
 		if (plist.size >= 1) {
 			val nxtpid = plist(0); // Get next place id in the list
-			val rmtbuf = new GlobalRail[Double](rcvden.d as Rail[Double]{self!=null});
-			val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
-			at(dmlist.dist(nxtpid)) {
+			val rmtbuf = new RemoteArray[Double](rcvden.d as Array[Double]{self!=null});
+			val nplist = new Array[Int](plist.size-1, (i:Int)=>plist(i+1));
+			at (dmlist.dist(nxtpid)) {
 				//Need: rmtbuf, dmlist, colOff, offset, datasz, nplist, root
 				copyToHere(rmtbuf, dmlist, datCnt, nplist, root);
 			}
@@ -293,33 +323,36 @@ public class MatrixRingCast {
 	 */
 	protected static def x10RingCast(
 			smlist:DistArray[SparseCSC](1), 
-			datCnt:Long, 
-			plist:Rail[Long]):void {
+			datCnt:Int, 
+			plist:Array[Int](1)):void {
 		
 		//Check place list 
-		if (plist.size == 0L) return;
+		if (plist.size == 0) return;
 		val root   = here.id();
 		val srcspa = smlist(root);	
-		val rmtidx = new GlobalRail[Long  ](srcspa.getIndex() as Rail[Long]{self!=null});
-		val rmtval = new GlobalRail[Double](srcspa.getValue() as Rail[Double]{self!=null});
-		val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
+		val rmtidx = new RemoteArray[Int   ](srcspa.getIndex() as Array[Int]{self!=null});
+		val rmtval = new RemoteArray[Double](srcspa.getValue() as Array[Double]{self!=null});
+		val nplist = new Array[Int](plist.size-1, (i:Int)=>plist(i+1));
 
 		val nxtpid = plist(0);
 		
 		srcspa.initRemoteCopyAtSource();
-		at(smlist.dist(nxtpid)) {
+		at (smlist.dist(nxtpid)) {
 			copyToHere(rmtidx, rmtval, smlist, datCnt, nplist, root);
 		}
 		srcspa.finalizeRemoteCopyAtSource();		
 	}
 
+	/**
+	 *
+	 */
 	private static def copyToHere(
-			rmtIndex:GlobalRail[Long], 
-			rmtValue:GlobalRail[Double],
+			rmtIndex:RemoteArray[Int], 
+			rmtValue:RemoteArray[Double],
 			smlist:DistArray[SparseCSC](1),
-			datCnt:Long,
-			plist:Rail[Long],
-			root:Long): void {
+			datCnt:Int,
+			plist:Array[Int](1),
+			root:Int): void {
 		
 		val mypid  = here.id();
 		val rcvspa = smlist(mypid);
@@ -327,18 +360,18 @@ public class MatrixRingCast {
 		if (mypid != root) {
 			rcvspa.initRemoteCopyAtDest(datCnt);
 			if (datCnt > 0) {
-				finish Rail.asyncCopy[Long  ](rmtIndex, 0L, rcvspa.getIndex(), 0L, datCnt);
-				finish Rail.asyncCopy[Double](rmtValue, 0L, rcvspa.getValue(), 0L, datCnt);
+				finish Array.asyncCopy[Int   ](rmtIndex, 0, rcvspa.getIndex(), 0, datCnt);
+				finish Array.asyncCopy[Double](rmtValue, 0, rcvspa.getValue(), 0, datCnt);
 			}	
 		}
 		
 		//Goto next place in the list
 		if (plist.size >= 1) {
 			val nxtpid = plist(0); // Get next place id in the list
-			val rmtidx = new GlobalRail[Long  ](rcvspa.getIndex() as Rail[Long]{self!=null});
-			val rmtval = new GlobalRail[Double](rcvspa.getValue() as Rail[Double]{self!=null});
-			val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
-			at(smlist.dist(nxtpid)) {
+			val rmtidx = new RemoteArray[Int   ](rcvspa.getIndex() as Array[Int]{self!=null});
+			val rmtval = new RemoteArray[Double](rcvspa.getValue() as Array[Double]{self!=null});
+			val nplist = new Array[Int](plist.size-1, (i:Int)=>plist(i+1));
+			at (smlist.dist(nxtpid)) {
 				//Need: rmtidx, rmtval, dmlist, datCnt, nplist, root
 				copyToHere(rmtidx, rmtval, smlist, datCnt, nplist, root);
 			}
@@ -346,6 +379,7 @@ public class MatrixRingCast {
 
 		if (mypid != root) {
 			rcvspa.finalizeRemoteCopyAtDest();
+			//rcvspa.print("Ring cast receive "+datCnt+" data at Place:"+mypid);
 		}
 	}
 }

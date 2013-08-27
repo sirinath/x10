@@ -21,16 +21,16 @@ import harness.x10Test;
 
 public class Types7e6v extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types7e6v().execute();
     }
 
 
-// file Types line 2602
- static class Numb(p:Long){
-  static def dup(n:Long){n != 0} = new Numb(n);
-  public static def example(n:Long) {
-    val x = dup(n as Long{self != 0});
+// file Types line 2598
+ static class Numb(p:Int){
+  static def dup(n:Int){n != 0} = new Numb(n);
+  public static def example(n:Int) {
+    val x = dup(n as Int{self != 0});
     val y : Numb{self.p==n, n!=0, self!=null} = x;
   }
 }

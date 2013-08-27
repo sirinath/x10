@@ -27,14 +27,14 @@ public class JavaSerialization4b extends x10Test {
     }
         
     static def test():Boolean {
-        val e = new MyInt(99n);
+        val e = new MyInt(99);
         val j = e.intValue();
         Console.OUT.println(j);
-        if (99n != j) return false;
+        if (99 != j) return false;
         val ok = at (here.next()) {
             val i = e.intValue();
             Console.OUT.println(i);
-            return 99n == i;
+            return 99 == i;
         };
         return ok;
     }
@@ -43,7 +43,7 @@ public class JavaSerialization4b extends x10Test {
         return test();
     }
 
-    public static def main(args: Rail[String]) {
+    public static def main(args: Array[String](1)) {
         new JavaSerialization4b().execute();
     }
 

@@ -16,10 +16,10 @@ import harness.x10Test;
  */
 
 class XTENLANG_47 extends x10Test {
-	static class C(rank:Long) {
-		def this(r:Long) = property(r);
+	static class C(rank:Int) {
+		def this(r:Int) = property(r);
 	}
-	public class CL(rank2:Long) {
+	public class CL(rank2:Int) {
 
 		// this reference to rank2 should succeed.
 		private class It implements Iterator[C{self.rank==rank2}] {  
@@ -28,19 +28,19 @@ class XTENLANG_47 extends x10Test {
 			public def remove() {}
 		}
 
-		def this(r:Long) = property(r);
+		def this(r:Int) = property(r);
 	}
 
 	public def run()=true;
 
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new XTENLANG_47().execute();
 	}
 }
 
 
 class XXXXXXXXXX {
-	class B(rank2:Long) {
+	class B(rank2:Int) {
 		class C {}
 		class D {
 			class A {

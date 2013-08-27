@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Testing the maxAbs function on arrays.
@@ -19,19 +18,19 @@ import x10.regionarray.*;
 public class IntArrayMaxAbs extends x10Test {
 
     public def run(): boolean = {
-        val ia  = new Array[int](Region.make(1..10, 1..10), (p:Point)=>(-p(0) as Int));
+        val ia  = new Array[int]((1..10)*(1..10), (p:Point)=>-p(0));
 
 	    val absMax = ia.reduce((a:Int, b:Int):Int => {
             val ma = Math.abs(a);
             val mb = Math.abs(b);
             ma <= mb? mb : ma
-        }, 0n);
+        }, 0);
 
 	    println("ABSmax=" + absMax);
-	    return absMax==10n;
+	    return absMax==10;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new IntArrayMaxAbs().execute();
     }
 }

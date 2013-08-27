@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class InnerClasses30 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new InnerClasses30().execute();
     }
 
 
-// file Classes line 3926
+// file Classes line 3924
  static class OC1 {
  static    class IC1 {}
 }

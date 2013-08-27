@@ -21,13 +21,13 @@ import harness.x10Test;
 
 public class Types310 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types310().execute();
     }
 
 
-// file Types line 1140
- static  class Matrix(rows:Long, cols:Long){
+// file Types line 1137
+ static  class Matrix(rows:Int, cols:Int){
  public static def someMatrix(): Matrix = null;
  public static def example(){
   val a : Matrix = someMatrix() ;

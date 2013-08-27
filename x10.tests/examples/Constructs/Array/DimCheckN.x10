@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * A rank 2 array can be initialized with a point of rank 1. The
@@ -22,11 +21,11 @@ import x10.regionarray.*;
 public class DimCheckN extends x10Test {
 
     public def run(): boolean = {
-        val a1  = new Array[long](Region.make(0..2, 0..3), ([i,j]: Point) => i);
+        val a1  = new Array[int]((0..2)*(0..3), ([i,j]: Point) => i);
         return true;
     }
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DimCheckN().execute();
     }
 }

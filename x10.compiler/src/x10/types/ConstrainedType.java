@@ -434,8 +434,8 @@ public class ConstrainedType extends ReferenceType_c implements ObjectType, X10T
 		 * @param x
 		 * @return
 		 */
-		public ConstrainedType addRank(long x) {
-		    return addRank(ConstraintManager.getConstraintSystem().makeLit(x, ts.Long()));
+		public ConstrainedType addRank(int x) {
+		    return addRank(ConstraintManager.getConstraintSystem().makeLit(x, ts.Int()));
 		}
 		public ConstrainedType addSize(int x) {
 		    return addIntProperty(x, Name.make("size"));
@@ -516,7 +516,7 @@ public class ConstrainedType extends ReferenceType_c implements ObjectType, X10T
 		    }
             if (val!=null) {                   
                 // expand it in order to handle Dist.rank()
-                val = XTypeTranslator.expandPropertyMethod(val,false,null,null);
+                val = XTypeTranslator.expandSelfPropertyMethod(val);
             }
 		    return val; // todo: val can be null! if we build a synthetic term, then why not always build it???
 		}

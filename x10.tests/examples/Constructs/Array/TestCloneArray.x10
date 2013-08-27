@@ -9,7 +9,6 @@
  *  (C) Copyright Australian National University 2011.
  */
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Functional test of "at" closures with arrays 
@@ -38,14 +37,14 @@ public class TestCloneArray extends x10Test {
         // test Int
         val b = new Array[Int](N+1);
         for (i in 0..N) {
-            b(i) = i as int;
+            b(i) = i;
         }
         at (here) {
-            var sum : Int = 0n;
+            var sum : Int = 0;
             for (i in 0..N) {
                 sum += b(i);
             }
-            val expected = N*(N+1n)/2n;
+            val expected = N*(N+1)/2;
             chk(sum == expected);
         }
 
@@ -81,7 +80,7 @@ public class TestCloneArray extends x10Test {
     }
 
     public static def main(var args: Rail[String]): void = {
-        var n : Int = 10n;
+        var n : Int = 10;
         if (args.size > 0) {
             n = Int.parseInt(args(0));
         }

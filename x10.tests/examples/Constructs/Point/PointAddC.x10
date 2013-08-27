@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Testing point arithmetic operations.
@@ -22,19 +21,19 @@ public class PointAddC extends x10Test {
 
     public def run(): boolean = {
 
-        val p:Point = [2 as long, 2, 2, 2, 2] as Point;
-        var c:long = 2;
+        val p:Point = [2, 2, 2, 2, 2] as Point;
+        var c:int = 2;
         val a = p + c;
 
-        var sum: long= 0;
-        for (var i: long = 0; i < p.rank; i++)
+        var sum: int= 0;
+        for (var i: int = 0; i < p.rank; i++)
             sum += a(i);
 
         if (sum != 20) return false;
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new PointAddC().execute();
     }
 }

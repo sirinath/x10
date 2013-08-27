@@ -25,15 +25,15 @@ public class PropertyAssign_MustFailCompile extends x10Test {
     class A(x:Int) {
         
         def this():A { // The computed return type is A{self.x==0}.
-            property(0n);
+            property(0);
         }
         
-        val y:A{self.x==0n} = new A(); // ERR
+        val y:A{self.x==0} = new A(); // ERR
     }
   
     public def run(): boolean = true;
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new PropertyAssign_MustFailCompile().execute();
     }
 }

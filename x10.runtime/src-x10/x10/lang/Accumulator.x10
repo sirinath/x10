@@ -10,10 +10,8 @@
  */
 
 package x10.lang;
-
 import x10.io.CustomSerialization;
-import x10.io.Deserializer;
-import x10.io.Serializer;
+import x10.io.SerialData;
 import x10.compiler.NonEscaping;
 
 /**
@@ -35,16 +33,14 @@ public class Accumulator[T] extends Acc implements CustomSerialization {
         this.root = new GlobalRef[Acc](this);
         this.curr = red.zero();
     }
-    public def this(ds:Deserializer) {
+    public def this(data:SerialData) {
         //owner = null;
-        this.red = ds.readAny() as Reducible[T];
-        this.root = ds.readAny() as GlobalRef[Acc];
+        val arr:Array[Any](1) = data.data as Array[Any](1);
+        this.red = arr(0) as Reducible[T];
+        this.root = arr(1) as GlobalRef[Acc];
         this.curr = red.zero();
     }
-    public def serialize(s:Serializer) {
-        s.writeAny(red);
-        s.writeAny(root);
-    }
+    public def serialize():SerialData = new SerialData([red as Any, root as Any], null);
 
     /*
     private def isSync():Boolean {

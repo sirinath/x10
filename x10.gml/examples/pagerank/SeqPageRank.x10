@@ -6,18 +6,25 @@
 
 package pagerank;
 
+import x10.io.Console;
+import x10.util.Timer;
+//
 import x10.matrix.Debug;
+//
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
 import x10.matrix.blas.DenseMatrixBLAS;
+//
 
 /**
+ * 
  * Sequential implementation of page rank algorithm based on GML dense/sparse 
  * matrix.
  */
 public class SeqPageRank {
-	val rowG:Long;
+
+	val rowG:Int;
 
 	public val iteration:Int;
 	val nzDensity:Double;
@@ -50,7 +57,7 @@ public class SeqPageRank {
 	
 	public def run():Vector {
 		Debug.flushln("Start sequential PageRank");
-		for (var i:Long=0; i<iteration; i++) {
+		for (var i:Int=0; i<iteration; i++) {
 			GP.mult(G, P, false).scale(alpha);			
 			//DenseMatrixBLAS.comp(G, P, GP);
 			//GP.scale(alpha);
@@ -64,4 +71,5 @@ public class SeqPageRank {
 		Debug.flushln("Sequential PageRank completes");
 		return P;
 	}
+		
 }

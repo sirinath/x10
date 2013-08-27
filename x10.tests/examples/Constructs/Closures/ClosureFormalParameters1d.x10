@@ -18,16 +18,16 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureFormalParameters1d extends x10Test {
+public class ClosureFormalParameters1d extends ClosureTest {
 
     public def run(): boolean = {
         
-        chk(((i:String,j:long)=>i+j)("1",1).equals("11"), "((i:String,j:long)=>i+j)(\"1\",1)");
+        check("((i:String,j:int)=>i+j)(\"1\",1)", ((i:String,j:int)=>i+j)("1",1), "11");
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureFormalParameters1d().execute();
     }
 }

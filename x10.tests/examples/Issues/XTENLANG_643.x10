@@ -13,15 +13,18 @@ import harness.x10Test;
 
 public class XTENLANG_643 extends x10Test {
 
+
+
+
     public static def test() {
-        type Ome(x:Long) = String;
+        type Ome(x:Int) = String;
         var result:Boolean = "some string " instanceof Ome(5);
         return result;
     }
     public def run() = test();
 
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_643().execute();
     }
 

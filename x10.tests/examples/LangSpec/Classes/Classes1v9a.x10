@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Classes1v9a extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Classes1v9a().execute();
     }
 
 
 // file Classes line 1337
- static class Ret(n:Long) {
+ static class Ret(n:Int) {
    def this()    { property(1); }     // (A)
-   def this(n:Long) : Ret{n==self.n} { // (B)
+   def this(n:Int) : Ret{n==self.n} { // (B)
       property(n);
    }
    static def typeIs[T](x:T){}

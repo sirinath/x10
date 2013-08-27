@@ -21,12 +21,12 @@ import harness.x10Test;
 
 public class Expressions3g5x extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Expressions3g5x().execute();
     }
 
 
-// file Expressions line 1201
+// file Expressions line 1214
  static interface Snack {}
  static interface Crunchy {}
  static class Pretzel implements Snack, Crunchy{}

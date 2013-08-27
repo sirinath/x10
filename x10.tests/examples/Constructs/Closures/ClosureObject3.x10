@@ -22,18 +22,18 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureObject3 extends x10Test {
+public class ClosureObject3 extends ClosureTest {
 
     public def run(): boolean = {
         
-        val f:(long)=>long = (i:long) => i+1;
-        chk(f(1) == 2, "f(1)");
-        chk(f(1) == 2, "f(1)");
+        val f:(int)=>int = (i:int) => i+1;
+        check("f(1)", f(1), 2);
+        check("f(1)", f(1), 2);
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureObject3().execute();
     }
 }

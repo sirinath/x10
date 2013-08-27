@@ -12,32 +12,14 @@
 import x10.io.Console;
 
 /**
- * The classic hello world program, with a twist - prints a message
- * from the command line at every Place. 
- * The messages from each Place may appear in any order, but the
- * finish ensures that the last message printed will be "Goodbye"
- * <pre>
- * Typical output:
- * [dgrove@linchen samples]$ ./HelloWholeWorld 'best wishes'
- * Place(1) says hello and best wishes
- * Place(2) says hello and best wishes
- * Place(3) says hello and best wishes
- * Place(0) says hello and best wishes
- * Goodbye 
- * [dgrove@linchen samples]$
- * </pre>
+ * The classic hello world program, with a twist - prints hello
+ * from every Place.
  */
 class HelloWholeWorld {
-  public static def main(args:Rail[String]):void {
-     if (args.size < 1) {
-         Console.OUT.println("Usage: HelloWholeWorld message");
-         return;
-     }
-    
+  public static def main(Array[String]):void {
      finish for (p in Place.places()) {
-     	at (p) async Console.OUT.println(here+" says hello and "+args(0));
+     	at (p) async Console.OUT.println("Hello World from place "+p.id);
      }
-     Console.OUT.println("Goodbye");
   }
 }
 

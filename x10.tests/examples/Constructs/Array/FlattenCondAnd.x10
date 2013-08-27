@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Conditional and is evaluated, well, conditionally. So it must be
@@ -34,7 +33,7 @@ public class FlattenCondAnd extends x10Test {
     val a: Array[Boolean](2);
 
     public def this(): FlattenCondAnd = {
-        a = new Array[Boolean](Region.make(1..10, 1..10), ([i,j]: Point) => true);
+        a = new Array[Boolean]((1..10)*(1..10), ([i,j]: Point) => true);
     }
 
     def m(x: boolean)= !x;
@@ -44,7 +43,7 @@ public class FlattenCondAnd extends x10Test {
         return !x;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new FlattenCondAnd().execute();
     }
 }

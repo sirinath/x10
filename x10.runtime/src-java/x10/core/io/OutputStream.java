@@ -44,8 +44,6 @@ public class OutputStream extends Ref {
     }
 
     public final OutputStream x10$io$OutputStreamWriter$OutputStream$$init$S(java.io.OutputStream stream) {
-        // Note: enable buffering for performance
-        if (stream != null && !(stream instanceof java.io.BufferedOutputStream)) stream = new java.io.BufferedOutputStream(stream);
         this.stream = stream;
         return this;
     }
@@ -90,15 +88,15 @@ public class OutputStream extends Ref {
     
     // XTENLANG-2680
     // for !Emitter.manglePrimitivesAsShortName
-    public void write__0$1x10$lang$Byte$2(x10.core.Rail buf) {
+    public void write__0$1x10$lang$Byte$2(x10.array.Array buf) {
         try {
-            stream.write(buf.getByteArray());
+            stream.write(buf.raw().getByteArray());
         } catch (java.io.IOException e) {
             throw new x10.io.IOException(e.getMessage());
         }
     }
 //    // for Emitter.manglePrimitivesAsShortName
-//    public void write__0$1$B$2(x10.regionarray.Array buf) {
+//    public void write__0$1$B$2(x10.array.Array buf) {
 //        try {
 //            stream.write(buf.raw().getByteArray());
 //        } catch (java.io.IOException e) {
@@ -116,16 +114,15 @@ public class OutputStream extends Ref {
     
     // XTENLANG-2680
     // for !Emitter.manglePrimitivesAsShortName
-    // LONG_RAIL: unsafe int cast
-    public void write__0$1x10$lang$Byte$2(x10.core.Rail buf, long off, long len) {
+    public void write__0$1x10$lang$Byte$2(x10.array.Array buf, int off, int len) {
         try {
-            stream.write(buf.getByteArray(), (int)off, (int)len);
+            stream.write(buf.raw().getByteArray(), off, len);
         } catch (java.io.IOException e) {
             throw new x10.io.IOException(e.getMessage());
         }
     }
 //    // for Emitter.manglePrimitivesAsShortName
-//    public void write__0$1$B$2(x10.regionarray.Array buf, int off, int len) {
+//    public void write__0$1$B$2(x10.array.Array buf, int off, int len) {
 //        try {
 //            stream.write(buf.raw().getByteArray(), off, len);
 //        } catch (java.io.IOException e) {

@@ -21,13 +21,13 @@ import harness.x10Test;
 
 public class Structs6i5t extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Structs6i5t().execute();
     }
 
 
 // file Structs line 125
- static struct Exam[T](nQuestions:Long){T <: Question} {
+ static struct Exam[T](nQuestions:Int){T <: Question} {
   public static  interface Question {}
   // ...
 }

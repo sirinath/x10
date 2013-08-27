@@ -11,7 +11,7 @@
 
 package x10.core;
 
-import x10.io.Unserializable;
+import x10.io.SerialData;
 import x10.lang.Place;
 import x10.rtt.NamedType;
 import x10.rtt.RuntimeType;
@@ -24,7 +24,7 @@ import java.io.IOException;
 
 /**
  */
-public class Thread implements Any, Unserializable {
+public class Thread implements Any {
     private static final long serialVersionUID = 1L;
     public static final RuntimeType<Thread> $RTT = NamedType.<Thread> make("x10.lang.Thread", Thread.class);
     public RuntimeType<?> $getRTT() { return $RTT; }
@@ -48,6 +48,9 @@ public class Thread implements Any, Unserializable {
 
     // constructor just for allocation
     public Thread(java.lang.System[] $dummy) {}
+    public Thread(SerialData $dummy) {
+        throw new java.lang.UnsupportedOperationException("Cannot deserialize Thread");
+    }
 
     public final Thread x10$lang$Thread$$init$S(java.lang.String name) {
         jthread = new java.lang.Thread(name) {
@@ -129,7 +132,7 @@ public class Thread implements Any, Unserializable {
             java.lang.Thread.sleep(time, nanos);
         } catch (java.lang.InterruptedException e) {
             try {
-                throw new x10.lang.InterruptedException();
+                throw java.lang.Class.forName("x10.lang.InterruptedException").asSubclass(java.lang.RuntimeException.class).newInstance();
             } catch (java.lang.Exception e2) {
                 e2.printStackTrace();
             }

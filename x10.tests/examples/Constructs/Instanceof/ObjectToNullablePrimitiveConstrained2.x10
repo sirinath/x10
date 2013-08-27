@@ -20,10 +20,10 @@ public class ObjectToNullablePrimitiveConstrained2 extends x10Test {
 	 
 	public def run(): boolean = {
 		var primitive: x10.lang.Any = 3;
-		return !(primitive instanceof Long{self==4});
+		return !(primitive instanceof int{self==4});
 	}
 	
-	public static def main(Rail[String]) {
+	public static def main(Array[String](1)) {
 		new ObjectToNullablePrimitiveConstrained2().execute();
 	}
 }

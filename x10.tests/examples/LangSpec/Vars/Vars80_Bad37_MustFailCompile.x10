@@ -17,11 +17,11 @@
 
 import harness.x10Test;
 
- import x10.regionarray.*;
+
 
 public class Vars80_Bad37_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Vars80_Bad37_MustFailCompile().execute();
     }
 
@@ -30,11 +30,11 @@ public class Vars80_Bad37_MustFailCompile extends x10Test {
  static  class Example {
  static def example () {
 val [i] : Point = Point.make(11);
-assert i == 11L;
+assert i == 11;
 val p[j,k] = Point.make(22,33);
-assert j == 22L && k == 33L;
+assert j == 22 && k == 33;
 val q[l,m] = [44,55] as Point;
-assert l == 44L && m == 55L;
+assert l == 44 && m == 55;
  val [n] = p; // ERR
 }}
  static  class Hook{ def run() {Example.example(); return true;}}

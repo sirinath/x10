@@ -20,12 +20,12 @@ public class XTENLANG_209 extends x10Test {
     public operator this + (c: int) = this;
     
     public def run():boolean {
-        val i = 0n;
+        val i = 0;
         val sum = this + i;
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_209().execute();
     }
 }

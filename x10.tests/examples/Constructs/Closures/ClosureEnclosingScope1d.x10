@@ -20,7 +20,7 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureEnclosingScope1d extends x10Test {
+public class ClosureEnclosingScope1d extends ClosureTest {
 
     val a = 1;
 
@@ -39,12 +39,13 @@ public class ClosureEnclosingScope1d extends x10Test {
             }
         }
 
-        chk(new C().foo() == 4, "new C().foo()");
+        check("new C().foo()", new C().foo(), 4);
 
-        return true;
+
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureEnclosingScope1d().execute();
     }
 }

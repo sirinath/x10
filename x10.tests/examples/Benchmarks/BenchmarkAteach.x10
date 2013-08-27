@@ -9,7 +9,6 @@
  *  (C) Copyright Australian National University 2010.
  */
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Tests base performance of finish/ateach
@@ -18,7 +17,7 @@ import x10.regionarray.*;
 public class BenchmarkAteach extends x10Test {
 
 	public def run(): Boolean = {
-        val a = DistArray.make[Long](Dist.makeUnique());
+        val a = DistArray.make[Int](Dist.makeUnique());
 
         val start = System.nanoTime();
         finish {
@@ -32,7 +31,7 @@ public class BenchmarkAteach extends x10Test {
         return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new BenchmarkAteach().execute();
 	}
 

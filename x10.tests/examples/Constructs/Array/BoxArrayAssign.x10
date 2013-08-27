@@ -10,7 +10,6 @@
  */
 
 import x10.util.Box;
-import x10.regionarray.*;
 
 import harness.x10Test;
 
@@ -24,12 +23,12 @@ import harness.x10Test;
 public class BoxArrayAssign extends x10Test {
 
     public def run(): boolean = {
-        val table = new Array[Box[Complex]](Region.make(1, 5), (Point)=>(null as Box[Complex]));
+        val table = new Array[Box[Complex]](1..5, (Point)=>(null as Box[Complex]));
         for (val p: Point(1) in table) async table(p) = null;
         return true;
     }
     
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new BoxArrayAssign().execute();
     }
 

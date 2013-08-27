@@ -23,7 +23,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import sun.misc.Unsafe;
-import x10.io.Deserializer;
+import x10.io.SerialData;
 import x10.rtt.NamedStructType;
 import x10.rtt.NamedType;
 import x10.rtt.RuntimeType;
@@ -144,6 +144,12 @@ abstract class DeserializerThunk {
             return new SpecialCaseDeserializerThunk(null);  
         } else if ("x10.rtt.RuntimeType".equals(clazz.getName())) {
             return new SpecialCaseDeserializerThunk(null);      
+        } else if ("x10.core.IndexedMemoryChunk".equals(clazz.getName())) {
+            return new SpecialCaseDeserializerThunk(null);
+        } else if ("x10.core.IndexedMemoryChunk$$Closure$0".equals(clazz.getName())) {
+            return new SpecialCaseDeserializerThunk(null);
+        } else if ("x10.core.IndexedMemoryChunk$$Closure$1".equals(clazz.getName())) {
+            return new SpecialCaseDeserializerThunk(null);
         } else if (x10.core.GlobalRef.class.getName().equals(clazz.getName())) {
             return new SpecialCaseDeserializerThunk(null);
         } else if ("java.lang.Throwable".equals(clazz.getName())) {
@@ -156,13 +162,20 @@ abstract class DeserializerThunk {
 
         Class<?>[] interfaces = clazz.getInterfaces();
         boolean isCustomSerializable = false;
-        boolean isHadoopSerializable = Runtime.implementsHadoopWritable(clazz);
-        boolean isX10JavaSerializable = SerializationUtils.useX10SerializationProtocol(clazz);
+        boolean isHadoopSerializable = false;
         for (Class<?> aInterface : interfaces) {
             if ("x10.io.CustomSerialization".equals(aInterface.getName())) {
                 isCustomSerializable = true;
                 break;
             }
+        }
+
+        if (Runtime.implementsHadoopWritable(clazz)) {
+            isHadoopSerializable = true;
+        }
+
+        if (isCustomSerializable && isHadoopSerializable) {
+            throw new RuntimeException("deserializer: " + clazz + " implements both x10.io.CustomSerialization and org.apache.hadoop.io.Writable.");
         }
 
         if (isCustomSerializable) {
@@ -171,10 +184,6 @@ abstract class DeserializerThunk {
 
         if (isHadoopSerializable) {
             return new HadoopDeserializerThunk(clazz);
-        }
-        
-        if (isX10JavaSerializable) {
-            return new X10JavaSerializableDeserializerThunk(clazz);
         }
 
         Class<?> superclass = clazz.getSuperclass();
@@ -186,36 +195,6 @@ abstract class DeserializerThunk {
         return new FieldBasedDeserializerThunk(clazz, superThunk);
     }
 
-    /**
-     * A thunk for a vanilla X10 class (supports compiler-generated serialization code).
-     */
-    private static class X10JavaSerializableDeserializerThunk extends DeserializerThunk {
-        protected final Method deserializeBodyMethod;
-
-        X10JavaSerializableDeserializerThunk(Class<? extends Object> clazz) {
-            super(null);  // The compiler-generated serialization code will invoke the superclass deserializer directly
-            
-            try {
-                deserializeBodyMethod = clazz.getDeclaredMethod("$_deserialize_body", clazz, X10JavaDeserializer.class);
-            } catch (SecurityException e) {
-                System.err.println("DeserializerThunk: class "+clazz+" does not have a $_deserialize_body method");
-                throw new RuntimeException(e);
-            } catch (NoSuchMethodException e) {
-                System.err.println("DeserializerThunk: class "+clazz+" does not have a $_deserialize_body method");
-                throw new RuntimeException(e);
-            }
-            deserializeBodyMethod.setAccessible(true);
-        }
-
-        @Override
-        protected <T> T deserializeBody(Class<?> clazz, T obj, int i, X10JavaDeserializer jds) throws IOException,
-                IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
-
-            deserializeBodyMethod.invoke(null, obj, jds);
-            return obj;
-        }
-    }
-    
     private static class FieldBasedDeserializerThunk extends DeserializerThunk {
         protected final Field[] fields;
 
@@ -324,7 +303,7 @@ abstract class DeserializerThunk {
             }
 
             // We can't use the same method name in all classes cause it creates an endless loop cause when super.init is called it calls back to this method
-            makeMethod = clazz.getMethod(clazz.getName().replace(".", "$") + "$" + DeserializerThunk.CONSTRUCTOR_METHOD_NAME_FOR_REFLECTION, Deserializer.class);
+            makeMethod = clazz.getMethod(clazz.getName().replace(".", "$") + "$" + DeserializerThunk.CONSTRUCTOR_METHOD_NAME_FOR_REFLECTION, SerialData.class);
             makeMethod.setAccessible(true);
         }
 
@@ -335,11 +314,8 @@ abstract class DeserializerThunk {
                 field.set(obj, value);
             }
 
-            makeMethod.invoke(obj, new Deserializer(jds));
-            short marker = jds.readShort();
-            if (marker != SerializationConstants.CUSTOM_SERIALIZATION_END) {
-                X10JavaDeserializer.raiseSerializationProtocolError();
-            }
+            SerialData serialData = (SerialData) jds.readRefUsingReflection();
+            makeMethod.invoke(obj, serialData);
             return obj;
         }
     }
@@ -370,8 +346,6 @@ abstract class DeserializerThunk {
     }
     
     private static class SpecialCaseDeserializerThunk extends DeserializerThunk {
-    	// XTENLANG-3258: enable writable stack trace before calling setStackTrace
-        private static final StackTraceElement[] UNASSIGNED_STACK = new StackTraceElement[0];
 
         SpecialCaseDeserializerThunk(Class <? extends Object> clazz) {
             super(null);
@@ -396,6 +370,14 @@ abstract class DeserializerThunk {
                     obj = (T) x10JavaSerializable;
                 }
                 return obj;
+            } else if ("x10.core.IndexedMemoryChunk".equals(clazz.getName())) {
+                x10.core.IndexedMemoryChunk imc = (x10.core.IndexedMemoryChunk) obj;
+                x10.core.IndexedMemoryChunk.$_deserialize_body(imc, jds);
+                return (T) imc;
+            } else if ("x10.core.IndexedMemoryChunk$$Closure$0".equals(clazz.getName())) {
+                return (T) x10.core.IndexedMemoryChunk.$Closure$0.$_deserialize_body((x10.core.IndexedMemoryChunk.$Closure$0) obj, jds);
+            } else if ("x10.core.IndexedMemoryChunk$$Closure$1".equals(clazz.getName())) {
+                return (T) x10.core.IndexedMemoryChunk.$Closure$1.$_deserialize_body((x10.core.IndexedMemoryChunk.$Closure$1) obj, jds);
             } else if (x10.core.GlobalRef.class.getName().equals(clazz.getName())) {
                 return (T) x10.core.GlobalRef.$_deserialize_body((x10.core.GlobalRef) obj, jds);
             } else if ("java.lang.Throwable".equals(clazz.getName())) {
@@ -411,25 +393,8 @@ abstract class DeserializerThunk {
                 }
                 if (X10JavaSerializer.THROWABLES_SERIALIZE_STACKTRACE) {
                     java.lang.StackTraceElement[] trace = (java.lang.StackTraceElement[]) jds.readArrayUsingReflection(java.lang.StackTraceElement.class);
-                	// XTENLANG-3258: enable writable stack trace before calling setStackTrace
-                    boolean nonNonIBMJavaVM = false;
-                    try {
-                    	// For IBM Java VM: set enableWritableStackTrace before calling setStackTrace
-                    	Field enableWritableStackTraceField = Throwable.class.getDeclaredField("enableWritableStackTrace");
-                    	enableWritableStackTraceField.setAccessible(true);
-                    	enableWritableStackTraceField.setBoolean(obj, true);
-                    } catch (Exception e) {
-                    	nonNonIBMJavaVM = true;
-                    }
-                    if (nonNonIBMJavaVM) {
-                    try {
-                        // For Oracle Java VM: set stackTrace before calling setStackTrace
-                    	Field stackTraceField = Throwable.class.getDeclaredField("stackTrace");
-                    	stackTraceField.setAccessible(true);
-                    	stackTraceField.set(obj, UNASSIGNED_STACK);
-                    } catch (Exception e) { }
-                    }
-                    ((Throwable) obj).setStackTrace(trace);
+                    java.lang.Throwable t = (java.lang.Throwable) obj;
+                    t.setStackTrace(trace);
                 }
                 if (X10JavaSerializer.THROWABLES_SERIALIZE_CAUSE) {
                     try {
@@ -443,16 +408,9 @@ abstract class DeserializerThunk {
                 }
                 return obj;
             } else if ("java.lang.Class".equals(clazz.getName())) {
+                String className = jds.readString();
                 try {
-                    T t = null;
-                    String className = jds.readString();
-                    if (Runtime.OSGI) {
-                    	String bundleName = jds.readStringValue();
-                    	String bundleVersion = jds.readStringValue();
-                    	t = (T) jds.dict.loadClass(className, bundleName, bundleVersion);                    	
-                    } else {
-                    	t = (T) jds.dict.loadClass(className);
-                    }
+                    T t = (T) Class.forName(className);
                     jds.update_reference(i, t);
                     return t;
                 } catch (ClassNotFoundException e) {

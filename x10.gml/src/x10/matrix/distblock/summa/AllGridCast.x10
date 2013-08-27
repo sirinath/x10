@@ -11,21 +11,33 @@
 
 package x10.matrix.distblock.summa;
 
+import x10.io.Console;
+import x10.util.Timer;
+import x10.util.ArrayList;
+import x10.compiler.Inline;
+
 import x10.matrix.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.sparse.SparseCSC;
+import x10.matrix.block.MatrixBlock;
+
+import x10.matrix.distblock.DistMap;
 import x10.matrix.distblock.BlockSet;
 import x10.matrix.distblock.DistBlockMatrix;
+import x10.matrix.distblock.DupBlockMatrix;
+
 
 public class AllGridCast {
-	public static def startRowCast(jj:Long, klen:Long, itCol:Long, 
+
+	public static def startRowCast(jj:Int, klen:Int, itCol:Int, 
 			distA:DistBlockMatrix, work1:PlaceLocalHandle[BlockSet]) {
 
 		val dmap = distA.getMap();
 		val grid = distA.getGrid();
 		val sttplc = dmap.findPlace(grid.getBlockId(0, itCol));
 		if (here.id()!= sttplc) {
-            at(Place(sttplc)) {
+			at (Dist.makeUnique()(sttplc)) {
 				startRowCast(jj, klen, itCol, distA, work1);
 			}
 		} else {
@@ -33,8 +45,9 @@ public class AllGridCast {
 			val plst = work1().colCastPlaceMap.getPlaceList(itCol);
 			//Debug.flushln("Init all row cast from places:"+plst.toString());
 			finish {
-                for (pid in plst) {
-                    at(Place(pid)) async {
+				for ([p]:Point in plst) async {
+					val pid = plst(p);
+					at (Dist.makeUnique()(pid)) async {
 						//Debug.flushln("Starting row cast to places at row block "+itCol);
 						rowCastAll(jj, klen, itCol, distA, work1);
 					}
@@ -49,7 +62,7 @@ public class AllGridCast {
 	}
 	
 	protected static def rowCastAll(
-			jj:Long, klen:Long, itCol:Long, 
+			jj:Int, klen:Int, itCol:Int, 
 			dA:DistBlockMatrix, work1:PlaceLocalHandle[BlockSet]) {
 		
 		val grid = dA.getGrid();
@@ -66,7 +79,7 @@ public class AllGridCast {
 			
 			val datcnt = blk.copyCols(jj, klen, dstblk.getMatrix());
 			
-			val rowplst = work1().rowCastPlaceMap.getPlaceList(blk.myRowId);	
+			val rowplst:Array[Int](1) = work1().rowCastPlaceMap.getPlaceList(blk.myRowId);	
 			//Debug.flushln("Starting row cast to places:"+rowplst.toString());
 			BlockGridCast.rowCastToPlaces(work1, rootbid, klen, datcnt, rowplst);
 			//Debug.flushln("Done row cast to places:"+rowplst.toString());
@@ -74,22 +87,26 @@ public class AllGridCast {
 		}
 	}
 		
-	public static def startColCast(ii:Long, klen:Long, itRow:Long, 
+	//--------------------------------------
+	
+	
+	public static def startColCast(ii:Int, klen:Int, itRow:Int, 
 			distB:DistBlockMatrix, work2:PlaceLocalHandle[BlockSet]){
 		
 		val dmap = distB.getMap();
 		val grid = distB.getGrid();
 		val sttplc = dmap.findPlace(grid.getBlockId(itRow, 0));
 		if (here.id()!= sttplc) {
-            at(Place(sttplc)) {
+			at (Dist.makeUnique()(sttplc)) {
 				startColCast(ii, klen, itRow, distB, work2);
 			}
 		} else {
-			//Using row cast place startlist as the starting places of row cast
+			//Using row cast place list as the starting places of row cast
 			val plst = work2().rowCastPlaceMap.getPlaceList(itRow);
 			finish {
-				for (pid in plst) {
-					at(Place(pid)) async {
+				for ([p]:Point in plst) {
+					val pid = plst(p);
+					at (Dist.makeUnique()(pid)) async {
 						colCastAll(ii, klen, itRow, distB, work2);
 					}
 				} 
@@ -103,7 +120,7 @@ public class AllGridCast {
 	}
 	
 	protected static def colCastAll(
-			ii:Long, klen:Long, itRow:Long, 
+			ii:Int, klen:Int, itRow:Int, 
 			dB:DistBlockMatrix, 
 			work2:PlaceLocalHandle[BlockSet]) {
 		
@@ -115,7 +132,7 @@ public class AllGridCast {
 			if (blk.myRowId != itRow) continue;
 			
 			val rootbid = grid.getBlockId(blk.myRowId, blk.myColId);
-
+			//------------------------------------------------
 			val dstblk  = work2().findFrontRowBlock(blk.myColId);
 			//Debug.flushln("Copy block :"+blk.myRowId+","+blk.myColId+" to "+dstblk.myRowId+","+dstblk.myColId);
 			//Dense matrix must reshape to (klen x N), klen may be smaller than the
@@ -129,8 +146,8 @@ public class AllGridCast {
 			}
 			//Debug.flushln(blk.toString()+"\n"+mat.toString());
 			val datcnt = blk.copyRows(ii, klen, mat);
-
-			val colplst = work2().colCastPlaceMap.getPlaceList(blk.myColId);
+			//-------------------------------------------------
+			val colplst:Array[Int](1) = work2().colCastPlaceMap.getPlaceList(blk.myColId);
 			//Debug.flushln("Starting col cast to places:"+colplst.toString());
 			BlockGridCast.colCastToPlaces(work2, rootbid, mat.N, datcnt, colplst);	
 			//Debug.flushln("Done col cast to places:"+colplst.toString());
@@ -139,18 +156,20 @@ public class AllGridCast {
 		}	
 	}
 	
-	public static def startVerifyRowCast(jj:Long, klen:Long, itCol:Long, 
+	//========================================
+	//========================================
+	
+	public static def startVerifyRowCast(jj:Int, klen:Int, itCol:Int, 
 			distA:DistBlockMatrix, work1:PlaceLocalHandle[BlockSet]):Boolean {
 		var retval:Boolean = true;
 		val dmap = distA.getMap();
 		val grid = distA.getGrid();
-		for  (var rowId:Long=0; rowId < grid.numRowBlocks&&retval; rowId++) {
+		for  (var rowId:Int=0; rowId < grid.numRowBlocks&&retval; rowId++) {
 			val sttbid = grid.getBlockId(rowId, 0);
 			val sttplc = dmap.findPlace(sttbid);
 			val rId    = rowId;
-            val result = at(Place(sttplc)) 
+			retval &= at (Dist.makeUnique()(sttplc)) 
 				verifyRowCastAll(jj, klen, itCol, rId, distA, work1);
-            retval &= result;
 			if (!retval) Debug.flushln("Verify failed when checking "+rowId+
 					" idx off:"+jj+" klen:"+klen+" itCol:"+itCol+" start plc:"+sttplc);
 		}
@@ -158,8 +177,8 @@ public class AllGridCast {
 	}
 		
 	protected static def verifyRowCastAll(
-			jj:Long, klen:Long, itCol:Long, 
-			rowId:Long, dA:DistBlockMatrix, 
+			jj:Int, klen:Int, itCol:Int, 
+			rowId:Int, dA:DistBlockMatrix, 
 			work1:PlaceLocalHandle[BlockSet]): Boolean {
 		var retval:Boolean = true;
 		val grid = dA.getGrid();
@@ -169,16 +188,18 @@ public class AllGridCast {
 		val rootbid = grid.getBlockId(rowId, itCol);
 		val rootpid = dmap.findPlace(rootbid);
 		
-        retval &= at(Place(rootpid)) {
+		retval &= at (Dist.makeUnique()(rootpid)) {
 			val rootblk = dA.handleBS().findBlock(rootbid);
 			val dstblk  = work1().findFrontColBlock(rowId);
 		
 			val srcmat = rootblk.getMatrix();
 			val dstmat = dstblk.getMatrix();
 			var eql:Boolean = true;
+			//srcmat.printMatrix("source mat idx off:"+jj+" root col:"+itCol+" klen"+klen);
+			//dstmat.printMatrix("target mat");
 			
-			for (var c:Long=0; c<klen&&eql; c++)
-				for (var r:Long=0; r<srcmat.M&&eql; r++)
+			for (var c:Int=0; c<klen&&eql; c++)
+				for (var r:Int=0; r<srcmat.M&&eql; r++)
 					eql &= (srcmat(r, c+jj)==dstmat(r, c));
 			if (!eql) Debug.flushln("Copy columns verification failed");
 		
@@ -190,17 +211,18 @@ public class AllGridCast {
 		return retval;
 	}
 	
-	public static def startVerifyColCast(ii:Long, klen:Long, itRow:Long, 
+	//---------------
+	public static def startVerifyColCast(ii:Int, klen:Int, itRow:Int, 
 			distB:DistBlockMatrix, work2:PlaceLocalHandle[BlockSet]): Boolean{
 		var retval:Boolean = true;
 		val dmap = distB.getMap();
 		val grid = distB.getGrid();
 		
-		for (var colId:Long=0; colId < grid.numColBlocks && retval; colId++) {
+		for  (var colId:Int=0; colId < grid.numColBlocks&&retval; colId++) {
 			val sttbid = grid.getBlockId(0, colId);
 			val sttplc = dmap.findPlace(sttbid);
 			val cId    = colId;
-            retval &= at(Place(sttplc)) 
+			retval &= at (Dist.makeUnique()(sttplc)) 
 				verifyColCastAll(ii, klen, itRow, cId, distB, work2);
 			if (!retval) Debug.flushln("Verify failed when checking column "+cId+
 					" idx off:"+ii+" klen:"+klen+" itRow:"+itRow+" start plc:"+sttplc);
@@ -209,7 +231,7 @@ public class AllGridCast {
 	}
 	
 	protected static def verifyColCastAll(
-			ii:Long, klen:Long, itRow:Long, colId:Long,
+			ii:Int, klen:Int, itRow:Int, colId:Int,
 			dB:DistBlockMatrix, 
 			work2:PlaceLocalHandle[BlockSet]) {
 
@@ -221,7 +243,7 @@ public class AllGridCast {
 		val rootbid = grid.getBlockId(itRow, colId);
 		val rootpid = dmap.findPlace(rootbid);
 		
-        retval &= at(Place(rootpid)) {
+		retval &= at (Dist.makeUnique()(rootpid)) {
 			val rootblk = dB.handleBS().findBlock(rootbid);
 			val srcmat = rootblk.getMatrix();
 			//Debug.flushln("Searching front block:"+colId);
@@ -235,9 +257,11 @@ public class AllGridCast {
 			}
 
 			var eql:Boolean = true;
+			//srcmat.printMatrix("source mat idx off:"+ii+" root row:"+itRow+" klen"+klen);
+			//mat.printMatrix("target mat");
 			
-			for (var c:Long=0; c<srcmat.N&&eql; c++)
-				for (var r:Long=0; r<klen&&eql; r++)
+			for (var c:Int=0; c<srcmat.N&&eql; c++)
+				for (var r:Int=0; r<klen&&eql; r++)
 					eql &= (srcmat(r+ii, c)==mat(r, c));
 			
 			if (!eql) Debug.flushln("Copy rows verification failed");
@@ -249,4 +273,6 @@ public class AllGridCast {
 		};
 		return retval;
 	}
+	
+	
 }

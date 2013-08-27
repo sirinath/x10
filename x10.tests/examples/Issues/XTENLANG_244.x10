@@ -21,10 +21,10 @@ class XTENLANG_244 extends x10Test {
     static def check(a:Any, b:Any) = a==b;
     
     public def run():boolean {
-        return check(new Box[Int](1n), new Box[Int](1n))==false;
+        return check(new Box[Int](1), new Box[Int](1))==false;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_244().execute();
     }
 }

@@ -20,7 +20,7 @@ import harness.x10Test;
  */
 class BangAcrossPlaces2_MustFailCompile extends x10Test {
     class C {
-        var x:Int=0n;
+        var x:Int=0;
         def x() = x;
     }
     def m(z:GlobalRef[C]{self.home==here}) {
@@ -31,7 +31,7 @@ class BangAcrossPlaces2_MustFailCompile extends x10Test {
     }
     public def run() = true;
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new BangAcrossPlaces2_MustFailCompile().execute();
     }
 }

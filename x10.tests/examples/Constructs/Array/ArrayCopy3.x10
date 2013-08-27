@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Test for arrays, regions and dists.
@@ -38,7 +37,7 @@ public class ArrayCopy3 extends x10Test {
     /**
      * Does not throw an error iff A[i] == B[i] for all points i.
      */
-    public def arrayEqual(A: DistArray[long], B: DistArray[long](A.rank)) {
+    public def arrayEqual(A: DistArray[int], B: DistArray[int](A.rank)) {
         val D = A.dist;
         val E:Dist(A.rank) = B.dist;
         // Spawn an activity for each index to
@@ -57,7 +56,7 @@ public class ArrayCopy3 extends x10Test {
      * regions are equal.
      * Throws an error iff some assertion failed.
      */
-    public def arrayCopy(val A: DistArray[long], val B: DistArray[long](A.rank)) {
+    public def arrayCopy(val A: DistArray[int], val B: DistArray[int](A.rank)) {
 
         val D = A.dist;
         val E = B.dist;
@@ -66,10 +65,10 @@ public class ArrayCopy3 extends x10Test {
         val D_1 = Dist.makeUnique(D.places());
 
         // number of times elems of A are accessed
-        val accessed_a = DistArray.make[int](D, (Point)=>0n);
+        val accessed_a = DistArray.make[int](D, (Point)=>0);
 
         // number of times elems of B are accessed
-        val accessed_b  = DistArray.make[int](E, (Point)=>0n);
+        val accessed_b  = DistArray.make[int](E, (Point)=>0);
 
         finish
             ateach (val x in D_1) {
@@ -82,13 +81,13 @@ public class ArrayCopy3 extends x10Test {
                     val D_common: Dist(A.rank) = D | Common;
                     // the future's can be aggregated
                     for (val i: Point(A.rank) in D_common) {
-                        async at(py) atomic accessed_b(i) += 1n;
+                        async at(py) atomic accessed_b(i) += 1;
                         val temp  = at(py)B(i);
                         // the following may need to be bracketed in
                         // atomic, unless the disambiguator
                         // knows about dists
                         A(i) = temp;
-                        atomic accessed_a(i) += 1n;
+                        atomic accessed_a(i) += 1;
                     }
                     // check if dist ops are working
 	            /* TODO: Restore this part of test test when Region/Dist - is supported again
@@ -118,13 +117,13 @@ public class ArrayCopy3 extends x10Test {
             }
 
         // ensure each A[i] was accessed exactly once
-        finish ateach (i: Point(A.rank) in D) chk(accessed_a(i) == 1n);
+        finish ateach (i: Point(A.rank) in D) chk(accessed_a(i) == 1);
 
         // ensure each B[i] was accessed exactly once
-        finish ateach (i: Point(A.rank) in E) chk(accessed_b(i) == 1n);
+        finish ateach (i: Point(A.rank) in E) chk(accessed_b(i) == 1);
     }
 
-    public static N: int = 3n;
+    public static N: int = 3;
 
     /**
      * For all combinations of dists of arrays B and A,
@@ -132,23 +131,23 @@ public class ArrayCopy3 extends x10Test {
      */
     public def run(): boolean = {
 
-        val R: Region{rank==4} = Region.make(0..(N-1), 0..(N-1), 0..(N-1), 0..(N-1));
-        val TestDists: Region(2) = Region.make(0..(dist2.N_DIST_TYPES-1), 0..(dist2.N_DIST_TYPES-1));
+        val R: Region{rank==4} = 0..(N-1)*0..(N-1)*0..(N-1)*0..(N-1);
+        val TestDists: Region(2) = 0..(dist2.N_DIST_TYPES-1)*0..(dist2.N_DIST_TYPES-1);
 
         for (distP[dX,dY]: Point(2) in TestDists) {
             val D: Dist{rank==4} = dist2.getDist(dX, R);
             val E: Dist{rank==4} = dist2.getDist(dY, R);
             chk(D.region.equals(E.region) && D.region.equals(R));
-            val A: DistArray[long]{rank==4} = DistArray.make[long](D, (Point)=>0L);
-            val B: DistArray[long]{rank==A.rank} = DistArray.make[long](E, 
-                (p[i,j,k,l]: Point) => { val x=((i*N+j)*N+k)*N+l; x*x+1});
+            val A: DistArray[int]{rank==4} = DistArray.make[int](D, (Point)=>0);
+            val B: DistArray[int]{rank==A.rank} = DistArray.make[int](E, 
+            (p[i,j,k,l]: Point) => { val x=((i*N+j)*N+k)*N+l; x*x+1});
             arrayCopy(A, B);
             arrayEqual(A, B);
         }
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ArrayCopy3().execute();
     }
 
@@ -158,17 +157,17 @@ public class ArrayCopy3 extends x10Test {
      */
     static class dist2 {
 
-        static BLOCK: int = 0n;
+        static BLOCK: int = 0;
         //public static val CYCLIC: int = 1;
         //public static val BLOCKCYCLIC: int = 2;
-        static CONSTANT: int = 1n;
-        static N_DIST_TYPES: int = 2n;
+        static CONSTANT: int = 1;
+        static N_DIST_TYPES: int = 2;
 
         /**
          * Return a dist with region r, of type disttype
          */
-        public static def getDist(distType: Long, r: Region): Dist(r) = {
-            switch(distType as Int) {
+        public static def getDist(distType: Int, r: Region): Dist(r) = {
+            switch(distType) {
                 case BLOCK: return Dist.makeBlock(r);
                 // case CYCLIC: return Dist.makeCyclic(r);
                 // case BLOCKCYCLIC: return Dist.makeBlockCyclic(r, 0, 3);

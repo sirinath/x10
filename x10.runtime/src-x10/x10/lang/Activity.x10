@@ -11,8 +11,7 @@
 
 package x10.lang;
 
-import x10.io.Deserializer;
-import x10.io.Serializer;
+import x10.io.SerialData;
 import x10.util.Map;
 import x10.util.HashMap;
 
@@ -21,17 +20,12 @@ import x10.util.HashMap;
  */
 class Activity {
 
-    // This flag is hacked to be false in the APGAS C++ library
-    // TODO: refactor XRX so body is more than a ()=>void so that run
-    //       can simply ask the body if it should be deallocated on completion.
-    private static DEALLOC_BODY:Boolean = true;
-
     static class ClockPhases extends HashMap[Clock,Int] {
         // compute spawnee clock phases from spawner clock phases in async clocked(clocks)
         // and register spawnee on these on clocks
         static def make(clocks:Rail[Clock]) {
             val clockPhases = new ClockPhases();
-            for(var i:Long = 0; i < clocks.size; i++) 
+            for(var i:Int = 0; i < clocks.size; i++) 
                 clockPhases.put(clocks(i), clocks(i).register());
             return clockPhases;
         }
@@ -54,12 +48,15 @@ class Activity {
         }
 
         // HashMap implements CustomSerialization, so we must as well
-        public def serialize(s:Serializer) {
-            super.serialize(s);
+        public def serialize():SerialData {
+	    // minor optimization instead of doing:
+            //    new SerialData(null, super.serialize())
+            // just return super.serialize() directly
+            return super.serialize();
         }
         def this() { super(); }
-        def this(ds:Deserializer) { 
-            super(ds); 
+        def this(a:SerialData) { 
+            super(a);  // see optimization in serialize();
         }
     }
 
@@ -81,36 +78,25 @@ class Activity {
      */
     var clockPhases:ClockPhases;
 
-    /** Set to true unless this activity represents the body of an 'at' statement.
-     */
-    val shouldNotifyTermination:Boolean;
-
     /**
      * Depth of enclosong atomic blocks
      */
-    private var atomicDepth:int = 0n;
+    private var atomicDepth:int = 0;
 
     /**
      * Create activity.
      */
-    def this(body:()=>void, srcPlace:Place, finishState:FinishState) {
-        this(body, srcPlace, finishState, true);
-    }
-    def this(body:()=>void, srcPlace:Place, finishState:FinishState, nac:Boolean) {
-        this(body, srcPlace, finishState, nac, true);
-    }
-    def this(body:()=>void, srcPlace:Place, finishState:FinishState, nac:Boolean, nt:Boolean) {
+    def this(body:()=>void, finishState:FinishState) {
         this.finishState = finishState;
-        if (nac) finishState.notifyActivityCreation(srcPlace);
-        this.shouldNotifyTermination = nt;
+        finishState.notifyActivityCreation();
         this.body = body;
     }
 
     /**
      * Create clocked activity.
      */
-    def this(body:()=>void, srcPlace:Place, finishState:FinishState, clockPhases:ClockPhases) {
-        this(body, srcPlace, finishState);
+    def this(body:()=>void, finishState:FinishState, clockPhases:ClockPhases) {
+        this(body, finishState);
         this.clockPhases = clockPhases;
     }
 
@@ -164,8 +150,8 @@ class Activity {
             finishState.pushException(t);
         }
         if (null != clockPhases) clockPhases.drop();
-        if (shouldNotifyTermination) finishState.notifyActivityTermination();
-        if (DEALLOC_BODY) Unsafe.dealloc(body);
+        finishState.notifyActivityTermination();
+        Runtime.dealloc(body);
     }
 }
 

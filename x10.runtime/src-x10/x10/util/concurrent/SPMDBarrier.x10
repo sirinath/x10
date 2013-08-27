@@ -17,7 +17,7 @@
  *     static tasks = 8;
  *     static iterations = 100000;
  *
- *     public static def main(Rail[String]) {
+ *     public static def main(Array[String]) {
  *         val time = System.nanoTime();
  *         finish {
  *             val b = new x10.util.concurrent.SPMDBarrier(tasks);
@@ -40,7 +40,7 @@ package x10.util.concurrent;
 public final class SPMDBarrier(count:Int) {
     private val alive:AtomicInteger = new AtomicInteger(count);
     private val workers = new Rail[Runtime.Worker](count);
-    private var index:Int = 0n;
+    private var index:Int = 0;
 
     /* constructs an SPMDBarrier for the given task count */
     /* does not implicitly register caller task */
@@ -56,10 +56,10 @@ public final class SPMDBarrier(count:Int) {
 
     /* blocks until all tasks have called advance */
     public def advance() {
-        if (alive.decrementAndGet() == 0n) {
+        if (alive.decrementAndGet() == 0) {
             alive.set(count);
             val me = Runtime.worker();
-            for (var i:Int=0n; i<count; ++i)
+            for (var i:Int=0; i<count; ++i)
                 if (workers(i) != me) workers(i).unpark();
         } else {
             Runtime.Worker.park();

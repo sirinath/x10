@@ -19,9 +19,9 @@ import harness.x10Test;
 
 public class FinishCrossMethodMultiAsync extends x10Test{
     
-    var value: long = 0;
+    var value: int = 0;
     
-    public def update(level:long){
+    public def update(level:int){
         if(level > 0){
             async update(level - 1);
             update(level - 1);
@@ -39,7 +39,7 @@ public class FinishCrossMethodMultiAsync extends x10Test{
         return value == 16;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new FinishCrossMethodMultiAsync().execute();
     }
     

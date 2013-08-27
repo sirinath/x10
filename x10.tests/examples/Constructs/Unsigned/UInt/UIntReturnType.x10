@@ -35,7 +35,7 @@ public class UIntReturnType extends x10Test {
 	}
 
 	def bbb():UInt {
-	    return aaa()+0xffffffffun;
+	    return aaa()+0xffffffffu;
 	}
     }
 
@@ -45,17 +45,17 @@ public class UIntReturnType extends x10Test {
 	}
 
 	def bbb():Int {
-	    return aaa()-1n;
+	    return aaa()-1;
 	}
     }
 
     public def run() : Boolean {
-	if (new AUInt(1un).bbb() != 0un) return false;
-	if (new AInt(1n).bbb() != 0n) return false;
+	if (new AUInt(1u).bbb() != 0u) return false;
+	if (new AInt(1).bbb() != 0) return false;
 	return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String]) {
         new UIntReturnType().execute();
     }
 }

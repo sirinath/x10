@@ -20,20 +20,20 @@ import harness.x10Test;
  * @author bdlucas 8/2008
  */
 
-public class ClosureCall2 extends x10Test {
+public class ClosureCall2 extends ClosureTest {
 
-    def f(x:long) = "method";
+    def f(x:int) = "method";
     val f = (x:String) => "closure";
 
     public def run(): boolean = {
 
-        chk(f(1).equals("method"), "f(1)");
-        chk(f("1").equals("closure"), "f(\"1\")");
+        check("f(1)", f(1), "method");
+        check("f(\"1\")", f("1"), "closure");
 
-        return true;
+        return result;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new ClosureCall2().execute();
     }
 }

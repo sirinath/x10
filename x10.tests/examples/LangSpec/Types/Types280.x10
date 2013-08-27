@@ -21,15 +21,15 @@ import harness.x10Test;
 
 public class Types280 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Types280().execute();
     }
 
 
-// file Types line 1048
+// file Types line 1045
  static  class TypeDefNonGenerative {
 def someTypeDefs () {
-  type A = Long;
+  type A = Int;
   type B = String;
   type C = String;
   a: A = 3;

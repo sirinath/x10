@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * This must compile and run fine. Checks that the initializer may not specify
@@ -22,16 +21,16 @@ import x10.regionarray.*;
 public class DimCheckN3 extends x10Test {
 
     def m(r:Region(2)): void = {
-        val a1 = new Array[int](r, (p[i,j]: Point): int => { return i as int; });
+        val a1 = new Array[int](r, (p[i,j]: Point): int => { return i; });
     }
 
     public def run(): boolean = {
-        val r  = Region.make(0..2, 0..3);
+        val r  = (0..2)*(0..3);
         m(r);
         return true;
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DimCheckN3().execute();
     }
 }

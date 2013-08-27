@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class ObjectInitialization50 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization50().execute();
     }
 
 
-// file Classes line 3041
+// file Classes line 3040
  static class Score {
-  public var currently : Long;
+  public var currently : Int;
 }
 
  static class Hook {

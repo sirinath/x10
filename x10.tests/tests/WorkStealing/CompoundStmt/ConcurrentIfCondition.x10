@@ -38,7 +38,7 @@ public class ConcurrentIfCondition {
         return r;
     }
 
-    public static def main(args:Rail[String]) {
+    public static def main(args:Array[String](1)) {
         val r = new ConcurrentIfCondition().run();
         if(r){
              x10.io.Console.OUT.println("++++++Test succeeded.");

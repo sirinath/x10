@@ -9,6 +9,7 @@
  *  (C) Copyright IBM Corporation 2006-2011.
  */
 
+import x10.io.Console;
 import x10.util.Timer;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
@@ -29,7 +30,7 @@ import x10.matrix.dist.summa.SummaDense;
    <p>
  */
 public class DistDenseBench {
-	public static def main(args:Rail[String]) {
+	public static def main(args:Array[String](1)) {
 		val M = args.size > 0 ?Int.parse(args(0)):50;
 		val K = args.size > 1 ?Int.parse(args(1)):50;
 		val N = args.size > 2 ?Int.parse(args(2)):50;
@@ -45,7 +46,7 @@ class RunDistDenseBench{
 
 	public val iter:Int;
 	public val testps:Int, lastps:Int;
-	public val M:Long, N:Long, K:Long;
+	public val M:Int, N:Int, K:Int;
 	public val nplace:Int = Place.MAX_PLACES;
 
 	public val aPart:Grid, bPart:Grid, btPart:Grid, cPart:Grid;
@@ -56,7 +57,7 @@ class RunDistDenseBench{
 	val C:DistDenseMatrix(cPart.M, cPart.N);
 	
 	
-	public def this(m:Long, k:Int, n:Long, it:Int, p:Int) {
+	public def this(m:Int, k:Int, n:Int, it:Int, p:Int) {
 		M = m; N = n; K=k; iter=it; 
 		aPart  = Grid.make(M, K);
 		bPart  = Grid.make(K, N);

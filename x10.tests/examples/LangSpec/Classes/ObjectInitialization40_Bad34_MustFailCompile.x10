@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class ObjectInitialization40_Bad34_MustFailCompile extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new ObjectInitialization40_Bad34_MustFailCompile().execute();
     }
 
 
-// file Classes line 3016
+// file Classes line 3015
  static class C {
-  val a:Long;
+  val a:Int;
   def this() {
     this.a = 1;
     //ERROR: val bad1 = () => this;

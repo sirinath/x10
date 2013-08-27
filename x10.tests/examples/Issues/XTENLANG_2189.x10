@@ -16,30 +16,30 @@ import harness.x10Test;
  * across at boundaries
  */
 class XTENLANG_2189 extends x10Test {
-    val a:int = 1n;
-    transient val b:int = 2n;
+    val a:int = 1;
+    transient val b:int = 2;
 
     public def run(): boolean {
-      chk(a == 1n);
-      chk(b == 2n);
+      chk(a == 1);
+      chk(b == 2);
       at (here.next()) {
-          chk(a == 1n);
-          chk(b == 0n);
+          chk(a == 1);
+          chk(b == 0);
       }
       return runS(this);
     }
 
     static def runS(t:XTENLANG_2189): boolean {
-      chk(t.a == 1n);
-      chk(t.b == 2n);
+      chk(t.a == 1);
+      chk(t.b == 2);
       at (here.next()) {
-          chk(t.a == 1n);
-          chk(t.b == 0n);
+          chk(t.a == 1);
+          chk(t.b == 0);
       }
       return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_2189().execute();
     }
 }

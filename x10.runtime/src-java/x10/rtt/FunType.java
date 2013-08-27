@@ -17,8 +17,21 @@ public final class FunType<T> extends RuntimeType<T> {
 
     private static final long serialVersionUID = 1L;
 
-    protected FunType(Class<?> javaClass, int numParams, Type<?>[] parents) {
-        super(javaClass, numParams, parents);
+    // not used
+//    protected FunType(Class<?> javaClass) {
+//        super(javaClass);
+//    }
+//    
+//    protected FunType(Class<?> javaClass, Variance[] variances) {
+//        super(javaClass, variances);
+//    }
+//
+//    protected FunType(Class<?> javaClass, Type<?>[] parents) {
+//        super(javaClass, parents);
+//    }
+    
+    protected FunType(Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
+        super(javaClass, variances, parents);
     }
 
     private static final boolean useCache = true;
@@ -27,27 +40,27 @@ public final class FunType<T> extends RuntimeType<T> {
         if (useCache) {
             FunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                FunType<?> type0 = new FunType<T>(javaClass, 0, null);
+                FunType<?> type0 = new FunType<T>(javaClass, null, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (FunType<T>) type;
         } else {
-            return new FunType<T>(javaClass, 0, null);
+            return new FunType<T>(javaClass, null, null);
         }
     }
     
-    public static <T> FunType/*<T>*/ make(Class<?> javaClass, int numParams) {
+    public static <T> FunType/*<T>*/ make(Class<?> javaClass, Variance[] variances) {
         if (useCache) {
             FunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                FunType<?> type0 = new FunType<T>(javaClass, numParams, null);
+                FunType<?> type0 = new FunType<T>(javaClass, variances, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (FunType<T>) type;
         } else {
-            return new FunType<T>(javaClass, numParams, null);
+            return new FunType<T>(javaClass, variances, null);
         }
     }
 
@@ -55,27 +68,27 @@ public final class FunType<T> extends RuntimeType<T> {
         if (useCache) {
             FunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                FunType<?> type0 = new FunType<T>(javaClass, 0, parents);
+                FunType<?> type0 = new FunType<T>(javaClass, null, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (FunType<T>) type;
         } else {
-            return new FunType<T>(javaClass, 0, parents);
+            return new FunType<T>(javaClass, null, parents);
         }
     }
     
-    public static <T> FunType/*<T>*/ make(Class<?> javaClass, int numParams, Type<?>[] parents) {
+    public static <T> FunType/*<T>*/ make(Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
         if (useCache) {
             FunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                FunType<?> type0 = new FunType<T>(javaClass, numParams, parents);
+                FunType<?> type0 = new FunType<T>(javaClass, variances, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (FunType<T>) type;
         } else {
-            return new FunType<T>(javaClass, numParams, parents);
+            return new FunType<T>(javaClass, variances, parents);
         }
     }
 
@@ -83,11 +96,5 @@ public final class FunType<T> extends RuntimeType<T> {
     public String typeName(Object o) {
         return typeNameForFun(o);
     }
-
-	@Override
-	protected RuntimeType.Variance getVariance(int i) {
-		if (i == numParams() - 1) return RuntimeType.Variance.COVARIANT; // return type is covarient
-		return RuntimeType.Variance.CONTRAVARIANT; // parameter types are contravarient
-	}
 
 }

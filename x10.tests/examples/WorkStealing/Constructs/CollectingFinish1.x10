@@ -18,12 +18,12 @@ import harness.x10Test;
 
 class CollectingFinish1 extends x10Test {
     
-    static struct Reducer implements Reducible[Long] {
+    static struct Reducer implements Reducible[Int] {
         public def zero()=0;
-        public operator this(a:Long,b:Long)=a+b;
+        public operator this(a:Int,b:Int)=a+b;
     }
     
-    static def fib(n:Long):Long {
+    static def fib(n:Int):Int {
 
         if (n < 2) return 1;
         val x = finish(Reducer()) {
@@ -42,7 +42,7 @@ class CollectingFinish1 extends x10Test {
         return (r == 10946);
     }
     
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new CollectingFinish1().execute();
     }
     

@@ -28,21 +28,21 @@ import harness.x10Test;
 public class GuardedMethodAccess extends x10Test { 
 
    class Test(i:int, j:int) {
-		public var v: int = 0n;
+		public var v: int = 0;
 		def this(i:int, j:int):Test{self.i==i,self.j==j} = {
 			property(i,j);
 		}
-		public def  key(){i==j}=5n;
+		public def  key(){i==j}=5;
 	}
 	
 		
 	public def run(): boolean = {
-		var t: Test{i==j} = new Test(5n, 5n);
-		t.v = t.key() + 1n;
+		var t: Test{i==j} = new Test(5, 5);
+		t.v = t.key() + 1;
 	   return true;
 	}  
 	
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GuardedMethodAccess().execute();
     }
    

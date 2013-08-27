@@ -17,8 +17,21 @@ public final class VoidFunType<T> extends RuntimeType<T> {
     
     private static final long serialVersionUID = 1L;
 
-    protected VoidFunType(Class<?> javaClass, int numParams, Type<?>[] parents) {
-        super(javaClass, numParams, parents);
+    // not used
+//    protected VoidFunType(Class<?> javaClass) {
+//        super(javaClass);
+//    }
+//    
+//    protected VoidFunType(Class<?> javaClass, Variance[] variances) {
+//        super(javaClass, variances);
+//    }
+//
+//    protected VoidFunType(Class<?> javaClass, Type<?>[] parents) {
+//        super(javaClass, parents);
+//    }
+    
+    protected VoidFunType(Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
+        super(javaClass, variances, parents);
     }
 
     private static final boolean useCache = true;
@@ -27,27 +40,27 @@ public final class VoidFunType<T> extends RuntimeType<T> {
         if (useCache) {
             VoidFunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, 0, null);
+                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, null, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (VoidFunType<T>) type;
         } else {
-            return new VoidFunType<T>(javaClass, 0, null);
+            return new VoidFunType<T>(javaClass, null, null);
         }
     }
     
-    public static <T> VoidFunType/*<T>*/ make(Class<?> javaClass, int numParams) {
+    public static <T> VoidFunType/*<T>*/ make(Class<?> javaClass, Variance[] variances) {
         if (useCache) {
             VoidFunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, numParams, null);
+                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, variances, null);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (VoidFunType<T>) type;
         } else {
-            return new VoidFunType<T>(javaClass, numParams, null);
+            return new VoidFunType<T>(javaClass, variances, null);
         }
     }
 
@@ -55,27 +68,27 @@ public final class VoidFunType<T> extends RuntimeType<T> {
         if (useCache) {
             VoidFunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, 0, parents);
+                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, null, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (VoidFunType<T>) type;
         } else {
-            return new VoidFunType<T>(javaClass, 0, parents);
+            return new VoidFunType<T>(javaClass, null, parents);
         }
     }
     
-    public static <T> VoidFunType/*<T>*/ make(Class<?> javaClass, int numParams, Type<?>[] parents) {
+    public static <T> VoidFunType/*<T>*/ make(Class<?> javaClass, Variance[] variances, Type<?>[] parents) {
         if (useCache) {
             VoidFunType<?> type = typeCache.get(javaClass);
             if (type == null) {
-                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, numParams, parents);
+                VoidFunType<?> type0 = new VoidFunType<T>(javaClass, variances, parents);
                 type = typeCache.putIfAbsent(javaClass, type0);
                 if (type == null) type = type0;
             }
             return (VoidFunType<T>) type;
         } else {
-            return new VoidFunType<T>(javaClass, numParams, parents);
+            return new VoidFunType<T>(javaClass, variances, parents);
         }
     }
 
@@ -83,10 +96,5 @@ public final class VoidFunType<T> extends RuntimeType<T> {
     public String typeName(Object o) {
         return typeNameForVoidFun(o);
     }
-
-	@Override
-	protected RuntimeType.Variance getVariance(int i) {
-		return RuntimeType.Variance.CONTRAVARIANT; // parameter types are contravarient
-	}
 
 }

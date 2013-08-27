@@ -5,24 +5,32 @@
  *  (C) Copyright Australian National University 2011.
  */
 
-import x10.compiler.Ifndef;
+import x10.io.Console;
 
 import x10.matrix.Matrix;
 import x10.matrix.Vector;
 import x10.matrix.distblock.DupVector;
 
+/**
+   <p>
+
+   <p>
+ */
 public class TestDupVector{
-    public static def main(args:Rail[String]) {
-		val n = (args.size > 0) ? Long.parse(args(0)):4;
+
+    public static def main(args:Array[String](1)) {
+		val n = (args.size > 0) ? Int.parse(args(0)):4;
 		val testcase = new TestRunDV(n);
 		testcase.run();
 	}
 }
 
-class TestRunDV {
-	public val M:Long;
 
-	public def this(m:Long) {
+class TestRunDV {
+
+	public val M:Int;
+
+	public def this(m:Int) {
 		M = m;
 	}
 
@@ -30,7 +38,7 @@ class TestRunDV {
 		Console.OUT.println("Starting dup vector clone/add/sub/scaling tests on "+
 							M + "-vectors");
 		var ret:Boolean = true;
-	@Ifndef("MPI_COMMU") { // TODO Deadlocks!
+ 		// Set the matrix function
 		ret &= (testClone());
 		ret &= (testScale());
 		ret &= (testAdd());
@@ -40,7 +48,7 @@ class TestRunDV {
 		ret &= (testCellMult());
 		ret &= (testCellDiv());
 		ret &= (testReduce());
-    }
+
 		if (ret)
 			Console.OUT.println("DupVector test passed!");
 		else
@@ -108,9 +116,13 @@ class TestRunDV {
 		Console.OUT.println("Starting Duplicated Vector add-sub test");
 		val dm = DupVector.make(M).initRandom();
 		val dm1= DupVector.make(M).initRandom();
+		//sp.print("Input:");
 		val dm2= dm  + dm1;
+		//sp2.print("Add result:");
+		//
 		val dm_c  = dm2 - dm1;
 		val ret   = dm.equals(dm_c);
+		//sp_c.print("Another add result:");
 		if (ret)
 			Console.OUT.println("DupVector Add-sub test passed!");
 		else
@@ -122,8 +134,8 @@ class TestRunDV {
 		Console.OUT.println("Starting DupVector associative test");
 
 		val a = DupVector.make(M).init(1.0);
-		val b = DupVector.make(M).initRandom(1n, 10n);
-		val c = DupVector.make(M).initRandom(10n, 100n);
+		val b = DupVector.make(M).initRandom(1, 10);
+		val c = DupVector.make(M).initRandom(10, 100);
 		val c1 = a + b + c;
 		val c2 = a + (b + c);
 		val ret = c1.equals(c2);
@@ -153,8 +165,8 @@ class TestRunDV {
 	public def testCellMult():Boolean {
 		Console.OUT.println("Starting duplicated vector cellwise mult test");
 
-		val a = DupVector.make(M).initRandom(1n, 10n);
-		val b = DupVector.make(M).initRandom(10n, 100n);
+		val a = DupVector.make(M).initRandom(1, 10);
+		val b = DupVector.make(M).initRandom(10, 100);
 		val c = (a + b) * a;
 		val d = a * a + b * a;
 		val ret = c.equals(d);
@@ -170,8 +182,11 @@ class TestRunDV {
 
 		val a = DupVector.make(M).init(1);
 		val b = DupVector.make(M).init(1);
+		//a.print();
 		val c = (a + b) * a;
+		//c.print();
 		val d =  c / (a + b);
+		//d.print();
 		val ret = d.equals(a);
 		if (ret)
 			Console.OUT.println("DupVector cellwise mult-div passed!");

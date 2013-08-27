@@ -11,18 +11,14 @@
 
 package x10.visit;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import polyglot.ast.Block;
 import polyglot.ast.ClassDecl;
@@ -123,10 +119,7 @@ public class X10Translator extends Translator {
         return tr;
     }
 
-    // XTENLANG-3170: X10DT requires Java file to make sure there is no compiler bug.
-    private static final boolean alwaysGenerateJavaFile = true;
     private static boolean generateJavaFile(TopLevelDecl decl) {
-    	if (alwaysGenerateJavaFile) return true;
         if (decl instanceof TypeDecl) return false;  // public type Int(b:Int) = Int{self==b};
 //        assert decl instanceof ClassDecl;
         if (!(decl instanceof ClassDecl)) return true; // for safety
@@ -134,7 +127,6 @@ public class X10Translator extends Translator {
         return false;
     }
     private static boolean generateJavaFile(SourceFile sfn) {
-    	if (alwaysGenerateJavaFile) return true;
         for (TopLevelDecl decl : sfn.decls()) {
             if (generateJavaFile(decl)) return true;
         }
@@ -149,6 +141,9 @@ public class X10Translator extends Translator {
         int outputWidth = job.compiler().outputWidth();
         CodeWriter w= null;
 
+        // if all toplevel decls are @NativeRep'ed, stop generating Java file
+        if (!generateJavaFile(sfn)) return true;
+
         try {
             QName pkg = null;
 
@@ -156,9 +151,6 @@ public class X10Translator extends Translator {
                 Package p = sfn.package_().package_().get();
                 pkg = p.fullName();
             }
-
-            // if all toplevel decls are @NativeRep'ed, stop generating Java file
-            if (generateJavaFile(sfn)) {
 
             // Use the source name to derive a default output file name.
             File of = tf.outputFile(pkg, sfn.source());
@@ -179,8 +171,6 @@ public class X10Translator extends Translator {
             }
 
             w.flush();
-
-            }
 
             X10CompilerOptions options = (X10CompilerOptions) ts.extensionInfo().getOptions();
             if (options.post_compiler != null && !options.output_stdout && options.executable_path != null) {
@@ -238,15 +228,6 @@ public class X10Translator extends Translator {
             	javacCmd.add(st.nextToken());
             }
             
-            int javacOptionsStart = javacCmd.size();
-            javacCmd.add("-source");
-            javacCmd.add("1.6");
-            
-            javacCmd.add("-target");
-            javacCmd.add("1.6");
-            
-            javacCmd.add("-nowarn");
-            
             javacCmd.add("-classpath");
             javacCmd.add(options.constructPostCompilerClasspath());
             
@@ -259,7 +240,6 @@ public class X10Translator extends Translator {
                 javacCmd.add("-g");                
             }
 
-            int javacSourcesStart = javacCmd.size();
             for (Collection<String> files : compiler.outputFiles().values()) {
                 javacCmd.addAll(files);
             }
@@ -273,9 +253,10 @@ public class X10Translator extends Translator {
             }
 
             try {
-            	// invoke ecj as an external process
                 Process proc = runtime.exec(javacCmd.toArray(strarray));
+
                 InputStreamReader err = new InputStreamReader(proc.getErrorStream());
+
                 try {
                     char[] c = new char[72];
                     int len;
@@ -283,6 +264,7 @@ public class X10Translator extends Translator {
                     while((len = err.read(c)) > 0) {
                         sb.append(String.valueOf(c, 0, len));
                     }
+
                     if (sb.length() != 0) {
                         eq.enqueue(ErrorInfo.POST_COMPILER_ERROR, sb.toString());
                     }
@@ -290,27 +272,8 @@ public class X10Translator extends Translator {
                 finally {
                     err.close();
                 }
-                int procExitValue = proc.waitFor();
 
-
-                // invoke javac with Java Compiler API
-//            	javax.tools.JavaCompiler javac = javax.tools.ToolProvider.getSystemJavaCompiler();
-//            	javax.tools.DiagnosticCollector<javax.tools.JavaFileObject> diagCollector = new javax.tools.DiagnosticCollector<javax.tools.JavaFileObject>();
-//            	javax.tools.StandardJavaFileManager fileManager = javac.getStandardFileManager(null, null, null);
-//            	javax.tools.JavaCompiler.CompilationTask task = javac.getTask(null, null,
-//            			diagCollector,
-//            			javacCmd.subList(javacOptionsStart, javacSourcesStart),
-//            			null,
-//            			fileManager.getJavaFileObjectsFromStrings(javacCmd.subList(javacSourcesStart, javacCmd.size()))
-//            			);
-//            	int procExitValue = task.call() ? 0 : 1;
-//            	for (javax.tools.Diagnostic<? extends javax.tools.JavaFileObject> diag : diagCollector.getDiagnostics()) {
-//            		String message = diag.toString();
-//            		int type = diag.getKind() == javax.tools.Diagnostic.Kind.ERROR ? ErrorInfo.POST_COMPILER_ERROR : ErrorInfo.WARNING;
-//            		eq.enqueue(type, message);
-//            	}
-//            	fileManager.close();
-
+                proc.waitFor();
 
                 if (!options.keep_output_files) {
                 	java.util.ArrayList<String> rmCmd = new java.util.ArrayList<String>();
@@ -321,9 +284,10 @@ public class X10Translator extends Translator {
                     runtime.exec(rmCmd.toArray(strarray));
                 }
 
-                if (procExitValue > 0) {
-                	eq.enqueue(ErrorInfo.POST_COMPILER_ERROR, "Non-zero return code: " + procExitValue);
-                	return false;
+                if (proc.exitValue() > 0) {
+                    eq.enqueue(ErrorInfo.POST_COMPILER_ERROR,
+                            "Non-zero return code: " + proc.exitValue());
+                    return false;
                 }
 
                 if (options.executable_path != null) {  // -o executable_path
@@ -356,11 +320,10 @@ public class X10Translator extends Translator {
                         out.println("Main-Class: " + main_class + "$" + X10PrettyPrinterVisitor.MAIN_CLASS);
                         // N.B. Following jar files should be same as the ones used in X10CCompilerOptions.setDefaultValues()
                         String x10_jar = "x10.jar";
-                        String math_jar = System.getProperty("x10c.math.jar", "commons-math3-3.2.jar");
-                        String log_jar = System.getProperty("x10c.log.jar",  "commons-logging-1.1.3.jar");
+                        String math_jar = System.getProperty("x10c.math.jar", "commons-math3-3.0.jar");
                         // XTENLANG-2722
                         // need a new preloading mechanism which does not use classloader to determine system classes
-                        out.println("Class-Path: " + x10_jar + " " + math_jar + " " + log_jar);
+                        out.println("Class-Path: " + x10_jar + " " + math_jar);
                     }
                     out.println("Created-By: " + compiler.sourceExtension().compilerName() + " version " + compiler.sourceExtension().version());
                     out.close();
@@ -370,8 +333,6 @@ public class X10Translator extends Translator {
                     File directoryHoldingJarFile = jarFile.getParentFile();
                     if (directoryHoldingJarFile != null) {
                     	directoryHoldingJarFile.mkdirs();
-                    } else {
-                    	directoryHoldingJarFile = new File(".");
                     }
                     
                     // execute "jar cmf ${manifest_file} ${executable_path} -C ${output_directory} ."
@@ -406,91 +367,14 @@ public class X10Translator extends Translator {
                         return false;
                     }
 
-                    // pre XTENLANG-3199
-//                    if (options.buildX10Lib != null) {  // ignore lib from -buildx10lib <lib>
-//                    	// generate property file for use as "x10c -x10lib foo.properties ..."
-//                    	String jarFileName = jarFile.getName(); // foo.jar
-//                    	String propFileName = jarFileName.substring(0, jarFileName.length() - ".jar".length()) + ".properties"; // foo.properties
-//                    	File propFile = new File(directoryHoldingJarFile, propFileName);
-//                    	PrintWriter propFileWriter = new PrintWriter(new FileWriter(propFile));
-//                    	propFileWriter.println("X10LIB_TIMESTAMP=" + String.format("%tc", Calendar.getInstance()));
-//                    	propFileWriter.println("X10LIB_SRC_JAR=" + jarFileName);
-//                    	propFileWriter.close();
-//                    }
-                    // post XTENLANG-3199
-                    if (options.buildX10Lib != null) {	// "-buildx10lib <dir> -o foo.jar" generates <dir>/foo.properties
-                    	File propDir = new File(options.buildX10Lib);
-//                    	System.out.println("buildx10lib = " + options.buildX10Lib);
-                    	
-                        // ensure propDir exists and is a directory
-                    	if (propDir.exists()) {
-                    		if (!propDir.isDirectory()) {
-                                eq.enqueue(ErrorInfo.SEMANTIC_ERROR, "-buildx10lib <dir> only accepts directory name. property file was not generated.");
-                                return false;
-                    		}
-                    	} else {
-                    		propDir.mkdirs();
-                    	}
-                    	
-                    	String jarDirPath; // either absolute or relative
-                    	if (directoryHoldingJarFile.isAbsolute()) {
-                    		// When jar file is specified with absolute path, refer it with absolute path.
-                    		jarDirPath = directoryHoldingJarFile.getCanonicalPath();
-                    		if (!jarDirPath.endsWith("/")) jarDirPath += "/";
-                    	} else {
-                    		// Otherwise, refer the jar file with relative path from prop file.
-                    		File f;
-                    		
-                    		List<File> listPropDir = new ArrayList<File>();
-                    		f = propDir.getCanonicalFile(); // "/usr/local/bin"
-                    		do {
-                    			listPropDir.add(f);
-                    			f = f.getParentFile();
-                    		} while (f != null);
-                    		Collections.reverse(listPropDir); // [ "/", "/usr", "/usr/local", "/usr/local/bin" ]
-//                    		System.out.println("listPropDir = " + listPropDir);
-                    		
-                    		List<File> listJarDir = new ArrayList<File>();
-                    		File jarDir = directoryHoldingJarFile;
-                    		f = jarDir.getCanonicalFile(); // "/usr/bin"
-                    		do {
-                    			listJarDir.add(f);
-                    			f = f.getParentFile();                        	
-                    		} while (f != null);
-                    		Collections.reverse(listJarDir); // [ "/", "/usr", "/usr/bin" ]
-//                    		System.out.println("listJarDir = " + listJarDir);
-                    		
-                    		// compute relative path from propDir /usr/local/bin to jarDir /usr/bin
-                    		
-                    		// first compute the same header length
-                    		int i = 0;
-                    		while (i < listPropDir.size() && i < listJarDir.size() && listPropDir.get(i).equals(listJarDir.get(i))) {
-                    			++i;
-                    		}
-                    		// i == 2
-                    		
-                    		// compute relative path from propDir to list{Prop,Jar}Dir(i)
-                    		StringBuilder sb = new StringBuilder();
-                    		for (int j = i; j < listPropDir.size(); ++j) {
-                    			sb.append(".." + "/");
-                    		}
-                    		
-                    		// compute relative path from list{Prop,Jar}Dir(i) to jarDir
-                    		for (int j = i; j < listJarDir.size(); ++j) {
-                    			sb.append(listJarDir.get(j).getName() + "/");
-                    		}
-                    		
-                    		jarDirPath = sb.toString();
-                    	}
-//                    	System.out.println("jarDirPath = " + jarDirPath);
-                    	
+                    if (options.buildX10Lib != null) {  // ignore lib from -buildx10lib <lib>
                     	// generate property file for use as "x10c -x10lib foo.properties ..."
                     	String jarFileName = jarFile.getName(); // foo.jar
                     	String propFileName = jarFileName.substring(0, jarFileName.length() - ".jar".length()) + ".properties"; // foo.properties
-                    	File propFile = new File(propDir, propFileName);
+                    	File propFile = new File(directoryHoldingJarFile, propFileName);
                     	PrintWriter propFileWriter = new PrintWriter(new FileWriter(propFile));
                     	propFileWriter.println("X10LIB_TIMESTAMP=" + String.format("%tc", Calendar.getInstance()));
-                    	propFileWriter.println("X10LIB_SRC_JAR=" + jarDirPath + jarFileName);
+                    	propFileWriter.println("X10LIB_SRC_JAR=" + jarFileName);
                     	propFileWriter.close();
                     }
                 }
@@ -505,9 +389,7 @@ public class X10Translator extends Translator {
                 }
             }
             catch(Exception e) {
-            	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            	e.printStackTrace(new PrintWriter(baos, true));
-                eq.enqueue(ErrorInfo.POST_COMPILER_ERROR, baos.toString());
+                eq.enqueue(ErrorInfo.POST_COMPILER_ERROR, e.getMessage());
                 return false;
             }
         }

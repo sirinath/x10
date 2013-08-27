@@ -18,7 +18,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Building arrays distributed accross places using the encapsulation approach 
@@ -37,8 +36,8 @@ public class EncapsulatedArray2D extends x10Test {
     
     public def run(): boolean = {
 
-        val size: int = 5n;
-        val R = Region.make(0..(size-1), 0..(size-1));
+        val size: int = 5;
+        val R = 0..(size-1)*0..(size-1);
         val D  = Dist.makeBlock(R, 0); 
         
         val A = DistArray.make[Wrapper](D, (Point) => Wrapper(DistArray.make[double](R->here, (Point)=>0.0D)));
@@ -54,7 +53,7 @@ public class EncapsulatedArray2D extends x10Test {
         return true;
     }
     
-    public static def main(Rail[String])  {
+    public static def main(Array[String](1))  {
         new EncapsulatedArray2D().execute();
     }
 

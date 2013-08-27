@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.regionarray.*;
 
 /**
  * Minimal test for dists.
@@ -19,15 +18,15 @@ import x10.regionarray.*;
 public class DistributionTest extends x10Test {
 
     public def run(): boolean = {
-        val r = Region.make(0,100); //(low, high)
+        val r = 0..100; //(low, high)
         val R = r*r;
         val d  = R->here;
         return ((d.rank == 2) &&
                 (R.rank == 2) &&
-                (R.max(1) - R.min(1) + 1 == 101L));
+                (R.max(1) - R.min(1) + 1 == 101));
     }
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new DistributionTest().execute();
     }
 }

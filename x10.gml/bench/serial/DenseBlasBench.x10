@@ -9,6 +9,7 @@
  *  (C) Copyright IBM Corporation 2006-2011.
  */
 
+import x10.io.Console;
 import x10.util.Timer;
 
 import x10.matrix.Matrix;
@@ -25,7 +26,7 @@ import x10.matrix.blas.DenseMatrixBLAS;
    <p>
  */
 public class DenseBlasBench {
-	public static def main(args:Rail[String]) {
+	public static def main(args:Array[String](1)) {
 		val M = args.size > 0 ?Int.parse(args(0)):50;
 		val K = args.size > 1 ?Int.parse(args(1)):M;
 		val N = args.size > 2 ?Int.parse(args(2)):M;
@@ -39,16 +40,16 @@ public class DenseBlasBench {
 class RunBlasComp{
 
 	public val iter:Int;
-	public val M:Long;
-	public val N:Long;
-	public val K:Long;
+	public val M:Int;
+	public val N:Int;
+	public val K:Int;
 
 	val A:DenseMatrix(M, K);
 	val B:DenseMatrix(K, N);
 	val tB:DenseMatrix(N, K);
 	val C:DenseMatrix(M, N);
 	
-	public def this(m:Long, k:Int, n:Long, it:Int) {
+	public def this(m:Int, k:Int, n:Int, it:Int) {
 		M = m; N = n; K=k; iter=it;
 		
 		A  = DenseMatrix.make(M, K);

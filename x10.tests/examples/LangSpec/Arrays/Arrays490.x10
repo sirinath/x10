@@ -17,20 +17,20 @@
 
 import harness.x10Test;
 
- import x10.regionarray.*;
+
 
 public class Arrays490 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Arrays490().execute();
     }
 
 
-// file Arrays line 776
+// file Arrays line 780
  static  class Example{
-static def add(da:DistArray[Long], db: DistArray[Long])
+static def add(da:DistArray[Int], db: DistArray[Int])
     {da.dist==db.dist}
-    = da.map(db, (a:Long,b:Long)=>a+b);
+    = da.map(db, (a:Int,b:Int)=>a+b);
 }
 
  static class Hook {

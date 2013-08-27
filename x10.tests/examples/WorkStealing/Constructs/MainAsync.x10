@@ -34,7 +34,7 @@ public class MainAsync extends x10Test{
         return b;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new MainAsync().execute();
     }
     

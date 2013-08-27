@@ -21,14 +21,14 @@ import harness.x10Test;
 
 public class Clocks90 extends x10Test {
    public def run() : boolean = (new Hook()).run();
-   public static def main(args:Rail[String]):void {
+   public static def main(var args: Array[String](1)): void = {
         new Clocks90().execute();
     }
 
 
 // file Clocks line 391
  static class Example{
-static def phase(String, Long) {}
+static def phase(String, Int) {}
 def example() {
 clocked finish {
   clocked async {

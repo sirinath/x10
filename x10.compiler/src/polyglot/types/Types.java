@@ -328,8 +328,8 @@ public class Types {
 		if (t instanceof X10ClassType) {
 			X10ClassType ct = (X10ClassType) t;
 			TypeSystem ts = (TypeSystem) t.typeSystem();
-			ClassType a = (ClassType) ts.RegionArray();
-			ClassType da = (ClassType) ts.RegionArray();
+			ClassType a = (ClassType) ts.Array();
+			ClassType da = (ClassType) ts.Array();
 			if (ct.def() == a.def() || ct.def() == da.def())
 				return ct.typeArguments().get(0);
 			else
@@ -398,7 +398,7 @@ public class Types {
 	public static Type arrayElementType(Type t) {
 		t = baseType(t);
 		TypeSystem xt = (TypeSystem) t.typeSystem();
-		if (xt.isX10RegionArray(t) || xt.isX10RegionDistArray(t)) {
+		if (xt.isX10Array(t) || xt.isX10DistArray(t)) {
 			if (t instanceof X10ParsedClassType) {
 				Type result = ((X10ParsedClassType) t).typeArguments().get(0);
 				return result;
@@ -619,6 +619,7 @@ public class Types {
 	        // So, type bounds (e.g., T<:Int) do not help, because  Int{self!=0}<:Int
 	        // Similarly, Int<:T doesn't help, because  Int<:Any{self!=null}
 	        // However, T==Int does help, and so does an explicit T hasZero
+	    	// isref implies haszero which is good too
 	    	// [DC] shouldn't we be using some kind of entailment check here?
 	        TypeConstraint typeConst = xc.currentTypeConstraint();
 	        List<SubtypeConstraint> env =  typeConst.terms();
@@ -874,30 +875,6 @@ public class Types {
 		}
 	}
 
-    /**
-     * Return the type Rail[type]{self.size==size}.
-     * @param type
-     * @param pos
-     * @return
-     */
-    public static Type makeRailOf(Type type, long size, Position pos) {
-        TypeSystem ts = type.typeSystem();
-        X10ClassType t = ts.Rail(type);
-        CConstraint c = Types.xclause(t);
-        FieldInstance sizeField = t.toClass().fieldNamed(Name.make("size"));
-        if (sizeField == null)
-            throw new InternalCompilerError("Could not find size field of " + t, pos);
-        try {
-            XTerm selfSize = ts.xtypeTranslator().translate(c.self(), sizeField);
-            XLit sizeLiteral = ConstraintManager.getConstraintSystem().makeLit(size, ts.Long());
-            c.addBinding(selfSize, sizeLiteral);
-            Type result = Types.xclause(t, c);
-            return result;
-        } catch (InternalCompilerError z) {
-            throw new InternalCompilerError("Could not create Rail[T]{self.size==size}");
-        }
-    }
-
 	/**
 	 * Return the type Array[type]{self.rail==true,self.size==size}.
 	 * @param type
@@ -931,7 +908,7 @@ public class Types {
 	 */
 	public static Type makeArrayRailOf(Type type, Position pos) {
 	    TypeSystem ts = type.typeSystem();
-	    X10ClassType t = ts.RegionArray(type);
+	    X10ClassType t = ts.Array(type);
 	    CConstraint c = ConstraintManager.getConstraintSystem().makeCConstraint();
 	    FieldInstance regionField = t.fieldNamed(Name.make("region"));
 	    if (regionField == null)
@@ -956,7 +933,7 @@ public class Types {
 	    XTerm selfZeroBased = xt.translate(self, zeroBasedField);
 	    XTerm selfRail = xt.translate(self, railField);
 
-	    XLit rankLiteral = ConstraintManager.getConstraintSystem().makeLit(1L, ts.Long());
+	    XLit rankLiteral = ConstraintManager.getConstraintSystem().makeLit(1, ts.Int());
 	    c.addBinding(selfRank, rankLiteral);
 	    c.addBinding(selfRect, ConstraintManager.getConstraintSystem().xtrue());
 	    c.addBinding(selfZeroBased, ConstraintManager.getConstraintSystem().xtrue());
@@ -1186,10 +1163,10 @@ public class Types {
 	    return Collections.<FieldInstance>emptyList();
 	}
 
-	public static boolean isX10RegionArray(Type t) {
+	public static boolean isX10Array(Type t) {
 	    TypeSystem ts = (TypeSystem) t.typeSystem();
 	    Type tt = baseType(t);
-	    Type at = baseType(ts.RegionArray());
+	    Type at = baseType(ts.Array());
 	    if (tt instanceof ClassType && at instanceof ClassType) {
 	        ClassDef tdef = ((ClassType) tt).def();
 	        ClassDef adef = ((ClassType) at).def();
@@ -1198,17 +1175,17 @@ public class Types {
 	    return false;
 	}
 
-    public static boolean isX10Rail(Type t) {
-        TypeSystem ts = (TypeSystem) t.typeSystem();
-        Type tt = baseType(t);
-        Type at = baseType(ts.Rail());
-        if (tt instanceof ClassType && at instanceof ClassType) {
-            ClassDef tdef = ((ClassType) tt).def();
-            ClassDef adef = ((ClassType) at).def();
-            return ts.descendsFrom(tdef, adef);
-        }
-        return false;
-    }
+	public static boolean isX10DistArray(Type t) {
+	    TypeSystem ts = (TypeSystem) t.typeSystem();
+	    Type tt = baseType(t);
+	    Type at = baseType(ts.DistArray());
+	    if (tt instanceof ClassType && at instanceof ClassType) {
+	        ClassDef tdef = ((ClassType) tt).def();
+	        ClassDef adef = ((ClassType) at).def();
+	        return ts.descendsFrom(tdef, adef);
+	    }
+	    return false;
+	}
 
 	public static XVar self(Type t) {
 	    CConstraint c = realX(t);
@@ -1277,16 +1254,7 @@ public class Types {
 		}
 		TypeSystem ts = t.typeSystem();
 		if (ts.isParameterType(t)) {			
-			TypeConstraint tc = cxt.currentTypeConstraint();
-			boolean haszero = false;
-			boolean isref = false;
-			for (SubtypeConstraint term : tc.terms()) {
-				if (term.subtype().typeEquals(t, cxt)) {
-					if (term.isHaszero()) haszero = true;
-					if (term.isIsRef()) isref = true;
-				}
-			}
-			return isref && haszero;
+			return false; // a parameter type might be instantiated with a struct that doesn't permit null.
 		}
 		return true;
 	}
@@ -1874,7 +1842,7 @@ public class Types {
                         assert false;
                     }
                     res.add(Types.xclause(arg, xclause));
-                } else if (ts.typeIsJLIterable(classType)) {
+                } else if (ts.typeEquals(classType, ts.JLIterable(), context)) {
                     Type arg = ts.Any();
                     CConstraint xclause = Types.xclause(t);
 			        final XVar tt = ConstraintManager.getConstraintSystem().makeEQV();

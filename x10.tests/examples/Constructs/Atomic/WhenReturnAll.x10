@@ -19,8 +19,8 @@ import harness.x10Test;
 public class WhenReturnAll extends x10Test {
 
 	def a():boolean = false;
-	def test(): long = {
-		var ret: long = 0;
+	def test(): int = {
+		var ret: int = 0;
 		when (X.t()) {
 			if (a()) {
 			  return 1;
@@ -31,11 +31,11 @@ public class WhenReturnAll extends x10Test {
 	}
 
 	public def run(): boolean = {
-		var x: long = test();
+		var x: int = test();
 		return true;
 	}
 
-	public static def main(var args: Rail[String]): void = {
+	public static def main(var args: Array[String](1)): void = {
 		new WhenReturnAll().execute();
 	}
 

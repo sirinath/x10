@@ -22,13 +22,13 @@ class XTENLANG_192 extends x10Test {
         def this(x:int):C[T]{self.x==x} = property(x);
     }
     
-    val c: C[int] = C.make[int](0n);
+    val c: C[int] = C.make[int](0);
 
     public def run(): boolean {
         return true;
     }
 
-    public static def main(Rail[String]) {
+    public static def main(Array[String](1)) {
         new XTENLANG_192().execute();
     }
 }

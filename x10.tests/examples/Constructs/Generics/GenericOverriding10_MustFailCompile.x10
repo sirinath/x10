@@ -25,19 +25,19 @@ import harness.x10Test;
 public class GenericOverriding10_MustFailCompile extends GenericTest {
 
     static class A[T] {
-        def m[U](T) :long{} = 0;
+        def m[U](T) :Int{} = 0;
     }
 
     static class B[T] extends A[T] {
-        def m[U](T) {T<:U} :long{}  = 1; // ERR (type constraint in a guard not entailed)
+        def m[U](T) {T<:U} :Int{}  = 1; // ERR (type constraint in a guard not entailed)
     }
 
-    val a = new A[long]();
-    val b = new B[long]();
+    val a = new A[int]();
+    val b = new B[int]();
 
     public def run() = true;
 
-    public static def main(var args: Rail[String]): void = {
+    public static def main(var args: Array[String](1)): void = {
         new GenericOverriding10_MustFailCompile().execute();
     }
 }

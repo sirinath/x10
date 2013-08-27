@@ -23,7 +23,12 @@ public struct IntRange(
                /**
                 * The maximum value included in the range
                 */
-               max:Int
+               max:Int,
+               
+               /**
+                * Is the range zero-based?
+                */
+               zeroBased: boolean
 ) implements Iterable[Int] {
 
     /**
@@ -32,15 +37,33 @@ public struct IntRange(
      * @param max the maximum value of the range
      */
     public def this(min:Int, max:Int) {
-        property(min, max);
+    	val zero:Boolean = min == 0;
+        property(min, max, zero);
     }
     
     /**
-     * Convert a given LongRange to an IntRange.
-     * @param x the given LongRange
-     * @return the given LongRange converted to an IntRange.
+     * The product of two int ranges is interpreted as if the IntRanges
+     * were first converted to Region(1) and then the * operator applied.
      */
-    public static operator (x:LongRange) as IntRange = IntRange(x.min as Int, x.max as Int);
+    public operator this * (that:IntRange):Region(2){rect} {
+        return Region.makeRectangular([min, that.min], [max, that.max]);
+    }
+
+    /**
+     * Return a new IntRange of the same size of this, but
+     * with min/max shifted by i.
+     */    
+    public def translate(i:int) = new IntRange(min+i, max+i);
+
+    /**
+     * Return a new IntRange of the same size of this, but
+     * with min/max shifted by p(0).
+     */    
+    public def translate(p:Point(1)) = new IntRange(min+p(0), max+p(0));
+    
+    public operator this && (that:Region(1)): Region(1) = (this as Region(1)) && that;
+
+    public operator this -> (p:Place) = Dist.makeConstant(this as Region(1), p);
 
     public def toString():String = min+".."+max;
     
