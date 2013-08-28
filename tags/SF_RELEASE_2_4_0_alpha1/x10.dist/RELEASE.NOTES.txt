@@ -1,0 +1,57 @@
+Release 2.4.0 Alpha1
+
+This is the first alpha release of X10 2.4.0.  
+
+MAJOR CHANGES
+
+Summary
+  (1) Shift to 64 bit Rail/Array/etc.
+  (2) Default integral literal is now a long (was int)
+  (3) Numerous class library API changes in support of
+      emphasis of 64bit integers/addresses
+  (4) First release with BlueGene/Q support
+
+LIMITATIONS OF THIS RELEASE
+
+The following features described in the 2.4 language manual do not
+currently work and may be fixed in the subsequent releases:
+  - Non-static type definitions as class or interface members
+    (static type defs do work)
+
+The constraint solver used by X10 typechecker is known to be incomplete 
+for situations in which a constraint implies an infinite number of 
+distinct constraints.
+
+Additionally, the following features described in the language
+manual do not currently work with Native X10.
+  - Garbage collection on AIX
+  - Non-final generic instance methods
+  - Exception stack traces on Cygwin
+
+Although greatly improved from previous releases, the X10 runtime 
+still uses a modified "busy wait" loop in the worker threads that 
+execute asyncs. A consequence of this is that even if a Place has 
+no asyncs to execute, one worker thread in the Place will still consume
+CPU cycles busy waiting for messages to arrive from the network.  
+
+The generated C++ code requires g++ 4.2 or better to be compiled; 
+we do almost all of our testing against g++ 4.4.
+  + On AIX and Power/Linux, you may either use g++ 4.2 or better or 
+    xlC 10.1.0.4 or better. 
+  + Some versions of Xcode on MacOS default to using the Clang C++
+    front-end; Clang cannot compile the generated C++ code; you need to
+    use the g++ front-end.  To do this export CC=gcc; CXX=g++.  
+
+SUMMARY OF ISSUES RESOLVED IN THIS RELEASE
+
+Below is a summary of JIRA issues addressed for the X10 2.4.0
+
+TODO:
+
+For the details of JIRA issues fixed in this release, see
+http: TODO
+
+Please use the X10 JIRA to report bugs, after ensuring the problem is
+not already reported:
+http://jira.codehaus.org/secure/IssueNavigator.jspa?reset=true&&pid=11812&resolution=-1
+
