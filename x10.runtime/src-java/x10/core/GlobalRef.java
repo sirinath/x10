@@ -10,7 +10,10 @@
  */
 package x10.core;
 
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +32,7 @@ import x10.serialization.X10JavaSerializer;
  * [GlobalGC] Managed X10 (X10 on Java) supports distributed GC, which is mainly implemented here, in GlobalRef.java.
  *            See a paper "Distributed Garbage Collection for Managed X10" in ACM SIGPLAN 2012 X10 Workshop, June 2012.
  */
-public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerializable {
+public final class GlobalRef<T> extends x10.core.Struct implements Externalizable, X10JavaSerializable {
 	
     public static final RuntimeType<GlobalRef<?>> $RTT = x10.rtt.NamedType.<GlobalRef<?>> make(
         "x10.lang.GlobalRef",
@@ -64,13 +67,9 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
         private static final ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
         private static AtomicLong lastId = new AtomicLong(0L);
         private static AtomicLong lastMortalId = new AtomicLong(0L); // used for Mortal objects
-        // isNull support (kawatiya 2013/09/09)
-        private static final long NULL_ID_START = 8000000000000000000L;
-        private static AtomicLong lastNullId = new AtomicLong(NULL_ID_START);
         
         private /*final*/ long id;  // unique id for the corresponding {T,localObj}
                                     // id==0 means not assigned, negative ids are assigned to Mortal objects
-                                    // id>=NULL_ID_START is used for isNull (kawatiya 2013/09/09)
         private Object strongRef;   // strong reference to the localObj, used to prevent the collection
         private Type<?> T;          // T of corresponding GlobalRef[T](localObj)
         private int remoteCount;    // number of active remote GlobalRefs, should be < #places
@@ -106,22 +105,13 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
             // assign an id
             boolean isMortal = obj instanceof Mortal;
             while (true) {
-                if (obj == $null) { // isNull support (kawatiya 2013/09/09)
-                    id = lastNullId.incrementAndGet();
-                    if (id >= NULL_ID_START) {
-                        // try to use the id
-                    } else { // wraparound
-                        if(GLOBALGC_DEBUG>=1)GlobalGCDebug("GlobalizedObjectTracker.<init>: resetting lastNullId");
-                        synchronized(lastNullId) { if (lastNullId.get() < NULL_ID_START) lastNullId.set(NULL_ID_START); }
-                        continue; // retry
-                    }                    
-                } else if (!isMortal) {
+                if (!isMortal) {
                     id = lastId.incrementAndGet();
-                    if (id < NULL_ID_START) {
+                    if (id > 0) {
                         // try to use the id
                     } else { // wraparound
                         if(GLOBALGC_DEBUG>=1)GlobalGCDebug("GlobalizedObjectTracker.<init>: resetting lastId");
-                        synchronized(lastId) { if (lastId.get() >= NULL_ID_START) lastId.set(0L); }
+                        synchronized(lastId) { if (lastId.get() < 0) lastId.set(0L); }
                         continue; // retry
                     }
                 } else { // for Mortal objects, use negative id
@@ -364,12 +354,20 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
         // modified from the compiled code of "async at (place) { changeRemoteCount(id, delta); }"
         private /*@@public@@*/ static class $Closure$0 extends x10.core.Ref implements x10.core.fun.VoidFun_0_0,
                 x10.serialization.X10JavaSerializable {
+            private static final long serialVersionUID = 1L;
 
             public static final x10.rtt.RuntimeType<$Closure$0> $RTT = x10.rtt.StaticVoidFunType.<$Closure$0> make(
             /* base class */$Closure$0.class, /* parents */new x10.rtt.Type[] { x10.core.fun.VoidFun_0_0.$RTT });
 
             public x10.rtt.RuntimeType<?> $getRTT() {return $RTT;}
             public Type<?> $getParam(int i) {return null;}
+
+            private void writeObject(java.io.ObjectOutputStream oos) throws java.io.IOException {
+                if (x10.runtime.impl.java.Runtime.TRACE_SER) {
+                    java.lang.System.out.println("Serializer: writeObject(ObjectOutputStream) of " + this + " calling");
+                }
+                oos.defaultWriteObject();
+            }
 
             public static x10.serialization.X10JavaSerializable $_deserialize_body($Closure$0 $_obj, X10JavaDeserializer $deserializer) throws java.io.IOException {
                 if (x10.runtime.impl.java.Runtime.TRACE_SER) {
@@ -494,9 +492,7 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
     @Override
     final public java.lang.String toString() {
         globalize(); // necessary to decide the id for this object
-//      return "GlobalRef(" + this.home + "," + this.id + ")";
-        // isNull support (2013/09/09)
-        return "GlobalRef["+T+"](" + home + "," + id + "," + (isNull() ? "isNull" : "nonNull") + ")";
+        return "GlobalRef(" + this.home + "," + this.id + ")";
     }
 
     @Override
@@ -536,11 +532,32 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
         }
     }
 
-    public boolean isNull() { // isNull support (kawatiya 2013/09/09)
-        if (home.id == x10.lang.Runtime.home().id) { // local GlobalRef
-            return obj == null;
-        } else { // remote GlobalRefs
-            return id >= GlobalizedObjectTracker.NULL_ID_START;
+    public void writeExternal(ObjectOutput out) throws IOException {
+        if (true) {
+            if(GLOBALGC_DEBUG>=1)GlobalGCDebug("GlobalRef.writeExternal: not supported!");
+            throw new RuntimeException("GlobalRef.writeExternal is not supported");
+        }
+        
+        globalize();
+        out.writeObject(T);
+        out.writeObject(home);
+        out.writeLong(id);
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        if (true) {
+            if(GLOBALGC_DEBUG>=1)GlobalGCDebug("GlobalRef.readExternal: not supported!");
+            throw new RuntimeException("GlobalRef.readExternal is not supported");
+        }
+        
+        T = (Type<?>) in.readObject();
+        home = (x10.lang.Place) in.readObject();
+        id = in.readLong();
+
+        if (home.id == x10.lang.Runtime.home().id) {
+            obj = GlobalizedObjectTracker.getObject(id);
+        } else {
+            obj = null;
         }
     }
 
@@ -639,6 +656,7 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
 
     public static class LocalEval extends x10.core.Ref {
 
+	private static final long serialVersionUID = 1L;
 	public static final RuntimeType<LocalEval> $RTT = x10.rtt.NamedType.<LocalEval> make("x10.lang.GlobalRef.LocalEval", LocalEval.class);
 	public RuntimeType<?> $getRTT() {return $RTT;}
 	public Type<?> $getParam(int i) {return null;}
@@ -690,6 +708,7 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
 
 
 	public static class $Closure$Eval<$T, $U> extends x10.core.Ref implements x10.core.fun.Fun_0_0 {
+	    private static final long serialVersionUID = 1L;
 	    public static final RuntimeType<$Closure$Eval> $RTT =
 		x10.rtt.StaticFunType.<$Closure$Eval> make($Closure$Eval.class, 2,
 							 new Type[] {x10.rtt.ParameterizedType.make(x10.core.fun.Fun_0_0.$RTT, x10.rtt.UnresolvedType.PARAM(1))});
@@ -746,6 +765,7 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
 
             
 	public static class $Closure$Apply<$T> extends x10.core.Ref implements x10.core.fun.Fun_0_0 {
+	    private static final long serialVersionUID = 1L;
 	    public static final RuntimeType<$Closure$Apply> $RTT =
 		x10.rtt.StaticFunType.<$Closure$Apply> make($Closure$Apply.class, 1,
 							  new Type[] {x10.rtt.ParameterizedType.make(x10.core.fun.Fun_0_0.$RTT, x10.rtt.UnresolvedType.PARAM(0))});

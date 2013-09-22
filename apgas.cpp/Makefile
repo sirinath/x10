@@ -56,11 +56,10 @@ SELECTED_COMPILER = Native.x10 NativeRep.x10 NoThisAccess.x10 NonEscaping.x10 Em
 		Finalization.x10 Abort.x10 NativeDef.x10 FinishAsync.x10 AsyncClosure.x10 Endpoint.x10 CUDA.x10 \
 		Opaque.x10 TransientInitExpr.x10
 
-SELECTED_UTIL = HashMap.x10 Map.x10 Box.x10 Ordered.x10 Pair.x10 Triple.x10 Set.x10 Random.x10 \
+SELECTED_UTIL = HashMap.x10 Map.x10 Box.x10 Ordered.x10 Pair.x10 Set.x10 Random.x10 \
 		AbstractCollection.x10 AbstractContainer.x10  Collection.x10 GrowableRail.x10 \
 		Container.x10 NoSuchElementException.x10 Timer.x10 Indexed.x10 \
-		CollectionIterator.x10 MapIterator.x10 StringBuilder.x10 Builder.x10 \
-		HashSet.x10 MapSet.x10
+		CollectionIterator.x10 MapIterator.x10 StringBuilder.x10 Builder.x10
 
 SELECTED_IO = 	CustomSerialization.x10 Serializer.x10 Deserializer.x10 Unserializable.x10 NotSerializableException.x10 \
 		Printer.x10 Reader.x10 Writer.x10 Marshal.x10 \
@@ -114,12 +113,6 @@ testme: $(X10_COPY_SRC) $(NATIVE_COPY_SRC)
 ###############################
 
 X10CPPFLAGS += -APGAS_LIB_MODE -STATIC_CHECKS -J-Xmx512M -rtdev -commandlineonly
-ifdef OPTIMIZE
-	X10CPPFLAGS += -O
-endif
-ifdef NO_CHECKS
-	x10CPPFLAGS += -NO_CHECKS
-endif
 
 $(GEN_DIR)/all-cpp-generated: $(X10_COPY_SRC)
 	@echo "Compiling X10 source files to C++"
