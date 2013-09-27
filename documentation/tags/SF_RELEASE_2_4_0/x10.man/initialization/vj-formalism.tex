@@ -1,0 +1,521 @@
+Featherweight X10 (FX10) is a formal calculus for X10 intended to  complement Featherweight Java
+(FJ).  It models imperative aspects of X10 including the concurrency
+constructs \hfinish{} and \hasync{}.
+FX10 models the heart of the field initialization problem:
+    a field can be read only after it  is definitely assigned.
+
+%    and that final (\code{val}) fields can be assigned exactly once (in \Ref{Section}{val}).
+
+The basic idea behind the formalization is very straightforward. We
+break up the formalization into two distinct but interacting
+subsystems, a {\em type system}~(\Ref{Section}{Type system}) and an {\em
+  effect} system~(\Ref{Section}{Effect system}). The type
+system is completely standard -- think the system of FJ, adapted to
+the richer constructs of FX10.
+
+The effect system is built on a very simple {\em logic of
+  initialization assertions}.  The primitive formula $+\hx$
+($+\hp.\hf$) asserts that the variable $\hx$ (the field $\hf$ of
+$\hp$) is definitely initialized with a cooked object, and the formula $-\hx$
+($-\hp.\hf$) asserts that it is being initialized by a concurrent
+activity (and hence it will be definitely initialized once an
+enclosing $\hfinish$ is crossed).
+An {\em initialization formula}
+$\phi$ or $\psi$ is simply a conjunction of such formulas $\phi \wedge
+\psi$. % or an existential quantification $\exists{}\hx.\phi$.
+An {\em
+  effects assertion} $\phi~\hS~\psi$ (for a statement $\hS$) is read as a
+partial correctness assertion: when executed in a heap~$H$ that satisfies
+the constraint $\phi$, $\hS$ will on termination result in a heap~$H'$ that
+satisfies $\psi$.  Since we do not model \code{null}, our
+formalization can be particularly simple: variables, once initialized,
+stay initialized, hence $H'$ will also satisfy $\phi$
+    (see \Ref{Section}{Reduction} for a definition of heaps and when a heap satisfy~$\phi$).
+
+Another feature of our approach is that, unlike Masked
+Types~\cite{XinQi:2009}, the source program syntax does not permit the
+specification of initialization assertions. Instead we use a standard
+least fixed point computation to automatically decorate each method
+$\hdef~\hm(\ol{\hx}:\ol{\hC})\{\hS\}$ with pairs $(\phi, \psi)$ (in the free
+variables $\hthis, \ol{\hx}$) such that under the assumption that all
+methods satisfy their corresponding assertion we can show that
+$\phi~\hS~\psi$.\footnote{Note that this approach permits a formal $\hx$ to a
+  method to be completely raw ($\phi$ does not entail $+\hx$ or
+  $+\hx.\hf$ for any field $\hf$) or partially raw ($\phi$ does not
+  entail $+\hx$ but may entail $+\hx.\hf$ for some fields $\hf$). As a
+  result of the method invocation the formal may become more cooked.
+  In X10, in order for the inference to be intra-class, we require that all method parameters~$\ol{\hx}$ (except \this) are cooked, i.e.,
+    $+\hx_i$. In FX10 we are more relaxed and allow methods to receive and initialize raw parameters.
+  }
+This computation must be sensitive to the semantics
+of method overriding, that is a method with decoration $(\phi,\psi)$
+can only be overridden by a method with decoration $(\phi',\psi')$
+that is ``at least as strong as'' $(\phi,\psi)$ (viz, it must be the
+case that ($\phi \vdash \phi'$ and $\psi' \vdash \psi$). Further, if
+the method is not marked \code{@NonEscaping}, then $\phi$ is required
+to entail $+\hthis$ (that is, \code{this} is cooked), and if it marked
+\code{@NoThisAccess} then $\phi,\psi$ cannot have \code{this} free.
+
+
+\comment{{\sc We also have to check that if it is marked
+    \code{@NonEscaping} then it does not escape.
+    Yoav notes: if \this is not cooked then it cannot escape to the heap - only as a parameter to other methods.}}
+
+By not permitting the user to specify initialization assertions we
+make the source language much simpler than \cite{XinQi:2009} and
+usable by most programmers. The down side is that some initialization
+idioms, such as cyclic initialization, are not expressible.
+
+For reasons of space we do not include the (standard) details behind
+the decoration of methods with initialization assertions. We also omit
+many extensions (such as generics, interfaces, constraints, casting,
+inner classes, overloading, co-variant return types, final, field initializers etc.) necessary to establish the soundness
+of initialization for the full language discussed in the first half of
+the paper. FX10 also does not model places because the language design
+decision to only permit cooked objects to cross places means that the
+rules for \code{at} are routine.
+
+We use the usual notation of~$\ol{\hx}$ to represent a vector or set of~$\hx_1, \ldots,\hx_n$.
+A program~\hP is a pair of class declarations~$\ol{\hL}$ (that is assumed to be global information)
+    and a statement \hS.
+%Like in masked-types, there is no \hnull value in the language, because none is needed for object initialization.
+%Phrased differently,
+%    FX10 guarantees that a field is read only after assigned, so no need to initialize it with \hnull.
+%In the formalism, an object is represented as a mapping from initialized fields to their values
+%    (so initially the mapping is empty because no field is initialized).
+
+\paragraph{Overview of formalism}
+\Ref{Section}{Syntax} presents the syntax of FX10.
+% todo
+\Ref{Section}{Type system} briefly describes the type
+system. \Ref{Section}{Effect system} defines the flow-sensitive rules for
+    ($\phi~\hS~\psi$), while
+    \Ref{Section}{Reduction} gives the reduction rules for statements
+    and expressions ($\hS,H \reducesto \hS',H' ~|~H'$
+    and~$\he,H \reduce \hl,H'$). Finally \Ref{Section}{Results}
+    presents the main formal result (soundness theorem).
+%Finally, \Ref{Section}{val} extends the formalism with \hval and \hvar fields.
+
+
+\Subsection{Syntax}
+
+\begin{figure}[htpb!]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+
+$\hP ::= \ol{\hL},\hS$ & Program. \\
+
+$\hL ::= \hclass ~ \hC~\hextends~\hD~\lb~\ol{\hF};~\ol{\hM}~\rb$
+& cLass declaration. \\
+
+$\hF ::= \hvar\,\hf:\hC$
+& Field declaration. \\
+
+$\hM ::= \hG\ \hdef\ \hm(\ol{\hx}:\ol{\hC}):\hC\{\hS\}$
+& Method declaration. \\
+
+$\hG ::= \code{@NonEscaping} ~~|~~ \code{@NoThisAccess}$
+& Method modifier. \\
+
+$\hp ::= \hl ~~|~~ \hx$
+& Path. \\ %(location or parameter)
+
+$\he ::=  \hp.\hf  ~|~ \hnew{\hC}$
+& Expressions. \\ %: locations, parameters, field access\&assignment,  %invocation, \code{new}
+
+$\hS ::=  \hp.\hf = \hp; ~|~ \hp.\hm(\ol{\hp});  ~|~ \hval{\hx}{\he}{\hS}$ &\\
+$~~~~|~ \finish{\hS}~|~ \async{\hS} ~|~ \hS~\hS$
+& Statements. \\ %: locations, parameters, field access\&assignment, invocation, \code{new}
+
+\hline
+\end{tabular}
+\end{center}
+\caption{FX10 Syntax.
+    The terminals are locations (\hl), parameters and \hthis (\hx), field name (\hf), method name (\hm), class name (\hB,\hC,\hD,\hObject),
+        and keywords (\hhnew, \hfinish, \hasync, \code{val}).
+    The program source code cannot contain locations (\hl), because locations are only created during execution/reduction in \RULE{R-New} of \Ref{Figure}{reduction}.
+    }
+\label{Figure:syntax}
+\end{figure}
+
+\Ref{Figure}{syntax} shows the syntax of FX10.
+%(\Ref{Section}{val} will later add the \hval and \hvar field modifiers.)
+Expression~$\hval{\hx}{\he}{\hS}$ evaluates $\he$, assigns it to a
+new variable $\hx$, and then evaluates \hS. The scope of \hx{} is \hS.
+
+The syntax is similar to the real X10 syntax with the following difference:
+%Non-escaping methods are marked with \code{@NonEscaping}, such methods
+%can be invoked on raw objects (and can be used to initialize them).
+FX10 does not have constructors; instead, an object is initialized by assigning to its fields or
+    by calling
+    non-escaping methods.
+
+%To simplify presentation, we allow only paths~$\hp$
+%    (variables \hx at
+%    compile time, or heap locations \hl at run time) to appear in field access, assignment and method call.
+% Phrased differently, the user must flatten the program.
+%This does not restrict expressiveness, because of \code{val} expressions.
+
+\Subsection{Type system}
+%\vspace{-0.2cm}\begin{lstlisting}
+%class D extends Object { f:Object; }
+%val d:D = new D; d.f = new Object
+%\end{lstlisting}\vspace{-0.2cm}
+%Then, the type of \code{d} is \code{D} where field \code{f} is uninitialized
+%    (which we formally write below as $\code{D}\myinit{\hf}{\hf}$).
+%Therefore, reading \code{d.f} would be illegal, but writing to \code{d.f} would update the type of \code{d}
+%    to be fully initialized.
+
+The type system for FX10 checks that every parameter and variable has
+a type (a type is the name of a class), and that a variable of type
+\hC can be assigned only expressions whose type is a subclass of \hC,
+and can only be the receiver of invocations of methods defined in
+\hC. The type system is formalized along the lines of FJ. No
+complications are introduced by the extra features of FX10 --
+assignable fields, local variable declarations, \hfinish{} and
+\hasync{}. We omit details for lack of space and because they are
+completely routine.
+
+In the rest of this section we shall assume that the program being
+considered $\ol{\hL},\hS$ is well-typed.
+
+\Subsection{Effect system}
+\begin{figure*}[t]
+\begin{center}
+\begin{tabular}{|c|}
+\hline
+
+$\typerule{
+ \phi \vdash +\hp.\hf \gap \phi, +\hx~\hS~\psi
+}{
+ \phi~\hval{\hx}{\hp.\hf}{\hS}~\psi
+}$~\RULE{(T-Access)}
+\quad
+$\typerule{
+  \phi~\hS~\psi
+}{
+ \phi~ \hval{\hx}{\hnew{\hC}}{\hS}~\psi
+}$~\RULE{(T-New)}
+\quad
+$\typerule{
+  \phi \vdash +\hq
+}{
+ \phi ~ \hp.\hf=\hq ~ + \hp.\hf
+}$~\RULE{(T-Assign)}
+\\\\
+
+$\typerule{
+    \phi~\hS~\psi
+}{
+  \begin{array}{l}
+    \phi~\finish{\hS}~ +\psi \\
+    \phi~\async{\hS}~ -\psi
+  \end{array}
+}$~\RULE{(T-Finish,Async)}
+
+\quad
+$\typerule{
+  \phi~\hS_1~\psi_1
+        \gap
+    \phi,\psi_1~\hS_2~\psi_2
+}{
+  \phi~\hS_1~\hS_2~\psi_1,\psi_2
+}$~\RULE{(T-Seq)}
+\quad
+
+$\typerule{
+\hm(\ol{\hx}):: \phi' \Rightarrow \psi' \gap \phi \vdash \phi'[\hp/\hthis,\ol{\hp}/\ol{\hx}]
+}{
+\phi~\hp.\hm(\ol{\hp})~\psi'[\hp/\hthis,\ol{\hp}/\ol{\hx}]
+}$~\RULE{(T-Invoke)}\\
+
+\hline
+\end{tabular}
+\end{center}
+\caption{FX10 Effect System ($\phi~\hS~\psi$)}
+\label{Figure:effects}
+\end{figure*}
+
+We use a simple logic of initialization for our basic assertions.
+This is an intuitionistic logic over the
+primitive formulas $+\hp$ (the variable or parameter $\hp$ is
+initialized), $+\hp.\hf$ (the field $\hp.\hf$ is initialized), and
+$-\hp,-\hp.\hf$ (it is being \emph{concurrently}
+initialized). We are only concerned with conjunctions and existential
+quantifications over these formulas:
+$
+ \phi,\psi {::=}  \htrue ~|~ +\hx ~|~ +\hp.\hf ~|~ -\hp.\hf ~|~ \phi \wedge \psi
+$
+
+The notion of substitution on formulas $\phi\char`[\ol{\hx}/\ol{\hz}\char`]$ is
+specified in a standard fashion.
+
+The inference relation is the usual intuitionistic implication over
+these formulas, and the following additional proof rules:
+(1)~if $\phi\vdash +\hp$ then~$\phi\vdash -\hp$;
+(2)~if $\phi\vdash +\hp.\hf$ then~$\phi\vdash -\hp.\hf$;
+(3)~if $\phi\vdash +\hp$ ($\phi\vdash -\hp$) then~$\phi\vdash +\hp.\hf$ ($\phi\vdash -\hp.\hf$);
+and (4)~if
+the \emph{exact} class of $\hp$ is $\hC$, and $\hC$ has the fields $\ol{\hf}$,
+then $\phi\vdash +\hp$ ($\phi\vdash -\hp$) if $\phi\vdash +\hp.\hf_i$ ($\phi\vdash -\hp.\hf_i$), for each $i$.
+(We only know the \emph{exact} class for a local~\hp when~$\hval{\hp}{\hnew \hC}{\hS}$.)
+
+
+The proof rules for the judgement $\phi~\hS~\psi$ are given in
+Figure~\ref{Figure:effects}. They use two syntactic operations on initialization
+formulas defined as follows.
+$+\psi$ is defined inductively as follows:
+$+\htrue=\htrue$,
+$+\pm\hx=+\hx$,
+$+\pm\hp.\hf=+\hp.\hf$,
+$+(\phi \wedge\psi)=(+\phi)\wedge(+\psi)$.
+$-\psi$ is defined similarly:
+$-\htrue=\htrue$,
+$-\pm\hx=-\hx$,
+$-\pm\hp.\hf=-\hp.\hf$,
+$-(\phi \wedge\psi)=(-\phi)\wedge(-\psi)$.
+
+The rule~\RULE{(T-Access)} can be read as asserting: if $\phi$ entails
+the field $\hp.\hf$ is initialized
+(together with $+\hx$ which states that $\hx$ is initialized to a
+cooked object), we can establish that execution of $\hS$ satisfies the assertion
+$\psi$ then we can establish that execution of
+$\hval{\hx}{\hp.\hf}{\hS}$ in
+(a heap satisfying) $\phi$ establishes $\psi$. Here we
+must take care to project $\hx$ out of $\psi$ since $\hx$ is not
+accessible outside its scope $\hS$; similarly we must take care to
+project $\hx$ out of $\phi$ when checking \hS.
+The rule ~\RULE{(T-New)} can be read in a similar way except that when
+executing $\hS$ we can make no assumption that $\hx$ is initialized,
+since it has been initialized with a raw object (none of its fields
+are initialized). Subsequent assignments to the fields of $\hx$ will
+introduce effects recording that those fields have been initialized.
+The rule~\RULE{(T-Assign)} checks that \hq{} is initialized to a
+cooked object and then asserts that $\hp.\hf$ is initialized to a
+cooked object.
+The rule~\RULE{(T-Finish)} can be understood as recording that after a
+\hfinish{} has been ``crossed'' all asynchronous initializations $\psi$
+can be considered to have been performed $\phi$. Conversely,
+the rule~\RULE{(T-Async)} states that any initializations must be
+considered asynchronous to the surrounding context.
+The rule~\RULE{(T-Seq)} is a slight variation of the stadard rule for
+sequential composition that permits $\phi$ to be used in the
+antecedent of $\hS_2$, exploiting monotonicity of effects. Note the
+effects recorded for $\hS_1~\hS_2$ are a conjunction of the effects
+recorded for $\hS_1$ and $\hS_2$.
+The rule~\RULE{(T-Invoke)} is routine.
+
+As an example, consider the following classes. Assertions are provided
+in-line.
+\vspace{-0.2cm}\begin{lstlisting}
+class A extends Object {
+  var f:Object; var g:Object; var h:Object;
+  @NonEscaping def build(a:Object) {
+    // inferred decoration: phi => psi
+    //   phi= +this.g, +a
+    //   psi= -this.h, +this.f
+    // checks phi implies +this.g
+    val x = this.g;
+    async { this.h = x; } // psi= -this.h
+    finish {
+      // checks phi implies +a
+      async { this.f = a; } // psi= -this.h,-this.f
+    } // psi= -this.h,+this.f
+  }
+}
+class B extends A { e:Object; }
+\end{lstlisting}\vspace{-0.2cm}
+Method \code{build} synchronously (asynchronously) initializes fields \code{this.f} (\code{this.h}),
+    and it assumes that \code{this.g} and \code{a} are cooked.
+The following statement completely initializes \code{b}:
+\vspace{-0.2cm}\begin{lstlisting}
+val b = new B();
+val a = new Object(); // psi= +a
+b.g = a; // psi= +a,+b.g
+finish {
+  b.build(a); // psi= +a,+b.g,+b.f,-b.h
+  async { b.e = a; } // psi= +a,+b.g,+b.f,-b.h,-b,-b.e,-b
+} // psi= +a,+b
+\end{lstlisting}\vspace{-0.2cm}
+
+
+\Subsection{Reduction}
+A {\em heap}~$H$ is a mapping from a given set of locations to {\em
+  objects}. An object is a pair $C(F)$ where $C$ is a class (the exact
+class of the object), and $F$ is a partial map from the fields of $C$
+to locations.
+We say the object~\hl is {\em total/cooked} (written~$\cooked_H(\hl)$)
+    if its map is total, i.e.,~$H(\hl)=\hC(F) \gap \dom(F)=\fields(\hC)$.
+
+We say that a heap~$H$ {\em satisfies} $\phi$ (written~$H \vdash \phi$)
+    if the plus assertions in~$\phi$ (ignoring the minus assertions) are true in~$H$,
+    i.e., if~$\phi \vdash +\hl$ then~$\hl$ is cooked in~$H$
+    and if~$\phi \vdash +\hl.\hf$ then~$H(\hl)=\hC(F)$ and~$F(\hf)$ is cooked in~$H$.
+
+
+%An {\em annotation} $N$ for a heap $H$ maps each $l \in \dom(H)$ to a
+%possibly empty set of fields $a(H(l))$ of the class of $H(l)$ disjoint
+%from $\dom(H(l))$. (These are the fields currently being
+%asynchronously initialized.) The logic of initialization described
+%above is clearly sound for the obvious interpretation of formulas over
+%annotated heaps. For future reference, we say that a heap $H$
+%{\em satisfies} $\phi$ if there is some annotation $N$ (and some
+%valuation $v$ assigning locations in $\dom(H)$ to free variables of
+%$\phi$) such that $\phi$ evaluates to true.
+
+The reduction relation is described in
+Figure~\ref{Figure:reduction}. An S-configuration is of the form
+$\hS,H$ where \hS{} is a statement and $H$ is a heap (representing a
+computation which is to execute $\hS$ in the heap $H$), or $H$
+(representing terminated computation). An
+E-configuration is of the form $\he,H$ and represents the
+computation which is to evaluate $\he$ in the configuration $H$. The
+set of {\em values} is the set of locations; hence E-configurations of
+the form $\hl,H$ are terminal.
+
+Two transition relations $\reduce{}$ are defined, one over S-configurations and
+the other over E-configurations.
+For $X$ a partial function, we use the notation $X[v \mapsto
+  e]$ to represent the partial function which is the same as $X$
+except that it maps $v$ to $e$.
+The rules defining these relations are
+standard.
+The only minor novelty is in how \hasync{} is defined. The
+critical rule is the last rule in~\RULE{(R-Step)}  -- it specifies the
+``asynchronous'' nature of \hasync{} by permitting \hS{} to make a step
+even if it is preceded by $\async{\hS_1}$.
+%
+The rule~\RULE{(R-New)} returns a new location that is bound to a new
+object that is an instance of \hC{} with none of its fields initialized.
+%
+The rule~\RULE{(R-Access)} ensures that the field is initialized before it is
+read ($\hf_i$ is contained in $\ol{\hf}$).
+
+\begin{figure*}[t]
+\begin{center}
+\begin{tabular}{|c|}
+\hline
+$\typerule{
+ \hS,H \reduce H'
+}{
+  \begin{array}{l}
+    \finish{\hS},H \reduce H'\\
+    \async{\hS},H \reduce H'\\
+    \hS~\hS', H \reduce \hS',H'\\
+  \end{array}
+}$~\RULE{(R-Term)}
+~
+$\typerule{
+ \hS,H \reduce \hS', H'
+}{
+  \begin{array}{l}
+    \finish{\hS},H \reduce \finish{\hS'},H'\\
+    \async{\hS},H \reduce \async{\hS'}, H'\\
+    \hS~\hS_1, H \reduce \hS'~\hS_1,H'\\
+    \async{\hS_1}~\hS, H \reduce \async{\hS_1}~\hS', H'\\
+  \end{array}
+}$~\RULE{(R-Step)}
+~
+$\typerule{
+  \he,H \reduce \hl,H'
+}{
+  \hval{\hx}{\he}{\hS},H \reduce \hS[\hl/\hx], H'
+}$~\RULE{(R-Val)}
+\\\\
+
+$\typerule{
+    \hl' \not \in \dom(H)
+}{
+  \hnew{\hC},H \reduce \hl',H[ \hl' \mapsto \hC()]
+}$~\RULE{(R-New)}
+\quad
+$\typerule{
+    H(\hl')=\hC(\ldots)
+        \gap
+    \mbody{}(\hm,\hC)=\ol{\hx}.\hS
+}{
+  \hl'.\hm(\ol{\hl}),H \reduce \hS[\ol{\hl}/\ol{\hx},\hl'/\hthis],H
+}$~\RULE{(R-Invoke)}
+\quad
+
+\\\\
+
+$\typerule{
+    H(\hl)=\hC(\ol{\hf}\mapsto\ol{\hl'})
+}{
+  \hl.\hf_i,H \reduce \hl_i',H
+}$~\RULE{(R-Access)}
+\quad
+$\typerule{
+    H(\hl)=\hC(F) \gap \cooked_H(\hl')
+}{
+  \hl.\hf=\hl',H \reduce H[ \hl \mapsto \hC(F[ \hf \mapsto \hl'])]
+}$~\RULE{(R-Assign)}
+\\
+\hline
+\end{tabular}
+\end{center}
+\caption{FX10 Reduction Rules ($\hS,H \reducesto \hS',H' ~|~H'$ and~$\he,H \reduce \hl,H'$).}
+\label{Figure:reduction}
+\end{figure*}
+
+
+\Subsection{Results}
+
+We say a heap $H$ is {\em correctly cooked} (written~$\vdash H$)
+    if a field can point only to cooked objects, i.e.,~for every object $o=C(F)$ in the range of $H$ and
+    every field $f \in \dom(F)$ it is the case that every object~$\hl=H(F(f))$ is cooked ($\cooked_H(\hl)$).
+We shall only consider correctly cooked heaps (valid
+programs will only produce correctly cooked heaps).
+As the program is executed, the heap monotonically becomes more and more cooked.
+Formally,~$H'$ is \emph{more cooked} than~$H$ (written~$H' \vdash H$)
+    if for every~$\hl \in \dom(H)$, we have~$H(\hl)=\hC(F)$,~$H'(\hl)=\hC(F')$, and~$\dom(F)\subseteq\dom(F')$.
+
+A {\em heap typing} $\Gamma$ is a mapping from locations to classes. $H$ is
+said to be typed by $\Gamma$ if for each $l\in\dom(H)$, the class of $H(l)$
+is a subclass of $\Gamma(l)$.  Since our treatment separates out effects
+from types, and the treatment of types is standard, we shall assume
+that all programs and heaps are typed.
+
+A statement~$\hS$ is \emph{closed} (written~$\vdash \hS$) if it does not contain any free variables.
+We say that $\hS$ is \emph{annotable} if there exists $\phi,\psi$ such that
+$\phi~\hS~\psi$ can be established.\footnote{An example of a statement that is
+{\em not} annotable is $\hval{\hx}{\hnew
+  \hC}{\hval{\hy}{\hx.\hf}{\hz.\hg=\hy}}$ where $\hC{}$ has a field
+\hf. This attempts to read a field of a variable initialized with a
+brand-new object.}
+
+We say that a program $\hP=\ol{\hL}\hS$ is {\em proper} if it is
+well-typed and each method in \hL{} can be decorated with pre-post assertions
+$(\phi,\psi)$, and \hS is annotable.
+The decorations must satisfy the property that under the
+assumption that every method satisfies its assertion (this is for use
+in recursive calls) we can establish for every method
+$\hdef~\hm(\ol{\hx}:\ol{\hC})\{\hS\}$ with assertion $(\phi,\psi)$ that
+it is the case that the free variables of $\phi,\psi$ are contained in
+$\this,\ol{\hx}$, and that $\phi~\hS~\psi$.
+
+We prove the following theorems. In all these theorems the background
+program \hP{} is assumed to be proper. The first theorem is analogous
+to subject-reduction for typing systems.
+\begin{Theorem}{\textbf{Preservation}}
+%\label{Theorem:Preservation}
+Let $\phi~\hS~\psi$, $\vdash \hS$, $\vdash H$, $H \vdash \phi$.
+(a) If $\hS,H \reducesto H'$ then $\vdash H'$, $H' \vdash H$, $H' \vdash +\psi$.
+(b) If $\hS,H \reducesto \hS',H'$ then $\vdash \hS'$, $\vdash H'$, $H' \vdash H$,
+there exists $\phi',\psi'$ such
+that $H' \vdash \phi'$, $\phi'~\hS'~\psi'$, $\phi' \vdash \phi$, $\psi' \vdash \psi$.
+\end{Theorem}
+
+\begin{Theorem}{\textbf{Progress}}
+%\label{Theorem:Progress}
+Let $\phi~\hS~\psi$, $\vdash \hS$, $\vdash H$, $H \vdash \phi$.
+The configuration $\hS,H$ is not stuck.
+\end{Theorem}
+
+For proofs, please see associated technical report.
+
+Because our reduction rules only allow reads from initialized fields,
+a corollary is that a field can only be read after it was assigned,
+and an attempt to read a field will always succeed.
