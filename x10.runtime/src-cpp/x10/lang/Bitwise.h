@@ -43,7 +43,6 @@ namespace x10 {
     
             static x10_boolean equals(x10::lang::Bitwise<TPMGL(T)>* _recv, x10::lang::Any* arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->equals))(arg0);
             }
             template <class R> static x10_boolean equals(R _recv, x10::lang::Any* arg0) {
@@ -51,7 +50,6 @@ namespace x10 {
             }
             static x10_int hashCode(x10::lang::Bitwise<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->hashCode))();
             }
             template <class R> static x10_int hashCode(R _recv) {
@@ -59,7 +57,6 @@ namespace x10 {
             }
             static TPMGL(T) __ampersand(x10::lang::Bitwise<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__ampersand))(arg0);
             }
             template <class R> static TPMGL(T) __ampersand(R _recv, TPMGL(T) arg0) {
@@ -67,7 +64,6 @@ namespace x10 {
             }
             static TPMGL(T) __left(x10::lang::Bitwise<TPMGL(T)>* _recv, x10_long arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__left))(arg0);
             }
             template <class R> static TPMGL(T) __left(R _recv, x10_long arg0) {
@@ -75,7 +71,6 @@ namespace x10 {
             }
             static TPMGL(T) __right(x10::lang::Bitwise<TPMGL(T)>* _recv, x10_long arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__right))(arg0);
             }
             template <class R> static TPMGL(T) __right(R _recv, x10_long arg0) {
@@ -83,7 +78,6 @@ namespace x10 {
             }
             static TPMGL(T) __unsigned_right(x10::lang::Bitwise<TPMGL(T)>* _recv, x10_long arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__unsigned_right))(arg0);
             }
             template <class R> static TPMGL(T) __unsigned_right(R _recv, x10_long arg0) {
@@ -91,7 +85,6 @@ namespace x10 {
             }
             static TPMGL(T) __caret(x10::lang::Bitwise<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__caret))(arg0);
             }
             template <class R> static TPMGL(T) __caret(R _recv, TPMGL(T) arg0) {
@@ -99,7 +92,6 @@ namespace x10 {
             }
             static TPMGL(T) __bar(x10::lang::Bitwise<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__bar))(arg0);
             }
             template <class R> static TPMGL(T) __bar(R _recv, TPMGL(T) arg0) {
@@ -107,7 +99,6 @@ namespace x10 {
             }
             static TPMGL(T) __tilde(x10::lang::Bitwise<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->__tilde))();
             }
             template <class R> static TPMGL(T) __tilde(R _recv) {
@@ -115,7 +106,6 @@ namespace x10 {
             }
             static x10::lang::String* toString(x10::lang::Bitwise<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->toString))();
             }
             template <class R> static x10::lang::String* toString(R _recv) {
@@ -123,7 +113,6 @@ namespace x10 {
             }
             static x10::lang::String* typeName(x10::lang::Bitwise<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::lang::Bitwise<TPMGL(T)> >(_refRecv->_getITables())->typeName))();
             }
             template <class R> static x10::lang::String* typeName(R _recv) {
@@ -159,7 +148,6 @@ namespace x10 {
             static x10_int hashCode(PRIM recv) { return x10aux::hash_code(recv); } \
             static PRIM __ampersand(x10::lang::Bitwise<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__ampersand))(arg0); \
             }                                                           \
             static inline PRIM __ampersand(PRIM recv, PRIM arg0) {      \
@@ -167,7 +155,6 @@ namespace x10 {
             }                                                           \
             static PRIM __left(x10::lang::Bitwise<PRIM>* _recv, x10_long arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__left))(arg0); \
             }                                                           \
             static inline PRIM __left(PRIM recv, x10_long arg0) {       \
@@ -175,7 +162,6 @@ namespace x10 {
             }                                                           \
             static PRIM __right(x10::lang::Bitwise<PRIM>* _recv, x10_long arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__right))(arg0); \
             }                                                           \
             static inline PRIM __right(PRIM recv, x10_long arg0) {      \
@@ -183,7 +169,6 @@ namespace x10 {
             }                                                           \
             static PRIM __unsigned_right(x10::lang::Bitwise<PRIM>* _recv, x10_long arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__unsigned_right))(arg0); \
             }                                                           \
             static inline PRIM __unsigned_right(PRIM recv, x10_long arg0) { \
@@ -191,7 +176,6 @@ namespace x10 {
             }                                                           \
             static PRIM __caret(x10::lang::Bitwise<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__caret))(arg0); \
             }                                                           \
             static inline PRIM __caret(PRIM recv, PRIM arg0) {          \
@@ -199,7 +183,6 @@ namespace x10 {
             }                                                           \
             static PRIM __bar(x10::lang::Bitwise<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__bar))(arg0); \
             }                                                           \
             static inline PRIM __bar(PRIM recv, PRIM arg0) {            \
@@ -207,7 +190,6 @@ namespace x10 {
             }                                                           \
             static PRIM __tilde(x10::lang::Bitwise<PRIM>* _recv) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Bitwise<PRIM> >(recv->_getITables())->__tilde))(); \
             }                                                           \
             static inline PRIM __tilde(PRIM recv) {                     \
