@@ -1164,8 +1164,6 @@ public class StaticInitializer extends ContextVisitor {
             return true;
         if (e instanceof CharLit)
             return true;
-        if (e instanceof StringLit)
-            return true;
         // N.B. Process safe cast as constant  
 //        if (e instanceof Cast)
 //            return isConstantExpression(((Cast) e).expr());

@@ -104,7 +104,6 @@ import polyglot.ast.IntLit_c;
 import polyglot.ast.Labeled_c;
 import polyglot.ast.Lit;
 import polyglot.ast.LocalClassDecl_c;
-import polyglot.ast.LocalDecl;
 import polyglot.ast.LocalDecl_c;
 import polyglot.ast.Local_c;
 import polyglot.ast.MethodDecl;
@@ -186,6 +185,7 @@ import x10.ast.SettableAssign_c;
 import x10.ast.StmtExpr_c;
 import x10.ast.StmtSeq_c;
 import x10.ast.SubtypeTest_c;
+import x10.ast.Tuple_c;
 import x10.ast.TypeDecl_c;
 import x10.ast.When_c;
 import x10.ast.X10Binary_c;
@@ -227,10 +227,8 @@ import x10.types.X10ParsedClassType_c;
 import polyglot.types.TypeSystem_c.BaseTypeEquals;
 import x10.types.checker.Converter;
 
-import x10.visit.ExpressionFlattener;
 import x10.visit.StaticNestedClassRemover;
 import x10.visit.X10DelegatingVisitor;
-import x10.util.AltSynthesizer;
 import x10.util.ClassifiedStream;
 import x10.util.ClosureSynthesizer;
 import x10.util.StreamWrapper;
@@ -276,10 +274,10 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         if (Types.isX10Struct(type)) {
             sw.write(typeName+ "::" +SharedVarsMethods.ALLOC+ "()");
         } else {
-            // XTENLANG-1407: Replace alloc_z with alloc once we finish the default value specification/implementation.
+            // XTENLANG-1407: Remove this memset call once we finish the default value specification/implementation.
             //                Expect it to be more efficient to explicitly initialize all of the object fields instead
-            //                of first calling alloc_z, then storing into most of the fields a second time.
-            sw.write("(new (x10aux::alloc_z"+chevrons(typeName)+"()) "+typeName+"())");
+            //                of first calling memset, then storing into most of the fields a second time.
+            sw.write("((new (memset(x10aux::alloc"+chevrons(typeName)+"(), 0, sizeof("+typeName+"))) "+typeName+"()))");
             sw.newline();
         }
     }
@@ -894,7 +892,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
      * AST nodes by calling the helper method extractAllClassTypes.
      */
     private ArrayList<ClassType> referencedTypes(X10ClassDecl_c n, X10ClassDef def) {
-		X10SearchVisitor<Node> xTypes = new X10SearchVisitor<Node>(X10CanonicalTypeNode_c.class, Closure_c.class, 
+		X10SearchVisitor<Node> xTypes = new X10SearchVisitor<Node>(X10CanonicalTypeNode_c.class, Closure_c.class, Tuple_c.class, 
 		                                                           Allocation_c.class, X10Call_c.class, Field_c.class, FieldAssign_c.class);
 		n.visit(xTypes);
 		ArrayList<ClassType> types = new ArrayList<ClassType>();
@@ -917,6 +915,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		            ClassType c = t.type().toClass();
 		            assert (c.interfaces().size() == 1);
                     extractAllClassTypes(c.interfaces().get(0), types, dupes);
+		        } else if (tn instanceof Tuple_c) {
+		            extractAllClassTypes(((Tuple_c) tn).type(), types, dupes);
 		        } else if (tn instanceof Allocation_c) {
                     extractAllClassTypes(((Allocation_c) tn).type(), types, dupes);
 		        } else if (tn instanceof X10Call_c) {
@@ -1632,10 +1632,11 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	        if (container.isX10Struct()) {
 	            sw.write(typeName+" this_; "); sw.newline();
 	        } else {
-	            // XTENLANG-1407: Replace alloc_z with alloc once we finish the default value specification/implementation.
+	            // XTENLANG-1407: Remove this memset call once we finish the default value specification/implementation.
 	            //                Expect it to be more efficient to explicitly initialize all of the object fields instead
-	            //                of first calling alloc_z, then storing into most of the fields a second time.
-	            sw.writeln(make_ref(typeName)+" this_ = new (x10aux::alloc_z"+chevrons(typeName)+"()) "+typeName+"();");
+	            //                of first calling memset, then storing into most of the fields a second time.
+	            sw.write(make_ref(typeName)+" this_ = "+
+	                    "new (memset(x10aux::alloc"+chevrons(typeName)+"(), 0, sizeof("+typeName+"))) "+typeName+"();"); sw.newline();
 	        }
             sw.write("this_->"+CONSTRUCTOR+"(");
 	        for (Iterator<Formal> i = dec.formals().iterator(); i.hasNext(); ) {
@@ -1741,8 +1742,6 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    // define the actual field initializer
 	    // This method is mainly called indirectly from the on-demand field initializer,
 	    // but for a few fields is also called from initialize_xrx in bootstrap.cc
-	    
-	    
 	    sw.write("void ");
 	    sw.write(container + "::" + init_nb);
 	    sw.write("() {");
@@ -1753,28 +1752,12 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	    // initialize the field
 	    sw.write("_SI_(\"Doing static initialization for field: "+container+"."+name+"\");"); sw.newline();
 	    String val = getId();
-	    boolean generatedFlatInit = false;
-	    if (((x10.ExtensionInfo)(tr.job().extensionInfo())).getOptions().x10_config.FLATTEN_EXPRESSIONS) {
-	        // The expression flattening passes run over the entire AST leave static field init expressions alone
-	        // because at the X10 AST level there isn't a statement to flatten them into.
-	        // If the init expr isn't a primary expression, we need to do some munging now to make sure
-	        // it is fully flattened.
-	        if (!ExpressionFlattener.isPrimary(dec.init())) {
-	            generatedFlatInit = true;
-	            AltSynthesizer syn = new AltSynthesizer(tr.typeSystem(), tr.nodeFactory());
-	            LocalDecl initDecl = syn.createLocalDecl(dec.position(), Flags.NONE, Name.make(val), dec.type().type(), dec.init());
-	            ExpressionFlattener ef = new ExpressionFlattener(tr.job(), tr.typeSystem(), tr.nodeFactory());
-	            ef.begin();
-	            Stmt outS = (Stmt) initDecl.visit(ef);
-	            dec.printBlock(outS, sw, tr);
-	        } 
-	    }
-	    if (!generatedFlatInit) {
-	        emitter.printType(dec.type().type(), sw);
-	        sw.write(" "+val + " = ");
-	        dec.print(dec.init(), sw, tr);
-	        sw.writeln(";");
-	    }
+	    emitter.printType(dec.type().type(), sw);
+	    sw.allowBreak(2, 2, " ", 1);
+	    sw.write(val + " = "+selectUncheckedCast(tr.typeSystem(), dec.init().type(), dec.type().type()));
+	    sw.write(chevrons(Emitter.translateType(dec.type().type(), true))+"(");
+	    dec.print(dec.init(), sw, tr);
+	    sw.writeln(");");
 	    // copy into the field
 	    sw.writeln(fname + " = " + val + ";");
 	    // update the status
@@ -3633,7 +3616,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
         inc.write("template<class __T> static "+make_ref("__T")+" "+DESERIALIZE_METHOD+"("+DESERIALIZATION_BUFFER+" &buf) {");
         inc.newline(4); inc.begin(0);
-        inc.writeln(cnamet+"* storage = x10aux::alloc_z"+chevrons(cnamet)+"();");
+        inc.writeln(cnamet+"* storage = x10aux::alloc"+chevrons(cnamet)+"();");
         inc.writeln("buf.record_reference(storage);");
         
         // FIXME: factor out this loop
@@ -3994,6 +3977,38 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 			components.put(Integer.toString(i++), "/"+"*"+" UNUSED "+"*"+"/");
 	    }
 	    emitter.nativeSubst("Native", components, tr, pat, sw);
+	}
+
+	public void visit(Tuple_c c) {
+	    TypeSystem xts =  tr.typeSystem();
+	    Context context = tr.context();
+
+		// Handles Array initializer.
+		Type T = Types.getParameterType(c.type(), 0);		
+		String type = Emitter.translateType(c.type());
+		String tmp = getId();
+		// [DC] this cast is needed to ensure everything has a ref type
+		// otherwise overloads don't seem to work properly
+		sw.write("("+make_ref(type)+")");
+
+		sw.write("(__extension__ ({");
+		sw.newline(4); sw.begin(0);
+		sw.write(make_ref(type)+" "+tmp+"(");
+
+		sw.write("x10::lang::Rail"+chevrons(Emitter.translateType(T, true)));
+		sw.writeln("::_make("+c.arguments().size()+"));");
+		int count = 0;
+		for (Expr e : c.arguments()) {
+		    sw.write(tmp+"->"+Emitter.mangled_method_name(SettableAssign.SET.toString())+"(");
+		    sw.writeln((count++)+", ");
+		    c.printSubExpr(e, false, sw, tr);
+		    sw.writeln(");");
+		}
+		sw.write(tmp);
+		X10CPPCompilerOptions opts = (X10CPPCompilerOptions) tr.job().extensionInfo().getOptions();
+		sw.write(";");
+		sw.end(); sw.newline();
+		sw.write("}))");
 	}
 } // end of MessagePassingCodeGenerator
 // vim:tabstop=4:shiftwidth=4:expandtab

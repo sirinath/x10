@@ -20,7 +20,7 @@ import polyglot.util.ErrorQueue;
 public class Cygwin_CXXCommandBuilder extends CXXCommandBuilder {
 
     protected String defaultPostCompiler() {
-        return "g++";
+        return "g++-4";
     }
 
     public void addPreArgs(ArrayList<String> cxxCmd) {

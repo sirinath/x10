@@ -24,8 +24,7 @@ class Activity {
     // This flag is hacked to be false in the APGAS C++ library
     // TODO: refactor XRX so body is more than a ()=>void so that run
     //       can simply ask the body if it should be deallocated on completion.
-    private static DEALLOC_BODY:Boolean = canDealloc();
-    private static def canDealloc():Boolean = true;  // sigh. Block constant propagation.
+    private static DEALLOC_BODY:Boolean = true;
 
     static class ClockPhases extends HashMap[Clock,Int] {
         // compute spawnee clock phases from spawner clock phases in async clocked(clocks)
@@ -86,10 +85,6 @@ class Activity {
      */
     val shouldNotifyTermination:Boolean;
 
-    /** Set to true unless this activity was spawned by a place that then immediately died
-     */
-    val confirmed:Boolean;
-
     /**
      * Depth of enclosong atomic blocks
      */
@@ -106,12 +101,8 @@ class Activity {
     }
     def this(body:()=>void, srcPlace:Place, finishState:FinishState, nac:Boolean, nt:Boolean) {
         this.finishState = finishState;
+        if (nac) finishState.notifyActivityCreation(srcPlace);
         this.shouldNotifyTermination = nt;
-        if (nac) {
-            this.confirmed = finishState.notifyActivityCreation(srcPlace);
-        } else {
-            this.confirmed = true;
-        }
         this.body = body;
     }
 
@@ -165,17 +156,15 @@ class Activity {
      * Run activity.
      */
     def run():void {
-        if (confirmed) {
-            try {
-                body();
-            } catch (t:Error) {
-                finishState.pushException(new WrappedThrowable(t));
-            } catch (t:Exception) {
-                finishState.pushException(t);
-            }
-            if (null != clockPhases) clockPhases.drop();
-            if (shouldNotifyTermination) finishState.notifyActivityTermination();
+        try {
+            body();
+        } catch (t:Error) {
+            finishState.pushException(new WrappedThrowable(t));
+        } catch (t:Exception) {
+            finishState.pushException(t);
         }
+        if (null != clockPhases) clockPhases.drop();
+        if (shouldNotifyTermination) finishState.notifyActivityTermination();
         if (DEALLOC_BODY) Unsafe.dealloc(body);
     }
 }

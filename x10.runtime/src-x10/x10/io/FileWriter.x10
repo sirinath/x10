@@ -20,7 +20,7 @@ import x10.compiler.Native;
  * Note: The backing OutputStream is implicitly created with 
  *       buffering enabled at the native layer.
  */
-public class FileWriter extends OutputStreamWriter implements Unserializable { 
+public class FileWriter extends OutputStreamWriter {
     @NativeRep("java", "x10.core.io.FileOutputStream", null, "x10.core.io.FileOutputStream.$RTT")
     @NativeRep("c++", "x10::io::FileWriter__FileOutputStream*", "x10::io::FileWriter__FileOutputStream", null)
     protected final static class FileOutputStream extends OutputStream {
@@ -28,6 +28,8 @@ public class FileWriter extends OutputStreamWriter implements Unserializable {
         public native def this(path: String, append: Boolean); // throws IOException;
     }
 
+    // TODO: This is questionable.
+    //       What does it mean to send a File to another node?
     val file: File;
     
     // @Native("java", "new java.io.BufferedOutputStream(new java.io.FileOutputStream(#path))")

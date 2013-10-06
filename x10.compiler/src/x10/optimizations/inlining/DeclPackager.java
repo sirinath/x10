@@ -72,7 +72,7 @@ public class DeclPackager extends ContextVisitor {
                  utils.inliningProhibited(decl) ||
                  utils.inliningProhibited(cdef) ||
                  utils.inliningProhibited(pdef) ||
-                 ExpressionFlattener.cannotFlatten(n, job) ||
+                 ExpressionFlattener.cannotFlatten(n) ||
                  isNative(pdef, cdef) ||
                  null == decl.body()
                ) {
