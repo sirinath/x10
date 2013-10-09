@@ -20,26 +20,28 @@ import x10.compiler.Native;
  * Note: The backing OutputStream is implicitly created with 
  *       buffering enabled at the native layer.
  */
-public class FileWriter extends OutputStreamWriter implements Unserializable { 
+public class FileWriter extends OutputStreamWriter {
     @NativeRep("java", "x10.core.io.FileOutputStream", null, "x10.core.io.FileOutputStream.$RTT")
     @NativeRep("c++", "x10::io::FileWriter__FileOutputStream*", "x10::io::FileWriter__FileOutputStream", null)
     protected final static class FileOutputStream extends OutputStream {
         @Native("java", "new x10.core.io.FileOutputStream((java.lang.System[]) null).x10$io$FileReader$FileOutputStream$$init$S(#path, #append)")
-        public native def this(path:String, append:Boolean);
+        public native def this(path: String, append: Boolean); // throws IOException;
     }
 
-    val file:File;
+    // TODO: This is questionable.
+    //       What does it mean to send a File to another node?
+    val file: File;
     
     // @Native("java", "new java.io.BufferedOutputStream(new java.io.FileOutputStream(#path))")
-    private static def make(path: String, append: Boolean):OutputStream {
+    private static def make(path: String, append: Boolean):OutputStream{ //throws IOException {
         return new FileOutputStream(path, append);       
     }
 
-    public def this(file: File) {
+    public def this(file: File) { //throws IOException {
         this(file, false);
     }
 
-    public def this(file: File, append: Boolean) {
+    public def this(file: File, append: Boolean) { //throws IOException {
         super(make(file.getPath(), append));
         this.file = file;
     }

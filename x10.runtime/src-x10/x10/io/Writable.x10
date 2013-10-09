@@ -11,24 +11,6 @@
 
 package x10.io;
 
-import x10.util.StringBuilder;
-
-public class StringWriter extends Writer {
-    val b:StringBuilder;
-
-    public def this() { 
-    	this.b = new StringBuilder(); 
-    }
-
-    public def write(x:Byte):void { 
-        b.add(x as Char);
-    }
-
-    public def size() = b.length();
-
-    public def result() = b.result();
-    
-    public def flush():void { }
-    public def close():void { }
+public interface Writable {
+    def write(w: Writer): void; //throws IOException;
 }
-

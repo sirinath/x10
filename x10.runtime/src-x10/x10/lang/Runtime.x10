@@ -198,7 +198,6 @@ public final class Runtime {
     public static BUSY_WAITING = Configuration.busy_waiting();
     public static RESILIENT_PLACE_ZERO = Configuration.envOrElse("X10_RESILIENT_PLACE_ZERO", false);
     public static RESILIENT_ZOO_KEEPER = Configuration.envOrElse("X10_RESILIENT_ZOO_KEEPER", false);
-    public static RESILIENT_DISTRIBUTED = Configuration.envOrElse("X10_RESILIENT_DISTRIBUTED", false);
 
     // External process execution
 
@@ -634,6 +633,7 @@ public final class Runtime {
                 // try network
                 x10rtProbe();
                 if (Place.numDead() != numDead) {
+                    // atomic wakes up ResilientFinish...
                     atomic {
                         numDead = Place.numDead();
                         //Runtime.println("Number of dead places now "+numDead);
@@ -641,8 +641,8 @@ public final class Runtime {
                         //    if (p.isDead()) Runtime.println("Dead: "+p);
                         //}
                     }
-                    // release any finishes that may have quiesced due to activities vanishing
-                    FinishState.notifyPlaceDeath();
+                    // release the pool
+                    if (here.id == 0l) Runtime.rootFinish.notifyPlaceDeath();
                 }
                 activity = worker.poll();
                 if (null != activity || latch()) return activity;
@@ -709,7 +709,7 @@ public final class Runtime {
     public static def surplusActivityCount():int = worker().size();
 
     /** The finish state that manages the 'main' activity and sub activities. */
-    static rootFinish = makeDefaultFinish(pool.latch);
+    private static rootFinish = makeDefaultFinish(pool.latch);
 
     private static val processStartNanos_ = new Cell[Long](0);
     public static def processStartNanos() = processStartNanos_();
@@ -1171,8 +1171,6 @@ public final class Runtime {
             return new FinishState.FinishResilientPlaceZero(null);
         } else if (RESILIENT_ZOO_KEEPER) {
             return new FinishState.FinishResilientZooKeeper(null);
-        } else if (RESILIENT_DISTRIBUTED) {
-            return new FinishState.FinishResilientDistributed(new SimpleLatch());
         } else {
             return new FinishState.Finish();
         }
@@ -1182,8 +1180,6 @@ public final class Runtime {
             return new FinishState.FinishResilientPlaceZero(latch);
         } else if (RESILIENT_ZOO_KEEPER) {
             return new FinishState.FinishResilientZooKeeper(latch);
-        } else if (RESILIENT_DISTRIBUTED) {
-            return new FinishState.FinishResilientDistributed(latch);
         } else {
             return new FinishState.Finish(latch);
         }
@@ -1214,8 +1210,6 @@ public final class Runtime {
             f = new FinishState.FinishResilientPlaceZero(null); break;
         case Pragma.FINISH_RESILIENT_ZOO_KEEPER:
             f = new FinishState.FinishResilientZooKeeper(null); break;
-        case Pragma.FINISH_RESILIENT_DISTRIBUTED:
-            f = new FinishState.FinishResilientDistributed(null); break;
         default: 
             f = makeDefaultFinish();
         }

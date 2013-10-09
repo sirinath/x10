@@ -35,6 +35,8 @@ public class ExpressionFlattenerForAtExpr extends ContextVisitor {
     private final TypeSystem xts;
     private final NodeFactory xnf;
 
+    private Type imc;
+
     public ExpressionFlattenerForAtExpr(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         xts = (TypeSystem) ts;

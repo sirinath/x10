@@ -34,7 +34,8 @@ namespace x10aux {
         Bucket **_buckets;
 
         simple_hashmap() {
-            _buckets = x10aux::alloc_z<Bucket*>(NUM_BUCKETS*sizeof(Bucket*));
+            _buckets = x10aux::alloc<Bucket*>(NUM_BUCKETS*sizeof(Bucket*));
+            memset(_buckets, 0, NUM_BUCKETS*sizeof(Bucket*));
         }
 
         ~simple_hashmap() {

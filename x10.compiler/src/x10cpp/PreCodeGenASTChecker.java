@@ -24,8 +24,6 @@ import x10.ast.Here_c;
 import x10.ast.Next;
 import x10.ast.Next_c;
 import x10.ast.SettableAssign;
-import x10.ast.StmtExpr;
-import x10.ast.Tuple;
 import x10.ast.When;
 import x10.ast.When_c;
 import x10.ast.X10Loop;
@@ -37,11 +35,9 @@ import x10.ast.X10Loop;
  */
 public class PreCodeGenASTChecker extends NodeVisitor {
     private Job job;
-    boolean stmtExprsAllowed;
 
-    public PreCodeGenASTChecker(Job job, boolean stmtExprsAllowed) {
+    public PreCodeGenASTChecker(Job job) {
         this.job = job;
-        this.stmtExprsAllowed = stmtExprsAllowed;
     }
 
     public Node visitEdgeNoOverride(Node parent, Node n) {
@@ -51,7 +47,7 @@ public class PreCodeGenASTChecker extends NodeVisitor {
     		String msg = "c++ codegen: "+m+("!")+(" n=")+(n).toString();
     		job.compiler().errorQueue().enqueue(ErrorInfo.INVARIANT_VIOLATION_KIND,msg,n.position());
     	} else {
-    	    n.del().visitChildren(this); // only recurse to the children if there isn't an error already.
+    	    n.del().visitChildren(this); // if there is an error, I don't recurse to the children
         }
     	return n;
     }
@@ -83,14 +79,6 @@ public class PreCodeGenASTChecker extends NodeVisitor {
         
         if (n instanceof Try && ((Try) n).finallyBlock() != null) {
             return "Finally block not eliminated before codegen";
-        }
-        
-        if (n instanceof Tuple) {
-            return "Rail literal should have been expanded";
-        }
-        
-        if (!stmtExprsAllowed && n instanceof StmtExpr) {
-            return "StatementExpression should have been flattened";
         }
 
         return null;

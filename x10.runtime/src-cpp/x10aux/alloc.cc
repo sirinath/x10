@@ -39,6 +39,7 @@
 using namespace x10aux;
 
 void x10aux::reportOOM(size_t size) {
+    _M_("Out of memory allocating " << size << " bytes");
 #ifndef NO_EXCEPTIONS
     throwException<x10::lang::OutOfMemoryError>();
 #else
