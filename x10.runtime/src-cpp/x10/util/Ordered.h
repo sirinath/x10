@@ -27,21 +27,20 @@ namespace x10 {
         public:
             RTT_H_DECLS_INTERFACE
     
-            template <class Iface> struct itable {
-            itable(x10_boolean (Iface::*equals) (x10::lang::Any*), x10_int (Iface::*hashCode) (), x10_boolean (Iface::*__lt) (TPMGL(T)), x10_boolean (Iface::*__le) (TPMGL(T)), x10_boolean (Iface::*__gt) (TPMGL(T)), x10_boolean (Iface::*__ge) (TPMGL(T)), x10::lang::String* (Iface::*toString) (), x10::lang::String* (Iface::*typeName) ()) : equals(equals), hashCode(hashCode), __lt(__lt), __le(__le), __gt(__gt), __ge(__ge), toString(toString), typeName(typeName) {}
-                x10_boolean (Iface::*equals) (x10::lang::Any*);
-                x10_int (Iface::*hashCode) ();
-                x10_boolean (Iface::*__lt) (TPMGL(T));
-                x10_boolean (Iface::*__le) (TPMGL(T));
-                x10_boolean (Iface::*__gt) (TPMGL(T));
-                x10_boolean (Iface::*__ge) (TPMGL(T));
-                x10::lang::String* (Iface::*toString) ();
-                x10::lang::String* (Iface::*typeName) ();
+            template <class I> struct itable {
+            itable(x10_boolean (I::*equals) (x10::lang::Any*), x10_int (I::*hashCode) (), x10_boolean (I::*__lt) (TPMGL(T)), x10_boolean (I::*__le) (TPMGL(T)), x10_boolean (I::*__gt) (TPMGL(T)), x10_boolean (I::*__ge) (TPMGL(T)), x10::lang::String* (I::*toString) (), x10::lang::String* (I::*typeName) ()) : equals(equals), hashCode(hashCode), __lt(__lt), __le(__le), __gt(__gt), __ge(__ge), toString(toString), typeName(typeName) {}
+                x10_boolean (I::*equals) (x10::lang::Any*);
+                x10_int (I::*hashCode) ();
+                x10_boolean (I::*__lt) (TPMGL(T));
+                x10_boolean (I::*__le) (TPMGL(T));
+                x10_boolean (I::*__gt) (TPMGL(T));
+                x10_boolean (I::*__ge) (TPMGL(T));
+                x10::lang::String* (I::*toString) ();
+                x10::lang::String* (I::*typeName) ();
             };
     
             static x10_boolean equals(Ordered<TPMGL(T)>* _recv, x10::lang::Any* arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->equals))(arg0);
             }
             template <class R> static x10_boolean equals(R _recv, x10::lang::Any* arg0) {
@@ -49,7 +48,6 @@ namespace x10 {
             }
             static x10_int hashCode(Ordered<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->hashCode))();
             }
             template <class R> static x10_int hashCode(R _recv) {
@@ -57,7 +55,6 @@ namespace x10 {
             }
             static x10_boolean __lt(Ordered<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->__lt))(arg0);
             }
             template <class R> static x10_boolean __lt(R _recv, TPMGL(T) arg0) {
@@ -65,7 +62,6 @@ namespace x10 {
             }
             static x10_boolean __le(Ordered<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->__le))(arg0);
             }
             template <class R> static x10_boolean __le(R _recv, TPMGL(T) arg0) {
@@ -73,7 +69,6 @@ namespace x10 {
             }
             static x10_boolean __gt(Ordered<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->__gt))(arg0);
             }
             template <class R> static x10_boolean __gt(R _recv, TPMGL(T) arg0) {
@@ -81,7 +76,6 @@ namespace x10 {
             }
             static x10_boolean __ge(Ordered<TPMGL(T)>* _recv, TPMGL(T) arg0) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->__ge))(arg0);
             }
             template <class R> static x10_boolean __ge(R _recv, TPMGL(T) arg0) {
@@ -89,7 +83,6 @@ namespace x10 {
             }
             static x10::lang::String* toString(Ordered<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->toString))();
             }
             template <class R> static x10::lang::String* toString(R _recv) {
@@ -97,7 +90,6 @@ namespace x10 {
             }
             static x10::lang::String* typeName(Ordered<TPMGL(T)>* _recv) {
                 x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-                x10aux::nullCheck(_refRecv);
                 return (_refRecv->*(x10aux::findITable<x10::util::Ordered<TPMGL(T)> >(_refRecv->_getITables())->typeName))();
             }
             template <class R> static x10::lang::String* typeName(R _recv) {
@@ -115,22 +107,21 @@ namespace x10 {
 #define ORDERED_PRIM_DECL(PRIM) template<> class Ordered<PRIM> {        \
         public:                                                         \
             RTT_H_DECLS_INTERFACE                                       \
-                template <class Iface> struct itable {                      \
-                itable(x10_boolean (Iface::*equals) (x10::lang::Any*), x10_int (Iface::*hashCode) (), x10_boolean (Iface::*__lt) (PRIM), x10_boolean (Iface::*__le) (PRIM), x10_boolean (Iface::*__gt) (PRIM), x10_boolean (Iface::*__ge) (PRIM), x10::lang::String* (Iface::*toString) (), x10::lang::String* (Iface::*typeName) ()) : equals(equals), hashCode(hashCode), __lt(__lt), __le(__le), __gt(__gt), __ge(__ge), toString(toString), typeName(typeName) {} \
-                x10_boolean (Iface::*equals) (x10::lang::Any*);             \
-                x10_int (Iface::*hashCode) ();                              \
-                x10_boolean (Iface::*__lt) (PRIM);                          \
-                x10_boolean (Iface::*__le) (PRIM);                          \
-                x10_boolean (Iface::*__gt) (PRIM);                          \
-                x10_boolean (Iface::*__ge) (PRIM);                          \
-                x10::lang::String* (Iface::*toString) ();                   \
-                x10::lang::String* (Iface::*typeName) ();                   \
+                template <class I> struct itable {                      \
+                itable(x10_boolean (I::*equals) (x10::lang::Any*), x10_int (I::*hashCode) (), x10_boolean (I::*__lt) (PRIM), x10_boolean (I::*__le) (PRIM), x10_boolean (I::*__gt) (PRIM), x10_boolean (I::*__ge) (PRIM), x10::lang::String* (I::*toString) (), x10::lang::String* (I::*typeName) ()) : equals(equals), hashCode(hashCode), __lt(__lt), __le(__le), __gt(__gt), __ge(__ge), toString(toString), typeName(typeName) {} \
+                x10_boolean (I::*equals) (x10::lang::Any*);             \
+                x10_int (I::*hashCode) ();                              \
+                x10_boolean (I::*__lt) (PRIM);                          \
+                x10_boolean (I::*__le) (PRIM);                          \
+                x10_boolean (I::*__gt) (PRIM);                          \
+                x10_boolean (I::*__ge) (PRIM);                          \
+                x10::lang::String* (I::*toString) ();                   \
+                x10::lang::String* (I::*typeName) ();                   \
                 };                                                      \
             static x10_boolean equals(PRIM recv, PRIM arg0) { return x10aux::equals(recv, arg0); } \
             static x10_int hashCode(PRIM recv) { return x10aux::hash_code(recv); } \
             static x10_boolean __lt(Ordered<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::util::Ordered<PRIM> >(recv->_getITables())->__lt))(arg0); \
             }                                                           \
             static inline x10_boolean __lt(PRIM recv, PRIM arg0) {      \
@@ -138,7 +129,6 @@ namespace x10 {
             }                                                           \
             static x10_boolean __le(Ordered<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::util::Ordered<PRIM> >(recv->_getITables())->__le))(arg0); \
             }                                                           \
             static inline x10_boolean __le(PRIM recv, PRIM arg0) {      \
@@ -146,7 +136,6 @@ namespace x10 {
             }                                                           \
             static x10_boolean __gt(Ordered<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::util::Ordered<PRIM> >(recv->_getITables())->__gt))(arg0); \
             }                                                           \
             static inline x10_boolean __gt(PRIM recv, PRIM arg0) {      \
@@ -154,7 +143,6 @@ namespace x10 {
             }                                                           \
             static x10_boolean __ge(Ordered<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::util::Ordered<PRIM> >(recv->_getITables())->__ge))(arg0); \
             }                                                           \
             static inline x10_boolean __ge(PRIM recv, PRIM arg0) {      \

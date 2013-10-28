@@ -11,6 +11,8 @@
 
 #include <errno.h>
 
+#include <x10aux/math.h>
+
 #include <x10/lang/Float.h>
 #include <x10/lang/String.h>
 #include <x10/lang/NumberFormatException.h>
@@ -59,6 +61,14 @@ x10_float FloatNatives::parseFloat(String* s) {
         }
     }
     return ans;
+}
+
+x10_boolean FloatNatives::isNaN(x10_float x) {
+    return x10aux::math::isnan(x);
+}
+
+x10_boolean FloatNatives::isInfinite(x10_float x) {
+    return x10aux::math::isinf(x);
 }
 
 x10_int FloatNatives::toIntBits(x10_float x) {

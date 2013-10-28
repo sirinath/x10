@@ -13,7 +13,7 @@
 #define X10_LANG_DOUBLE_H
 
 #include <x10aux/config.h>
-#include <cmath>
+#include <x10aux/math.h>
 
 namespace x10 {
     namespace lang {
@@ -24,20 +24,8 @@ namespace x10 {
             static String* toHexString(x10_double value);
             static String* toString(x10_double value);
             static x10_double parseDouble(String* s);
-            static x10_boolean isNaN(x10_double value) {
-#if defined(_AIX)
-				return isnan(value);
-#else
-				return std::isnan(value);
-#endif
-            }
-            static x10_boolean isInfinite(x10_double value) {
-#if defined(_AIX)
-				return isinf(value);
-#else
-				return std::isinf(value);
-#endif
-            }
+            static x10_boolean isNaN(x10_double value);
+            static x10_boolean isInfinite(x10_double value);
             static x10_long toLongBits(x10_double value);
             static x10_long toRawLongBits(x10_double value);
             static x10_double fromLongBits(x10_long value);

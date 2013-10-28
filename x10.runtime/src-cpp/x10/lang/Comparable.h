@@ -27,22 +27,21 @@ namespace x10 {
         public:
             RTT_H_DECLS_INTERFACE
     
-          template <class Iface> struct itable {
-              itable(x10_int (Iface::*compareTo) (TPMGL(T)),
-                     x10_boolean (Iface::*equals) (x10::lang::Any*),
-                     x10_int (Iface::*hashCode) (),
-                     x10::lang::String* (Iface::*toString) (),
-                     x10::lang::String* (Iface::*typeName) ()) : compareTo(compareTo), equals(equals), hashCode(hashCode), toString(toString), typeName(typeName) {}
-              x10_int (Iface::*compareTo) (TPMGL(T));
-              x10_boolean (Iface::*equals) (x10::lang::Any*);
-              x10_int (Iface::*hashCode) ();
-              x10::lang::String* (Iface::*toString) ();
-              x10::lang::String* (Iface::*typeName) ();
+          template <class I> struct itable {
+              itable(x10_int (I::*compareTo) (TPMGL(T)),
+                     x10_boolean (I::*equals) (x10::lang::Any*),
+                     x10_int (I::*hashCode) (),
+                     x10::lang::String* (I::*toString) (),
+                     x10::lang::String* (I::*typeName) ()) : compareTo(compareTo), equals(equals), hashCode(hashCode), toString(toString), typeName(typeName) {}
+              x10_int (I::*compareTo) (TPMGL(T));
+              x10_boolean (I::*equals) (x10::lang::Any*);
+              x10_int (I::*hashCode) ();
+              x10::lang::String* (I::*toString) ();
+              x10::lang::String* (I::*typeName) ();
           };
     
           static x10_int compareTo(x10::lang::Comparable<TPMGL(T)>* _recv, TPMGL(T) arg0) {
               x10::lang::Reference* _refRecv = reinterpret_cast<x10::lang::Reference*>(_recv);
-              x10aux::nullCheck(_refRecv);
               return (_refRecv->*(x10aux::findITable<Comparable<TPMGL(T)> >(_refRecv->_getITables())->compareTo))(arg0);
           }     
           template <class R> static x10_int compareTo(R _recv, TPMGL(T) arg0) {
@@ -51,22 +50,18 @@ namespace x10 {
 
           static x10_boolean equals(x10::lang::Comparable<TPMGL(T)>* _recv, x10::lang::Any* arg0) {
               x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv);
-              x10aux::nullCheck(_recv);
               return (recv->*(x10aux::findITable<x10::lang::Comparable<TPMGL(T)> >(recv->_getITables())->equals))(arg0);
           }
           static x10_int hashCode(x10::lang::Comparable<TPMGL(T)>* _recv) {
               x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv);
-              x10aux::nullCheck(_recv);
               return (recv->*(x10aux::findITable<x10::lang::Comparable<TPMGL(T)> >(recv->_getITables())->hashCode))();
           }
           static x10::lang::String* toString(x10::lang::Comparable<TPMGL(T)>* _recv) {
               x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv);
-              x10aux::nullCheck(_recv);
               return (recv->*(x10aux::findITable<x10::lang::Comparable<TPMGL(T)> >(recv->_getITables())->toString))();
           }
           static x10::lang::String* typeName(x10::lang::Comparable<TPMGL(T)>* _recv) {
               x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv);
-              x10aux::nullCheck(_recv);
               return (recv->*(x10aux::findITable<x10::lang::Comparable<TPMGL(T)> >(recv->_getITables())->typeName))();
           }
         };
@@ -82,24 +77,23 @@ namespace x10 {
         template<> class Comparable<PRIM>   {    \
         public:                                     \
         RTT_H_DECLS_INTERFACE                       \
-            template <class Iface> struct itable {                       \
-                itable(x10_int (Iface::*compareTo) (PRIM),               \
-                       x10_boolean (Iface::*equals) (x10::lang::Any*), \
-                       x10_int (Iface::*hashCode) (),                       \
-                       x10::lang::String* (Iface::*toString) (), \
-                       x10::lang::String* (Iface::*typeName) ()) : compareTo(compareTo), equals(equals), hashCode(hashCode), toString(toString), typeName(typeName) {} \
-                x10_int (Iface::*compareTo) (PRIM);                      \
-                x10_boolean (Iface::*equals) (x10::lang::Any*); \
-                x10_int (Iface::*hashCode) ();                              \
-                x10::lang::String* (Iface::*toString) ();       \
-                x10::lang::String* (Iface::*typeName) ();       \
+            template <class I> struct itable {                       \
+                itable(x10_int (I::*compareTo) (PRIM),               \
+                       x10_boolean (I::*equals) (x10::lang::Any*), \
+                       x10_int (I::*hashCode) (),                       \
+                       x10::lang::String* (I::*toString) (), \
+                       x10::lang::String* (I::*typeName) ()) : compareTo(compareTo), equals(equals), hashCode(hashCode), toString(toString), typeName(typeName) {} \
+                x10_int (I::*compareTo) (PRIM);                      \
+                x10_boolean (I::*equals) (x10::lang::Any*); \
+                x10_int (I::*hashCode) ();                              \
+                x10::lang::String* (I::*toString) ();       \
+                x10::lang::String* (I::*typeName) ();       \
             };                                                          \
             static inline x10_int compareTo(PRIM recv, PRIM arg0) {     \
                 return UTILS::compareTo(recv, arg0);            \
             }                                                           \
             static x10_int compareTo(Comparable<PRIM>* _recv, PRIM arg0) { \
                 x10::lang::Reference* recv = reinterpret_cast<x10::lang::Reference*>(_recv); \
-                x10aux::nullCheck(_recv); \
                 return (recv->*(x10aux::findITable<x10::lang::Comparable<PRIM> >(recv->_getITables())->compareTo))(arg0); \
             }                                                           \
             static x10_boolean equals(PRIM recv, PRIM arg0) { return x10aux::equals(recv, arg0); } \

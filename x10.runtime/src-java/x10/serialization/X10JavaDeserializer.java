@@ -104,10 +104,6 @@ public final class X10JavaDeserializer implements SerializationConstants {
     }
 
     public void update_reference(int pos, Object obj) {
-        if (Runtime.TRACE_SER) {
-            String className = obj == null ? "null" : obj.getClass().getName();
-            Runtime.printTraceMessage("\t\tUpdated reference of type " + Runtime.ANSI_CYAN + Runtime.ANSI_BOLD + className + Runtime.ANSI_RESET + " at " + pos + " (absolute) in map");
-        }
         objectList.set(pos, obj);
     }
 
@@ -148,6 +144,7 @@ public final class X10JavaDeserializer implements SerializationConstants {
             }
             objectList.clear();
             counter = 0;
+
             return readSerializationId();
         }
         return sid;

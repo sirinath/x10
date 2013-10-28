@@ -367,7 +367,7 @@ template<class T> x10::lang::Rail<T>* x10::lang::Rail<T>::_make(x10_long size, x
     if (alloc->FMGL(congruent)) {
         if (containsPtrs) failAllocNoPointers("Congruent memory cannot contain pointers");
         this_ = new (x10aux::alloc_internal_congruent(numBytes)) x10::lang::Rail<T>(numElems);
-    } else if (alloc->FMGL(hugePages)) {
+    } else if (alloc->FMGL(congruent)) {
         if (containsPtrs) failAllocNoPointers("Huge pages cannot contain pointers");
         this_ = new (x10aux::alloc_internal_huge(numBytes)) x10::lang::Rail<T>(numElems);
     } else {
@@ -576,14 +576,14 @@ namespace x10 {
         PRIMITIVE_COPY_SERIALIZATION(x10_float)
         PRIMITIVE_COPY_SERIALIZATION(x10_double)
 
-        template<> inline void x10::lang::Rail<x10_complex >::_serialize_body(x10aux::serialization_buffer& buf) {
+        template<> inline void x10::lang::Rail<x10::lang::Complex>::_serialize_body(x10aux::serialization_buffer& buf) {
             x10_long sz = FMGL(size);
             buf.write<x10_long>(sz);
             // Complex is serialized as two doubles
             buf.copyIn(buf, raw, sz*2, sizeof(x10_double));
         }
 
-        template<> inline void x10::lang::Rail<x10_complex >::_deserialize_body(x10aux::deserialization_buffer& buf) {
+        template<> inline void x10::lang::Rail<x10::lang::Complex>::_deserialize_body(x10aux::deserialization_buffer& buf) {
             buf.copyOut(buf, raw, FMGL(size)*2, sizeof(x10_double));
         }
     }

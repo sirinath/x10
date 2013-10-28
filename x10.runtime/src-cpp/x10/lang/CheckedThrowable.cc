@@ -17,7 +17,6 @@
 #include <x10/lang/Rail.h>
 #include <x10/lang/String.h>
 #include <x10/io/Printer.h>
-#include <x10/lang/Exception.h>
 
 #if defined(__GLIBC__) || defined(__APPLE__)
 #   include <execinfo.h> // for backtrace()
@@ -90,9 +89,6 @@ CheckedThrowable* CheckedThrowable::_constructor(String* message, CheckedThrowab
     return this;
 }
 
-Exception* CheckedThrowable::getCause() {
-    return x10::lang::Exception::ensureException(this);
-}
 
 String* CheckedThrowable::toString() {
     String* message = getMessage();
@@ -189,9 +185,9 @@ CheckedThrowable* CheckedThrowable::fillInStackTrace() {
 #if defined(__GLIBC__) || defined(__APPLE__)
     void *buffer[MAX_TRACE_SIZE];
 
-    int numFrames = (::backtrace(buffer, MAX_TRACE_SIZE)) - 1; // 1 frame smaller to cut out this "fillInStackTrace" method from the disalayed stack
+    int numFrames = ::backtrace(buffer, MAX_TRACE_SIZE);
     FMGL(trace) = x10aux::alloc<void*>(numFrames*sizeof(void*), false); // does not contain pointers to GC heap
-    memcpy(FMGL(trace), &buffer[1], numFrames*sizeof(void*));
+    memcpy(FMGL(trace), buffer, numFrames*sizeof(void*));
     FMGL(trace_size) = numFrames;
 #elif defined(_AIX)
     int numFrames = 0;
@@ -438,7 +434,7 @@ void CheckedThrowable::printStackTrace() {
     Rail<String*>* trace = this->getStackTrace();
     for (int i = 0; i < trace->FMGL(size); ++i)
         fprintf(stderr, "\tat %s\n", trace->__apply(i)->c_str());
-    CheckedThrowable* cause = FMGL(cause);
+    CheckedThrowable* cause = getCause();
     if (NULL != cause) {
         fprintf(stderr, "Caused by: ");
         cause->printStackTrace();
@@ -453,7 +449,7 @@ void CheckedThrowable::printStackTrace(x10::io::Printer* printer) {
         printer->print(atStr);
         printer->println(class_cast<Any*,String*>(trace->__apply(i)));
     }
-    CheckedThrowable* cause = FMGL(cause);
+    CheckedThrowable* cause = getCause();
     if (NULL != cause) {
         printer->print(x10::lang::String::Lit("Caused by: "));
         cause->printStackTrace(printer);

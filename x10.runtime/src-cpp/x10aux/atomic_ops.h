@@ -18,14 +18,7 @@
 #include <x10aux/lock.h>
 #endif
 
-#if defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d) || defined(__PPC__)
-#define X10_PPC_ARCH 1
-#if defined(__xlC__)
-#define X10_NO_GNU_INLINE_ASM 1
-#endif
-#endif
-
-#if defined(X10_PPC_ARCH) && defined(X10_NO_GNU_INLINE_ASM)
+#if (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d)) && defined(__xlC__)
 /* inline ppc asms for xlc; must be defined in global scope.  Ugh. */
 void ppc_sync();
 void ppc_isync();
@@ -72,7 +65,7 @@ namespace x10aux {
         static void unlock();
 #endif
 
-#if defined(X10_PPC_ARCH) && !defined(X10_NO_GNU_INLINE_ASM)
+#if (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d)) && !defined(__xlC__)
         /* inline ppc asms for gcc; can be nicely defined as private class member functions  */
         static inline void ppc_isync() { asm("isync"); }
         static inline void ppc_lwsync(){ asm("lwsync"); }
@@ -129,7 +122,7 @@ namespace x10aux {
          * data before any load after the data accesses its data.
          */
         static inline void load_load_barrier() {
-#if defined(X10_PPC_ARCH)
+#if (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d))
             ppc_sync(); /* TODO: sync is overkill for this barrier */
 #endif
         }
@@ -140,7 +133,7 @@ namespace x10aux {
          * the barrier has been flushed.
          */
         static inline void load_store_barrier() {
-#if defined(X10_PPC_ARCH)
+#if (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d))
             ppc_isync();
 #endif
         }
@@ -151,7 +144,7 @@ namespace x10aux {
          * barrier is accessed.
          */
         static inline void store_load_barrier() {
-#if defined(X10_PPC_ARCH)
+#if (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d))
             ppc_sync();
 #endif
         }
@@ -162,7 +155,7 @@ namespace x10aux {
          * the barrier is flushed.
          */
         static inline void store_store_barrier() {
-#if defined(X10_PPC_ARCH)
+#if (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d))
             ppc_lwsync();
 #endif
         }
@@ -188,7 +181,7 @@ namespace x10aux {
                    : "q" (newValue), "m" (*address), "0" (oldValue)
                    : "cc");
             return oldValue;
-#elif defined(X10_PPC_ARCH)
+#elif (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d))
             return ppc_compareAndSet32(oldValue, address, newValue);
 #elif defined(__sparc__)
             /* FIXME: is the memory barrier needed? */
@@ -236,7 +229,7 @@ namespace x10aux {
                    : "q" (newValue), "m" (*address), "0" (oldValue)
                    : "cc");
             return oldValue;
-#elif defined(X10_PPC_ARCH)
+#elif (defined(_ARCH_PPC) || defined(_ARCH_450) || defined(_ARCH_450d))
             return ppc_compareAndSet64(oldValue, address, newValue);
 #elif defined(__sparc__)
             /* FIXME: is the memory barrier needed? */

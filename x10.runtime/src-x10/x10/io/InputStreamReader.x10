@@ -14,6 +14,7 @@ package x10.io;
 import x10.compiler.Native;
 import x10.compiler.NativeRep;
 
+/** Note: package scope */
 public class InputStreamReader extends Reader {
     val stream: InputStream;
 
@@ -21,63 +22,66 @@ public class InputStreamReader extends Reader {
     @NativeRep("c++", "x10::io::InputStreamReader__InputStream*", "x10::io::InputStreamReader__InputStream", null)
     protected abstract static class InputStream {
         @Native("java", "#this.close()")
-        public native def close():void;
+        @Native("c++", "(#this)->close()")
+        public native def close(): void; //throws IOException;
 
         @Native("java", "#this.read()")
-        public native def read():Int;
+        @Native("c++", "(#this)->read()")
+        public native def read(): Int; //throws IOException;
 
         @Native("java", "#this.read((#r).getByteArray(), #off, #len)")
-        public native def read(r:Rail[Byte], off:Long, len:Long):void;
+        @Native("c++", "(#this)->read(#r,#off,#len)")
+        public native def read(r:Rail[Byte], off: Long, len: Long): void; //throws IOException;
 
         @Native("java", "#this.available()")
-        public native def available():Int;
+        @Native("c++", "(#this)->available()")
+        public native def available(): Int; //throws IOException;
 
         @Native("java", "#this.skip(#v)")
-        public native def skip(v:Int):void;
+        @Native("c++", "(#this)->skip(#v)")
+        public native def skip(v:Int): void; //throws IOException;
 
         @Native("java", "#this.mark(#m)")
-        public native def mark(m:Int):void;
+        @Native("c++", "(#this)->mark(#m)")
+        public native def mark(m:Int): void;
 
         @Native("java", "#this.reset()")
-        public native def reset():void;
+        @Native("c++", "(#this)->reset()")
+        public native def reset(): void; //throws IOException;
 
         @Native("java", "#this.markSupported()")
-        public native def markSupported():Boolean;
+        @Native("c++", "(#this)->markSupported()")
+        public native def markSupported(): Boolean;
     }
 
-    public def this(stream:InputStream) {
+    public def this(stream: InputStream) {
         this.stream = stream;
     }
 
-    protected def stream():InputStream = stream;
+    protected def stream(): InputStream = stream;
 
-    public def close():void { 
-        stream.close(); 
-    }
+    public def close(): void //throws IOException 
+    { stream.close(); }
 
-    public def read():Byte {
+    public def read(): Byte //throws IOException 
+    {
         val n: Int = stream.read();
         if (n == -1n) throw new EOFException();
         return n as Byte;
     }
     
-    public def read(r:Rail[Byte], off:Long, len:Long):void { 
-        stream.read(r,off,len); 
-    }
+    public def read(r:Rail[Byte], off:Long, len:Long): void //throws IOException 
+    { stream.read(r,off,len); }
 
-    public def available():Int = stream.available();
+    public def available(): Int //throws IOException 
+    = stream.available();
 
-    public def skip(off:Int):void { 
-        stream.skip(off); 
-    }
+    public def skip(off: Int): void //throws IOException 
+    { stream.skip(off); }
 
-    public def mark(off:Int):void {
-       stream.mark(off);
-    }
-
-    public def reset():void {
-        stream.reset(); 
-    }
-
-    public def markSupported():Boolean = stream.markSupported();
+    public def mark(off: Int): void //throws IOException 
+    { stream.mark(off); }
+    public def reset(): void //throws IOException 
+    { stream.reset(); }
+    public def markSupported() = stream.markSupported();
 }

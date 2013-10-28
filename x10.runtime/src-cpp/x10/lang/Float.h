@@ -13,7 +13,7 @@
 #define X10_LANG_FLOAT_H
 
 #include <x10aux/config.h>
-#include <cmath>
+#include <x10aux/math.h>
 
 namespace x10 {
     namespace lang {
@@ -24,20 +24,8 @@ namespace x10 {
             static String* toHexString(x10_float value);
             static String* toString(x10_float value);
             static x10_float parseFloat(String* s);
-            static x10_boolean isNaN(x10_float value) {
-#if defined(_AIX)
-				return isnan(value);
-#else
-				return std::isnan(value);
-#endif
-            }
-            static x10_boolean isInfinite(x10_float value) {
-#if defined(_AIX)
-				return isinf(value);
-#else
-				return std::isinf(value);
-#endif
-            }
+            static x10_boolean isNaN(x10_float value);
+            static x10_boolean isInfinite(x10_float value);
             static x10_int toIntBits(x10_float value);
             static x10_int toRawIntBits(x10_float value);
             static x10_float fromIntBits(x10_int value);

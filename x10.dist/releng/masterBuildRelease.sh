@@ -2,7 +2,7 @@
 
 # Dave Grove
 
-hosts="condor.watson.ibm.com triloka1.pok.ibm.com bellatrix.watson.ibm.com nashira.watson.ibm.com p7ih x10aix.watson.ibm.com bgqfen1.watson.ibm.com"
+hosts="condor.watson.ibm.com triloka1.pok.ibm.com bellatrix.watson.ibm.com nashira.watson.ibm.com p7ih x10aix.watson.ibm.com"
 
 x10dt_hosts="condor.watson.ibm.com triloka1.pok.ibm.com bellatrix.watson.ibm.com nashira.watson.ibm.com"
 
@@ -65,13 +65,13 @@ do
     if [[ -z "$pushed_source" ]]; then
 	echo "transfering source build and testsuite from $host to orquesta"
 	scp "$host:/tmp/x10-rc-$USER/x10-$version/x10-$version*.tar.bz2" "orquesta.pok.ibm.com:/var/www/localhost/htdocs/x10dt/x10-rc-builds/$version/"
-	echo "Packaging benchmarks"
-	./packageBenchmarks.sh -dir /tmp/x10-bench-$USER -version $version -tag $tag
-	echo "transfering benchmarks tar to orquesta"
-	scp "/tmp/x10-bench-$USER/x10-benchmarks-$version.tar.bz2" "orquesta.pok.ibm.com:/var/www/localhost/htdocs/x10dt/x10-rc-builds/$version/"
+#	echo "Packaging benchmarks"
+#	./packageBenchmarks.sh -dir /tmp/x10-bench-$USER -version $version -tag $tag
+#	echo "transfering benchmarks tar to orquesta"
+#	scp "/tmp/x10-bench-$USER/x10-benchmarks-$version.tar.bz2" "orquesta.pok.ibm.com:/var/www/localhost/htdocs/x10dt/x10-rc-builds/$version/"
 
 	export pushed_source="done"
     fi
 
-    ssh $host "rm -rf /tmp/x10-rc-$USER"
+    #ssh $host rm -rf /tmp/x10-rc-$USER 
 done

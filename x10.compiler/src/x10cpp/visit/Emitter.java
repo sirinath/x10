@@ -133,14 +133,11 @@ public class Emitter {
         "bitand", "bitor", "compl",
         // X10 types
         "x10_boolean", "x10_byte", "x10_char", "x10_short", "x10_int",
-        "x10_long", "x10_float", "x10_double", "x10_complex", 
-        "x10_ubyte", "x10_ushort", "x10_uint", "x10_ulong",
+        "x10_long", "x10_float", "x10_double",
         // X10 implementation names
         "FMGL", "TPMGL", "TYPENAME", "getRTT", "rtt", "RTT_H_DECLS", "RTT_CC_DECLS1",
         // macros defined by the C++ implementation
         "i386",
-        // hack around cygwin defining log2 as a macro in math.h
-        "log2",
         // Additionally, anything starting with a '_' is reserved, and may clash
     };
     private static boolean isCPPKeyword(String name) {
@@ -1102,7 +1099,8 @@ public class Emitter {
                 printTemplateSignature(ct.x10Def().typeParameters(), sw);
                 sw.write(make_ref("x10::lang::Reference")+" "+klass+"::"+DESERIALIZER_METHOD+"("+DESERIALIZATION_BUFFER+"& buf) {");
                 sw.newline(4); sw.begin(0);
-                sw.writeln(make_ref(klass)+" this_ = new (x10aux::alloc_z"+chevrons(klass)+"()) "+klass+"();");
+                sw.writeln(make_ref(klass)+" this_ = "+
+                        "new (memset(x10aux::alloc"+chevrons(klass)+"(), 0, sizeof("+klass+"))) "+klass+"();");
                 sw.writeln("buf.record_reference(this_);");
                 sw.writeln("this_->"+DESERIALIZE_BODY_METHOD+"(buf);");
                 sw.write("return this_;");

@@ -47,7 +47,6 @@ import x10.ExtensionInfo.X10Scheduler.ValidatingVisitorGoal;
 import x10.ast.X10NodeFactory_c;
 import x10.optimizations.Optimizer;
 import x10.visit.CheckNativeAnnotationsVisitor;
-import x10.visit.ExpressionFlattener;
 import x10.visit.InstanceInvariantChecker;
 import x10.visit.NativeClassVisitor;
 import x10.visit.StaticNestedClassRemover;
@@ -58,7 +57,6 @@ import x10cpp.postcompiler.CXXCommandBuilder;
 import x10cpp.postcompiler.PrecompiledLibrary;
 import x10cpp.types.X10CPPSourceClassResolver;
 import x10cpp.types.X10CPPTypeSystem_c;
-import x10cpp.visit.TupleRemover;
 import x10cpp.visit.X10CPPTranslator;
 import x10cpp.visit.CastInjector;
 
@@ -153,10 +151,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
                 protected boolean invokePostCompiler(Options options, Compiler compiler, ErrorQueue eq) {
 		            if (System.getProperty("x10.postcompile", "TRUE").equals("FALSE"))
 		                return true;
-		            // Ensure that there is no post compilation for ONLY_TYPE_CHECKING jobs
-                    X10CompilerOptions opts = extensionInfo().getOptions();
-                    if (opts.x10_config.ONLY_TYPE_CHECKING) return true;
-                    
 		            return X10CPPTranslator.postCompile((X10CPPCompilerOptions)options, compiler, eq);
 		        }
 		    }.intern(this);
@@ -176,13 +170,8 @@ public class ExtensionInfo extends x10.ExtensionInfo {
                 if (g == nvc) {
                     goals.add(ExternAnnotationVisitor(job));
                 } else if (g == cg) {
-                    goals.add(TupleRemover(job));
-                    if (Optimizer.FLATTENING(this.extensionInfo())) {
-                        goals.add(FinalExpressionFlattener(job));
-                    }
                     goals.add(CastInjector(job));
-                    boolean stmtExprsAllowed = true || !Optimizer.FLATTENING(this.extensionInfo()); // FIXME:  XTENLANG-2236:  enable this check once we can flatten Runtime
-                    goals.add(PreCodegenASTInvariantChecker(job, stmtExprsAllowed));
+                    goals.add(PreCodegenASTInvariantChecker(job));
                 }
                 goals.add(g);
             }
@@ -200,20 +189,12 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 		    return new ForgivingVisitorGoal("NativeAnnotation", job, new ExternAnnotationVisitor(job, ts, nf, nativeAnnotationLanguage())).intern(this);
 		}
 
-		public Goal PreCodegenASTInvariantChecker(Job job, boolean stmtExprsAllowed) {
-		    return new ValidatingVisitorGoal("CodegenASTInvariantChecker", job, new PreCodeGenASTChecker(job, stmtExprsAllowed)).intern(this);
+		public Goal PreCodegenASTInvariantChecker(Job job) {
+		    return new ValidatingVisitorGoal("CodegenASTInvariantChecker", job, new PreCodeGenASTChecker(job)).intern(this);
 		}
 		
 		public Goal CastInjector(Job job) {
 		    return new ValidatingVisitorGoal("CastInjector", job, new CastInjector(job, extInfo.typeSystem(), extInfo.nodeFactory())).intern(this);
-		}
-		
-		public Goal TupleRemover(Job job) {
-		    return new ValidatingVisitorGoal("TupleRemover", job, new TupleRemover(job, extInfo.typeSystem(), extInfo.nodeFactory())).intern(this);
-		}
-		
-		public Goal FinalExpressionFlattener(Job job) {
-		    return new ValidatingVisitorGoal("FinalExpressionFlattener", job, new ExpressionFlattener(job, extInfo.typeSystem(), extInfo.nodeFactory())).intern(this);
 		}
 	}
 

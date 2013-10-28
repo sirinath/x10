@@ -2562,13 +2562,6 @@ public class TypeSystem_c implements TypeSystem
         return runtimeType_;
     }
 
-    protected X10ClassType unsafeType_;
-    public X10ClassType Unsafe() {
-        if (unsafeType_ == null)
-            unsafeType_ = load("x10.lang.Unsafe");
-        return unsafeType_;
-    }
-
     protected X10ClassType systemType_;
     public X10ClassType System() {
         if (systemType_ == null)
@@ -2581,6 +2574,13 @@ public class TypeSystem_c implements TypeSystem
         if (embedType_ == null)
             embedType_ = load("x10.compiler.Embed");
         return embedType_;
+    }
+
+    protected X10ClassType perProcessType_;
+    public X10ClassType PerProcess() {
+        if (perProcessType_ == null)
+            perProcessType_ = load("x10.compiler.PerProcess");
+        return perProcessType_;
     }
 
     protected X10ClassType remoteInvocationType_;
@@ -4243,8 +4243,7 @@ public class TypeSystem_c implements TypeSystem
         return hasSameClassDef(me, Any()) ||
                 hasSameClassDef(me, Arithmetic()) ||
                 hasSameClassDef(me, Ordered()) ||
-                hasSameClassDef(me, Bitwise()) ||
-                hasSameClassDef(me, Comparable());
+                hasSameClassDef(me, Bitwise());
     }
 
     public boolean isString(Type me) {

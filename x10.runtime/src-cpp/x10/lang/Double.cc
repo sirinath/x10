@@ -11,6 +11,8 @@
 
 #include <errno.h>
 
+#include <x10aux/math.h>
+
 #include <x10/lang/Double.h>
 #include <x10/lang/String.h>
 #include <x10/lang/NumberFormatException.h>
@@ -60,6 +62,14 @@ x10_double DoubleNatives::parseDouble(String* s) {
     }
     
     return ans;
+}
+
+x10_boolean DoubleNatives::isNaN(x10_double x) {
+    return x10aux::math::isnan(x);
+}
+
+x10_boolean DoubleNatives::isInfinite(x10_double x) {
+    return x10aux::math::isinf(x);
 }
 
 x10_long DoubleNatives::toLongBits(x10_double x) {
