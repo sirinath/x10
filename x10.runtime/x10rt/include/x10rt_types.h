@@ -177,19 +177,15 @@ typedef enum
     /** Unsigned qword*/ X10RT_RED_TYPE_U64 = 7,
     /** Double precision IEEE float*/ X10RT_RED_TYPE_DBL = 8,
     /** Single precision IEEE float*/ X10RT_RED_TYPE_FLT = 9,
-    /** A pair of double and signed dword*/ X10RT_RED_TYPE_DBL_S32 = 10,
-    /** std::complex<double> */ X10RT_RED_TYPE_COMPLEX_DBL = 11    
+    /** A pair of double and signed dword*/ X10RT_RED_TYPE_DBL_S32 = 10
 } x10rt_red_type;
 
 /** The list of optional x10rt_net features.
  */
 typedef enum {
-	X10RT_COLL_NOCOLLECTIVES = 0,
-	X10RT_COLL_BARRIERONLY = 1,
-    X10RT_COLL_ALLBLOCKINGCOLLECTIVES = 2,
-    X10RT_COLL_NONBLOCKINGBARRIER = 3,
-    X10RT_COLL_ALLNONBLOCKINGCOLLECTIVES = 4
-} x10rt_coll_type;
+    X10RT_OPT_REMOTE_OP = 0,
+    X10RT_OPT_COLLECTIVES = 1
+} x10rt_opt;
 
 /**
  * Structure to hold a remote update operation

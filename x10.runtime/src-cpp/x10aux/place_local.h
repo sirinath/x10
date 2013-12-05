@@ -20,7 +20,7 @@ namespace x10aux {
     class reentrant_lock;
 
     class place_local {
-#ifndef __FCC_VERSION
+#ifndef ENABLE_CROSS_COMPILE_FX10
     private:
 #else
     public:
@@ -36,7 +36,7 @@ namespace x10aux {
         static void* get(x10_int id);
         static void put(x10_int id, void *data);
         static void remove(x10_int id);
-        template<class T> friend const char *::x10aux::typeName();
+        template<class T> friend const char *x10aux::typeName();
     };
 
     template<> inline const char *typeName<place_local>() { return "place_local"; }

@@ -161,13 +161,10 @@ X10RT_C void x10rt_net_register_mem (void *ptr, size_t len);
  */
 X10RT_C void x10rt_net_finalize (void); 
 
-/** Return what level of collectives the network transport supports
+/** Return whether the x10rt_net implementation supports a particular feature.
  */
-X10RT_C x10rt_coll_type x10rt_net_coll_support ();
+X10RT_C int x10rt_net_supports (x10rt_opt o);
 
-/** Return whether the x10rt_net implementation supports remote operations.
- */
-X10RT_C bool x10rt_net_remoteop_support ();
 
 /** \see #x10rt_lgl_team_new
  * \param placec As in #x10rt_lgl_team_new

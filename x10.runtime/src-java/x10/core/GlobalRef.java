@@ -64,13 +64,9 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
         private static final ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
         private static AtomicLong lastId = new AtomicLong(0L);
         private static AtomicLong lastMortalId = new AtomicLong(0L); // used for Mortal objects
-        // isNull support (kawatiya 2013/09/09)
-        private static final long NULL_ID_START = 8000000000000000000L;
-        private static AtomicLong lastNullId = new AtomicLong(NULL_ID_START);
         
         private /*final*/ long id;  // unique id for the corresponding {T,localObj}
                                     // id==0 means not assigned, negative ids are assigned to Mortal objects
-                                    // id>=NULL_ID_START is used for isNull (kawatiya 2013/09/09)
         private Object strongRef;   // strong reference to the localObj, used to prevent the collection
         private Type<?> T;          // T of corresponding GlobalRef[T](localObj)
         private int remoteCount;    // number of active remote GlobalRefs, should be < #places
@@ -106,22 +102,13 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
             // assign an id
             boolean isMortal = obj instanceof Mortal;
             while (true) {
-                if (obj == $null) { // isNull support (kawatiya 2013/09/09)
-                    id = lastNullId.incrementAndGet();
-                    if (id >= NULL_ID_START) {
-                        // try to use the id
-                    } else { // wraparound
-                        if(GLOBALGC_DEBUG>=1)GlobalGCDebug("GlobalizedObjectTracker.<init>: resetting lastNullId");
-                        synchronized(lastNullId) { if (lastNullId.get() < NULL_ID_START) lastNullId.set(NULL_ID_START); }
-                        continue; // retry
-                    }                    
-                } else if (!isMortal) {
+                if (!isMortal) {
                     id = lastId.incrementAndGet();
-                    if (id < NULL_ID_START) {
+                    if (id > 0) {
                         // try to use the id
                     } else { // wraparound
                         if(GLOBALGC_DEBUG>=1)GlobalGCDebug("GlobalizedObjectTracker.<init>: resetting lastId");
-                        synchronized(lastId) { if (lastId.get() >= NULL_ID_START) lastId.set(0L); }
+                        synchronized(lastId) { if (lastId.get() < 0) lastId.set(0L); }
                         continue; // retry
                     }
                 } else { // for Mortal objects, use negative id
@@ -494,9 +481,7 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
     @Override
     final public java.lang.String toString() {
         globalize(); // necessary to decide the id for this object
-//      return "GlobalRef(" + this.home + "," + this.id + ")";
-        // isNull support (2013/09/09)
-        return "GlobalRef["+T+"](" + home + "," + id + "," + (isNull() ? "isNull" : "nonNull") + ")";
+        return "GlobalRef(" + this.home + "," + this.id + ")";
     }
 
     @Override
@@ -533,14 +518,6 @@ public final class GlobalRef<T> extends x10.core.Struct implements X10JavaSerial
             return obj == other.obj;
         } else { // remote GlobalRefs
             return id == other.id;
-        }
-    }
-
-    public boolean isNull() { // isNull support (kawatiya 2013/09/09)
-        if (home.id == x10.lang.Runtime.home().id) { // local GlobalRef
-            return obj == null;
-        } else { // remote GlobalRefs
-            return id >= GlobalizedObjectTracker.NULL_ID_START;
         }
     }
 

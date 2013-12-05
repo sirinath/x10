@@ -102,8 +102,9 @@ ifdef JAVA_HOME
     JNI_LIBS = -L"$(JAVA_HOME)"/jre/lib/$(jarch)/j9vm -L"$(JAVA_HOME)"/jre/lib/$(jarch)/server -L"$(JAVA_HOME)"/jre/lib/$(jarch)/client
   else
   ifeq ($(firstword $(subst _, ,$(shell uname -s))),CYGWIN)
-    # Intentionally not setting JNI_INCLUDES and JNI_LIBS
-    # We don't want to build the jni-bindings for x10rt on cygwin
+    JAVA_CYGPATH = $(shell cygpath '$(JAVA_HOME)')
+    JNI_INCLUDES = -I"$(JAVA_CYGPATH)"/include -I"$(JAVA_CYGPATH)"/include/win32
+    JNI_LIBS = -I"$(JAVA_CYGPATH)"/lib
   else
   ifeq ($(shell uname -s),Darwin)
     JNI_INCLUDES = -I"$(JAVA_HOME)"/include -I"$(JAVA_HOME)"/include/darwin
@@ -142,7 +143,6 @@ ifdef ENABLE_CROSS_COMPILE_BGP
   export X10_STATIC_LIB=1
   export X10RT_PLATFORM=bgp
   export CROSS_COMPILE_BLUEGENE=true
-  export CROSS_COMPILE_ANY=true
 
   override MPICXX=/bgsys/drivers/ppcfloor/comm/bin/mpicxx
   ifdef USE_GCC
@@ -174,13 +174,10 @@ endif
 ifdef ENABLE_CROSS_COMPILE_BGQ
   export X10RT_PLATFORM=bgq
   export CROSS_COMPILE_BLUEGENE=true
-  export CROSS_COMPILE_ANY=true
   export BGQ_FLOOR ?= /bgsys/driver/ppcfloor
   export X10_STATIC_LIB=1
   ifdef USE_GCC
-    export X10RT_PLATFORM=bgq_gcc
-    override MPICXX=/bgsys/drivers/ppcfloor/comm/bin/gcc/mpicxx
-    override CXX=/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-g++
+    override CXX = /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-g++
     override CC =/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-gcc
     override AR =/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-ar
     ifndef X10_STATIC_LIB
@@ -195,22 +192,8 @@ ifdef ENABLE_CROSS_COMPILE_BGQ
     override XRX_PROPS_CXXFLAGS += -mminimal-toc
   endif
   ifdef USE_XLC
-    export X10RT_PLATFORM=bgq_xlc
-    # have to override CXX, but let user specify CUSTOM_XLC if they
-    # need something other than just xlC_r to be used as CXX
-    ifdef CUSTOM_XLC
-      override CXX = $(CUSTOM_XLC)
-      override CC = $(CUSTOM_XLC)
-    else
-      override CXX = bgxlC_r
-      override CC = bgxlC_r     
-    endif
-    override MPICXX=/bgsys/drivers/ppcfloor/comm/bin/xl/mpixlcxx_r
-    ifdef OPTIMIZE
-      override CXXFLAGS += -O3 -qinline -qhot -qsimd=auto -qtune=qp -qarch=qp
-    endif
-    override CXXFLAGS += -qsuppress=1540-0809:1500-029:1540-1101:1540-1102
-    override CXXFLAGS += $(XLC_EXTRA_FLAGS)
+      echo "FAILURE: haven't defined XLC rules for BGQ yet!"
+      exit -1
   endif
 endif
 
@@ -408,31 +391,14 @@ endif
 endif
 
 ifdef ENABLE_CROSS_COMPILE_FX10
-  export X10RT_PLATFORM=fx10
-  export CROSS_COMPILE_FX10=true
-  export CROSS_COMPILE_ANY=true
-  export X10_STATIC_LIB=1
-
-  override CXX = FCCpx
-  override CC = fccpx
-  override CFLAGS = -Xg -w
-  override CXXFLAGS = -Xg -w -Wp,--special_module_id 
-  override CXX_NO_WARNING=true
+#export X10_STATIC_LIB=1
   override CXX_WARNING_FLAGS = 
-  override MPICXX= mpiFCCpx -Xg
-  ifndef X10_STATIC_LIB
-    override CXXFLAGS_SHARED += -shared -fPIC
-    export X10RT_TEST_LDFLAGS = -dynamic -Wl,--rpath -Wl,"$(X10_HOME)"/x10.runtime/x10rt/lib
-  endif
-  ifdef OPTIMIZE
-    override CFLAGS += -Kfast
-    override CXXFLAGS += -Kfast
-  endif
-  override X10CPPFLAGS += -FLATTEN_EXPRESSIONS
-  override CXXFLAGS += -g
   ifdef TARGET_JAVA_HOME
     jarch = s64fx
     override JNI_LIBS = -L"$(TARGET_JAVA_HOME)"/jre/lib/$(jarch)/server
   endif
+  override MPICXX=/opt/FJSVfxlang/GM-1.2.1-04/bin/mpiFCC -Xg
 endif
+
+
 

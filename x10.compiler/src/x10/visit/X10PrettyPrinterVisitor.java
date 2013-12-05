@@ -164,7 +164,6 @@ import x10.types.ParameterType;
 import x10.types.ParameterType.Variance;
 import x10.types.X10ClassDef;
 import x10.types.X10ClassType;
-import x10.types.X10CodeDef;
 import x10.types.X10ConstructorDef;
 import x10.types.X10ConstructorInstance;
 import x10.types.X10FieldDef_c;
@@ -594,9 +593,9 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
                         w.write(", ");
                     }
                     alreadyPrintedTypes.add(tn.type());
-                    // the 1st formal parameter of x10.lang.Comparable[T].compareTo(T) must be erased since it implements java.lang.Comparable/*<T>*/.compareTo(Object).
-                    // for x10.lang.Point implements java.lang.Comparable/*<x10.lang.Point>*/
-                    er.printType(tn.type(), (useSelfDispatch ? 0 : PRINT_TYPE_PARAMS) | BOX_PRIMITIVES | NO_VARIANCE);
+                    boolean isJavaNative = Emitter.isNativeRepedToJava(tn.type());
+                    er.printType(tn.type(), (useSelfDispatch && !isJavaNative ? 0 : PRINT_TYPE_PARAMS) | BOX_PRIMITIVES
+                            | NO_VARIANCE);
                 }
             }
 
@@ -1820,21 +1819,6 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
         }
     }
 
-    // XTENLANG-3287
-    private static boolean isFormalTypeErased(X10CodeDef codedef) {
-        if (!(codedef instanceof X10MethodDef)) return false;
-        X10MethodDef def = (X10MethodDef) codedef;
-        if (def.flags().isStatic()) return false;
-        String methodName = def.name().toString();
-        List<Ref<? extends Type>> formalTypes = def.formalTypes();
-        int numFormals = formalTypes.size();
-
-        // the 1st parameter of x10.lang.Comparable[T].compareTo(T)
-        if (methodName.equals("compareTo") && numFormals == 1) return true;
-
-        return false;
-    }
-
     @Override
     public void visit(FieldAssign_c n) {
         Type t = n.fieldInstance().type();
@@ -1845,7 +1829,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
                 er.printType(n.target().type(), 0);
             else {
                 // XTENLANG-3206, XTENLANG-3208
-                if (ts.isParameterType(n.target().type()) || hasParams(n.fieldInstance().container()) || isFormalTypeErased(tr.context().currentCode())) {
+                if (ts.isParameterType(n.target().type()) || hasParams(n.fieldInstance().container())) {
                     // TODO:CAST
                     w.write("(");
                     w.write("(");
@@ -2355,7 +2339,7 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
                     w.write(")");
 
                     w.write(")");
-                } else if ((useSelfDispatch && (mi.typeParameters().size() > 0 || hasParams(containerType) || isFormalTypeErased(tr.context().currentCode()))) ||
+                } else if ((useSelfDispatch && (mi.typeParameters().size() > 0 || hasParams(containerType))) ||
                            (target instanceof NullLit_c)) {
                     // TODO:CAST
                     w.write("(");
@@ -2867,8 +2851,8 @@ public class X10PrettyPrinterVisitor extends X10DelegatingVisitor {
             }
             w.begin(0);
             if (!n.isTargetImplicit()) {
-                if ((target instanceof NullLit_c) ||
-                    (!(target instanceof Special || target instanceof New) && (xts.isParameterType(targetType) || hasParams(fi.container()) || isFormalTypeErased(tr.context().currentCode())))) {
+                if ((target instanceof NullLit_c) || 
+                    (!(target instanceof Special || target instanceof New) && (xts.isParameterType(targetType) || hasParams(fi.container())))) {
                     // TODO:CAST
                     w.write("(");
                     w.write("(");

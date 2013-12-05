@@ -190,11 +190,7 @@ case "${__cat_system}" in
 esac
 __cat_backend_arch="${__cat_backend}-${__cat_arch}"
 __cat_arch_os="${__cat_arch}-${__cat_os}"
-if [[ -z "$CAT_LOGICAL_HOSTNAME" ]]; then
-    __cat_hostname=$(hostname)
-else
-    __cat_hostname=$CAT_LOGICAL_HOSTNAME
-fi
+__cat_hostname=$(hostname)
 __cat_target_arch=${__cat_arch}
 __cat_target_os=${__cat_os}
 __cat_target_jvm="$(java -classpath $DATADIR GetProp java.vm.name)"
@@ -302,7 +298,7 @@ __cat_x10_LOAD=""
 
 export X10DIST=$X10_HOME/x10.dist
 ( \
-	cd $X10_HOME/x10.tests/tests; \
+	cd $X10_HOME/x10.tests/examples; \
 	$ABSDIR/xtestScriptCT -clean -shiftLog; \
 )
 cleanUpExit $?

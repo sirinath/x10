@@ -49,10 +49,6 @@ template<class T> static inline T* safe_realloc (T *old, size_t f=1, size_t a=0)
 
 static inline void safe_free (void *p) { free (p); }
 
-static inline bool checkBoolEnvVar(char* value) {
-	return (value && !(strcasecmp("false", value) == 0) && !(strcasecmp("0", value) == 0) && !(strcasecmp("f", value) == 0));
-}
-
 namespace {
 
     // Lookup table from message id to callback function
@@ -127,7 +123,6 @@ X10RT_C void x10rt_emu_init (x10rt_msg_type *counter);
 X10RT_C void x10rt_emu_remote_op (x10rt_place place, x10rt_remote_ptr remote_addr,
                                   x10rt_op_type type, unsigned long long value);
 
-X10RT_C void x10rt_emu_remote_ops (x10rt_remote_op_params *ops, size_t num_ops);
 
 X10RT_C void x10rt_emu_coll_init (x10rt_msg_type *counter);
 

@@ -857,10 +857,7 @@ bool Launcher::handleDeadChild(uint32_t childNo, int type)
 				if (WTERMSIG(status) != SIGPIPE) // normal at shutdown
 				{
 					_exitcode = 128 + WTERMSIG(status);
-					if (_myproc == (uint32_t)-1)
-						fprintf(stderr, "Launcher for place 0 exited unexpectedly with signal: %s\n", strsignal(WTERMSIG(status)));
-					else
-					    fprintf(stderr, "Place %u exited unexpectedly with signal: %s\n", _myproc, strsignal(WTERMSIG(status)));
+					fprintf(stderr, "Place %u exited unexpectedly with signal: %s\n", _myproc, strsignal(WTERMSIG(status)));
 				}
 			}
 			else if (WIFSTOPPED(status))
@@ -1130,9 +1127,7 @@ void Launcher::cb_sighandler_cld(int signo)
 	// limit our lifetime to a few seconds, to allow any children to shut down on their own. Then kill em' all.
 	if (_singleton->_dieAt == 0)
 	{
-        bool resilient_x10 = checkBoolEnvVar(getenv(X10_RESILIENT_PLACE_ZERO))
-                          || checkBoolEnvVar(getenv(X10_RESILIENT_ZOO_KEEPER))
-                          || checkBoolEnvVar(getenv(X10_RESILIENT_DISTRIBUTED));
+        bool resilient_x10 = checkBoolEnvVar(getenv(X10_RESILIENT_PLACE_ZERO)) || checkBoolEnvVar(getenv(X10_RESILIENT_ZOO_KEEPER));
         if ((_singleton->_myproc == 0 && signo!=SIGCHLD) || !resilient_x10) {
             _singleton->_dieAt = 2+time(NULL);
             #ifdef DEBUG

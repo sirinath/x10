@@ -108,22 +108,17 @@ public class CXXCommandBuilder {
 
     
     protected final boolean usingXLC() {
-        return defaultPostCompiler().contains("xlC") || 
-               defaultPostCompiler().contains("mpCC") ||
-	       defaultPostCompiler().contains("xlcxx");
+        return defaultPostCompiler().contains("xlC");
     }
     
     protected final boolean bluegene() {
         return bluegeneP() || bluegeneQ();
     }
     protected final boolean bluegeneP() {
-        return getPlatform().contains("bgp");
+        return platform.contains("bgp");
     }
     protected final boolean bluegeneQ() {
-        return getPlatform().contains("bgq");
-    }
-    protected final boolean fx10() {
-        return getPlatform().contains("fx10");
+        return platform.contains("bgq");
     }
 
     /** 
@@ -156,20 +151,10 @@ public class CXXCommandBuilder {
             cxxCmd.add(usingXLC() ? "-O3" : "-O2");
             cxxCmd.add(usingXLC() ? "-qinline" : "-finline-functions");
             cxxCmd.add("-DNO_TRACING");
-            if (fx10()) {
-                cxxCmd.add("-Kfast");
-            }
-            if (usingXLC()) {
-                if (bluegeneQ()) {
-                    cxxCmd.add("-qhot");
-                    cxxCmd.add("-qtune=qp");
-                    cxxCmd.add("-qsimd=auto");
-                    cxxCmd.add("-qarch=qp");
-                } else if (!bluegeneP()) {
-                    cxxCmd.add("-qhot");
-                    cxxCmd.add("-qtune=auto");
-                    cxxCmd.add("-qarch=auto");
-                }
+            if (usingXLC() && !bluegene()) {
+                cxxCmd.add("-qhot");
+                cxxCmd.add("-qtune=auto");
+                cxxCmd.add("-qarch=auto");
             }
         }
 
@@ -178,9 +163,6 @@ public class CXXCommandBuilder {
                                + ":1540-1101"    // Do not warn about non-void functions with no return
                                + ":1540-1102"    // Do not warn about uninitialized variables
                                + ":1500-029");   // Do not warn about being unable to inline when optimizing
-        } else if (fx10()) {
-            cxxCmd.add("-Xg");        	
-            cxxCmd.add("-w");
         } else {
             cxxCmd.add("-Wno-long-long");        // Do not warn about using long long
             cxxCmd.add("-Wno-unused-parameter"); // Do not warn about unused parameters
@@ -403,8 +385,6 @@ public class CXXCommandBuilder {
         } else if (platform.startsWith("bgp")) {
         	cbb = new Linux_CXXCommandBuilder();            
         } else if (platform.startsWith("bgq")) {
-            cbb = new Linux_CXXCommandBuilder();            
-        } else if (platform.startsWith("fx10")) {
             cbb = new Linux_CXXCommandBuilder();            
         } else {   
             eq.enqueue(ErrorInfo.WARNING,

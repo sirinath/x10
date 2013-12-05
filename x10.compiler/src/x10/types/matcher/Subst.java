@@ -75,9 +75,8 @@ public class Subst {
         if (t instanceof UnknownType)
             return t;
         if (t instanceof ParameterType) {
-        	return t;
-          //  if (in.valid()) return t;
-          //  return Types.xclause(t, in);
+            if (in.valid()) return t;
+            return Types.xclause(t, in);
         }
         if (ts.isVoid(t)) {
             return t;

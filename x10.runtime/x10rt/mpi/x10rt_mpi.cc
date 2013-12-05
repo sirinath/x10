@@ -63,7 +63,7 @@ static void x10rt_net_coll_init(int *argc, char ** *argv, x10rt_msg_type *counte
 
 #define X10RT_MPI_DEBUG_PRINT "X10RT_MPI_DEBUG_PRINT"
 #define X10RT_MPI_THREAD_MULTIPLE "X10RT_MPI_THREAD_MULTIPLE"
-#define X10RT_MPI_FORCE_COLLECTIVES "X10RT_MPI_FORCE_COLLECTIVES"
+#define X10RT_MPI_ENABLE_COLLECTIVES "X10RT_MPI_ENABLE_COLLECTIVES"
 
 /* Generic utility funcs */
 template <class T> T* ChkAlloc(size_t len) {
@@ -89,6 +89,10 @@ template <class T> T* ChkRealloc(T * ptr, size_t len) {
         abort();
     }
     return ptr2;
+}
+
+bool checkBoolEnvVar(char* value) {
+	return (value && !(strcasecmp("false", value) == 0) && !(strcasecmp("0", value) == 0) && !(strcasecmp("f", value) == 0));
 }
 
 /**
@@ -146,15 +150,6 @@ typedef enum {
     X10RT_REQ_TYPE_UNDEFINED            = -1
 } X10RT_REQ_TYPES;
 
-/* differentiate from x10rt_{get|put}_req
- * to save precious bytes from packet size
- * for each PUT/GET */
-typedef struct _x10rt_nw_req {
-    int                       type;
-    int                       msg_len;
-    int                       len;
-} x10rt_nw_req;
-
 typedef struct _x10rt_get_req {
     int                       type;
     int                       dest_place;
@@ -169,6 +164,15 @@ typedef struct _x10rt_put_req {
     int                       msg_len;
     int                       len;
 } x10rt_put_req;
+
+/* differentiate from x10rt_{get|put}_req
+ * to save precious bytes from packet size
+ * for each PUT/GET */
+typedef struct _x10rt_nw_req {
+    int                       type;
+    int                       msg_len;
+    int                       len;
+} x10rt_nw_req;
 
 class x10rt_req {
         int                   type;
@@ -351,7 +355,7 @@ class x10rt_internal_state {
         bool                finalized;
         pthread_mutex_t     lock;
         bool                is_mpi_multithread;
-        bool				report_nonblocking_coll;
+        bool				use_collectives;
         int                 rank;
         int                 nprocs;
         MPI_Comm            mpi_comm;
@@ -375,7 +379,7 @@ class x10rt_internal_state {
             init                = false;
             finalized           = false;
             is_mpi_multithread  = false;
-            report_nonblocking_coll	= false;
+            use_collectives		= false;
         }
         void Init() {
             init          = true;
@@ -512,8 +516,8 @@ x10rt_error x10rt_net_init(int *argc, char ** *argv, x10rt_msg_type *counter) {
         }
     }
 
-    if (checkBoolEnvVar(getenv(X10RT_MPI_FORCE_COLLECTIVES))) {
-    	global_state.report_nonblocking_coll = true;
+    if (checkBoolEnvVar(getenv(X10RT_MPI_ENABLE_COLLECTIVES))) {
+    	global_state.use_collectives = true;
     }
 
     if (MPI_SUCCESS != MPI_Comm_size(MPI_COMM_WORLD, &global_state.nprocs)) {
@@ -549,7 +553,8 @@ x10rt_error x10rt_net_init(int *argc, char ** *argv, x10rt_msg_type *counter) {
         abort();
     }
     
-    x10rt_net_coll_init(argc, argv, counter);
+    if (global_state.use_collectives)
+	    x10rt_net_coll_init(argc, argv, counter);
 
     return X10RT_ERR_OK;
 }
@@ -601,6 +606,11 @@ void x10rt_net_register_get_receiver(x10rt_msg_type msg_type,
 
     global_state.getCb1Tbl[msg_type] = cb1;
     global_state.getCb2Tbl[msg_type] = cb2;
+}
+
+void x10rt_net_internal_barrier (void)
+{
+    abort(); // FUNCTION IS ON DEATH ROW
 }
 
 x10rt_place x10rt_net_nhosts(void) {
@@ -1212,7 +1222,8 @@ static void x10rt_net_probe_ex (bool network_only) {
 
     release_lock(&global_state.lock);
 
-    x10rt_net_team_probe();
+	if (global_state.use_collectives)
+	    x10rt_net_team_probe();
 }
 
 void x10rt_net_finalize(void) {
@@ -1236,15 +1247,18 @@ void x10rt_net_finalize(void) {
     global_state.finalized = true;
 }
 
-x10rt_coll_type x10rt_net_coll_support () {
-    if (global_state.report_nonblocking_coll)
-	    return X10RT_COLL_ALLNONBLOCKINGCOLLECTIVES;
-	else
-        return X10RT_COLL_ALLBLOCKINGCOLLECTIVES;
-}
+int x10rt_net_supports (x10rt_opt o) {
+    X10RT_NET_DEBUG("o = %d", o);
+    if (!global_state.use_collectives)
+    	return 0;
 
-bool x10rt_net_remoteop_support () {
-	return false;
+    switch (o) {
+        case X10RT_OPT_COLLECTIVES:
+             return 1;
+             break;
+        default:
+            return 0;
+    }
 }
 
 void x10rt_net_remote_op (x10rt_place place, x10rt_remote_ptr victim,
@@ -2257,7 +2271,6 @@ int x10rt_red_type_length(x10rt_red_type dtype) {
     BORING(X10RT_RED_TYPE_DBL)
     BORING(X10RT_RED_TYPE_FLT)
     BORING(X10RT_RED_TYPE_DBL_S32)
-    BORING(X10RT_RED_TYPE_COMPLEX_DBL)
 #undef BORING
     default:
         fprintf(stderr, "[%s:%d] unexpected argument. got: %d\n",
@@ -2335,8 +2348,6 @@ MPI_Datatype mpi_red_type(x10rt_red_type dtype) {
         return MPI_DOUBLE;
     case X10RT_RED_TYPE_FLT:
         return MPI_FLOAT;
-    case X10RT_RED_TYPE_COMPLEX_DBL:
-        return MPI_DOUBLE_COMPLEX;
     default:
         fprintf(stderr, "[%s:%d] unexpected argument. got: %d\n",
                 __FILE__, __LINE__, dtype);
@@ -2402,7 +2413,6 @@ MPI_Op mpi_red_op_type(x10rt_red_type dtype, x10rt_red_op_type op) {
     case X10RT_RED_TYPE_U64:
     case X10RT_RED_TYPE_DBL:
     case X10RT_RED_TYPE_FLT:
-    case X10RT_RED_TYPE_COMPLEX_DBL:
         return mpi_red_arith_op_type(op);
     case X10RT_RED_TYPE_DBL_S32:
         return mpi_red_loc_op_type(op);
@@ -3010,7 +3020,6 @@ static int sizeof_dtype(x10rt_red_type dtype)
         BORING_MACRO(X10RT_RED_TYPE_DBL);
         BORING_MACRO(X10RT_RED_TYPE_FLT);
         BORING_MACRO(X10RT_RED_TYPE_DBL_S32);
-        BORING_MACRO(X10RT_RED_TYPE_COMPLEX_DBL);
         #undef BORING_MACRO
         default: fprintf(stderr, "Corrupted type? %x\n", dtype); abort();
     }

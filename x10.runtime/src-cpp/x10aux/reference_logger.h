@@ -27,7 +27,7 @@ namespace x10aux {
     class ReferenceLogger {
     public:
         static ReferenceLogger* it;
-#ifndef __FCC_VERSION
+#ifndef ENABLE_CROSS_COMPILE_FX10
     private:
 #else
     public:
@@ -48,7 +48,7 @@ namespace x10aux {
         	if (NULL == it) it = initMe();
         	it->log_(x);
         }
-        template<class T> friend const char *::x10aux::typeName();
+        template<class T> friend const char *x10aux::typeName();
     };
 
     template<> inline const char *typeName<ReferenceLogger>() { return "ReferenceLogger"; }

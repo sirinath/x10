@@ -33,7 +33,6 @@
     <property name="FLATTEN_EXPRESSIONS" value="false" />
     <property name="HOMOGENEOUS" value="true" />
     <property name="GCC_SYMBOLS" value="false" />
-    <property name="INCLUDE_JAVA_SOURCE" value="false" />
     <path id="project.classpath">
         <path refid="mainproject.classpath"/>
         <path refid="x10.constraints.classpath"/>
@@ -99,7 +98,6 @@
         <or>
             <istrue value="${CROSS_COMPILE_BGP}" />
             <istrue value="${CROSS_COMPILE_BGQ}" />
-            <istrue value="${CROSS_COMPILE_FX10}" />
         </or>
     </condition>
 
@@ -132,16 +130,10 @@
         <istrue value="${NO_CHECKS}" />
     </condition>
     <condition property="cppmake.flatten_expressions" value="FLATTEN_EXPRESSIONS=1" else="DUMMY_ARG=1">
-        <or>
-            <istrue value="${FLATTEN_EXPRESSIONS}" />
-            <istrue value="${CROSS_COMPILE_FX10}" />
-        </or>
+        <istrue value="${FLATTEN_EXPRESSIONS}" />
     </condition>
     <condition property="cppmake.x10rt_mpi" value="ENABLE_X10RT_MPI=1" else="DISABLE_X10RT_MPI=1">
-        <or>
-            <istrue value="${X10RT_MPI}" />
-            <istrue value="${CROSS_COMPILE_BGQ}" />
-        </or>
+        <istrue value="${X10RT_MPI}" />
     </condition>
     <condition property="cppmake.x10rt_pami" value="ENABLE_X10RT_PAMI=1" else="DISABLE_X10RT_PAMI=1">
         <or> 
@@ -210,7 +202,6 @@
             <arg value="clean"/>
             <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
-            <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
     </target>
     <target name="prepare-clean-bdwgc" if="bdwgc.enabled">
@@ -232,7 +223,6 @@
             <arg value="${cppmake.x10rt_cuda}" />
             <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
-            <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
     </target>
 
@@ -291,7 +281,6 @@
             <arg value="${cppmake.no_checks}" />
             <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
-            <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
     </target>
     <target name="dist-stdlibprops" depends="init">
@@ -306,12 +295,11 @@
             <arg value="${cppmake.no_checks}" />
             <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
-            <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
     </target>
     <target name="dist" depends="dist-java,dist-cpp" description="generate part of the distribution">
     </target>
-    <target name="dist-par" depends="init,available-procs,dist-stdlibprops">
+    <target name="dist-par" depends="init,available-procs">
         <parallel>
             <antcall target="dist-java-x10rt"/>
             <antcall target="dist-cpp-no-x10rt"/>
@@ -322,14 +310,6 @@
         <jar jarfile="${gen}/${jar}">
             <fileset dir="${build}" includes="x10/**/*.class" excludes="${jar}"/>
             <fileset dir="${basedir}/src-x10" includes="x10/**" excludes="${jar}"/>
-            <fileset dir="${basedir}/src-java">
-                <exclude name="${jar}" />
-                <include name="x10/**/*.java" if="${INCLUDE_JAVA_SOURCE}" />
-            </fileset>
-            <fileset dir="${basedir}/src-java/gen">
-                <exclude name="${jar}" />
-                <include name="x10/**/*.java" if="${INCLUDE_JAVA_SOURCE}" />
-            </fileset>
             <fileset dir="${x10.constraints.location}/classes" includes="x10/constraint/**" excludes="x10/constraint/test/**"/>
             <fileset dir="${x10.common.location}/classes" includes="x10/**"/>
 	    <manifest>
@@ -469,7 +449,6 @@
             <arg value="${cppmake.x10rt_cuda}" />
             <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
-            <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
     </target>
 
@@ -525,10 +504,10 @@
 			<sequential>
 			  <echo message="Configuring BDWGC for FX10 cross compile"/>
 			  <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
-		 	    <env key="CXX" value="FCCpx"/>
-		 	    <env key="CC" value="fccpx"/>
-		 	    <env key="CFLAGS" value="-Xg -w" />
-		 	    <env key="CXXFLAGS" value="-Xg -w" />
+			    <env key="CXX" value="/opt/FJSVfxlang/GM-1.2.1-03/bin/FCCpx"/>
+			    <env key="CC" value="/opt/FJSVfxlang/GM-1.2.1-03/bin/fccpx"/>
+			    <env key="CFLAGS" value="-Xg" />
+			    <env key="CXXFLAGS" value="-Xg" />
 			    <arg value="${bdwgc.dir}/src/configure" />
 			    <arg value="--host=sparc64-unknown-linux-gnu" />
 			    <arg value="-enable-threads=posix" />
@@ -585,9 +564,7 @@
                           <os arch="ppc"/>
                           <os arch="ppc32"/>
                           <os arch="ppc64"/>
-                          <!-- POE has problems with BDWGC using the signal for "CPU time limit exceeded".  Use alternate signals -->
                           <istrue value="${X10RT_PAMI}"/>
-                          <istrue value="${X10RT_MPI}"/>
                         </or>
                       </conditions>
                       <then>
@@ -747,8 +724,6 @@
 		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/bluegeneStackHeuristic.patch.txt"
                        dir="${bdwgc.dir}/src" strip="0" />
 		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fixThreadConfigureForPPC.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		 		 <patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fx10Support.patch.txt"
                        dir="${bdwgc.dir}/src" strip="1" />
 	      </then>
 	    </if>

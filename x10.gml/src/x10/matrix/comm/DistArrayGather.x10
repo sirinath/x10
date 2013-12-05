@@ -41,7 +41,7 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	 */
 	public static def gather(
 			src:DistDataArray, 
-			dst:Rail[Rail[Double]]) : void {
+			dst:Array[Rail[Double]](1)) : void {
 		
 		val nb = src.region.size();
 		Debug.assure(nb==dst.size, 
@@ -79,7 +79,7 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	public static def gather(
 			src:DistDataArray, 
 			dst:Rail[Double],
-			szlist:Rail[Long]):void {
+			szlist:Rail[Int]):void {
 
 		@Ifdef("MPI_COMMU") {
 			mpiGather(src, dst, szlist);
@@ -148,7 +148,7 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	public static def x10Gather(
 			src:DistDataArray, 
 			dstbuf:Rail[Double],
-			gp:Rail[Long]): void {
+			gp:Rail[Int]): void {
 
 		val root = here.id();
 		var off:Long=0;

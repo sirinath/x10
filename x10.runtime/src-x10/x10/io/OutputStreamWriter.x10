@@ -19,46 +19,50 @@ public class OutputStreamWriter extends Writer {
     @NativeRep("c++", "x10::io::OutputStreamWriter__OutputStream*", "x10::io::OutputStreamWriter__OutputStream", null)
     protected abstract static class OutputStream {
         @Native("java", "#this.close()")
-        public native def close():void;
+        @Native("c++", "(#this)->close()")
+        public native def close(): void; //throws IOException;
 
         @Native("java", "#this.flush()")
-        public native def flush():void;
+        @Native("c++", "(#this)->flush()")
+        public native def flush(): void; //throws IOException;
         
         @Native("java", "#this.write(#v)")
-        public native def write(v:Int):void;
+        @Native("c++", "(#this)->write(#v)")
+        public native def write(v:Int): void; //throws IOException
         
-        @Native("java", "#this.write(#s)")
-        public native def write(s:String):void;
+        @Native("java", "#this.write((#r).getByteArray())")
+        @Native("c++", "(#this)->write(#r)")
+        public native def write(r:Rail[Byte]): void; //throws IOException
         
         @Native("java", "#this.write((#r).getByteArray(), #off, #len)")
-        public native def write(r:Rail[Byte], off:Long, len:Long):void;
+        @Native("c++", "(#this)->write(#r, #off, #len)")
+        public native def write(r:Rail[Byte], off:Long, len:Long): void; //throws IOException
     }
 
     val out: OutputStream;
     
-    def stream():OutputStream = out;
+    def stream(): OutputStream = out;
     
     public def this(out: OutputStream) {
         this.out = out;
     }
     
-    public def flush():void { 
-        out.flush(); 
+    public def flush(): void //throws IOException 
+    { out.flush(); }
+
+    public def close(): void //throws IOException 
+    { out.close(); }
+    
+    public def write(x: Byte): void //throws IOException 
+    { out.write(x); }
+    
+    public def write(buf:Rail[Byte]): void //throws IOException 
+    {
+        out.write(buf);
     }
 
-    public def close():void {
-        out.close(); 
-    }
-    
-    public def write(x:Byte):void {
-        out.write(x); 
-    }
-
-    public def write(s:String):void {
-        out.write(s); 
-    }
-    
-    public def write(buf:Rail[Byte], off:Long, len:Long):void {
+    public def write(buf:Rail[Byte], off: Long, len: Long): void //throws IOException 
+    {
         out.write(buf, off, len);
     }
 }

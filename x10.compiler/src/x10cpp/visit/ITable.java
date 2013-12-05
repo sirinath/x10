@@ -169,7 +169,7 @@ public final class ITable {
 		X10ClassDef cd = cls.x10Def();
 		boolean doubleTemplate = cd.typeParameters().size() > 0 && interfaceType.x10Def().typeParameters().size() > 0;
 		h.write("static "+(doubleTemplate ? "typename ":"")+interfaceCType+
-				(doubleTemplate ? "::template itable< ":"::itable< ")+Emitter.translateType(cls, false)+" > _itable_"+itableNum+";");
+				(doubleTemplate ? "::template itable<":"::itable<")+Emitter.translateType(cls, false)+" > _itable_"+itableNum+";");
 		h.newline();
 	}
 
@@ -181,7 +181,7 @@ public final class ITable {
 	        // an additional thunk class and itable for use by the IBox of the
 	        // struct.
             String interfaceCType = Emitter.translateType(interfaceType, false);
-            String clsCType = Emitter.translateType(cls, false, true);
+            String clsCType = Emitter.translateType(cls, false);
             String thunkBaseType = Emitter.mangled_non_method_name(cd.name().toString());
             String thunkParams = "";
             if (cd.typeParameters().size() != 0) {
@@ -201,14 +201,14 @@ public final class ITable {
             }            
 
             String thunkType = thunkBaseType + "_ibox"+itableNum;
-            String parentCType = "::x10::lang::IBox"+chevrons(clsCType);
+            String parentCType = "x10::lang::IBox"+chevrons(clsCType);
             String recvArg = "this->value";
 
             cg.emitter.printTemplateSignature(cd.typeParameters(), sw);
             sw.write("class "+thunkType+" : public "+parentCType+" {"); sw.newline();
             sw.write("public:"); sw.newline(4); sw.begin(0);
             sw.write("static "+(doubleTemplate ? "typename ":"")+interfaceCType+
-                     (doubleTemplate ? "::template itable< ":"::itable< ")+thunkType+thunkParams+" > itable;");
+                     (doubleTemplate ? "::template itable<":"::itable<")+thunkType+thunkParams+" > itable;");
             sw.newline();
 
             for (MethodInstance meth : methods) {
@@ -241,7 +241,7 @@ public final class ITable {
             sw.write("};"); sw.newline();
 
             cg.emitter.printTemplateSignature(cd.typeParameters(), sw);
-            sw.write((doubleTemplate ? "typename " : "")+interfaceCType+(doubleTemplate ? "::template itable< " : "::itable< ")+
+            sw.write((doubleTemplate ? "typename " : "")+interfaceCType+(doubleTemplate ? "::template itable<" : "::itable<")+
                      thunkType+thunkParams+" > "+" "+thunkType+thunkParams+"::itable");
             if (!isEmpty()) {
                 int methodNum = 0;
@@ -261,11 +261,11 @@ public final class ITable {
 	    }
 	    
 	    String interfaceCType = Emitter.translateType(interfaceType, false);
-	    String clsCType = Emitter.translateType(cls, false, false);
+	    String clsCType = Emitter.translateType(cls, false);
 	    boolean doubleTemplate = cd.typeParameters().size() > 0 && interfaceType.x10Def().typeParameters().size() > 0;
 
 	    cg.emitter.printTemplateSignature(cd.typeParameters(), sw);
-	    sw.write((doubleTemplate ? "typename " : "")+interfaceCType+(doubleTemplate ? "::template itable< " : "::itable< ")+
+	    sw.write((doubleTemplate ? "typename " : "")+interfaceCType+(doubleTemplate ? "::template itable<" : "::itable<")+
 	             Emitter.translateType(cls, false)+" > "+" "+clsCType+"::_itable_"+itableNum+"");
 	    TypeSystem xts = cls.typeSystem();
 	    if (!isEmpty()) {

@@ -18,12 +18,11 @@ namespace x10 {
 
     namespace lang {
         template<class T> class Rail;
-        class String;
     }
 
     namespace io {
 
-        class OutputStreamWriter__OutputStream : public ::x10::lang::X10Class {
+        class OutputStreamWriter__OutputStream : public x10::lang::X10Class {
             public:
             RTT_H_DECLS_CLASS;
 
@@ -37,16 +36,16 @@ namespace x10 {
             virtual void close() { }
             virtual void flush() { }
             virtual void write(x10_int b) = 0;
-            virtual void write(::x10::lang::Rail<x10_byte>* b, x10_long off, x10_long len) = 0;
-            virtual void write(::x10::lang::String* s) = 0;
+            virtual void write(x10::lang::Rail<x10_byte>* b);
+            virtual void write(x10::lang::Rail<x10_byte>* b, x10_long off, x10_long len);
 
             static OutputStreamWriter__OutputStream* STANDARD_OUT();
 
             static OutputStreamWriter__OutputStream* STANDARD_ERR();
 
             // Serialization
-            virtual void _serialize_body(::x10aux::serialization_buffer& buf);
-            void _deserialize_body(::x10aux::deserialization_buffer& buf);
+            virtual void _serialize_body(x10aux::serialization_buffer& buf);
+            void _deserialize_body(x10aux::deserialization_buffer& buf);
         };
     }
 }

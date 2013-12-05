@@ -22,9 +22,6 @@ ifdef USE_GCC
         override CXXFLAGS += ${CXX_WARNING_FLAGS} -Werror=return-type
     endif
 endif
-ifdef CROSS_COMPILE_FX10
-    override CXXFLAGS += ${CXX_WARNING_FLAGS}
-endif
 
 BASE_TESTS      = test/x10rt_basic test/x10rt_gups test/x10rt_topology test/x10rt_coll test/x10rt_crash test/x10rt_remote_op test/x10rt_resilient_monte_pi
 
@@ -34,8 +31,8 @@ X10_HOME        = ${CURDIR}/../..
 
 COMMON_OBJS     = common/x10rt_front.o common/x10rt_logical.o common/x10rt_cuda.o common/x10rt_emu.o common/x10rt_emu_coll.o
 
-# Include JNI bindings in x10rt if we can find a JDK unless cross-compiling
-ifndef CROSS_COMPILE_ANY
+# Include JNI bindings in x10rt if we can find a JDK unless cross-compiling for BG
+ifndef CROSS_COMPILE_BLUEGENE
 ifdef JNI_INCLUDES
   COMMON_OBJS += jni/jni_x10rt.o jni/jni_message.o jni/jni_team.o jni/jni_helpers.o
 endif

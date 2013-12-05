@@ -203,11 +203,7 @@ case "${__cat_system}" in
 esac
 __cat_backend_arch="${__cat_backend}-${__cat_arch}"
 __cat_arch_os="${__cat_arch}-${__cat_os}"
-if [[ -z "$CAT_LOGICAL_HOSTNAME" ]]; then
-    __cat_hostname=$(hostname)
-else
-    __cat_hostname=$CAT_LOGICAL_HOSTNAME
-fi
+__cat_hostname=$(hostname)
 __cat_target_arch=${__cat_arch}
 __cat_target_os=${__cat_os}
 if [[ "$(uname -s)" == CYGWIN* ]]; then
@@ -360,7 +356,7 @@ if [[ -n "$TMPDIR" && -d "$TMPDIR" ]]; then
     export TMPDIR=$TMPDIR
 fi
 ( \
-	cd $X10_HOME/x10.tests/tests; \
+	cd $X10_HOME/x10.tests/examples; \
 	$ABSDIR/xtestScriptCT++ -logPath $LOGD -mailAddr srkodali@linux.vnet.ibm.com -runFile $DATADIR/testrun.dat; \
 )
 cleanUpExit $?

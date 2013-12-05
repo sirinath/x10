@@ -15,47 +15,53 @@ import x10.compiler.Native;
 import x10.compiler.NativeRep;
 
 @NativeRep("java", "x10.core.concurrent.AtomicReference<#T$box>", null, "x10.rtt.ParameterizedType.make(x10.core.concurrent.AtomicReference.$RTT, #T$rtt)")
-@NativeRep("c++", "x10::util::concurrent::AtomicReference< #T >*", "x10::util::concurrent::AtomicReference< #T >", null)
+@NativeRep("c++", "x10::util::concurrent::AtomicReference<#T >*", "x10::util::concurrent::AtomicReference<#T >", null)
 public final class AtomicReference[T]{T isref} {
 	
 	@Native("java", "new x10.core.concurrent.AtomicReference<#T$box>(#T$rtt)")
-	@Native("c++", "::x10::util::concurrent::AtomicReference< #T >::_make()")
+	@Native("c++", "x10::util::concurrent::AtomicReference<#T >::_make()")
 	public native def this():AtomicReference[T];
 
 	@Native("java", "new x10.core.concurrent.AtomicReference<#T$box>(#T$rtt,#v)")
-	@Native("c++", "::x10::util::concurrent::AtomicReference< #T >::_make(#v)")
+	@Native("c++", "x10::util::concurrent::AtomicReference< #T >::_make(#v)")
 	public native def this(v:T):AtomicReference[T];
 
 	/**
 	 * @Deprecated("Use this()")
 	 */	
 	@Native("java", "new x10.core.concurrent.AtomicReference<#T$box>(#T$rtt)")
-	@Native("c++", "::x10::util::concurrent::AtomicReference< #T >::_make()")
+	@Native("c++", "x10::util::concurrent::AtomicReference< #T >::_make()")
 	public static native def newAtomicReference[T]() {T isref} :AtomicReference[T];
 
 	/**
 	 * @Deprecated("Use this(T)")
 	 */	
 	@Native("java", "new x10.core.concurrent.AtomicReference<#T$box>(#T$rtt,#v)")
-	@Native("c++", "::x10::util::concurrent::AtomicReference< #T >::_make(#v)")
-	public static native def newAtomicReference[T](v:T) {T isref} :AtomicReference[T];
+	@Native("c++", "x10::util::concurrent::AtomicReference<#T >::_make(#v)")
+	public static  native def newAtomicReference[T](v:T) {T isref} :AtomicReference[T];
 
 	@Native("java", "#this.get()")
+	@Native("c++", "(#this)->get()")
 	public native def get():T;
 
 	@Native("java", "#this.set(#v)")
+	@Native("c++", "(#this)->set(#v)")
 	public native def set(v:T):void;
 
 	@Native("java", "#this.compareAndSet(#expect,#update)")
+	@Native("c++", "(#this)->compareAndSet(#expect,#update)")
 	public native def compareAndSet(expect:T, update:T):Boolean;
 
 	@Native("java", "#this.weakCompareAndSet(#expect,#update)")
+	@Native("c++", "(#this)->weakCompareAndSet(#expect,#update)")
 	public native def weakCompareAndSet(expect:T, update:T):Boolean;
 	
 	@Native("java", "#this.getAndSet(#v)")
+	@Native("c++", "(#this)->getAndSet(#v)")
 	public native def getAndSet(v:T):T;
 
 	@Native("java", "#this.toString()")
+	@Native("c++", "(#this)->toString()")
 	public native def toString():String;
 }
  
