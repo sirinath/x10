@@ -53,7 +53,6 @@ import x10.ast.X10Call_c;
 public class X10MethodDef_c extends MethodDef_c implements X10MethodDef {
     private static final long serialVersionUID = -9049001281152283179L;
 
-    Ref<CConstraint> sourceGuard; // added to support type-inferencing of guards
     Ref<CConstraint> guard;
     Ref<TypeConstraint> typeGuard;
     List<ParameterType> typeParameters;
@@ -100,8 +99,7 @@ public class X10MethodDef_c extends MethodDef_c implements X10MethodDef {
         super(ts, pos, errorPos, container, flags, returnType, name, formalTypes, throwTypes);
         this.typeParameters = TypedList.copyAndCheck(typeParams, ParameterType.class, true);
         this.formalNames = TypedList.copyAndCheck(formalNames, LocalDef.class, true);
-        this.sourceGuard = guard;
-        this.guard = guard; // assume no guard inference for now
+        this.guard = guard;
         this.typeGuard = typeGuard;
         this.thisDef = thisDef;
         this.body = body;
@@ -156,12 +154,6 @@ public class X10MethodDef_c extends MethodDef_c implements X10MethodDef {
     public boolean inferReturnType() { return inferReturnType; }
     public void inferReturnType(boolean r) { this.inferReturnType = r; }
 
-    protected boolean inferGuard;
-    @Override
-    public boolean inferGuard() { return inferGuard; }
-    @Override
-    public void inferGuard(boolean r) { this.inferGuard = r; }
-
     // BEGIN ANNOTATION MIXIN
     List<Ref<? extends Type>> annotations;
 
@@ -193,17 +185,9 @@ public class X10MethodDef_c extends MethodDef_c implements X10MethodDef {
     }
 
     public void setGuard(Ref<CConstraint> s) {
-    	this.guard = s;
+        this.guard = s;
     }
-
-    public Ref<CConstraint> sourceGuard() {
-    	return sourceGuard;
-    }
-
-    public void setSourceGuard(Ref<CConstraint> s) {
-    	this.sourceGuard = s;
-    }
-
+    
     /** Constraint on type parameters. */
     public Ref<TypeConstraint> typeGuard() {
         return typeGuard;

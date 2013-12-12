@@ -30,6 +30,8 @@
  *   X10_USE_BDWGC     - enable BDW conservative GC
  *
  * The following debugging macros are supported:
+ *   TRACE_CAST        - trace casts
+ *   TRACE_ALLOC       - trace allocation operations
  *   TRACE_ENV_VAR     - turn on support for the tracing variables listed below
  *
  * Note, tracing is not actually enabled unless the following environment variables are defined:
@@ -204,15 +206,31 @@ namespace x10aux {
 
 #define _DEBUG_MSG(col,type,msg) do { \
     std::stringstream ss; \
-    if (::x10aux::x10rt_initialized)                                    \
-        ss << ANSI_BOLD << ::x10aux::here << ": " << col << type << ": " << ANSI_RESET << msg; \
+    if (x10aux::x10rt_initialized) \
+        ss << ANSI_BOLD << x10aux::here << ": " << col << type << ": " << ANSI_RESET << msg; \
     else \
         ss << ANSI_BOLD << col << type << ": " << ANSI_RESET << msg; \
     fprintf(stderr,"%s\n",ss.str().c_str()); \
 } while (0)
 
+#define ANSI_ALLOC ANSI_WHITE
+#define ANSI_CAST ANSI_RED
 #define ANSI_SER ANSI_CYAN
 #define ANSI_X10RT ANSI_BLUE
+
+#if !defined(NO_IOSTREAM) && defined(TRACE_ALLOC)
+#include <stdio.h>
+#define _M_(x) _DEBUG_MSG(ANSI_ALLOC,"MM",x)
+#else
+#define _M_(x)
+#endif
+
+#if !defined(NO_IOSTREAM) && defined(TRACE_CAST)
+#include <stdio.h>
+#define _CAST_(x) _DEBUG_MSG(ANSI_CAST,"CAST",x)
+#else
+#define _CAST_(x)
+#endif
 
 #if !defined(NO_IOSTREAM) && defined(TRACE_ENV_VAR)
 #include <stdio.h>

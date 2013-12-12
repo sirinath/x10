@@ -22,8 +22,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#include <x10rt_internal.h>
-
 #ifndef __sock_launcher_h__
 #define __sock_launcher_h__
 
@@ -37,7 +35,6 @@
 #define X10_HOSTLIST "X10_HOSTLIST" // an alternative to HOSTFILE above.  This is a comma-separated list of hostnames
 #define X10_RESILIENT_PLACE_ZERO "X10_RESILIENT_PLACE_ZERO" // either of these will disable the aggressive propagation of place failure
 #define X10_RESILIENT_ZOO_KEEPER "X10_RESILIENT_ZOO_KEEPER" // 
-#define X10_RESILIENT_DISTRIBUTED "X10_RESILIENT_DISTRIBUTED" // 
 #define X10_LAUNCHER_PLACE "X10_LAUNCHER_PLACE" // a number for the "place" of this process.  Set by the launcher.
 #define X10_LAUNCHER_SSH "X10_LAUNCHER_SSH" // the ssh command.  This doesn't normally need to be set.
 #define X10_LAUNCHER_PARENT "X10_LAUNCHER_PARENT" // the hostname:port of the parent launcher.  This is set by the launcher.
@@ -68,6 +65,11 @@ struct ctrl_msg
 	int datalen;
 	// followed by the data
 };
+
+static inline bool checkBoolEnvVar(char* value)
+{
+    return (value && !(strcasecmp("false", value) == 0) && !(strcasecmp("0", value) == 0) && !(strcasecmp("f", value) == 0));
+}
 
 /* ************************************************************************ */
 /*                ProcManager class definition                              */

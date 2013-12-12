@@ -11,8 +11,6 @@
 
 package x10.matrix.blas;
 
-import x10.compiler.CompilerFlags;
-
 import x10.matrix.Debug;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
@@ -35,39 +33,7 @@ import x10.matrix.TriDense;
  */
 public class DenseMatrixBLAS {
 
-	/**
-	 * Use BLAS driver for dense matrix-vector multiplication to
-	 * compute y += A &#42 x if plus is true, otherwise y = A &#42 x.
-	 *
-	 * @param A      the first operand dense matrix in multiplication
-	 * @param x      the second operand vector
-	 * @param y      vector which is used to store the result
-     * @param dim    the dimensions M, N used in BLAS multiply where
-     *               M is the number of rows in A and y
-                     N is the number of columns in A and rows in x
-     * @param offset row and column offsets [Ar, Ac, xr, yr] into matrix/vectors
-	 * @param plus   the add-on flag
-	 */
-	public static def comp(
-			A:DenseMatrix, 
-            x:Vector, 
-            y:Vector, 
-            dim:Rail[Long],
-            offset:Rail[Long], 
-            plus:Boolean) :void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(1) <= A.N,
-                offset(0)+"+"+dim(0) + " <= " + A.M + " && " + offset(1)+"+"+dim(1) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(1) <= x.M && offset(3)+dim(0) <= y.M,
-                offset(2)+"+"+dim(1) + " <= " + x.M + " && " + offset(3)+"+"+dim(0) + " <= " + y.M);
-        }
-		val scal = new Rail[Double](2);
-	    scal(0)=1.0;
-		scal(1)=plus?1.0:0.0;
-        val transA = 0n;
-		DriverBLAS.matrix_vector_mult(A.d, x.d, y.d, dim, A.M, offset, scal, transA);
-	}
-
+	// Dense multiply vector
 	public static def comp(
 			A:DenseMatrix, 
             B:Vector(A.N), 
@@ -79,40 +45,6 @@ public class DenseMatrixBLAS {
 		scal(1)=plus?1.0:0.0;
         val transA = 0n;
 		DriverBLAS.matrix_vector_mult(A.d, B.d, C.d, dim, scal, transA);
-	}
-
-	/**
-	 * Use BLAS driver for dense matrix-vector multiplication to
-	 * compute y += A<sup>T<sup> &#42 x if plus is true, 
-     * otherwise y = A<sup>T<sup> &#42 x.
-	 *
-	 * @param A      the first operand dense matrix in multiplication
-	 * @param x      the second operand vector
-	 * @param y      vector which is used to store the result
-     * @param dim    the dimensions M, N used in BLAS multiply where
-     *               M is the number of rows in A and x
-                     N is the number of columns in A and rows in y
-     * @param offset row and column offsets [Ar, Ac, xr, yr] into matrix/vectors
-	 * @param plus   the add-on flag
-	 */
-	public static def compTransMult(
-			A:DenseMatrix, 
-            x:Vector, 
-            y:Vector, 
-            dim:Rail[Long],
-            offset:Rail[Long], 
-            plus:Boolean) :void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(1) <= A.N,
-                offset(0)+"+"+dim(0) + " <= " + A.M + " && " + offset(1)+"+"+dim(1) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(0) <= x.M && offset(3)+dim(1) <= y.M,
-                offset(2)+"+"+dim(0) + " <= " + x.M + " && " + offset(3)+"+"+dim(1) + " <= " + y.M);
-        }
-		val scal = new Rail[Double](2);
-	    scal(0)=1.0;
-		scal(1)=plus?1.0:0.0;
-        val transA = 1n;
-		DriverBLAS.matrix_vector_mult(A.d, x.d, y.d, dim, A.M, offset, scal, transA);
 	}
 
 	public static def compTransMult(
@@ -257,14 +189,9 @@ public class DenseMatrixBLAS {
 	 * @param plus   the add-on flag
 	 */
 	public static def comp(A:DenseMatrix, B:DenseMatrix, C:DenseMatrix, dim:Rail[Long], offset:Rail[Long], plus:Boolean):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(2) <= A.N,
-                offset(0)+"+"+dim(0) + " <= " + A.M + " && " + offset(1)+"+"+dim(2) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(2) <= B.M && offset(3)+dim(1) <= B.N,
-                offset(2)+"+"+dim(2) + " <= " + B.M + " && " + offset(3)+"+"+dim(1) + " <= " + B.N);
-            Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N,
-                offset(4)+"+"+dim(0) + " <= " + C.M + " && " + offset(5)+"+"+dim(1) + " <= " + C.N);
-        }
+        Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(2) <= A.N);
+        Debug.assure(offset(2)+dim(2) <= B.M && offset(3)+dim(1) <= B.N);
+        Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N);
 
 		val scaling = new Rail[Double](2);
 		scaling(0) = 1.0;
@@ -370,14 +297,9 @@ public class DenseMatrixBLAS {
 	 * @param plus   the add-on flag
 	 */
 	public static def compTransMult(A:DenseMatrix, B:DenseMatrix, C:DenseMatrix, dim:Rail[Long], offset:Rail[Long], plus:Boolean):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(2) <= A.M && offset(1)+dim(0) <= A.N,
-                offset(0)+"+"+dim(2) + " <= " + A.M + " && " + offset(1)+"+"+dim(0) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(2) <= B.M && offset(3)+dim(1) <= B.N,
-                offset(2)+"+"+dim(2) + " <= " + B.M + " && " + offset(3)+"+"+dim(1) + " <= " + B.N);
-            Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N,
-                offset(4)+"+"+dim(0) + " <= " + C.M + " && " + offset(5)+"+"+dim(1) + " <= " + C.N);
-        }
+        Debug.assure(offset(0)+dim(2) <= A.M && offset(1)+dim(0) <= A.N);
+        Debug.assure(offset(2)+dim(2) <= B.M && offset(3)+dim(1) <= B.N);
+        Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N);
 
 		val scaling = new Rail[Double](2);
 		scaling(0) = 1.0;
@@ -478,14 +400,9 @@ public class DenseMatrixBLAS {
 	 * @param plus   the add-on flag
 	 */
 	public static def compMultTrans(A:DenseMatrix, B:DenseMatrix, C:DenseMatrix, dim:Rail[Long], offset:Rail[Long], plus:Boolean):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(2) <= A.N,
-                offset(0)+"+"+dim(0) + " <= " + A.M + " && " + offset(1)+"+"+dim(2) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(1) <= B.M && offset(3)+dim(2) <= B.N,
-                offset(2)+"+"+dim(1) + " <= " + B.M + " && " + offset(3)+"+"+dim(2) + " <= " + B.N);
-            Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N,
-                offset(4)+"+"+dim(0) + " <= " + C.M + " && " + offset(5)+"+"+dim(1) + " <= " + C.N);
-        }
+        Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(2) <= A.N);
+        Debug.assure(offset(2)+dim(1) <= B.M && offset(3)+dim(2) <= B.N);
+        Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N);
 
 		val scaling = new Rail[Double](2);
 		scaling(0) = 1.0;
@@ -581,14 +498,9 @@ public class DenseMatrixBLAS {
 	 * @param plus   the add-on flag
 	 */
 	public static def compTransMultTrans(A:DenseMatrix, B:DenseMatrix, C:DenseMatrix, dim:Rail[Long], offset:Rail[Long], plus:Boolean):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(2) <= A.M && offset(1)+dim(0) <= A.N,
-                offset(0)+"+"+dim(2) + " <= " + A.M + " && " + offset(1)+"+"+dim(0) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(1) <= B.M && offset(3)+dim(2) <= B.N,
-                offset(2)+"+"+dim(1) + " <= " + B.M + " && " + offset(3)+"+"+dim(2) + " <= " + B.N);
-            Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N,
-                offset(4)+"+"+dim(0) + " <= " + C.M + " && " + offset(5)+"+"+dim(1) + " <= " + C.N);
-        }
+        Debug.assure(offset(0)+dim(2) <= A.M && offset(1)+dim(0) <= A.N);
+        Debug.assure(offset(2)+dim(1) <= B.M && offset(3)+dim(2) <= B.N);
+        Debug.assure(offset(4)+dim(0) <= C.M && offset(5)+dim(1) <= C.N);
 
 		val scaling = new Rail[Double](2);
 		scaling(0) = 1.0;
@@ -617,7 +529,7 @@ public class DenseMatrixBLAS {
     /**
      * Compute symmetric rank K update C += A &#42 A<sup>T</sup>
      *
-     * @param A      a symmetric dense matrix
+     * @param A      the first operand dense matrix in multiplication which is used in transposed form
      * @param C      dense matrix which is used to store the result
      * @param upper  if true, update upper half of C; otherwise update lower half
      * @param plus   the add-on flag
@@ -631,75 +543,19 @@ public class DenseMatrixBLAS {
     }
 
     /**
-     * Compute symmetric rank K update C += A &#42 A<sup>T</sup>
-     * for offset patches within A, C
-     *
-     * @param A      a symmetric dense matrix
-     * @param C      dense matrix which is used to store the result
-     * @param dim    the dimensions M, N used in BLAS rank-K update where
-     *               M is the number of rows in the patch of A and the 
-                     number of rows and columns in the patch of C, and
-                     N is the number of columns in the patch of A
-     * @param offset row and column offsets [Ar, Ac, Cr, Cc] into matrices
-     * @param upper  if true, update upper half of C; otherwise update lower half
-     * @param plus   the add-on flag
-     */
-    public static def symRankKUpdate(A:DenseMatrix, C:DenseMatrix, dim:Rail[Long], offset:Rail[Long], upper:Boolean, plus:Boolean):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(1) <= A.N,
-                offset(0)+"+"+dim(0) + " <= " + A.M + " && " + offset(1)+"+"+dim(1) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(0) <= C.M && offset(3)+dim(0) <= C.N,
-                offset(2)+"+"+dim(0) + " <= " + C.M + " && " + offset(3)+"+"+dim(1) + " <= " + C.N);
-        }
-        val scaling = new Rail[Double](2);
-        scaling(0) = 1.0;
-        scaling(1) = plus?1.0:0.0;
-        val ld = [A.M, C.M];
-        DriverBLAS.sym_rank_k_update(A.d, C.d, dim, ld, offset, scaling, upper, false);
-    }
-
-    /**
      * Compute symmetric rank K update C += A<sup>T</sup> &#42 A
      *
-     * @param A      a symmetric dense matrix which is used in transposed form
+     * @param A      the first operand dense matrix in multiplication which is used in transposed form
      * @param C      dense matrix which is used to store the result
      * @param upper  if true, update upper half of C; otherwise update lower half
      * @param plus   the add-on flag
      */
-    public static def symRankKUpdateTrans(A:DenseMatrix, C:DenseMatrix{C.M==C.N,C.N==A.N}, upper:Boolean, plus:Boolean):void {
-        val dim = [A.N, A.M];
+    public static def symRankKUpdateTrans(A:DenseMatrix, C:DenseMatrix{C.M==C.N,C.N==A.M}, upper:Boolean, plus:Boolean):void {
+        val dim = [A.M, A.N];
         val scaling = new Rail[Double](2);
         scaling(0) = 1.0;
         scaling(1) = plus?1.0:0.0;
         DriverBLAS.sym_rank_k_update(A.d, C.d, dim, scaling, upper, true);
-    }
-
-    /**
-     * Compute symmetric rank K update C += A<sup>T</sup> &#42 A
-     * for offset patches within A, C
-     *
-     * @param A      a symmetric dense matrix which is used in transposed form
-     * @param C      dense matrix which is used to store the result
-     * @param dim    the dimensions M, N used in BLAS rank-K update where
-     *               M is the number of columns in the patch of A and the 
-                     number of rows and columns in the patch of C, and
-                     N is the number of rows in the patch of A
-     * @param offset row and column offsets [Ar, Ac, Cr, Cc] into matrices
-     * @param upper  if true, update upper half of C; otherwise update lower half
-     * @param plus   the add-on flag
-     */
-    public static def symRankKUpdateTrans(A:DenseMatrix, C:DenseMatrix, dim:Rail[Long], offset:Rail[Long], upper:Boolean, plus:Boolean):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(1) <= A.M && offset(1)+dim(0) <= A.N,
-                offset(0)+"+"+dim(1) + " <= " + A.M + " && " + offset(1)+"+"+dim(0) + " <= " + A.N);
-            Debug.assure(offset(2)+dim(0) <= C.M && offset(3)+dim(0) <= C.N,
-                offset(2)+"+"+dim(0) + " <= " + C.M + " && " + offset(3)+"+"+dim(1) + " <= " + C.N);
-        }
-        val scaling = new Rail[Double](2);
-        scaling(0) = 1.0;
-        scaling(1) = plus?1.0:0.0;
-        val ld = [A.M, C.M];
-        DriverBLAS.sym_rank_k_update(A.d, C.d, dim, ld, offset, scaling, upper, true);
     }
 
 	/**

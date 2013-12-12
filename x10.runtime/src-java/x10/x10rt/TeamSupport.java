@@ -11,11 +11,8 @@
 package x10.x10rt;
 
 import x10.core.Rail;
-import x10.lang.Complex;
 import x10.lang.FinishState;
 import x10.lang.Place;
-import x10.rtt.Type;
-import x10.util.Team.DoubleIdx;
 
 public class TeamSupport {
     
@@ -28,48 +25,26 @@ public class TeamSupport {
     private static final int RED_TYPE_LONG = 6;
     private static final int RED_TYPE_DOUBLE = 8;
     private static final int RED_TYPE_FLOAT = 9;
-    private static final int RED_TYPE_COMPLEX = 11;
     
     private static int getTypeCode(Rail<?> chunk) {
         Object chunkRaw = chunk.getBackingArray();
+        int typeCode = 0;
         if (chunkRaw instanceof byte[]) {
-            return RED_TYPE_BYTE;
+            typeCode = RED_TYPE_BYTE;
         } else if (chunkRaw instanceof short[]) {
-            return RED_TYPE_SHORT;
+            typeCode = RED_TYPE_SHORT;
         } else if (chunkRaw instanceof int[]) {
-            return RED_TYPE_INT;
+            typeCode = RED_TYPE_INT;
         } else if (chunkRaw instanceof long[]) {
-            return RED_TYPE_LONG;
+            typeCode = RED_TYPE_LONG;
         } else if (chunkRaw instanceof double[]) {
-            return RED_TYPE_DOUBLE;
+            typeCode = RED_TYPE_DOUBLE;
         } else if (chunkRaw instanceof float[]) {
-            return RED_TYPE_FLOAT;
-        } else if (chunkRaw instanceof Object[]) {
-            Type<?> elemType = chunk.$getParam(0);
-            if (elemType.equals(x10.lang.Complex.$RTT)) {
-                return RED_TYPE_COMPLEX;
-            }
+            typeCode = RED_TYPE_FLOAT;
+        } else {
+            throw new java.lang.UnsupportedOperationException("Unsupported type of src array "+chunk.$getParam(0).typeName()+" in nativeAllReduce");
         }
-        throw new java.lang.UnsupportedOperationException("Unsupported type of src array "+chunk.$getParam(0).typeName()+" in nativeAllReduce");
-    }
-    
-    // Called from native code in jni_team.cc
-    private static void copyDoubleToComplex(double[] src, Object dstObj, int offset, int count) {
-        Object[] dst = (Object[])dstObj;
-        for (int i=0; i<count; i++) {
-            dst[i+offset] = new Complex(src[2*i], src[2*i+1]);
-        }
-    }
-    
-    private static double[] copyComplexToNewDouble(Rail<?> src, int src_off, int count) {
-        Object[] boxedSrc = src.getObjectArray();
-        double[] tmp = new double[count*2];
-        for (int i=0; i<count; i++) {
-            x10.lang.Complex c = (Complex) boxedSrc[i+src_off];
-            tmp[2*i] = c.re;
-            tmp[2*i + 1] = c.im;
-        }
-        return tmp;
+        return typeCode;
     }
     
     private static void aboutToDie(String methodName) {
@@ -141,11 +116,11 @@ public class TeamSupport {
     public static void nativeBcast(int id, int role, int root, Rail<?> src, int src_off, 
                                    Rail<?> dst, int dst_off, int count) {
         if (!X10RT.forceSinglePlace) {
+        Object srcRaw = src.getBackingArray();
+        Object dstRaw = dst.getBackingArray();
+
         int typeCode = getTypeCode(src);
         assert getTypeCode(dst) == typeCode : "Incompatible src and dst arrays";
-        
-        Object srcRaw = typeCode == RED_TYPE_COMPLEX ? copyComplexToNewDouble(src, src_off, count) : src.getBackingArray();
-        Object dstRaw = dst.getBackingArray();
 
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
 
@@ -156,14 +131,14 @@ public class TeamSupport {
         }
         }
     }
-
+    
     public static void nativeAllToAll(int id, int role, Rail<?> src, int src_off, 
                                       Rail<?> dst, int dst_off, int count) {
         if (!X10RT.forceSinglePlace) {
-        int typeCode = getTypeCode(src);
-        Object srcRaw = typeCode == RED_TYPE_COMPLEX ? copyComplexToNewDouble(src, src_off, count) : src.getBackingArray();
+        Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
 
+        int typeCode = getTypeCode(src);
         assert getTypeCode(dst) == typeCode : "Incompatible src and dst arrays";
 
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
@@ -179,10 +154,10 @@ public class TeamSupport {
     public static void nativeReduce(int id, int role, int root, Rail<?> src, int src_off, 
                                        Rail<?> dst, int dst_off, int count, int op) {
         if (!X10RT.forceSinglePlace) {
-        int typeCode = getTypeCode(src);
-        Object srcRaw = typeCode == RED_TYPE_COMPLEX ? copyComplexToNewDouble(src, src_off, count) : src.getBackingArray();
+        Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
         
+        int typeCode = getTypeCode(src);
         assert getTypeCode(dst) == typeCode : "Incompatible src and dst arrays";
         
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
@@ -198,10 +173,10 @@ public class TeamSupport {
     public static void nativeAllReduce(int id, int role, Rail<?> src, int src_off, 
                                        Rail<?> dst, int dst_off, int count, int op) {
         if (!X10RT.forceSinglePlace) {
-        int typeCode = getTypeCode(src);
-        Object srcRaw = typeCode == RED_TYPE_COMPLEX ? copyComplexToNewDouble(src, src_off, count) : src.getBackingArray();
+        Object srcRaw = src.getBackingArray();
         Object dstRaw = dst.getBackingArray();
         
+        int typeCode = getTypeCode(src);
         assert getTypeCode(dst) == typeCode : "Incompatible src and dst arrays";
         
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
@@ -217,12 +192,16 @@ public class TeamSupport {
     public static void nativeIndexOfMax(int id, int role, Rail<?> src,
                                         Rail<?> dst) {
         if (!X10RT.forceSinglePlace) {
-        DoubleIdx sObj = ((x10.util.Team.DoubleIdx[])src.getBackingArray())[0];
-        DoubleIdx dObj = ((x10.util.Team.DoubleIdx[])dst.getBackingArray())[0];
+        double v = ((x10.util.Team.DoubleIdx[])src.getBackingArray())[0].value;
+        double[] value = new double[] { v };
+        int[] idx = new int[1];
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
 
         try {
-            nativeIndexOfMaxImpl(id, role, sObj, dObj, fs);
+            nativeIndexOfMaxImpl(id, role, value, idx, fs);
+            x10.util.Team.DoubleIdx dstTuple = ((x10.util.Team.DoubleIdx[])dst.getBackingArray())[0];
+            dstTuple.value = value[0];
+            dstTuple.idx = idx[0];
         } catch (UnsatisfiedLinkError e) {
             aboutToDie("nativeIndexOfMax");
         }
@@ -237,12 +216,16 @@ public class TeamSupport {
     public static void nativeIndexOfMin(int id, int role, Rail<?> src,
                                         Rail<?> dst) {
         if (!X10RT.forceSinglePlace) {
-        DoubleIdx sObj = ((x10.util.Team.DoubleIdx[])src.getBackingArray())[0];
-        DoubleIdx dObj = ((x10.util.Team.DoubleIdx[])dst.getBackingArray())[0];
+        double v = ((x10.util.Team.DoubleIdx[])src.getBackingArray())[0].value;
+        double[] value = new double[] { v };
+        int[] idx = new int[1];
         FinishState fs = ActivityManagement.activityCreationBookkeeping();
 
         try {
-            nativeIndexOfMinImpl(id, role, sObj, dObj, fs);
+            nativeIndexOfMinImpl(id, role, value, idx, fs);
+            x10.util.Team.DoubleIdx dstTuple = ((x10.util.Team.DoubleIdx[])dst.getBackingArray())[0];
+            dstTuple.value = value[0];
+            dstTuple.idx = idx[0];
         } catch (UnsatisfiedLinkError e) {
             aboutToDie("nativeIndexOfMin");
         }
@@ -306,9 +289,9 @@ public class TeamSupport {
                                                    Object dstRaw, int dst_off,
                                                    int count, int op, int typecode, FinishState fs);
     
-    private static native void nativeIndexOfMaxImpl(int id, int role, DoubleIdx src, DoubleIdx dst, FinishState fs);
+    private static native void nativeIndexOfMaxImpl(int id, int role, double[] value, int[] idx, FinishState fs);
     
-    private static native void nativeIndexOfMinImpl(int id, int role, DoubleIdx src, DoubleIdx dst, FinishState fs);
+    private static native void nativeIndexOfMinImpl(int id, int role, double[] value, int[] idx, FinishState fs);
     
     private static native void nativeSplitImpl(int id, int role, int color, int new_role, int[] nr, FinishState fs);
     

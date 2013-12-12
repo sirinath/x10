@@ -817,7 +817,7 @@ public class Errors {
             CConstraint 
             c = Types.xclause(type), 
             d = Types.xclause(targetType);
-            XConstraint residue = c==null? d: c.residue(d);
+            XConstraint residue = c.residue(d);
             
             
             return new CannotReturnExpr(expr, type, residue, pos);
@@ -2183,14 +2183,6 @@ public class Errors {
         private static final long serialVersionUID = 2851042936446059831L;
         public ArrayExplosionError(int n, Position pos) {
             super("Array argument must have constraint {rank==1,size=" + n + "}.", pos);
-        }
-    }
-    public static class ParametricClassCannotExtendCheckedThrowable extends EqualByTypeAndPosException {
-		private static final long serialVersionUID = -5078018337334696948L;
-
-		public ParametricClassCannotExtendCheckedThrowable(X10ClassDef cd, Position pos) {
-            super("A class with type parameters cannot extend x10.lang.CheckedThrowable."
-            		+ "\n\t Class: " + cd, pos);
         }
     }
 }

@@ -25,7 +25,6 @@ import polyglot.types.TypeSystem;
 import polyglot.util.ErrorQueue;
 import polyglot.visit.PostCompiled;
 import x10.X10CompilerOptions;
-import x10.ExtensionInfo.X10Scheduler.ValidatingVisitorGoal;
 import x10.visit.X10Translator;
 import x10c.ast.X10CNodeFactory_c;
 import x10c.types.X10CTypeSystem_c;
@@ -99,7 +98,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
                     goals.add(JavaCaster(job));
                     goals.add(InlineHelped(job));
                     goals.add(BoxingDetector(job));
-                    goals.add(PreCodegenASTInvariantChecker(job));
                 }
                 goals.add(g);
             }
@@ -133,11 +131,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
                 protected boolean invokePostCompiler(Options options, Compiler compiler, ErrorQueue eq) {
                     if (System.getProperty("x10.postcompile", "TRUE").equals("FALSE"))
                         return true;
-                    
-                    // Ensure that there is no post compilation for ONLY_TYPE_CHECKING jobs
-                    X10CompilerOptions opts = extensionInfo().getOptions();
-                    if (opts.x10_config.ONLY_TYPE_CHECKING) return true;
-                    
                     return X10Translator.postCompile((X10CompilerOptions)options, compiler, eq);
                 }
             }.intern(this);
@@ -216,10 +209,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
             TypeSystem ts = extInfo.typeSystem();
             NodeFactory nf = extInfo.nodeFactory();
             return new ValidatingVisitorGoal("ExpressionFlattenerForAtExpr", job, new ExpressionFlattenerForAtExpr(job, ts, nf)).intern(this);
-        }
-        
-        public Goal PreCodegenASTInvariantChecker(Job job) {
-            return new ValidatingVisitorGoal("CodegenASTInvariantChecker", job, new PreCodeGenASTChecker(job)).intern(this);
         }
     }
 

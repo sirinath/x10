@@ -41,7 +41,6 @@ import x10.constraint.XFailure;
 import x10.constraint.XLit;
 import x10.types.constraints.ConstraintManager;
 import x10.constraint.XVar;
-import x10.types.ConstrainedType;
 import x10.types.X10ClassType;
 import x10.types.checker.Converter;
 import polyglot.types.TypeSystem;
@@ -175,9 +174,7 @@ public class Tuple_c extends Expr_c implements Tuple {
 	        }
             me = this.reconstruct(indexType,newChildren);
         }
-        ConstrainedType resultType = Types.toConstrainedType(Types.makeRailOf(type, elements.size(), position()));
-        resultType = resultType.addNonNull();
-
+	    Type resultType = Types.makeRailOf(type, elements.size(), position());
 	    if (! Types.consistent(resultType))
 	        Errors.issue(tc.job(), new Errors.InconsistentType(resultType, position()));
 	    return me.type(resultType);

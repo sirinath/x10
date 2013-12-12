@@ -1,11 +1,14 @@
 package x10doc.doc;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import polyglot.types.LocalDef;
+import polyglot.types.Ref;
 import x10.types.ParameterType;
 import x10.types.X10ConstructorDef;
+import x10.types.X10MethodDef;
 
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ClassDoc;
@@ -19,265 +22,254 @@ import com.sun.javadoc.Type;
 import com.sun.javadoc.TypeVariable;
 
 public class X10ConstructorDoc extends X10Doc implements ConstructorDoc {
-    private X10ConstructorDef constrDef;
-    private X10ClassDoc containingClass;
-    private X10RootDoc rootDoc;
-    private ArrayList<X10Parameter> parameters;
-    private Type returnType;
-    private X10TypeVariable[] typeParams;
-    private boolean included;
+	private X10ConstructorDef constrDef;
+	private X10ClassDoc containingClass;
+	private X10RootDoc rootDoc;
+	private ArrayList<X10Parameter> parameters;
+	private Type returnType;
+	private X10TypeVariable[] typeParams;
+	private boolean included;
+	
+	public X10ConstructorDoc() {
+		super();
+		processComment("");
+	}
 
-    public X10ConstructorDoc() {
-        super();
-        processComment("");
-    }
+	public X10ConstructorDoc(X10ConstructorDef constrDef, X10ClassDoc containingClass, String comment) {
+		//super(comment);
+		this.constrDef = constrDef;
+		this.containingClass = containingClass;
+		this.rootDoc = X10RootDoc.getRootDoc();
 
-    public X10ConstructorDoc(X10ConstructorDef constrDef, X10ClassDoc containingClass, String comment) {
-        // super(comment);
-        this.constrDef = constrDef;
-        this.containingClass = containingClass;
-        this.rootDoc = X10RootDoc.getRootDoc();
+		// the following ensure that methodDef.signature() does not contain <unknown> in place
+		// of formal parameter types; see constructor X10MethodDoc(...) for more details
+//		List<Ref<? extends polyglot.types.Type>> ls = constrDef.formalTypes();
+//		for (Ref<? extends polyglot.types.Type> ref: ls) {
+//			polyglot.types.Type formalType = ref.get();
+//		}
+		
+		// type parameters should be initialized before parameter types because the latter may use the former
+		initTypeParameters();
+		// containingClass.addConstructor(this);
+		
+		// initialize returnType
+		returnType = rootDoc.getType(constrDef.returnType().get(), typeParams);
 
-        // the following ensure that methodDef.signature() does not contain
-        // <unknown> in place
-        // of formal parameter types; see constructor X10MethodDoc(...) for more
-        // details
-        // List<Ref<? extends polyglot.types.Type>> ls =
-        // constrDef.formalTypes();
-        // for (Ref<? extends polyglot.types.Type> ref: ls) {
-        // polyglot.types.Type formalType = ref.get();
-        // }
+		// initialize parameters
+		List<LocalDef> formals = constrDef.formalNames();
+		int n = ((formals == null) ? 0 : formals.size());
+		parameters = new ArrayList<X10Parameter>(n);
+		for (LocalDef ld: formals) {
+			String paramName = ld.name().toString();
+			polyglot.types.Type paramType = ld.type().get();
+			parameters.add(new X10Parameter(paramName, rootDoc.getType(paramType, typeParams)));
+		}
+		
+		// X10Doc.isIncluded(..., this) valid only if this.{isPublic(),...,isPrivate()} are valid, which requires
+		// this.constrDef to have been set appropriately
+		this.included = X10Doc.isIncluded(rootDoc.accessModFilter(), this);
+		super.processComment(comment);
+	}
+	
+	void initTypeParameters() {
+		// [IP] Constructors don't have type parameters, they inherit them from the container.
+		//List<ParameterType> params = constrDef.typeParameters();
+		//typeParams = new X10TypeVariable[params.size()];
+		//int i = 0;
+		//for (ParameterType p: params) {
+		//	X10TypeVariable v = new X10TypeVariable(p, this);
+		//	// typeParams.put(typeParameterKey(p), v);
+		//	typeParams[i++] = v;
+		//}
+		typeParams = new X10TypeVariable[0];
+	}
+	
+	public X10ConstructorDef getConstructorDef() {
+		return constrDef;
+	}
+	
+	public X10Tag[] getX10Tags() {
+		List<X10Tag> list = new ArrayList<X10Tag>();
+		addGuardTags(list);
+		return list.toArray(new X10Tag[list.size()]);
+	}
+	
+	public void addDeclTag(String declString) {
+		if (declString == null) {
+			return;
+		}
+		X10Tag[] declTags = createInlineTags(declString, this).toArray(new X10Tag[0]);
+		X10Tag[] tags = getX10Tags();
+		
+		// place declaration before the first sentence of the existing comment so that
+		// the declaration is displayed in the "Methods Summary" table before the first sentence
+		firstSentenceTags = concat(declTags, firstSentenceTags);
+		inlineTags = concat(concat(declTags, tags), inlineTags);
+	}
 
-        // type parameters should be initialized before parameter types because
-        // the latter may use the former
-        initTypeParameters();
-        // containingClass.addConstructor(this);
+	public String declString() {
+		// the X10 constructor declaration needs to be displayed in the constructors's comments only if a param type,  
+		// return type or the constructor is X10-specific
+		
+		if (!(X10Type.isX10Specific(returnType)) && constrDef.guard() == null) {
+			boolean hasConstraints = false;
+			for (X10Parameter p: parameters) {
+				if (p.isX10Specific()) {
+					hasConstraints = true;
+					break;
+				}
+			}
+			if (!hasConstraints) {
+				return "";
+			}
+		}
+		String guard = (constrDef.guard() == null) ? "" : constrDef.guard().toString();
+		String result = "<B>Declaration</B>: <TT>" + constrDef.signature() + guard + ": " + 
+		                constrDef.returnType().toString() + ".</TT><PRE>\n</PRE>";
+		return result; 
+	}
 
-        // initialize returnType
-        returnType = rootDoc.getType(constrDef.returnType().get(), typeParams);
+	@Override
+	public boolean isConstructor() {
+		return true;
+	}
 
-        // initialize parameters
-        List<LocalDef> formals = constrDef.formalNames();
-        int n = ((formals == null) ? 0 : formals.size());
-        parameters = new ArrayList<X10Parameter>(n);
-        for (LocalDef ld : formals) {
-            String paramName = ld.name().toString();
-            polyglot.types.Type paramType = ld.type().get();
-            parameters.add(new X10Parameter(paramName, rootDoc.getType(paramType, typeParams)));
-        }
+	@Override
+	public boolean isIncluded() {
+		return included;
+	}
 
-        // X10Doc.isIncluded(..., this) valid only if
-        // this.{isPublic(),...,isPrivate()} are valid, which requires
-        // this.constrDef to have been set appropriately
-        this.included = X10Doc.isIncluded(rootDoc.accessModFilter(), this);
-        super.processComment(comment);
-    }
+	@Override
+	public String name() {
+		return containingClass.name();
+	}
 
-    void initTypeParameters() {
-        // [IP] Constructors don't have type parameters, they inherit them from
-        // the container.
-        // List<ParameterType> params = constrDef.typeParameters();
-        // typeParams = new X10TypeVariable[params.size()];
-        // int i = 0;
-        // for (ParameterType p: params) {
-        // X10TypeVariable v = new X10TypeVariable(p, this);
-        // // typeParams.put(typeParameterKey(p), v);
-        // typeParams[i++] = v;
-        // }
-        typeParams = new X10TypeVariable[0];
-    }
+	public String flatSignature() {
+		return signature();
+	}
 
-    public X10ConstructorDef getConstructorDef() {
-        return constrDef;
-    }
+	public boolean isNative() {
+		return constrDef.flags().isNative();
+	}
 
-    public X10Tag[] getX10Tags() {
-        List<X10Tag> list = new ArrayList<X10Tag>();
-        addGuardTags(list);
-        return list.toArray(new X10Tag[list.size()]);
-    }
+	public boolean isSynchronized() {
+		return false;
+	}
 
-    public void addDeclTag(String declString) {
-        if (declString == null) {
-            return;
-        }
-        X10Tag[] declTags = createInlineTags(declString, this).toArray(new X10Tag[0]);
-        X10Tag[] tags = getX10Tags();
+	public boolean isVarArgs() {
+		return false; // no variable args. constructors in current X10 implementation
+	}
 
-        // place declaration before the first sentence of the existing comment
-        // so that
-        // the declaration is displayed in the "Methods Summary" table before
-        // the first sentence
-        firstSentenceTags = concat(declTags, firstSentenceTags);
-        inlineTags = concat(concat(declTags, tags), inlineTags);
-    }
+	public ParamTag[] paramTags() {
+		// TODO Auto-generated method stub
+		return new ParamTag[0];
+	}
 
-    public String declString() {
-        // the X10 constructor declaration needs to be displayed in the
-        // constructors's comments only if a param type,
-        // return type or the constructor is X10-specific
+	public Parameter[] parameters() {
+		return parameters.toArray(new Parameter[0]);
+	}
 
-        if (!(X10Type.isX10Specific(returnType)) && constrDef.guard() == null) {
-            boolean hasConstraints = false;
-            for (X10Parameter p : parameters) {
-                if (p.isX10Specific()) {
-                    hasConstraints = true;
-                    break;
-                }
-            }
-            if (!hasConstraints) {
-                return "";
-            }
-        }
-        String guard = (constrDef.guard() == null) ? "" : constrDef.guard().toString();
-        String result = "<B>Declaration</B>: <TT>" + constrDef.signature() + guard + ": "
-                + constrDef.returnType().toString() + ".</TT><PRE>\n</PRE>";
-        return result;
-    }
+	public String signature() {
+		String sig = constrDef.signature();
+		return sig.substring(sig.indexOf('('));
+	}
 
-    @Override
-    public boolean isConstructor() {
-        return true;
-    }
+	public Type[] thrownExceptionTypes() {
+		return thrownExceptions();
+	}
 
-    @Override
-    public boolean isIncluded() {
-        return included;
-    }
+	public ClassDoc[] thrownExceptions() {
+	    // TODO: look at the @Throws annotation when we have one
+//		List<Ref<? extends polyglot.types.Type>> throwTypes = constrDef.throwTypes();
+//		if(throwTypes != null && throwTypes.size() > 0)
+//		{
+//			ClassDoc[] types = new ClassDoc[throwTypes.size()];
+//			int i = 0;
+//			for(Ref<? extends polyglot.types.Type> type : throwTypes)
+//			{
+//				types[i++] = (ClassDoc)rootDoc.getType(type.get());
+//			}
+//			
+//			return types;
+//		}
+		
+		return new ClassDoc[0];
+	}
 
-    @Override
-    public String name() {
-        return containingClass.name();
-    }
+	public ThrowsTag[] throwsTags() {
+		Tag[] tags = tags(X10Tag.THROWS);
+		ThrowsTag[] newTags = new ThrowsTag[tags.length];
+		System.arraycopy(tags, 0, newTags, 0, tags.length);
+		return newTags;
+	}
 
-    public String flatSignature() {
-        return signature();
-    }
+	public ParamTag[] typeParamTags() {
+		// TODO Auto-generated method stub
+		return new ParamTag[0];
+	}
 
-    public boolean isNative() {
-        return constrDef.flags().isNative();
-    }
+	public TypeVariable[] typeParameters() {
+		// return typeParams.values().toArray(new TypeVariable[0]);
+		return typeParams;
+	}
 
-    public boolean isSynchronized() {
-        return false;
-    }
+	public TypeVariable getTypeVariable(ParameterType p) {
+		// return typeParams.get(typeParameterKey(p));
+		return null;
+	}
 
-    public boolean isVarArgs() {
-        return false; // no variable args. constructors in current X10
-                      // implementation
-    }
+	public boolean isSynthetic() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
-    public ParamTag[] paramTags() {
-        // TODO Auto-generated method stub
-        return new ParamTag[0];
-    }
+	public AnnotationDesc[] annotations() {
+		// TODO Auto-generated method stub
+		return new AnnotationDesc[0];
+	}
 
-    public Parameter[] parameters() {
-        return parameters.toArray(new Parameter[0]);
-    }
+	public ClassDoc containingClass() {
+		return containingClass;
+	}
 
-    public String signature() {
-        String sig = constrDef.signature();
-        return sig.substring(sig.indexOf('('));
-    }
+	public PackageDoc containingPackage() {
+		return containingClass.containingPackage();
+	}
 
-    public Type[] thrownExceptionTypes() {
-        return thrownExceptions();
-    }
+	public boolean isFinal() {
+		return constrDef.flags().isFinal();
+	}
 
-    public ClassDoc[] thrownExceptions() {
-        // TODO: look at the @Throws annotation when we have one
-        // List<Ref<? extends polyglot.types.Type>> throwTypes =
-        // constrDef.throwTypes();
-        // if(throwTypes != null && throwTypes.size() > 0)
-        // {
-        // ClassDoc[] types = new ClassDoc[throwTypes.size()];
-        // int i = 0;
-        // for(Ref<? extends polyglot.types.Type> type : throwTypes)
-        // {
-        // types[i++] = (ClassDoc)rootDoc.getType(type.get());
-        // }
-        //
-        // return types;
-        // }
+	public boolean isPackagePrivate() {
+		return constrDef.flags().isPackage();
+	}
 
-        return new ClassDoc[0];
-    }
+	public boolean isPrivate() {
+		return constrDef.flags().isPrivate();
+	}
 
-    public ThrowsTag[] throwsTags() {
-        Tag[] tags = tags(X10Tag.THROWS);
-        ThrowsTag[] newTags = new ThrowsTag[tags.length];
-        System.arraycopy(tags, 0, newTags, 0, tags.length);
-        return newTags;
-    }
+	public boolean isProtected() {
+		return constrDef.flags().isProtected();
+	}
 
-    public ParamTag[] typeParamTags() {
-        // TODO Auto-generated method stub
-        return new ParamTag[0];
-    }
+	public boolean isPublic() {
+		return constrDef.flags().isPublic();
+	}
 
-    public TypeVariable[] typeParameters() {
-        // return typeParams.values().toArray(new TypeVariable[0]);
-        return typeParams;
-    }
+	public boolean isStatic() {
+		return constrDef.flags().isStatic();
+	}
 
-    public TypeVariable getTypeVariable(ParameterType p) {
-        // return typeParams.get(typeParameterKey(p));
-        return null;
-    }
+	public int modifierSpecifier() {
+		return X10Doc.flagsToModifierSpecifier(constrDef.flags().flags());
+	}
 
-    public boolean isSynthetic() {
-        // TODO Auto-generated method stub
-        return false;
-    }
+	public String modifiers() {
+		return constrDef.flags().toString();
+	}
 
-    public AnnotationDesc[] annotations() {
-        // TODO Auto-generated method stub
-        return new AnnotationDesc[0];
-    }
-
-    public ClassDoc containingClass() {
-        return containingClass;
-    }
-
-    public PackageDoc containingPackage() {
-        return containingClass.containingPackage();
-    }
-
-    public boolean isFinal() {
-        return constrDef.flags().isFinal();
-    }
-
-    public boolean isPackagePrivate() {
-        return constrDef.flags().isPackage();
-    }
-
-    public boolean isPrivate() {
-        return constrDef.flags().isPrivate();
-    }
-
-    public boolean isProtected() {
-        return constrDef.flags().isProtected();
-    }
-
-    public boolean isPublic() {
-        return constrDef.flags().isPublic();
-    }
-
-    public boolean isStatic() {
-        return constrDef.flags().isStatic();
-    }
-
-    public int modifierSpecifier() {
-        return X10Doc.flagsToModifierSpecifier(constrDef.flags().flags());
-    }
-
-    public String modifiers() {
-        return constrDef.flags().toString();
-    }
-
-    public String qualifiedName() {
-        return containingClass.qualifiedName();
-    }
+	public String qualifiedName() {
+		return containingClass.qualifiedName();
+	}
 
 }

@@ -15,7 +15,6 @@
 #include <x10aux/config.h>
 #include <x10aux/captured_lval.h>
 #include <x10aux/deserialization_dispatcher.h>
-#include <x10/lang/Complex.h>
 
 class Serializer;
 namespace x10 { namespace lang { template<class T> class Rail; } }
@@ -43,15 +42,15 @@ namespace x10aux {
             : buffer(buffer_), cursor(buffer_), map(), len(len_)
         { }
 
-        void _constructor(::x10::io::Serializer*);
+        void _constructor(x10::io::Serializer*);
 
-        void _constructor(::x10::lang::Rail<x10_byte>*);
+        void _constructor(x10::lang::Rail<x10_byte>*);
         
-        void _constructor(::x10::io::InputStreamReader*);
+        void _constructor(x10::io::InputStreamReader*);
 
         size_t consumed (void) { return cursor - buffer; }
 
-        static ::x10::lang::Reference* deserialize_reference(deserialization_buffer &buf);
+        static x10::lang::Reference* deserialize_reference(deserialization_buffer &buf);
         static void copyOut(deserialization_buffer &buf, void* data, x10_long length, size_t sizeOfT);
         
         // Default case for primitives and other things that never contain pointers
@@ -70,7 +69,7 @@ namespace x10aux {
 
         template<typename T> void update_reference(T* r, T* newr);
 
-        ::x10::lang::Any* readAny();
+        x10::lang::Any* readAny();
         
         // So it can access the addr_map
         template<class T> friend struct Read;
@@ -144,7 +143,6 @@ namespace x10aux {
     PRIMITIVE_READ(x10_ulong)
     PRIMITIVE_READ(x10_float)
     PRIMITIVE_READ(x10_double)
-    PRIMITIVE_READ(x10_complex)
 
     // Case for references e.g. Reference*, 
     template<class T> struct deserialization_buffer::Read<T*> {
@@ -152,9 +150,9 @@ namespace x10aux {
     };
     template<class T> T* deserialization_buffer::Read<T*>::_(deserialization_buffer &buf) {
         _S_("Deserializing a "<<ANSI_SER<<ANSI_BOLD<<TYPENAME(T)<<ANSI_RESET<<" from buf: "<<&buf);
-        ::x10aux::serialization_id_t code = buf.peek< ::x10aux::serialization_id_t>();
-        if (code == (::x10aux::serialization_id_t) 0xFFFF) {
-            buf.read< ::x10aux::serialization_id_t>();
+        x10aux::serialization_id_t code = buf.peek<x10aux::serialization_id_t>();
+        if (code == (x10aux::serialization_id_t) 0xFFFF) {
+            buf.read<x10aux::serialization_id_t>();
             int pos = (int) buf.read<x10_int>();
             _S_("\tRepeated ("<<pos<<") deserialization of a "<<ANSI_SER<<ANSI_BOLD<<TYPENAME(T)<<ANSI_RESET<<" from buf: "<<&buf);
             return buf.map.get_at_position<T>(pos);
@@ -171,7 +169,7 @@ namespace x10aux {
         _S_("Deserializing a stack variable of type ref<"<<ANSI_SER<<ANSI_BOLD<<TYPENAME(T)<<ANSI_RESET<<"> from buf: "<<&buf);
         x10_long addr = buf.read<x10_long>();
         _S_("\tCaptured address is "<<((void*)addr));
-        ::x10aux::captured_ref_lval<T> result;
+        x10aux::captured_ref_lval<T> result;
         result.setCapturedAddress(addr);
         return result;
     }
@@ -182,7 +180,7 @@ namespace x10aux {
         _S_("Deserializing a stack variable of type "<<ANSI_SER<<ANSI_BOLD<<TYPENAME(T)<<ANSI_RESET<<" from buf: "<<&buf);
         x10_long addr = buf.read<x10_long>();
         _S_("\tCaptured address is "<<((void*)addr));
-        ::x10aux::captured_struct_lval<T> result;
+        x10aux::captured_struct_lval<T> result;
         result.setCapturedAddress(addr);
         return result;
     }

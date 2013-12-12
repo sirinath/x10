@@ -21,7 +21,8 @@ public class PutbackReader extends FilterReader {
         putback = new GrowableRail[Byte]();
     }
 
-    public def read() {
+    public def read() //throws IOException 
+    {
        if (putback.size() > 0) {
            val p = putback(putback.size()-1);
            putback.removeLast();
@@ -30,7 +31,8 @@ public class PutbackReader extends FilterReader {
        return super.read();
     }
 
-    public def read(r:Rail[Byte], off:Int, len:Int):void {
+    public def read(r:Rail[Byte], off:Int, len:Int): void //throws IOException 
+    {
     	var read:Int = 0n;
     	while (putback.size() > 0) {
     		if (read >= len) break;

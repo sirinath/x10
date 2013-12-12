@@ -115,10 +115,10 @@ import x10.visit.FieldInitializerMover;
 //import x10.visit.FinishAsyncVisitor;
 import x10.visit.FinallyEliminator;
 import x10.visit.IfdefVisitor;
-import x10.visit.InferGuardVisitor;
 import x10.visit.MainMethodFinder;
 import x10.visit.NativeClassVisitor;
 import x10.visit.RewriteAtomicMethodVisitor;
+import x10.visit.StaticFieldAnalyzer;
 import x10.visit.StaticNestedClassRemover;
 import x10.visit.TypeParamAlphaRenamer;
 import x10.visit.X10ImplicitDeclarationExpander;
@@ -331,15 +331,6 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
         return weakCallsCount;
     }
 
-    private int inferredGuardsCount = 0;
-    public void incrInferredGuardsCount() {
-    	inferredGuardsCount++;
-    }
-    public int inferredGuardsCount() {
-        return inferredGuardsCount;
-    }
-
-
     @Override
     protected void initTypeSystem() {
         X10CompilerOptions opts = getOptions();
@@ -486,9 +477,6 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
            goals.add(LoadJobPlugins(job));
            goals.add(RegisterPlugins(job));
            
-           if (opts.x10_config.CONSTRAINT_INFERENCE) {
-        	   goals.add(InferGuard(job));
-           }
            goals.add(PreTypeCheck(job));
            goals.add(Ifdef(job));
            goals.add(TypesInitializedForCommandLineBarrier());
@@ -518,6 +506,7 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
        private Goal addPreOptimizationGoals(Job job, List<Goal> goals) {
            final Goal typeCheckBarrierGoal = TypeCheckBarrier();
 	       goals.add(CommunicationOptimizer(job));
+           goals.add(StaticFieldAnalyzer(job));
            goals.add(MoveFieldInitializers(job)); // should do this before desugaring
            final Goal desugarerGoal = Desugarer(job);
            goals.add(desugarerGoal);
@@ -713,13 +702,6 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
                    int count = ext.weakCallsCount();
                    if (count > 0) {
                        compiler.errorQueue().enqueue(ErrorInfo.WARNING, count + " dynamically checked calls or field accesses, run with -VERBOSE_CHECKS for more details.");
-                   }
-               }
-               // TODO move the following code in a new class PrintInferredGuardsCount?
-               if ((!opts.x10_config.VERBOSE_INFERENCE) && (opts.x10_config.CONSTRAINT_INFERENCE)) {
-                   int count = ext.inferredGuardsCount();
-                   if (count > 0) {
-                       compiler.errorQueue().enqueue(ErrorInfo.WARNING, count + " inferred method or constructor guards, run with -VERBOSE_INFERENCE for more details.");
                    }
                }
                return true;
@@ -1034,9 +1016,6 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
        private Goal Ifdef(Job job) {
            return new ForgivingVisitorGoal("IfdefVisitor", job, new IfdefVisitor(job,job.extensionInfo().typeSystem(),job.extensionInfo().nodeFactory())).intern(this);
        }
-       private Goal InferGuard(Job job) {
-    	   return new ForgivingVisitorGoal("InferGuardVisitor", job, new InferGuardVisitor(job,job.extensionInfo().typeSystem(),job.extensionInfo().nodeFactory())).intern(this);
-       }
        private Goal ErrChecker(Job job) {
            return new ForgivingVisitorGoal("ErrChecker", job, new ErrChecker(job)).intern(this);
        }
@@ -1076,6 +1055,12 @@ public class ExtensionInfo extends polyglot.frontend.ParserlessJLExtensionInfo {
            return new ValidatingVisitorGoal("MoveFieldInitializers", job, new FieldInitializerMover(job, ts, nf)).intern(this);
        }
        
+       public Goal StaticFieldAnalyzer(Job job) {
+           TypeSystem ts = extInfo.typeSystem();
+           NodeFactory nf = extInfo.nodeFactory();
+           return new ValidatingVisitorGoal("StaticFieldAnalyzer", job, new StaticFieldAnalyzer(job, ts, nf)).intern(this);
+       }
+
        public Goal X10RewriteAtomicMethods(Job job) {
            TypeSystem ts = extInfo.typeSystem();
            NodeFactory nf = extInfo.nodeFactory();

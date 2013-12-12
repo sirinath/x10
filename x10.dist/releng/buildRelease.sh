@@ -69,11 +69,6 @@ case "$UNAME" in
           EXTRA_X10RT_BUILD_ARG="-DX10RT_PAMI=true"
           export USE_XLC=1
       fi
-      if [[ "$SHORT_HOSTNAME" == "bgqfen1" ]]; then 
-          EXTRA_X10RT_BUILD_ARG="-DCROSS_COMPILE_BGQ=true"
-	  X10_PLATFORM='linux_bgq'
-	  SKIP_DEBUG_BUILD=1
-      fi
       ;;
   AIX,*,powerpc) 
       X10_PLATFORM='aix_ppc'
@@ -123,8 +118,8 @@ echo "The distribution is now exported to the directory $workdir"
 if [[ -z "$SKIP_X10_BUILD" ]]; then
     echo "Building distribution"
     cd $distdir/x10.dist
-    ant $EXTRA_X10RT_BUILD_ARG -Doptimize=true -Dx10.version=$X10_VERSION testtar
-    ant $EXTRA_X10RT_BUILD_ARG -Doptimize=true -Dx10.version=$X10_VERSION srctar
+    ant -Doptimize=true -Dx10.version=$X10_VERSION testtar
+    ant -Doptimize=true -Dx10.version=$X10_VERSION srctar
     ant $EXTRA_X10RT_BUILD_ARG -Doptimize=true dist
     if [[ -z "$SKIP_DEBUG_BUILD" ]]; then
         ant $EXTRA_X10RT_BUILD_ARG -Ddebug=true dist-cpp

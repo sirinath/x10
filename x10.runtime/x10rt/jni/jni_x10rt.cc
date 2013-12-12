@@ -9,10 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2013.
  */
 
-#if defined(__CYGWIN__) || defined(__FreeBSD__)
-#undef __STRICT_ANSI__ // Strict ANSI mode is too strict in Cygwin and FreeBSD
-#endif
-
 #ifndef __int64
 #define __int64 __int64_t
 #endif
@@ -165,14 +161,6 @@ JNIEXPORT jint JNICALL Java_x10_x10rt_X10RT_x10rt_1here(JNIEnv *, jclass) {
     return (jint)x10rt_here();
 }
 
-/*
- * Class:     x10_x10rt_X10RT
- * Method:    x10rt_coll_support
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_x10_x10rt_X10RT_x10rt_1coll_1support(JNIEnv *, jclass) {
-    return (jint)x10rt_coll_support();
-}
 
 /*
  * Class:     x10_x10rt_X10RT
