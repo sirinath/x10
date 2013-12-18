@@ -11,6 +11,8 @@
 
 package x10.serialization;
 
+import com.ibm.xtq.xml.types.AnyType;
+
 import x10.runtime.impl.java.Runtime;
 import x10.serialization.DeserializationDictionary.MasterDeserializationDictionary;
 import x10.serialization.SerializationDictionary.MasterSerializationDictionary;
