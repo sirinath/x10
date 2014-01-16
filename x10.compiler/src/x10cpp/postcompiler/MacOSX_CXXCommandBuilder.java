@@ -24,18 +24,12 @@ public class MacOSX_CXXCommandBuilder extends CXXCommandBuilder {
         super.addPreArgs(cxxCmd);
         cxxCmd.add("-msse2");
         cxxCmd.add("-mfpmath=sse");
-        cxxCmd.add("-Wno-unused-value");
-        cxxCmd.add("-Wno-logical-op-parentheses");
     }
 
     public void addPostArgs(ArrayList<String> cxxCmd) {
         super.addPostArgs(cxxCmd);
 
         for (PrecompiledLibrary pcl:options.x10libs) {
-            if (options.x10_config.DEBUG && !options.x10_config.DEBUG_APP_ONLY) {
-                cxxCmd.add("-Wl,-rpath");
-                cxxCmd.add("-Wl,"+pcl.absolutePathToRoot+"/lib-dbg");
-            }
             cxxCmd.add("-Wl,-rpath");
             cxxCmd.add("-Wl,"+pcl.absolutePathToRoot+"/lib");
         }

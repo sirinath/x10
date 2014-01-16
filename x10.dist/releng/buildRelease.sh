@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# exit if anything goes wrong
-set -e
-
 # Dave Grove
 
 svn_command=export
@@ -99,7 +96,7 @@ distdir=$workdir/x10-$X10_VERSION
 echo
 echo cleaning $workdir
 rm -rf $workdir
-mkdir -p $workdir
+mkdir -p $workdir || exit 1
 mkdir -p $workdir/x10-$X10_VERSION
 
 (

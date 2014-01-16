@@ -280,6 +280,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             //                Expect it to be more efficient to explicitly initialize all of the object fields instead
             //                of first calling alloc_z, then storing into most of the fields a second time.
             sw.write("(new (::x10aux::alloc_z"+chevrons(typeName)+"()) "+typeName+"())");
+            sw.newline();
         }
     }
 
@@ -1246,7 +1247,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 				sw.write("::x10aux::itable_entry(&::x10aux::getRTT"+chevrons(Emitter.translateType(interfaceType, false))+", &_itable_"+itableNum+"), ");
 				itableNum += 1;
 			}
-			sw.write("::x10aux::itable_entry(NULL, (void*)\""+Emitter.translateType(currentClass, false)+"\")};"); sw.newline();
+			sw.write("::x10aux::itable_entry(NULL, (void*)::x10aux::getRTT"+chevrons(Emitter.translateType(currentClass, false))+"())};"); sw.newline();
 		}
 	}
 
@@ -1302,7 +1303,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	                     thunkBaseName+thunkParams+"::_itable_"+itableNum+"), ");
 	            itableNum += 1;
 	        }
-	        sw.write("::x10aux::itable_entry(NULL, (void*)\""+Emitter.translateType(currentClass, false)+"\")};"); sw.newline();
+	        sw.write("::x10aux::itable_entry(NULL, (void*)::x10aux::getRTT"+chevrons(Emitter.translateType(currentClass, false))+"())};"); sw.newline();
 	        
 	        // ITables init for the IBox thunk.
 	        emitter.printTemplateSignature(cd.typeParameters(), sw);
@@ -1313,7 +1314,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	                     thunkBaseName+"_ibox"+itableNum+thunkParams+"::itable), ");
 	            itableNum += 1;
 	        }
-	        sw.write("::x10aux::itable_entry(NULL, (void*)\""+Emitter.translateType(currentClass, false)+"\")};"); sw.newline();
+	        sw.write("::x10aux::itable_entry(NULL, (void*)::x10aux::getRTT"+chevrons(Emitter.translateType(currentClass, false))+"())};"); sw.newline();
 	    }
 	}
 
@@ -1522,9 +1523,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
                 int counter = 0;
                 for (LocalInstance f : mi.formalNames()) {
                     Type fType = mi.formalTypes().get(counter);
-                    String fname = Emitter.mangled_non_method_name(f.name().toString());
-                    params.add(fname);
-                    args.add(fname);
+                    params.add(f.name().toString());
+                    args.add(f.name().toString());
                     counter++;
                 }
                 List<Type> classTypeArguments  = Collections.<Type>emptyList();
@@ -2729,7 +2729,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		}
 		if (!virtual_dispatch && !already_static ) {
 		    // Statically bind call at C++ level by explictly qualifying
-		    String methodContainerType = Emitter.translateType(t, false, false);
+		    String methodContainerType = Emitter.translateType(t);
 		    if ((context.inTemplate() || context.isInsideTemplateClosure()) && (t.isClass() && t.toClass().hasParams())) {
 		        int firstTemplate = methodContainerType.indexOf("<");
 		        int i = methodContainerType.lastIndexOf("::", firstTemplate-1); // UGH. This is hacky, but it is really hard to restructure translateType to avoid needing a hack
@@ -3961,13 +3961,11 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		assert (opString.equals("&&") || opString.equals("||"))
 		    : "visiting "+n.getClass()+" at "+n.position()+": "+n;
 
-		sw.write("(");
 		n.printSubExpr(n.left(), true, sw, tr);
 		sw.write(" ");
 		sw.write(opString);
 		sw.allowBreak(0, " ");
 		n.printSubExpr(n.right(), false, sw, tr);
-		sw.write(")");
 	}
 
     // allow overriding in subclasses (i.e. CUDACodeGenerator)
