@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+HEAP=2048m
+X10FLAGS="-ms$HEAP -mx$HEAP"
+#DRYRUN=true
+#FULLRUN=true
+
+
+if [ -z "$FULLRUN" ]; then
+#
+# test run
+#
+for p in 1 8
+do
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp kmeans.jar KMeans -n $((40000*$p)) -c 4096 -d 12 -i 5"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.kmeans.managed.$(printf "%05d" $p)
+done
+
+exit 0
+fi
+
+
+#
+# full run for measurement
+#
+p=47040
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp kmeans.jar KMeans -n $((40000*$p)) -c 4096 -d 12 -i 5"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.kmeans.managed.$(printf "%05d" $p)
+
+for i in $(seq 15 -1 0)
+do
+p=$((2**i))
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp kmeans.jar KMeans -n $((40000*$p)) -c 4096 -d 12 -i 5"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.kmeans.managed.$(printf "%05d" $p)
+done

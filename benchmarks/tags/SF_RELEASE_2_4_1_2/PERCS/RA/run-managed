@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+HEAP=3072m
+X10FLAGS="-ms$HEAP -mx$HEAP"
+#DRYRUN=true
+#FULLRUN=true
+
+M=28
+#U=1
+U=0.25
+
+
+if [ -z "$FULLRUN" ]; then
+# Note: overwrite to reduce time
+M=18
+#
+# test run
+#
+for i in 0 1
+do
+p=$((2**$i))
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp ra.jar RandomAccess -m $M -u $U"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.ra.managed.m$M.u$U.$(printf "%05d" $p)
+done
+
+exit 0
+fi
+
+
+#
+# full run for measurement
+#
+for i in $(seq 15 -1 0)
+do
+p=$((2**$i))
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp ra.jar RandomAccess -m $M -u $U"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.ra.managed.m$M.u$U.$(printf "%05d" $p)
+done
