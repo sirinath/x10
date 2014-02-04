@@ -3901,9 +3901,7 @@ public class Emitter {
         if (def.flags().isAbstract()) {
             w.write("throw new UnsupportedOperationException(\"Can't instantiate an abstract class\");");
         } else {
-            if (!def.isStruct()) {
-                w.writeln("int $obj_id = $deserializer.record_reference(null); /* Get id eagerly so that ordering in object map is stable (needed for repeated reference mechanism) */");
-            }
+            w.writeln("int $obj_id = $deserializer.record_reference(null); /* Get id eagerly so that ordering in object map is stable (needed for repeated reference mechanism) */");
             for (ParameterType typeParam : def.typeParameters()) {
                 w.write(X10PrettyPrinterVisitor.X10_RTT_TYPE + " ");
                 printType(typeParam, PRINT_TYPE_PARAMS | BOX_PRIMITIVES);
@@ -3926,9 +3924,7 @@ public class Emitter {
                 }
                 w.writeln("(x10.io.Deserializer) null);");
             }
-            if (!def.isStruct()) {
-                w.writeln("$deserializer.update_reference($obj_id, $_obj); /* Update entry in object map with the actual object before deserializing body */");
-            }
+            w.writeln("$deserializer.update_reference($obj_id, $_obj); /* Update entry in object map with the actual object before deserializing body */");
             w.write("return " + DESERIALIZE_BODY_METHOD + "($_obj, $deserializer);");
         }
         w.end();

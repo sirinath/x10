@@ -64,7 +64,6 @@ final class Configuration {
        return v;
     }
     
-    // Note that "X10_RESILIENT_MODE" is also checked in x10rt/sockets/Launcher.cc
     static val RESILIENT_MODE_NONE = 0n;
     static val RESILIENT_MODE_PLACE_ZERO = 1n;
     static val RESILIENT_MODE_DISTRIBUTED = 2n;

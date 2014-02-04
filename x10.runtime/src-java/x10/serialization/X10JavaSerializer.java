@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import x10.core.GlobalRef;
 import x10.core.Rail;
-import x10.core.StructI;
+import x10.io.CustomSerialization;
 import x10.rtt.Types;
 import x10.runtime.impl.java.Runtime;
 import x10.serialization.SerializationDictionary.LocalSerializationDictionary;
@@ -146,13 +146,6 @@ public final class X10JavaSerializer implements SerializationConstants {
         counter = 0;
     }
     
-    public void addDeserializeCount(long extraCount) {
-        // [GlobalGC] Adjust speculative increment of remoteCounts of GlobalRefs
-        if (extraCount < 0L || extraCount > Integer.MAX_VALUE)
-            throw new RuntimeException("extraCount " + extraCount + " is out of range");
-        x10.core.GlobalRef.adjustRemoteCountsInMap(getGrefMap(), (int)extraCount);
-    }
-    
     // Called from x10.io.Serializer.
     // The only goal of this wrapper message is to avoid a throws java.io.IOException
     // in the X10 API for Serializer.writeAny(v:Any).
@@ -261,13 +254,11 @@ public final class X10JavaSerializer implements SerializationConstants {
             return;
         }
         
-        if (!(obj instanceof StructI)) {
-            Integer pos = previous_position(obj, true);
-            if (pos != null) {
-                return;
-            }
+        Integer pos = previous_position(obj, true);
+        if (pos != null) {
+            return;
         }
-
+        
         writeSerializationId(sid);
         if (obj instanceof X10JavaSerializable) {
              if (Runtime.TRACE_SER) {

@@ -70,6 +70,7 @@ import x10.types.constants.ConstantValue;
 import x10.types.constants.StringValue;
 import x10.types.constraints.CConstraint;
 import x10.util.AltSynthesizer;
+import x10.visit.Desugarer.ClosureCaptureVisitor;
 
 /**
  * Very simple constant propagation pass. 

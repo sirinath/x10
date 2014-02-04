@@ -25,7 +25,7 @@ public class CompilerFlags {
     @Native("java", "(!`NO_CHECKS`)")
     @Native("c++", "BOUNDS_CHECK_BOOL")
     @CompileTimeConstant("!NO_CHECKS")
-    public static native def checkBounds():Boolean;
+    public static native def checkBounds():boolean;
 
     /**
      * @return <code>true</code> if the compiler was invoked with
@@ -34,27 +34,27 @@ public class CompilerFlags {
     @Native("java", "(!`NO_CHECKS`)")
     @Native("c++", "PLACE_CHECK_BOOL")
     @CompileTimeConstant("!NO_CHECKS")
-    public static native def checkPlace():Boolean;
+    public static native def checkPlace():boolean;
 
     /**
      * Should bounds checking operations be optimized by using unsigned compares
      */
     @Native("java", "true")
     @Native("c++", "true")
-    public static native def useUnsigned():Boolean;
+    public static native def useUnsigned():boolean;
 
     /**
      * A false that is not understood by the constant propagator
      */
     @Native("java", "false")
     @Native("c++", "false")
-    public static native def FALSE():Boolean;
+    public static native def FALSE():boolean;
     
     /**
      * A "true" that is not understood by the constant propagator
      */
     @Native("java", "true")
     @Native("c++",  "true")
-    public static native def TRUE():Boolean;
+    public static native def TRUE():boolean;
     
 }

@@ -13,8 +13,6 @@
 package x10.lang;
 
 import x10.compiler.Pragma;
-import x10.io.Serializer;
-import x10.io.Deserializer;
 
 /**
  * <p> A PlaceGroup represents an ordered set of Places.
@@ -68,7 +66,7 @@ public abstract class PlaceGroup implements Iterable[Place] {
    * 
    * @return the index of place
    */
-  public def indexOf(place:Place):Long = indexOf(place.id);
+  public def indexOf(place:Place):long = indexOf(place.id);
 
   /**
    * <p>If the Place with id equal to id is contained in the PlaceGroup
@@ -91,7 +89,7 @@ public abstract class PlaceGroup implements Iterable[Place] {
    * @param i the ordinal number of the desired place
    * @return the ith place in the place group
    */
-  public abstract operator this(i:Long):Place;
+  public abstract operator this(i:long):Place;
 
 
   /**
@@ -102,7 +100,7 @@ public abstract class PlaceGroup implements Iterable[Place] {
     if (!(thatObj instanceof PlaceGroup)) return false;
     val that = thatObj as PlaceGroup;
     if (numPlaces() != that.numPlaces()) return false;
-    for (var i:Long=0; i<numPlaces(); i++) {
+    for (var i:long=0; i<numPlaces(); i++) {
       if (!this(i).equals(that(i))) return false;
     }
     return true;
@@ -114,16 +112,8 @@ public abstract class PlaceGroup implements Iterable[Place] {
    *    (any async/at must be nested inside of a finish).
    */
   public def broadcastFlat(cl:()=>void) {
-    val ser = new Serializer();
-    ser.writeAny(cl);
-    ser.addDeserializeCount(this.size()-1);
-    val message = ser.toRail();
     @Pragma(Pragma.FINISH_SPMD) finish for (p in this) {
-      at (p) async {
-          val dser = new x10.io.Deserializer(message);
-          val cls = dser.readAny() as ()=>void;
-          cls();
-      };
+      at (p) async cl();
     }
   }
 
@@ -132,45 +122,21 @@ public abstract class PlaceGroup implements Iterable[Place] {
    * Note: cl must not have any exposed at/async constructs
    *    (any async/at must be nested inside of a finish).
    */
-  public def broadcastFlat(cl:()=>void, ignoreIfDead:(Place)=>Boolean) {
-    val ser = new Serializer();
-    ser.writeAny(cl);
-    ser.addDeserializeCount(this.size()-1);
-    val message = ser.toRail();
-    var numSkipped:Long = 0;
+  public def broadcastFlat(cl:()=>void, ignoreIfDead:(Place)=>boolean) {
     @Pragma(Pragma.FINISH_SPMD) finish for (p in this) {
       if (!p.isDead() || !ignoreIfDead(p)) {
-          at (p) async {
-              val dser = new x10.io.Deserializer(message);
-              val cls = dser.readAny() as ()=>void;
-              cls();
-          };
-      } else {
-          numSkipped++;
+          at (p) async cl();
       }
-    }
-    if (numSkipped > 0) {
-        for (1..numSkipped) {
-            // TODO: Resilient X10.
-            // We skipped some places, so need to adjust the
-            // ref counts. The simplest way to do this is to simply
-            // deserialize the object graph here and discard it.
-            // There should be a more efficient way to accomplish this by directly 
-            // adjusting the weights (perhaps count the number of skipped places and
-            // then adjust weights by (#drop/size) at the end of the finish?)
-            val dser = new x10.io.Deserializer(message);
-            val cls = dser.readAny() as ()=>void;
-        }    
     }
   }
 
   public static class SimplePlaceGroup extends PlaceGroup {
     private val numPlaces:Long;
     def this(numPlaces:Long) { this.numPlaces = numPlaces; }
-    public operator this(i:Long):Place = Place(i);
+    public operator this(i:long):Place = Place(i);
     public def numPlaces() = numPlaces;
-    public def contains(id:Long) = id >= 0L && id < numPlaces;
-    public def indexOf(id:Long) = contains(id) ? id : -1L;
+    public def contains(id:long) = id >= 0L && id < numPlaces;
+    public def indexOf(id:long) = contains(id) ? id : -1L;
     public def iterator():Iterator[Place]{self!=null} = new Iterator[Place](){
       private var i:Long = 0L;
       public def hasNext() = i < numPlaces;
@@ -186,20 +152,12 @@ public abstract class PlaceGroup implements Iterable[Place] {
     public def hashCode() = numPlaces.hashCode();
     public def broadcastFlat(cl:()=>void) {
         if (numPlaces() >= 1024L) {
-            val ser = new Serializer();
-            ser.writeAny(cl);
-            ser.addDeserializeCount(this.size()-1);
-            val message = ser.toRail();
             @Pragma(Pragma.FINISH_SPMD) finish for(var i:Long=numPlaces()-1; i>=0L; i-=32L) {
                 at (Place(i)) async {
                     val max = Runtime.hereLong();
                     val min = Math.max(max-31L, 0L);
                     @Pragma(Pragma.FINISH_SPMD) finish for (var j:Long=min; j<=max; ++j) {
-                        at (Place(j)) async {
-                            val dser = new x10.io.Deserializer(message);
-                            val cls = dser.readAny() as ()=>void;
-                            cls();
-                       }
+                        at (Place(j)) async cl();
                     }
                 }
             }

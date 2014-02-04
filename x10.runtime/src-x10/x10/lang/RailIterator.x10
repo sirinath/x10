@@ -18,7 +18,7 @@ package x10.lang;
 
 final class RailIterator[T] implements Iterator[T] {
   val rail:Rail[T];
-  var cur:Long;
+  var cur:long;
 
   def this(x:Rail[T]) { 
     this.rail = x;

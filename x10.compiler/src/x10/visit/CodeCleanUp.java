@@ -18,7 +18,6 @@ import java.util.Map;
 
 import polyglot.ast.Block;
 import polyglot.ast.Branch;
-import polyglot.ast.Empty;
 import polyglot.ast.Eval;
 import polyglot.ast.Expr;
 import polyglot.ast.For;
@@ -122,8 +121,7 @@ public class CodeCleanUp extends ContextVisitor {
         }
         
         if (n instanceof Return && ((Return) n).expr() instanceof StmtExpr) {
-            Block b = sinkReturn((StmtExpr)((Return)n).expr(), n.position());
-            return clean(flattenBlock(b));
+            return sinkReturn((Return)n);
         }
         
         if (!(n instanceof Block) || n instanceof SwitchBlock) {
@@ -162,22 +160,12 @@ public class CodeCleanUp extends ContextVisitor {
     }
 
     //Return(StmtExpr(Block(S), e)) ==> Block(S, return e)
-    private Block sinkReturn(StmtExpr stexp, Position pos) {
-        Block b = nf.Block(pos, stexp.statements());
-        if (!((X10Ext)stexp.ext()).annotations().isEmpty()) {
-            b = (Block)((X10Ext)b.ext()).annotations(((X10Ext)stexp.ext()).annotations());
-        }
-        Expr res = stexp.result();
-        Stmt ret;
-        if (res instanceof StmtExpr) {
-            ret = clean(flattenBlock(sinkReturn((StmtExpr)res, pos)));
-        } else {
-            ret = nf.Return(pos, res);
-        }
-        
-        b = b.append(ret);
-        
-        return b;
+    private Block sinkReturn(Return oldRet) {
+        StmtExpr stExpr = (StmtExpr)oldRet.expr();
+        List<Stmt> statements = new ArrayList<Stmt>(stExpr.statements());
+        Return newRet= nf.Return(oldRet.position(), stExpr.result());
+        statements.add(newRet);
+        return nf.Block(oldRet.position(), statements);
     }
     
     
@@ -223,12 +211,6 @@ public class CodeCleanUp extends ContextVisitor {
         // for (Stmt stmt : stl) {
         for (Iterator<Stmt> i = b.statements().iterator(); i.hasNext();) {
             Stmt stmt = i.next();
-            
-            if (stmt instanceof Empty) {
-                // remove empty statements
-                changeMade = true;
-                continue;
-            }
             stmtList.add(stmt);
 
             if (stmt instanceof Branch || stmt instanceof Return || stmt instanceof Throw) {

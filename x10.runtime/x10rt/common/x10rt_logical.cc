@@ -850,10 +850,6 @@ x10rt_error x10rt_lgl_blocking_probe (void)
     return X10RT_ERR_OK;
 }
 
-x10rt_error x10rt_lgl_unblock_probe (void)
-{
-	return x10rt_net_unblock_probe();
-}
 
 void x10rt_lgl_finalize (void)
 {

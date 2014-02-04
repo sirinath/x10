@@ -83,7 +83,6 @@ import polyglot.util.CodeWriter;
 import polyglot.util.ErrorInfo;
 import polyglot.util.ErrorQueue;
 import polyglot.util.InternalCompilerError;
-import polyglot.util.Position;
 import polyglot.util.SimpleCodeWriter;
 import polyglot.util.StdErrorQueue;
 import polyglot.util.StringUtil;
@@ -178,12 +177,10 @@ public class X10CPPTranslator extends Translator {
 				 (n instanceof ConstructorDecl) ||
 				 (n instanceof ClassDecl)))
 		{
-		    Position lastLine = ((X10CPPContext_c)context).lastLine;
-		    if (lastLine == null || lastLine.line() != line || !lastLine.file().equals(file)) {
-		        ((X10CPPContext_c)context).lastLine = n.position();
-		        w.forceNewline(0);
-		        w.writeln("//#line " + line + " \"" + file + "\"");
-		    }
+		    String nodeName = n instanceof Eval ? ("Eval of "+(((Eval)n).expr().getClass().getName())) : n.getClass().getName();
+			w.forceNewline(0);
+			w.write("//#line " + line + " \"" + file + "\": "+nodeName);
+			w.newline();
 		}
 		
 		X10CPPCompilerOptions opts = (X10CPPCompilerOptions) job.extensionInfo().getOptions();

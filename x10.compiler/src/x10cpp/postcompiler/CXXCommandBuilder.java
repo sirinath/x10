@@ -113,6 +113,12 @@ public class CXXCommandBuilder {
 	       defaultPostCompiler().contains("xlcxx");
     }
     
+    protected final boolean bluegene() {
+        return bluegeneP() || bluegeneQ();
+    }
+    protected final boolean bluegeneP() {
+        return getPlatform().contains("bgp");
+    }
     protected final boolean bluegeneQ() {
         return getPlatform().contains("bgq");
     }
@@ -159,6 +165,10 @@ public class CXXCommandBuilder {
                     cxxCmd.add("-qtune=qp");
                     cxxCmd.add("-qsimd=auto");
                     cxxCmd.add("-qarch=qp");
+                } else if (!bluegeneP()) {
+                    cxxCmd.add("-qhot");
+                    cxxCmd.add("-qtune=auto");
+                    cxxCmd.add("-qarch=auto");
                 }
             }
         }
@@ -390,6 +400,8 @@ public class CXXCommandBuilder {
         	cbb = new MacOSX_CXXCommandBuilder();
         } else if (platform.startsWith("freebsd_")) {
         	cbb = new FreeBSD_CXXCommandBuilder();
+        } else if (platform.startsWith("bgp")) {
+        	cbb = new Linux_CXXCommandBuilder();            
         } else if (platform.startsWith("bgq")) {
             cbb = new Linux_CXXCommandBuilder();            
         } else if (platform.startsWith("fx10")) {

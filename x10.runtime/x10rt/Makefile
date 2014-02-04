@@ -18,7 +18,9 @@ GZIP            ?= gzip
 
 override CXXFLAGS += -Iinclude -Icommon ${JNI_INCLUDES}
 ifdef USE_GCC
-    override CXXFLAGS += ${CXX_WARNING_FLAGS} -Werror=return-type
+    ifndef ENABLE_CROSS_COMPILE_BGP
+        override CXXFLAGS += ${CXX_WARNING_FLAGS} -Werror=return-type
+    endif
 endif
 ifdef CROSS_COMPILE_FX10
     override CXXFLAGS += ${CXX_WARNING_FLAGS}
@@ -75,6 +77,10 @@ ifdef ENABLE_X10RT_PAMI
   include pami/pami.mk
 endif
 
+ifndef DISABLE_X10RT_PGAS
+  include pgas/pgas.mk
+endif
+
 ifndef CROSS_COMPILE_BLUEGENE
   include standalone/standalone.mk
   include sockets/sockets.mk
@@ -104,13 +110,15 @@ debug::
 	@echo DISABLE_X10RT_MPI = $(DISABLE_X10RT_MPI)
 	@echo ENABLE_X10RT_PAMI = $(ENABLE_X10RT_PAMI)
 	@echo DISABLE_X10RT_PAMI = $(DISABLE_X10RT_PAMI)
+	@echo ENABLE_X10RT_PGAS = $(ENABLE_X10RT_PGAS)
+	@echo DISABLE_X10RT_PGAS = $(DISABLE_X10RT_PGAS)
 	@echo JNI_INCLUDES = $(JNI_INCLUDES)
 	@echo LIBS = $(LIBS)
 	@echo PROPERTIES = $(PROPERTIES)
 	@echo TESTS = $(TESTS)
 
 clean:
-	-$(RM) -r */*.o lib/* bin/* etc/*.properties test/*.mpi test/*.standalone test/*.sockets test/*.pami */*~ *~ core* vgcore* ${EXECUTABLES}
+	-$(RM) -r */*.o lib/* bin/* etc/*.properties test/*.mpi test/*.standalone test/*.sockets test/*.pami test/*.pgas_* */*~ *~ core* vgcore* include/pgasrt*.h include/xlupc*.h ${EXECUTABLES}
 
 depend:
 	makedepend -I include -I common -Y */*.cc

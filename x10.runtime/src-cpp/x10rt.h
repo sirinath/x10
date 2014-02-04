@@ -5,8 +5,7 @@
 
 #include <x10aux/config.h>
 
-// has to be first to ensure initialisation of x10rt occurs before uses of x10aux::alloc
-// Dave G: 1/29/14.  The comment above was made about pgas_sockets; still true?
+// has to be first to ensure initialisation of pgas occurs before uses of x10aux::alloc
 #include <x10aux/network.h>
 
 #include <x10aux/throw.h>

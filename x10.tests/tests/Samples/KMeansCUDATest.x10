@@ -14,19 +14,17 @@ import harness.x10Test;
 
 // SOURCEPATH: x10.dist/samples/CUDA
 
-public class CUDAMatMulTest extends x10Test {
+public class KMeansCUDATest extends x10Test {
     public def run():boolean {
-         val args:Rail[String];
-         if (here.numChildren() == 0) {
-             args = ["64" as String];
-         } else {
-             args = new Rail[String](0);
-         }
-         CUDAMatMul.main(args);
+         val args = new Rail[String](2);
+         val x10home = System.getenv("X10_HOME");
+         args(0) = "-p"; 
+         args(1) = (x10home == null ? "../../.." : x10home) + "/x10.dist/samples/points.dat";
+         KMeansCUDA.main(args);
          return true;
     }
 
     public static def main(args:Rail[String]) {
-	new CUDAMatMulTest().execute();
+	new KMeansCUDATest().execute();
     }
 }

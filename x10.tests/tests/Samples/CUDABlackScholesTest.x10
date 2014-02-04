@@ -13,16 +13,15 @@
 import harness.x10Test;
 
 // SOURCEPATH: x10.dist/samples/CUDA
-// NUM_PLACES: 4
 
-public class CUDATopologyTest extends x10Test {
+public class CUDABlackScholesTest extends x10Test {
     public def run():boolean {
          val args = new Rail[String](0);
-         CUDATopology.main(args);
+         CUDABlackScholes.main(args);
          return true;
     }
 
     public static def main(args:Rail[String]) {
-	new CUDATopologyTest().execute();
+	new CUDABlackScholesTest().execute();
     }
 }

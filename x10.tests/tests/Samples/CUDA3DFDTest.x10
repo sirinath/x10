@@ -13,16 +13,15 @@
 import harness.x10Test;
 
 // SOURCEPATH: x10.dist/samples/CUDA
-// NUM_PLACES: 1
 
-public class CUDABlackScholesTest extends x10Test {
+public class CUDA3DFDTest extends x10Test {
     public def run():boolean {
-         val args = new Rail[String](0);
-         CUDABlackScholes.main(args);
+         val args = ["16" as String, "16", "16"];
+         CUDA3DFD.main(args);
          return true;
     }
 
     public static def main(args:Rail[String]) {
-	new CUDABlackScholesTest().execute();
+	new CUDA3DFDTest().execute();
     }
 }
