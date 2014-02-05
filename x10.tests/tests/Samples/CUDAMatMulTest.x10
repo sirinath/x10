@@ -13,21 +13,15 @@
 import harness.x10Test;
 
 // SOURCEPATH: x10.dist/samples/CUDA
-// NUM_PLACES: 1
 
-public class CUDA3DFDTest extends x10Test {
+public class CUDAMatMulTest extends x10Test {
     public def run():boolean {
-         val args:Rail[String];
-         if (here.numChildren() == 0) {
-             args = ["16" as String, "16", "16"];
-         } else {
-             args = new Rail[String](0);
-         }
-         CUDA3DFD.main(args);
+         val args = ["64" as String];
+         CUDAMatMul.main(args);
          return true;
     }
 
     public static def main(args:Rail[String]) {
-	new CUDA3DFDTest().execute();
+	new CUDAMatMulTest().execute();
     }
 }

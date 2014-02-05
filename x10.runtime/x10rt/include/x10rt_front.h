@@ -107,7 +107,8 @@
  * x10rt_net.h which provides the links between hosts.  There are currently many implementations of
  * the core networking layer:  There is a standalone implementation that allows multiple places via
  * inter-process communication on a single host.  There is an MPI implementation that uses MPI for
- * communication between hosts.  There is a sockets implementation that uses TCP/IP sockets. All
+ * communication between hosts.  There is also a proprietary implementation on top of the PGAS
+ * library, which internally supports many HPC libraries and also has a sockets implementation.  All
  * of these implement the symbols in x10rt_net.h so they cannot currently be used simultaneously.
  * However one can link against whichever implementation is preferred for inter-host communication.
  * Details on the available implementations of the Core Networking Layer can be found <a
@@ -565,20 +566,12 @@ X10RT_C void x10rt_blocks_threads (x10rt_place d, x10rt_msg_type type, int dyn_s
 X10RT_C x10rt_error x10rt_probe (void);
 
 
-/** Handle outstanding incoming messages, or block on the network if nothing is available.
+/** Handle outstanding incoming messages, and block on the network if nothing is available.
  * This method operates like x10rt_probe(), but this version will attempt to block if nothing was
- * available from the network, there are no outgoing network messages pending, and there is nothing
- * running/pending on any attached accelerators.  This mechanism allows an X10 program to go idle
- * on the CPU.  The network probe will attempt to block if possible, but this is not guaranteed.
+ * available from the network.  This mechanism allows an X10 program to go idle on the CPU.  The
+ * network probe will attempt to block if possible, but this is not guaranteed.
  */
 X10RT_C x10rt_error x10rt_blocking_probe (void);
-
-/**
- * Unblock a thread stuck in x10rt_blocking_probe(), or, if none are currently blocked,
- * prevent the next call to x10rt_blocking_probe() from blocking.
- * Safe to call at any time, or to call multiple times in a row.
- */
-X10RT_C x10rt_error x10rt_unblock_probe (void);
 
 /** \} */
 

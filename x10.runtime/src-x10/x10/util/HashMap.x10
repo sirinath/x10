@@ -182,7 +182,7 @@ public class HashMap[K,V] implements Map[K,V], CustomSerialization {
         assert size == oldSize;
     }
     
-    public def containsKey(k: K): Boolean {
+    public def containsKey(k: K): boolean {
         val e = getEntry(k);
         return e != null && ! e.removed;
     }

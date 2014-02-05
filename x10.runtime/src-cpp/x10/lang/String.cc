@@ -615,14 +615,14 @@ CharSequence::itable<String> String::_itable_CharSequence(&String::charAt,
 x10aux::itable_entry String::_itables[3] = {
     x10aux::itable_entry(&x10aux::getRTT<Comparable<String*> >, &String::_itable_Comparable),
     x10aux::itable_entry(&x10aux::getRTT<CharSequence>, &String::_itable_CharSequence),
-    x10aux::itable_entry(NULL,  (void*)"x10.lang.String")
+    x10aux::itable_entry(NULL,  (void*)x10aux::getRTT<String>())
 };
 
 x10aux::RuntimeType String::rtt;
 
 void String::_initRTT() {
     if (rtt.initStageOne(&rtt)) return;
-    const x10aux::RuntimeType* parents[2] = { Comparable<String*>::getRTT(), CharSequence::getRTT() };
+    const x10aux::RuntimeType* parents[2] = { Comparable<String>::getRTT(), CharSequence::getRTT() };
     
     rtt.initStageTwo("x10.lang.String", RuntimeType::class_kind, 2, parents, 0, NULL, NULL);
 }    

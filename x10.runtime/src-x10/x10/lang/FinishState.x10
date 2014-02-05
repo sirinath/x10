@@ -471,8 +471,8 @@ abstract class FinishState {
         }
 
         protected def process(rail:Rail[Pair[Int,Int]]):void {
-            for(var i:Long=0; i<rail.size; i++) {
-                counts(rail(i).first as Long) += rail(i).second;
+            for(var i:long=0; i<rail.size; i++) {
+                counts(rail(i).first as long) += rail(i).second;
                 seen(rail(i).first) = true;
             }
             count += counts(ref().home.id);
@@ -533,12 +533,12 @@ abstract class FinishState {
             if (counts == null || counts.size == 0L) {
                 counts = new Rail[Int](Place.MAX_PLACES);
                 places = new Rail[Int](Place.MAX_PLACES);
-                places(0) = id as Int; // WARNING: assuming 32 bit places at X10 level.
+                places(0) = id as int; // WARNING: assuming 32 bit places at X10 level.
             }
             val old = counts(place.id);
             counts(place.id)++;
             if (old == 0n && id != place.id) {
-                places(length++) = place.id as Int; // WARNING: assuming 32 bit places at X10 level.
+                places(length++) = place.id as int; // WARNING: assuming 32 bit places at X10 level.
             }
             lock.unlock();
         }
@@ -649,12 +649,12 @@ abstract class FinishState {
             if (counts == null || counts.size == 0L) {
                 counts = new Rail[Int](Place.MAX_PLACES);
                 places = new Rail[Int](Place.MAX_PLACES);
-                places(0) = id as Int; // WARNING: assuming 32 bit places at X10 level.
+                places(0) = id as int; // WARNING: assuming 32 bit places at X10 level.
             }
             val old = counts(place.id);
             counts(place.id)++;
             if (old == 0n && id != place.id) {
-                places(length++) = place.id as Int; // WARNING: assuming 32 bit places at X10 level.
+                places(length++) = place.id as int; // WARNING: assuming 32 bit places at X10 level.
             }
             lock.unlock();
         }
@@ -710,7 +710,7 @@ abstract class FinishState {
             exceptions = null;
             lock.unlock();
             val h = Runtime.hereInt();
-            if ((Place.MAX_PLACES < 1024) || (h%32n == 0n) || (h-h%32n == (ref.home.id as Int))) {
+            if ((Place.MAX_PLACES < 1024) || (h%32n == 0n) || (h-h%32n == (ref.home.id as int))) {
                 Runtime.x10rtSendMessage(ref.home.id, closure, null);
             } else {
                 val clx = ()=>@RemoteInvocation("notifyActivityTermination_7") { Runtime.x10rtSendMessage(ref.home.id, closure, null); };
@@ -930,23 +930,15 @@ abstract class FinishState {
             //real_finish.notifySubActivitySpawn(place);
 
             val tmp_finish = new FinishResilientPlaceZero(id, null);
-            // TODO: clockPhases are now passed but their resiliency is not supported yet
+            // TODO: clockPhases -- clocks not supported in resilient X10 at the moment
             // TODO: This implementation of runAt does not explicitly dealloc things
             val home = here;
             tmp_finish.notifySubActivitySpawn(place);
-            
-            // XTENLANG-3357: clockPhases must be passed and returned
-            val myActivity = Runtime.activity();
-            val clockPhases = myActivity.clockPhases;
-            val cpCell = new Cell[Activity.ClockPhases](clockPhases);
-            val cpGref = GlobalRef(cpCell);
 
             // [DC] do not use at (place) async since the finish state is handled internally
             // [DC] go to the lower level...
             val cl = () => @x10.compiler.RemoteInvocation("resilient_place_zero_run_at") {
                 val exc_body = () => {
-                    val remoteActivity = Runtime.activity();
-                    remoteActivity.clockPhases = clockPhases; // XTENLANG-3357: set passed clockPhases
                     if (tmp_finish.notifyActivityCreation(home)) {
                         try {
                             try {
@@ -958,21 +950,10 @@ abstract class FinishState {
                             val e = Exception.ensureException(t);
                             tmp_finish.pushException(e);
                         }
-                        // XTENLANG-3357: return the (maybe modified) clockPhases, similar code as "at (cpGref) { cpGref().set(clockPhases); }"
-                        // TODO: better to merge this with notifyActivityTermination to reduce send
-                        val cl1 = ()=> @x10.compiler.RemoteInvocation("resilient_place_zero_run_at_1") {
-                            val gref = cpGref as GlobalRef[Cell[Activity.ClockPhases]{self==cpCell,cpCell!=null}]{home==here,cpCell!=null};
-                            val cell = gref(); cell.set(clockPhases); // this will be set to myActivity.clockPhases
-                        };
-                        Runtime.x10rtSendMessage(cpGref.home.id, cl1, null);
-                        Unsafe.dealloc(cl1);
-                        
                         tmp_finish.notifyActivityTermination();
                     }
-                    remoteActivity.clockPhases = null; // XTENLANG-3357
                 };
-                Runtime.execute(new Activity(exc_body, home, real_finish, false, false));
-                // TODO: Unsafe.dealloc(exc_body); needs to be called somewhere
+                Runtime.execute(new Activity(exc_body, home, real_finish, false, false)); 
             };
             Runtime.x10rtSendMessage(place.id, cl, prof);
 
@@ -980,7 +961,6 @@ abstract class FinishState {
                 if (VERBOSE) Runtime.println("Entering resilient at waitForFinish");
                 tmp_finish.waitForFinish();
                 if (VERBOSE) Runtime.println("Exiting resilient at waitForFinish");
-                myActivity.clockPhases = cpCell(); // XTENLANG-3357: set the (maybe modified) clockPhases
             } catch (e:MultipleExceptions) {
                 assert e.exceptions.size == 1l : e.exceptions();
                 val e2 = e.exceptions(0);

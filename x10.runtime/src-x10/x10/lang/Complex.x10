@@ -238,7 +238,7 @@ public struct Complex implements Arithmetic[Complex] {
      * @return true if either part of this complex number is <code>NaN</code>.
      */
     @Native("c++", "::x10::lang::ComplexNatives::isNaN(#this)")
-    public def isNaN():Boolean {
+    public def isNaN():boolean {
         return re.isNaN() || im.isNaN();
     }
 
@@ -247,7 +247,7 @@ public struct Complex implements Arithmetic[Complex] {
      * and neither part is <code>NaN</code>.
      */
     @Native("c++", "::x10::lang::ComplexNatives::isInfinite(#this)")
-    public def isInfinite():Boolean {
+    public def isInfinite():boolean {
         return !isNaN() &&
         (re.isInfinite() || im.isInfinite());
     }
@@ -255,7 +255,7 @@ public struct Complex implements Arithmetic[Complex] {
     /**
      * @return the string representation of this complex number.
      */
-    @Native("c++", "::x10aux::to_string(#this)")
+    @Native("c++", "::x10aux::to_string(#0)")
     public def toString():String {
         return ("" + re + " + " + im + "i");
     }

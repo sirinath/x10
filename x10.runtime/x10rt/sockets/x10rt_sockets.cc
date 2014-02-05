@@ -15,6 +15,9 @@
  * an SSH daemon, and public/private keys configured so that there isn't any password prompt.
  * As long as you have SSH daemons, you shouldn't need any other system dependencies.
  *
+ * The pgas_socket backend has its own buffers and it spawns threads to populate those buffers,
+ * getting data out of the network as quickly as possible.  This implementation does not do this.
+ * The network is read/written directly.
  **********************************************************************************************/
 
 #ifdef __CYGWIN__
@@ -1043,12 +1046,6 @@ x10rt_error x10rt_net_blocking_probe ()
 	while (probe(false, false)) { }
 
     return context.errorCode;
-}
-
-x10rt_error x10rt_net_unblock_probe (void)
-{
-	// TODO
-	return X10RT_ERR_UNSUPPORTED;
 }
 
 // return T if data was processed or sent, F if not

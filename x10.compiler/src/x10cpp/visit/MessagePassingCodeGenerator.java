@@ -280,6 +280,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             //                Expect it to be more efficient to explicitly initialize all of the object fields instead
             //                of first calling alloc_z, then storing into most of the fields a second time.
             sw.write("(new (::x10aux::alloc_z"+chevrons(typeName)+"()) "+typeName+"())");
+            sw.newline();
         }
     }
 
@@ -747,6 +748,10 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		    Emitter.openNamespaces(h, pkgName);
 		    h.newline(0);
 		    h.forceNewline(0);
+		    if (def.fullName().toString().equals("x10.lang.Place")) {
+		        h.write("class Any; class String; // Forward reference are required in Place to prevent circularity");
+		        h.newline();
+		    }
 		}
 
         /*
@@ -1242,7 +1247,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 				sw.write("::x10aux::itable_entry(&::x10aux::getRTT"+chevrons(Emitter.translateType(interfaceType, false))+", &_itable_"+itableNum+"), ");
 				itableNum += 1;
 			}
-			sw.write("::x10aux::itable_entry(NULL, (void*)\""+Emitter.translateType(currentClass, false)+"\")};"); sw.newline();
+			sw.write("::x10aux::itable_entry(NULL, (void*)::x10aux::getRTT"+chevrons(Emitter.translateType(currentClass, false))+"())};"); sw.newline();
 		}
 	}
 
@@ -1298,7 +1303,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	                     thunkBaseName+thunkParams+"::_itable_"+itableNum+"), ");
 	            itableNum += 1;
 	        }
-	        sw.write("::x10aux::itable_entry(NULL, (void*)\""+Emitter.translateType(currentClass, false)+"\")};"); sw.newline();
+	        sw.write("::x10aux::itable_entry(NULL, (void*)::x10aux::getRTT"+chevrons(Emitter.translateType(currentClass, false))+"())};"); sw.newline();
 	        
 	        // ITables init for the IBox thunk.
 	        emitter.printTemplateSignature(cd.typeParameters(), sw);
@@ -1309,7 +1314,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 	                     thunkBaseName+"_ibox"+itableNum+thunkParams+"::itable), ");
 	            itableNum += 1;
 	        }
-	        sw.write("::x10aux::itable_entry(NULL, (void*)\""+Emitter.translateType(currentClass, false)+"\")};"); sw.newline();
+	        sw.write("::x10aux::itable_entry(NULL, (void*)::x10aux::getRTT"+chevrons(Emitter.translateType(currentClass, false))+"())};"); sw.newline();
 	    }
 	}
 
@@ -1518,9 +1523,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
                 int counter = 0;
                 for (LocalInstance f : mi.formalNames()) {
                     Type fType = mi.formalTypes().get(counter);
-                    String fname = Emitter.mangled_non_method_name(f.name().toString());
-                    params.add(fname);
-                    args.add(fname);
+                    params.add(f.name().toString());
+                    args.add(f.name().toString());
                     counter++;
                 }
                 List<Type> classTypeArguments  = Collections.<Type>emptyList();
@@ -2024,11 +2028,10 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
 	public void visit(Branch_c br) {
 		if (br.labelNode() != null) {
-		    String cname = Emitter.mangled_non_method_name(br.labelNode().id().toString());
 			if (br.kind() == Branch_c.CONTINUE)
-				sw.write("goto " + cname + "_next_");
+				sw.write("goto " + br.labelNode().id() + "_next_");
 			else
-				sw.write("goto " + cname + "_end_");
+				sw.write("goto " + br.labelNode().id() + "_end_");
 		} else
 			sw.write(br.kind().toString());
 		sw.write(";");
@@ -2036,9 +2039,8 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 
 
 	private void printLabel(String label, CodeWriter w) {
-	    String cname = Emitter.mangled_non_method_name(label);
-	    w.write("goto " + cname + "; ");
-	    w.write(cname + ":");
+	    w.write("goto " + label + "; ");
+	    w.write(label + ":");
 	}
 
 	public void visit(Labeled_c label) {
@@ -2727,7 +2729,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		}
 		if (!virtual_dispatch && !already_static ) {
 		    // Statically bind call at C++ level by explictly qualifying
-		    String methodContainerType = Emitter.translateType(t, false, false);
+		    String methodContainerType = Emitter.translateType(t);
 		    if ((context.inTemplate() || context.isInsideTemplateClosure()) && (t.isClass() && t.toClass().hasParams())) {
 		        int firstTemplate = methodContainerType.indexOf("<");
 		        int i = methodContainerType.lastIndexOf("::", firstTemplate-1); // UGH. This is hacky, but it is really hard to restructure translateType to avoid needing a hack
@@ -3690,7 +3692,7 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
         inc.end(); inc.newline();
         inc.write("}"); inc.newline(); inc.forceNewline();
 
-        inc.write("static x10::lang::Reference* "+DESERIALIZE_METHOD+"("+DESERIALIZATION_BUFFER+" &buf) {");
+        inc.write("template<class __T> static "+make_ref("__T")+" "+DESERIALIZE_METHOD+"("+DESERIALIZATION_BUFFER+" &buf) {");
         inc.newline(4); inc.begin(0);
         inc.writeln(cnamet+"* storage = ::x10aux::alloc_z"+chevrons(cnamet)+"();");
         inc.writeln("buf.record_reference(storage);");
@@ -3744,8 +3746,10 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
             emitter.printTemplateSignature(freeTypeParams, defn_s);
         defn_s.write("const ::x10aux::serialization_id_t "+cnamet+"::"+SERIALIZATION_ID_FIELD+" = ");
         defn_s.newline(4);
+        String template = in_template_closure ? "template " : "";
         defn_s.write("::x10aux::DeserializationDispatcher::addDeserializer("+
-                  cnamet+"::"+DESERIALIZE_METHOD+","+closure_kind_strs[kind]+");");
+                  cnamet+"::"+template+DESERIALIZE_METHOD+
+                  chevrons("::x10::lang::Reference")+","+closure_kind_strs[kind]+");");
         defn_s.newline(); defn_s.forceNewline();
     }
 
@@ -3957,13 +3961,11 @@ public class MessagePassingCodeGenerator extends X10DelegatingVisitor {
 		assert (opString.equals("&&") || opString.equals("||"))
 		    : "visiting "+n.getClass()+" at "+n.position()+": "+n;
 
-		sw.write("(");
 		n.printSubExpr(n.left(), true, sw, tr);
 		sw.write(" ");
 		sw.write(opString);
 		sw.allowBreak(0, " ");
 		n.printSubExpr(n.right(), false, sw, tr);
-		sw.write(")");
 	}
 
     // allow overriding in subclasses (i.e. CUDACodeGenerator)

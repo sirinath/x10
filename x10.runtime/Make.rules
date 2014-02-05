@@ -138,6 +138,39 @@ endif
 
 ifndef NO_VAR_OVERRIDE
 
+ifdef ENABLE_CROSS_COMPILE_BGP
+  export X10_STATIC_LIB=1
+  export X10RT_PLATFORM=bgp
+  export CROSS_COMPILE_BLUEGENE=true
+  export CROSS_COMPILE_ANY=true
+
+  override MPICXX=/bgsys/drivers/ppcfloor/comm/bin/mpicxx
+  ifdef USE_GCC
+    override CXX = /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-g++
+    override LDFLAGS += -lpthread
+    override CC =/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc
+    ifdef OPTIMIZE
+      override CXXFLAGS += -O2 -finline-functions
+    endif
+  endif
+  ifdef USE_XLC
+    # have to override CXX, but let user specify CUSTOM_XLC if they
+    # need something other than just xlC_r to be used as CXX
+    ifdef CUSTOM_XLC
+      override CXX = $(CUSTOM_XLC)
+      override CC = $(CUSTOM_XLC)
+    else
+      override CXX = bgxlC_r
+      override CC = bgxlc_r     
+    endif
+    ifdef OPTIMIZE
+      override CXXFLAGS += -O3 -qinline
+    endif
+    override CXXFLAGS += -qsuppress=1540-0809:1500-029:1540-1101:1540-1102
+    override CXXFLAGS += $(XLC_EXTRA_FLAGS)
+  endif
+endif
+
 ifdef ENABLE_CROSS_COMPILE_BGQ
   export X10RT_PLATFORM=bgq
   export CROSS_COMPILE_BLUEGENE=true
@@ -321,10 +354,6 @@ ifndef CROSS_COMPILE_BLUEGENE
       ifeq ($(shell readlink `which $(CXX)`),clang++) # avoid clang++ on Mountain Lion
         CXX = g++
         CC = gcc
-      endif
-      ifdef CXX_NO_WARNINGS
-        # even without -Wall clang++ enables some warnings we want to disable for compiling generated code
-        CXX_WARNING_FLAGS = -Wno-unused-parameter -Wno-unused-variable -Wno-unused-value
       endif
       export X10RT_PLATFORM=$(shell echo | gcc -E -dM - | grep -q x86_64 && echo darwin64 || echo darwin)
       ifndef X10_STATIC_LIB

@@ -127,12 +127,7 @@ public abstract class ConstructorCall_c extends Stmt_c implements ConstructorCal
 	    w.write(".");
 	} 
 
-	if (target!= null) {
-	    print(target, w, tr);
-	    w.write(".$init$(");
-	} else {
-	    w.write(kind + "(");
-	}
+	w.write(kind + "(");
 
 	w.begin(0);
 

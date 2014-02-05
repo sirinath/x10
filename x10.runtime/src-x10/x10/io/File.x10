@@ -150,7 +150,7 @@ FileSystem operations
         absolute = p != null && p.absolute;
     }
 
-    public def toString():String = getPath();
+    // @Incomplete def this(u: URI);
 
     public def lines(): ReaderIterator[String] //throws IOException 
      = openRead().lines();
@@ -177,6 +177,9 @@ FileSystem operations
     public def getAbsoluteFile(): File = new File(nativeFile().getAbsolutePath());
     public def getCanonicalFile(): File  // throws IOException 
     = new File(nativeFile().getCanonicalPath());
+
+    // incomplete def toURL(): URL;
+    // incomplete def toURI(): URI;
 
     public def exists(): Boolean = nativeFile().exists();
 

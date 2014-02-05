@@ -7,11 +7,9 @@
 # Usage: makeTag -rev <svn revision number> -tag <revision name>
 #
 
-DO_BENCH=0
+DO_CODE=0
 DO_MAN=0
-DO_X10=0
 DO_X10DT=0
-BRANCH=trunk
 
 while [ $# != 0 ]; do
 
@@ -26,21 +24,12 @@ while [ $# != 0 ]; do
 	    shift
 	    ;;
 
-	-branch)
-	    export BRANCH="branches/$2"
-	    shift
-	    ;;
-
-	-bench)
-	    DO_BENCH=1;
+	-code)
+	    DO_CODE=1;
 	    ;;
 
 	-man)
 	    DO_MAN=1;
-	    ;;
-
-	-x10)
-	    DO_X10=1;
 	    ;;
 
 	-x10dt)
@@ -66,26 +55,26 @@ if [[ -z "$TAG" ]]; then
     exit 1
 fi
 
-if [[ $DO_BENCH == 1 ]]; then
-    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/benchmarks/$BRANCH/ \
+if [[ $DO_CODE == 1 ]]; then
+    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/branches/x10-2.4.1/ \
+        https://svn.code.sourceforge.net/p/x10/code/tags/$TAG \
+        -m "Tagging branches/x10-2.4.1 revision $REVISION as $TAG release of X10"
+
+    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/benchmarks/trunk/ \
         https://svn.code.sourceforge.net/p/x10/code/benchmarks/tags/$TAG \
-        -m "Tagging benchmarks $BRANCH revision $REVISION as $TAG release of benchmarks"
+        -m "Tagging benchmarks trunk revision $REVISION as $TAG release of X10"
 fi
 
 if [[ $DO_MAN == 1 ]]; then
-    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/documentation/$BRANCH/ \
+    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/documentation/trunk/ \
         https://svn.code.sourceforge.net/p/x10/code/documentation/tags/$TAG \
-        -m "Tagging documentation $BRANCH revision $REVISION as $TAG release of documentation"
-fi
-
-if [[ $DO_X10 == 1 ]]; then
-    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/$BRANCH/ \
-        https://svn.code.sourceforge.net/p/x10/code/tags/$TAG \
-        -m "Tagging X10 $BRANCH revision $REVISION as $TAG release of X10"
+        -m "Tagging documentation trunk revision $REVISION as $TAG release of X10"
 fi
 
 if [[ $DO_X10DT == 1 ]]; then
-    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/x10dt/$BRANCH/ \
+    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/x10dt/trunk/ \
         https://svn.code.sourceforge.net/p/x10/code/x10dt/tags/$TAG \
-        -m "Tagging X10DT $BRANCH revision $REVISION as $TAG release of X10DT"
+        -m "Tagging X10DT trunk revision $REVISION as $TAG release of X10DT"
 fi
+
+

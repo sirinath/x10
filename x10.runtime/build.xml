@@ -2,7 +2,7 @@
 <!DOCTYPE project [<!ENTITY buildfile SYSTEM "./build-user.xml">]>
 <project name="x10.runtime" default="dist" basedir=".">
     &buildfile;
-    <property name="bdwgc.version" value="7.2e"/>
+    <property name="bdwgc.version" value="7.2d"/>
     <property name="x10.home" value="${basedir}/.."/>
     <property name="x10.dist.location" value="${x10.home}/x10.dist"/>
     <property name="x10.constraints.location" location="${x10.home}/x10.constraints"/>
@@ -97,6 +97,7 @@
 
     <condition property="x10rt.jnibindings.disabled">
         <or>
+            <istrue value="${CROSS_COMPILE_BGP}" />
             <istrue value="${CROSS_COMPILE_BGQ}" />
             <istrue value="${CROSS_COMPILE_FX10}" />
         </or>
@@ -148,11 +149,20 @@
             <istrue value="${CROSS_COMPILE_BGQ}" />
         </or>
     </condition>
+    <condition property="cppmake.x10rt_pgas" value="ENABLE_X10RT_PGAS=1" else="DISABLE_X10RT_PGAS=1">
+        <or> 
+	    <istrue value="${X10RT_PGAS}" />
+            <istrue value="${CROSS_COMPILE_BGP}" />
+        </or>
+    </condition>
     <condition property="cppmake.x10rt_cuda" value="ENABLE_X10RT_CUDA=1" else="DISABLE_X10RT_CUDA=1">
         <istrue value="${X10RT_CUDA}" />
     </condition>
     <condition property="cppmake.gcc_symbols" value="ENABLE_GCC_SYMBOLS=1" else="DISABLE_GCC_SYMBOLS=1">
         <istrue value="${GCC_SYMBOLS}" />
+    </condition>
+    <condition property="cppmake.cross_compile_bgp" value="ENABLE_CROSS_COMPILE_BGP=1" else="DISABLE_CROSS_COMPILE_BGP=1">
+        <istrue value="${CROSS_COMPILE_BGP}" />
     </condition>
     <condition property="cppmake.cross_compile_bgq" value="ENABLE_CROSS_COMPILE_BGQ=1" else="DISABLE_CROSS_COMPILE_BGQ=1">
         <istrue value="${CROSS_COMPILE_BGQ}" />
@@ -198,6 +208,7 @@
         <exec executable="${make.exe}" failonerror="true" dir="${basedir}/src-cpp">
             <arg value="-j1" />
             <arg value="clean"/>
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -217,7 +228,9 @@
             <arg value="clean"/>
             <arg value="${cppmake.x10rt_mpi}" />
             <arg value="${cppmake.x10rt_pami}" />
+            <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -234,7 +247,9 @@
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
+            <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -258,6 +273,7 @@
             <arg value="${cppmake.debug}" />
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -273,6 +289,7 @@
             <arg value="${cppmake.debug}" />
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -287,6 +304,7 @@
             <arg value="${cppmake.debug}" />
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -428,7 +446,9 @@
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
+            <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -445,7 +465,9 @@
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
+            <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -465,7 +487,9 @@
             <arg value="${cppmake.flatten_expressions}" />
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
+            <arg value="${cppmake.x10rt_pgas}" />
             <arg value="${cppmake.x10rt_cuda}" />
+            <arg value="${cppmake.cross_compile_bgp}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
         </exec>
@@ -487,6 +511,7 @@
 		  <conditions>
 		    <or>
                       <istrue value="${CROSS_COMPILE_FX10}" />
+                      <istrue value="${CROSS_COMPILE_BGP}" />
                       <istrue value="${CROSS_COMPILE_BGQ}" />
 		    </or>
 		  </conditions>
@@ -514,6 +539,23 @@
 			  </exec>
 			</sequential>
 		      </then>
+		    </if>
+                    <if>
+                      <conditions>
+			<istrue value="${CROSS_COMPILE_BGP}" />
+                      </conditions>
+                      <then>
+			<echo message="Configuring BDWGC for BGP cross compile"/>
+			<exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
+			  <env key="CXX" value="/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-g++"/>
+			  <env key="CC" value="/bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc-bgp-linux-gcc"/>
+			  <arg value="${bdwgc.dir}/src/configure" />
+			  <arg value="--host=powerpc-bgp-linux" />
+			  <arg value="-enable-threads=posix" />
+			  <arg value="--disable-shared" />
+			  <arg value="--prefix=${bdwgc.platform.dir}/install" />
+			</exec>
+                      </then>
 		    </if>
                     <if>
                       <conditions>
@@ -695,7 +737,7 @@
 	    <!-- Patches to apply for bdwgc version 7.2d -->
 	    <if>
 	      <conditions>
-		  <equals arg1="${bdwgc.version}" arg2="7.2d" />
+		<equals arg1="${bdwgc.version}" arg2="7.2d" />
 	      </conditions>
 	      <then>
 		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/enableRTSignals.patch.txt"
@@ -706,30 +748,10 @@
                        dir="${bdwgc.dir}/src" strip="0" />
 		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fixThreadConfigureForPPC.patch.txt"
                        dir="${bdwgc.dir}/src" strip="1" />
-                <patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fx10Support.patch.txt"
+		 		 <patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fx10Support.patch.txt"
                        dir="${bdwgc.dir}/src" strip="1" />
 	      </then>
 	    </if>
-
-	    <!-- Patches to apply for bdwgc version 7.2e -->
-	    <if>
-	      <conditions>
-		  <equals arg1="${bdwgc.version}" arg2="7.2e" />
-	      </conditions>
-	      <then>
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/enableRTSignals.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/pthread_support.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/bluegeneStackHeuristic.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fixThreadConfigureForPPC.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/fx10Support.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-	      </then>
-	    </if>
-
         </sequential>
     </target>
 

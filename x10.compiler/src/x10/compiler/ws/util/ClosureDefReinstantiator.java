@@ -34,7 +34,8 @@ import x10.types.EnvironmentCapture;
 import x10.types.ThisDef;
 import x10.types.X10ClassType;
 import x10.types.X10MemberDef;
-import x10.visit.ClosureCaptureVisitor;
+import x10.visit.Desugarer;
+import x10.visit.Desugarer.ClosureCaptureVisitor;
 import polyglot.types.TypeSystem;
 import polyglot.util.InternalCompilerError;
 
@@ -81,7 +82,7 @@ public class ClosureDefReinstantiator extends ContextVisitor {
 //            }
             
             //Now set the CapturedEnvironment
-            NodeVisitor captureEnvVisitor = new ClosureCaptureVisitor(context, c.closureDef());
+            NodeVisitor captureEnvVisitor = new Desugarer.ClosureCaptureVisitor(context, c.closureDef());
             c.visit(captureEnvVisitor);
 //            for(VarInstance<? extends VarDef> vi : cdc.capturedEnvironment()){
 //                WSUtil.debug("afer-process var:"+ vi.toString());
