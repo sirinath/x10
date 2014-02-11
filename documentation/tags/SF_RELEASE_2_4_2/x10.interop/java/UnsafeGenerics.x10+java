@@ -1,0 +1,48 @@
+////////////////////////////////////////////////////
+// if X10 represents java generics Java5-style
+// * types erased
+
+/* X10 */
+class X10Class {
+    def main() {
+
+        val list : java.util.List[String] = new java.util.ArrayList[String]();
+
+        val java_obj = new JavaObject();
+        java_obj.fillIn(list);
+        val str : String = list.get(0);                         // ClassCastException at runtime
+
+        val asany : Any = list;
+
+        val b1 = asany instanceof java.util.List[String];       // true or false?
+        val b2 = asany instanceof java.util.List[Double];       // b2 == b1, as types are erased
+    }
+}
+
+/* Java */
+class JavaObject {      
+        public void fillIn(java.util.List list) {
+                list.add(new Object());
+        }
+}
+
+////////////////////////////////////////////////////
+// if X10 represents java generics as raw types
+
+/* X10 */
+class X10Class {
+    def main() {
+
+        val list : java.util.List = new java.util.ArrayList();
+
+        val java_obj = new JavaObject();
+        java_obj.fillIn(list);
+        val v : Any = list.get(0);
+        val str = v as String;          // ClassCastException
+        if (v instanceof String) {      
+            val str2 = v as String;     // downcast is safe after check
+        } else {
+            // ...
+        }
+    }
+}
