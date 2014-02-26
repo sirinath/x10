@@ -38,7 +38,7 @@ Deque* Deque::_constructor() {
 }
 
 const serialization_id_t Deque::_serialization_id =
-    DeserializationDispatcher::addDeserializer(Deque::_deserializer);
+    DeserializationDispatcher::addDeserializer(Deque::_deserializer, x10aux::CLOSURE_KIND_NOT_ASYNC);
 
 void Deque::growQueue() {
     Slots *oldQ = queue;

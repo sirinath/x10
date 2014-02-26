@@ -20,7 +20,6 @@
 #include <x10/lang/Rail.h>
 #include <x10/lang/Runtime__Profile.h>
 #include <x10/io/Serializer.h>
-#include <x10/io/DeserializationException.h>
 
 using namespace x10aux;
 using namespace x10::lang;
@@ -107,7 +106,7 @@ void serialization_buffer::serialize_reference(serialization_buffer &buf,
         buf.write((x10aux::serialization_id_t)0);
     } else {
         x10aux::serialization_id_t id = this_->_get_serialization_id();
-        _S_("Serializing id "<<id<<" of type "<< ANSI_SER<<ANSI_BOLD<<this_->_type()->name()<<" and address "<<(void*)(this_));
+        _S_("Serializing id "<<id<<" of type "<< ANSI_SER<<ANSI_BOLD<<this_->_type()->name()<<"and address "<<(void*)(this_));
         buf.write(id);
         this_->_serialize_body(buf);
         _S_("Completed serialization of "<<(void*)(this_));
@@ -169,14 +168,13 @@ void x10aux::set_prof_data(x10::lang::Runtime__Profile *prof, unsigned long long
 }
 
 void x10aux::raiseSerializationProtocolError() {
-    const char* msg = "Error detected in custom serialization protocol";
-#ifndef NO_EXCEPTIONS
-    throwException(x10::io::DeserializationException::_make(String::Lit(msg)));
-#else
-    fprintf(stderr, "%s. Aborting\n", msg);
+    // TODO: This really should throw an x10-level exception, but that
+    //       is too likely to hang XRX, so make it a hard abort for now.
+    //       FIXME to make this throw an exception when XTENLANG-3219 is fixed.
+    fprintf(stderr, "\nError detected in custom serialization protocol. Aborting\n");
     abort();
-#endif
 }
+
 
 // vim:tabstop=4:shiftwidth=4:expandtab:textwidth=100
 

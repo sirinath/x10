@@ -89,10 +89,11 @@ class KernelWorker {
         val the_host_clusters = this.hostClusters;
         val the_num_clusters = this.numClusters;
         val the_dim = 4l;
+        val g = gpu;
 
         val kernel_start_time : Long = System.currentTimeMillis();
         // classify kernel
-        finish async at (gpu) @CUDA @CUDADirectParams {
+        finish async at (g) @CUDA @CUDADirectParams {
             val blocks = CUDAUtilities.autoBlocks();
             val threads = CUDAUtilities.autoThreads();
             finish for (block in 0n..(blocks-1n)) async {
@@ -103,7 +104,7 @@ class KernelWorker {
                     for (var p:Long=tid ; p<kernel_num_points ; p+=tids) {
                         var closest:Int = -1n;
                         var closest_dist:Float = Float.MAX_VALUE;
-                        @Unroll(20) for (k in 0n..(the_num_clusters-1n)) { 
+                        for (k in 0n..(the_num_clusters-1n)) { 
                             // Pythagoras (in dim dimensions)
                             var dist : Float = 0;
                             for (d in 0l..(the_dim-1l)) { 
