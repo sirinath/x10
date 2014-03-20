@@ -27,6 +27,7 @@ public class Launcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		if (args.length < 1) {
 			System.out.println("Example Usage: java -cp .:../stdlib/x10.jar x10.x10rt.Launcher HelloWholeWorld hi");
 			return;
@@ -41,39 +42,19 @@ public class Launcher {
 		OutputStream[] outTo = new OutputStream[numPlaces];
 		Process[] child = new Process[numPlaces];
 		String[] connectionInfo = new String[numPlaces];
-		String[] connectionDebugInfo = new String[numPlaces];
 		
 		// gather up the class and arguments to run
 		
-		boolean isDebug = args[0].equals("-debug")? true : false;
-		
-		String[] newArgs;
-		
-		if (isDebug){
-			newArgs = new String[args.length+8];
-			newArgs[0] = System.getProperty("java.home").concat("/bin/java");
-			newArgs[1] = "-XX:+UseParallelGC";
-			newArgs[2] = "-Xdebug";
-			newArgs[3] = "-Xrunjdwp:transport=dt_socket,server=y,suspend=y";
-			newArgs[4] = "-ea";
-			newArgs[5] = "-Djava.library.path="+System.getProperty("java.library.path");
-			newArgs[6] = "-Djava.class.path="+System.getProperty("java.class.path");
-			newArgs[7] = "-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file");
-			newArgs[8] = SlaveLauncher.class.getName();
-			for (int i=1; i<args.length; i++)
-				newArgs[i+8] = args[i];
-		} else {
-			newArgs = new String[args.length+6];
-			newArgs[0] = System.getProperty("java.home").concat("/bin/java");
-			newArgs[1] = "-ea";
-			newArgs[2] = "-Djava.library.path="+System.getProperty("java.library.path");
-			newArgs[3] = "-Djava.class.path="+System.getProperty("java.class.path");
-			newArgs[4] = "-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file");
-			newArgs[5] = SlaveLauncher.class.getName();
-			for (int i=0; i<args.length; i++)
-				newArgs[i+6] = args[i];
-		}
-		
+		String[] newArgs = new String[args.length+6];
+		newArgs[0] = System.getProperty("java.home").concat("/bin/java");
+		newArgs[1] = "-ea";
+		newArgs[2] = "-Djava.library.path="+System.getProperty("java.library.path");
+		newArgs[3] = "-Djava.class.path="+System.getProperty("java.class.path");
+		newArgs[4] = "-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file");
+		newArgs[5] = SlaveLauncher.class.getName();
+		for (int i=0; i<args.length; i++)
+			newArgs[i+6] = args[i];
+
 		// launch the places
 		ProcessBuilder pb = new ProcessBuilder(newArgs);
 		pb.environment().remove("X10_NPLACES");
@@ -95,39 +76,21 @@ public class Launcher {
 			}
 		}
 		
-		if (isDebug){
-			// gather up the debug connection info from each place
-			for (int i=0; i<numPlaces; i++) {
-				try {
-					BufferedReader reader = new BufferedReader(new InputStreamReader(inFrom[i]), 1024);
-					connectionDebugInfo[i] = reader.readLine();
-					while (connectionDebugInfo[i] == null) {
-						Thread.yield();
-						connectionDebugInfo[i] = reader.readLine();
-					} 
-					// The following line is needed by remote debugger in X10DT -- do not remove!
-					System.err.println("Place "+i+" - "+connectionDebugInfo[i]);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
+		// gather up the connection info from each place
+		for (int i=0; i<numPlaces; i++) {
+			try {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(inFrom[i]), 1024);
+				connectionInfo[i] = reader.readLine();
+				while (connectionInfo[i] == null) {
+					Thread.yield();
+					connectionInfo[i] = reader.readLine();
+				} 
+				//System.err.println("Launcher: Place "+i+" has connection string \""+connectionInfo[i]+"\"");
+			}
+			catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-		
-		// gather up the connection info from each place
-				for (int i=0; i<numPlaces; i++) {
-					try {
-						BufferedReader reader = new BufferedReader(new InputStreamReader(inFrom[i]), 1024);
-						connectionInfo[i] = reader.readLine();
-						while (connectionInfo[i] == null) {
-							Thread.yield();
-							connectionInfo[i] = reader.readLine();
-						} 
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
 		
 		// tell each place its ID, and where to find the others
 		for (int i=0; i<numPlaces; i++) {

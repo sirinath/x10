@@ -223,15 +223,11 @@ namespace x10 {
             static void intr_hndlr(int signo);
             // Thread permit initialization.
             static void thread_permit_init(permit_t *perm);
-            // Thread cond_mutex initialization.
-            static void thread_cmp_init(cond_mutex_t *cmp);
             // Thread permit finalization.
             static void thread_permit_destroy(permit_t *perm);
-            // Thread cond_mutex finalization.
-            static void thread_cmp_destroy(cond_mutex_t *cmp);
             // Thread permit cleanup handler.
             static void thread_permit_cleanup(void *arg);
-            // Thread cond_mutex cleanup handler.
+            // Thread mapper cleanup handler.
             static void thread_mapper_cleanup(void *arg);
             // Thread binding to processor capabilities
             void thread_bind_cpu();
@@ -258,7 +254,6 @@ namespace x10 {
             pthread_mutex_t __thread_start_lock;
             // thread specific permit object
             permit_t __thread_permit;
-            cond_mutex_t __thread_cmp;
         };
     }
 }

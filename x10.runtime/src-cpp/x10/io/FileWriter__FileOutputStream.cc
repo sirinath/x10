@@ -32,8 +32,10 @@ void FileWriter__FileOutputStream::_constructor(x10::lang::String* name, bool ap
 
     const char *filename = name->c_str();
     FMGL(file) = fopen(filename, (append ? "a" : "w"));
+#ifndef NO_EXCEPTIONS
     if (NULL == FMGL(file))
         throwException(FileNotFoundException::_make(name));
+#endif
 }
 
 void FileWriter__FileOutputStream::_constructor(FILE* file) {
@@ -67,7 +69,7 @@ void FileWriter__FileOutputStream::close() {
 }
 
 const x10aux::serialization_id_t FileWriter__FileOutputStream::_serialization_id = 
-    x10aux::DeserializationDispatcher::addDeserializer(FileWriter__FileOutputStream::_deserializer);
+    x10aux::DeserializationDispatcher::addDeserializer(FileWriter__FileOutputStream::_deserializer, x10aux::CLOSURE_KIND_NOT_ASYNC);
 
 void FileWriter__FileOutputStream::_serialize_body(x10aux::serialization_buffer& buf) {
     x10aux::throwException(NotSerializableException::_make(String::Lit("FileWriter.FileOutputStream")));

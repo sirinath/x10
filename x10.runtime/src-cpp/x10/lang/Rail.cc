@@ -20,28 +20,28 @@ namespace x10 {
     namespace lang {
 
         const serialization_id_t Rail_copy_to_serialization_id =
-            NetworkDispatcher::addPutFunctions(Rail_buffer_finder,
-                                               Rail_notifier,
-                                               Rail_buffer_finder,
-                                               Rail_notifier);
+            DeserializationDispatcher::addPutFunctions(Rail_buffer_finder,
+                                                       Rail_notifier,
+                                                       Rail_buffer_finder,
+                                                       Rail_notifier);
 
         const serialization_id_t Rail_uncounted_copy_to_serialization_id =
-            NetworkDispatcher::addPutFunctions(Rail_buffer_finder,
-                                               Rail_uncounted_notifier,
-                                               Rail_buffer_finder,
-                                               Rail_uncounted_notifier);
+            DeserializationDispatcher::addPutFunctions(Rail_buffer_finder,
+                                                       Rail_uncounted_notifier,
+                                                       Rail_buffer_finder,
+                                                       Rail_uncounted_notifier);
 
         const serialization_id_t Rail_copy_from_serialization_id =
-            NetworkDispatcher::addGetFunctions(Rail_buffer_finder,
-                                               Rail_notifier,
-                                               Rail_buffer_finder,
-                                               Rail_notifier);
+            DeserializationDispatcher::addGetFunctions(Rail_buffer_finder,
+                                                       Rail_notifier,
+                                                       Rail_buffer_finder,
+                                                       Rail_notifier);
 
         const serialization_id_t Rail_uncounted_copy_from_serialization_id =
-            NetworkDispatcher::addGetFunctions(Rail_buffer_finder,
-                                               Rail_uncounted_notifier,
-                                               Rail_buffer_finder,
-                                               Rail_uncounted_notifier);
+            DeserializationDispatcher::addGetFunctions(Rail_buffer_finder,
+                                                       Rail_uncounted_notifier,
+                                                       Rail_buffer_finder,
+                                                       Rail_uncounted_notifier);
 
         
         void Rail_notifyEnclosingFinish(deserialization_buffer& buf) {
@@ -146,12 +146,16 @@ namespace x10 {
         }
 
         void throwArrayIndexOutOfBoundsException(x10_long index, x10_long length) {
+            #ifndef NO_EXCEPTIONS
             char *msg = alloc_printf("Index %lld out of range (length is %lld)", (long long)index, (long long)length);
             throwException(x10::lang::ArrayIndexOutOfBoundsException::_make(String::Lit(msg)));
+            #endif
         }
 
         void throwNegativeArraySizeException() {
+            #ifndef NO_EXCEPTIONS
             throwException(x10::lang::NegativeArraySizeException::_make());
+            #endif
         }            
 
         void failAllocNoPointers(const char* msg) {

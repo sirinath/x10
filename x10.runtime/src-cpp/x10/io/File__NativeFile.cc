@@ -50,7 +50,7 @@ void File__NativeFile::_deserialize_body(deserialization_buffer& buf) {
 }
 
 const x10aux::serialization_id_t File__NativeFile::_serialization_id =
-    x10aux::DeserializationDispatcher::addDeserializer(File__NativeFile::_deserializer);
+    x10aux::DeserializationDispatcher::addDeserializer(File__NativeFile::_deserializer, x10aux::CLOSURE_KIND_NOT_ASYNC);
 
 Reference* File__NativeFile::_deserializer(x10aux::deserialization_buffer &buf) {
     File__NativeFile* this_ = new (x10aux::alloc<File__NativeFile>()) File__NativeFile();
@@ -173,22 +173,23 @@ Rail<String*>*
 File__NativeFile::list() {
 	char sep = (char) (File::FMGL(SEPARATOR__get)().v);
 	DIR* dir;
-
-    if((dir = ::opendir(path->c_str())) == NULL) {
-		return NULL;
-    }
-
-    x10::util::GrowableRail<String*>* gr = x10::util::GrowableRail<String*>::_make();
 	struct dirent* de;
-    while ((de = ::readdir(dir)) != NULL) {
-        const char* fn = de->d_name;
-        if ((strncmp(fn, ".", 1) != 0) && (strncmp(fn, "..", 1) != 0)){
-            gr->add(String::Lit(fn));
-        }
-    }
-    ::closedir(dir);
-
-    return gr->toRail();
+	if((dir = ::opendir(path->c_str())) == NULL)
+		return NULL;
+	long i;
+	for(i = 0L; (de = ::readdir(dir)) != NULL; i++) ;
+	::rewinddir(dir);
+	::readdir(dir);  // skip "."
+	::readdir(dir);  // skip ".."
+	Rail<String*>* rail = Rail<String*>::_make((x10_long)(i - 2L));
+	String* absPath = getAbsolutePath();
+	for(i = 0L; (de = ::readdir(dir)) != NULL; i++) {
+		char* tmp = (char*)::malloc(sizeof(char) * ((int)absPath->length() + 1 + ::strlen(de->d_name) + 1));
+		::sprintf(tmp, "%s%c%s", absPath->c_str(), sep, de->d_name);
+		rail->__set((x10_long)i, String::Steal(tmp));
+	}
+	::closedir(dir);
+	return rail;
 }
 
 x10_boolean

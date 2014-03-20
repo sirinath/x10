@@ -80,14 +80,7 @@ struct x10SocketState
 	bool linkAtStartup; // this flag tells us that we should establish all our connections at startup, not on-demand.  It gets flipped after all links are up.
 	pthread_mutex_t readLock; // a lock to prevent overlapping reads on each socket
 	uint32_t nextSocketToCheck; // this is used in the socket read loop so that we don't give preference to the low-numbered places
-
-	// the file descriptors for each socket to other places.  FD=-1 means not yet connected, FD=-2 means connection lost
-	// the slot for my own place ID is used to hold the serverSocket on which we accept new connections
-	// the slot at numPlaces holds a special FD used by x10rt_net_unblock_probe to wake up a blocked thread
-	struct pollfd* socketLinks;
-	int unblockFD[2];
-	int noBlockWindow; // a flag so that a thread won't block in blocking_probe while some other socket is busy reading off a socket
-
+	struct pollfd* socketLinks; // the file descriptors for each socket to other places.  FD=-1 means not yet connected, FD=-2 means connection lost
 	pthread_mutex_t* writeLocks; // a lock to prevent overlapping writes on each socket
 	// special case for index=myPlaceId on the above three.  The socket link is the local listen socket,
 	// the read lock is used for listen socket handling and write lock for launcher communication
@@ -666,7 +659,7 @@ x10rt_error x10rt_net_init (int * argc, char ***argv, x10rt_msg_type *counter)
 		context.linkAtStartup = false;
 		context.state = RUNNING_LIBRARY;
 		pthread_mutex_init(&context.readLock, NULL);
-		context.socketLinks = safe_malloc<pollfd>(context.numPlaces+1);
+		context.socketLinks = safe_malloc<pollfd>(context.numPlaces);
 		context.writeLocks = safe_malloc<pthread_mutex_t>(context.numPlaces);
 		for (unsigned int i=0; i<context.numPlaces; i++)
 		{
@@ -685,16 +678,6 @@ x10rt_error x10rt_net_init (int * argc, char ***argv, x10rt_msg_type *counter)
 				context.socketLinks[i].fd = -1;
 			}
 		}
-		// initialize the unblock file descriptor
-		context.socketLinks[context.numPlaces].events = POLLIN | POLLPRI;
-		if (pipe(context.unblockFD) == 0 &&
-				fcntl(context.unblockFD[0], F_SETFL, O_NONBLOCK) != -1 &&
-				fcntl(context.unblockFD[1], F_SETFL, O_NONBLOCK) != -1) {
-			context.socketLinks[context.numPlaces].fd = context.unblockFD[0];
-			context.noBlockWindow = 0;
-		}
-		else
-			fatal("Unable to initialize unblock pipe structure");
 		// establish connections to remote places with lower place IDs
 		for (unsigned i=0; i<context.myPlaceId; i++) {
 			int ret = initLink(i, (*argv)[i]); // connect to all lower places
@@ -753,23 +736,13 @@ x10rt_error x10rt_net_init (int * argc, char ***argv, x10rt_msg_type *counter)
 
 		context.nextSocketToCheck = 0;
 		pthread_mutex_init(&context.readLock, NULL);
-		context.socketLinks = safe_malloc<pollfd>(context.numPlaces+1);
+		context.socketLinks = safe_malloc<pollfd>(context.numPlaces);
 		context.writeLocks = safe_malloc<pthread_mutex_t>(context.numPlaces);
 		for (unsigned int i=0; i<context.numPlaces; i++)
 		{
 			context.socketLinks[i].fd = -1;
 			context.socketLinks[i].events = 0;
 		}
-		// initialize the unblock file descriptor
-		context.socketLinks[context.numPlaces].events = POLLIN | POLLPRI;
-		if (pipe(context.unblockFD) == 0 &&
-				fcntl(context.unblockFD[0], F_SETFL, O_NONBLOCK) != -1 &&
-				fcntl(context.unblockFD[1], F_SETFL, O_NONBLOCK) != -1) {
-			context.socketLinks[context.numPlaces].fd = context.unblockFD[0];
-			context.noBlockWindow = 0;
-		}
-		else
-			fatal("Unable to initialize unblock pipe structure");
 
 		// open local listen port.
 		unsigned listenPort = getPortEnv(context.myPlaceId);
@@ -1044,7 +1017,9 @@ void x10rt_net_send_put (x10rt_msg_params *parameters, void *buffer, x10rt_copy_
 x10rt_error x10rt_net_probe ()
 {
     CHECK_ERR_AND_RETURN;
-    if (context.linkAtStartup)
+	if (context.numPlaces == 1)
+		sched_yield(); // why is the runtime calling probe() with only one place?  It looses its CPU as punishment. ;-)
+	else if (context.linkAtStartup)
 	{
 		for (unsigned i=0; i<context.myPlaceId; i++)
 			initLink(i, NULL); // connect to all lower places
@@ -1059,39 +1034,30 @@ x10rt_error x10rt_net_probe ()
     return context.errorCode;
 }
 
-bool x10rt_net_blocking_probe_support(void)
-{
-	return true;
-}
-
 x10rt_error x10rt_net_blocking_probe ()
 {
     CHECK_ERR_AND_RETURN;
 	// Call the blocking form of probe, returning after the one call.
 	probe(false, true);
 	// then, loop again to gather everything from the network before returning.
-	while (probe(false, false));
+	while (probe(false, false)) { }
+
     return context.errorCode;
 }
 
 x10rt_error x10rt_net_unblock_probe (void)
 {
-	// write a single byte to the unblock pipe, which will wake up any thread waiting for something in blocking_probe
-	char v = 1;
-	::write(context.unblockFD[1], &v, 1);
-	return X10RT_ERR_OK;
+	// TODO
+	return X10RT_ERR_UNSUPPORTED;
 }
 
 // return T if data was processed or sent, F if not
 bool probe (bool onlyProcessAccept, bool block)
 {
-	if (block && pthread_mutex_lock(&context.readLock) != 0) // blocking probe, block or return if error getting lock
+	if (pthread_mutex_lock(&context.readLock) < 0)
 		return false;
-	else if (!block && pthread_mutex_trylock(&context.readLock) != 0) // non-blocking probe, return if lock not available
-	    return false;
-	// we aquired the readLock
 	uint32_t whichPlaceToHandle = context.nextSocketToCheck;
-	int ret = poll(context.socketLinks, context.numPlaces+1, (context.noBlockWindow==0 && block && context.pendingWrites == NULL)?-1:(context.linkAtStartup?100:0));
+	int ret = poll(context.socketLinks, context.numPlaces, (block && context.pendingWrites == NULL)?-1:(context.linkAtStartup?100:0));
 	if (ret > 0)
 	{ // There is at least one socket with something interesting to look at
 
@@ -1111,7 +1077,7 @@ bool probe (bool onlyProcessAccept, bool block)
 					break;
 
 				whichPlaceToHandle++;
-				if (whichPlaceToHandle == context.numPlaces+1)
+				if (whichPlaceToHandle == context.numPlaces)
 					whichPlaceToHandle = 0;
 				if (whichPlaceToHandle == context.nextSocketToCheck)
 				{
@@ -1122,13 +1088,12 @@ bool probe (bool onlyProcessAccept, bool block)
 			}
 
 			// Set nextSocketToCheck
-			if (whichPlaceToHandle == context.numPlaces)
+			if (whichPlaceToHandle == context.numPlaces-1)
 				context.nextSocketToCheck = 0;
 			else
 				context.nextSocketToCheck = whichPlaceToHandle+1;
-		}
+		}		
 		context.socketLinks[whichPlaceToHandle].events = 0; // disable any further polls on this socket
-		context.noBlockWindow++; // don't allow threads to block while a socket is not visible to poll
 		pthread_mutex_unlock(&context.readLock);
 
 		if ((context.socketLinks[whichPlaceToHandle].revents & POLLIN) || (context.socketLinks[whichPlaceToHandle].revents & POLLPRI))
@@ -1140,26 +1105,8 @@ bool probe (bool onlyProcessAccept, bool block)
 				#endif
 				handleConnectionRequest();
 				pthread_mutex_lock(&context.readLock);
-				context.noBlockWindow--;
 				context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
 				pthread_mutex_unlock(&context.readLock);
-			}
-			else if (whichPlaceToHandle == context.numPlaces) { // unblockProbe was called
-				#ifdef DEBUG
-					fprintf(stderr, "saw that unblock probe was called in place %u\n", context.myPlaceId);
-				#endif
-				char dummy;
-				// clear out any previously set unblock signals
-				while (::read(context.socketLinks[whichPlaceToHandle].fd, &dummy, 1) > 0);
-				// re-enable unblockProbe
-				pthread_mutex_lock(&context.readLock);
-				context.noBlockWindow--;
-				context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
-				pthread_mutex_unlock(&context.readLock);
-				#ifdef DEBUG				
-					fprintf(stderr, "finished processing unblock probe in place %u\n\n", context.myPlaceId);
-				#endif
-				return false;
 			}
 			else
 			{
@@ -1218,10 +1165,8 @@ bool probe (bool onlyProcessAccept, bool block)
 					case STANDARD:
 					{
 						pthread_mutex_lock(&context.readLock);
-						context.noBlockWindow--;
 						context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
 						pthread_mutex_unlock(&context.readLock);
-
 						handlerCallback hcb = context.callBackTable[mp.type].handler;
                         x10rt_lgl_stats.msg.messages_received++;
                         x10rt_lgl_stats.msg.bytes_received += mp.len;
@@ -1243,10 +1188,8 @@ bool probe (bool onlyProcessAccept, bool block)
 						if (nonBlockingRead(context.socketLinks[whichPlaceToHandle].fd, dest, dataLen) < (int)dataLen)
 							return fatal_error("reading PUT data"), false;
 						pthread_mutex_lock(&context.readLock);
-						context.noBlockWindow--;
 						context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
 						pthread_mutex_unlock(&context.readLock);
-
 						notifierCallback ncb = context.callBackTable[mp.type].notifier;
 						ncb(&mp, dataLen);
                         x10rt_lgl_stats.put_copied_bytes_received += dataLen;
@@ -1265,7 +1208,6 @@ bool probe (bool onlyProcessAccept, bool block)
 								return fatal_error("reading GET pointer"), false;
 
 						pthread_mutex_lock(&context.readLock);
-						context.noBlockWindow--;
 						context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
 						pthread_mutex_unlock(&context.readLock);
 
@@ -1315,7 +1257,6 @@ bool probe (bool onlyProcessAccept, bool block)
 								return fatal_error("reading GET_COMPLETED data"), false;
 						}
 						pthread_mutex_lock(&context.readLock);
-						context.noBlockWindow--;
 						context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
 						pthread_mutex_unlock(&context.readLock);
 
@@ -1357,7 +1298,6 @@ bool probe (bool onlyProcessAccept, bool block)
 				fprintf(stderr, "X10rt.Sockets: place %u got a dud message from place %u\n", context.myPlaceId, whichPlaceToHandle);
 			#endif
 			pthread_mutex_lock(&context.readLock);
-			context.noBlockWindow--;
 			context.socketLinks[whichPlaceToHandle].events = POLLIN | POLLPRI;
 			pthread_mutex_unlock(&context.readLock);
 		}
@@ -1417,8 +1357,6 @@ void x10rt_net_finalize (void)
 			close(Launcher::_parentLauncherControlLink);
 		#endif
 	}
-	close(context.unblockFD[0]);
-	close(context.unblockFD[1]);
 	pthread_mutex_destroy(&context.readLock);
 	free(context.socketLinks);
 	free(context.writeLocks);

@@ -21,11 +21,15 @@
 using namespace x10::lang;
 
 void x10aux::throwArithmeticException() {
+#ifndef NO_EXCEPTIONS
     throwException(ArithmeticException::_make(String::Lit("divide by zero")));
+#endif
 }
 
 void x10aux::throwNPE() {
+#ifndef NO_EXCEPTIONS
     throwException<NullPointerException>();
+#endif
 }
 
 void x10aux::throwClassCastException(const char *msg_) {

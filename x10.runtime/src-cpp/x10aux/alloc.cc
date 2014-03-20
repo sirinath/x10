@@ -39,7 +39,12 @@
 using namespace x10aux;
 
 void x10aux::reportOOM(size_t size) {
+#ifndef NO_EXCEPTIONS
     throwException<x10::lang::OutOfMemoryError>();
+#else
+    fprintf(stderr,"Out of memory\n");
+    abort();
+#endif
 }
 
 char *x10aux::alloc_printf(const char *fmt, ...) {
@@ -535,7 +540,12 @@ void *x10aux::alloc_internal_congruent(size_t size) {
 
     if (congruent_cursor - congruent_base + size > congruent_sz) {
         // run out of space
+        #ifndef NO_EXCEPTIONS
         throwException<x10::lang::OutOfMemoryError>();
+        #else
+        fprintf(stderr, "Out of congruent memory, see "ENV_CONGRUENT_SIZE"\n");
+        abort();
+        #endif
     }
 
     void *r = congruent_cursor;

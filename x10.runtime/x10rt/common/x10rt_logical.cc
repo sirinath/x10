@@ -836,11 +836,6 @@ x10rt_error x10rt_lgl_probe (void)
     return X10RT_ERR_OK;
 }
 
-bool x10rt_lgl_blocking_probe_support(void)
-{
-	return x10rt_net_blocking_probe_support();
-}
-
 x10rt_error x10rt_lgl_blocking_probe (void)
 {
     CHECK_ERR_AND_RETURN;

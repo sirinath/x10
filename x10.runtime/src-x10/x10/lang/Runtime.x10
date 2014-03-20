@@ -17,8 +17,6 @@ import x10.compiler.Pragma;
 import x10.compiler.StackAllocate;
 import x10.compiler.NativeCPPInclude;
 
-import x10.io.Serializer;
-import x10.io.Deserializer;
 import x10.io.Unserializable;
 import x10.io.Reader;
 import x10.io.Writer;
@@ -120,11 +118,6 @@ public final class Runtime {
     @Native("java", "x10.runtime.impl.java.Runtime.eventProbe()")
     public static native def x10rtProbe():void;
 
-    
-    @Native("c++", "x10rt_blocking_probe_support()")
-    @Native("java", "x10.x10rt.X10RT.blockingProbeSupport()")
-    private static native def x10rtBlockingProbeSupport():Boolean;
-
     @Native("c++", "::x10aux::blocking_probe()")
     @Native("java", "x10.runtime.impl.java.Runtime.blockingProbe()")
     public static native def x10rtBlockingProbe():void;
@@ -141,26 +134,13 @@ public final class Runtime {
     public static native def wsProcessEvents():void;
 
     /**
-     * Return a deep copy of the object graph rooted at o.
+     * Return a deep copy of the parameter.
      */
-    public static def deepCopy[T](o:T, prof:Profile):T {
-        val start = prof != null ? System.nanoTime() : 0;
+    @Native("java", "x10.runtime.impl.java.Runtime.<#T$box>deepCopy(#o, #prof)")
+    @Native("c++", "::x10aux::deep_copy< #T >(#o, #prof)")
+    public static native def deepCopy[T](o:T, prof:Profile):T;
 
-        @StackAllocate val ser = @StackAllocate new Serializer();
-        ser.writeAny(o);
-        @StackAllocate val deser = @StackAllocate new Deserializer(ser);
-        val copy:T = deser.readAny() as T;
-
-        if (prof != null) {
-            val end = System.nanoTime();
-            prof.serializationNanos += (end-start);
-            prof.bytes += ser.dataBytesWritten();
-        }
-
-        return copy;
-    }
-
-    public static def deepCopy[T](o:T):T = deepCopy[T](o, null);
+    public static def deepCopy[T](o:T) = deepCopy[T](o, null);
 
     // Memory management
 
@@ -318,9 +298,7 @@ public final class Runtime {
         var idleCount:Int = 0n; // idle thread count
         var deadCount:Int = 0n; // dead thread count
         var spareNeeded:Int = 0n; // running threads - NTHREADS
-        var multiplace:Boolean = true; // is running with multiple places
-        var busyWaiting:Boolean = true; // should busy wait
-        var probing:Boolean = false; // is already in bloking probe
+        var multiplace:Boolean = true; // better safe than sorry
 
         // reduce permits by n
         def reduce(n:Int):void {
@@ -410,21 +388,13 @@ public final class Runtime {
 
         // park until given work to do -> idle thread
         def take(worker:Worker):Activity {
-            if (multiplace && busyWaiting && (idleCount - spareNeeded >= NTHREADS - 1)) return null;
+            if (BUSY_WAITING) return null;
+            if (multiplace && (idleCount - spareNeeded >= NTHREADS - 1)) return null; // better safe than sorry
             lock.lock();
             convert();
-            if (multiplace && busyWaiting && (idleCount >= NTHREADS - 1)) {
+            if (multiplace && (idleCount >= NTHREADS - 1)) {
                 lock.unlock();
                 return null;
-            }
-            if (multiplace && !busyWaiting && !probing) {
-                probing = true;
-                lock.unlock();
-                x10rtBlockingProbe();
-                lock.lock();
-                probing = false;
-                lock.unlock();
-                return worker.poll();
             }
             val i = spareCount + idleCount++;
             parkedWorkers(i) = worker;
@@ -440,13 +410,12 @@ public final class Runtime {
         // deal to idle worker if any
         // return true on success
         def give(activity:Activity):Boolean {
-            if (idleCount - spareNeeded <= 0n && !probing) return false;
+            if (BUSY_WAITING) return false;
+            if (idleCount - spareNeeded <= 0n) return false;
             lock.lock();
             convert();
             if (idleCount <= 0n) {
-                val p = probing;
                 lock.unlock();
-                if (p && multiplace) x10rtUnblockProbe();
                 return false;
             }
             val i = spareCount + --idleCount;
@@ -473,9 +442,7 @@ public final class Runtime {
                 parkedWorkers(spareCount) = null;
                 worker.unpark();
             }
-            val p = probing;
             lock.unlock();
-            if (p && multiplace) x10rtUnblockProbe();
         }
 
         public operator this(i:Int) = workers(i);
@@ -633,7 +600,6 @@ public final class Runtime {
 
         operator this(n:Int):void {
             workers.multiplace = Place.ALL_PLACES>1; // ALL_PLACES includes accelerators
-            workers.busyWaiting = BUSY_WAITING || !x10rtBlockingProbeSupport();
             workers.count = n;
             workers(0n) = worker();
             for (var i:Int = 1n; i<n; i++) {
@@ -852,24 +818,18 @@ public final class Runtime {
         val state = a.finishState();
         val clockPhases = a.clockPhases().make(clocks);
         if (place.id == hereLong()) {
-            // Synchronous serialization
-	    val start = prof != null ? System.nanoTime() : 0;
-            val ser = new Serializer();
-            ser.writeAny(body);
-            if (prof != null) {
-                val end = System.nanoTime();
-                prof.serializationNanos += (end-start);
-                prof.bytes += ser.dataBytesWritten();
-            }
-
-            // Spawn asynchronous activity
+            var bodyCopy:()=>void = null;
             state.notifySubActivitySpawn(place);
-            val asyncBody = ()=>{
-                val deser = new Deserializer(ser);
-                val bodyCopy = deser.readAny() as ()=>void;
-                bodyCopy();
-            };
-            executeLocal(new Activity(asyncBody, here, state, clockPhases));
+	    try {
+                bodyCopy = deepCopy(body, prof);
+            } catch (e:CheckedThrowable) {
+                state.notifyActivityCreation(here);
+                state.pushException(new x10.io.SerializationException(e));
+                state.notifyActivityTermination();
+            }
+            if (bodyCopy != null) {
+                executeLocal(new Activity(bodyCopy, here, state, clockPhases));
+            }
         } else {
             val src = here;
             val closure = ()=> @x10.compiler.RemoteInvocation("runAsync") { execute(new Activity(body, src, state, clockPhases)); };
@@ -887,24 +847,18 @@ public final class Runtime {
         
         val state = a.finishState();
         if (place.id == hereLong()) {
-            // Synchronous serialization
-	    val start = prof != null ? System.nanoTime() : 0;
-            val ser = new Serializer();
-            ser.writeAny(body);
-            if (prof != null) {
-                val end = System.nanoTime();
-                prof.serializationNanos += (end-start);
-                prof.bytes += ser.dataBytesWritten();
-            }
-
-            // Spawn asynchronous activity
+            var bodyCopy:()=>void = null;
             state.notifySubActivitySpawn(place);
-            val asyncBody = ()=>{
-                val deser = new Deserializer(ser);
-                val bodyCopy = deser.readAny() as ()=>void;
-                bodyCopy();
-            };
-            executeLocal(new Activity(asyncBody, here, state));
+	    try {
+                bodyCopy = deepCopy(body, prof);
+            } catch (e:CheckedThrowable) {
+                state.notifyActivityCreation(here);
+                state.pushException(new x10.io.SerializationException(e));
+                state.notifyActivityTermination();
+            }
+            if (bodyCopy != null) {
+                executeLocal(new Activity(bodyCopy, here, state));
+            }
         } else {
             val preSendAction = ()=>{ state.notifySubActivitySpawn(place); };
             x10rtSendAsync(place.id, body, state, prof, preSendAction); // optimized case
@@ -949,23 +903,18 @@ public final class Runtime {
         a.ensureNotInAtomic();
         
         if (place.id == hereLong()) {
-            // Synchronous serialization
-	    val start = prof != null ? System.nanoTime() : 0;
-            val ser = new Serializer();
-            ser.writeAny(body);
-            if (prof != null) {
-                val end = System.nanoTime();
-                prof.serializationNanos += (end-start);
-                prof.bytes += ser.dataBytesWritten();
+            var bodyCopy:()=>void = null;
+	    try {
+                bodyCopy = deepCopy(body, prof);
+            } catch (e:CheckedThrowable) {
+                // Hygiene: currently these calls do nothing, but put them here for completeness.
+                FinishState.UNCOUNTED_FINISH.notifyActivityCreation(here);
+                FinishState.UNCOUNTED_FINISH.pushException(new x10.io.SerializationException(e));
+                FinishState.UNCOUNTED_FINISH.notifyActivityTermination();
             }
-
-            // Spawn asynchronous activity
-            val asyncBody = ()=>{
-                val deser = new Deserializer(ser);
-                val bodyCopy = deser.readAny() as ()=>void;
-                bodyCopy();
-            };
-            executeLocal(new Activity(asyncBody, here, FinishState.UNCOUNTED_FINISH));
+            if (bodyCopy != null) {
+                executeLocal(new Activity(bodyCopy, here, FinishState.UNCOUNTED_FINISH));
+            }
         } else {
             // [DC] passing FIRST_PLACE instead of the correct src, since UNCOUNTED_FINISH does not use this value
             // and it saves sending some bytes over the network
