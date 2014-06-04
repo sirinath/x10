@@ -937,7 +937,8 @@ public class DenseMatrix extends Matrix {
      * @param plus     add-on flag
      * @return         result ("this" the method invoking object)
      */
-    public def mult(A:Matrix(this.M), B:Matrix(A.N,this.N), plus:Boolean):DenseMatrix(this) {
+    public def mult(A:Matrix(this.M), B:Matrix(A.N,this.N),    plus:Boolean):DenseMatrix(this) {
+
         if (A instanceof DenseMatrix){
             if (B instanceof SparseCSC)
                 return mult(A as DenseMatrix(A), B as SparseCSC(B), plus);
@@ -1032,10 +1033,8 @@ public class DenseMatrix extends Matrix {
      * @param  plus    result add-on flag
      * @return        result
      */
-    public def mult(A:DenseMatrix(this.M), B:DenseMatrix(A.N, this.N), plus:Boolean) {
-        val alpha = 1.0;
-        val beta = plus?1.0:0.0;
-        DenseMatrixBLAS.comp(alpha, A, B, beta, this);
+    public def mult(A:DenseMatrix(this.M), B:DenseMatrix(A.N, this.N),    plus:Boolean) {
+        DenseMatrixBLAS.comp(A, B, this, plus); //BLAS driver
         return this;
     }
     
@@ -1047,7 +1046,7 @@ public class DenseMatrix extends Matrix {
      * @param  B     second dense matrix used in transposed
      * @return        result
      */
-    public def transMult(A:DenseMatrix{self.N==this.M}, B:DenseMatrix(A.M, this.N)) = 
+    public def transMult(A:DenseMatrix{self.N==this.M},    B:DenseMatrix(A.M, this.N)) = 
         transMult(A, B, false);
     
     /**
@@ -1060,10 +1059,8 @@ public class DenseMatrix extends Matrix {
      * @param  plus    add-on flag
      * @return        result
      */
-    public def transMult(A:DenseMatrix{self.N==this.M}, B:DenseMatrix(A.M,this.N), plus:Boolean) {
-		val alpha = 1.0;
-		val beta = plus?1.0:0.0;
-        DenseMatrixBLAS.compTransMult(alpha, A, B, beta, this);
+    public def transMult(A:DenseMatrix{self.N==this.M},B:DenseMatrix(A.M,this.N), plus:Boolean) {
+        DenseMatrixBLAS.compTransMult(A, B, this, plus); //BLAS driver
         return this;
     }
 
@@ -1076,10 +1073,8 @@ public class DenseMatrix extends Matrix {
      * @param  plus    add-on flag
      * @return        result
      */
-    public def multTrans(A:DenseMatrix(this.M), B:DenseMatrix(this.N,A.N), plus:Boolean) {
-		val alpha = 1.0;
-		val beta = plus?1.0:0.0;
-        DenseMatrixBLAS.compMultTrans(alpha, A, B, beta, this);
+    public def multTrans(A:DenseMatrix(this.M), B:DenseMatrix(this.N,A.N),plus:Boolean) {
+        DenseMatrixBLAS.compMultTrans(A, B, this, plus); //BLAS driver
         return this;
     }
 
@@ -1099,7 +1094,7 @@ public class DenseMatrix extends Matrix {
      * this =this &#42 A
      */
     public def mult(A:TriDense(this.N)):DenseMatrix(this) {
-        DenseMatrixBLAS.comp(this, A);
+        DenseMatrixBLAS.comp(this, A); //BLAS driver
         return this;
     }
     
@@ -1107,7 +1102,7 @@ public class DenseMatrix extends Matrix {
      * this = A &#42 this
      */
     public def multBy(A:TriDense(this.M)):DenseMatrix(this) {
-        DenseMatrixBLAS.comp(A, this);
+        DenseMatrixBLAS.comp(A, this); //BLAS driver
         return this;
     }
 
@@ -1115,7 +1110,7 @@ public class DenseMatrix extends Matrix {
      * this =this<sup>T<sup> &#42 A
      */
     public def transMult(A:TriDense(this.N)):DenseMatrix(this) {
-        DenseMatrixBLAS.compTransMult(this, A);
+        DenseMatrixBLAS.compTransMult(this, A); //BLAS driver
         return this;
     }
     
@@ -1123,7 +1118,7 @@ public class DenseMatrix extends Matrix {
      * this = A &#42 this<sup>T<sup>
      */
     public def multTransBy(A:TriDense(this.M)):DenseMatrix(this) {
-        DenseMatrixBLAS.compMultTrans(A, this);
+        DenseMatrixBLAS.compMultTrans(A,  this); //BLAS driver
         return this;
     }
     
@@ -1203,9 +1198,7 @@ public class DenseMatrix extends Matrix {
      */
     public  operator this % (that:DenseMatrix{self.M==this.N}):DenseMatrix(this.M,that.N) {
         val dm = DenseMatrix.make(this.M, that.N);
-		val alpha = 1.0;
-		val beta = 0.0;
-        DenseMatrixBLAS.comp(alpha, this, that, beta, dm);
+        DenseMatrixBLAS.comp(this, that, dm, false);
         return dm;
     }
     

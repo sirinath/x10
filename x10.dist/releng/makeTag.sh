@@ -7,7 +7,6 @@
 # Usage: makeTag -rev <svn revision number> -tag <revision name>
 #
 
-DO_APP=0
 DO_BENCH=0
 DO_MAN=0
 DO_X10=0
@@ -30,10 +29,6 @@ while [ $# != 0 ]; do
 	-branch)
 	    export BRANCH="branches/$2"
 	    shift
-	    ;;
-
-	-app)
-	    DO_APP=1;
 	    ;;
 
 	-bench)
@@ -69,12 +64,6 @@ fi
 if [[ -z "$TAG" ]]; then
     echo "usage: $0 must give tag name as -tag <tag>"
     exit 1
-fi
-
-if [[ $DO_APP == 1 ]]; then
-    svn copy -r $REVISION https://svn.code.sourceforge.net/p/x10/code/applications/$BRANCH/ \
-        https://svn.code.sourceforge.net/p/x10/code/applications/tags/$TAG \
-        -m "Tagging applications $BRANCH revision $REVISION as $TAG release of applications"
 fi
 
 if [[ $DO_BENCH == 1 ]]; then

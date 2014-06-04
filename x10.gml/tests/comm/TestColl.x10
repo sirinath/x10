@@ -67,7 +67,9 @@ class RunDenseCollTest {
  		ret &= (testReduce());
  		ret &= (testAllReduce());
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Test Matrix collective communication passed!");
+		else
 			Console.OUT.println("--------Test of Matrix collective communication failed!--------");
 	}
     }
@@ -83,7 +85,9 @@ class RunDenseCollTest {
 		MatrixBcast.bcast(dupDA.dupMs);
 	
 		ret =dupDA.syncCheck();
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Dense matrix.bcast for dup matrix test passed!");
+		else
 			Console.OUT.println("-----Test dense matrix bcast failed!-----");
 		return ret;
 	}
@@ -102,7 +106,9 @@ class RunDenseCollTest {
 		//dupDA.printAll("All copies:");
 
 		ret =dupmat.syncCheck();
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Dense matrix ring rast test passed!");
+		else
 			Console.OUT.println("-----Test dense matrix ring cast failed!-----");
 		return ret;
  	}
@@ -115,16 +121,23 @@ class RunDenseCollTest {
  		dstDM.initRandom();
 		val blkDM = DenseBlockMatrix.make(gpart);
 
+		Debug.flushln("Start gathering "+numplace+" places");
 		MatrixGather.gather(dstDM.distBs, blkDM.listBs);
+		Debug.flushln("Done");
 		
 		ret = dstDM.equals(blkDM as Matrix(gpart.M, gpart.N));
+		Debug.flushln("Done with verify");
 
 		if (ret) {
 			val dm = DenseMatrix.make(gpart.M, gpart.N);
+			Debug.flushln("Start copy from block matrix to dense matrix locally");
 			blkDM.copyTo(dm);
+			Debug.flushln("Done");
 			ret &= dm.equals(blkDM as Matrix(gpart.M, gpart.N));
 		}
- 		if (!ret)
+ 		if (ret)
+ 			Console.OUT.println("Test gather for dist dense matrix test passed!");
+ 		else
  			Console.OUT.println("-----Test gather for dist dense matrix failed!-----");
  		return ret;
  	}
@@ -139,11 +152,16 @@ class RunDenseCollTest {
 
 		val DM = DenseMatrix.make(gpartRow.M, gpartRow.N);
 
+		Debug.flushln("Start single-row gather for matrix blocks");
 		MatrixGather.gatherRowBs(gpartRow, distDM.distBs, DM);
+		Debug.flushln("Done");
 
 		ret = distDM.equals(DM);
+		Debug.flushln("Done verification");
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Test single-row blocks gather for dist dense matrix test passed!");
+		else
 			Console.OUT.println("-----Test single-row block gather for dist dense matrix failed!-----");
 		return ret;
 	}
@@ -156,11 +174,16 @@ class RunDenseCollTest {
 		val blkDM = DenseBlockMatrix.make(gpart);
  		blkDM.initRandom();
 
+		Debug.flushln("Start scattering data to "+numplace+" places");
 		MatrixScatter.scatter(blkDM.listBs, dstDM.distBs);
+		Debug.flushln("Done");
 		
 		ret = dstDM.equals(blkDM as Matrix(gpart.M, gpart.N));
+		Debug.flushln("Done with verify");
 
- 		if (!ret)
+ 		if (ret)
+ 			Console.OUT.println("Test scatter for dist dense matrix test passed!");
+ 		else
  			Console.OUT.println("-----Test scatter for dist dense matrix failed!-----");
  		return ret;
  	}
@@ -174,11 +197,16 @@ class RunDenseCollTest {
 		val distDM = DistDenseMatrix.make(gpartRow);
 		DM.initRandom();
 
+		Debug.flushln("Start single-row block scatter dense matrix");
 		MatrixScatter.scatterRowBs(gpartRow, DM, distDM.distBs);
+		Debug.flushln("Done");
 
 		ret = distDM.equals(DM);
+		Debug.flushln("Done verification");
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Test single-row blocks scatter for dense matrix test passed!");
+		else
 			Console.OUT.println("-----Test single-row block scatter for dense matrix failed!-----");
 		return ret;
 	}
@@ -196,7 +224,9 @@ class RunDenseCollTest {
 	
 // 		val da = dupDA.local();
 // 		ret = dupDA.syncCheck() && distDA.equals(da);
-// 		if (!ret)
+// 		if (ret)
+// 			Console.OUT.println("Test allgather for dist matrix test passed!");
+// 		else
 // 			Console.OUT.println("-----Test allgather for dist matrix failed!-----");
 // 		return ret;
 
@@ -218,8 +248,10 @@ class RunDenseCollTest {
 		denDA.scale(numplace as Double);
 		ret = denDA.equals(dupDA.local() as Matrix(denDA.M, denDA.N));
 
-		if (!ret)
-    		Console.OUT.println("-----Test reduce for dup matrix failed!-----");
+		if (ret)
+				Console.OUT.println("Test reduce for dup matrix test passed!");
+			else
+				Console.OUT.println("-----Test reduce for dup matrix failed!-----");
 		return ret;
 	}
 
@@ -239,7 +271,9 @@ class RunDenseCollTest {
 		denDA.scale(numplace);
 		
 		ret = denDA.equals(dupDA.local() as Matrix(denDA.M, denDA.N));
-		if (!ret || !dupDA.syncCheck())
+		if (ret && dupDA.syncCheck())
+			Console.OUT.println("Test reduce for dup matrix test passed!");
+		else
 			Console.OUT.println("-----Test reduce for dup matrix failed!-----");
 	
 		return ret;
@@ -274,7 +308,9 @@ class RunDenseCollTest {
 
   		
 // 		ret = dupDA.syncCheck();
-// 		if (!ret)
+// 		if (ret)
+// 			Console.OUT.println("Test ring cast for dup matrix test passed!");
+// 		else
 // 			Console.OUT.println("-----Test ring cast for dup matrix failed!-----");
 // 		return ret;
 // 	}

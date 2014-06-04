@@ -11,6 +11,7 @@
 
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.dist.DupDenseMatrix;
 import x10.matrix.dist.DupSparseMatrix;
 
@@ -43,7 +44,9 @@ public class TestDupSparse {
 			ret &=testAddTo();
 			ret &=testSubTo();
         }
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Test passed!");
+			else
 				Console.OUT.println("----------------Test failed!----------------");
 			return ret;
 		}
@@ -56,17 +59,19 @@ public class TestDupSparse {
 			ret &= s1.syncCheck();
 			ret &= s2.syncCheck();
 		
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dup sparse matrix clone test passed!");
+			else
 				Console.OUT.println("--------Dup sparse Matrix clone test failed!--------");
+                	s1(1, 1) = s2(2,2) = 10.0;
 
-        	s1(1, 1) = s2(2,2) = 10.0;
-
-        	if ((s1(1,1)==s2(2,2)) && (s1(1,1)==10.0)) {
-            	ret &= true;
-        	} else {
-            	ret &= false;
-            	Console.OUT.println("---------- DupSparse Matrix chain assignment test failed!-------");
-        	}
+                	if ((s1(1,1)==s2(2,2)) && (s1(1,1)==10.0)) {
+                        	ret &= true;
+                        	Console.OUT.println("DupSparse Matrix chain assignment test passed!");
+                	} else {
+                        	ret &= false;
+                        	Console.OUT.println("---------- DupSparse Matrix chain assignment test failed!-------");
+                	}
 
 			return ret;
 		}
@@ -86,7 +91,9 @@ public class TestDupSparse {
 			var ret:Boolean = d2.equals(d3);
 			ret &= d2.syncCheck();
 
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dup sparse Matrix addto test passed!");
+			else
 				Console.OUT.println("--------Dup sparse matrix addto test failed!--------");
 			return ret;
 		}
@@ -106,7 +113,9 @@ public class TestDupSparse {
 			var ret:Boolean = d2.equals(d3);
 			ret &= d2.syncCheck();
 
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dup sparse Matrix sub test passed!");
+			else
 				Console.OUT.println("--------Dup sparse matrix sub test failed!--------");
 			return ret;
 		}

@@ -14,7 +14,6 @@ package x10.x10rt;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -50,11 +49,11 @@ public class SocketTransport {
 	public static final String X10_LAUNCHER_PARENT = "X10_LAUNCHER_PARENT";
 	public static final String X10_NOWRITEBUFFER = "X10_NOWRITEBUFFER"; // turns off non-blocking sockets
 	public static final String X10_SOCKET_TIMEOUT = "X10_SOCKET_TIMEOUT";
-	static final String UTF8 = "UTF-8";
+	private static final String UTF8 = "UTF-8";
 	private static final String DEAD = "DEAD";
 	private static enum PROBE_TYPE {ACCEPT, ACCEPTORWRITE, ALL};
 	private static enum CTRL_MSG_TYPE {HELLO, GOODBYE, PORT_REQUEST, PORT_RESPONSE}; // Correspond to values in Launcher.h
-	static enum MSGTYPE {STANDARD, PUT, GET, GET_COMPLETED, GET_PLACE_REQUEST, GET_PLACE_RESPONSE, CONNECT_DATASTORE}; // note that GET_PLACE_REQUEST does not overlap with CTRL_MSG_TYPE
+	private static enum MSGTYPE {STANDARD, PUT, GET, GET_COMPLETED, GET_PLACE_REQUEST, GET_PLACE_RESPONSE}; // note that GET_PLACE_REQUEST does not overlap with CTRL_MSG_TYPE
 	public static enum CALLBACKID {closureMessageID, simpleAsyncMessageID};
 	public static enum RETURNCODE { // see matching list of error codes "x10rt_error" in x10rt_types.h 
 	    X10RT_ERR_OK,   /* No error */
@@ -435,19 +434,6 @@ public class SocketTransport {
 								if (socketTimeout != -1) sc.socket().setSoTimeout(socketTimeout);
 								sc.register(selector, SelectionKey.OP_READ);
 								if (DEBUG) System.err.println("Place "+myPlaceId+" initialized new place "+remote);
-								
-								// tell the new place to connect to the hazelcast cluster
-								if (X10RT.hazelcastDatastore != null) {
-									ByteBuffer[] connectionBytes;
-									try {
-										connectionBytes = new ByteBuffer[]{ByteBuffer.wrap(X10RT.hazelcastDatastore.getConnectionInfo().getBytes(SocketTransport.UTF8))};
-						      	   		sendMessage(SocketTransport.MSGTYPE.CONNECT_DATASTORE, remote, 0, connectionBytes);
-									} catch (UnsupportedEncodingException e) {
-										// this won't happen, because UTF8 is a required encoding
-										e.printStackTrace();
-										assert(false);
-									}
-								}
 							}
 							else { // Ask the lowest numbered place for a new place ID
 								// store link for later, when the GET_PLACE_RESPONSE comes in
@@ -558,28 +544,9 @@ public class SocketTransport {
 							// update nplaces here, because we won't get a connection from the new place, as it already exists
 							if (remote >= nplaces)
 								this.nplaces = remote+1;
-							
-							// tell the new place to connect to the hazelcast cluster
-							if (X10RT.hazelcastDatastore != null) {
-								ByteBuffer[] connectionBytes;
-								try {
-									connectionBytes = new ByteBuffer[]{ByteBuffer.wrap(X10RT.hazelcastDatastore.getConnectionInfo().getBytes(SocketTransport.UTF8))};
-					      	   		sendMessage(SocketTransport.MSGTYPE.CONNECT_DATASTORE, remote, 0, connectionBytes);
-								} catch (UnsupportedEncodingException e) {
-									// this won't happen, because UTF8 is a required encoding
-									e.printStackTrace();
-									assert(false);
-								}
-							}
 						}
 						else
 							System.err.println("Unexpected GET_PLACE_RESPONSE arrived!!");
-					}
-					else if (msgType == MSGTYPE.CONNECT_DATASTORE.ordinal()) {
-						byte[] linkdata = new byte[datalen];
-						bb.get(linkdata);
-						String linkString = new String(linkdata, UTF8);
-						X10RT.initDataStore(linkString);
 					}
 					else 
 						System.err.println("Unknown message type: "+msgType);

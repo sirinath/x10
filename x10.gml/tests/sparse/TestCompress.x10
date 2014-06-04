@@ -40,7 +40,9 @@ class CompArrayTest {
  		ret &= (testDataExtraction());
  		ret &= (testSeqAdjustIndex());
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Compress Data Test passed!\n");
+		else
 			Console.OUT.println("----------Compress Data Test failed!----------\n");
 	}
 
@@ -54,10 +56,13 @@ class CompArrayTest {
 
 		var ret:Boolean;
 		ret = ca.equals(uc);
+		if (ret) Console.OUT.println("Decompress passed");
 
 		val ca1 = CompressArray.compress(uc);
 		ret &= ca1.equals(ca);
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Compress array test passed!");
+		else
 			Console.OUT.println("----------Compress array test failed!----------");
 		return ret;	
 	}
@@ -73,7 +78,9 @@ class CompArrayTest {
 		Console.OUT.println("non-zero : "+ c1d.size());
 		
 		ret &= c1d.testIn(alist);
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Compress 1D test passed!");
+		else
 			Console.OUT.println("----------Compress 1D test failed!----------");
 		return ret;
 	}
@@ -103,7 +110,9 @@ class CompArrayTest {
 		val c2d_ = c2d.clone();
 		ret&=c2d.equals(c2d_);
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Compress 2D test passed!");
+		else
 			Console.OUT.println("----------Compress 2D test failed!----------");
 		return ret;
 	}
@@ -121,13 +130,16 @@ class CompArrayTest {
 		Compress2D.copy(c1, c2);
 
 		ret &= c1.equals(c2);
-		if (!ret) 
+		if (ret) 
+			Console.OUT.println("Test full copy passed");
+		else
 			Console.OUT.println("----------Test full copy failed!------------");
 
 		// Test partial copy
  		val ss= M/5;
  		val cnt= M/2+5;
 		c2.reset();
+		Console.OUT.printf("Copy [%d %d] indexes \n", ss, ss+cnt-1);
 		Compress2D.copySection(c1, ss, c2, cnt);
 
  		for (var l:Long=0; l<M; l++) {
@@ -135,8 +147,11 @@ class CompArrayTest {
  				ret &= (c1(l, idx)==c2(l, idx-ss));
  			}
  		}
+		if (ret) Console.OUT.println("Test partial copy passed");
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Compress 2D line section copy test passed!");
+		else
 			Console.OUT.println("----------Compress 2D line section copy test failed!----------");
 		return ret;		
 	}
@@ -160,7 +175,9 @@ class CompArrayTest {
 		if (! ret) Console.OUT.printf("Extracted data mismatch at index %d : %f <> %f\n", 
 									  i-1, c1(i-1), s1(i-1));
 		
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Compress line data extraction test passed!");
+		else
 			Console.OUT.println("----------Compress line data extraction test failed!----------");
 		return ret;		
 	}
@@ -179,7 +196,9 @@ class CompArrayTest {
 
 		var ret:Boolean = c2.equals(cd);
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Sequentialize index test passed!");
+		else
 			Console.OUT.println("----------Sequentialize index test failed!----------");
 		return ret;		
 	}

@@ -70,7 +70,9 @@ class GridReduceTest {
 		Console.OUT.println("Distribution grid:"+pM+"x"+pN);
 		retval &= testRowReduceSum(dbmat);
  		retval &= testColReduceSum(dbmat);
-		if (!retval)
+		if (retval)
+			Console.OUT.println("Block communication test grid-reduce commu passed!");
+		else
 			Console.OUT.println("------------Block communication test collective grid-reduce failed!-----------");
     }
 	}
@@ -90,7 +92,9 @@ class GridReduceTest {
 		
 		retval &= distmat.equals(pN as Double);//verifyRowReduceSum(pN as Double, 1, colId, work1);
 		if (!retval) Console.OUT.println(distmat);
-		if (!retval)
+		if (retval)
+			Console.OUT.println("Test ring reduce row-wise for dist block matrix test passed!");
+		else
 			Console.OUT.println("-----Test ring reduce row-wise for dist block matrix failed!-----");
 		return retval;
 	}
@@ -111,7 +115,9 @@ class GridReduceTest {
 		}
 		retval &= distmat.equals(pN as Double);
 
-		if (!retval)
+		if (retval)
+			Console.OUT.println("Test ring reduce col-wise for dist block matrix test passed!");
+		else
 			Console.OUT.println("-----Test ring reduce col-wise for dist block matrix failed!-----");
 		return retval;
 	}

@@ -80,6 +80,7 @@ class BlockP2PTest {
 		retval &= testCopyTo(srcden as Matrix, dbmat);
 		retval &= testCopyFrom(dbmat, dstden as Matrix, srcden as Matrix);
 
+		Console.OUT.println("");
 		Console.OUT.println("Test sparse blocks in distributed block matrix");
 	
 		retval &= testCopyTo(srcspa as Matrix, sbmat);
@@ -111,7 +112,9 @@ class BlockP2PTest {
 						   ds*8, avgt, 8000.0*ds/avgt/1024/1024);
 		
 		ret = dbmat.checkAllBlocksEqual();
-		if (!ret)
+		if (ret)
+			Console.OUT.println("P2P CopyTo dist block matrix passed!");
+		else
 			Console.OUT.println("--------P2P CopyTo dist block matrix test failed!--------");
 		
 		return ret;
@@ -139,7 +142,9 @@ class BlockP2PTest {
 		Console.OUT.printf("P2P copyFrom %d bytes: %.3f ms, thput: %2.2f MB/s per iteration\n", 
 						   ds*8, avgt, 8000.0*ds/avgt/1024/1024);
 
-		if (!ret) 
+		if (ret) 
+			Console.OUT.println("P2P CopyFrom dist block matrix check passed!");
+		else
 			Console.OUT.println("--------P2P CopyFrom dist block matrix test failed!--------");
 		
 		return ret;
