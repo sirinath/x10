@@ -250,12 +250,14 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public  def scale(a:Double):TriDense(this)  {
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)
+			// Lower part
+			for (var len:Long=M; len>0; len--, colstt+=M+1)
+				for (var i:Long=colstt; i<colstt+len; i++)		
 					this.d(i) = this.d(i) * a;
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			// Upper part
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					this.d(i) = this.d(i) * a;
 		}
 		return this;
@@ -265,12 +267,13 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 		var tt:Double = 0.0;
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)
+			// lower part
+			for (var len:Long=M; len>0; len--, colstt+=M+1) 
+				for (var i:Long=colstt; i<colstt+len; i++)
 					tt += this.d(i);
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					tt += this.d(i);			
 		}
 		return tt;
@@ -284,12 +287,12 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public def cellAddTo(x:DenseMatrix(M,N)):DenseMatrix(x) {
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)
+			for (var len:Long=M; len>0; len--, colstt+=M+1) 
+				for (var i:Long=colstt; i<colstt+len; i++) 		
 					x.d(i) += this.d(i);
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					x.d(i) += this.d(i);
 		}
 		return x;
@@ -300,12 +303,12 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public def cellSubFrom(v:Double):TriDense(this) {
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)
+			for (var len:Long=M; len>0; len--, colstt+=M+1)
+				for (var i:Long=colstt; i<colstt+len; i++)		
 					this.d(i) = v-this.d(i);
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					this.d(i) = v-this.d(i);
 		}
 		return this;
@@ -319,12 +322,12 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public def cellSubFrom(x:DenseMatrix(M,N)):DenseMatrix(x) {
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)
+			for (var len:Long=M; len>0; len--, colstt+=M+1) 
+				for (var i:Long=colstt; i<colstt+len; i++) 		
 					x.d(i) -= this.d(i);
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					x.d(i) -= this.d(i);
 		}
 		return x;
@@ -332,6 +335,21 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	
 
 	// Cell-wise matrix multiplication
+
+	public def cellMult(v:Double):TriDense(this) {
+		var colstt:Long=0;
+		if (upper==false) {
+			for (var len:Long=M; len>0; len--, colstt+=M+1)
+				for (var i:Long=colstt; i<colstt+len; i++)		
+					this.d(i) *= v;
+		} else {
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
+					this.d(i) *= v;
+		}
+		return this;
+	}
+
 	public def cellMult(x:TriDense(M,N)):TriDense(this) {
 		if (x.upper != this.upper) {
 			reset();
@@ -339,12 +357,12 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 		}
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)	
+			for (var len:Long=M; len>0; len--, colstt+=M+1)
+				for (var i:Long=colstt; i<colstt+len; i++)		
 					this.d(i) *= x.d(i);
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					this.d(i) *= x.d(i);			
 		}
 		return this;
@@ -353,12 +371,12 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public def cellMult(x:DenseMatrix(M,N)):TriDense(this) {
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt; i<colstt+M-c; i++)
+			for (var len:Long=M; len>0; len--, colstt+=M+1)
+				for (var i:Long=colstt; i<colstt+len; i++)		
 					this.d(i) *= x.d(i);
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					this.d(i) *= x.d(i);			
 		}
 		return this;
@@ -388,12 +406,12 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public def cellDiv(v:Double):TriDense(this) {
 		var colstt:Long=0;
 		if (upper==false) {
-		    for (var c:Long=0; c < N; c++, colstt+=M+1)
-			    for (var i:Long=colstt+1; i<colstt+M-c; i++)
-				    this.d(i) /= v;
+			for (var len:Long=N; len>0; len--, colstt+=M+1)
+			for (var i:Long=colstt; i<colstt+len; i++)	
+				this.d(i) /= v;
 		} else {
-		    for (var c:Long=0; c < N; c++, colstt+=M)
-			    for (var i:Long=colstt; i<colstt+c+1; i++)
+			for (var len:Long=1; len <=len; len++, colstt+=M)
+				for (var i:Long=colstt; i<len; i++)
 					this.d(i) /= v;			
 		}
 		return this;
@@ -507,24 +525,15 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 		var idx:Long=0;
 		val outstr=new StringBuilder();
 		outstr.add("--------- Triangular Matrix "+M+" x "+N);
-		if (upper) {
+		if (upper)
 			outstr.add(" upper part data ---------\n");
-		    for (var r:Long=0; r<M; r++) {
-			    outstr.add(r+"\t[ ");
-                for (var c:Long=0; c<r; c++)
-                    outstr.add("         ");
-			    for (var c:Long=r; c<M; c++)
-				    outstr.add(String.format("%8.3f ",[this(r,c) as Any]));
-			    outstr.add("]\n");
-            }
-		} else {
+		else
 			outstr.add(" lower part data ---------\n");
-		    for (var r:Long=0; r<M; r++) {
-			    outstr.add(r+"\t[ ");
-			    for (var c:Long=0; c<=r; c++)
-				    outstr.add(String.format("%8.3f ",[this(r,c) as Any]));
-			    outstr.add("]\n");
-            }
+		for (var r:Long=0; r<M; r++) {
+			outstr.add(r+"\t[ ");
+			for (var c:Long=0; c<=r; c++)
+				outstr.add(this(r,c).toString()+" ");
+			outstr.add("]\n");
 		}
 		outstr.add("---------------------------------------\n");
 		return outstr.toString();	

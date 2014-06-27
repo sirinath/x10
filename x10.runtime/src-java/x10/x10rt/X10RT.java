@@ -11,21 +11,12 @@
 
 package x10.x10rt;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-
-import com.hazelcast.core.IMap;
-
 import x10.lang.GlobalRail;
 import x10.x10rt.SocketTransport.RETURNCODE;
 
 public class X10RT {
     enum State { UNINITIALIZED, INITIALIZED, RUNNING, TEARING_DOWN, TORN_DOWN };
-    
-    // environment variables we check here
-	public static final String X10_JOIN_EXISTING = "X10_JOIN_EXISTING"; // used to join an existing set of places
-	public static final String X10RT_IMPL = "X10RT_IMPL"; // disabled, javasockets, or x10rt_* (e.g. x10rt_sockets )
-	public static final String X10RT_DATASTORE = "X10RT_DATASTORE"; // only hazelcast is valid currently
+	public static final String X10_JOIN_EXISTING = "X10_JOIN_EXISTING";
 
     static State state = State.UNINITIALIZED;
     static int here;
@@ -35,7 +26,6 @@ public class X10RT {
     public static boolean X10_EXITING_NORMALLY = false;
     static final boolean REPORT_UNCAUGHT_USER_EXCEPTIONS = true;
     public static final boolean VERBOSE = false;
-    static HazelcastDatastore hazelcastDatastore = null;
     
     /**
      * Initialize the X10RT runtime.  This method, or the standard init() method below 
@@ -54,7 +44,7 @@ public class X10RT {
                 System.loadLibrary(libs[i]);
         }
 
-        String libName = System.getProperty(X10RT_IMPL, "sockets");
+        String libName = System.getProperty("X10RT_IMPL", "sockets");
         if (libName.equals("disabled"))
             forceSinglePlace = true;
         else if (libName.equalsIgnoreCase("JavaSockets")) {
@@ -128,8 +118,6 @@ public class X10RT {
         	x10.runtime.impl.java.Runtime.MAX_PLACES = connectionInfo.length;
 
         state = State.RUNNING;
-        initDataStore();
-
         return true;
     }
 
@@ -206,17 +194,12 @@ public class X10RT {
                           if (VERBOSE) System.err.println("Abnormal exit; skipping call to x10rt_finalize");
                       }
                       state = State.TORN_DOWN;
-                      if (hazelcastDatastore != null)
-                    	  hazelcastDatastore.shutdown();
                       System.err.flush();
                       System.out.flush();
                   }
               }}));
       }
-      
       state = State.RUNNING;
-      initDataStore();
-
       return true;
     }
 
@@ -336,7 +319,7 @@ public class X10RT {
         	return x10rt_blocking_probe_support();
       }
 
-    public static boolean isBooted() {
+    static boolean isBooted() {
       return state.compareTo(State.RUNNING) >= 0;
     }
 
@@ -361,69 +344,8 @@ public class X10RT {
     		ret = javaSockets.shutdown();
     	else
     		ret = x10rt_finalize();
-    	
-    	if (hazelcastDatastore != null)
-    		hazelcastDatastore.shutdown();
     	state = State.TORN_DOWN;
     	return ret;
-    }
-    
-    // Retrieve a resilient data store from the underlying network transport
-    // See details of the implementation here: http://hazelcast.org/docs/latest/javadoc/com/hazelcast/core/IMap.html
-    @SuppressWarnings("rawtypes")
-	public static IMap getResilientMap(String name) {
-    	if (hazelcastDatastore != null)
-    		return hazelcastDatastore.getResilientMap(name);
-    	else
-    		return null;
-    }
-    
-    // this form of initDataStore is called as a part of normal startup.
-    private static void initDataStore() {
-        // initialize hazelcast if X10RT_HAZELCAST has been set to true, and this is place 0
-    	// we only start at 0 because the other places need to join an existing hazelcast cluster, 
-    	// and the cluster is seeded via at least one other hazelcast instance.  place 0 doesn't join
-    	// an existing cluster - it is the start of one.
-    	
-    	if (here == 0 && "Hazelcast".equalsIgnoreCase(System.getProperty(X10RT_DATASTORE, "none"))) {
-    		if (X10RT.javaSockets == null) {
-    			System.err.println("Error: you specified X10RT_DATASTORE=Hazelcast, but are not using JavaSockets, which is required.  Hazelcast is disabled.");
-    			return;
-    		}
-    		// initialize a new hazelcast cluster
-        	hazelcastDatastore = new HazelcastDatastore(null);
-        	
-        	// go to all other places, and tell them to connect to my newly created hazelcast cluster (of one, so far)
-			try {
-				byte[] message = hazelcastDatastore.getConnectionInfo().getBytes(SocketTransport.UTF8);
-	      	   	for (int i=1; i<numPlaces(); i++) {
-	          	   	ByteBuffer[] connectionBytes = new ByteBuffer[]{ByteBuffer.wrap(message)};
-	      	   		javaSockets.sendMessage(SocketTransport.MSGTYPE.CONNECT_DATASTORE, i, 0, connectionBytes);
-	      	   	}
-
-			} catch (UnsupportedEncodingException e) {
-				// this won't happen, because UTF8 is a required encoding
-				e.printStackTrace();
-				assert(false);
-			}
-			
-			// wait until the number of expected containers have joined us
-			while (hazelcastDatastore.getContainerCount() < numPlaces() ) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// nothing to do - just go back and check again
-				}
-			}
-			// hazelcast is up and running in all places.  Return, and allow the user program to begin
-    	}
-    }
-    
-    // this form of initDataStore is used to load the data store on demand after normal startup
-    // it takes one argument which is used to describe where this datastore should connect to
-    static void initDataStore(String connectTo) {
-    	//System.out.println("Connecting to hazelcast at "+connectTo);
-    	hazelcastDatastore = new HazelcastDatastore(connectTo);
     }
     
     /*

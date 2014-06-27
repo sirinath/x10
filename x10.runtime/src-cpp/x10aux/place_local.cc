@@ -17,50 +17,69 @@
 using namespace x10::lang;
 using namespace x10aux;
 
+#define MAX_FAST_ID 255
+
 x10_int place_local::_nextId;
-simple_hashmap<x10_long, void*>* place_local::_map;
+simple_hashmap<int, void*>* place_local::_map;
+void **place_local::_fastData;
 x10aux::reentrant_lock* place_local::_lock;
 
 // used by simple_hashmap
-x10_uint x10aux::simple_hash_code(x10_long id) {
-    return (x10_uint)x10aux::hash_code(id);
+x10_uint x10aux::simple_hash_code(int id) {
+    return (x10_uint)id;
 }
 
 void place_local::initialize() {
     _nextId = 0;
     _lock = new (alloc<reentrant_lock>())reentrant_lock();
 
-    _map = new (x10aux::alloc< x10aux::simple_hashmap<x10_long, void*> >()) x10aux::simple_hashmap<x10_long, void*>();
+    _map = new (x10aux::alloc< x10aux::simple_hashmap<int, void*> >()) x10aux::simple_hashmap<int, void*>();
+    _fastData = alloc_z<void*>((MAX_FAST_ID+1)*sizeof(void*));
 }
 
-x10_long place_local::nextId() {
+x10_int place_local::nextId() {
+    // hack to allow XRX to use PLS without distribution of statics
+    assert(_nextId==0 || here==0);
     _lock->lock();
     x10_int id = _nextId++;
     _lock->unlock();
-    x10_long plhId = (((x10_long)here) << 32) | id;
-    return plhId;
+    return id;
 }
 
-void* place_local::get(x10_long id) {
+void* place_local::get(x10_int id) {
+    void* data;
     _lock->lock();
-    void *data = _map->get(id);
+    if (id < MAX_FAST_ID) {
+        data = _fastData[id];
+    } else {
+        data = _map->get(id);
+    }
     _lock->unlock();
     return data;
 }
 
-void place_local::put(x10_long id, void *data) {
+void place_local::put(x10_int id, void *data) {
     _lock->lock();
-    if (NULL == data) {
-        // optimize storing NULL as absence of the key (match Java Map semantics)
-        remove(id);
+    if (id < MAX_FAST_ID) {
+        _fastData[id] = data;
     } else {
-        _map->put(id, data);
+        if (NULL == data) {
+            // optimize storing NULL as absence of the key (match Java Map semantics)
+            remove(id);
+        } else {
+            _map->put(id, data);
+        }
     }
     _lock->unlock();
 }
 
-void place_local::remove(x10_long id) {
+void place_local::remove(x10_int id) {
     _lock->lock();
-    _map->remove(id);
+    if (id < MAX_FAST_ID) {
+        assert(NULL != _fastData[id]);
+        _fastData[id] = NULL;
+    } else {
+        _map->remove(id);
+    }
     _lock->unlock();
 }

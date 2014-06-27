@@ -1,7 +1,7 @@
 /*
  *  This file is part of the X10 Applications project.
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011.
  */
 
 import x10.util.Timer;
@@ -33,7 +33,7 @@ public class TestP2P{
 class TestMatrixCopy {
 	public val M:Long;
 	public val N:Long;
-	public val iter:Long;
+	public val iter:Int;
 	public val nzdensity:Double;
 
 	public val numplace:Long;
@@ -41,7 +41,7 @@ class TestMatrixCopy {
 	public val dmat:DupDenseMatrix;
 	public val smat:DupSparseMatrix;
 
-    public def this(m:Long, n:Long, d:Double, i:Long) {
+    public def this(m:Long, n:Long, d:Double, i:Int) {
 		M=m; N=n; iter=i;
 		nzdensity = d;
 		
@@ -50,7 +50,9 @@ class TestMatrixCopy {
         smat = null;
     }
 	@Ifndef("MPI_COMMU") { // TODO Deadlocks!
+        Console.OUT.println("smat");
 		smat = DupSparseMatrix.make(m, n, nzdensity);
+        Console.OUT.println("smatz");
     }
 		numplace  = Place.numPlaces();
 	}
@@ -64,7 +66,9 @@ class TestMatrixCopy {
 		retval &= testSparseCopyTo();
 		retval &= testSparseCopyFrom();
 
-		if (!retval) 
+		if (retval) 
+			Console.OUT.println("Matrix communication test P2P passed!");
+		else
 			Console.OUT.println("------------Matrix communication test P2P failed!-----------");
     }
 	}
@@ -94,10 +98,13 @@ class TestMatrixCopy {
 						   ds*8, avgt, 8000.0*ds/avgt/1024/1024);
 
 		ret = dmat.syncCheck();
-		if (!ret)
+		if (ret)
+			Console.OUT.println("P2P CopyTo sync check passed!");
+		else
 			Console.OUT.println("--------P2P CopyTo failed, sync check failed!--------");
 		
 		return ret;
+
 	}
 
 	public def testCopyFrom() : Boolean{
@@ -127,7 +134,9 @@ class TestMatrixCopy {
 						   ds*8, avgt, 8000.0*ds/avgt/1024/1024);
 				
 		ret=dmat.syncCheck();
-		if (!ret) 
+		if (ret) 
+			Console.OUT.println("P2P CopyFrom sync check passed!");
+		else
 			Console.OUT.println("--------P2P CopyFrom failed, sync check not pass!--------");
 		
 		return ret;
@@ -159,7 +168,9 @@ class TestMatrixCopy {
 						   ds*8, avgt, 8000.0*ds/avgt/1024/1024);
 
 		ret = smat.syncCheck();
-		if (!ret) 
+		if (ret) 
+			Console.OUT.println("P2P CopyTo sparse matrix sync check passed!");
+		else
 			Console.OUT.println("--------P2P CopyTo sparse matrix failed, sync check not pass!--------");
 		return ret;
 	}
@@ -195,7 +206,9 @@ class TestMatrixCopy {
 						   ds*8, avgt, 8000.0*ds/avgt/1024/1024);
 
 		ret = smat.syncCheck();
-		if (!ret) 
+		if (ret) 
+			Console.OUT.println("P2P CopyFrom sparse matrix sync check passed!");
+		else
 			Console.OUT.println("--------P2P CopyFrom sparse matrix failed, sync check not pass!--------");
 		
 		return ret;

@@ -11,10 +11,8 @@
     <property name="stdlib" location="${basedir}/stdlib"/>
     <property name="lpg.jar" value="lpg.jar"/>
     <property name="lpg.jar.url" value="http://x10.sourceforge.net/dependencies/lpg.runtime.java_2.0.22.jar"/>
-    <property name="ecj.jar" value="ecj-4.4.jar"/>
-    <property name="ecj.jar.url" value="http://x10.sourceforge.net/dependencies/ecj-4.4.jar"/>
-    <property name="hazelcast.jar" value="hazelcast-3.2.jar"/>
-    <property name="hazelcast.jar.url" value="http://x10.sourceforge.net/dependencies/hazelcast-3.2.jar"/>
+    <property name="ecj.jar" value="ecj-4.3.2.jar"/>
+    <property name="ecj.jar.url" value="http://x10.sourceforge.net/dependencies/ecj-4.3.2.jar"/>
     <property name="wala.jar" value="com.ibm.wala.cast.java_1.0.0.201101071300.jar"/>
     <property name="wala.jar.url" value="http://x10.sourceforge.net/dependencies/com.ibm.wala.cast.java_1.0.0.201101071300.jar"/>
     <property name="wala2.jar" value="com.ibm.wala.cast_1.0.0.201101071300.jar"/>
@@ -25,8 +23,8 @@
     <property name="shrike.jar.url" value="http://x10.sourceforge.net/dependencies/com.ibm.wala.shrike_1.3.1.201101071300.jar"/>
     <property name="equinox.jar" value="org.eclipse.equinox.common_3.6.0.v20100503.jar"/>
     <property name="equinox.jar.url" value="http://x10.sourceforge.net/dependencies/org.eclipse.equinox.common_3.6.0.v20100503.jar"/>
-    <property name="math.jar" value="commons-math3-3.3.jar"/>
-    <property name="math.jar.url" value="http://x10.sourceforge.net/dependencies/commons-math3-3.3.jar"/>
+    <property name="math.jar" value="commons-math3-3.2.jar"/>
+    <property name="math.jar.url" value="http://x10.sourceforge.net/dependencies/commons-math3-3.2.jar"/>
     <property name="log.jar" value="commons-logging-1.1.3.jar"/>
     <property name="log.jar.url" value="http://x10.sourceforge.net/dependencies/commons-logging-1.1.3.jar"/>
     <property name="logging.properties" value="logging.properties"/>
@@ -80,9 +78,6 @@
         </condition>
         <condition property="local.ecj.jar" value="${env.LOCAL_ECJ_JAR}">
             <isset property="env.LOCAL_ECJ_JAR"/>
-        </condition>
-        <condition property="local.hazelcast.jar" value="${env.LOCAL_HAZELCAST_JAR}">
-            <isset property="env.LOCAL_HAZELCAST_JAR"/>
         </condition>
         <condition property="local.wala.jar" value="${env.LOCAL_WALA_JAR}">
             <isset property="env.LOCAL_WALA_JAR"/>
@@ -207,7 +202,6 @@
     <target name="check-jar-cache" depends="init">
         <available property="lpg.jar.present" file="${lib}/${lpg.jar}"/>
         <available property="ecj.jar.present" file="${lib}/${ecj.jar}"/>
-        <available property="hazelcast.jar.present" file="${lib}/${hazelcast.jar}"/>
         <available property="wala.jar.present" file="${lib}/${wala.jar}"/>
         <available property="wala2.jar.present" file="${lib}/${wala2.jar}"/>
         <available property="wala3.jar.present" file="${lib}/${wala3.jar}"/>
@@ -219,7 +213,6 @@
             <and>
                 <isset property="lpg.jar.present"/>
                 <isset property="ecj.jar.present"/>
-                <isset property="hazelcast.jar.present"/>
                 <isset property="wala.jar.present"/>
                 <isset property="wala2.jar.present"/>
                 <isset property="wala3.jar.present"/>
@@ -278,21 +271,6 @@
         <copy file="${local.ecj.jar}" tofile="${lib}/${ecj.jar}"/>
         <available property="ecj.jar.present" file="${lib}/${ecj.jar}"/>
         <fail message="Unable to find ${ecj.jar} at ${local.ecj.jar}" unless="ecj.jar.present"/>
-    </target>
-
-    <target name="hazelcast-jar" depends="init,hazelcast-local-jar" unless="local.hazelcast.jar">
-        <mkdir dir="${lib}"/>
-	<retry>
-          <get usetimestamp="true" src="${hazelcast.jar.url}" dest="${lib}/${hazelcast.jar}"/>
-	</retry>
-        <available property="hazelcast.jar.present" file="${lib}/${hazelcast.jar}"/>
-        <fail message="Unable to get ${hazelcast.jar} from ${hazelcast.jar.url}" unless="hazelcast.jar.present"/>
-    </target>
-    <target name="hazelcast-local-jar" depends="init" if="local.hazelcast.jar">
-        <mkdir dir="${lib}"/>
-        <copy file="${local.hazelcast.jar}" tofile="${lib}/${hazelcast.jar}"/>
-        <available property="hazelcast.jar.present" file="${lib}/${hazelcast.jar}"/>
-        <fail message="Unable to find ${hazelcast.jar} at ${local.hazelcast.jar}" unless="hazelcast.jar.present"/>
     </target>
 
     <target name="wala-jar" depends="init,wala-local-jar" unless="local.wala.jar">
@@ -400,7 +378,7 @@
         <fail message="Unable to find ${log.jar} at ${local.log.jar}" unless="log.jar.present"/>
     </target>
 
-    <target name="update-jar-cache" depends="init,lpg-jar,ecj-jar,hazelcast-jar,wala-jar,wala2-jar,wala3-jar,shrike-jar,equinox-jar,math-jar,log-jar"/>
+    <target name="update-jar-cache" depends="init,lpg-jar,ecj-jar,wala-jar,wala2-jar,wala3-jar,shrike-jar,equinox-jar,math-jar,log-jar"/>
 
 	<target name="download-dependencies" depends="init,check-jar-cache" unless="cache.up-to-date">
         <antcall target="update-jar-cache"/>
@@ -616,7 +594,6 @@ if [[ "$UNAME" = CYGWIN* ]]; then JAVA="$(cygpath -au "$JAVA")"; JAR="$(cygpath 
 #CONFIG_FILE='${config}'
 LPG_JAR='${lpg.jar}'
 ECJ_JAR='${ecj.jar}'
-HAZELCAST_JAR='${hazelcast.jar}'
 WALA_JAR='${wala.jar}'
 WALA2_JAR='${wala2.jar}'
 WALA3_JAR='${wala3.jar}'
@@ -812,7 +789,6 @@ X10RT_PAMI_IS_DEFAULT='${X10RT_PAMI_IS_DEFAULT}'
         <mkdir dir="${targetDir}/include" />
         <mkdir dir="${targetDir}/lib" />
         <mkdir dir="${targetDir}/stdlib" />
-        <mkdir dir="${targetDir}/src-x10" />
         <echo message="Cleaning out bin, etc, include, lib, and stdlib of old files from ${targetDir}..."/>
         <delete>
           <fileset dir="${targetDir}/bin"     includes="**"/>
@@ -820,7 +796,6 @@ X10RT_PAMI_IS_DEFAULT='${X10RT_PAMI_IS_DEFAULT}'
           <fileset dir="${targetDir}/include" includes="**"/>
           <fileset dir="${targetDir}/lib"     includes="**"/>
           <fileset dir="${targetDir}/stdlib"  includes="**"/>
-          <fileset dir="${targetDir}/src-x10"  includes="**"/>
         </delete>
 
     	<echo message="Copying bin, etc, include, lib and stdlib files to ${targetDir}..."/>
@@ -834,13 +809,6 @@ X10RT_PAMI_IS_DEFAULT='${X10RT_PAMI_IS_DEFAULT}'
         <chmod file="${targetDir}/bin/x10c++" perm="u+x"/>
         <chmod file="${targetDir}/bin/X10Launcher" perm="u+x"/>
         <chmod file="${targetDir}/bin/X10MPIJava" perm="u+x"/>
-
-        <echo message="Extracting X10 sources to src-x10..."/>
-        <unzip src="${targetDir}/stdlib/x10.jar" dest="${targetDir}/src-x10">
-	  <patternset>
-	    <include name="**/*.x10" />
-	  </patternset>
-	</unzip>
 
         <echo message="Attempting to compile Hello, World..."/>
         <exec executable="${bash.exe}" failonerror="true" dir="${targetDir}">

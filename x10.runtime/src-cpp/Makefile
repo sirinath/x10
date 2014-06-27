@@ -86,10 +86,7 @@ xrx: $(XRX_ARCHIVE)
 #
 # The sort is a workaround for XTENLANG-676.  The order in which files are listed on the x10c++ commandline
 # appears to affect the results of typechecking.  By sorting, we force a deterministic order of files.
-#
-# By convention, we also ignore all packages called 'managed' when compiling Native X10.
-#
-XRX_REL_SRCS  = $(shell $(FIND) ../src-x10 -name .svn -prune -o -name managed -prune -o -name '*.x10' -print | sort )
+XRX_REL_SRCS  = $(shell $(FIND) ../src-x10 -name .svn -prune -o -name '*.x10' -print | sort )
 XRX_SRCS = $(subst ../src-x10/,, $(XRX_REL_SRCS))
 
 #enable asserts, do not look in jar for x10 files

@@ -1,25 +1,51 @@
-# Makefile for X10 global matrix library - GML
-
-include scripts/system_setting.mk
+###################################################
+###################################################
+## Name:  	X10 global parallel matrix library - GML
+## Created by: 	Juemin Zhang
+## Contact:   	zhangj@us.ibm.com
+###################################################
+###################################################
+# This is makefile for building global matrix library (GML)
+# for managed, native on socket, and native on MPI
+#
+###################################################
+# Source files and paths
+###################################################
 
 src_path	=src
 lib_path	=lib
 build_path	=include
 
+###
+# Configure system settings for blas and lapack libraries
+# check script/system_settings.mk
+# add_blas  = ...
+# blas_path = ... 
+# blas_name = ...
+# add_lapack= ...
+# lapack_path = ... 
+# lapack_name = ...
+
+#----
 # Output libs, properties, and tar files
 target		= native_gml
 
+#---- short keys
 default	: help 
+## 
 
 ## Managed backend must be built last
 all		: native_gml native_mpi_gml managed_gml
 
+###################################################
 ## short-cut keys
 native		: native_gml
 native_mpi	: native_mpi_gml
 managed		: managed_gml
 
+###################################################
 ## Source files
+###################################################
 bwrap_path =$(src_path)/x10/matrix/blas
 lwrap_path =$(src_path)/x10/matrix/lapack
 
@@ -54,7 +80,6 @@ comm_src=\
 	x10/matrix/comm/DenseRemoteDestInfo.x10 \
 	x10/matrix/comm/MatrixGather.x10 \
 	x10/matrix/comm/MatrixRingCast.x10 \
-    x10/matrix/comm/RemotePair.x10 \
 	x10/matrix/comm/SparseRemoteSourceInfo.x10\
 	x10/matrix/comm/BlockRemoteCopy.x10 \
 	x10/matrix/comm/BlockBcast.x10 \
@@ -173,33 +198,51 @@ lib_src     = $(seq_src) $(dist_src) $(builder_src) $(comm_src) $(summa_src)
 #--------------------------------------------------
 VPATH		=$(bwrap_path):$(lwrap_path):$(src_path)
 
+###################################################
+# Dependent library setting BLAS lib
+###################################################
+include scripts/system_setting.mk
 
-X10FLAGS	+= -VERBOSE_CHECKS -O -NO_CHECKS -g
+
+#X10_FLAG	= -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS #-O -NO_CHECKS
+X10_FLAG	= -VERBOSE_CHECKS -O -NO_CHECKS
 ifdef COVERAGE
-    X10CXXFLAGS += --coverage
+    X10_FLAG += -cxx-prearg --coverage
+    POST_LIBS += --coverage
 endif
 
 #-define ENABLE_RING_COMM
 
-MPI_X10CXXFLAGS = -x10rt mpi -define MPI_COMMU -cxx-prearg -DMPI_COMMU 
+MPI_CFLAG   = -define MPI_COMMU -cxx-prearg -DMPI_COMMU 
+
+POST_CPP	= $(BLAS_CFLAG) $(LAPACK_CFLAG) -post $(CPP) \# $(POST_PATH) \# $(POST_LIBS)
+POST_MPI	= $(MPI_CFLAG) $(BLAS_CFLAG) $(LAPACK_CFLAG) -post $(MCC) \# $(POST_PATH) \# $(POST_LIBS)
+
+###
+# __bgp__ should be defined on Blue gene env
+
+POST_CPP_SLNK = $(BLAS_CFLAG) $(LAPACK_CFLAG) -cxx-postarg $(CPP) \# $(POST_PATH) \# $(POST_LIBS)
 
 ###################################################
 # X10 file built rules
 ################################################### 
 
+###----------------------------------------------------
+
+###----------------------------------------------------
 ### build dist lib, multi-place parallel execution 
 ## build for managed backend
 jlib : $(src) chk_dir $(add_jblas) $(add_jlapack)
-	@echo "------------------ build lib for $(target) on $(HOSTNAME)-------------------"
-	cd $(src_path) && $(X10C) $(X10FLAGS) -buildx10lib ../. $(src) -d ../include -o ../lib/$(target).jar
+	@echo "------------------ build lib for $(target) on $(server)-------------------"
+	cd $(src_path) && $(XJ) $(X10_FLAG) -buildx10lib ../. $(src) -d ../include -o ../lib/$(target).jar
 	@echo "------------ making properties file for $(target) ------------"
 	@echo "X10LIB_SRC_JAR=lib/$(target).jar" >> $(target).properties
 
 
 ## build for native backend
 clib : $(clib_src) chk_dir
-	@echo "------------------ build lib for $(target) on $(HOSTNAME) -------------------"
-	cd $(src_path) && $(X10CXX) $(X10FLAGS) -report postcompile=1 $(X10CXX_PREARGS) $(X10CXX_POSTARGS) $(extra_opts) -buildx10lib ../. $(src) -d ../include -o $(target)
+	@echo "------------------ build lib for $(target) on $(server) -------------------"
+	cd $(src_path) && $(XC) $(X10_FLAG) -buildx10lib ../. $(src) -d ../include -o $(target) $(post_opts)
 	@echo "-------- Packaging source files into jar for $(target)--------"
 	cd $(src_path) && $(JAR) -cf ../lib/$(target).jar $(src)
 	@echo "------------ making properties file for $(target) ------------"
@@ -210,17 +253,17 @@ managed_gml		: $(lib_src)
 		@($(MAKE) jlib target=$@ src="$(lib_src)") 
 ## native on socket
 native_gml		: $(lib_src)
-		@($(MAKE) clib target=$@ src="$(lib_src)")
+		@($(MAKE) clib target=$@ src="$(lib_src)" post_opts='$(POST_CPP)')
 
 native_mpi_gml	: $(lib_src) $(mpi_wrap) 
-		@($(MAKE) clib target=$@ src="$(lib_src) $(mpi_wrap)" extra_opts='$(MPI_X10CXXFLAGS)')
+		@($(MAKE) clib target=$@ src="$(lib_src) $(mpi_wrap)" post_opts='$(POST_MPI)')
 
 ### build basic non-dist lib, single place (sequential matrix lib)
 managed_seq_gml	: $(seq_src)
 		@($(MAKE) jlib target=$@ src="$(seq_src)")
 
 native_seq_gml	: $(seq_src)
-		@($(MAKE) clib target=$@ src="$(seq_src)")
+		@($(MAKE) clib target=$@ src="$(seq_src)" post_opts='$(POST_CPP)')
 
 
 ###------------------------------------------------
@@ -232,14 +275,14 @@ chk_jblas	: chk_blas jblas
 chk_blas	: 
 			mkdir -p $(build_path)/x10/matrix/blas 
 
-wrap_blas.o	: wrap_blas.cc
-			$(CXX) -c -fPIC -DENABLE_BLAS $< -o $@
+wrap_blas.o	: wrap_blas.c
+			g++ -c -v -fPIC -DENABLE_BLAS $< -o $@
 
-jni_blas.o 	: jni_blas.cc
-			$(CXX) $(JNI_INCLUDES) -c -fPIC $< -o $@
+jni_blas.o 	: jni_blas.c
+			g++ -I $(JNI_inc) -c -v -fPIC $< -o $@
 
 libjblas.so	: wrap_blas.o jni_blas.o
-			$(CXX) $(JNI_INCLUDES) -shared -fPIC $^ $(X10CXX_POSTARGS:-cxx-postarg=) -o $@ 
+			g++ -shared -fPIC $^ -L$(blas_path) -l$(blas_name) -lgfortran -o $@
 
 jblas		: libjblas.so
 			cp $< $(lib_path)/.
@@ -251,14 +294,14 @@ chk_jlapack	: chk_lapack jlapack
 chk_lapack	:
 			mkdir -p $(build_path)/x10/matrix/lapack
 
-wrap_lapack.o: wrap_lapack.cc
-			g++ -c -fPIC -DENABLE_LAPACK $< -o $@
+wrap_lapack.o: wrap_lapack.c
+			g++ -c -v -fPIC -DENABLE_LAPACK $< -o $@
 
-jni_lapack.o: jni_lapack.cc
-			g++ $(JNI_INCLUDES) -c -fPIC $< -o $@
+jni_lapack.o: jni_lapack.c
+			g++ -I $(JNI_inc) -c -v -fPIC $< -o $@
 
 libjlapack.so: wrap_lapack.o jni_lapack.o
-			g++ -shared -fPIC $^ -o $@ $(X10CXX_POSTARGS:-cxx-postarg=)
+			g++ -shared -fPIC $^ -L$(blas_path) -l$(lapack_name) -lgfortran -o $@
 
 jlapack		: libjlapack.so
 			cp $< $(lib_path)/.
@@ -283,6 +326,8 @@ help	::
 	@echo "Configure system settings"
 	@echo "Dependent library: BLAS"
 	@echo "Configuring script/system_setting.mk"
+	@echo "--- Define server name when building gml on server side (optional). Default is local host"
+	@echo "--- Define blas_path and blas lib name on local host, and server side (optional)"
 	@echo ""
 	@echo "1) Build full library for multi-place execution"
 	@echo "make managed    -- make library tar file for managed backend: lib/managed_gml.jar and managed_gml.properties"
@@ -322,6 +367,6 @@ coverage:
 	lcov --directory include --ignore-errors gcov --capture -o lcov.info; genhtml lcov.info --output-directory coverage
 
 ################################################
-.PHONY	: help clean clear help clib jlib chk_dir
+.PHONY	: clean clear help clib jlib chk_dir
 ###########################################
 

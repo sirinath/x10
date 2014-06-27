@@ -36,14 +36,14 @@ extern "C"  {
 
   // for	x = a*x
   // Reciprocal Scale: x <-x/alpha
-#if defined(__essl__)
+#if defined(__bgp__)
   void dscal(blas_long* N, double* alpha, double *X, blas_long* incX);
 #else
   void dscal_(blas_long* N, double* alpha, double *X, blas_long* incX);
 #endif
 
   // Vector Copy: y <-x
-#if defined(__essl__)
+#if defined(__bgp__)
   void dcopy(blas_long* N, double *X, blas_long* incx, double *Y, blas_long* incy);
 #else
   void dcopy_(blas_long* N, double *X, blas_long* incx, double *Y, blas_long* incy);
@@ -51,21 +51,21 @@ extern "C"  {
 
   // for dot product
   // DOT Production: r <- beta * r + alpha * x^T * y
-#if defined(__essl__)
+#if defined(__bgp__)
   double ddot(blas_long* N, double *X, blas_long* incx, double *Y, blas_long* incy);
 #else
   double ddot_(blas_long* N, double *X, blas_long* incx, double *Y, blas_long* incy);
 #endif
 	
   // for Euclidean norm
-#if defined(__essl__)
+#if defined(__bgp__)
   double dnrm2(blas_long* N, double *X, blas_long* incx);
 #else
   double dnrm2_(blas_long* N, double *X, blas_long* incx);
 #endif
 
   // SUM: for sum of absolute values
-#if defined(__essl__)
+#if defined(__bgp__)
   double dasum(blas_long* N, double *X, blas_long* incx);
 #else
   double dasum_(blas_long* N, double *X, blas_long* incx);
@@ -75,7 +75,7 @@ extern "C"  {
   // CBLAS_INDEX cblas_idamax(blasint n, double *x, blasint incx)
   
   // SUBROUTINE DAXPY(N,DA,DX,INCX,DY,INCY)
-#if defined(__essl__)
+#if defined(__bgp__)
   void  daxpy(blas_long*N, blas_long*da, double*X, blas_long*incx, double*Y,blas_long* incy);
 #else
   void  daxpy_(blas_long*N, blas_long*da, double*X, blas_long*incx, double*Y,blas_long* incy); 
@@ -162,7 +162,7 @@ extern "C"  {
    *           Y. INCY must not be zero.
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
   void dgemv(char* trans, blas_long* M, blas_long* N,
 			  double* alpha, double  *A, blas_long* lda,
 			  double* x, blas_long* incx,
@@ -250,7 +250,7 @@ extern "C"  {
    *           Y. INCY must not be zero.
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
   void dsymv(char* uplo, blas_long* N, double* alpha, double* A, blas_long* lda,
 			  double* X, blas_long* incx, double* beta, double* Y, blas_long* incy);
 #else
@@ -341,7 +341,7 @@ extern "C"  {
 	*           X. INCX must not be zero.
 	*           Unchanged on exit.
 	*/
-#if defined(__essl__)
+#if defined(__bgp__)
   void dtrmv(char* uplo, char* trans, char* diag, blas_long* N, double* A, blas_long* lda, double* X, blas_long* incx);
 #else
   void dtrmv_(char* uplo, char* trans, char* diag, blas_long* N, double* A, blas_long* lda, double* X, blas_long* incx);
@@ -407,7 +407,7 @@ extern "C"  {
     *           max( 1, m ).
     *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
   void dger(blas_long* M, blas_long* N,
 			  double* alpha, double* x, blas_long* incX,
 			  double* Y, blas_long* incY,
@@ -494,7 +494,7 @@ extern "C"  {
    *           X. INCX must not be zero.
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
   void dtrsv(char* uplo, char* trans, char* diag,
 			  blas_long* N, double* A, blas_long* lda,
 			  double* X, blas_long* incx);
@@ -621,16 +621,16 @@ extern "C"  {
    *           max( 1, m ).
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
   void dgemm(char* transA, char* transB, blas_long* M, blas_long* N, blas_long* K,
 			  double* alpha, double* A, blas_long* lda, 
-			                 double* B, blas_long* ldb, 
-			  double* beta,  double* C, blas_long* ldc);
+			  double* B, blas_long* ldb, 
+			  double* beta, double* C, blas_long* ldc);
 #else
    void dgemm_(char* transA, char* transB, blas_long* M, blas_long* N, blas_long* K,
  			  double* alpha, double* A, blas_long* lda,
- 			                 double* B, blas_long* ldb,
- 			  double* beta,  double* C, blas_long* ldc);
+ 			  double* B, blas_long* ldb,
+ 			  double* beta, double* C, blas_long* ldc);
 #endif
 
   /**
@@ -737,7 +737,7 @@ extern "C"  {
    *           max( 1, m ).
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
    void dsymm(char* side, char* uplo, blas_long* M, blas_long* N,
  			  double* alpha, double* A, blas_long* lda,
  			  double* B, blas_long* ldb,
@@ -848,7 +848,7 @@ extern "C"  {
    *           Unchanged on exit.
    *
    */
-#if defined(__essl__)
+#if defined(__bgp__)
    void dsyrk(char* uplo, char* trans, blas_long* N, blas_long* K, 
               double* alpha, double* A, blas_long* lda, double* beta, double* C, blas_long* ldc);
 #else
@@ -963,7 +963,7 @@ extern "C"  {
    *           max( 1, m ).
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
    void dtrmm(char* side, char* uplo, char* transA, char* diag,
  			  blas_long* M, blas_long* N, double* alpha, double* A, blas_long* lda, double* B, blas_long* ldb);
 #else
@@ -1065,7 +1065,7 @@ extern "C"  {
    *           max( 1, m ).
    *           Unchanged on exit.
    */
-#if defined(__essl__)
+#if defined(__bgp__)
    void dtrsm(char* side, char* uplo, char* transA, char* diag, blas_long* M, blas_long* N,
  			  double* alpha, double* A, blas_long* lda,
  			  double* B, blas_long* ldb);
@@ -1081,12 +1081,6 @@ extern "C"  {
 
 /*----------------------------------------------------------------*/
 
-void error_missing_blas() {
-  printf("BLAS is not added in GML build.\n");
-  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
-  fflush(stdout);
-  exit(1);
-}
 
 //------------------------------------------------------------------------
 // Level One 
@@ -1096,13 +1090,16 @@ void scale(blas_long n, double alpha, double* x)
 {
 #ifdef ENABLE_BLAS
   blas_long incx = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
   dscal(&n, &alpha, x, &incx);
 #else
   dscal_(&n, &alpha, x, &incx);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 // Copy: Y <- X
@@ -1111,13 +1108,16 @@ void copy(blas_long n, double* x, double* y)
 #ifdef ENABLE_BLAS
   blas_long incx = 1;
   blas_long incy = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
   dcopy(&n, x, &incx, y, &incy);
 #else
   dcopy_(&n, x, &incx, y, &incy);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 // Dot product
@@ -1126,13 +1126,16 @@ double dot_prod(blas_long n, double* x, double* y)
 #ifdef ENABLE_BLAS
   blas_long incx = 1;
   blas_long incy = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
   return ddot(&n, x, &incx, y, &incy);
 #else
   return ddot_(&n, x, &incx, y, &incy);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1141,13 +1144,16 @@ double norm2(blas_long n, double* x)
 {
 #ifdef ENABLE_BLAS
   blas_long incx = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
   return dnrm2(&n, x, &incx);
 #else
   return dnrm2_(&n, x, &incx);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1156,13 +1162,16 @@ double abs_sum(blas_long n, double* x)
 {
 #ifdef ENABLE_BLAS
   blas_long incx = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
   return dasum(&n, x, &incx);
 #else
   return dasum_(&n, x, &incx);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1171,10 +1180,13 @@ double abs_sum(blas_long n, double* x)
 // Level Two 
 //------------------------------------------------------------------------
 //y = alpha*op(A)*x + beta * y
-void matrix_vector_mult(double alpha, double* A, double* x, double beta, double* y, blas_long* dim, blas_long lda, blas_long* offset, int transA)
+void matrix_vector_mult(double* A, double* x, double* y, blas_long* dim, blas_long lda, blas_long* offset, double* scale, int transA)
 {
 #ifdef ENABLE_BLAS
   char tA = transA?'T':'N';
+
+  double alpha = scale[0];
+  double beta  = scale[1];
   blas_long m   = dim[0];
   blas_long n   = dim[1];
   blas_long incx = 1;
@@ -1182,7 +1194,7 @@ void matrix_vector_mult(double alpha, double* A, double* x, double beta, double*
   blas_long offsetA = offset[0] + offset[1]*lda;
   blas_long offsetX = offset[2];
   blas_long offsetY = offset[3];
-#if defined(__essl__)
+#if defined(__bgp__)
   dgemv(&tA, &m, &n,
 		 &alpha, A+offsetA, &lda,
 		         x+offsetX, &incx,
@@ -1194,20 +1206,26 @@ void matrix_vector_mult(double alpha, double* A, double* x, double beta, double*
 		 &beta,  y+offsetY, &incy);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
 //y = alpha*op(A)*x + beta * y
-void matrix_vector_mult(double alpha, double* A, double* x, double beta, double* y, blas_long* dim, int transA)
+void matrix_vector_mult(double* A, double* x, double* y, blas_long* dim, double* scale, int transA)
 {
 #ifdef ENABLE_BLAS
   char tA = transA?'T':'N';
+
+  double alpha = scale[0];
+  double beta  = scale[1];
   blas_long m   = dim[0];
   blas_long n   = dim[1];
   blas_long incx = 1;
   blas_long incy = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
   dgemv(&tA, &m, &n,
 		 &alpha, A, &m,
 		         x, &incx,
@@ -1219,15 +1237,20 @@ void matrix_vector_mult(double alpha, double* A, double* x, double beta, double*
 		 &beta,  y, &incy);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
 //y = alpha*A*x + beta * y, A is symmetrix matrix of lower triangular part
-void sym_vector_mult(double alpha, double* A, double* x, double beta, double* y, blas_long* dim)
+void sym_vector_mult(double* A, double* x, double* y, blas_long* dim, double* scale)
 {
 #ifdef ENABLE_BLAS
   char uplo = 'L';
+  double alpha = scale[0];
+  double beta  = scale[1];
   blas_long m   = dim[0];
   blas_long n   = dim[1];
   blas_long incx = 1;
@@ -1236,7 +1259,7 @@ void sym_vector_mult(double alpha, double* A, double* x, double beta, double* y,
   //printf("dim: %i %i\n", m, n);
   //printf("%f %f %f  \n", A[2], A[5], A[7]);
   //printf("%f %f %f %f \n", x[0], x[1], x[2], x[3]);
-#if defined(__essl__)
+#if defined(__bgp__)
   dsymv(&uplo, &n,
  		 &alpha, A, &m,
  		         x, &incx,
@@ -1250,7 +1273,10 @@ void sym_vector_mult(double alpha, double* A, double* x, double beta, double* y,
   //printf("%f %f %f %f \n", y[0], y[1], y[2], y[3]);
   //fflush(stdout);
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1264,14 +1290,17 @@ void tri_vector_mult(double* A, blas_long ul, double* bx, blas_long lda, int tra
 	char diag = 'N';
 	blas_long  N  = lda;
 	blas_long  incx = 1;
-#if defined(__essl__)
+#if defined(__bgp__)
 	dtrmv(&uplo, &trnA, &diag, &N, A, &lda, bx, &incx);
 #else
 	dtrmv_(&uplo, &trnA, &diag, &N, A, &lda, bx, &incx);
 #endif
 	//dtrmv_(char* uplo, char* trans, char* diag, int N, double* A, int lda, double* X, int incx);
 #else
-  error_missing_blas();Z
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1286,7 +1315,7 @@ void rank_one_update(double* A, double* x, double* y, blas_long* dim, blas_long*
   double* yStart = y + offy;
   blas_long incx = inc[0];
   blas_long incy = inc[1];
-#if defined(__essl__)
+#if defined(__bgp__)
   dger(&m, &n,
 		 &alpha, xStart, &incx,
 		         yStart, &incy,
@@ -1308,8 +1337,8 @@ void rank_one_update(double* A, double* x, double* y, blas_long* dim, blas_long*
 //-----------------------------------------------------------------
 
 // C = alpha*op(A) * op(B) + beta*C
-void matrix_matrix_mult(double alpha, double* A, double* B, double beta, double* C, blas_long* dim, 
-						blas_long* ld, blas_long* offset, int* trans)
+void matrix_matrix_mult(double* A, double* B, double* C, blas_long* dim, 
+						blas_long* ld, blas_long* offset, double* scale, int* trans)
 {
 #ifdef ENABLE_BLAS
   char transA = (trans[0])?'T':'N';
@@ -1323,8 +1352,10 @@ void matrix_matrix_mult(double alpha, double* A, double* B, double beta, double*
   blas_long  offsetA = offset[0] + offset[1]*lda;
   blas_long  offsetB = offset[2] + offset[3]*ldb;
   blas_long  offsetC = offset[4] + offset[5]*ldc;
-  //printf("call dgemm: %c %c, %d %d %d, %d %d %d\n", transA, transB, m, n, k, lda, ldb, ldc); fflush(stdout);
-#if defined(__essl__)
+  double alpha = scale[0];
+  double beta  = scale[1];
+  //printf("call dgemm: %d %d %d, %c %c\n", m, n, k, transA, transB); fflush(stdout);
+#if defined(__bgp__)
   dgemm(&transA, &transB,
 		 &m, &n, &k,
 		 &alpha, A+offsetA, &lda,
@@ -1338,13 +1369,16 @@ void matrix_matrix_mult(double alpha, double* A, double* B, double beta, double*
 		 &beta,  C+offsetC, &ldc);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
 // C = alpha*op(A) * op(B) + beta*C
-void matrix_matrix_mult(double alpha, double* A, double* B, double beta, double* C, blas_long* dim, 
-						  blas_long* ld, int* trans)
+void matrix_matrix_mult(double* A, double* B, double* C, blas_long* dim, 
+						  blas_long* ld, double* scale, int* trans)
 {
   char transA = (trans[0])?'T':'N';
   char transB = (trans[1])?'T':'N';
@@ -1354,8 +1388,10 @@ void matrix_matrix_mult(double alpha, double* A, double* B, double beta, double*
   blas_long  lda = ld[0];
   blas_long  ldb = ld[1];
   blas_long  ldc = ld[2];
-  //printf("call dgemm: %c %c, %d %d %d, %d %d %d\n", transA, transB, m, n, k, lda, ldb, ldc); fflush(stdout);
-#if defined(__essl__)
+  double alpha = scale[0];
+  double beta  = scale[1];
+  //printf("call dgemm: dim %d %d %d, ld %d %d %d, %c %c\n", m, n, k, lda, ldb, ldc, transA, transB); fflush(stdout);
+#if defined(__bgp__)
   dgemm(&transA, &transB,
 		 &m, &n, &k,
 		 &alpha, A, &lda,
@@ -1370,9 +1406,46 @@ void matrix_matrix_mult(double alpha, double* A, double* B, double beta, double*
 #endif
 }
 
+// C = alpha*op(A) * op(B) + beta*C
+void matrix_matrix_mult(double* A, double* B, double* C, blas_long* dim, 
+						  double* scale, int* trans)
+{
+#ifdef ENABLE_BLAS
+  char transA = (trans[0])?'T':'N';
+  char transB = (trans[1])?'T':'N';
+  blas_long  m = dim[0];
+  blas_long  n = dim[1];
+  blas_long  k = dim[2];
+  blas_long  lda = (trans[0])?k:m;
+  blas_long  ldb = (trans[1])?n:k;
+  blas_long  ldc = m;
+  double alpha = scale[0];
+  double beta  = scale[1];
+  //printf("call dgemm: %d %d %d, %c %c\n", m, n, k, transA, transB); fflush(stdout);
+#if defined(__bgp__)
+  dgemm(&transA, &transB,
+		 &m, &n, &k,
+		 &alpha, A, &lda,
+		         B, &ldb,
+		 &beta,  C, &ldc);
+#else
+  dgemm_(&transA, &transB, 
+		 &m, &n, &k,
+		 &alpha, A, &lda,
+		         B, &ldb, 
+		 &beta,  C, &ldc);
+#endif
+#else
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
+#endif
+}
+
 // C = alpha*A*A**T + beta*C
-void sym_rank_k_update(double alpha, double* A, double beta, double* C, blas_long* dim, 
-                       blas_long* ld, blas_long* offset, bool upper, bool trans)
+void sym_rank_k_update(double* A, double* C, blas_long* dim, 
+                       blas_long* ld, blas_long* offset, double* scale, bool upper, bool trans)
 {
 #ifdef ENABLE_BLAS
   char uplo = (upper)?'U':'L'; // upper / lower triangular
@@ -1383,8 +1456,10 @@ void sym_rank_k_update(double alpha, double* A, double beta, double* C, blas_lon
   blas_long  ldc = ld[1];
   blas_long  offsetA = offset[0] + offset[1]*lda;
   blas_long  offsetC = offset[2] + offset[3]*ldc;
+  double alpha = scale[0];
+  double beta  = scale[1];
   //printf("call dsyrk: trans=%c, %d %d %d %d\n", transA, n, k, lda, ldc); fflush(stdout);
-#if defined(__essl__)
+#if defined(__bgp__)
   dsyrk(&uplo, &transA,
         &n, &k,
         &alpha, A+offsetA, &lda,
@@ -1396,13 +1471,16 @@ void sym_rank_k_update(double alpha, double* A, double beta, double* C, blas_lon
          &beta,  C+offsetC, &ldc);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
 // C = alpha*A*A**T + beta*C
-void sym_rank_k_update(double alpha, double* A, double beta, double* C, 
-                       blas_long* dim, bool upper, bool trans)
+void sym_rank_k_update(double* A, double* C, blas_long* dim, 
+                       double* scale, bool upper, bool trans)
 {
 #ifdef ENABLE_BLAS
   char uplo = (upper)?'U':'L'; // upper / lower triangular
@@ -1411,8 +1489,10 @@ void sym_rank_k_update(double alpha, double* A, double beta, double* C,
   blas_long  k = dim[1];
   blas_long  lda = (trans)?k:n;
   blas_long  ldc = n;
+  double alpha = scale[0];
+  double beta  = scale[1];
   //printf("call dsyrk: trans=%c, %d %d %d %d\n", transA, n, k, lda, ldc); fflush(stdout);
-#if defined(__essl__)
+#if defined(__bgp__)
   dsyrk(&uplo, &transA,
         &n, &k,
         &alpha, A, &lda,
@@ -1424,7 +1504,10 @@ void sym_rank_k_update(double alpha, double* A, double beta, double* C,
          &beta,  C, &ldc);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1432,7 +1515,7 @@ void sym_rank_k_update(double alpha, double* A, double beta, double* C,
 
 // C = alpah*A * B + beta*C
 // side = "L", Lower symmetric-triangular data, Non-unit triangular
-void sym_matrix_mult(double alpha, double* A, double* B, double beta, double* C, blas_long* dim)
+void sym_matrix_mult(double* A, double* B, double* C, blas_long* dim, double* scale)
 {
 #ifdef ENABLE_BLAS
   char side = 'L'; // alpha*A*B
@@ -1440,7 +1523,9 @@ void sym_matrix_mult(double alpha, double* A, double* B, double beta, double* C,
   
   blas_long   m     = dim[0];
   blas_long   n     = dim[1];
-#if defined(__essl__)
+  double alpha = scale[0];
+  double beta  = scale[1];
+#if defined(__bgp__)
   dsymm(&side, &uplo,
 		 &m, &n,
 		 &alpha, A, &m,
@@ -1454,11 +1539,14 @@ void sym_matrix_mult(double alpha, double* A, double* B, double beta, double* C,
 		 &beta,  C, &n);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
-void matrix_sym_mult(double* B, double alpha, double* A, double beta, double* C, blas_long* dim)
+void matrix_sym_mult(double* B, double* A, double* C, blas_long* dim, double* scale)
 {
 #ifdef ENABLE_BLAS
   char side = 'R'; // alpha*B*A
@@ -1466,7 +1554,9 @@ void matrix_sym_mult(double* B, double alpha, double* A, double beta, double* C,
   
   blas_long   m     = dim[0];
   blas_long   n     = dim[1];
-#if defined(__essl__)
+  double alpha = scale[0];
+  double beta  = scale[1];
+#if defined(__bgp__)
   dsymm(&side, &uplo,
 		 &m, &n,
 		 &alpha, A, &m,
@@ -1480,7 +1570,10 @@ void matrix_sym_mult(double* B, double alpha, double* A, double beta, double* C,
 		 &beta,  C, &n);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1498,7 +1591,7 @@ void tri_matrix_mult(double* A, double* B, blas_long* dim, int tranA)
   blas_long n = dim[1]; //Columns of B
   blas_long lda = m;
   blas_long ldb = n;
-#if defined(__essl__)
+#if defined(__bgp__)
   dtrmm(&side, &uplo, &tran, &diag,
 		 &m, &n, &alpha, A, &lda, B, &ldb);
 #else
@@ -1506,7 +1599,10 @@ void tri_matrix_mult(double* A, double* B, blas_long* dim, int tranA)
 		 &m, &n, &alpha, A, &lda, B, &ldb);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 // B := alpha*A*op( B ), B is lower-non-unit triangular
@@ -1522,7 +1618,7 @@ void matrix_tri_mult(double* B, double* A, blas_long* dim, int tranB)
   blas_long n = dim[1]; //Columns of B
   blas_long lda = n;
   blas_long ldb = m;
-#if defined(__essl__)
+#if defined(__bgp__)
   dtrmm(&side, &uplo, &tTri, &diag,
 		 &m, &n, &alpha, A, &lda, B, &ldb);
 #else
@@ -1530,7 +1626,10 @@ void matrix_tri_mult(double* B, double* A, blas_long* dim, int tranB)
 		 &m, &n, &alpha, A, &lda, B, &ldb);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1546,7 +1645,7 @@ void tri_vector_solve(double* A, double* bx, blas_long* dim, int tranA)
   blas_long incx = 1;
   blas_long m = dim[0]; // Leading dimension of A, must be number of rows in A
   blas_long n = dim[1]; // Order of matrix A, must be number of columns in A
-#if defined(__essl__)
+#if defined(__bgp__)
   dtrsv(&uplo,  &trans, &diag,
 		 &n, A,  &m,
 		 bx, &incx);
@@ -1556,7 +1655,10 @@ void tri_vector_solve(double* A, double* bx, blas_long* dim, int tranA)
 		 bx, &incx);
 #endif
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
@@ -1572,17 +1674,24 @@ void tri_matrix_solve(double* A, double* BX, blas_long* dim, int tranA)
 	blas_long lda = m;      //first dimension of A
 	blas_long ldb = m;      //first dimension of B
 	double alpha = 1.0;
-#if defined(__essl__)
+#if defined(__bgp__)
 	dtrsm(&side, &uplo, &trans, &diag,
 		   &m, &n, &alpha, A, &lda, BX, &ldb);
 #else
 	dtrsm_(&side, &uplo, &trans, &diag,
 		   &m, &n, &alpha, A, &lda, BX, &ldb);
 #endif
+//void dtrsm_(char* side, char* uplo, char* transA, char* diag, blas_long* M, blas_long* N,
+//			  double* alpha, double* A, blas_long* lda,
+//			  double* B, blas_long* ldb);
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
+
 
 void matrix_tri_solve(double* BX, double* A, blas_long* dim, int tranA)
 {
@@ -1596,16 +1705,83 @@ void matrix_tri_solve(double* BX, double* A, blas_long* dim, int tranA)
 	blas_long lda = m;      //first dimension of A
 	blas_long ldb = n;      //first dimension of B
 	double alpha = 1.0;
-#if defined(__essl__)
+#if defined(__bgp__)
 	dtrsm(&side, &uplo, &trans, &diag,
 		   &m, &n, &alpha, A, &lda, BX, &ldb);
 #else
 	dtrsm_(&side, &uplo, &trans, &diag,
 		   &m, &n, &alpha, A, &lda, BX, &ldb);
 #endif
+//void dtrsm_(char* side, char* uplo, char* transA, char* diag, blas_long* M, blas_long* N,
+//			  double* alpha, double* A, blas_long* lda,
+//			  double* B, blas_long* ldb);
 #else
-  error_missing_blas();
+  printf("BLAS is not added in GML build.\n");
+  printf("Uncomment the line: add_blas = yes in system_setting.mk, and make sure blas lib and path names are correct\n");
+  fflush(stdout);
+  exit(1);
 #endif
 }
 
 
+//-----------------------------------------------------------------------------
+//y = A*x
+/* void matrix_vector_mult(double* A, double* x, double* y, int m, int n) */
+/* { */
+/*   char   transA = 'N'; */
+/*   double alpha = 1.0; */
+/*   double beta  = 0.0; */
+/*   blas_long incx = 1; */
+/*   blas_long incy = 1; */
+
+/*   dgemv_(&transA, &m, &n, */
+/* 		 &alpha, A, &m, */
+/* 		         x, &incx,  */
+/* 		 &beta,  y, &incy); */
+/* } */
+
+
+//------------------------------------------------------------------------
+// Other tools
+//------------------------------------------------------------------------
+
+void print_matrix_data(double* M, blas_long m, blas_long n) 
+{
+  blas_long r, c;
+  printf("Matrix %ld x %ld:\n", m, n);
+  for (r=0; r<m; r++)
+	{
+	  for (c=0; c<n; c++)
+		printf("%2.3f \t | ", M[c*n+r]); //data stored in column major
+	  printf("\n");
+	}
+}
+//
+void print_matrix(char* st, double* M, blas_long m, blas_long n) 
+{
+  printf("%s", st);
+  print_matrix_data(M, m, n);
+}
+//------------------------------------------------------------------------
+void c_mat_mat_mult(double* A, double* B, double* C, blas_long M, blas_long N, blas_long K)
+{
+  blas_long r, c, k;
+ 
+  for (r=0; r<M; r++)
+	{
+	  blas_long idx_2 =0;
+	  for (c=0; c<N; c++) 
+		{
+		  double v = 0.0;
+		  blas_long idx_1 = r;
+
+		  for (k=0; k<K; k++) 
+			{
+			  v     += A[idx_1] * B[idx_2];
+			  idx_1 += M;
+			  idx_2 += 1;
+			}
+		  C[c*M+r] = v;
+		}
+	}
+}

@@ -12,8 +12,10 @@
 import x10.util.Timer;
 
 import x10.matrix.Matrix;
+import x10.matrix.util.Debug;
 import x10.matrix.DenseMatrix;
 import x10.matrix.DenseMultXTen;
+import x10.matrix.util.VerifyTool;
 import x10.matrix.blas.DenseMatrixBLAS;
 
 public class DenseBlasBench {
@@ -53,6 +55,7 @@ class RunBlasComp {
     public def run(): void {
 		Console.OUT.println("Starting dense multiply benchamrks tests on "+
 							M+"x"+K+" * "+K+"x"+N+" matrices");
+		Debug.flushln("Start init matrices");
 		A.initRandom();
 		B.initRandom();
 		tB.initRandom();
@@ -66,10 +69,11 @@ class RunBlasComp {
     						M, K, K, N);
 
     	C.init(0.1/7);
+    	Debug.flushln("Start computation");
 
     	val stt = Timer.milliTime();
     	for (1..iter) {
-    		DenseMatrixBLAS.comp(1.0, A, B, 1.0, C);
+    		DenseMatrixBLAS.comp(A, B, C, true);
     	}
     	val avgt= (1.0*Timer.milliTime()-stt) /1000/iter;
     	Console.OUT.printf("Benchmark BLAS driver dense mult --- Time:%8.3f Sec, Mfps:%f\n", 
@@ -82,10 +86,11 @@ class RunBlasComp {
     						M, K, K, N);
 
     	C.init(0.1/7);
+    	Debug.flushln("Start computation");
 
     	val stt = Timer.milliTime();
     	for (1..iter) {
-    		DenseMatrixBLAS.compMultTrans(1.0, A, tB, 1.0, C);
+    		DenseMatrixBLAS.compMultTrans(A, tB, C, true);
     	}
     	val avgt= (1.0*Timer.milliTime()-stt) /1000/iter;
     	Console.OUT.printf("Benchmark BLAS driver multTrans --- Time:%8.3f Sec, Mfps:%f\n", 

@@ -70,6 +70,7 @@ class BlockCollTest {
 	}
 	
 	public def run(): void {
+ 		// Set the matrix function
 		var retval:Boolean = true;
 	@Ifndef("MPI_COMMU") { // TODO Deadlocks!
 
@@ -115,10 +116,13 @@ class BlockCollTest {
 						   ds*8, avgt/bmat.getGrid().size);
 		
 		//ret = dbmat.syncCheck();
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Bcast dist block matrix passed!");
+		else
 			Console.OUT.println("--------Bcast block matrix test failed!--------");
 		
 		return ret;
+
 	} 	
 	
 	public def testGather(distmat:DistBlockMatrix, blksmat:BlockMatrix):Boolean {
@@ -127,11 +131,16 @@ class BlockCollTest {
 		Console.OUT.printf("\nTest gather of dist block matrix over %d places\n", numplace);
 		blksmat.reset();
 		
+		Debug.flushln("Start gathering "+numplace+" places");
 		var st:Long =  Timer.milliTime();
 		BlockGather.gather(distmat.handleBS, blksmat.listBs);
+		//Debug.flushln("Done");
 		ret = distmat.equals(blksmat as Matrix(distmat.M, distmat.N));
+		Debug.flushln("Done verification");
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Test gather for dist block matrix test passed!");
+		else
 			Console.OUT.println("-----Test gather for dist block matrix failed!-----");
 		return ret;
 	}
@@ -142,12 +151,17 @@ class BlockCollTest {
 		Console.OUT.printf("\nTest scatter of dist block matrix over %d places\n", numplace);
 		distmat.reset();
 		
+		Debug.flushln("Start scatter among "+numplace+" places");
 		var st:Long =  Timer.milliTime();
 		BlockScatter.scatter(blksmat.listBs, distmat.handleBS);
+		//Debug.flushln("Done");
 		
 		ret = distmat.equals(blksmat as Matrix(distmat.M,distmat.N));
+		Debug.flushln("Done verification");
 
-		if (!ret)
+		if (ret)
+			Console.OUT.println("Test scatter for dist block matrix test passed!");
+		else
 			Console.OUT.println("-----Test scatter for dist block matrix failed!-----");
 		return ret;
 	}

@@ -1,5 +1,5 @@
 /*
-b *  This file is part of the X10 project (http://x10-lang.org).
+ *  This file is part of the X10 project (http://x10-lang.org).
  *
  *  This file is licensed to You under the Eclipse Public License (EPL);
  *  You may not use this file except in compliance with the License.
@@ -13,23 +13,14 @@ package x10rose;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 import polyglot.ast.ClassMember;
 import polyglot.ast.Node;
 import polyglot.ast.NodeFactory;
 import polyglot.ast.SourceFile;
-import polyglot.ast.SourceFile_c;
 import polyglot.ast.TopLevelDecl;
 import polyglot.ast.TypeNode;
 import polyglot.frontend.Compiler;
@@ -40,12 +31,10 @@ import polyglot.frontend.JLScheduler;
 import polyglot.frontend.Job;
 import polyglot.frontend.OutputGoal;
 import polyglot.frontend.ParserGoal;
-import polyglot.frontend.ResourceLoader;
 import polyglot.frontend.Scheduler;
 import polyglot.frontend.Source;
 import polyglot.frontend.SourceGoal;
 import polyglot.frontend.SourceGoal_c;
-import polyglot.frontend.SourceLoader;
 import polyglot.frontend.VisitorGoal;
 import polyglot.main.Options;
 import polyglot.types.Flags;
@@ -73,7 +62,6 @@ import x10.visit.IfdefVisitor;
 import x10.visit.X10TypeBuilder;
 import x10.visit.X10TypeChecker;
 import x10rose.visit.RoseTranslator;
-import x10rose.visit.RoseTranslator.ToRoseVisitor;
 
 /**
  * Extension information for x10 extension.
@@ -107,34 +95,6 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 	protected Scheduler createScheduler() {
 		return new X10Scheduler(this);
 	}
-    
-    public static class FileStatus {
-    	private SourceFile_c file;
-    	private boolean isDeclHandled;
-    	private boolean isDefHandled;
-    	
-    	public FileStatus(SourceFile_c filename) {
-    		file = filename;
-    	}
-    	
-    	public void handleDecl() {
-    		isDeclHandled = true;
-    	}
-    	
-    	public void handleDef() {
-    		isDefHandled = true;
-    	}
-    	
-    	public boolean isDeclHandled() {
-    		return isDeclHandled;
-    	}
-    	
-    	public boolean isDefHandled() {
-    		return isDefHandled;
-    	}
-    }
-
-	public static HashMap<SourceFile_c, FileStatus> fileHandledMap = new HashMap<SourceFile_c, FileStatus>();
 
 	public static class X10Scheduler extends JLScheduler {
 
@@ -184,15 +144,12 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 			goals.add(CheckASTForErrors(job));
 
 
-//	    	System.out.println("******* " + job + ", " + this);
 			goals.add(RoseHandoff(job));
 
 			goals.add(End(job));
 
 			return goals;
 		}
-	    
-	    public static List<SourceFile_c> sourceList = new ArrayList<SourceFile_c>();
 
 	    @Override
 		protected Goal PostCompiled() {
@@ -200,28 +157,15 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 				private static final long serialVersionUID = 1834245937046911633L;
 
 			    @Override
-				protected boolean invokePostCompiler(Options options, Compiler compiler, ErrorQueue eq)  {
-			    	ToRoseVisitor.isGatheringFile = false;
-		    		ToRoseVisitor roseVisitor = new ToRoseVisitor(null, null);
-		    		
-			    	for (int i = 0; i < sourceList.size(); ++i) {
-			    		SourceFile_c file = sourceList.get(i);
-			    		FileStatus fileStatus = fileHandledMap.get(file);
-			    		if (!fileStatus.isDeclHandled())
-			    			roseVisitor.visitDeclarations();
-			    		if (!fileStatus.isDefHandled())
-			    			roseVisitor.visitDefinitions();
-			    		roseVisitor.addFileIndex();
-			    	}
-			    	
+				protected boolean invokePostCompiler(Options options, Compiler compiler, ErrorQueue eq) {
 					if (System.getProperty("x10.postcompile", "TRUE").equals("FALSE"))
 						return true;
 					// invoke rose postcompiler
 					return true;
 				}
 			}.intern(this);
-		}
-    
+		}		
+
 		public Goal CheckASTForErrors(Job job) {
 			return new SourceGoal_c("CheckASTForErrors", job) {
 				private static final long serialVersionUID = 565345690079406384L;

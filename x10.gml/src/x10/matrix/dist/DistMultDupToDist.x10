@@ -147,10 +147,8 @@ public class DistMultDupToDist {
 			val dmA = A.getMatrix(p);
 			val dmB = B.getMatrix() as DenseMatrix(dmA.N);
 			val dmC = C.getMatrix(p) as DenseMatrix(dmA.M, dmB.N);
-		    val alpha = 1.0;
-		    val beta = plus?1.0:0.0;
 			/* TIMING */ val stt = Timer.milliTime();
-			DenseMatrixBLAS.comp(alpha, dmA, dmB, beta, dmC);
+			DenseMatrixBLAS.comp(dmA, dmB, dmC, plus);
 			/* TIMING */ C.distBs(p).calcTime += Timer.milliTime() - stt;
 		}
 		return C;
@@ -181,10 +179,8 @@ public class DistMultDupToDist {
 			val dmB = B.getMatrix() as DenseMatrix{self.N==dmA.N};
 			val dmC = C.getMatrix(p) as DenseMatrix(dmA.M, dmB.M);
 			
-	    	val alpha = 1.0;
-    		val beta = plus?1.0:0.0;
 			/* TIMING */ val stt = Timer.milliTime();
-			DenseMatrixBLAS.compMultTrans(alpha, dmA, dmB, beta, dmC);
+			DenseMatrixBLAS.compMultTrans(dmA, dmB, dmC, plus);
 			/* TIMING */ C.distBs(p).calcTime += Timer.milliTime() - stt;
 		}
 		return C;
@@ -216,10 +212,8 @@ public class DistMultDupToDist {
 			val dmB = B.local() as DenseMatrix{self.M==dmA.M};
 			val dmC = C.local() as DenseMatrix(dmA.N, dmB.N);
 			
-	    	val alpha = 1.0;
-    		val beta = plus?1.0:0.0;
 			/* TIMING */ val stt = Timer.milliTime();
-			DenseMatrixBLAS.compTransMult(alpha, dmA, dmB, beta, dmC);
+			DenseMatrixBLAS.compTransMult(dmA, dmB, dmC, plus);
 			/* TIMING */ C.distBs(p).calcTime += Timer.milliTime() - stt;
 		}
 		return C;

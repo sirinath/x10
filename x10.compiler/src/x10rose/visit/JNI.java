@@ -13,8 +13,6 @@ import java.util.*;
 // class JavaTraversal {
 import java.util.concurrent.Callable;
 
-import x10.visit.X10DelegatingVisitor;
-
 class JNI implements Callable<Boolean> {
 
 	static {
@@ -92,8 +90,9 @@ class JNI implements Callable<Boolean> {
     public static native void cactionMethodDeclarationEnd(int numberOfStatements, JavaToken jToken);
 
     public static native void cactionTypeParameterReference(String package_name, String type_name, int method_index, String type_parameter_name, JavaToken jToken);
-    public static native void cactionTypeReference(String package_name, String type_name, /*RoseTranslator.ToRoseVisitor*/Object visitor, JavaToken jToken);
-//    public static native void cactionTypeReference(String packageName, String name);
+//MH-20140414
+//    public static native void cactionTypeReference(String package_name, String type_name, JavaToken jToken);
+    public static native void cactionTypeReference(String packageName, String name);
 
     public static native void cactionQualifiedTypeReference(String package_name, String type_name, JavaToken jToken);
     public static native void cactionArgument(String argumentName, JavaToken jToken);
@@ -238,8 +237,7 @@ class JNI implements Callable<Boolean> {
     public static native void cactionUpdatePushMethodParameterScope(String package_name, String typename, JavaToken jToken);
     public static native void cactionUpdateTypeParameterSupport(String name, int method_index, int num_bounds, JavaToken jToken);
     public static native void cactionUpdatePopMethodParameterScope(JavaToken jToken);
-//    public static native void cactionBuildClassExtendsAndImplementsSupport(int num_type_parameters, boolean has_super_class, int num_interfaces, JavaToken jToken);
-	public static native void cactionBuildClassExtendsAndImplementsSupport(int num_type_parameters, String[] type_parameters, boolean has_super_class, String super_class_name, int num_interfaces, String[] interfaces, JavaToken jToken);
+    public static native void cactionBuildClassExtendsAndImplementsSupport(int num_type_parameters, boolean has_super_class, int num_interfaces, JavaToken jToken);
 //MH-20140414
 //    public static native void cactionBuildClassSupportEnd(String className, int num_class_members, JavaToken jToken);
     public static native void cactionBuildClassSupportEnd(String className, JavaToken jToken);
@@ -263,17 +261,7 @@ class JNI implements Callable<Boolean> {
     // Added new support functions for Argument IR nodes.
     public static native void cactionArgumentName(String name);
     public static native void cactionArgumentModifiers(int modifiers);
-    
-	public static native void cactionSetCurrentClassName(String typename);
-	public static native void cactionSetCurrentFilePath(String filepath);
 
-	public static native void cactionAsync(JavaToken jToken);
-	public static native void cactionAsyncEnd(JavaToken jToken);
-	public static native void cactionFinish(JavaToken jToken);
-	public static native void cactionFinishEnd(JavaToken jToken);
-	public static native void cactionAt(JavaToken jToken);
-	public static native void cactionAtEnd(JavaToken jToken);
-	
     //**********************************************************
     //*                                                        *
     //*    Start of JavaDoc Nodes.                             *

@@ -14,6 +14,7 @@ package x10.lang;
 import x10.compiler.Global;
 import x10.compiler.Native;
 import x10.compiler.Pinned;
+import x10.util.Map;
 
 /**
  * Ported from 2.0 to 2.1 via naive simulation of 

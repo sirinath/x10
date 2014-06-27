@@ -178,10 +178,6 @@ public final class Rail<T> extends Ref implements x10.lang.Iterable,
      * Serialization
      */
 
-    private Object writeReplace() throws java.io.ObjectStreamException {
-        return new x10.serialization.SerializationProxy(this);
-    }
-
     public void $_serialize(X10JavaSerializer serializer) throws java.io.IOException {
         serializer.write(T);
         serializer.write(size);
@@ -448,7 +444,7 @@ public final class Rail<T> extends Ref implements x10.lang.Iterable,
         }
     }
 
-    public static <T> void uncountedCopy__0$1x10$lang$Rail$$T$2__2$1x10$lang$Rail$$T$2(Type T, Rail<T> src, long srcIndexL, GlobalRail<T> dst, long dstIndexL, long numElemsL, VoidFun_0_0 notifier) {
+    public static <T> void uncountedCopy__0$1x10$lang$Rail$$T$2__2$1x10$lang$Rail$$T$2$2$2(Type T, Rail<T> src, long srcIndexL, GlobalRail<T> dst, long dstIndexL, long numElemsL, VoidFun_0_0 notifier) {
         int srcIndex = (int)srcIndexL;
         int dstIndex = (int)dstIndexL;
         int numElems = (int)numElemsL;
@@ -553,7 +549,7 @@ public final class Rail<T> extends Ref implements x10.lang.Iterable,
         }
     }
 
-    public static <T> void uncountedCopy__0$1x10$lang$Rail$$T$2__2$1x10$lang$Rail$$T$2(Type T, GlobalRail<T> src, long srcIndexL, Rail<T> dst, long dstIndexL, long numElemsL, VoidFun_0_0 notifier) {
+    public static <T> void uncountedCopy__0$1x10$lang$Rail$$T$2__2$1x10$lang$Rail$$T$2$2$2(Type T, GlobalRail<T> src, long srcIndexL, Rail<T> dst, long dstIndexL, long numElemsL, VoidFun_0_0 notifier) {
         int srcIndex = (int)srcIndexL;
         int dstIndex = (int)dstIndexL;
         int numElems = (int)numElemsL;

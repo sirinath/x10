@@ -8,6 +8,7 @@ import x10.util.Timer;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.blas.DenseMatrixBLAS;
 import x10.matrix.block.Grid;
 import x10.matrix.dist.DistDenseMatrix;
 import x10.matrix.dist.DistSparseMatrix;
@@ -201,7 +202,7 @@ public class LogisticRegression {
 					// 					beta = norm_r2/old_norm_r2
 					val beta = norm_r2/old_norm_r2;
 					// 					d = r + beta*d
-					d.scale(beta).cellAdd(r);
+					d.cellMult(beta).cellAdd(r);
 					// 					innerconverge = (sqrt(norm_r2) <= psi * norm_grad) | (inneriter < maxinneriter)
 					innerconverge = (Math.sqrt(norm_r2) <= psi * norm_grad) | (inneriter < maxinneriter);
 				}

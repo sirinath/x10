@@ -222,9 +222,9 @@ public class DistMultDistToDup {
             val dmC = C.local() as DenseMatrix(dmA.N, dmB.N);
             
             if (p != rootpid || !plus)
-                DenseMatrixBLAS.compTransMult(1.0, dmA, dmB, 0.0, dmC);
+                DenseMatrixBLAS.compTransMult(dmA, dmB, dmC, false);
             else 
-                DenseMatrixBLAS.compTransMult(1.0, dmA, dmB, 1.0, dmC);
+                DenseMatrixBLAS.compTransMult(dmA, dmB, dmC, true);
         }
         /* TIMING */ C.calcTime += Timer.milliTime() - stt;
 

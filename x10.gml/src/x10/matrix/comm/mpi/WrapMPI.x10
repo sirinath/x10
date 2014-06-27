@@ -38,7 +38,7 @@ import x10.matrix.util.Debug;
  * and reduce sum are available.  X10.team collective communication can be used. 
  */
 @NativeCPPInclude("mpi_api.h")
-@NativeCPPCompilationUnit("mpi_api.cc")
+@NativeCPPCompilationUnit("mpi_api.c")
 public class WrapMPI {
     
 	@Native("c++","mpi_new_comm()")

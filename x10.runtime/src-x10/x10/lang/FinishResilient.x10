@@ -63,7 +63,6 @@ abstract class FinishResilient extends FinishState {
         var fs:FinishState;
         switch (Runtime.RESILIENT_MODE) {
         case Configuration.RESILIENT_MODE_SAMPLE:
-        case Configuration.RESILIENT_MODE_SAMPLE_HC:
         {
             val p = (parent!=null) ? parent : getCurrentFS();
             val l = (latch!=null) ? latch : new SimpleLatch();
@@ -77,6 +76,17 @@ abstract class FinishResilient extends FinishState {
             fs = FinishResilientPlace0.make(p, l);
             break;
         }
+            
+            //TODO: followings will be restrucutured
+        case Configuration.RESILIENT_MODE_PLACE_ZERO:
+            fs = new FinishState.FinishResilientPlaceZero(latch);
+            break;
+        case Configuration.RESILIENT_MODE_DISTRIBUTED:
+            fs = new FinishState.FinishResilientDistributed(latch==null ? new SimpleLatch() : latch);
+            break;
+        case Configuration.RESILIENT_MODE_ZOO_KEEPER:
+            fs = new FinishState.FinishResilientZooKeeper(latch);
+            break;
         default:
             throw new UnsupportedOperationException("Unsupported RESILIENT_MODE " + Runtime.RESILIENT_MODE);
         }
@@ -88,11 +98,28 @@ abstract class FinishResilient extends FinishState {
         if (verbose>=1) debug("FinishResilient.notifyPlaceDeath called");
         switch (Runtime.RESILIENT_MODE) {
         case Configuration.RESILIENT_MODE_SAMPLE:
-        case Configuration.RESILIENT_MODE_SAMPLE_HC:
             FinishResilientSample.notifyPlaceDeath();
             break;
         case Configuration.RESILIENT_MODE_PLACE0:
             FinishResilientPlace0.notifyPlaceDeath();
+            break;
+            
+            //TODO: followings will be restructured
+        case Configuration.RESILIENT_MODE_PLACE_ZERO:
+            if (here.id == 0) {
+                // most finishes are woken up by 'atomic'
+                atomic { }
+                // the root one also needs to have its latch released
+                // also adopt activities of finishes whose homes are dead into closest live parent
+                ResilientStorePlaceZero.notifyPlaceDeath((Runtime.rootFinish as FinishResilientPlaceZero).id);
+            }
+            break;
+        case Configuration.RESILIENT_MODE_DISTRIBUTED:
+            FinishState.FinishResilientDistributedMaster.notifyAllPlaceDeath();
+            // merge backups to parent
+            break;
+        case Configuration.RESILIENT_MODE_ZOO_KEEPER:
+            //
             break;
         default:
             throw new UnsupportedOperationException("Unsupported RESILIENT_MODE " + Runtime.RESILIENT_MODE);
@@ -135,9 +162,7 @@ abstract class FinishResilient extends FinishState {
         // [DC] do not use at (place) async since the finish state is handled internally
         // [DC] go to the lower level...
         val cl = () => @RemoteInvocation("fiish_resilient_run_at") {
-            if (verbose>=2) debug("FinishResilient.runAt closure received");
             val exec_body = () => {
-                if (verbose>=2) debug("FinishResilient.runAt exec_body started");
                 val remoteActivity = Runtime.activity();
                 remoteActivity.clockPhases = clockPhases; // XTENLANG-3357: set passed clockPhases
                 if (tmp_finish.notifyActivityCreation(home)) {
@@ -154,20 +179,17 @@ abstract class FinishResilient extends FinishState {
                     // XTENLANG-3357: return the (maybe modified) clockPhases, similar code as "at (cpGref) { cpGref().set(clockPhases); }"
                     // TODO: better to merge this with notifyActivityTermination to reduce send
                     val cl1 = ()=> @RemoteInvocation("finish_resilient_run_at_1") {
-                        if (verbose>=2) debug("FinishResilient.runAt setting new clockPhases");
-                        cpGref.getLocalOrCopy().set(clockPhases); // this will be set to myActivity.clockPhases
+                        val gref = cpGref as GlobalRef[Cell[Activity.ClockPhases]{self==cpCell,cpCell!=null}]{home==here,cpCell!=null};
+                        val cell = gref(); cell.set(clockPhases); // this will be set to myActivity.clockPhases
                     };
-                    if (verbose>=2) debug("FinishResilient.runAt exec_body sending closure to set clockPhases");
-                    Runtime.x10rtSendMessage(cpGref.home.id, cl1, null); // TODO: should use lowLevelAt
+                    Runtime.x10rtSendMessage(cpGref.home.id, cl1, null);
                     Unsafe.dealloc(cl1);
                     
                     tmp_finish.notifyActivityTermination();
                 }
                 remoteActivity.clockPhases = null; // XTENLANG-3357
-                if (verbose>=2) debug("FinishResilient.runAt exec_body finished");
             };
-            if (verbose>=2) debug("FinishResilient.runAt create a new activity to execute");
-            Runtime.executeLocal(new Activity(exec_body, home, real_finish, false, false));
+            Runtime.execute(new Activity(exec_body, home, real_finish, false, false));
             // TODO: Unsafe.dealloc(exec_body); needs to be called somewhere
         };
         if (verbose>=2) debug("FinishResilient.runAt sending closure");

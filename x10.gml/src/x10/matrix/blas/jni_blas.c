@@ -4,6 +4,7 @@
  *  (C) Copyright IBM Corporation 2011.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,7 +29,6 @@ extern "C" {
 	  env->ReleaseDoubleArrayElements(x, xmat, 0);
 	}	
   }
-
   //-------------------------------------------------------------
   // public static native void copy(int n, double[] x, double[] y);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_copy
@@ -69,18 +69,20 @@ extern "C" {
 	return abs_sum(n, xmat);
   }
 
+
 //------------------------------------------------------------------------
 // Level Two 
 //------------------------------------------------------------------------
   //-------------------------------------------------------------
   // public static native void matvecMultOff(double[] A, double[] x, double[] y, ....)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMultOff
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim, jlong lda, jlongArray off, jint tranA) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray x, jdoubleArray y, jlongArray dim, jlong lda, jlongArray off, jdoubleArray scale, jint tranA) {
 
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
     jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
     jlong dimlist[2];
     jlong offlist[4];
     // This line is necessary, since Java arrays are not guaranteed
@@ -88,50 +90,54 @@ extern "C" {
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
     env->GetLongArrayRegion(off, 0, 4, offlist);
 
-    matrix_vector_mult(alpha, amat, xvec, beta, yvec, dimlist, lda, offlist, tranA);
+    matrix_vector_mult(amat, xvec, yvec, dimlist, lda, offlist, scal, tranA);
 
     if (isCopy == JNI_TRUE) {
        //printf("Copying data from c library back to original data in JVM\n");
        env->ReleaseDoubleArrayElements(y, yvec, 0);
     }
-  }
 
+  }
   //-------------------------------------------------------------
   // public static native void matvecMult(double[] A, double[] x, double[] y, ....)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMult
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim, jint tranA) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray x, jdoubleArray y, jlongArray dim, jdoubleArray scale, jint tranA) {
+
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
     jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
     jlong dimlist[2];
     // This line is necessary, since Java arrays are not guaranteed
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
 
-    matrix_vector_mult(alpha, amat, xvec, beta, yvec, dimlist, tranA);
+    matrix_vector_mult(amat, xvec, yvec, dimlist, scal, tranA);
 
     if (isCopy == JNI_TRUE) {
        //printf("Copying data from c library back to original data in JVM\n");
        env->ReleaseDoubleArrayElements(y, yvec, 0);
     }
+
   }
 
   //-------------------------------------------------------------
   // public static native void symvecMult(double[] A, double[] x, double[] y, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_symvecMult
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray x, jdoubleArray y, jlongArray dim, jdoubleArray scale) {
     jboolean isCopy;
 
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
     jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
     jlong dimlist[2];
     // This line is necessary, since Java arrays are not guaranteed
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
 
-	sym_vector_mult(alpha, amat, xvec, beta, yvec, dimlist);
+	sym_vector_mult(amat, xvec, yvec, dimlist, scal);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -181,6 +187,7 @@ extern "C" {
        //printf("Copying data from c library back to original data in JVM\n");
 	  env->ReleaseDoubleArrayElements(A, amat, 0);
     }
+
   }
 
 //------------------------------------------------------------------------
@@ -190,12 +197,13 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void matmatMult(double[] A, double[] B, double[] C, long[] dim, long[] ld, long[] off...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matmatMultOff
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray B, jdouble beta, jdoubleArray C, jlongArray dim, jlongArray ld, jlongArray off, jintArray trans) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jdoubleArray C, jlongArray dim, jlongArray ld, jlongArray off, jdoubleArray scale, jintArray trans) {
 
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
     jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
 
     jlong dimlist[3];
     jlong ldlist[3];
@@ -208,7 +216,7 @@ extern "C" {
     env->GetLongArrayRegion(off, 0, 6, offlist);
     env->GetIntArrayRegion(trans, 0, 2, trnlist);
 
-	matrix_matrix_mult(alpha, amat, bmat, beta, cmat, dimlist, ldlist, offlist, trnlist);
+	matrix_matrix_mult(amat, bmat, cmat, dimlist, ldlist, offlist, scal, trnlist);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -218,12 +226,14 @@ extern "C" {
 
   //-------------------------------------------------------------
   // public static native void matmatMult(double[] A, double[] B, double[] C, long[] dim, long[] ld, ...)
-  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matmatMult
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray B, jdouble beta, jdoubleArray C, jlongArray dim, jlongArray ld, jintArray trans) {
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matmatMultLd
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jdoubleArray C, jlongArray dim, jlongArray ld, jdoubleArray scale, jintArray trans) {
+
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
     jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
 
     jlong dimlist[3];
     jlong ldlist[3];
@@ -234,7 +244,33 @@ extern "C" {
     env->GetLongArrayRegion(ld, 0, 3, ldlist);
     env->GetIntArrayRegion(trans, 0, 2, trnlist);
 
-	matrix_matrix_mult(alpha, amat, bmat, beta, cmat, dimlist, ldlist, trnlist);
+	matrix_matrix_mult(amat, bmat, cmat, dimlist, ldlist, scal, trnlist);
+
+	if (isCopy == JNI_TRUE) {
+	  //printf("Copying data from c library back to original data in JVM\n");
+	  env->ReleaseDoubleArrayElements(C, cmat, 0);
+	}
+  }
+
+  //-------------------------------------------------------------
+  // public static native void matmatMult(double[] A, double[] B, double[] C, ...)
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matmatMult
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jdoubleArray C, jlongArray dim, jdoubleArray scale, jintArray trans) {
+
+	jboolean isCopy;
+	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
+    jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
+    jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
+
+    jlong dimlist[3];
+	jint trnlist[2];
+    // This line is necessary, since Java arrays are not guaranteed 
+    // to have a continuous memory layout like C arrays.
+    env->GetLongArrayRegion(dim, 0, 3, dimlist);
+    env->GetIntArrayRegion(trans, 0, 2, trnlist);
+
+	matrix_matrix_mult(amat, bmat, cmat, dimlist, scal, trnlist);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -245,11 +281,12 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void symRankKUpdate(double[] A, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_symRankKUpdateOff
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdouble beta, jdoubleArray C, jlongArray dim, jlongArray ld, jlongArray off, jboolean upper, jboolean trans) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray C, jlongArray dim, jlongArray ld, jlongArray off, jdoubleArray scale, jboolean upper, jboolean trans) {
 
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
 
     jlong dimlist[2];
     jlong ldlist[2];
@@ -260,7 +297,7 @@ extern "C" {
     env->GetLongArrayRegion(ld, 0, 2, ldlist);
     env->GetLongArrayRegion(off, 0, 4, offlist);
 
-	sym_rank_k_update(alpha, amat, beta, cmat, dimlist, ldlist, offlist, upper, trans);
+	sym_rank_k_update(amat, cmat, dimlist, ldlist, offlist, scal, upper, trans);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -271,18 +308,19 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void symRankKUpdate(double[] A, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_symRankKUpdate
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdouble beta, jdoubleArray C, jlongArray dim, jboolean upper, jboolean trans) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray C, jlongArray dim, jdoubleArray scale, jboolean upper, jboolean trans) {
 
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
 
     jlong dimlist[2];
     // This line is necessary, since Java arrays are not guaranteed 
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
 
-	sym_rank_k_update(alpha, amat, beta, cmat, dimlist, upper, trans);
+	sym_rank_k_update(amat, cmat, dimlist, scal, upper, trans);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -293,18 +331,19 @@ extern "C" {
   //-------------------------------------------------------------
   // public static native void symmatMult(double[] A, double[] B, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_symmatMult
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray B, jdouble beta, jdoubleArray C, jlongArray dim) {
+  (JNIEnv *env, jclass cls, jdoubleArray A, jdoubleArray B, jdoubleArray C, jlongArray dim, jdoubleArray scale) {
 	jboolean isCopy;
 	jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
     jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
 
     jlong dimlist[2];
     // This line is necessary, since Java arrays are not guaranteed 
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
 	//printf("Here calling blas matrix mult\n"); fflush(stdout);
-	sym_matrix_mult(alpha, amat, bmat, beta, cmat, dimlist);
+	sym_matrix_mult(amat, bmat, cmat, dimlist, scal);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -314,18 +353,19 @@ extern "C" {
 
   // public static native void matsymMult(double[] A, double[] B, double[] C, ...)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matsymMult
-  (JNIEnv *env, jclass cls, jdoubleArray B, jdouble alpha, jdoubleArray A, jdouble beta, jdoubleArray C, jlongArray dim) {
+  (JNIEnv *env, jclass cls, jdoubleArray B, jdoubleArray A, jdoubleArray C, jlongArray dim, jdoubleArray scale) {
 	jboolean isCopy;
 	jdouble* bmat = env->GetDoubleArrayElements(B, NULL);
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* cmat = env->GetDoubleArrayElements(C, &isCopy);
+    jdouble* scal = env->GetDoubleArrayElements(scale, NULL);
 
     jlong dimlist[2];
     // This line is necessary, since Java arrays are not guaranteed 
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
 	//printf("Here calling blas matrix mult\n"); fflush(stdout);
-	matrix_sym_mult(bmat, alpha, amat, beta, cmat, dimlist);
+	matrix_sym_mult(bmat, amat, cmat, dimlist, scal);
 
 	if (isCopy == JNI_TRUE) {
 	  //printf("Copying data from c library back to original data in JVM\n");
@@ -449,4 +489,11 @@ extern "C" {
 	}
   }
 }
+//-----------------------------------------------------------------
+// Simplified interface, thread-safe routine
+//-----------------------------------------------------------------
 
+
+//------------------------------------------------------------------------
+// Other tools
+//------------------------------------------------------------------------

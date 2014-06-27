@@ -40,10 +40,10 @@ public class TestMultDense{
 			ret &= (testMultAssociative());
 			ret &= (testAddMultDist());
 			ret &= (testSubMultDist());
-			ret &= (testMatrixMultXTen());
-			ret &= (testDenseMultXTen());
+			ret &= (testMatrixMult());
 			ret &= (testDenseMult());
 			ret &= (testDenseMultOffset());
+			ret &= (testBlasMult());
 			ret &= (testMultDrivers());
 			ret &= (testMatMultVector());
 			ret &= (testMatMultVectorOffset());
@@ -51,7 +51,9 @@ public class TestMultDense{
 			ret &= (testSymRankKUpdateOffset());
 			//ret &= (mm.testSmallMult());
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix multiply Test passed!");
+			else
 				Console.OUT.println("--------Dense matrix multiply Test failed!--------");
 		}
 
@@ -70,11 +72,13 @@ public class TestMultDense{
 			val d1= a % (b % c);
 			
 			val ret = d1.equals(d);
-			if (!ret)
+			Console.OUT.printf("Result matrix: %dx%d\n", d.M, d.N);
+			if (ret)
+				Console.OUT.println("Dense matrix multiply associative test passed!");
+			else
 				Console.OUT.println("-----Dense matrix multiply associative test failed!-----");
 			return ret;
 		}
-
 		public def testAddMultDist():Boolean {
 			Console.OUT.println("\nTest Dense matrix (a+b)*c = a*c+b*c ");
 			val a = DenseMatrix.make(M, K);
@@ -85,11 +89,13 @@ public class TestMultDense{
 			val d = (a + b) % c;
 			val d1= a % c + b % c;
 			val ret = d1.equals(d);
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix (a+b)*c = a*c+b*c test passed!");
+			else
 				Console.OUT.println("-----Dense matrix (a+b)*c = a*c+b*c test failed!-----");
 			return ret;
 		}
-
+		//
 		public def testSubMultDist():Boolean {
 			Console.OUT.println("\nTest (a-b)*c = a*c-b*c ");
 			val a = DenseMatrix.make(M, K);
@@ -101,12 +107,14 @@ public class TestMultDense{
 			val d1= a % c - b % c;
 			
 			val ret = d1.equals(d);
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix (a-b)*c = a*c-b*c test passed!");
+			else
 				Console.OUT.println("-----Dense matrix (a-b)*c = a*c-b*c test failed!-----");
 			return ret;
 		}
 		
-		public def testMatrixMultXTen():Boolean {
+		public def testMatrixMult():Boolean {
 			Console.OUT.printf("\nTest X10 matrix multiply driver: (%dx%d) * (%dx%d)\n",
 					M, K, K, N);
 			val a = DenseMatrix.make(M, K);
@@ -115,38 +123,30 @@ public class TestMultDense{
 	   
 			val c = MatrixMultXTen.comp(a as Matrix(M,K), b as Matrix(K,N));
 			
+			Console.OUT.printf("Result matrix: %dx%d\n", c.M, c.N);
+			
 			val ret = VerifyTool.verifyMatMult(a, b, c);
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Matrix base X10 multiply driver test passed!");
+			else
 				Console.OUT.println("-----Matrix base X10 multply driver test failed!-----");
 			return ret;
 		}
 
-		public def testDenseMultXTen():Boolean {
+		public def testDenseMult():Boolean {
 			Console.OUT.printf("\nTest X10 dense multiplication driver: (%dx%d) * (%dx%d)\n",
 					M, K, K, N);
 			val a:DenseMatrix(M,K) = DenseMatrix.makeRand(M, K);
 			val b:DenseMatrix(K,N) = DenseMatrix.makeRand(K, N);
 			val c:DenseMatrix(a.M,b.N) = DenseMultXTen.comp(a, b);
 			
+			Console.OUT.printf("Result matrix: %dx%d\n", c.M, c.N);
 			val ret = VerifyTool.verifyMatMult(a, b, c);
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix X10 multiply driver test passed!");
+			else
 				Console.OUT.println("-----Dense matrix X10 multiply driver test failed!-----");
-			return ret;
-		}
-		
-		public def testDenseMult():Boolean {
-			Console.OUT.printf("\nTest BLAS multiplication driver: (%dx%d) * (%dx%d)\n",
-					M, K, K, N);
-			val a = DenseMatrix.make(M, K);
-			val b = DenseMatrix.make(K, N);
-			a.initRandom(); b.initRandom();
-
-			val c = a % b;
-			
-			val ret = VerifyTool.verifyMatMult(a, b, c);
-			if (!ret)
-				Console.OUT.println("-----Dense matrix BLAS multiply driver test failed!-----");
 			return ret;
 		}
 
@@ -161,7 +161,7 @@ public class TestMultDense{
             val offsetN = N / 3;
 
             val partC = new DenseMatrix(M, N);
-            DenseMatrixBLAS.comp(1.0, a, b, 0.0, partC, [M - offsetM, N - offsetN, K], [offsetM, 0, 0, offsetN, offsetM, offsetN]);
+            DenseMatrixBLAS.comp(a, b, partC, [M - offsetM, N - offsetN, K], [offsetM, 0, 0, offsetN, offsetM, offsetN], false);
 
             var ret:Boolean = true;
             for (m in offsetM..(M-1)) {
@@ -174,10 +174,32 @@ public class TestMultDense{
                 }
             }
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix X10 multiply with offsets driver test passed!");
+			else
 				Console.OUT.println("-----Dense matrix X10 multiply with offsets driver test failed!-----");
 			return ret;
 		}
+		
+		public def testBlasMult():Boolean {
+			Console.OUT.printf("\nTest BLAS multiplication driver: (%dx%d) * (%dx%d)\n",
+					M, K, K, N);
+			val a = DenseMatrix.make(M, K);
+			val b = DenseMatrix.make(K, N);
+			a.initRandom(); b.initRandom();
+
+			val c = DenseMatrixBLAS.comp(a, b);
+			
+			Console.OUT.printf("Result matrix: %dx%d\n", c.M, c.N);
+			
+			val ret = VerifyTool.verifyMatMult(a, b, c);
+			if (ret)
+				Console.OUT.println("Dense matrix BLAS multiply driver test passed!");
+			else
+				Console.OUT.println("-----Dense matrix BLAS multiply driver test failed!-----");
+			return ret;
+		}
+		
 		
 		public def testMultDrivers():Boolean {
 			Console.OUT.printf("\nTest X10 Dense, Matrix, BLAS multiply driver: (%dx%d) * (%dx%d)\n",
@@ -186,7 +208,7 @@ public class TestMultDense{
 			val b = DenseMatrix.make(K, N);
 			a.initRandom(); b.initRandom();
 
-			val c1 = a % b;
+			val c1 = DenseMatrixBLAS.comp(a, b);
 			val c2 = DenseMultXTen.comp(a, b);
 			val c3 = MatrixMultXTen.comp(a as Matrix(M,K), b as Matrix(K,N));
 			
@@ -200,6 +222,9 @@ public class TestMultDense{
 				ret = false;
 			}
 			
+			if (ret)
+				Console.OUT.println("BLAS == X10 Matrix == X10 Dense driver\n");
+			
 			return ret;
 		}
 
@@ -211,7 +236,7 @@ public class TestMultDense{
 			val c1 = Vector.make(M);
 			val c2 = Vector.make(M);
 
-			DenseMatrixBLAS.comp(1.0, a, v, 0.0, c1);
+			DenseMatrixBLAS.comp(a, v, c1, false);
 			DenseMultXTen.comp(a, v, c2, false);
 			
 			var ret:Boolean = true;
@@ -222,7 +247,7 @@ public class TestMultDense{
 
             val aT = a.T();
 			val c3 = Vector.make(M);
-			DenseMatrixBLAS.compTransMult(1.0, aT, v, 0.0, c3);
+			DenseMatrixBLAS.compTransMult(aT, v, c3, false);
             if (!c3.equals(c1)) {
 				Console.OUT.println("----- BLAS: (A^T)^Tv != Av -----\n");
                 ret = false;
@@ -234,15 +259,19 @@ public class TestMultDense{
                 ret = false;
             }
 
-			DenseMatrixBLAS.comp(1.0, a, v, 1.0, c1);
+			DenseMatrixBLAS.comp(a, v, c1, true);
 			DenseMultXTen.comp(a, v, c2, true);
 
 			if (!c1.equals(c2)) {
 				Console.OUT.println("----- c += Av : BLAS != X10 Dense driver -----\n");
 				ret = false;
 			}
+
+
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix vector multiply test passed!");
+			else
 				Console.OUT.println("-----Dense matrix vector multiply test failed!-----");
 			
 			return ret;
@@ -256,10 +285,10 @@ public class TestMultDense{
 			val c1 = Vector.make(M);
 			val c2 = Vector.make(M);
 
-			DenseMatrixBLAS.comp(1.0, a, v, 0.0, c1);
+			DenseMatrixBLAS.comp(a, v, c1, false);
             // compare that a single GEMV is equivalent to a series of M 1-row GEMVs
             for (i in 0..(M-1)) {
-			    DenseMatrixBLAS.comp(1.0, a, v, 0.0, c2, [1, K], [i, 0, 0, i]);
+			    DenseMatrixBLAS.comp(a, v, c2, [1, K], [i, 0, 0, i], false);
             }
 			
 			var ret:Boolean = true;
@@ -271,16 +300,16 @@ public class TestMultDense{
             val aT = a.T();
 			val c3 = Vector.make(M);
             for (i in 0..(M-1)) {
-			    DenseMatrixBLAS.compTransMult(1.0, aT, v, 0.0, c3, [K, 1], [0, i, 0, i]);
+			    DenseMatrixBLAS.compTransMult(aT, v, c3, [K, 1], [0, i, 0, i], false);
             }
             if (!c3.equals(c1)) {
 				Console.OUT.println("----- BLAS: (A^T)^Tv != Av -----\n");
                 ret = false;
             }
 
-			DenseMatrixBLAS.comp(1.0, a, v, 1.0, c1);
+			DenseMatrixBLAS.comp(a, v, c1, true);
             for (i in 0..(M-1)) {
-			    DenseMatrixBLAS.comp(1.0, a, v, 1.0, c2, [1, K], [i, 0, 0, i]);
+			    DenseMatrixBLAS.comp(a, v, c2, [1, K], [i, 0, 0, i], true);
             }
 
 			if (!c1.equals(c2)) {
@@ -288,7 +317,9 @@ public class TestMultDense{
 				ret = false;
 			}
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix vector multiply with offset test passed!");
+			else
 				Console.OUT.println("-----Dense matrix vector multiply with offset test failed!-----");
 			
 			return ret;
@@ -307,7 +338,7 @@ public class TestMultDense{
 			val c:DenseMatrix(a.M,a.N) = DenseMultXTen.comp(a, a);
 			
 			val d = new DenseMatrix(M, M);
-            DenseMatrixBLAS.symRankKUpdate(1.0, a, 0.0, d, false);
+            DenseMatrixBLAS.symRankKUpdate(a, d, false, false);
 
             // check lower triangle same for matmul and rank-K update
             var ret:Boolean=true;
@@ -321,7 +352,9 @@ public class TestMultDense{
                 }
             }
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix X10 symmetric rank-K update driver test passed!");
+			else
 				Console.OUT.println("-----Dense matrix X10 symmetric rank-K update driver test failed!-----");
 			return ret;
 		}
@@ -342,7 +375,7 @@ public class TestMultDense{
 
             // calculate the top left quadrant of A*A^T, but write it into the bottom left quadrant of C
             val partC = new DenseMatrix(M, M);
-            DenseMatrixBLAS.symRankKUpdate(1.0, a, 0.0, partC, [M - half, M], [0, 0, half, 0], false);
+            DenseMatrixBLAS.symRankKUpdate(a, partC, [M - half, M], [0, 0, half, 0], false, false);
 
             // check the calculated quadrant is the same for matmul and rank-K update
             var ret:Boolean=true;
@@ -356,7 +389,9 @@ public class TestMultDense{
                 }
             }
 			
-			if (!ret)
+			if (ret)
+				Console.OUT.println("Dense matrix X10 symmetric rank-K update with offsets passed!");
+			else
 				Console.OUT.println("-----Dense matrix X10 symmetric rank-K update with offsets failed!-----");
 			return ret;
 		}
@@ -368,6 +403,7 @@ public class TestMultDense{
 		// 		val a = DenseMatrix.makeSmall(M, K);
 		// 		val b = DenseMatrix.makeSmall(K, N);
 		// 		val c = DenseMatrixBLAS.comp(a, b);
+		// 		Console.OUT.printf("Result matrix: %dx%d\n", c.M, c.N);
 		// 		val cd= MatrixMultXTen.comp(a, b);
 		
 		// 		var ret:Boolean = true;
@@ -382,6 +418,8 @@ public class TestMultDense{
 		// 			ret = false;
 		// 		}
 		
+		// 		if (ret) 
+		// 			Console.OUT.println("Test X10 matrix multiply driver on small number test passed!\n");
 		// 		return ret;
 		// 	}
 	}

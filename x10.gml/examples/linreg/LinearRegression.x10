@@ -15,6 +15,7 @@ import x10.util.Timer;
 import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.Vector;
+import x10.matrix.blas.DenseMatrixBLAS;
 
 import x10.matrix.block.Grid;
 import x10.matrix.sparse.SparseCSC;

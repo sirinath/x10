@@ -333,7 +333,7 @@ thrunstate="UNKNOWN_STATE"
 tcbackend="native"
 
 # resiliency modes
-tc_all_resilient_modes="0 11"
+tc_all_resilient_modes="0 1"
 tc_default_resilient_mode="0"
 tcresilient_modes="$tc_default_resilient_mode"
 typeset -i tcresilient_x10_only=0
@@ -476,11 +476,8 @@ function junitLog {
 	        s/</\&lt;/g;
 	        s/>/\&gt;/g;
 	        s/"/\&quot;/g;
-                s/'"'"'/\&apos;/g;
+    s/'"'"'/\&apos;/g;
 	        s/([^[:print:]\t\n\r])/sprintf("\&#x%04x;", ord($1))/eg' $2 $3 >> $JUFILE
-    if [[ "${__jen_test_exit_code}" != "0" ]]; then
-	printf "\n\tTest exited with non-zero return code ${__jen_test_exit_code}\n\n"  >> $JUFILE
-    fi
     printf "\t</system-out>\n" >> $JUFILE
     # TODO: include system-err in file
     printf "\t<system-err></system-err>\n" >> $JUFILE
@@ -739,6 +736,9 @@ function main {
 	    # the actual output will be logged here
 	    tcoutdat=${tcroot}/${tctarget}.${jen_resiliency_mode}.out
 
+        # temporary patch (else part)
+        # set X10_BUSY_WAITING=TRUE to test Resilient X10
+        if [[ ${jen_resiliency_mode} -eq 0 ]]; then
 	    if [[ "$tcbackend" == "native" ]]; then
 		if [[ "$(uname -s)" == CYGWIN* ]]; then
 		    run_cmd="X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $RUN_X10 ./${tctarget}.exe"
@@ -746,12 +746,19 @@ function main {
 		    run_cmd="X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost ./${tctarget}"
 		fi
 	    else
-		managed_x10_extra_resiliency_args=""
-		if [[ "$jen_resiliency_mode" != "0" ]]; then
-		    managed_x10_extra_resiliency_args="-DX10RT_IMPL=JavaSockets"
-		fi
-		run_cmd="X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $X10_HOME/x10.dist/bin/x10 -ms128M -mx512M ${managed_x10_extra_resiliency_args} -t -v -J-ea ${className}"
+		run_cmd="X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $X10_HOME/x10.dist/bin/x10 -ms128M -mx512M -t -v -J-ea ${className}"
 	    fi
+        else
+	    if [[ "$tcbackend" == "native" ]]; then
+		if [[ "$(uname -s)" == CYGWIN* ]]; then
+		    run_cmd="X10_BUSY_WAITING=TRUE X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $RUN_X10 ./${tctarget}.exe"
+		else
+		    run_cmd="X10_BUSY_WAITING=TRUE X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost ./${tctarget}"
+		fi
+	    else
+		run_cmd="X10_BUSY_WAITING=TRUE X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $X10_HOME/x10.dist/bin/x10 -ms128M -mx512M -t -v -J-ea ${className}"
+	    fi
+        fi
 	    printf "\n${run_cmd}\n" >> $tcoutdat
 
 	    __jen_test_x10_timeout="$tctoutval"
