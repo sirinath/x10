@@ -1,14 +1,3 @@
-/*
- *  This file is part of the X10 project (http://x10-lang.org).
- *
- *  This file is licensed to You under the Eclipse Public License (EPL);
- *  You may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *      http://www.opensource.org/licenses/eclipse-1.0.php
- *
- *  (C) Copyright IBM Corporation 2006-2014.
- */
-
 package x10.glb;
 
 import x10.compiler.*;
@@ -23,7 +12,7 @@ import x10.util.Random;
  * @param <R> Result type.
  */
 final class Worker[Queue, R]{Queue<:TaskQueue[Queue, R]} {
-    /** TaskQueue, responsible for crunching numbers */
+	/** TaskQueue, responsible for crunching numbers */
     val queue:Queue;
     
     /** Read as I am the "lifeline buddy" of my "lifelineThieves" */
@@ -423,31 +412,31 @@ final class Worker[Queue, R]{Queue<:TaskQueue[Queue, R]} {
      * @param st: PLH of Worker
      */
     static def initContexts[Queue,R](st:PlaceLocalHandle[Worker[Queue, R]]){Queue<:TaskQueue[Queue, R]}{
-        val P = Place.numPlaces();
-        @Pragma(Pragma.FINISH_DENSE) finish {
-            if (P < 256) {
-                for(var i:Long=0; i<P; i++) {
-                    at (Place(i)) async st().setContext(st);
-                }
-            } else {
-                for(var i:Long=P-1; i>=0; i-=32) {
-                    at (Place(i)) async {
-                        val max = Runtime.hereLong();
-                        val min = Math.max(max-31, 0);
-                        for (var j:Long=min; j<=max; ++j) {
-                            at (Place(j)) async st().setContext(st);
-                        }
-                    }
-                }
-            }
-        }
+    	val P = Place.numPlaces();
+    	@Pragma(Pragma.FINISH_DENSE) finish {
+    		if (P < 256) {
+    			for(var i:Long=0; i<P; i++) {
+    				at (Place(i)) async st().setContext(st);
+    			}
+    		} else {
+    			for(var i:Long=P-1; i>=0; i-=32) {
+    				at (Place(i)) async {
+    					val max = Runtime.hereLong();
+    					val min = Math.max(max-31, 0);
+    					for (var j:Long=min; j<=max; ++j) {
+    						at (Place(j)) async st().setContext(st);
+    					}
+    				}
+    			}
+    		}
+    	}
     }
     
     /**
      * Returns yield point
      */
     @Inline public def getYieldPoint(){
-        return (st:PlaceLocalHandle[Worker[Queue, R]])=>{Runtime.probe();distribute(st);reject(st);};
+    	return (st:PlaceLocalHandle[Worker[Queue, R]])=>{Runtime.probe();distribute(st);reject(st);};
     }
     
     /**
@@ -456,6 +445,6 @@ final class Worker[Queue, R]{Queue<:TaskQueue[Queue, R]} {
      */
     protected def setContext(st:PlaceLocalHandle[Worker[Queue, R]]){Queue<:TaskQueue[Queue, R]}{
     
-        this.context = new Context(st);
+    	this.context = new Context(st);
     }
 }
