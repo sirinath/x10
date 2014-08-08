@@ -127,12 +127,11 @@ class DeclPackage extends NodeVisitor {
      */
     @Override
     public Node leave(Node old, Node n, NodeVisitor v) {
-        boolean isMananged = ((x10.ExtensionInfo) job.extensionInfo()).isManagedX10();
-        if (XTENLANG_2818_METHOD && n instanceof Special && ((Special) n).kind() == Special.SUPER && isMananged) {
+        if (XTENLANG_2818_METHOD && n instanceof Special && ((Special) n).kind() == Special.SUPER && ExpressionFlattener.javaBackend(job)) {
             cannotInline("Java back-end cannot handle inlined super targets");
-        } else if (XTENLANG_2818_CTOR && n instanceof ConstructorCall && ((ConstructorCall) n).kind() == ConstructorCall.SUPER && isMananged) {
+        } else if (XTENLANG_2818_CTOR && n instanceof ConstructorCall && ((ConstructorCall) n).kind() == ConstructorCall.SUPER && ExpressionFlattener.javaBackend(job)) {
             cannotInline("Java back-end cannot handle inlined super calls either");
-        } else if (XTENLANG_2819 && utils.hasEmbedAnnotation(n) && !isMananged) {
+        } else if (XTENLANG_2819 && utils.hasEmbedAnnotation(n) && !ExpressionFlattener.javaBackend(job)) {
             cannotInline("C++ back-end cannot handle embedded fields");
         } else if (utils.isNativeCode(n)) {
             cannotInline("Procedure body contains native code");

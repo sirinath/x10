@@ -12,20 +12,24 @@
 package x10.runtime.impl.java;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 import x10.core.fun.VoidFun_0_0;
 import x10.io.Reader;
 import x10.io.Writer;
 import x10.lang.DeadPlaceException;
+import x10.lang.Place;
 import x10.lang.FinishState;
 import x10.rtt.RuntimeType;
 import x10.rtt.Type;
 import x10.rtt.Types;
+import x10.serialization.X10JavaDeserializer;
+import x10.serialization.X10JavaSerializable;
 import x10.serialization.X10JavaSerializer;
 import x10.x10rt.SocketTransport;
-import x10.x10rt.SocketTransport.RETURNCODE;
 import x10.x10rt.X10RT;
+import x10.x10rt.SocketTransport.RETURNCODE;
 
 public abstract class Runtime implements VoidFun_0_0 {
 
@@ -53,8 +57,8 @@ public abstract class Runtime implements VoidFun_0_0 {
     public Runtime() {}
 
     /**
-     * Default start method used by the X10 compiler to run the X10 main.
-     * (The current thread is joined the X10 thread pool.)
+     * Body of main java thread
+     * (only called in non-library mode)
      */
     protected void start(final String[] args) {
         this.args = args;
@@ -73,7 +77,25 @@ public abstract class Runtime implements VoidFun_0_0 {
             throw new InternalError("Failed to initialize X10RT.");
         }
 
-        commonInit();
+        x10.lang.Runtime.get$staticMonitor();
+        x10.lang.Runtime.get$STRICT_FINISH();
+        x10.lang.Runtime.get$NTHREADS();
+        x10.lang.Runtime.get$MAX_THREADS();
+        x10.lang.Runtime.get$STATIC_THREADS();
+        x10.lang.Runtime.get$WARN_ON_THREAD_CREATION();
+        x10.lang.Runtime.get$BUSY_WAITING();
+        if (X10RT.initialEpoch != -1) {
+        	// initialize epoch to match other places
+        	x10.lang.Runtime.epoch$O(); 
+        	x10.lang.Runtime.get$pool().workers.epoch = X10RT.initialEpoch;
+        }
+        x10.util.Team.get$WORLD();
+
+        java.lang.Runtime.getRuntime().addShutdownHook(new java.lang.Thread() {
+            public void run() {
+                System.out.flush();
+            }
+        });
 
         // start and join main x10 thread in place 0
         x10.lang.Runtime.Worker worker = new x10.lang.Runtime.Worker(0);
@@ -90,10 +112,23 @@ public abstract class Runtime implements VoidFun_0_0 {
         System.exit(exitCode);
     }
 
-    /**
-     * Initializes X10-level statics that need to be there before we boot the X10 runtime.
-     */
-    public static void commonInit() {
+    protected void startExecutor(final String[] args) {
+        this.args = args;
+
+        // load libraries
+        String property = System.getProperty("x10.LOAD");
+        if (null != property) {
+            String[] libs = property.split(":");
+            for (int i = libs.length - 1; i >= 0; i--)
+                System.loadLibrary(libs[i]);
+        }
+
+        boolean initialized = X10RT.init(); // TODO retry?
+        if (!initialized) {
+            System.err.println("Failed to initialize X10RT.");
+            throw new InternalError("Failed to initialize X10RT.");
+        }
+
         x10.lang.Runtime.get$staticMonitor();
         x10.lang.Runtime.get$STRICT_FINISH();
         x10.lang.Runtime.get$NTHREADS();
@@ -102,9 +137,9 @@ public abstract class Runtime implements VoidFun_0_0 {
         x10.lang.Runtime.get$WARN_ON_THREAD_CREATION();
         x10.lang.Runtime.get$BUSY_WAITING();
         if (X10RT.initialEpoch != -1) {
-            // initialize epoch to match other places
-            x10.lang.Runtime.epoch$O(); 
-            x10.lang.Runtime.get$pool().workers.epoch = X10RT.initialEpoch;
+        	// initialize epoch to match other places
+        	x10.lang.Runtime.epoch$O(); 
+        	x10.lang.Runtime.get$pool().workers.epoch = X10RT.initialEpoch;
         }
         x10.util.Team.get$WORLD();
 
@@ -113,15 +148,11 @@ public abstract class Runtime implements VoidFun_0_0 {
                 System.out.flush();
             }
         });
-    }
-    
-    /**
-     * Alternate start method used by the X10 compiler to run the X10 runtime as an executor service
-     * and use the main method as a single-threaded client for this service.
-     * (The current thread is not joined the X10 thread pool.)
-     */
-    protected void startExecutor(final String[] args) {
-        startEngine();
+
+        x10.lang.Runtime.start();
+        // x10rt-level registration of MessageHandlers
+        X10RT.registerHandlers();
+        X10RT.registration_complete();
 
         // build up Rail[String] for args
         final x10.core.Rail<String> aargs = new x10.core.Rail<String>(Types.STRING, (args == null) ? 0 : args.length);
@@ -147,33 +178,6 @@ public abstract class Runtime implements VoidFun_0_0 {
         System.exit(exitCode);
     }
 
-    /**
-     * Starts the X10 runtime engine as a thread pool separate from the calling thread.
-     */
-    public static void startEngine() {
-        // load libraries
-        String property = System.getProperty("x10.LOAD");
-        if (null != property) {
-            String[] libs = property.split(":");
-            for (int i = libs.length - 1; i >= 0; i--)
-                System.loadLibrary(libs[i]);
-        }
-
-        boolean initialized = X10RT.init(); // TODO retry?
-        if (!initialized) {
-            System.err.println("Failed to initialize X10RT.");
-            throw new InternalError("Failed to initialize X10RT.");
-        }
-
-        commonInit();
-
-        x10.lang.Runtime.start();
-
-        // x10rt-level registration of MessageHandlers
-        X10RT.registerHandlers();
-        X10RT.registration_complete();
-    }
-    
     // body of main activity
     static class $Closure$Main implements VoidFun_0_0 {
         private final Runtime out$;

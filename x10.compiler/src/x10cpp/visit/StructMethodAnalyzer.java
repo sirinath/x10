@@ -189,10 +189,10 @@ public class StructMethodAnalyzer extends ContextVisitor {
             return n;
         }
         
-        // Only allow calls to methods of the current container.
+        // Only allow calls to methods of the current container and to methods of built-in numeric types.
         if (n instanceof X10Call_c) {
             ContainerType methodType = ((X10Call_c)n).methodInstance().container();
-            if (!(xts.typeBaseEquals(methodType, myContainer, context))) {
+            if (!(xts.typeBaseEquals(methodType, myContainer, context) || isBuiltInNumeric(methodType))) {
                 canGoInHeaderStream[0] = false;
             }
             return n;    

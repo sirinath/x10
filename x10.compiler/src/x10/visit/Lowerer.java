@@ -138,13 +138,10 @@ import x10cuda.ast.CUDAKernel;
 public class Lowerer extends ContextVisitor {
     private final Synthesizer synth;
     private final AltSynthesizer altsynth;
-    private final boolean isManagedX10;
-    
     public Lowerer(Job job, TypeSystem ts, NodeFactory nf) {
         super(job, ts, nf);
         synth = new Synthesizer(nf, ts);
         altsynth = new AltSynthesizer(ts, nf);
-        isManagedX10 = ((x10.ExtensionInfo) job.extensionInfo()).isManagedX10();
     }
 
     private int count;
@@ -1076,25 +1073,16 @@ public class Lowerer extends ContextVisitor {
     }
 
     // finish S; ->
-    // Native X10:
     //    {
     //    Runtime.ensureNotInAtomic();
     //    val fresh = Runtime.startFinish();
     //    try { S; }
-    //    catch (t:CheckedThrowable) { Runtime.pushException(t); }
-    //    Runtime.stopFinish(fresh);
-    //    }
-    // Managed X10:
-    //    {
-    //    Runtime.ensureNotInAtomic();
-    //    val fresh = Runtime.startFinish();
-    //    try { S; }
-    //    catch (t:CheckedThrowable) { Runtime.pushException(t); throw new RuntimeException)(); }
+    //    catch (t:Throwable) { Runtime.pushException(t); throw new Exception(); }
     //    finally { Runtime.stopFinish(fresh); }
     //    }
     private Stmt visitFinish(Finish f) throws SemanticException {
         Position pos = f.position();
-        Name tmp = Name.makeFresh("ct");
+        Name tmp = getTmp();
 
         Stmt specializedFinish = specializeFinish(f);
         if (specializedFinish != null)
@@ -1108,13 +1096,14 @@ public class Lowerer extends ContextVisitor {
         Formal formal = nf.Formal(pos, nf.FlagsNode(pos, ts.NoFlags()),
             nf.CanonicalTypeNode(pos, catchType), nf.Id(pos, tmp)).localDef(lDef);
         Expr local = nf.Local(pos, nf.Id(pos, tmp)).localInstance(lDef.asInstance()).type(catchType);
-        Expr peCall = nf.X10Call(pos, nf.CanonicalTypeNode(pos, ts.Runtime()),
+        Expr call = nf.X10Call(pos, nf.CanonicalTypeNode(pos, ts.Runtime()),
                 nf.Id(pos, PUSH_EXCEPTION), Collections.<TypeNode>emptyList(),
                 Collections.singletonList(local)).methodInstance(mi).type(ts.Void());
+        Throw thr = throwException(pos);
         Expr startCall = specializedFinish2(f);
 
         Context xc = context();
-        final Name varName = Name.makeFresh("fs");
+        final Name varName = xc.getNewVarName();
         final Type type = ts.FinishState();
         final LocalDef li = ts.localDef(pos, ts.Final(), Types.ref(type), varName);
         final Id varId = nf.Id(pos, varName);
@@ -1122,64 +1111,36 @@ public class Lowerer extends ContextVisitor {
         final Local ldRef = (Local) nf.Local(pos, varId).localInstance(li.asInstance()).type(type);
 
         Block tryBlock = nf.Block(pos, f.body());
-        Catch catchBlock;
-        if (isManagedX10) {
-            // Need to confuse Java's definite assignment analysis so it won't complain...
-            Type re = ts.Exception();
-            X10ConstructorInstance ci = ts.findConstructor(re, ts.ConstructorMatcher(re, Collections.<Type>emptyList(), context()));
-            Expr newRE = nf.New(pos, nf.CanonicalTypeNode(pos, re), Collections.<Expr>emptyList()).constructorInstance(ci).type(re);
-            catchBlock = nf.Catch(pos, formal, nf.Block(pos, nf.Eval(pos, peCall), nf.Throw(pos, newRE)));
-        } else {
-            catchBlock = nf.Catch(pos, formal, nf.Block(pos, nf.Eval(pos, peCall)));            
-        }
-        Stmt endCall = nf.Eval(pos, call(pos, STOP_FINISH, ldRef, ts.Void()));
+        Catch catchBlock = nf.Catch(pos, formal, nf.Block(pos, nf.Eval(pos, call), thr));
+        Block finallyBlock = nf.Block(pos, nf.Eval(pos, call(pos, STOP_FINISH, ldRef, ts.Void())));
 
-        // For ManagedX10, we generate as a try/catch/finally block as the simplest way to
-        // deal with definite assignment checking and ensuring a well-defined block
-        // to generate async initialization code.
-        // For NativeX10, we do not need the finally block, so use a simpler try/catch
-        // followed by the stopFinish.
-        if (isManagedX10) {
-            Try tcfBlock = nf.Try(pos, tryBlock, Collections.singletonList(catchBlock), nf.Block(pos, endCall));
-            
-            X10Ext_c ext = (X10Ext_c) f.ext();
-            if (ext.initVals != null) {
-                tcfBlock = (Try)((X10Ext_c)tcfBlock.ext()).asyncInitVal(ext.initVals);
-            }
-            
-            return nf.Block(pos,
-                            nf.Eval(pos, call(pos, ENSURE_NOT_IN_ATOMIC, ts.Void())),
-                            ld,
-                            tcfBlock);
-        } else {
-            Try tcBlock = nf.Try(pos, tryBlock, Collections.singletonList(catchBlock));
-            
-            X10Ext_c ext = (X10Ext_c) f.ext();
-            if (ext.initVals != null) {
-                tcBlock = (Try)((X10Ext_c)tcBlock.ext()).asyncInitVal(ext.initVals);
-            }
-            
-            return nf.Block(pos,
-                            nf.Eval(pos, call(pos, ENSURE_NOT_IN_ATOMIC, ts.Void())),
-                            ld,
-                            tcBlock,
-                            endCall);
+        Try tcfBlock = nf.Try(pos, tryBlock, Collections.singletonList(catchBlock), finallyBlock);
+
+        // propagate async initialization info to backend
+        X10Ext_c ext = (X10Ext_c) f.ext();
+        if (ext.initVals != null) {
+            tcfBlock = (Try)((X10Ext_c)tcfBlock.ext()).asyncInitVal(ext.initVals);
         }
+
+        return nf.Block(pos,
+        		nf.Eval(pos, call(pos, ENSURE_NOT_IN_ATOMIC, ts.Void())),
+        		ld,
+        		tcfBlock);
+    }
+
+    // Generates a throw of a new Exception().
+    private Throw throwException(Position pos) throws SemanticException {
+        Type re = ts.Exception();
+        X10ConstructorInstance ci = ts.findConstructor(re, ts.ConstructorMatcher(re, Collections.<Type>emptyList(), context()));
+        Expr newRE = nf.New(pos, nf.CanonicalTypeNode(pos, re), Collections.<Expr>emptyList()).constructorInstance(ci).type(re);
+        return nf.Throw(pos, newRE);
     }
 
     // x = finish (R) S; ->
-    // Native X10:
     //    {
     //    val fresh = Runtime.startCollectingFinish(R);
     //    try { S; }
-    //    catch (t:CheckedThrowable) { Runtime.pushException(t); }
-    //    x = Runtime.stopCollectingFinish(fresh);
-    //    }
-    // Managed X10:
-    //    {
-    //    val fresh = Runtime.startCollectingFinish(R);
-    //    try { S; }
-    //    catch (t:CheckedThrowable) { Runtime.pushException(t); throw new RuntimeException() }
+    //    catch (t:Throwable) { Runtime.pushException(t); throw new Exception(); }
     //    finally { x = Runtime.stopCollectingFinish(fresh); }
     //    }
     private Stmt visitFinishExpr(Assign n, LocalDecl l, Return r) throws SemanticException {
@@ -1212,7 +1173,7 @@ public class Lowerer extends ContextVisitor {
         Call myCall = synth.makeStaticCall(pos, ts.Runtime(), START_COLLECTING_FINISH, Collections.<TypeNode>singletonList(nf.CanonicalTypeNode(pos, reducerTarget)), Collections.singletonList(reducer), ts.Void(), Collections.singletonList(reducerType), context());
 
         Context xc = context();
-        final Name varName = Name.makeFresh("fs");
+        final Name varName = xc.getNewVarName();
         final Type type = ts.FinishState();
         final LocalDef li = ts.localDef(pos, ts.Final(), Types.ref(type), varName);
         final Id varId = nf.Id(pos, varName);
@@ -1233,18 +1194,10 @@ public class Lowerer extends ContextVisitor {
         Expr call = nf.X10Call(pos, nf.CanonicalTypeNode(pos, ts.Runtime()),
                 nf.Id(pos, PUSH_EXCEPTION), Collections.<TypeNode>emptyList(),
                 Collections.singletonList(local)).methodInstance(mi).type(ts.Void());
-        Catch catchBlock;
-        if (isManagedX10) {
-            // Need to confuse Java's definite assignment analysis so it won't complain...
-            Type re = ts.Exception();
-            X10ConstructorInstance ci = ts.findConstructor(re, ts.ConstructorMatcher(re, Collections.<Type>emptyList(), context()));
-            Expr newRE = nf.New(pos, nf.CanonicalTypeNode(pos, re), Collections.<Expr>emptyList()).constructorInstance(ci).type(re);
-            catchBlock = nf.Catch(pos, formal, nf.Block(pos, nf.Eval(pos, call), nf.Throw(pos, newRE)));
-        } else {
-            catchBlock = nf.Catch(pos, formal, nf.Block(pos, nf.Eval(pos, call)));            
-        }
+        Throw thr = throwException(pos);
+        Catch catchBlock = nf.Catch(pos, formal, nf.Block(pos, nf.Eval(pos, call), thr));
         
-        // Begin stopCollectingFinish stmt
+        // Begin finally block
         Stmt returnS = null;
         Call staticCall = synth.makeStaticCall(pos, ts.Runtime(), STOP_COLLECTING_FINISH, Collections.<TypeNode>singletonList(nf.CanonicalTypeNode(pos, reducerTarget)), Collections.<Expr>singletonList(ldRef), reducerTarget, Collections.<Type>singletonList(type), context());
         if ((l==null) && (n!=null)&& (r==null)) {
@@ -1261,12 +1214,9 @@ public class Lowerer extends ContextVisitor {
             returnS = nf.X10Return(pos, staticCall, true);
         }
         
-        if (reducerS.size()>0) reducerS.pop();
-        if (isManagedX10) {
-            return nf.Block(pos, s1, nf.Try(pos, tryBlock, Collections.singletonList(catchBlock), nf.Block(pos, returnS)));            
-        } else {
-            return nf.Block(pos, s1, nf.Try(pos, tryBlock, Collections.singletonList(catchBlock)), returnS);            
-        }
+        Block finalBlock = nf.Block(pos, returnS);
+        if(reducerS.size()>0) reducerS.pop();
+        return nf.Block(pos, s1, nf.Try(pos, tryBlock, Collections.singletonList(catchBlock), finalBlock));
     }
 
     //  offer e ->

@@ -12,8 +12,6 @@
 #ifndef X10_AUX_PCOND_H
 #define X10_AUX_PCOND_H
 
-#include <x10aux/config.h>
-
 #include <pthread.h>
 
 namespace x10aux {
@@ -25,8 +23,6 @@ namespace x10aux {
         void unlock();
         void release();
         void await();
-        void await(x10_long timeout);
-        x10_boolean complete();
 
     private:
         pthread_mutex_t __mutex;

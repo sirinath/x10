@@ -69,9 +69,7 @@ import x10cpp.visit.CastInjector;
  */
 public class ExtensionInfo extends x10.ExtensionInfo {
 
-    public boolean isNativeX10() { return true; }
-    public boolean isManagedX10() { return false; }
-    
+
     @Override
 	public String compilerName() {
 		return "x10c++";

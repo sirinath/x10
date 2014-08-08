@@ -33,21 +33,4 @@ public class Condition extends java.util.concurrent.locks.ReentrantLock {
             unlock();
         }
     }
-
-    public void await(long timeout) {
-        if (!unblocked) {
-            lock();
-            if (!unblocked) {
-                thread = java.lang.Thread.currentThread();
-                unlock();
-                java.util.concurrent.locks.LockSupport.parkNanos(timeout);
-                lock();
-            }
-            unlock();
-        }
-    }
-    
-    public boolean complete$O() {
-        return unblocked;
-    }
 }
