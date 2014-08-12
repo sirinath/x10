@@ -1212,7 +1212,7 @@ public final class Runtime {
      * Transparently wrap checked exceptions at the root of an at desugared closure, and unpack later.
      */
     static class AtCheckedWrapper extends Exception {
-        public def this(cause:CheckedThrowable) { super(cause); }
+        public def this(cause: CheckedThrowable) { super(cause); }
     }
 
     /**
@@ -1576,7 +1576,8 @@ public final class Runtime {
      * onto the finish state.
      */
     public static def pushException(t:CheckedThrowable):void  {
-    	activity().finishState().pushException(t);
+    	val e = Exception.ensureException(t);
+    	activity().finishState().pushException(e);
     }
     public static def startCollectingFinish[T](r:Reducible[T]) {
         return activity().swapFinish(new FinishState.CollectingFinish[T](r));

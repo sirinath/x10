@@ -171,9 +171,9 @@ public class Activity {
         if (confirmed) {
             try {
                 body();
-            } catch (wt:WrappedThrowable) {
-                finishState.pushException(wt.getCheckedCause());
-            } catch (t:CheckedThrowable) {
+            } catch (t:Error) {
+                finishState.pushException(new WrappedThrowable(t));
+            } catch (t:Exception) {
                 finishState.pushException(t);
             }
             if (null != clockPhases) clockPhases.drop();
