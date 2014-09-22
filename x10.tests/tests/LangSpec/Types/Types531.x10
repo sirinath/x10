@@ -26,7 +26,7 @@ public class Types531 extends x10Test {
     }
 
 
-// file Types line 2594
+// file Types line 2592
  static  class EEEEVi1 {
  static   struct Unit{}
  }

@@ -96,13 +96,10 @@ class ResilientKMeansDecimation {
                     }
                 }
             } catch (es:MultipleExceptions) {
-                val deadPlaceExceptions = es.getExceptionsOfType[DeadPlaceException]();
-                for (dpe in deadPlaceExceptions) {
-                    Console.OUT.println("DeadPlaceException thrown from " + dpe.place);
-                    // No recovery is necessary, completeness will be checked by number of processed points
+                for (e in es.exceptions()) {
+                    if (!(e instanceof DeadPlaceException)) throw e;
+                    Console.OUT.println("DeadPlaceException thrown from " + (e as DeadPlaceException).place);
                 }
-                val filtered = es.filterExceptionsOfType[DeadPlaceException]();
-                if (filtered != null) throw filtered;
             }
             val dist_clusters_after = System.nanoTime();
             Console.OUT.println("-- Took "+(dist_clusters_after-dist_clusters_before)/1E9+" seconds");
@@ -173,13 +170,10 @@ class ResilientKMeansDecimation {
                     } /* at (pl) async */
                 } /* finish for (pl) */
             } catch (es:MultipleExceptions) {
-                val deadPlaceExceptions = es.getExceptionsOfType[DeadPlaceException]();
-                for (dpe in deadPlaceExceptions) {
-                    Console.OUT.println("DeadPlaceException thrown from " + dpe.place);
-                    // No recovery is necessary, completeness will be checked by number of processed points
+                for (e in es.exceptions()) {
+                    if (!(e instanceof DeadPlaceException)) throw e;
+                    Console.OUT.println("DeadPlaceException thrown from " + (e as DeadPlaceException).place);
                 }
-                val filtered = es.filterExceptionsOfType[DeadPlaceException]();
-                if (filtered != null) throw filtered;
             }
             val compute_clusters_after = System.nanoTime();
             Console.OUT.println("-- Took "+(compute_clusters_after-compute_clusters_before)/1E9+" seconds.  Used "+points_used()()+" points this iteration.");

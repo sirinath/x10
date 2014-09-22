@@ -11,7 +11,7 @@
 package x10.lang;
 import x10.util.resilient.ResilientMap; // ResilientMap using Hazelcast
 
-class ResilientStoreHC[K,V] {V haszero} extends ResilientStore[K,V] {V haszero} {
+class ResilientStoreHC[K,V] extends ResilientStore[K,V] {
     private static val verbose = ResilientStore.verbose;
 
     private transient val map:ResilientMap[K,V];
@@ -21,7 +21,7 @@ class ResilientStoreHC[K,V] {V haszero} extends ResilientStore[K,V] {V haszero} 
         map = ResilientMap.getMap[K,V](name);
         this.lockKey = lockKey;
     }
-    public static def make2[K,V](name:Any, lockKey:K){V haszero}:ResilientStoreHC[K,V] { // renamed to avoid XTENLANG-3396
+    public static def make2[K,V](name:Any, lockKey:K):ResilientStoreHC[K,V] { // renamed to avoid XTENLANG-3396
         if (verbose>=3) debug("ResilientStoreHC.make called, name="+name);
         val r = new ResilientStoreHC[K,V](name.toString(),lockKey);
         if (verbose>=3) debug("ResilientStoreHC.make returning result="+r);
@@ -43,7 +43,8 @@ class ResilientStoreHC[K,V] {V haszero} extends ResilientStore[K,V] {V haszero} 
     
     public def getOrElse(key:K, orelse:V):V {
         if (verbose>=3) debug("getOrElse called, key="+key);
-        val r = map.get(key);
+        val boxed = map.get(key);
+        val r = (boxed==null) ? orelse : boxed();
         if (verbose>=3) debug("getOrElse returning, result="+r);
         return r;
     }

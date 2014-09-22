@@ -686,12 +686,18 @@ public struct Team {
             if (DEBUGINTERNALS) Runtime.println(here + " leaving init phase");
         }
         
+        // on Managed X10, probe sometimes deadlocks, so sleep is required
+        // TODO: Figure out why probe doesn't work on Managed X10
+        @Native("java", "true")
+        @Native("c++", "false")
+        private static native def useSleepNotProbe():Boolean;
+        
         /*
          * This method contains the implementation for all collectives.  Some arguments are only valid
          * for specific collectives.
          */
         private def collective_impl[T](collType:Int, root:Place, src:Rail[T], src_off:Long, dst:Rail[T], dst_off:Long, count:Long, operation:Int):void {
-            if (DEBUGINTERNALS) Runtime.println(here+":team"+teamid+" entered "+getCollName(collType)+" phase="+phase.get()+", root="+root);
+            if (DEBUGINTERNALS) Runtime.println(here+":team"+teamid+" entered "+getCollName(collType)+" (phase="+phase.get()+", root="+root);
             val teamidcopy = this.teamid; // needed to prevent serializing "this" in at() statements
 
             /**
@@ -700,8 +706,16 @@ public struct Team {
              * from the network (x10rt probe).
              */
             val probeUntil = (condition:() => Boolean) => @NoInline {
-                if (!condition()) {
-                    while (!condition()) Runtime.probe();
+                if (useSleepNotProbe()) {
+                    if (!condition()) {
+                        Runtime.increaseParallelism();
+                        while (!condition()) System.threadSleep(0);
+                        Runtime.decreaseParallelism(1n);
+                    }
+                } else {
+                    if (!condition()) {
+                        while (!condition()) Runtime.probe();
+                    }
                 }
             };
 
@@ -753,10 +767,9 @@ public struct Team {
                 if (local_child2Index > -1) {
                     local_temp_buff2 = Unsafe.allocRailUninitialized[T](count);
                 }
-            } else if (myLinks.parentIndex != -1 && collType == COLL_SCATTER) {
+            //} else if (myLinks.parentIndex != -1 && collType == COLL_SCATTER || collType == COLL_GATHER) {
                 // data size may differ between places
-if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (myLinks.totalChildren+1)*count);
-                local_temp_buff = Unsafe.allocRailUninitialized[T]((myLinks.totalChildren+1)*count);
+            //    local_temp_buff = Unsafe.allocRailUninitialized[T](myLinks.dataToCarryForChildren);
             } else if ((collType == COLL_INDEXOFMIN || collType == COLL_INDEXOFMAX) && local_child1Index != -1) {
                 // pairs of values move around
                 local_temp_buff = Unsafe.allocRailUninitialized[T]((local_child2Index==-1)?1:2);
@@ -806,7 +819,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
                 if (collType == COLL_BROADCAST)
                     Rail.copy(src, src_off, dst, dst_off, count);
                 else if (collType == COLL_SCATTER)
-                    local_temp_buff = src;
+                    Rail.copy(src, src_off+(count*myIndex), dst, dst_off, count);
                 this.phase.set(PHASE_DONE); // the root node has no parent, and can skip its own state ahead
             } else {
                 val waitForParentToReceive = () => @NoInline {
@@ -847,7 +860,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
                             if (sourceIndex == Team.state(teamidcopy).local_child2Index) {
                                 target = Team.state(teamidcopy).local_temp_buff2 as Rail[T];
                                 off = 0;
-                            } else if (Team.state(teamidcopy).local_src == Team.state(teamidcopy).local_dst) {
+                            } else if (src == dst) {
                                 target = Team.state(teamidcopy).local_temp_buff as Rail[T];
                                 off = 0;
                             } else {
@@ -926,74 +939,69 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
                 } else if (collType == COLL_BROADCAST || collType == COLL_ALLREDUCE || 
                     collType == COLL_INDEXOFMIN || collType == COLL_INDEXOFMAX) {
                     // these all move a single value from root to all other team members
-                    finish {
+                    @Pragma(Pragma.FINISH_SPMD) finish {
                         at (places(local_child1Index)) async {
                             if (DEBUGINTERNALS) Runtime.println(here+ " pulling data from "+gr+" into "+(Team.state(teamidcopy).local_dst as Rail[T]));
-                            Rail.asyncCopy(gr, dst_off, Team.state(teamidcopy).local_dst as Rail[T], Team.state(teamidcopy).local_dst_off, Team.state(teamidcopy).local_count);
+                            @Pragma(Pragma.FINISH_ASYNC) finish {
+                                Rail.asyncCopy(gr, dst_off, Team.state(teamidcopy).local_dst as Rail[T], Team.state(teamidcopy).local_dst_off, Team.state(teamidcopy).local_count);
+                            }
                         }
                         if (local_child2Index != -1) {
                             at (places(local_child2Index)) async {
                                 if (DEBUGINTERNALS) Runtime.println(here+ " pulling data from "+gr+" into "+(Team.state(teamidcopy).local_dst as Rail[T]));
-                                Rail.asyncCopy(gr, dst_off, Team.state(teamidcopy).local_dst as Rail[T], Team.state(teamidcopy).local_dst_off, Team.state(teamidcopy).local_count);
+                                @Pragma(Pragma.FINISH_ASYNC) finish {
+                                    Rail.asyncCopy(gr, dst_off, Team.state(teamidcopy).local_dst as Rail[T], Team.state(teamidcopy).local_dst_off, Team.state(teamidcopy).local_count);
+                                }
                             }
                         }
                     }
-                } else if (collType == COLL_SCATTER) {
-                    val notNullTmp = local_temp_buff as Rail[T]{self!=null};
-                    val grTmp = new GlobalRail[T](notNullTmp);
-                    // root scatters direct from src
-                    val sourceOffset = (myLinks.parentIndex == -1) ? 0: Team.state(teamidcopy).myIndex*count;
-                    val copyToChild = () => @NoInline {
-                        val myOffset = (Team.state(teamidcopy).myIndex*count)-sourceOffset;
-                        val count = Team.state(teamidcopy).local_count;
-                        val totalData = (Team.state(teamidcopy).local_grandchildren+1)*count;
-                        finish {
-                            if (DEBUGINTERNALS) Runtime.println(here+ " scattering " + totalData + " from parent offset " + myOffset);
-                            Rail.asyncCopy(grTmp, myOffset, Team.state(teamidcopy).local_temp_buff as Rail[T], 0, totalData);
-                        }
-                    };
-
-                    @Pragma(Pragma.FINISH_SPMD) finish {
-                        at (places(local_child1Index)) async copyToChild();
-                        if (local_child2Index != -1) {
-                            at (places(local_child2Index)) async copyToChild();
-                        }
-                    }
+                }
+                else if (collType == COLL_SCATTER) {
+                    // TODO: scatter is more difficult because we want places to carry data that is not intended for them, so we need temp buffers
                 }
                 if (DEBUGINTERNALS) Runtime.println(here+ " finished moving data to children");
-            }
-        
-            if (collType == COLL_SCATTER) {
-                // root scatters own data direct from src to dst
-                val temp_off_my_data = (myLinks.parentIndex == -1) ? (src_off + myIndex*count) : 0;
-                if (DEBUGINTERNALS) Runtime.println(here+ " scatter " +count + " from local_temp_buff " + temp_off_my_data + " to dst");
-                Rail.copy(local_temp_buff as Rail[T]{self!=null}, temp_off_my_data, dst, dst_off, count);
             }
 
             // our parent has updated us - update any children, and leave the collective
             if (local_child1Index != -1) { // free the first child, if it exists
-                // NOTE: the use of runUncountedAsync allows the parent to continue past this section
+                // NOTE: there is some trickery here, which allows the parent to continue past this section
                 //   before the children have been set free.  This is necessary when there is a blocking
                 //   call immediately after this collective completes (e.g. the barrier before a blocking 
                 //   collective in MPI-2), because otherwise the at may not return before the barrier
                 //   locks up the worker thread.
-                val freeChild1 = () => @NoInline {
-                    if (!Team.state(teamidcopy).phase.compareAndSet(PHASE_SCATTER, PHASE_DONE))
-                        Runtime.println("ERROR root setting the first child "+here+":team"+teamidcopy+" to PHASE_DONE");
-                    else if (DEBUGINTERNALS) Runtime.println("set the first child "+here+":team"+teamidcopy+" to PHASE_DONE");
-                };
-                Runtime.runUncountedAsync(places(local_child1Index), freeChild1, null);
-                if (local_child2Index != -1) {
-                    // NOTE: can't use the same closure because runUncountedAsync deallocates it
-                    val freeChild2 = () => @NoInline {
+                // TODO: convert to Runtime.runUncountedAsync(), or Runtime.x10rtSendAsync(), or other such simpler mechanism
+                val origPlace:Place = here;
+                @Pragma(Pragma.FINISH_HERE) finish {
+                    at (places(local_child1Index)) async {
+                        at (origPlace) async {}
                         if (!Team.state(teamidcopy).phase.compareAndSet(PHASE_SCATTER, PHASE_DONE))
-                            Runtime.println("ERROR root setting the second child "+here+":team"+teamidcopy+" to PHASE_DONE");
-                        else if (DEBUGINTERNALS) Runtime.println("set the second child "+here+":team"+teamidcopy+" to PHASE_DONE");
-                    };
-                    Runtime.runUncountedAsync(places(local_child2Index), freeChild2, null);
+                            Runtime.println("ERROR root setting the first child "+here+":team"+teamidcopy+" to PHASE_DONE");
+                        else if (DEBUGINTERNALS) Runtime.println("set the first child "+here+":team"+teamidcopy+" to PHASE_DONE");
+                    }
+                }
+                if (local_child2Index != -1) {
+                    @Pragma(Pragma.FINISH_HERE) finish {
+                        at (places(local_child2Index)) async {
+                            at (origPlace) async {}
+                            if (!Team.state(teamidcopy).phase.compareAndSet(PHASE_SCATTER, PHASE_DONE))
+                                Runtime.println("ERROR root setting the second child "+here+":team"+teamidcopy+" to PHASE_DONE");
+                            else if (DEBUGINTERNALS) Runtime.println("set the second child "+here+":team"+teamidcopy+" to PHASE_DONE");
+                        }
+                    }
                 }
             }
-          
+/* alternative form of the above
+            val free_child = ()=> @x10.compiler.RemoteInvocation("free_child") {
+                if (!Team.state(teamidcopy).phase.compareAndSet(PHASE_SCATTER, PHASE_DONE))
+                       Runtime.println("ERROR setting child "+here+" to PHASE_DONE");
+            };
+            if (local_child1Index != -1) {
+                Runtime.x10rtSendMessage(places(local_child1Index).id, free_child, null);
+                if (local_child2Index != -1)
+                    Runtime.x10rtSendMessage(places(local_child2Index).id, free_child, null);
+            }
+            Unsafe.dealloc(free_child);
+*/            
             local_src = null;
             local_dst = null;
             local_temp_buff = null;

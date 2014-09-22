@@ -18,6 +18,7 @@ import x10.io.Console;
 import x10.io.CustomSerialization;
 import x10.io.Deserializer;
 import x10.io.Serializer;
+import x10.util.Box;
 import x10.util.resilient.ResilientMap;
 
 import java.util.Iterator;
@@ -28,7 +29,7 @@ import java.util.concurrent.Future;
  * The HazelcastMap class implements a resilient Map using Hazelcast as the underlying implementation.
  */
 
-public class HazelcastMap[K,V] {V haszero} extends ResilientMap[K,V] implements
+public class HazelcastMap[K,V] extends ResilientMap[K,V] implements
 CustomSerialization {
 
     protected var entrySet: java.util.Set;  // for creating Java Set view of
@@ -47,7 +48,7 @@ CustomSerialization {
     /**
      * Factory method to create Hazelcast map.
      */
-    public static def getMap[K,V](mapName:String){V haszero}:ResilientMap[K,V] = new HazelcastMap[K,V](mapName);
+    public static def getMap[K,V](mapName:String): ResilientMap[K,V] = new HazelcastMap[K,V](mapName);
 
     /**
      * Constructor method.  This is called by factory method getMap
@@ -56,7 +57,7 @@ CustomSerialization {
     protected def this(mapName: String) {
         this.keyValueMap = getResilientMap(mapName);
         if (keyValueMap == null) 
-	    throw new Exception("HazelcastMap.this("+mapName+"): HazelcastMap is not supported in this configuration");
+	    throw new Exception("HazelcastMap.this(mapName: String): HazelcastMap is not supported in this configuration");
         this.mapName = mapName;
 	this.entrySet = null;
 	this.iterator = null;
@@ -115,9 +116,9 @@ CustomSerialization {
     /**
      * Get the value of key k in the resilient map.
      */
-    public def get(k: K):V {
+    public def get(k: K): Box[V] {
         val v = keyValueMap.get(k);
-        return v as V;
+        return v == null ? null : new Box[V](v  as V);
     };
 
 
@@ -154,9 +155,9 @@ CustomSerialization {
     /**
      * Associate value v with key k in the resilient map.
      */
-    public def put(k: K, v: V):V {
+    public def put(k: K, v: V): Box[V] {
         val oldv = keyValueMap.put(k, v);
-        return oldv as V;
+        return oldv == null ? null : new Box[V](oldv as V);
     };
 
     /**
@@ -164,14 +165,14 @@ CustomSerialization {
      * a future that when forced will return the previous value (if any) 
      * that was stored for key k.  
      */
-    public def asyncPutFuture(k:K, v:V):()=>V {
+    public def asyncPutFuture(k:K, v:V):()=>Box[V] {
         val future = keyValueMap.putAsync(k, v);
         return ()=>{
-            var result:V = Zero.get[V]();
+            var result: Box[V] = null;
             try {
                 val evaluatedFuture = future.get();
                 if (evaluatedFuture != null)
-		    result = evaluatedFuture as V;
+		    result = new Box[V](evaluatedFuture as V);
             } catch (e:java.lang.InterruptedException) {
                 throw new WrappedThrowable(e);
             } catch (e:java.util.concurrent.ExecutionException) {
@@ -194,9 +195,9 @@ CustomSerialization {
     /**
      * Remove any value associated with key k from the resilient map.
      */
-    public def remove(k: K):V {
+    public def remove(k: K): Box[V] {
         val v = keyValueMap.remove(k);
-        return v as V;
+        return v == null ? null : new Box[V](v as V);
     };
 
     /**
@@ -204,15 +205,14 @@ CustomSerialization {
      * a future that when forced will return the previous value (if any) 
      * that was stored for key k.  
      */
-    public def asyncRemoveFuture(k:K):()=>V {
+    public def asyncRemoveFuture(k:K):()=>Box[V] {
         val future = keyValueMap.removeAsync(k);
         return ()=>{
-            var result: V = Zero.get[V]();
+            var result: Box[V] = null;
             try {
                 val evaluatedFuture = future.get();
-                if (evaluatedFuture != null) {
-		    result = evaluatedFuture as  V;
-                }
+                if (evaluatedFuture != null)
+		    result = new Box[V](evaluatedFuture as  V);
             } catch (e:java.lang.InterruptedException) {
                 throw new WrappedThrowable(e);
             } catch (e:java.util.concurrent.ExecutionException) {

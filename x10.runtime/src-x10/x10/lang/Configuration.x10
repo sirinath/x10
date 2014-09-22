@@ -24,8 +24,7 @@ final class Configuration {
     private static DEFAULT_STATIC_THREADS: Boolean = false;
 
     @Native("java", "java.lang.Runtime.getRuntime().availableProcessors()")
-    @Native("c++", "::x10::lang::RuntimeNatives::availableProcessors()")
-    private static native def availableProcessors():Int;
+    private static AVAILABLE_PROCESSORS:Int = 1n;
 
     @Native("java", "x10.runtime.impl.java.Runtime.loadenv()")
     @Native("c++", "::x10::lang::RuntimeNatives::loadenv()")
@@ -68,10 +67,10 @@ final class Configuration {
     static def nthreads():Int {
         var v:Int = 0n;
         try {
-            v = Int.parse(Runtime.env.getOrElse("X10_NTHREADS", "0"));
+            v = Int.parse(Runtime.env.getOrElse("X10_NTHREADS", "1"));
         } catch (NumberFormatException) {
         }
-        if (v <= 0) v = availableProcessors();
+        if (v <= 0) v = AVAILABLE_PROCESSORS;
         if (v > PLATFORM_MAX_THREADS) v = PLATFORM_MAX_THREADS;
         return v;
     }
@@ -92,10 +91,8 @@ final class Configuration {
     static val RESILIENT_MODE_NONE = 0n;
     static val RESILIENT_MODE_DEFAULT     = 1n;  // Most stable implementation of resilient finish (see FinishResilient.x10)
     static val RESILIENT_MODE_PLACE0      = 11n; // FinishResilientPlace0
-    static val RESILIENT_MODE_HC          = 12n; // FinishResilientHC
     static val RESILIENT_MODE_X10RT_ONLY  = 99n; // Resilient/Elastic X10RT, no resilient finish
     // The modes below are under development and not yet complete.
-    static val RESILIENT_MODE_PLACE0_OPTIMIZED = 21n; // FinishResilientPlace0opt
     static val RESILIENT_MODE_SAMPLE      = 91n; // FinishResilientSample + ResilientStorePlace0
     static val RESILIENT_MODE_SAMPLE_HC   = 92n; // FinishResilientSample + ResilientStoreHC
 

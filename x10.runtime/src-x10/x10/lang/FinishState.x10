@@ -604,6 +604,7 @@ abstract class FinishState {
             lock.unlock();
             Runtime.x10rtSendMessage(ref.home.id, closure, null);
             Unsafe.dealloc(closure);
+            Runtime.finishStates.remove(ref);
         }
     }
 
@@ -855,6 +856,7 @@ abstract class FinishState {
             lock.unlock();
             Runtime.x10rtSendMessage(ref.home.id, closure, null);
             Unsafe.dealloc(closure);
+            Runtime.finishStates.remove(ref);
         }
     }
 }

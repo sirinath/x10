@@ -35,7 +35,6 @@
 #endif
 #endif
 
-#ifdef __linux__
 // partial reimplemntation of glibc's getline
 static ssize_t mygetline (char **lineptr, size_t *sz, FILE *f)
 {
@@ -55,7 +54,6 @@ static ssize_t mygetline (char **lineptr, size_t *sz, FILE *f)
     *sz += 1;
     return *sz;
 }
-#endif
 
 #if !defined(SHM_R) || !defined(SHM_W)
 #include <sys/stat.h>
@@ -425,6 +423,7 @@ int main(int argc, char **argv)
 
     uint64_t logLocalTableSize = 12;
     bool enable_validate = false;
+    uint64_t updates = 4;
 
     for (int i=1 ; i<argc; ++i) {
         if (!strncmp(argv[i], "--help", 100)) {
@@ -438,6 +437,11 @@ int main(int argc, char **argv)
             logLocalTableSize = strtoul(argv[++i],NULL,0);
         } else if (!strncmp(argv[i], "-m", 100)) {
             logLocalTableSize = strtoul(argv[++i],NULL,0);
+
+        } else if (!strncmp(argv[i], "--updates", 100)) {
+            updates = strtoul(argv[++i],NULL,0);
+        } else if (!strncmp(argv[i], "-u", 100)) {
+            updates = strtoul(argv[++i],NULL,0);
 
         } else if (!strncmp(argv[i], "--validate", 100)) {
             enable_validate = true;

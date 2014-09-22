@@ -3,7 +3,7 @@
 ###################################################
 target_list 	= TestDistBlock TestDupBlock TestDistMult TestDistDupMult TestDupDistMult TestSumma TestDistVector TestDupVector TestDistDupVectorMult
 
-target		= TestDupVector
+target		= TestSumma
 #target		= TestDistDupMult
 
 # build path

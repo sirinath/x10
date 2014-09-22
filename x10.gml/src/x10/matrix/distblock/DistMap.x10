@@ -32,7 +32,7 @@ import x10.matrix.block.Grid;
  * constant and unique distrition of blocks to number of places.
  */
 public class DistMap(numBlock:Long, numPlace:Long)  {
-    private val blockmap:Rail[Long];            //mapping block ID to its place index in a Place Group
+    public val blockmap:Rail[Long];            //mapping block ID to its place ID
     //public val placemap:Rail[ArrayList[Long]]; //mapping place ID to list of block IDs
     
     public def this(numBlk:Long, numPlc:Long) {
@@ -49,14 +49,10 @@ public class DistMap(numBlock:Long, numPlace:Long)  {
 
     public static def make(numBlk:Long):DistMap {
         return new DistMap(numBlk, Place.numPlaces());
-    } 
-    public static def make(numBlk:Long, numPlc:Long):DistMap {
-        return new DistMap(numBlk, numPlc);
-    } 
-    public static def make(numBlk:Long, mapfunc:(Long)=>Long) = make(numBlk, mapfunc, Place.numPlaces());
+    }
     
-    public static def make(numBlk:Long, mapfunc:(Long)=>Long, numPlc:Long) {
-        val dmap = make(numBlk, numPlc);
+    public static def make(numBlk:Long, mapfunc:(Long)=>Long) {
+        val dmap = make(numBlk);
         for (var b:Long=0; b<numBlk; b++) 
             dmap.set(b, mapfunc(b));
         return dmap;
@@ -65,7 +61,6 @@ public class DistMap(numBlock:Long, numPlace:Long)  {
     public static def makeCylic(numBlk:Long) = make(numBlk, (i:Long)=>i%Place.numPlaces());
     public static def makeCylic(numBlk:Long, numPlc:Long) = make(numBlk, (i:Long)=>i%numPlc);
     public static def makeUnique() = make(Place.numPlaces(), (i:Long)=>i);
-    public static def makeUnique(places:PlaceGroup) = make(places.size(), (i:Long)=>i);
     public static def makeUnique(numBlk:Long) = make(numBlk, (i:Long)=>i);
     
     public static def makeConstant(numBlk:Long) = make(numBlk, (i:Long)=>0L);
@@ -93,30 +88,25 @@ public class DistMap(numBlock:Long, numPlace:Long)  {
     }
 
     /**
-     * Add block ID and place Index in mapping
+     * Add block ID and place ID in mapping
      */
-     public def set(blkID:Long, plcIndex:Long) {
-         blockmap(blkID)=plcIndex;
+     public def set(blkID:Long, plcID:Long) {
+         blockmap(blkID)=plcID;
      }
      
      /**
       * Find place ID for a given block ID
       */
      @Inline
-     public def findPlace(blkID:Long):Long = Place.places()(this.blockmap(blkID)).id;
-
-     @Inline
-     public def findPlace(blkID:Long, places:PlaceGroup):Long = places(this.blockmap(blkID)).id;
-
-     public def findPlaceIndex(blkID:Long):Long = this.blockmap(blkID);
+     public def findPlace(blkID:Long):Long = this.blockmap(blkID);
     
      /**
       * Get block ID set mapped to the same place
       */
-     public def buildBlockListAtPlace(plcIndex:Long):ArrayList[Long] {
+     public def buildBlockListAtPlace(plcID:Long):ArrayList[Long] {
          val blst = new ArrayList[Long]();
          for (var b:Long=0; b<blockmap.size; b++)
-             if (blockmap(b) == plcIndex)
+             if (blockmap(b) == plcID)
                  blst.add(b);
          blst.sort((a:Long,b:Long)=>(a-b) as Int);
          return blst;
@@ -124,10 +114,9 @@ public class DistMap(numBlock:Long, numPlace:Long)  {
      
      /**
       * Return iterator on blocks within the specified place
-      * Used by BlockSet
       */
-     public def buildBlockIteratorAtPlace(plcIndex:Long) : Iterator[Long] {
-         val blst = buildBlockListAtPlace(plcIndex);
+     public def buildBlockIteratorAtPlace(plcID:Long) : Iterator[Long] {
+         val blst = buildBlockListAtPlace(plcID);
          return blst.iterator();
      }
      

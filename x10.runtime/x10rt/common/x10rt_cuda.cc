@@ -195,11 +195,6 @@ namespace {
             case CUDA_ERROR_INVALID_PC:
                 errstr = "CUDA_ERROR_INVALID_PC"; break;
             #endif
-
-            #if CUDA_VERSION >= 6050
-            case CUDA_ERROR_INVALID_GRAPHICS_CONTEXT:
-                errstr = "CUDA_ERROR_INVALID_GRAPHICS_CONTEXT"; break;
-            #endif
         }
         fprintf(stderr,"%s (At %s:%d)\n",errstr,file,line);
         abort();
@@ -759,8 +754,8 @@ void x10rt_cuda_blocks_threads (x10rt_cuda_ctx *ctx, x10rt_msg_type type, int dy
     // round up to 512 bytes (the granularity of shm allocation)
     int shm = round_up(dyn_shm + static_shm, 512);
 
-    int alloc_size = (major>=2) ? 512 : 256;
-    int max_threads = (major>=2) ? 1024 : 512;
+    int alloc_size = (minor>=2) ? 512 : 256;
+    int max_threads = (minor>=2) ? 1024 : 768;
 
     while (*cfg) {
         int b = *(cfg++);

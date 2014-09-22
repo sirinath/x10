@@ -1,4 +1,4 @@
-/* Current test harness gets confused by packages, but it would be in package expsome_Places1;
+/* Current test harness gets confused by packages, but it would be in package expsome_Places2;
 */
 // Warning: This file is auto-generated from the TeX source of the language spec.
 // If you need it changed, work with the specification writers.
@@ -26,9 +26,9 @@ public class Places20 extends x10Test {
     }
 
 
-// file Places line 39
+// file Places line 44
 
- static class Places1TestExp{
+ static class Places2TestExp{
   def check()  = Place.FIRST_PLACE;  }
 
  static class Hook {

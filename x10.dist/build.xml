@@ -13,8 +13,8 @@
     <property name="lpg.jar.url" value="http://x10.sourceforge.net/dependencies/lpg.runtime.java_2.0.22.jar"/>
     <property name="ecj.jar" value="ecj-4.4.jar"/>
     <property name="ecj.jar.url" value="http://x10.sourceforge.net/dependencies/ecj-4.4.jar"/>
-    <property name="hazelcast.jar" value="hazelcast-3.3.jar"/>
-    <property name="hazelcast.jar.url" value="http://x10.sourceforge.net/dependencies/hazelcast-3.3.jar"/>
+    <property name="hazelcast.jar" value="hazelcast-3.2.jar"/>
+    <property name="hazelcast.jar.url" value="http://x10.sourceforge.net/dependencies/hazelcast-3.2.jar"/>
     <property name="wala.jar" value="com.ibm.wala.cast.java_1.0.0.201101071300.jar"/>
     <property name="wala.jar.url" value="http://x10.sourceforge.net/dependencies/com.ibm.wala.cast.java_1.0.0.201101071300.jar"/>
     <property name="wala2.jar" value="com.ibm.wala.cast_1.0.0.201101071300.jar"/>
@@ -27,8 +27,8 @@
     <property name="equinox.jar.url" value="http://x10.sourceforge.net/dependencies/org.eclipse.equinox.common_3.6.0.v20100503.jar"/>
     <property name="math.jar" value="commons-math3-3.3.jar"/>
     <property name="math.jar.url" value="http://x10.sourceforge.net/dependencies/commons-math3-3.3.jar"/>
-    <property name="log.jar" value="commons-logging-1.2.jar"/>
-    <property name="log.jar.url" value="http://x10.sourceforge.net/dependencies/commons-logging-1.2.jar"/>
+    <property name="log.jar" value="commons-logging-1.1.3.jar"/>
+    <property name="log.jar.url" value="http://x10.sourceforge.net/dependencies/commons-logging-1.1.3.jar"/>
     <property name="logging.properties" value="logging.properties"/>
     <property name="x10.bridge.location" location="${x10.home}/x10.wala"/>
     <property name="bridge.jar" value="x10wala.jar" />
@@ -477,6 +477,7 @@
             description="configure bin directory"
             depends="bin-deps"
             unless="bin.up-to-date">
+        <antcall target="apgas"/>
         <antcall target="x10"/>
         <antcall target="x10c"/>
         <antcall target="x10cj"/>
@@ -499,6 +500,10 @@
     </target>
 
     <target name="bin-deps">
+        <uptodate property="apgas.up-to-date" targetfile="${bin}/apgas">
+            <srcfiles file="${ant.file}"/>
+            <srcfiles file="${bin}/apgas.in"/>
+        </uptodate>
         <uptodate property="x10.up-to-date" targetfile="${bin}/x10">
             <srcfiles file="${ant.file}"/>
             <srcfiles file="${bin}/x10.in"/>
@@ -521,6 +526,7 @@
         </uptodate>
         <condition property="bin.up-to-date">
             <and>
+                <isset property="apgas.up-to-date"/>
                 <isset property="precommit.up-to-date"/>
                 <isset property="x10.up-to-date"/>
                 <isset property="x10c.up-to-date"/>
@@ -582,18 +588,17 @@
 	<echo file="${bin}/defs" append="no">#!/usr/bin/env bash
 # DO NOT EDIT - This file was automatically generated.
 UNAME=`uname -smp | sed -e 's/ /,/g'`
-unset IS_CYGWIN; if [[ "$UNAME" = CYGWIN* ]]; then IS_CYGWIN=1; fi
-FILE_SEP='/'; if [ -n "$IS_CYGWIN" ]; then FILE_SEP='\\'; fi
-PATH_SEP=':'; if [ -n "$IS_CYGWIN" ]; then PATH_SEP=';'; fi
+FILE_SEP='/'; if [[ "$UNAME" = CYGWIN* ]]; then FILE_SEP='\\'; fi
+PATH_SEP=':'; if [[ "$UNAME" = CYGWIN* ]]; then PATH_SEP=';'; fi
 
 prog="$(readlink "$0" 2&gt;&amp;1)"
 [ $? -eq 127 -o "$prog" = "" ] &amp;&amp; prog="$0"
 TOP="$(cd "$(dirname "$prog")/.." &amp;&amp; pwd)"
-if [ -n "$IS_CYGWIN" ]; then PATH="$PATH:$TOP/lib"; TOP="$(cygpath -am "$TOP")"; fi
+if [[ "$UNAME" = CYGWIN* ]]; then PATH="$PATH:$TOP/lib"; TOP="$(cygpath -am "$TOP")"; fi
 
 [ -n "$JAVA_HOME" ] || JAVA_HOME='${env.JAVA_HOME}'
 [ -n "$JRE_HOME" ] || JRE_HOME='${java.home}'
-if [ -n "$IS_CYGWIN" ]; then JAVA_HOME="$(cygpath -am "$JAVA_HOME")"; JRE_HOME="$(cygpath -am "$JRE_HOME")"; fi
+if [[ "$UNAME" = CYGWIN* ]]; then JAVA_HOME="$(cygpath -am "$JAVA_HOME")"; JRE_HOME="$(cygpath -am "$JRE_HOME")"; fi
 if [ -n "$JAVA_HOME" -a -e "$JAVA_HOME/bin/java" ]; then
     JAVA="$JAVA_HOME/bin/java"
     JAR="$JAVA_HOME/bin/jar"
@@ -604,7 +609,7 @@ else
     echo "JAVA_HOME ($JAVA_HOME) is not pointing to a JRE or a JDK"
     exit 1
 fi
-if [ -n "$IS_CYGWIN" ]; then JAVA="$(cygpath -au "$JAVA")"; JAR="$(cygpath -au "$JAR")"; fi
+if [[ "$UNAME" = CYGWIN* ]]; then JAVA="$(cygpath -au "$JAVA")"; JAR="$(cygpath -au "$JAR")"; fi
 
 # NOTE: the above assumes that Cygwin==win32 (probably valid)
 
@@ -706,6 +711,22 @@ X10RT_PAMI_IS_DEFAULT='${X10RT_PAMI_IS_DEFAULT}'
         <delete file="${bin}/defs"/>
     </target>
 
+    <target name="apgas" unless="apgas.up-to-date"
+            depends="executable-defs"
+            description="creates the executable script apgas">
+        <echo message="Creating ${bin}/apgas"/>
+        <concat destfile="${bin}/apgas" append="no">
+            <filelist dir="${bin}" files="defs"/>
+        </concat>
+        <concat destfile="${bin}/apgas" append="yes">
+            <filelist dir="${bin}" files="apgas.in"/>
+        </concat>
+
+        <chmod perm="+x" file="${bin}/apgas"/>
+
+        <delete file="${bin}/defs"/>
+    </target>
+
     <target name="tar-location" depends="init" unless="tar.location">
         <property name="tar.location" value="${x10.home}"/>
     </target>
@@ -744,12 +765,10 @@ X10RT_PAMI_IS_DEFAULT='${X10RT_PAMI_IS_DEFAULT}'
             <tarfileset prefix="x10.wala" dir="${x10.bridge.location}" excludes="releng/**,**/.*.swp,bin/**"/>
             <tarfileset prefix="x10.tests" dir="${x10.tests.location}" excludes="releng/**,**/.*.swp,lib/**,bin/**"/>
             <tarfileset prefix="x10.tests" dir="${x10.tests.location}" excludes="releng/**,**/.*.swp,lib/**" includes="bin/*" filemode="755" />
-            <tarfileset prefix="apgas" dir="${x10.home}/apgas" excludes="bin/**,**/.*.swp,classes/**"/>
-            <tarfileset prefix="apgas.examples" dir="${x10.home}/apgas.examples" excludes="bin/**,**/.*.swp,classes/**"/>
-            <tarfileset prefix="apgas.impl" dir="${x10.home}/apgas.impl" excludes="bin/**,**/.*.swp,classes/**"/>
-            <tarfileset prefix="apgas.tests" dir="${x10.home}/apgas.tests" excludes="bin/**,**/.*.swp,classes/**"/>
             <tarfileset prefix="apgas.cpp" dir="${x10.home}/apgas.cpp" excludes="bin/**,**/.*.swp,classes/**"/>
             <tarfileset prefix="apgas.cpp.examples" dir="${x10.home}/apgas.cpp.examples" excludes="bin/**,**/.*.swp,classes/**"/>
+            <tarfileset prefix="apgas.java" dir="${x10.home}/apgas.java" excludes="bin/**,**/.*.swp,classes/**"/>
+            <tarfileset prefix="apgas.java.examples" dir="${x10.home}/apgas.java.examples" excludes="bin/**,**/.*.swp,classes/**"/>
         </tar>
     </target>
     <target name="test-tar" depends="testtar"/>

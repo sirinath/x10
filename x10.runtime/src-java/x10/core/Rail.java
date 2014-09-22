@@ -412,10 +412,8 @@ public final class Rail<T> extends Ref implements x10.lang.Iterable,
             this.notif = notif;
         }
         public void $apply() {
-            if (numElems > 0) {
-                Object dstData = dst.$apply().getBackingArray();
-                System.arraycopy(srcData, 0, dstData, dstIndex, numElems);
-            }
+            Object dstData = dst.$apply().getBackingArray();
+            System.arraycopy(srcData, 0, dstData, dstIndex, numElems);
             if (notif != null) {
                 notif.$apply();
             }

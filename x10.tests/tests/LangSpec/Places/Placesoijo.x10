@@ -26,12 +26,11 @@ public class Placesoijo extends x10Test {
     }
 
 
-// file Places line 61
+// file Places line 75
  static  class Example {
  def example() {
 val h0 = here;
-val world = Place.places();
-at (world.next(here)) {
+at (Place.places().next(here)) {
   val h1 = here;
   assert (h0 != h1);
 }

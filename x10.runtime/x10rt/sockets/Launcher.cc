@@ -456,9 +456,12 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 	if (!onlyCheckForNewConnections)
 		fprintf(stderr, "Launcher %d: main loop start\n", _myproc);
 	#endif
-	bool running = true;
+	bool parent_alive = true;
+    int num_children_alive = _numchildren + 1; // must include runtime
 
-	while (running)
+    // [DC] resilient X10: if your parent launcher dies, you always die (TODO: heal the tree)
+    // [DC] resilient X10: only die if you have run out of children
+	while (parent_alive && num_children_alive>0)
 	{
 		struct timeval timeout = { 0, 100000 };
 		fd_set infds, efds;
@@ -501,10 +504,10 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 		if (_parentLauncherControlLink >= 0)
 		{
 			if (FD_ISSET(_parentLauncherControlLink, &efds))
-				running = handleDeadParent();
+				parent_alive = handleDeadParent();
 			else if (FD_ISSET(_parentLauncherControlLink, &infds))
 				if (handleControlMessage(_parentLauncherControlLink) < 0)
-					running = handleDeadParent();
+					parent_alive = handleDeadParent();
 		}
 		/* runtime and children control, stdout and stderr */
 		for (uint32_t i = 0; i <= _numchildren; i++)
@@ -513,31 +516,32 @@ void Launcher::handleRequestsLoop(bool onlyCheckForNewConnections)
 			if (_childControlLinks[i] >= 0)
 			{
 				if (FD_ISSET(_childControlLinks[i], &efds))
-					running = handleDeadChild(i, 0);
+					this_child_alive = handleDeadChild(i, 0);
 				else if (FD_ISSET(_childControlLinks[i], &infds))
 					if (handleControlMessage(_childControlLinks[i]) < 0)
-						running = handleDeadChild(i, 0);
+						this_child_alive = handleDeadChild(i, 0);
 			}
 
 			if (_childCoutLinks[i] >= 0)
 			{
 				if (FD_ISSET(_childCoutLinks[i], &efds))
-					running = handleDeadChild(i, 1);
+					this_child_alive = handleDeadChild(i, 1);
 				else if (FD_ISSET(_childCoutLinks[i], &infds))
-					running = handleChildCout(i);
+					this_child_alive = handleChildCout(i);
 			}
 
 			if (_childCerrorLinks[i] >= 0)
 			{
 				if (FD_ISSET(_childCerrorLinks[i], &efds))
-					running = handleDeadChild(i, 2);
+					this_child_alive = handleDeadChild(i, 2);
 				else if (FD_ISSET(_childCerrorLinks[i], &infds))
-					running = handleChildCerror(i);
+					this_child_alive = handleChildCerror(i);
 			}
+            if (!this_child_alive) num_children_alive--;
 		}
 	}
     #ifdef DEBUG
-        fprintf(stderr, "Launcher %d: coming out of main loop\n", _myproc);
+        fprintf(stdout, "Launcher %d: coming out of main loop\n", _myproc);
     #endif
 
 	/* --------------------------------------------- */
@@ -878,14 +882,14 @@ bool Launcher::handleDeadChild(uint32_t childNo, int type)
 			{
 				_exitcode = 128 + WSTOPSIG(status);
 				#ifdef DEBUG
-					fprintf(stderr, "Launcher %d: Local runtime stopped with code %i\n", _myproc, WSTOPSIG(status));
+					fprintf(stdout, "Launcher %d: Local runtime stopped with code %i\n", _myproc, WSTOPSIG(status));
 				#endif
 			}
 			#ifdef DEBUG
 			else if (WIFCONTINUED(status))
-				fprintf(stderr, "Launcher %d: Local runtime continue signal detected\n", _myproc);
+				fprintf(stdout, "Launcher %d: Local runtime continue signal detected\n", _myproc);
 			else
-				fprintf(stderr, "Launcher %d: Local runtime exit status unknown\n", _myproc);
+				fprintf(stdout, "Launcher %d: Local runtime exit status unknown\n", _myproc);
 			#endif
 		}
 		else if (WIFEXITED(status) && WEXITSTATUS(status) > 0)
@@ -894,10 +898,10 @@ bool Launcher::handleDeadChild(uint32_t childNo, int type)
 			// forward the signal and exit immediately
 			_exitcode = WEXITSTATUS(status);
 			#ifdef DEBUG
-				fprintf(stderr, "Launcher %d: child launcher gave return code %i.  Forwarding.\n", _myproc, _exitcode);
+				fprintf(stdout, "Launcher %d: child runtime gave return code %i.  Forwarding.\n", _myproc, _exitcode);
 			#endif
 			//Launcher::cb_sighandler_term(SIGTERM);
-			//return false;
+			return false;
 		}
 	}
 	#ifdef DEBUG
@@ -911,16 +915,9 @@ bool Launcher::handleDeadChild(uint32_t childNo, int type)
 	// check to see if *all* child links are down
 	for (uint32_t i=0; i<=_numchildren; i++)
 	{
-		if (_pidlst[i] != -1) {
-			#ifdef DEBUG
-				fprintf(stderr, "Launcher %d: at least one child is still alive\n", _myproc);
-			#endif
+		if (_pidlst[i] != -1)
 			return true;
-		}
 	}
-	#ifdef DEBUG
-		fprintf(stderr, "Launcher %d: all children appear to be dead\n", _myproc);
-	#endif
 	return false;
 }
 
@@ -1152,8 +1149,7 @@ void Launcher::cb_sighandler_cld(int signo)
         // Note that "X10_RESILIENT_MODE" is also checked in Configuration.x10
         char* resilient_mode = getenv(X10_RESILIENT_MODE);
         bool resilient_x10 = (resilient_mode!=NULL && strtol(resilient_mode, NULL, 10) != 0);
-
-        if (!resilient_x10) {
+        if ((_singleton->_myproc == 0 && signo!=SIGCHLD) || !resilient_x10) {
             _singleton->_dieAt = SHUTDOWN_GRACE_PERIOD+time(NULL); // SHUTDOWN_GRACE_PERIOD seconds into the future
             #ifdef DEBUG
                 fprintf(stderr, "Launcher %d: started the doomsday device\n", _singleton->_myproc);
@@ -1308,11 +1304,6 @@ void Launcher::startSSHclient(uint32_t id, char* masterPort, char* remotehost)
 {
 	char * cmd = (char *) _realpath;
 
-	bool usePseudoTTY = true;
-	char * pseudoTTYEnv = getenv(X10_LAUNCHER_TTY);
-	if (pseudoTTYEnv != NULL)
-		usePseudoTTY = checkBoolEnvVar(pseudoTTYEnv);
-
     // leak a bunch of memory, we're about to exec anyway and that will clean it up
     // on all OS that we care about
 
@@ -1329,11 +1320,9 @@ void Launcher::startSSHclient(uint32_t id, char* masterPort, char* remotehost)
 	char ** argv = (char **) alloca (sizeof(char *) * (_argc+environ_sz+32));
 	int z = 0;
 	argv[z] = _ssh_command;
-	if (usePseudoTTY) {
-		static char ttyarg[] = "-t";
-		argv[++z] = ttyarg;
-		argv[++z] = ttyarg; // put in -t twice
-	}
+	static char ttyarg[] = "-t";
+	argv[++z] = ttyarg;
+	argv[++z] = ttyarg; // put in -t twice
 	static char quietarg[] = "-q";
 	argv[++z] = quietarg;
 	argv[++z] = remotehost;

@@ -32,14 +32,14 @@ package x10.util;
  * }
  * 
  */
-public class WorkerLocalStorage[Key,Value] {Value haszero} {
+public class WorkerLocalStorage[Key,Value] {
     private val store = PlaceLocalHandle.make(Place.places(),
             ():Rail[HashMap[Key,Value]] => new Rail[HashMap[Key,Value]](Runtime.MAX_THREADS));
 
-    public def get(key:Key):Value {
+    public def get(key:Key):Box[Value] {
         val id = Runtime.workerId();
         val localStore = store();
-        if (null == localStore(id)) return Zero.get[Value]();
+        if (null == localStore(id)) return null;
         return localStore(id).get(key);
     }
 
@@ -57,17 +57,17 @@ public class WorkerLocalStorage[Key,Value] {Value haszero} {
         return localStore(id).getOrThrow(key);
     }
 
-    public def put(key:Key, value:Value):Value {
+    public def put(key:Key, value:Value):Box[Value] {
         val id = Runtime.workerId();
         val localStore = store();
         if (null == localStore(id)) localStore(id) = new HashMap[Key,Value]();
         return localStore(id).put(key, value);
     }
 
-    public def remove(key:Key):Value {
+    public def remove(key:Key):Box[Value] {
         val id = Runtime.workerId();
         val localStore = store();
-        if (null == localStore(id)) return Zero.get[Value]();
+        if (null == localStore(id)) return null;
         return localStore(id).remove(key);
     }
 }

@@ -26,9 +26,9 @@ public class Types6e6x extends x10Test {
     }
 
 
-// file Classes line 2548
+// file Classes line 2547
  static interface Named { def name():String; }
- static class NameMap[T]{T <: Named, T haszero} {
+ static class NameMap[T]{T <: Named} {
    val m = new HashMap[String, T]();
    def put(t:T) { m.put(t.name(), t); }
    def get(s:String):T = m.getOrThrow(s);

@@ -273,8 +273,7 @@ namespace {
         x10rt_emu_init(counter);
 
         x10rt_emu_coll_init(counter);
-        if (checkBoolEnvVar(getenv("X10RT_FORCE_NATIVE_COLLECTIVES")))
-            usleep(1000000); // sleep for 1 second
+        usleep(1000000); // sleep for 1 second
         has_remote_op = !checkBoolEnvVar(getenv("X10RT_EMULATE_REMOTE_OP")) && x10rt_net_remoteop_support();
         if (checkBoolEnvVar(getenv("X10RT_EMULATE_COLLECTIVES")))
         	has_collectives = X10RT_COLL_NOCOLLECTIVES;

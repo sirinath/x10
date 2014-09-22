@@ -101,13 +101,14 @@ class ResilientKMeans {
                     }
                 }
             } catch (es:MultipleExceptions) {
-                val deadPlaceExceptions = es.getExceptionsOfType[DeadPlaceException]();
-                for (dpe in deadPlaceExceptions) {
-                    Console.OUT.println("DeadPlaceException thrown from " + dpe.place);
-                    // No recovery is necessary, completeness will be checked by the value of processed_points
+                for (e in es.exceptions()) {
+                    if (e instanceof DeadPlaceException) {
+                        Console.OUT.println("DeadPlaceException thrown from " + (e as DeadPlaceException).place);
+                        // No recovery is necessary, values should be delivered to live places
+                    } else {
+                        Console.OUT.println("Unmanagable exception " + e); throw e;
+                    }
                 }
-                val filtered = es.filterExceptionsOfType[DeadPlaceException]();
-                if (filtered != null) throw filtered;
             }
             //val dist_clusters_after = System.nanoTime();
             //Console.OUT.println("Took "+(dist_clusters_after-dist_clusters_before)/1E9+" seconds");
@@ -199,13 +200,14 @@ class ResilientKMeans {
                     start = end; // point to be processed at the next place
                 } /* finish for (pl) */
             } catch (es:MultipleExceptions) {
-                val deadPlaceExceptions = es.getExceptionsOfType[DeadPlaceException]();
-                for (dpe in deadPlaceExceptions) {
-                    Console.OUT.println("DeadPlaceException thrown from " + dpe.place);
-                    // No recovery is necessary, completeness will be checked by the value of processed_points
+                for (e in es.exceptions()) {
+                    if (e instanceof DeadPlaceException) {
+                        Console.OUT.println("DeadPlaceException thrown from " + (e as DeadPlaceException).place);
+                        // No recovery is necessary, completeness will be checked by the value of processed_points
+                    } else {
+                        Console.OUT.println("Unmanagable exception " + e); throw e;
+                    }
                 }
-                val filtered = es.filterExceptionsOfType[DeadPlaceException]();
-                if (filtered != null) throw filtered;
             }
             //val compute_clusters_after = System.nanoTime();
             //Console.OUT.println("Took "+(compute_clusters_after-compute_clusters_before)/1E9+" seconds");

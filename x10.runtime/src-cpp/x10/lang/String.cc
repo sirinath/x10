@@ -508,8 +508,6 @@ x10_boolean String::endsWith(String* s) {
 
 
 String* String::__plus(String* p1, String* p2) {
-    if (NULL == p1) { p1 = makeStringLit("null"); }
-    if (NULL == p2) { p2 = makeStringLit("null"); }
     std::size_t newLength = p1->FMGL(content_length) + p2->FMGL(content_length);
     char *newChars = x10aux::alloc<char>(newLength+1, false);
     memcpy(newChars, p1->FMGL(content), p1->FMGL(content_length));
@@ -533,7 +531,6 @@ String* String::__plus(x10_boolean p1, String* p2) {
 String* String::__plus(String* p1, T p2) { \
     char buf[SZ]; \
     size_t used = (size_t)(::snprintf(buf, SZ, FMT, (C)p2)); \
-    if (NULL == p1) { p1 = makeStringLit("null"); } \ 
     std::size_t newLength = p1->FMGL(content_length) + used; \
     char *newChars = x10aux::alloc<char>(newLength+1, false); \
     memcpy(newChars, p1->FMGL(content), p1->FMGL(content_length)); \
@@ -544,7 +541,6 @@ String* String::__plus(String* p1, T p2) { \
 String* String::__plus(T p1, String* p2) { \
     char buf[SZ]; \
     size_t used = (size_t)(::snprintf(buf, SZ, FMT, (C)p1)); \
-    if (NULL == p2) { p2 = makeStringLit("null"); } \ 
     std::size_t newLength = used + p2->FMGL(content_length); \
     char *newChars = x10aux::alloc<char>(newLength+1, false); \
     memcpy(newChars, buf, used);                              \

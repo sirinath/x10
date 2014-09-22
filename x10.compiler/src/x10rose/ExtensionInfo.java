@@ -1,5 +1,5 @@
 /*
- *  This file is part of the X10 project (http://x10-lang.org).
+b *  This file is part of the X10 project (http://x10-lang.org).
  *
  *  This file is licensed to You under the Eclipse Public License (EPL);
  *  You may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ import x10.visit.IfdefVisitor;
 import x10.visit.X10TypeBuilder;
 import x10.visit.X10TypeChecker;
 import x10rose.visit.RoseTranslator;
-import x10rose.visit.SourceVisitor;
+import x10rose.visit.RoseTranslator.ToRoseVisitor;
 
 /**
  * Extension information for x10 extension.
@@ -201,8 +201,8 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 
 			    @Override
 				protected boolean invokePostCompiler(Options options, Compiler compiler, ErrorQueue eq)  {
-			    	SourceVisitor.isGatheringFile = false;
-		    		SourceVisitor roseVisitor = new SourceVisitor(null, null);
+			    	ToRoseVisitor.isGatheringFile = false;
+		    		ToRoseVisitor roseVisitor = new ToRoseVisitor(null, null);
 		    		
 			    	for (int i = 0; i < sourceList.size(); ++i) {
 			    		SourceFile_c file = sourceList.get(i);

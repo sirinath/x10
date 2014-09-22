@@ -94,7 +94,7 @@ public final class Runtime {
         var body:()=>void = msgBody;
         if (CANCELLABLE) {
             val epoch = epoch();
-            if (activity() != null && activity().epoch < epoch) throw new DeadPlaceException("Cancelled");
+            if (activity().epoch < epoch) throw new DeadPlaceException("Cancelled");
             body = ()=> {
                 if (epoch > epoch()) pool.flush(epoch);
                 if (epoch == epoch()) msgBody();
@@ -126,7 +126,7 @@ public final class Runtime {
                                             prof:Profile, preSendAction:()=>void):void {
         val epoch = epoch();
         if (CANCELLABLE) {
-            if (activity() != null && activity().epoch < epoch) throw new DeadPlaceException("Cancelled");
+            if (activity().epoch < epoch) throw new DeadPlaceException("Cancelled");
         }
         x10rtSendAsyncInternal(epoch, id, body, finishState, prof, preSendAction);
     }
@@ -391,9 +391,7 @@ public final class Runtime {
         // check max thread count has not been reached
         def check(new_count:Int):void {
             if (new_count > MAX_THREADS) {
-                if (new_count < MAX_THREADS + 100 || (new_count % 100 == 0)) {
-                    println(here+": TOO MANY THREADS (there are now "+new_count+" threads).");
-                }
+                println(here+": TOO MANY THREADS (there are now "+new_count+" threads).");
                 throw new InternalError(here+": TOO MANY THREADS (there are now "+new_count+" threads).");
             }
             if (WARN_ON_THREAD_CREATION) {
@@ -697,7 +695,6 @@ public final class Runtime {
     static class Pool {
         val latch = new Latch();
         val watcher = new Watcher();
-        var cancelWatcher:Watcher = null;
         
         var wsEnd:Boolean = false;
 
@@ -1030,17 +1027,10 @@ public final class Runtime {
     }
 
     /*
-     * Cancel all jobs.
-     * 
-     * Cancellation might fail, i.e., waiting on the watcher may throw an exception
-     * if places are lost during cancellation or due to multiple concurrent cancellation calls.
-     * 
-     * If a place is added while cancellation is in progress, the runtime may end up in an incosistent
-     * state were the added place does not belong to the same epoch as the existing places.
+     * Cancel all jobs
      */
     public static def cancelAll():Watcher {
         val watcher = new Watcher();
-        pool.cancelWatcher = watcher;
         val wrapper = ()=>{ try { cancelWave(); } catch (t:Exception) { watcher.raise(t); } finally { watcher.release(); } };
         submitUncounted(wrapper);
         return watcher;
@@ -1334,15 +1324,15 @@ public final class Runtime {
                     val me2 = (box as GlobalRef[RemoteControl]{home==here})();
                     me2.release();
                 };
-                x10rtSendMessageInternal(box.home.id, closure, null, null);
+                x10rtSendMessage(box.home.id, closure, null);
                 Unsafe.dealloc(closure);
             };
-        x10rtSendMessageInternal(place.id, latchedBody, null, null);
+        x10rtSendMessage(place.id, latchedBody, null);
         Unsafe.dealloc(latchedBody);
         me.await(); // wait until body is executed at remote place
       } else { // asynchronous exec
         val simpleBody = () => @x10.compiler.RemoteInvocation("runAtSimple_3") { body(); };
-        x10rtSendMessageInternal(place.id, simpleBody, null, null);
+        x10rtSendMessage(place.id, simpleBody, null);
         Unsafe.dealloc(simpleBody);
         // *not* wait until body is executed at remote place
       }
@@ -1524,12 +1514,6 @@ public final class Runtime {
     }
 
     static def notifyPlaceDeath() : void {
-        if (CANCELLABLE) {
-            if (pool.cancelWatcher != null) {
-                pool.cancelWatcher.raise(new DeadPlaceException());
-                pool.cancelWatcher.release();
-            }
-        }
         if (RESILIENT_MODE == Configuration.RESILIENT_MODE_NONE) {
             // This case seems occur naturally on shutdown, so transparently ignore it.
             // The launcher is responsible for tear-down in the case of place death, nothing we need to do.

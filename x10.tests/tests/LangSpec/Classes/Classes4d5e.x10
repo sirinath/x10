@@ -17,6 +17,7 @@
 
 import harness.x10Test;
 
+// SKIP_NATIVE_X10: XTENLANG-1191 Native X10 does not support non-final generic instance methods
 
 
 public class Classes4d5e extends x10Test {
@@ -41,7 +42,6 @@ public class Classes4d5e extends x10Test {
     // ERROR: t14.m(true);
   }
 }
- // SKIP_NATIVE_X10: XTENLANG-1191 Native X10 does not support non-final generic instance methods
 
  static class Hook {
    def run():Boolean = true;

@@ -55,7 +55,7 @@ public class Alltoall extends x10Test {
         val res:Cell[Boolean] = new Cell[Boolean](true);
         val gr:GlobalRef[Cell[Boolean]] = GlobalRef[Cell[Boolean]](res);
         finish for (p in Place.places()) {
-            at(p) async allToAllTest(Team.WORLD, gr);
+            async at(p) allToAllTest(Team.WORLD, gr);
         }
 
         return res();

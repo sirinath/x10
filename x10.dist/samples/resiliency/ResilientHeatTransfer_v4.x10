@@ -303,9 +303,10 @@ public class ResilientHeatTransfer_v4 {
                     }
                 }
             } catch (e:MultipleExceptions) {
-                val filtered = e.filterExceptionsOfType[DeadPlaceException]();
-                if (filtered != null) throw filtered;
-                // TODO restore
+                for (e2 in e.exceptions()) {
+                    if (!(e2 instanceof DeadPlaceException)) throw e2;
+                    Console.OUT.println(e2);
+                }
             }
             if (cfg.verbose) outputAcrossAllPlaces(plh, iter);
             iterationCounter++;

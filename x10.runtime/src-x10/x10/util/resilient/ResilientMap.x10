@@ -13,6 +13,7 @@ package x10.util.resilient;
 
 import x10.compiler.Native;
 import x10.compiler.NativeRep;
+import x10.util.Box;
 
 /**
  * The ResilientMap abstract class defines an interface for resilient stores.
@@ -20,13 +21,15 @@ import x10.compiler.NativeRep;
  * implements this interface for managed X10.  Native implementations are also
  * possible (but not yet implemented).
  */
-public abstract class ResilientMap[K,V] {V haszero} {
+
+
+public abstract class ResilientMap[K,V] {
 
     /**
      * Factory method to create resilient map.
      */
     @Native("java", "x10.util.resilient.managed.HazelcastMap.getMap(#K$rtt, #V$rtt, #mapName)")
-    public static def getMap[K,V](mapName:String){V haszero}:ResilientMap[K,V] {
+    public static def getMap[K,V](mapName:String):ResilientMap[K,V] {
         throw new Exception("ResilientMap is not supported in this configuration");
     }
 
@@ -66,7 +69,7 @@ public abstract class ResilientMap[K,V] {V haszero} {
     /**
      * Get the value of key k in the resilient map.
      */
-    public abstract def get(k:K):V;
+    public abstract def get(k:K): Box[V];
 
     /**
      * Check if the resilient map contains any mappings.
@@ -109,14 +112,14 @@ public abstract class ResilientMap[K,V] {V haszero} {
     /**
      * Associate value v with key k in the resilient map.
      */
-    public abstract def put(k:K, v:V):V;
+    public abstract def put(k:K, v:V): Box[V];
 
     /**
      * Asynchronously put value v with key k in the resilient map returning
      * a future that when forced will return the previous value (if any) 
      * that was stored for key k.  
      */
-    public abstract def asyncPutFuture(k:K, v:V):()=>V;
+    public abstract def asyncPutFuture(k:K, v:V):()=>Box[V];
 
     /**
      * Asynchronously put value v with key k in the resilient map.
@@ -128,14 +131,14 @@ public abstract class ResilientMap[K,V] {V haszero} {
     /**
      * Remove any value associated with key k from the resilient map.
      */
-    public abstract def remove(k:K):V;
+    public abstract def remove(k:K): Box[V];
 
     /**
      * Asynchronously remove the given key from the resilient map returning
      * a future that when forced will return the previous value (if any) 
      * that was stored for key k.  
      */
-    public abstract def asyncRemoveFuture(k:K):()=>V;
+    public abstract def asyncRemoveFuture(k:K):()=>Box[V];
 
     /**
      * Asynchronously remove the given key.

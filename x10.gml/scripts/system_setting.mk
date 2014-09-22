@@ -56,11 +56,15 @@ ifdef JAVA_HOME
   endif
 endif
 
+# comment the following lines to disable BLAS and LAPACK wrappers
+ADD_BLAS	= yes
+ADD_LAPACK	= yes
+
 # BLAS and LAPACK compiler options
-ifndef DISABLE_BLAS
+ifdef ADD_BLAS
     X10CXX_PREARGS += -cxx-prearg -DENABLE_BLAS
 	add_jblas	= chk_jblas
-    ifndef DISABLE_LAPACK
+    ifdef ADD_LAPACK
         X10CXX_PREARGS += -cxx-prearg -DENABLE_LAPACK
 	add_jlapack	= chk_jlapack
     endif
@@ -72,7 +76,7 @@ ifdef BGQ
     CXX = /bgsys/drivers/ppcfloor/gnu-linux/bin/powerpc64-bgq-linux-g++
     # IBM ESSL on Blue Gene/Q
     BLASLIB = ESSL
-    ifndef DISABLE_BLAS
+    ifdef ADD_BLAS
         IBMCMP_ROOT = /opt/ibmcmp
         XLSMP_LIB_PATH = $(IBMCMP_ROOT)/xlsmp/bg/3.1/bglib64
         XLMASS_LIB_PATH = $(IBMCMP_ROOT)/xlmass/bg/7.3/bglib64
@@ -91,13 +95,13 @@ BLASLIB ?=
 ifeq ($(BLASLIB),ESSL)
     # IBM ESSL
     X10CXX_PREARGS += -cxx-prearg -D__essl__
-    ifndef DISABLE_BLAS
+    ifdef ADD_BLAS
         IBMCMP_ROOT = /opt/ibmcmp
         XLSMP_LIB_PATH ?= $(IBMCMP_ROOT)/xlsmp/3.1/lib64
         XLF_LIB_PATH ?= $(IBMCMP_ROOT)/xlf/14.1/lib64
         ESSL_LIB_PATH ?= /usr/lib64
         ESSL_LIB ?= esslsmp6464
-        ifndef DISABLE_LAPACK
+        ifdef ADD_LAPACK
             X10CXX_POSTARGS += -cxx-postarg -llapack
         endif
         X10CXX_POSTARGS += -cxx-postarg -L$(ESSL_LIB_PATH) -cxx-postarg -l$(ESSL_LIB) -cxx-postarg -L$(XLF_LIB_PATH) -cxx-postarg -lxlf90_r -cxx-postarg -L$(XLSMP_LIB_PATH) -cxx-postarg -lxlsmp -cxx-postarg -lxlopt -cxx-postarg -lxlfmath -cxx-postarg -lxl
@@ -106,24 +110,24 @@ ifeq ($(BLASLIB),ESSL)
 else
 ifeq ($(BLASLIB),GotoBLAS2)
     # GotoBLAS2
-    ifndef DISABLE_BLAS
+    ifdef ADD_BLAS
         X10CXX_POSTARGS += -cxx-postarg -L$(HOME)/GotoBLAS2 -cxx-postarg -lgoto2
-        ifndef DISABLE_LAPACK
+        ifdef ADD_LAPACK
             X10CXX_POSTARGS += -cxx-postarg -llapack
         endif
     endif
 else
 ifeq ($(BLASLIB),MKL)
     # Intel Math Kernel Library (LP64, 64-bit, libgomp)
-    ifndef DISABLE_BLAS
+    ifdef ADD_BLAS
         X10CXX_POSTARGS += -cxx-postarg -L$(MKLROOT)/lib/intel64 -cxx-postarg -lmkl_intel_lp64 -cxx-postarg -lmkl_core -cxx-postarg -lmkl_gnu_thread -cxx-postarg -ldl
         X10CXX_PREARGS += -cxx-prearg -fopenmp -cxx-prearg -m64 -cxx-prearg -I$(MKLROOT)/include
     endif
 else
     # assume NetLib reference BLAS/LAPACK
-    ifndef DISABLE_BLAS
+    ifdef ADD_BLAS
         X10CXX_POSTARGS += -cxx-postarg -L/usr/lib64 -cxx-postarg -lblas
-        ifndef DISABLE_LAPACK
+        ifdef ADD_LAPACK
             X10CXX_POSTARGS += -cxx-postarg -llapack
         endif
     endif

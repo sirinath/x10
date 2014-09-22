@@ -205,17 +205,13 @@ public class ResilientPlhHeatTransfer {
             Console.OUT.println(new String(new Rail[Char](l,' ')) + "DeadPlaceException thrown from " + deadPlace);
             livePlaces.remove(deadPlace); // may be removed multiple times
             restore_needed() = true; // TODO: better to check usePlaces.contains(deadPlace)
-        }  else if (e instanceof MultipleExceptions) {
+        } else if (e instanceof MultipleExceptions) {
             val exceptions = (e as MultipleExceptions).exceptions();
             Console.OUT.println(new String(new Rail[Char](l,' ')) + "MultipleExceptions size=" + exceptions.size);
-            val deadPlaceExceptions = (e as MultipleExceptions).getExceptionsOfType[DeadPlaceException]();
-            for (dpe in deadPlaceExceptions) {
-                processException(dpe, l+1);
-            }
-            val filtered = (e as MultipleExceptions).filterExceptionsOfType[DeadPlaceException]();
-            if (filtered != null) throw filtered;
+            for (ec in exceptions) processException(ec, l+1);
         } else {
-            Console.ERR.println("unhandled exception " + e);
+            Console.OUT.println(new String(new Rail[Char](l,' ')) + e);
+            throw e;
         }
     }
 }
