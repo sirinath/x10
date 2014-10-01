@@ -16,7 +16,6 @@ import x10.compiler.Inline;
 import x10.compiler.Pragma;
 import x10.compiler.StackAllocate;
 import x10.compiler.NativeCPPInclude;
-import x10.compiler.Immediate;
 
 import x10.io.Serializer;
 import x10.io.Deserializer;
@@ -1193,34 +1192,6 @@ public final class Runtime {
         Unsafe.dealloc(body);
     }
 
-
-    /**
-     * Run @Immediate asyncat
-     *
-     * This method is only intended to be targeted by the compiler.
-     * Therefore it is private.
-     *
-     * For correct operation, it requires that the body closure be 
-     * annotated with @Immediate so that it is given a network id;
-     * the compiler respects this invariant.
-     */
-    private static def runImmediateAsync(place:Place, body:()=>void, prof:Profile):void {
-        if (place.id == hereLong()) {
-            // copy body (at semantics) and then invoke immediately on current thread
-            val copiedBody = Runtime.deepCopy(body, prof);
-            try {
-                copiedBody();
-            } catch (e:CheckedThrowable) {
-                println("WARNING: Ignoring uncaught exception in @Immediate async.");
-                e.printStackTrace();
-            }
-        } else {
-            x10rtSendMessage(place.id, body, prof, null);
-        }
-        Unsafe.dealloc(body);
-    }
-
-
     /**
      * Run @Uncounted async
      */
@@ -1304,25 +1275,26 @@ public final class Runtime {
                     // We use manual deserialization to get correct handling of exceptions
                     @StackAllocate val deser = @StackAllocate new x10.io.Deserializer(bytes);
                     val bodyPrime = deser.readAny() as ()=>void;
-
-		    // Actually evaluate body at remote place.
                     bodyPrime();
-                    
-                    at (box.home) @Immediate("runAt_1") async {
+                    val closure = ()=> @x10.compiler.RemoteInvocation("runAt_1") { 
                         val me2 = (box as GlobalRef[RemoteControl]{home==here})();
                         me2.clockPhases = clockPhases;
                         me2.release();
-                    }
+                    };
+                    x10rtSendMessage(box.home.id, closure, null);
+                    Unsafe.dealloc(closure);
                 } catch (e:AtCheckedWrapper) {
                     throw e.getCheckedCause();
                 }
             } catch (e:CheckedThrowable) {
-                at (box.home) @Immediate("runAt_2") async {
+                val closure = ()=> @x10.compiler.RemoteInvocation("runAt_2") { 
                     val me2 = (box as GlobalRef[RemoteControl]{home==here})();
                     me2.e = e;
                     me2.clockPhases = clockPhases;
                     me2.release();
                 };
+                x10rtSendMessage(box.home.id, closure, null);
+                Unsafe.dealloc(closure);
             }
             activity().clockPhases = null;
         }
@@ -1436,8 +1408,7 @@ public final class Runtime {
                     @StackAllocate val ser2 = @StackAllocate new x10.io.Serializer();
                     ser2.writeAny(result);
                     val bytes2 = ser2.toRail();
-
-                    at (box.home) @Immediate("evalAt_1") async {
+                    val closure = ()=> @x10.compiler.RemoteInvocation("evalAt_1") { 
                         val me2 = (box as GlobalRef[Remote[Any]]{home==here})();
                         // me2 has type Box[T{box.home==here}]... weird
                         me2.clockPhases = clockPhases;
@@ -1450,16 +1421,20 @@ public final class Runtime {
                         }
                         me2.release();
                     };
+                    x10rtSendMessage(box.home.id, closure, null);
+                    Unsafe.dealloc(closure);
                 } catch (t:AtCheckedWrapper) {
                     throw t.getCheckedCause();
                 }
             } catch (e:CheckedThrowable) {
-                at (box.home) @Immediate("evalAt_2") async {
+                val closure = ()=> @x10.compiler.RemoteInvocation("evalAt_2") { 
                     val me2 = (box as GlobalRef[Remote[Any]]{home==here})();
                     me2.e = e;
                     me2.clockPhases = clockPhases;
                     me2.release();
                 };
+                x10rtSendMessage(box.home.id, closure, null);
+                Unsafe.dealloc(closure);
             }
             activity().clockPhases = null;
         }

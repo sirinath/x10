@@ -369,7 +369,7 @@ public class SparseCSR extends Matrix {
 	// Access temporary space
 	public def getTempCol():Rail[Double] {
 		if (tmpcol.size == 0L)
-			tmpcol = new Rail[Double](this.M);
+			tmpcol = new Rail[Double](this.M, 0.0);
 		else {
 			for (var i:Long=0; i<this.M; i++) tmpcol(i)=0.0;
 		}
@@ -378,7 +378,7 @@ public class SparseCSR extends Matrix {
 
 	public def getTempRow():Rail[Double] {
 		if (tmprow.size == 0L) 
-			tmprow = new Rail[Double](this.N);
+			tmprow = new Rail[Double](this.N, 0.0);
 		else {
 			// reset the temp array
 			for (var i:Long=0; i<this.N; i++) tmprow(i) = 0.0;
