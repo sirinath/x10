@@ -17,6 +17,7 @@ import x10.util.StringBuilder;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.util.Debug;
 import x10.matrix.util.MathTool;
 import x10.matrix.block.Grid;
 import x10.matrix.block.MatrixBlock;
@@ -123,8 +124,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
     public static def make(m:Long, n:Long, 
             rowBs:Long, colBs:Long, 
             rowPs:Long, colPs:Long, places:PlaceGroup):DistBlockMatrix(m,n) {
-        assert (rowPs*colPs == places.size()) :
-            "Block partitioning error";        
+        Debug.assure(rowPs*colPs==places.size(), "Block partitioning error");        
         val blks = PlaceLocalHandle.make[BlockSet](places, 
                 ()=>(BlockSet.make(m,n,rowBs,colBs,rowPs,colPs, places)));
         val mygrid = blks().getGrid();
@@ -393,8 +393,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
      * matrix partitioning and block distribution as this.
      */
     public def alloc(m:Long, n:Long) : DistBlockMatrix(m,n) {
-        assert (m==M && n==N) :
-            "Matrix dimension is not same";
+        Debug.assure(m==M&&n==N, "Matrix dimension is not same");
         val nm = DistBlockMatrix.make(getGrid(), getMap(), places) as DistBlockMatrix(m,n);
         finish ateach(p in Dist.makeUnique(places)) {
             val blkitr = handleBS().iterator();
@@ -428,8 +427,8 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
             while (sit.hasNext()&&dit.hasNext()) {
                 val sblk = sit.next();
                 val dblk = dit.next();
-                assert (sblk.myRowId==dblk.myRowId && sblk.myColId==dblk.myColId) :
-                    "Block mismatch in DistBlockMatrix copyTo";
+                Debug.assure(sblk.myRowId==dblk.myRowId && sblk.myColId==dblk.myColId,
+                        "Block mismatch in DistBlockMatrix copyTo");
                 val smat = sblk.getMatrix();
                 val dmat = dblk.getMatrix();
                 smat.copyTo(dmat as Matrix(smat.M, smat.N));
@@ -441,8 +440,8 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
     public def copyTo(dst:BlockMatrix(M,N)) {
         
         val srcgrid = this.getGrid();
-        assert (srcgrid.equals(dst.grid)) :
-            "source and destination matrix partitions are not compatible";
+        Debug.assure(srcgrid.equals(dst.grid),
+            "source and destination matrix partitions are not compatible");
         val stt = Timer.milliTime();
         BlockGather.gather(this.handleBS, dst.listBs);
         commTime += Timer.milliTime() - stt;
@@ -450,8 +449,8 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
     
     public def copyTo(dst:DupBlockMatrix(M,N)) {
         val srcgrid = this.getGrid();
-        assert (srcgrid.equals(dst.local().grid)) :
-            "source and destination matrix partitions are not compatible";
+        Debug.assure(srcgrid.equals(dst.local().grid),
+            "source and destination matrix partitions are not compatible");
         val stt = Timer.milliTime();        
         BlockGather.gather(this.handleBS, dst.local().listBs);
         //TODO: bcast should allow arbitrary place group
@@ -476,7 +475,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
             BlockGather.gatherRowBs(this.handleBS, dst);
             commTime += Timer.milliTime() - stt;
         } else {
-            throw new UnsupportedOperationException("Not supported matrix type for converting DistBlockMatrix");
+            Debug.exit("Not supported matrix type for converting DistBlockMatrix");
         }
     }
     
@@ -487,7 +486,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
         } else if (getGrid().numRowBlocks==1L){
             BlockGather.gatherRowBs(this.handleBS, den as Matrix);
         } else {
-            throw new UnsupportedOperationException("DistBlockMatrix does not support direct copyTo densematrix,"+
+            Debug.exit("DistBlockMatrix does not support direct copyTo densematrix,"+
                     "unless it is single-column matrix (vector)."+
                     "Workaround is to use inter-media BlockMatrix to save gathered blocks"+
                     "and then convert to dense using BlockMatrix.copyTo(DenseMatrix)");
@@ -499,8 +498,8 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
         val dstgrid = getGrid();
         val stt = Timer.milliTime();
 
-        assert (dstgrid.equals(src.grid)) :
-            "source and destination matrix partitions are not compatible";
+        Debug.assure(dstgrid.equals(src.grid),
+        "source and destination matrix partitions are not compatible");
         BlockScatter.scatter(src.listBs, this.handleBS);
         commTime += Timer.milliTime() - stt;
     }
@@ -517,7 +516,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
             val blkset:BlockSet = this.handleBS();
             val blk:MatrixBlock = blkset.find(bid);
             if (blk == null) 
-                throw new UnsupportedOperationException("Error in search blocks in block set");
+                Debug.exit("Error in search blocks in block set");
 
             blk(bx, by)
         };
@@ -535,7 +534,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
             val blkset:BlockSet = handleBS();
             val blk:MatrixBlock = blkset.find(bid);
             if (blk == null) 
-                throw new UnsupportedOperationException("Error in search blocks in block set");
+                Debug.exit("Error in search blocks in block set");
             
             blk.getMatrix()(bx, by) = d;
         }
@@ -549,7 +548,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
         val by  = loc(3);                
         val blk:MatrixBlock = blockSet.find(loc(0),loc(1) );
         if (blk == null) 
-            throw new UnsupportedOperationException("Error in search blocks in block set");
+            Debug.exit("Error in search blocks in block set");
         return blk(bx, by);        
     }
 
@@ -612,7 +611,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
                  val m1:Matrix      = b1.getMatrix();
                  val b2:MatrixBlock = bsetA.find(b1.myRowId, b1.myColId);
                  
-                 if (b2 == null) throw new UnsupportedOperationException("Can not find corresponding block");
+                 if (b2 == null) Debug.exit("Can not find corresponding block");
                  m1.cellAdd(b2.getMatrix() as Matrix(m1.M, m1.N));
             }
         }
@@ -640,7 +639,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
                 val b1 = itr.next();
                 val m1 = b1.getMatrix();
                 val b2 = blkA.find(b1.myRowId, b1.myColId);
-                if (b2 == null) throw new UnsupportedOperationException("Can not find corresponding block");
+                if (b2 == null) Debug.exit("Can not find corresponding block");
                 m1.cellSub(b2.getMatrix() as Matrix(m1.M, m1.N));
             }
         }
@@ -681,7 +680,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
                 val b1 = itr.next();
                 val m1 = b1.getMatrix();
                 val b2 = blkA.find(b1.myRowId, b1.myColId);
-                if (b2 == null) throw new UnsupportedOperationException("Can not find corresponding block");
+                if (b2 == null) Debug.exit("Can not find corresponding block");
                 m1.cellMult(b2.getMatrix() as Matrix(m1.M, m1.N));
             }
         }
@@ -871,6 +870,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
         val rtmat:Matrix = handleBS().getFirst().getMatrix();
         var retval:Boolean = true;
         for (var p:Long=0 ; p<places.size() && retval; p++) {
+            //Debug.flushln("Check block local sync at "+p);
             if (here.id() != places(p).id) {
                 retval &= at(places(p)) {
                     //Remote capture: rtmat
@@ -883,6 +883,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
             if (!retval) 
                 Console.OUT.println("Integrity check failed at place "+p);
         }
+        //Debug.flushln("Check block local sync done");
         return retval;
     }
     
@@ -930,8 +931,7 @@ public class DistBlockMatrix extends Matrix implements Snapshottable {
      * Using the oldGrid can make the resulting distribution unbalanced
      */    
     public def remake(rowPs:Long, colPs:Long, newPg:PlaceGroup, useOldGrid:Boolean){        
-        assert (rowPs*colPs==newPg.size()) :
-            "Block partitioning error: rowsPs["+rowPs+"]*colPs["+colPs+"] != newPg.size["+places.size()+"]";
+        Debug.assure(rowPs*colPs==newPg.size(), "Block partitioning error: rowsPs["+rowPs+"]*colPs["+colPs+"] != newPg.size["+places.size()+"]");
         val oldGrid = getGrid();        
         val blks:PlaceLocalHandle[BlockSet];
         PlaceLocalHandle.destroy(places, handleBS, (Place)=>true);        

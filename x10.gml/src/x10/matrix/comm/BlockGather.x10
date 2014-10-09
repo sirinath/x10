@@ -13,6 +13,7 @@ package x10.matrix.comm;
 
 import x10.util.ArrayList;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.block.MatrixBlock;
@@ -31,8 +32,8 @@ public class BlockGather extends BlockRemoteCopy {
 	 */
 	public static def gather(src:BlocksPLH, dst:ArrayList[MatrixBlock]) : void {
 		val grid   = src().getGrid();
-        assert (dst.size() >= grid.size) :
-            "Not enough blocks at receiving side"; 
+		Debug.assure(dst.size() >= grid.size,
+				"Not enough blocks at receiving side"); 
 		
 		finish for (var bid:Long=0; bid<grid.size; bid++) {
 			val dstmat = dst(bid).getMatrix();
@@ -52,8 +53,7 @@ public class BlockGather extends BlockRemoteCopy {
 	public static def gatherRowBs(src:BlocksPLH, dst:Matrix): void {
 		val gp = src().getGrid();
 		var coloff:Long=0;
-        assert (gp.numRowBlocks==1L) :
-            "Cannot perform non-single row blocks gather";
+		Debug.assure(gp.numRowBlocks==1L, "Cannot perform non-single row blocks gather");
 		
 		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
 			val colcnt = gp.colBs(cb);

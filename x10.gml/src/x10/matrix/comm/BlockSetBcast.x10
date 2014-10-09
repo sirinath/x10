@@ -15,6 +15,8 @@ import x10.regionarray.Dist;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
+
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.comm.mpi.WrapMPI;
@@ -54,7 +56,7 @@ public class BlockSetBcast extends BlockSetRemoteCopy {
 			} else if (mat0.isSparse()) {
 				dsz= mpiBcastSparse(distBS, rootpid);
 			} else {
-				throw new UnsupportedOperationException("Block type is not supported");
+				Debug.exit("Block type is not supported");
 			}
 		}
 		
@@ -118,6 +120,7 @@ public class BlockSetBcast extends BlockSetRemoteCopy {
 					//Remote capture: distBS, szlist
 					val itr = distBS().iterator();
 					var j:Long = 0;
+					//Debug.flushln(szlist.toString());;
 
 					while (itr.hasNext()) {
 						
@@ -249,7 +252,7 @@ public class BlockSetBcast extends BlockSetRemoteCopy {
 				dstspa.finalizeRemoteCopyAtDest();				
 			}
 		} else {
-			throw new UnsupportedOperationException("Matrix block type is not supported");
+			Debug.exit("Matrix block type is not supported");
 		}
 	}	
 }

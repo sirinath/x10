@@ -74,20 +74,16 @@ abstract class FinishResilient extends FinishState {
         {
             val p = (parent!=null) ? parent : getCurrentFS();
             val l = (latch!=null) ? latch : new SimpleLatch();
-            val o = p as Any;
-            var r:FinishState = null;
-            @Native("java", "r = x10.lang.managed.FinishResilientHC.make(o, l);")
-            { if (true) throw new UnsupportedOperationException("Java-only RESILIENT_MODE " + Runtime.RESILIENT_MODE); }
-            fs = r;
+            fs = FinishResilientHC.make(p, l);
             break;
         }
-        case Configuration.RESILIENT_MODE_PLACE0_OPTIMIZED:
-        {
-            val p = (parent!=null) ? parent : getCurrentFS();
-            val l = (latch!=null) ? latch : new SimpleLatch();
-            fs = FinishResilientPlace0opt.make(p, l);
-            break;
-        }
+        // case Configuration.RESILIENT_MODE_PLACE0_OPTIMIZED:
+        // {
+        //     val p = (parent!=null) ? parent : getCurrentFS();
+        //     val l = (latch!=null) ? latch : new SimpleLatch();
+        //     fs = FinishResilientPlace0opt.make(p, l);
+        //     break;
+        // }
         case Configuration.RESILIENT_MODE_SAMPLE:
         case Configuration.RESILIENT_MODE_SAMPLE_HC:
         {
@@ -111,12 +107,11 @@ abstract class FinishResilient extends FinishState {
             FinishResilientPlace0.notifyPlaceDeath();
             break;
         case Configuration.RESILIENT_MODE_HC:
-            @Native("java", "x10.lang.managed.FinishResilientHC.notifyPlaceDeath();")
-            { if (true) throw new UnsupportedOperationException("Java-only RESILIENT_MODE " + Runtime.RESILIENT_MODE); }
+            FinishResilientHC.notifyPlaceDeath();
             break;
-        case Configuration.RESILIENT_MODE_PLACE0_OPTIMIZED:
-            FinishResilientPlace0opt.notifyPlaceDeath();
-            break;
+        // case Configuration.RESILIENT_MODE_PLACE0_OPTIMIZED:
+        //     FinishResilientPlace0opt.notifyPlaceDeath();
+        //     break;
         case Configuration.RESILIENT_MODE_SAMPLE:
         case Configuration.RESILIENT_MODE_SAMPLE_HC:
             FinishResilientSample.notifyPlaceDeath();
@@ -163,7 +158,7 @@ abstract class FinishResilient extends FinishState {
         
         // [DC] do not use at (place) async since the finish state is handled internally
         // [DC] go to the lower level...
-        val cl = () => @RemoteInvocation("finish_resilient_run_at") {
+        val cl = () => @RemoteInvocation("fiish_resilient_run_at") {
             if (verbose>=2) debug("FinishResilient.runAt closure received");
             val exec_body = () => {
                 if (verbose>=2) debug("FinishResilient.runAt exec_body started");

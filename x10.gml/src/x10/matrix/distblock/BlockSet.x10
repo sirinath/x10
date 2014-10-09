@@ -20,11 +20,12 @@ import x10.util.StringBuilder;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+
+import x10.matrix.util.Debug;
 import x10.matrix.block.Grid;
 import x10.matrix.block.DenseBlock;
 import x10.matrix.block.SparseBlock;
 import x10.matrix.block.MatrixBlock;
-import x10.matrix.util.Debug;
 
 /**
  * This class provides implementation of list of matrix blocks stored in on place.
@@ -95,16 +96,16 @@ public class BlockSet  {
     public static def make(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, places:PlaceGroup) {
         //val gd = new Grid(m, n, rowBs, colBs); not balanced when considering distribution among rowPs and colPs
         val gd = DistGrid.makeGrid(m, n, rowBs, colBs, rowPs, colPs);
-        assert (rowPs*colPs == places.size()) :
-              "number of distributions groups of blocks must equal to number of places";
+        Debug.assure(rowPs*colPs == places.size(),
+              "number of distributions groups of blocks must equal to number of places");
         val dp = new DistGrid(gd, rowPs, colPs);
         return new BlockSet(gd, dp.dmap, places);
     }
 
     public static def make(gd:Grid, rowPs:Long, colPs:Long, places:PlaceGroup) {
         //val gd = new Grid(m, n, rowBs, colBs); not balanced when considering distribution among rowPs and colPs    
-        assert (rowPs*colPs == places.size()) :
-            "number of distributions groups of blocks must equal to number of places";
+        Debug.assure(rowPs*colPs == places.size(),
+            "number of distributions groups of blocks must equal to number of places");
         val dp = new DistGrid(gd, rowPs, colPs);
         return new BlockSet(gd, dp.dmap, places);
     }
@@ -314,7 +315,8 @@ public class BlockSet  {
         }
         val numColBlk:Long = (blocklist.size() as Long)/nrb;
         val numRowBlk:Long = nrb;
-        assert numRowBlk*numColBlk == (blocklist.size() as Long);
+        //Debug.flushln("Build block "+numRowBlk+"x"+numColBlk);
+        Debug.assure(numRowBlk*numColBlk==(blocklist.size() as Long));
         // Assuming all blocks forms in rectangle 
         val minRow = blocklist.get(0).myRowId;
         val minCol = blocklist.get(0).myColId;
@@ -399,7 +401,7 @@ public class BlockSet  {
         if (idx < 0 ) {
             Debug.flushln(toString());
             Debug.flushln(dmap.toString());
-            throw new UnsupportedOperationException("Cannot find block ("+rid+","+cid+") at place "+here.id());
+            Debug.exit("Cannot find block ("+rid+","+cid+") at place "+here.id());
         }
         return blocklist.get(idx);
     }
@@ -411,7 +413,7 @@ public class BlockSet  {
     //         if (blk.myRowId == rid &&
     //             blk.myColId == cid ) return blk;
     //     }
-    //     throw new UnsupportedOperationException("Cannot find block ("+rid+","+cid+") at place "+here.id());
+    //     Debug.exit("Cannot find block ("+rid+","+cid+") at place "+here.id());
     //     return null;
     // }
     
@@ -483,7 +485,8 @@ public class BlockSet  {
                 return blk;
         }
         //This should be error
-        throw new UnsupportedOperationException("Error in searching front block ("+rowId+","+colId+")\n"+toString());
+        Debug.exit("Error in searching front block ("+rowId+","+colId+")\n"+toString());
+        return null;
     }    
     
     /**
@@ -557,7 +560,7 @@ public class BlockSet  {
     public def sync(rtbid:Long) : void {
         val it = this.blocklist.iterator();
         val rtblk = find(rtbid);
-        assert (rtblk!=null) : "Cannot find root block in local block list";
+        Debug.assure(rtblk!=null, "Cannot find root block in local block list");
         sync(rtblk);
     }
     
@@ -588,6 +591,7 @@ public class BlockSet  {
             if (blk != rootblk) {
                 val chkid = select(blk.myRowId, blk.myColId);
                 if (target == chkid) {
+                    //Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
                     rootblk.copyCols(0, colCnt, blk.getMatrix());
                 }
             }
@@ -661,6 +665,7 @@ public class BlockSet  {
             if (blk != rootblk) {
                 val chkid = select(blk.myRowId, blk.myColId);
                 if (target == chkid) {
+                    //Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
                     //rootblk.copyCols(0, colCnt, blk.getMatrix());
                     opFunc(blk.getMatrix() as DenseMatrix, rootden, colCnt);
                 }
@@ -685,6 +690,7 @@ public class BlockSet  {
             if (blk != dstblk) {
                 val chkid = select(blk.myRowId, blk.myColId);
                 if (target == chkid) {
+                    //Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
                     //rootblk.copyCols(0, colCnt, blk.getMatrix());
                     opFunc(blk.getMatrix() as DenseMatrix, dstden, datCnt);
                 }
@@ -718,7 +724,7 @@ public class BlockSet  {
     
     public def getBlockDataCount(bid:Long):Long {
         val blk = findBlock(bid);
-        assert (blk != null) :  "Cannot locate block "+bid+" in block set at " +here.id();
+        Debug.assure(blk!=null, "Cannot locate block "+bid+" in block set at " +here.id());
         return blk.getDataCount();
     }
     

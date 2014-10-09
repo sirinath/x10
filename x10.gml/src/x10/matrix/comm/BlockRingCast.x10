@@ -15,6 +15,7 @@ import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 import x10.compiler.Inline;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.comm.mpi.WrapMPI;
@@ -95,6 +96,8 @@ public class BlockRingCast extends BlockRemoteCopy {
 		val lfplist = new Rail[Long](lfcnt, (i:Long)=>plist(i));
 		val rtplist = new Rail[Long](rtcnt, (i:Long)=>plist(lfcnt+i));
 
+		//Debug.flushln("left branch "+lfplist.toString());
+		//Debug.flushln("Right branch "+rtplist.toString());		
 		finish {
 			if (rtcnt > 0) async {
 				copyBlockToRightBranch(distBS, rootbid, rtroot, datCnt, select, rtplist);
@@ -133,7 +136,7 @@ public class BlockRingCast extends BlockRemoteCopy {
 				x10CopySparseBlock(distBS, rootbid, srcblk, remotepid, datCnt, select, plist);
 			}			
 		} else {
-			throw new UnsupportedOperationException("Error in block type");
+			Debug.exit("Error in block type");
 		}
 	}
 
@@ -241,6 +244,7 @@ public class BlockRingCast extends BlockRemoteCopy {
 				WrapMPI.world.recv(dstspa.getIndex(), 0, datCnt, srcpid, tag);
 				WrapMPI.world.recv(dstspa.getValue(), 0, datCnt, srcpid, tag+1000000);
 				// Perform binary bcast on the right branch
+				//Debug.flushln("Recv "+here.id()+" get from "+srcpid);
 				if (plist.size > 1 ) {
 					binaryTreeCastTo(distBS, rootbid, datCnt, select, plist);
 				}

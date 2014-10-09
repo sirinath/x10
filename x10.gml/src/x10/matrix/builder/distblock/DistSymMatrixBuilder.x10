@@ -148,7 +148,7 @@ public class DistSymMatrixBuilder extends DistMatrixBuilder{self.M==self.N} impl
                 //copy remote block to dstblk at here
                 val srcbid = dmat.handleBS().getGrid().getBlockId(blk.myColId, blk.myRowId);
                 val dstmat:Matrix = blk.getMatrix();
-Console.OUT.println("blk = " + blk + " srcbid = " + srcbid);
+            
                 if (dstmat instanceof DenseMatrix) {
                     val dst = dstmat as DenseMatrix;
                     if (dstmat.M==dstmat.N) {
@@ -161,11 +161,9 @@ Console.OUT.println("blk = " + blk + " srcbid = " + srcbid);
                     }
                 } else if (dstmat instanceof SparseCSC) {
                     val dst = dstmat as SparseCSC;
-                    val rcvmat = SparseCSC.make(dst.N, dst.M, 1.0*dst.getStorageSize()/(dst.M*dst.N));
-                    BlockSetRemoteCopy.copy(dmat.handleBS, srcbid, rcvmat);
-Console.OUT.println("rcvmat = " + rcvmat);
-                    blk.transposeFrom(rcvmat);
-Console.OUT.println("blk.getMatrix() = " + blk.getMatrix());
+                    
+                    BlockSetRemoteCopy.copy(dmat.handleBS, srcbid, dst); 
+                    dst.selfT();
                     
                 } else {
                     throw new UnsupportedOperationException("Matrix type not supported in transpose");

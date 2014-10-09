@@ -35,7 +35,7 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
     @NonEscaping
     protected final def reloadLocalIndices():DenseIterationSpace_2{self!=null} {
         val ls = localHandle() as LocalState_BB2[T];
-        return ls != null ? ls.localIndices : new DenseIterationSpace_2(0, 0, -1, -1);
+        return ls != null ? ls.localIndices : new DenseIterationSpace_2(0,-1, 0, -1);
     }
     
     @TransientInitExpr(reloadMinIndex_1())
@@ -67,8 +67,8 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
     public def this(m:Long, n:Long, pg:PlaceGroup{self!=null}, init:(Long,Long)=>T) {
         super(pg, () => LocalState_BB2.make[T](pg, m, n, init), validateSize(m,n));
         globalIndices = new DenseIterationSpace_2(0, 0, m-1, n-1);
-        numElems_1 = m;
-        numElems_2 = n;
+        numElems_1 = globalIndices.max(0) - globalIndices.min(0) + 1;
+        numElems_2 = globalIndices.max(1) - globalIndices.min(1) + 1;
         localIndices = reloadLocalIndices();
         minIndex_1 = reloadMinIndex_1();
         minIndex_2 = reloadMinIndex_2();

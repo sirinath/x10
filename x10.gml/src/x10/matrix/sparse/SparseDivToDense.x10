@@ -11,20 +11,24 @@
 
 package x10.matrix.sparse;
 
+import x10.matrix.util.Debug;
 import x10.matrix.util.MathTool;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 
 /**
  * Implementation of division operation on sparse matrices.
+ *  
  */
 class SparseDivToDense {
+
 	/**
 	 *  Cellwise div sparse matrix in CSC by a dense matrix 
 	 *  C = A - C
 	 */
 	public static def comp(A:SparseCSC, 
 						   C:DenseMatrix(A.M,A.N)) : void {
+
 		var off:Long = 0;
 					   
 		for (var c:Long=0; c<C.N; c++) {
@@ -154,6 +158,7 @@ class SparseDivToDense {
 	 */
 	public static def comp(C:DenseMatrix,
 						   A:SparseCSR(C.M,C.N)):void {
+
 		for (var r:Long=0; r<C.M; r++) {
 			val aln = A.getRow(r);
 			for (var c:Long=0; c<aln.size(); c++) {
@@ -177,4 +182,5 @@ class SparseDivToDense {
 		A.copyTo(C);
 		comp(C, B);
 	}
+
 }

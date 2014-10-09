@@ -407,9 +407,9 @@ public abstract class Runtime implements VoidFun_0_0 {
             if (TRACE_SER_DETAIL) {
                 System.out.println("Message sent for runAt " + body.getClass());
             }
-		} catch (Throwable e) {
-		    System.out.println("WARNING: Ignoring uncaught exception in sending of @Immediate async.");
+		} catch (java.io.IOException e) {
 			e.printStackTrace();
+			throw new x10.lang.WrappedThrowable(e);
 		}
 	}
 

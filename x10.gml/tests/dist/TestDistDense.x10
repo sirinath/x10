@@ -13,7 +13,9 @@ import harness.x10Test;
 
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.DenseMatrix;
+
 import x10.matrix.block.Grid;
 import x10.matrix.block.DenseBlockMatrix;
 import x10.matrix.dist.DistDenseMatrix;
