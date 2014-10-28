@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import x10.core.GlobalRef;
 import x10.core.Rail;
 import x10.core.StructI;
-import x10.io.SerializationException;
 import x10.rtt.Types;
 import x10.runtime.impl.java.Runtime;
 import x10.serialization.SerializationDictionary.LocalSerializationDictionary;
@@ -141,7 +140,7 @@ public final class X10JavaSerializer implements SerializationConstants {
             out.writeShort(RESET_OBJECT_GRAPH_BOUNDARY_ID);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         }
         objectMap.clear();
         counter = 0;
@@ -150,7 +149,7 @@ public final class X10JavaSerializer implements SerializationConstants {
     public void addDeserializeCount(long extraCount) {
         // [GlobalGC] Adjust speculative increment of remoteCounts of GlobalRefs
         if (extraCount < 0L || extraCount > Integer.MAX_VALUE)
-            throw new SerializationException("extraCount " + extraCount + " is out of range");
+            throw new RuntimeException("extraCount " + extraCount + " is out of range");
         x10.core.GlobalRef.adjustRemoteCountsInMap(getGrefMap(), (int)extraCount);
     }
     
@@ -162,7 +161,7 @@ public final class X10JavaSerializer implements SerializationConstants {
             write(v);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         }
     }
         
@@ -281,22 +280,22 @@ public final class X10JavaSerializer implements SerializationConstants {
                 st.serializeObject(obj, objClass, this);
             } catch (SecurityException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             }
 
         }
@@ -342,22 +341,22 @@ public final class X10JavaSerializer implements SerializationConstants {
             st.serializeObject(obj, clazz, this);
         } catch (SecurityException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         }       
     }
 
@@ -544,7 +543,7 @@ public final class X10JavaSerializer implements SerializationConstants {
 
         default:
             System.err.println("Unhandled hard-wired serialization id "+sid);
-            throw new SerializationException("Unhandled hard-wired serialization id "+sid+" (class is "+obj.getClass()+")");    
+            throw new RuntimeException("Unhandled hard-wired serialization id "+sid+" (class is "+obj.getClass()+")");    
         }            
 
     }

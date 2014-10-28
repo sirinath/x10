@@ -14,6 +14,7 @@ package x10.matrix.distblock.summa;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.sparse.SparseCSC;
@@ -43,7 +44,7 @@ protected class RingCast  {
 				x10RingCastSparse(distBS, rootbid, datCnt, select, plist);
 			}			
 		} else {
-			throw new UnsupportedOperationException("Error in block type");
+			Debug.exit("Error in block type");
 		}		
 	}
 	
@@ -65,9 +66,13 @@ protected class RingCast  {
 						val matbuf = srcblk.getData();
 						val dtag = rootbid;
 						//receive data from pre-place
+						//Debug.flushln("Start recv data from "+prepid);
 						WrapMPI.world.recv(matbuf, 0, datCnt, prepid, dtag);
+						//Debug.flushln("Done recv data from "+prepid);
 						if (nxtpid != root) {//send data to next-place
+							//Debug.flushln("Start sending data to "+nxtpid);
 							WrapMPI.world.send(matbuf, 0, datCnt, nxtpid, dtag);
+							//Debug.flushln("Done sending data to "+nxtpid);
 						}
 					}
 				}
@@ -77,7 +82,9 @@ protected class RingCast  {
 					val den    = srcblk.getMatrix() as DenseMatrix;
 					val dtag   = rootbid;
 					val nxtpid = plist(0);
+					//Debug.flushln("Root start sending data to "+nxtpid);
 					WrapMPI.world.send(den.d, 0, datCnt, nxtpid, dtag);
+					//Debug.flushln("Root send done");
 				}
 			}
 		}
@@ -151,6 +158,7 @@ protected class RingCast  {
 		
 		val rcvblk = distBS().findFrontBlock(rootbid, select);
 		val rcvden = rcvblk.getMatrix() as DenseMatrix;
+		//Debug.flushln("Copy data to here at Place "+mypid);
 		finish Rail.asyncCopy[Double](rmtbuf, 0, rcvden.d, 0, datCnt);
 
 		if (plist.size > 0) {
@@ -188,6 +196,7 @@ protected class RingCast  {
 			plist:Rail[Long]) {
 		
 		val rcvblk = distBS().findFrontBlock(rootbid, select);
+		//Debug.flushln("Copy data to here at Place "+mypid);
 		val spa = rcvblk.getMatrix() as SparseCSC;
 		
 		spa.initRemoteCopyAtDest(datCnt);

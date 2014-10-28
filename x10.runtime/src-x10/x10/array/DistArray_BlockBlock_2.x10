@@ -35,7 +35,7 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
     @NonEscaping
     protected final def reloadLocalIndices():DenseIterationSpace_2{self!=null} {
         val ls = localHandle() as LocalState_BB2[T];
-        return ls != null ? ls.localIndices : new DenseIterationSpace_2(0, 0, -1, -1);
+        return ls != null ? ls.localIndices : new DenseIterationSpace_2(0,-1, 0, -1);
     }
     
     @TransientInitExpr(reloadMinIndex_1())
@@ -56,7 +56,7 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
 
     /**
      * Construct a m by n block-block distributed DistArray
-     * whose data is distributed over pg and initialized using
+     * whose data is distrbuted over pg and initialized using
      * the init function.
      *
      * @param m number of elements in the first dimension
@@ -67,8 +67,8 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
     public def this(m:Long, n:Long, pg:PlaceGroup{self!=null}, init:(Long,Long)=>T) {
         super(pg, () => LocalState_BB2.make[T](pg, m, n, init), validateSize(m,n));
         globalIndices = new DenseIterationSpace_2(0, 0, m-1, n-1);
-        numElems_1 = m;
-        numElems_2 = n;
+        numElems_1 = globalIndices.max(0) - globalIndices.min(0) + 1;
+        numElems_2 = globalIndices.max(1) - globalIndices.min(1) + 1;
         localIndices = reloadLocalIndices();
         minIndex_1 = reloadMinIndex_1();
         minIndex_2 = reloadMinIndex_2();
@@ -79,7 +79,7 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
 
     /**
      * Construct a m by n block-block distributed DistArray
-     * whose data is distributed over Place.places() and 
+     * whose data is distrbuted over Place.places() and 
      * initialized using the provided init closure.
      *
      * @param m number of elements in the first dimension
@@ -93,7 +93,7 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
 
     /**
      * Construct a m by n block-block distributed DistArray
-     * whose data is distributed over pg and zero-initialized.
+     * whose data is distrbuted over pg and zero-initialized.
      *
      * @param m number of elements in the first dimension
      * @param n number of elements in the second dimension
@@ -106,7 +106,7 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
 
     /**
      * Construct a m by n block-block distributed DistArray
-     * whose data is distributed over Place.places() and 
+     * whose data is distrbuted over Place.places() and 
      * zero-initialized.
      *
      * @param m number of elements in the first dimension
@@ -233,31 +233,6 @@ public class DistArray_BlockBlock_2[T] extends DistArray[T]{this.rank()==2} impl
 
     protected final @Inline def offset(i:Long, j:Long) {
          return (j - minIndex_2) + ((i - minIndex_1) * numElemsLocal_2);
-    }
-
-    /**
-     * Returns the specified rectangular patch of this array as a Rail.
-     * 
-     * @param space the IterationSpace representing the portion of this array to copy
-     * @see offset
-     * @throws ArrayIndexOutOfBoundsException if the specified region is not
-     *        contained in this array
-     */
-    public def getPatch(space:IterationSpace(2){self.rect}):Rail[T] {
-        val r = space as DenseIterationSpace_2;
-
-        if (CompilerFlags.checkBounds() &&
-          !(localIndices.min0 <= r.min0 && r.max0 <= localIndices.max0
-         && localIndices.min1 <= r.min1 && r.max1 <= localIndices.max1)) {
-            throw new ArrayIndexOutOfBoundsException("patch to copy: " + r + " not contained in local indices: " + localIndices);
-        }
-
-        val patch = Unsafe.allocRailUninitialized[T](r.size());
-        var patchIndex:Long = 0;
-        for ([i0,i1] in r) {
-            patch(patchIndex++) = raw(offset(i0,i1));
-        }
-        return patch;
     }
 
     private @Inline static def validateSize(m:Long, n:Long):Long {

@@ -785,10 +785,8 @@ public class SocketTransport {
 	    		try {
 					Thread.sleep(100);
 					delay-=100;
-					if (delay <= 0 || shuttingDown) {
-						markPlaceDead(remotePlace); // mark it as dead
+					if (delay <= 0 || shuttingDown)
 						throw new IOException("Place "+myPlaceId+" unable to connect to place "+remotePlace);
-					}
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1013,7 +1011,7 @@ public class SocketTransport {
             VoidFun_0_0 actObj = (VoidFun_0_0) deserializer.readObject();
             actObj.$apply();
         } catch (Throwable e) {
-            System.out.println("WARNING: Ignoring uncaught exception in @Immediate async.");
+            System.out.println("WARNING: Ignoring uncaught exception in incoming closure");
             e.printStackTrace();
         }
     }
@@ -1028,10 +1026,12 @@ public class SocketTransport {
     	    actObj = (VoidFun_0_0) deserializer.readObject();
     	} catch (Throwable e) {
     	    // TODO: handle epoch?
-            finishState.notifyActivityCreationFailed(src, new x10.io.SerializationException(e));
+            finishState.notifyActivityCreation$O(src);
+            finishState.pushException(new x10.io.SerializationException(e));
+            finishState.notifyActivityTermination();
             return;
     	}
-    	x10.lang.Runtime.submitRemoteActivity(epoch, actObj, src, finishState);
+    	x10.lang.Runtime.execute(epoch, actObj, src, finishState);
     }
     
     private class BackgroundLinkInitializer implements Runnable {

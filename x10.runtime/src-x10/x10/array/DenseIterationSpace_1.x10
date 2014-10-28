@@ -42,8 +42,6 @@ public final class DenseIterationSpace_1 extends IterationSpace(1){rect} {
 
     public def isEmpty() = max < min;
 
-    public def size() = max - min + 1;
-
     public def iterator():Iterator[Point(1)] = new DIS_1_It(min, max);
 
     private static class DIS_1_It implements Iterator[Point(1)] {
@@ -57,11 +55,5 @@ public final class DenseIterationSpace_1 extends IterationSpace(1){rect} {
  
         public def hasNext() = cur <= last;
         public def next() = Point.make(cur++);
-    }
-
-    public def toString():String {
-        return "["
-            +min+".."+max
-            +"]";
     }
 }

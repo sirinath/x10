@@ -320,18 +320,13 @@ static void receive_async (const x10rt_msg_params *p) {
     _X_(ANSI_X10RT<<"async nid: "<<nid<<" of kind: "<<ck<<ANSI_RESET);
     switch (ck) {
         case x10aux::CLOSURE_KIND_REMOTE_INVOCATION: {
-            try {
-                Reference* body(x10aux::NetworkDispatcher::create(buf, nid));
-                assert(buf.consumed() <= p->len);
-                _X_("The deserialised remote invocation was: "<<x10aux::safe_to_string(body));
-                deserialized_bytes += buf.consumed()  ; asyncs_received++;
-                if (NULL == body) return;
-                VoidFun_0_0::__apply(reinterpret_cast<VoidFun_0_0*>(body));
-                x10aux::dealloc(body);
-            } catch (x10::lang::CheckedThrowable* e) {
-                printf("WARNING: Ignoring uncaught exception in @Immediate async.");
-                e->printStackTrace();
-            }
+            Reference* body(x10aux::NetworkDispatcher::create(buf, nid));
+            assert(buf.consumed() <= p->len);
+            _X_("The deserialised remote invocation was: "<<x10aux::safe_to_string(body));
+            deserialized_bytes += buf.consumed()  ; asyncs_received++;
+            if (NULL == body) return;
+            VoidFun_0_0::__apply(reinterpret_cast<VoidFun_0_0*>(body));
+            x10aux::dealloc(body);
         } break;
         case x10aux::CLOSURE_KIND_ASYNC_CLOSURE: {
             x10::lang::FinishState* fs = buf.read<x10::lang::FinishState*>();
@@ -346,14 +341,16 @@ static void receive_async (const x10rt_msg_params *p) {
                     abort();
                 }
                 x10::io::SerializationException* se = x10::io::SerializationException::_make(e);
-                fs->notifyActivityCreationFailed(src, se);
+                fs->notifyActivityCreation(src);
+                fs->pushException(se);
+                fs->notifyActivityTermination();
                 return;
             }
             assert(buf.consumed() <= p->len);
             _X_("The deserialised async closure was: "<<x10aux::safe_to_string(body));
             deserialized_bytes += buf.consumed()  ; asyncs_received++;
             if (NULL == body) return;
-            x10::lang::Runtime::submitRemoteActivity(reinterpret_cast<VoidFun_0_0*>(body), src, fs);
+            x10::lang::Runtime::execute(reinterpret_cast<VoidFun_0_0*>(body), src, fs);
         } break;
         default: abort();
     }
@@ -366,7 +363,7 @@ static void cuda_pre (const x10rt_msg_params *p, size_t *blocks, size_t *threads
     x10aux::deserialization_buffer buf(static_cast<char*>(p->msg), p->len);
     x10::lang::FinishState* fs = buf.read<x10::lang::FinishState*>();
     x10::lang::Place sendingPlace = buf.read<x10::lang::Place>();
-    fs->notifyActivityCreation(sendingPlace, NULL);
+    fs->notifyActivityCreation(sendingPlace);
     serialization_id_t nid = x10aux::NetworkDispatcher::getNetworkId(p->type);
     _X_(ANSI_X10RT<<"mapped mid "<<p->type<<" to nid "<<nid<<ANSI_RESET);
     x10aux::CUDAPre pre = x10aux::NetworkDispatcher::getCUDAPre(nid);
@@ -509,7 +506,7 @@ void x10aux::cuda_put (place gpu, x10_ulong addr, void *var, size_t sz)
 void *x10aux::coll_enter() {
     x10::lang::FinishState* fs = Runtime::activity()->finishState();
     fs->notifySubActivitySpawn(x10::lang::Place::_make(x10aux::here));
-    fs->notifyActivityCreation(x10::lang::Place::_make(x10aux::here), NULL);
+    fs->notifyActivityCreation(x10::lang::Place::_make(x10aux::here));
     return fs;
 }
 

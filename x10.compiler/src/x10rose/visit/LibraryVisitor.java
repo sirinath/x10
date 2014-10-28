@@ -123,7 +123,6 @@ import x10.ast.Atomic_c;
 import x10.ast.ClosureCall_c;
 import x10.ast.Closure_c;
 import x10.ast.DepParameterExpr_c;
-import x10.ast.FinishExpr_c;
 import x10.ast.Finish_c;
 import x10.ast.ForLoop_c;
 import x10.ast.FunctionTypeNode_c;
@@ -657,7 +656,7 @@ public class LibraryVisitor extends NodeVisitor {
 
         handleClassMembers(members, package_name, class_name);
 
-        JNI.cactionBuildClassSupportEnd(class_name, members.size(), RoseTranslator.createJavaToken(n, class_name));
+        JNI.cactionBuildClassSupportEnd(class_name, RoseTranslator.createJavaToken(n, class_name));
         if (package_name.length() != 0) {
             JNI.cactionPushPackage(package_name, RoseTranslator.createJavaToken(n, class_name));
             JNI.cactionPopPackage();
@@ -781,6 +780,9 @@ public class LibraryVisitor extends NodeVisitor {
 
     public void previsit(X10MethodDecl_c n, String class_name) {
         toRose(n, "TypeVisitor.Previsit method decl: ", n.name().id().toString());
+        // TODO: currently, skip operator
+        if (n.name().id().toString().indexOf("operator") >= 0)
+            return;
         List<Formal> formals = n.formals();
 
         String method_name = n.name().id().toString();
@@ -794,14 +796,14 @@ public class LibraryVisitor extends NodeVisitor {
         List<TypeParamNode> typeParamList = n.typeParameters();
         for (int i = 0; i < typeParamList.size(); ++i) {
             String typeParam = typeParamList.get(i).name().toString();
-            // Mangled name. This should be fine for processing only library classes.
-            typeParam = typeParam + "_" + method_index + "_" + package_name + "_" + class_name;
-            if (RoseTranslator.DEBUG) System.out.println("TypeParam=" + typeParam + ", package=" + package_name + ", type=" + class_name);
+            if (RoseTranslator.DEBUG)
+                System.out.println("TypeParam=" + typeParam + ", package=" + package_name + ", type=" + class_name);
             JNI.cactionPushTypeParameterScope(package_name, class_name, RoseTranslator.createJavaToken(n, typeParam));
             JNI.cactionInsertTypeParameter(typeParam, RoseTranslator.createJavaToken(n, typeParam));
             JNI.cactionBuildTypeParameterSupport(package_name, class_name, method_index, typeParam, 0, RoseTranslator.createJavaToken(n, typeParam));
             JNI.cactionPopTypeParameterScope(RoseTranslator.createJavaToken(n, typeParam));
         }
+
         JNI.cactionBuildMethodSupportStart(method_name, method_index, RoseTranslator.createJavaToken(n, method_name + "(" + param + ")"));
 
         // in case the return type is unknown. Such a case will occur by
@@ -811,13 +813,16 @@ public class LibraryVisitor extends NodeVisitor {
             JNI.cactionTypeReference("", "void", this, RoseTranslator.createJavaToken());
         else
             visitChild(n, n.returnType());
-        
+
         visitChildren(n, n.formals());
 
-        JNI.cactionBuildMethodSupportEnd(method_name, method_index, 
-                false, false, false, 0, formals.size(), true, 
+        JNI.cactionBuildMethodSupportEnd(method_name, method_index, // method
+                                                                    // index
+                false, false, false, 0, formals.size(), true, /*
+                                                               * user-defined
+                                                               * -method
+                                                               */
                 RoseTranslator.createJavaToken(n, n.name().id().toString()), RoseTranslator.createJavaToken(n, n.name().id().toString() + "_args"));
-        if (RoseTranslator.DEBUG) System.out.println("Previsit method decl end");
     }
 
     public void previsit(X10ConstructorDecl_c n, String package_name, String type_name) {
@@ -834,7 +839,6 @@ public class LibraryVisitor extends NodeVisitor {
         List<TypeParamNode> typeParamList = n.typeParameters();
         for (int i = 0; i < typeParamList.size(); ++i) {
             String typeParam = typeParamList.get(i).name().toString();
-            typeParam = typeParam + "_" + method_index + "_" + package_name + "_" + class_name;
             JNI.cactionPushTypeParameterScope(package_name, type_name, RoseTranslator.createJavaToken(n, typeParam));
             JNI.cactionInsertTypeParameter(typeParam, RoseTranslator.createJavaToken(n, typeParam));
             JNI.cactionBuildTypeParameterSupport(package_name, type_name, method_index, typeParam, 0, RoseTranslator.createJavaToken(n, typeParam));
@@ -1135,11 +1139,7 @@ public class LibraryVisitor extends NodeVisitor {
         if (n instanceof Finish_c) {
             visit((Finish_c) n);
             return;
-        }          
-        if (n instanceof FinishExpr_c) {
-            visit((FinishExpr_c) n);
-            return;
-        }          
+        }
         if (n instanceof Eval_c) {
             visit((Eval_c) n);
             return;
@@ -1543,7 +1543,6 @@ public class LibraryVisitor extends NodeVisitor {
     public void visit(Node n) {
     }
 
-    
     public void visit(Node_c n) {
         visit((Node) n);
     }
@@ -1778,7 +1777,7 @@ public class LibraryVisitor extends NodeVisitor {
 
     public void searchFileList(String packageName, String typeName) throws IOException {
         if (RoseTranslator.DEBUG)
-            System.out.println("LibraryVisitor.searchFileList()for package=" + packageName + ", type=" + typeName);
+            System.out.println("TypeVisitor.searchFileList()");
         return;
         // MH-20140901 comment out for skipping to lookup library classes
         // from library classess
@@ -1866,7 +1865,8 @@ public class LibraryVisitor extends NodeVisitor {
                                    // toString() instead
         String ambTypeName = raw.replaceAll("\\{amb\\}", "");
         ambTypeName = RoseTranslator.trimTypeParameterClause(ambTypeName);
-        if (RoseTranslator.DEBUG) System.out.println("AmbTypeNode_c : " + ambTypeName + ", type=" + n.type());
+        if (RoseTranslator.DEBUG)
+            System.out.println("AmbTypeNode_c : " + ambTypeName + ", type=" + n.type());
 
         if (RoseTranslator.isX10Primitive(ambTypeName))
             JNI.cactionTypeReference("", ambTypeName, this, RoseTranslator.createJavaToken());
@@ -2359,15 +2359,7 @@ public class LibraryVisitor extends NodeVisitor {
         toRose(n, "Finish in TypeVisitor:");
         JNI.cactionFinish(RoseTranslator.createJavaToken(n, n.toString()));
         visitChild(n, n.body());
-        JNI.cactionFinishEnd(n.clocked(), RoseTranslator.createJavaToken(n, n.toString()));
-    }
-
-    public void visit(FinishExpr_c n) {
-        toRose(n, "FinishExpr:", n.toString());
-        JNI.cactionFinishExpr(RoseTranslator.createJavaToken(n, n.toString()));
-        visitChild(n, n.reducer());
-        visitChild(n, n.body());
-        JNI.cactionFinishExprEnd(RoseTranslator.createJavaToken(n, n.toString()));
+        JNI.cactionFinishEnd(RoseTranslator.createJavaToken(n, n.toString()));
     }
 
     public void visit(AtStmt_c n) {
@@ -2407,7 +2399,7 @@ public class LibraryVisitor extends NodeVisitor {
         toRose(n, "Async in TypeVisitor:");
         JNI.cactionAsync(RoseTranslator.createJavaToken(n, n.toString()));
         visitChild(n, n.body());
-        JNI.cactionAsyncEnd(n.clocked(), RoseTranslator.createJavaToken(n, n.toString()));
+        JNI.cactionAsyncEnd(RoseTranslator.createJavaToken(n, n.toString()));
     }
 
     public void visit(Atomic_c n) {

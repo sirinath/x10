@@ -16,6 +16,7 @@ import x10.regionarray.Dist;
 import x10.matrix.Matrix;
 import x10.matrix.util.RandTool;
 
+import x10.matrix.util.Debug;
 import x10.matrix.block.Grid;
 import x10.matrix.block.MatrixBlock;
 import x10.matrix.distblock.DistBlockMatrix;
@@ -132,7 +133,7 @@ public class DistMatrixBuilder(M:Long,N:Long) implements MatrixBuilder {
             val blkset:BlockSet = dmat.handleBS();
             val blk:MatrixBlock = blkset.find(bid);
             if (blk == null) 
-                throw new UnsupportedOperationException("Error in search block in block set");
+                Debug.exit("Error in search block in block set");
             
             blk.getBuilder().set(bx, by, value);
         }
@@ -150,7 +151,7 @@ public class DistMatrixBuilder(M:Long,N:Long) implements MatrixBuilder {
             val blkset:BlockSet = dmat.handleBS();
             val blk:MatrixBlock = blkset.find(bid);
             if (blk == null) 
-                throw new UnsupportedOperationException("Error in searching block in block set");
+                Debug.exit("Error in searching block in block set");
             
             blk.getBuilder().reset(bx, by)
         };
