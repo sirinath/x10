@@ -34,84 +34,14 @@ abstract class FinishState {
     // Turn this on to debug deadlocks within the finish implementation
     static VERBOSE = Configuration.envOrElse("X10_FINISH_VERBOSE", false);
 
-    /**
-     * Called by an activity running at the current Place when it
-     * is initiating the spawn of an new async at dstPlace. 
-     *
-     * Scheduling note: Will only be called on a full-fledged worker thread;
-     *                  this method is allowed to block/pause.
-     */
-    abstract def notifySubActivitySpawn(dstPlace:Place):void;
-
-    /**
-     * Called at the Place at which the argument activity will execute.
-     * If this method returns true, the activity will be submitted to
-     * the XRX Pool for execution. If this method returns false, the activity
-     * will not be submitted. 
-     * 
-     * Machinations: activity may actually be null when the XRX runtime
-     *               is calling this method to simulate the stages in the
-     *               Activity life-cycles from lowlevel code (eg implementation
-     *               of at or asyncCopy).
-     *
-     * Scheduling note: May be called on @Immediate worker.
-     *                  This method must not block or pause.
-     */
-    abstract def notifyActivityCreation(srcPlace:Place, activity:Activity):Boolean;
-
-    /**
-     * Called at the Place at which the argument activity will execute.
-     * If this method returns true, the activity should be submitted to
-     * the XRX Pool for execution. If this method returns false, the activity
-     * should not be submitted. 
-     * 
-     * Machinations: activity may actually be null when the XRX runtime
-     *               is calling this method to simulate the stages in the
-     *               Activity life-cycles from lowlevel code (eg implementation
-     *               of at or asyncCopy).
-     *
-     * Scheduling note: This variant may not be called on @Immediate worker.
-     *                  Therefore this variant is allowed to block/pause.
-     */
-    abstract def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity):Boolean;
-
-
-    /**
-     * Called at the Place where activity creation failed to indicate
-     * that an inbound activity could not be created due to an exceptional
-     * condition. 
-     *
-     * Scheduling note: May be called on @Immediate worker.
-     *                  This method must not block or pause.
-     */
-    abstract def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void; 
-
-    /**
-     * Called to indicate that the currently executing activity 
-     * has terminated successfully.
-     *
-     * Scheduling note: Will only be called on a full-fledged worker thread;
-     *                  this method is allowed to block/pause.
-     */
+    abstract def notifySubActivitySpawn(place:Place):void;
+    abstract def notifyActivityCreation(srcPlace:Place):Boolean;
     abstract def notifyActivityTermination():void;
-
-    /**
-     * Called to record the CheckedThrowable which caused the currently executing 
-     * activity to terminate abnormally.
-     *
-     * Scheduling note: Will only be called on a full-fledged worker thread;
-     *                  this method is allowed to block/pause.
-     */
     abstract def pushException(t:CheckedThrowable):void;
-
-    /**
-     * Called when the currently running activity needs to wait for the Finish
-     * to terminate.
-     *
-     * Scheduling note: Will only be called on a full-fledged worker thread;
-     *                  this method is allowed to block/pause.
-     */
     abstract def waitForFinish():void;
+    abstract def simpleLatch():SimpleLatch;
+    abstract def runAt(place:Place, body:()=>void, prof:Runtime.Profile):void;
+    abstract def evalAt(place:Place, body:()=>Any, prof:Runtime.Profile):Any;
 
     static def deref[T](root:GlobalRef[FinishState]) = (root as GlobalRef[FinishState]{home==here})() as T;
 
@@ -124,12 +54,7 @@ abstract class FinishState {
             assert place.id == Runtime.hereLong();
             count.getAndIncrement();
         }
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            pushException(t);
-            notifyActivityTermination();
-        }
+        public def notifyActivityCreation(srcPlace:Place) = true;
         public def notifyActivityTermination() {
             if (count.decrementAndGet() == 0n) latch.release();
         }
@@ -145,6 +70,13 @@ abstract class FinishState {
             latch.await();
             val t = MultipleExceptions.make(exceptions);
             if (null != t) throw t;
+        }
+        public def simpleLatch() = latch;
+        public def runAt(place:Place, body:()=>void, prof:Runtime.Profile):void {
+            Runtime.runAtNonResilient(place, body, prof);
+        }
+        public def evalAt(place:Place, body:()=>Any, prof:Runtime.Profile):Any {
+            return Runtime.evalAtNonResilient(place, body, prof);
         }
     }
 
@@ -173,10 +105,6 @@ abstract class FinishState {
         public def notifySubActivitySpawn(place:Place) {
             count.incrementAndGet();
         }
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            pushException(t);
-            notifyActivityTermination();
-        }
         public def notifyActivityTermination() {
             if (count.decrementAndGet() == 0n) latch.release();
         }
@@ -193,6 +121,7 @@ abstract class FinishState {
             val t = MultipleExceptions.make(exceptions);
             if (null != t) throw t;
         }
+        public def simpleLatch() = latch;
     }
 
     static class RemoteFinishSPMD extends RemoteFinishSkeleton {
@@ -206,28 +135,24 @@ abstract class FinishState {
             assert place.id == Runtime.hereLong();
             count.getAndIncrement();
         }
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            pushException(t);
-            notifyActivityTermination();
-        }
+        public def notifyActivityCreation(srcPlace:Place) = true;
         public def notifyActivityTermination() {
             if (count.decrementAndGet() == 0n) {
-                val excs = exceptions == null || exceptions.isEmpty() ? null : exceptions.toRail();
+                val t = MultipleExceptions.make(exceptions);
                 val ref = this.ref();
-                if (null != excs) {
-                    at (ref.home) @Immediate("notifyActivityTermination_1") async {
-                        for (e in excs) {
-                            deref[FinishState](ref).pushException(e);
-                        }
+                val closure:()=>void;
+                if (null != t) {
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_1") {
+                        deref[FinishState](ref).pushException(t);
                         deref[FinishState](ref).notifyActivityTermination();
                     };
                 } else {
-                    at (ref.home) @Immediate("notifyActivityTermination_2") async {
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_2") {
                         deref[FinishState](ref).notifyActivityTermination();
                     };
                 }
+                Runtime.x10rtSendMessage(ref.home.id, closure, null);
+                Unsafe.dealloc(closure);
             }
         }
         public def pushException(t:CheckedThrowable) {
@@ -256,14 +181,10 @@ abstract class FinishState {
         }
     }
 
-    static class RootFinishAsync extends RootFinishSkeleton {
+    static class RootFinishAsync extends RootFinishSkeleton{
         @Embed protected val latch = @Embed new SimpleLatch();
         protected var exception:CheckedThrowable = null;
         public def notifySubActivitySpawn(place:Place):void {}
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            pushException(t);
-            notifyActivityTermination();
-        }
         public def notifyActivityTermination():void {
             latch.release();
         }
@@ -275,6 +196,7 @@ abstract class FinishState {
             val t = MultipleExceptions.make(exception);
             if (null != t) throw t;
         }
+        public def simpleLatch() = latch;
     }
 
     static class RemoteFinishAsync extends RemoteFinishSkeleton {
@@ -282,29 +204,27 @@ abstract class FinishState {
         def this(ref:GlobalRef[FinishState]) {
             super(ref);
         }
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            exception = t;
-            notifyActivityTermination();
-        }
+        public def notifyActivityCreation(srcPlace:Place) = true;
         public def notifySubActivitySpawn(place:Place):void {}
         public def pushException(t:CheckedThrowable):void {
             exception = t;
         }
         public def notifyActivityTermination():void {
-            val exc = exception; // don't capture this in @Immediate body
+            val t = MultipleExceptions.make(exception);
             val ref = this.ref();
-            if (null != exc) {
-                at (ref.home) @Immediate("notifyActivityTermination_1") async {
-                    deref[FinishState](ref).pushException(exc);
+            val closure:()=>void;
+            if (null != t) {
+                closure = ()=>@RemoteInvocation("notifyActivityTermination_1") {
+                    deref[FinishState](ref).pushException(t);
                     deref[FinishState](ref).notifyActivityTermination();
                 };
             } else {
-                at (ref.home) @Immediate("notifyActivityTermination_2") async {
+                closure = ()=>@RemoteInvocation("notifyActivityTermination_2") {
                     deref[FinishState](ref).notifyActivityTermination();
                 };
             }
+            Runtime.x10rtSendMessage(ref.home.id, closure, null);
+            Unsafe.dealloc(closure);
         }
     }
 
@@ -329,18 +249,20 @@ abstract class FinishState {
     // a pseudo finish used to implement @Uncounted async
     static class UncountedFinish extends FinishState {
         public def notifySubActivitySpawn(place:Place) {}
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity) = true; 
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            Runtime.println("Uncaught exception in uncounted activity");
-            t.printStackTrace();
-        }
+        public def notifyActivityCreation(srcPlace:Place) = true; 
         public def notifyActivityTermination() {}
         public def pushException(t:CheckedThrowable) {
             Runtime.println("Uncaught exception in uncounted activity");
             t.printStackTrace();
         }
         public final def waitForFinish() { assert false; }
+        public def simpleLatch():SimpleLatch = null;
+        public def runAt(place:Place, body:()=>void, prof:Runtime.Profile):void {
+            Runtime.runAtNonResilient(place, body, prof);
+        }
+        public def evalAt(place:Place, body:()=>Any, prof:Runtime.Profile):Any {
+            return Runtime.evalAtNonResilient(place, body, prof);
+        }
     }
     
     static UNCOUNTED_FINISH = new UncountedFinish();
@@ -387,8 +309,13 @@ abstract class FinishState {
     abstract static class RootFinishSkeleton extends FinishState implements Runtime.Mortal {
         private val xxxx = GlobalRef[FinishState](this);
         def ref() = xxxx;
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity) = true;
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity) = true;
+        public def notifyActivityCreation(srcPlace:Place) = true;
+        public def runAt(place:Place, body:()=>void, prof:Runtime.Profile):void {
+            Runtime.runAtNonResilient(place, body, prof);
+        }
+        public def evalAt(place:Place, body:()=>Any, prof:Runtime.Profile):Any {
+            return Runtime.evalAtNonResilient(place, body, prof);
+        }
     }
 
     // the top of the remote finish hierarchy
@@ -399,6 +326,13 @@ abstract class FinishState {
         }
         def ref() = xxxx;
         public def waitForFinish() { assert false; }
+        public def simpleLatch():SimpleLatch = null;
+        public def runAt(place:Place, body:()=>void, prof:Runtime.Profile):void {
+            Runtime.runAtNonResilient(place, body, prof);
+        }
+        public def evalAt(place:Place, body:()=>Any, prof:Runtime.Profile):Any {
+            return Runtime.evalAtNonResilient(place, body, prof);
+        }
     }
 
     // the top of the finish hierarchy
@@ -416,18 +350,17 @@ abstract class FinishState {
             s.writeAny(ref);
         }
         public def notifySubActivitySpawn(place:Place) { me.notifySubActivitySpawn(place); }
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity) { 
-            return me.notifyActivityCreation(srcPlace, activity); 
-        }
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity) { 
-            return me.notifyActivityCreationBlocking(srcPlace, activity); 
-        }
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            me.notifyActivityCreationFailed(srcPlace, t); 
-        }
+        public def notifyActivityCreation(srcPlace:Place) { return me.notifyActivityCreation(srcPlace); }
         public def notifyActivityTermination() { me.notifyActivityTermination(); }
         public def pushException(t:CheckedThrowable) { me.pushException(t); }
         public def waitForFinish() { me.waitForFinish(); }
+        public def simpleLatch() = me.simpleLatch();
+        public def runAt(place:Place, body:()=>void, prof:Runtime.Profile):void {
+            Runtime.runAtNonResilient(place, body, prof);
+        }
+        public def evalAt(place:Place, body:()=>Any, prof:Runtime.Profile):Any {
+            return Runtime.evalAtNonResilient(place, body, prof);
+        }
     }
 
     // the default finish implementation
@@ -482,10 +415,6 @@ abstract class FinishState {
             remoteActivities.put(p.id, remoteActivities.getOrElse(p.id, 0n)+1n);
             latch.unlock();
         }
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            pushException(t);
-            notifyActivityTermination();
-        }
         public def notifyActivityTermination():void {
             latch.lock();
             if (--count != 0n) {
@@ -507,11 +436,6 @@ abstract class FinishState {
             if (null == exceptions) exceptions = new GrowableRail[CheckedThrowable]();
             exceptions.add(t);
         }
-        public def process(excs:Rail[CheckedThrowable]):void {
-            for (e in excs) {
-                process(e);
-            }
-        }
         public def pushException(t:CheckedThrowable):void {
             latch.lock();
             process(t);
@@ -527,10 +451,12 @@ abstract class FinishState {
             // if there were remote activities spawned, clean up the RemoteFinish objects which tracked them
             if (remoteActivities != null && remoteActivities.size() != 0) {
                 val root = ref();
+                val closure = ()=>@RemoteInvocation("remoteFinishCleanup") { Runtime.finishStates.remove(root); };
                 remoteActivities.remove(here.id);
                 for (placeId in remoteActivities.keySet()) {
-                    at(Place(placeId)) @Immediate("remoteFinishCleanup") async Runtime.finishStates.remove(root);
+                    Runtime.x10rtSendMessage(placeId, closure, null);
                 }
+                Unsafe.dealloc(closure);
             }
             // throw exceptions here if any were collected via the execution of child activities
             val t = MultipleExceptions.make(exceptions);
@@ -568,10 +494,10 @@ abstract class FinishState {
             latch.unlock();
         }
 
-        def notify(remoteMapBytes:Rail[Byte], excs:Rail[CheckedThrowable]):void {
+        def notify(remoteMapBytes:Rail[Byte], t:CheckedThrowable):void {
             remoteMap:HashMap[Long, Int] = new x10.io.Deserializer(remoteMapBytes).readAny() as HashMap[Long, Int];
             latch.lock();
-            process(excs);
+            process(t);
             process(remoteMap);
             latch.unlock();
         }
@@ -598,12 +524,14 @@ abstract class FinishState {
             latch.unlock();
         }
 
-        def notify(remoteEntry:Pair[Long, Int], excs:Rail[CheckedThrowable]):void {
+        def notify(remoteEntry:Pair[Long, Int], t:CheckedThrowable):void {
             latch.lock();
-            process(excs);
+            process(t);
             process(remoteEntry);
             latch.unlock();
         }
+
+        public def simpleLatch() = latch;
     }
 
     static class RemoteFinish extends RemoteFinishSkeleton {
@@ -616,17 +544,9 @@ abstract class FinishState {
         def this(ref:GlobalRef[FinishState]) {
             super(ref);
         }
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity):Boolean {
+        public def notifyActivityCreation(srcPlace:Place):Boolean {
             local.getAndIncrement();
             return true;
-        }
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity):Boolean {
-            return notifyActivityCreation(srcPlace, activity);
-        }
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            notifyActivityCreation(srcPlace, null);
-            pushException(t);
-            notifyActivityTermination();
         }
         public def notifySubActivitySpawn(place:Place):void {
             val id = Runtime.hereLong();
@@ -656,33 +576,34 @@ abstract class FinishState {
                 lock.unlock();
                 return;
             }
-            val excs = exceptions == null || exceptions.isEmpty() ? null : exceptions.toRail();
-            exceptions = null;
+            val t = MultipleExceptions.make(exceptions);
             val ref = this.ref();
+            val closure:()=>void;
             if (remoteActivities != null && remoteActivities.size() != 0) {
                 remoteActivities.put(here.id, count); // put our own count into the table
                 // pre-serialize the hashmap here
                 val serializer = new x10.io.Serializer();
                 serializer.writeAny(remoteActivities);
                 val serializedTable:Rail[Byte] = serializer.toRail();
-                remoteActivities.clear();
-                count = 0n;
-                lock.unlock();
-                if (null != excs) {
-                    at(ref.home) @Immediate("notifyActivityTermination_1") async deref[RootFinish](ref).notify(serializedTable, excs);
+                if (null != t) {
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_1") { deref[RootFinish](ref).notify(serializedTable, t); };
                 } else {
-                    at(ref.home) @Immediate("notifyActivityTermination_2") async deref[RootFinish](ref).notify(serializedTable);
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_2") { deref[RootFinish](ref).notify(serializedTable); };
                 }
+                remoteActivities.clear();
             } else {
                 val message = new Pair[Long, Int](here.id, count);
-                count = 0n;
-                lock.unlock();
-                if (null != excs) {
-                    at(ref.home) @Immediate("notifyActivityTermination_3") async deref[RootFinish](ref).notify(message, excs);
+                if (null != t) {
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_3") { deref[RootFinish](ref).notify(message, t); };
                 } else {
-                    at(ref.home) @Immediate("notifyActivityTermination_4") async deref[RootFinish](ref).notify(message);
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_4") { deref[RootFinish](ref).notify(message); };
                 }
             }
+            count = 0n;
+            exceptions = null;
+            lock.unlock();
+            Runtime.x10rtSendMessage(ref.home.id, closure, null);
+            Unsafe.dealloc(closure);
         }
     }
 
@@ -719,17 +640,9 @@ abstract class FinishState {
         def this(ref:GlobalRef[FinishState]) {
             super(ref);
         }
-        public def notifyActivityCreation(srcPlace:Place, activity:Activity):Boolean {
+        public def notifyActivityCreation(srcPlace:Place):Boolean {
             local.getAndIncrement();
             return true;
-        }
-        public def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity):Boolean {
-            return notifyActivityCreation(srcPlace, activity);
-        }
-        public def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void {
-            notifyActivityCreation(srcPlace, null);
-            pushException(t);
-            notifyActivityTermination();
         }
         public def notifySubActivitySpawn(place:Place):void {
             val id = Runtime.hereLong();
@@ -760,8 +673,7 @@ abstract class FinishState {
                 lock.unlock();
                 return;
             }
-            val excs = exceptions == null || exceptions.isEmpty() ? null : exceptions.toRail();
-            exceptions = null;
+            val t = MultipleExceptions.make(exceptions);
             val ref = this.ref();
             val closure:()=>void;
             if (remoteActivities != null && remoteActivities.size() != 0) {
@@ -770,31 +682,30 @@ abstract class FinishState {
                 val serializer = new x10.io.Serializer();
                 serializer.writeAny(remoteActivities);
                 val serializedTable:Rail[Byte] = serializer.toRail();
-                remoteActivities.clear();
-                count = 0n;
-                lock.unlock();
-                if (null != excs) {
-                    closure = ()=>{ deref[RootFinish](ref).notify(serializedTable, excs); };
+                if (null != t) {
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_1") { deref[RootFinish](ref).notify(serializedTable, t); };
                 } else {
-                    closure = ()=>{ deref[RootFinish](ref).notify(serializedTable); };
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_2") { deref[RootFinish](ref).notify(serializedTable); };
                 }
+                remoteActivities.clear();
             } else {
                 val message = new Pair[Long, Int](here.id, count);
-                count = 0n;
-                lock.unlock();
-                if (null != excs) {
-                    closure = ()=>{ deref[RootFinish](ref).notify(message, excs); };
+                if (null != t) {
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_3") { deref[RootFinish](ref).notify(message, t); };
                 } else {
-                    closure = ()=>{ deref[RootFinish](ref).notify(message); };
+                    closure = ()=>@RemoteInvocation("notifyActivityTermination_4") { deref[RootFinish](ref).notify(message); };
                 }
             }
+            count = 0n;
+            exceptions = null;
+            lock.unlock();
             val h = Runtime.hereInt();
             if ((Place.numPlaces() < 1024) || (h%32n == 0n) || (h-h%32n == (ref.home.id as Int))) {
-                at(ref.home) @Immediate("notifyActivityTermination_1") async closure();
+                Runtime.x10rtSendMessage(ref.home.id, closure, null);
             } else {
-                at(Place(h-h%32)) @Immediate("notifyActivityTermination_3") async {
-                    at(ref.home) @Immediate("notifyActivityTermination_2") async closure();
-                }
+                val clx = ()=>@RemoteInvocation("notifyActivityTermination_5") { Runtime.x10rtSendMessage(ref.home.id, closure, null); };
+                Runtime.x10rtSendMessage(h-h%32, clx, null);
+                Unsafe.dealloc(clx);
             }
             Unsafe.dealloc(closure);
         }
@@ -913,9 +824,9 @@ abstract class FinishState {
                 lock.unlock();
                 return;
             }
-            val excs = exceptions == null || exceptions.isEmpty() ? null : exceptions.toRail();
-            exceptions = null;
+            val t = MultipleExceptions.make(exceptions);
             val ref = this.ref();
+            val closure:()=>void;
             sr.placeMerge();
             val result = sr.result();
             sr.reset();
@@ -925,24 +836,25 @@ abstract class FinishState {
                 val serializer = new x10.io.Serializer();
                 serializer.writeAny(remoteActivities);
                 val serializedTable:Rail[Byte] = serializer.toRail();
-                remoteActivities.clear();
-                count = 0n;
-                lock.unlock();
-            	if (null != excs) {
-            		at(ref.home) @Immediate("notifyActivityTermination_1") async deref[RootCollectingFinish[T]](ref).notify(serializedTable, excs);
+            	if (null != t) {
+            		closure = ()=>@RemoteInvocation("notifyActivityTermination_1") { deref[RootCollectingFinish[T]](ref).notify(serializedTable, t); };
             	} else {
-            		at(ref.home) @Immediate("notifyActivityTermination_2") async deref[RootCollectingFinish[T]](ref).notifyValue(serializedTable, result);
+            		closure = ()=>@RemoteInvocation("notifyActivityTermination_2") { deref[RootCollectingFinish[T]](ref).notifyValue(serializedTable, result); };
             	}
+            	remoteActivities.clear();
             } else {
             	val message = new Pair[Long, Int](here.id, count);
-            	count = 0n;
-            	lock.unlock();
-            	if (null != excs) {
-            	    at(ref.home) @Immediate("notifyActivityTermination_3") async deref[RootCollectingFinish[T]](ref).notify(message, excs);
+            	if (null != t) {
+            		closure = ()=>@RemoteInvocation("notifyActivityTermination_3") { deref[RootCollectingFinish[T]](ref).notify(message, t); };
             	} else {
-            	    at(ref.home) @Immediate("notifyActivityTermination_4") async deref[RootCollectingFinish[T]](ref).notifyValue(message, result);
+            		closure = ()=>@RemoteInvocation("notifyActivityTermination_4") { deref[RootCollectingFinish[T]](ref).notifyValue(message, result); };
             	}
             }
+            count = 0n;
+            exceptions = null;
+            lock.unlock();
+            Runtime.x10rtSendMessage(ref.home.id, closure, null);
+            Unsafe.dealloc(closure);
         }
     }
 }

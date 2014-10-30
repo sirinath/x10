@@ -83,6 +83,8 @@ public final class X10JavaDeserializer implements SerializationConstants {
     public Object readAny() {
         try {
             return readObject();
+        } catch (SerializationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw e; // don't wrap
         } catch (Throwable e) {
@@ -195,6 +197,8 @@ public final class X10JavaDeserializer implements SerializationConstants {
             } else {
                 throw new SerializationException(cause != null ? cause : e);
             }
+        } catch (SerializationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw e; // don't wrap
         } catch (Throwable e) {
@@ -384,6 +388,8 @@ public final class X10JavaDeserializer implements SerializationConstants {
         try {
             DeserializerThunk thunk = DeserializerThunk.getDeserializerThunk(clazz);
             return thunk.deserializeObject(clazz, obj, i, this);
+        } catch (SerializationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw e; // don't wrap
         } catch (Throwable e) {

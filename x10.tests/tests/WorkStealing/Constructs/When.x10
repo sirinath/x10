@@ -10,9 +10,6 @@
  */
 //OPTIONS: -WORK_STEALING=true
 
-// SKIP_NATIVE_X10: XTENLANG-3440: Hangs with X10_NTHREADS>1
-// SKIP_MANAGED_X10: XTENLANG-3440: Hangs with X10_NTHREADS>1
-
 import harness.x10Test;
 
 public class When extends x10Test{

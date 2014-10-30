@@ -8,64 +8,18 @@
  *
  *  (C) Copyright IBM Corporation 2006-2014.
  */
-package x10.lang.managed;
+package x10.lang;
 import x10.util.concurrent.SimpleLatch;
-import x10.util.GrowableRail;
-
-import com.hazelcast.core.IMap;
-//import com.hazelcast.core.EntryEvent;
-//import com.hazelcast.core.EntryListener;
-//import com.hazelcast.core.MapEvent;
-//import com.hazelcast.map.AbstractEntryProcessor;
+import x10.util.*;
 
 /*
  * Resilient Finish optimized for Hazelcast
- * This file is compiled only for Managed X10, so we can use Java classes here
  */
-public
-class FinishResilientHC extends FinishResilientBridge {
-    private static val useX10RTforInit = true; // turn off this to use my own initialization code
-    private static val imap:IMap = getIMap("FinishResilientHC");
+class FinishResilientHC extends FinishResilient {
+    private static val verbose = FinishResilient.verbose;
     
-    private static def getIMap(mapName:String):IMap {
-        if (verbose>=1) debug(">>>> FinishResilientHC.getIMap(mapName="+mapName+") called, useX10RTforInit="+useX10RTforInit);
-        var imap:IMap = null;
-        
-      if (useX10RTforInit) {
-        @x10.compiler.Native("java", "imap = x10.x10rt.X10RT.getResilientMap(mapName);"){ /* dummy block */ }
-        
-      } else { // initialize by myself //@@@@ TODO: NOT COMPLETED
-        val config = new com.hazelcast.config.Config();
-        config.setProperty("hazelcast.logging.type", "none"); // disables Hazelcast logging
-        
-        // The following code is copied from x10.runtime/src-java/x10/x10rt/HazelcastDatastore.java
-        val leader:String = null; //@@@@ TODO: appropriate value should be specified here
-        val launcherProvidedHostname = System.getenv("X10_LAUNCHER_HOST");
-        if (verbose>=1) debug("launcherProvidedHostName="+launcherProvidedHostname+" leader="+leader);
-        var netconfig:com.hazelcast.config.NetworkConfig = config.getNetworkConfig();
-        if (launcherProvidedHostname != null) { // override the network interfaces used to match the hostfile/hostlist
-            try {
-                val IP = java.net.InetAddress.getByName(launcherProvidedHostname).getHostAddress();
-                netconfig = netconfig.setInterfaces(new com.hazelcast.config.InterfacesConfig().addInterface(IP).setEnabled(true));
-            } catch (e:CheckedException) { // java.net.UnknownHostException
-                // InetAddress.getByName() failed.  address not usable.  Let hazelcast pick one instead
-                if (verbose>=1) debug("launcherProvidedHostName not resolved");
-            }
-        }
-        val join = netconfig.setPortAutoIncrement(true).getJoin();
-        join.getMulticastConfig().setEnabled(false);
-        join.getTcpIpConfig().setEnabled(true).setRequiredMember(leader);
-        
-        val hazelcast = com.hazelcast.core.Hazelcast.newHazelcastInstance(config);
-        imap = hazelcast.getMap(mapName);
-      }
-        
-        if (imap==null) {
-            Console.OUT.println("FinishResilientHC.getIMap: imap is null, you may need to specify -DX10RT_DATASTORE=Hazelcast");
-        }
-        if (verbose>=1) debug("<<<< FinishResilientHC.getIMap(mapName="+mapName+") returning, imap="+imap);
-        return imap;
-    }
+    private static val RS
+    = ResilientStoreHC.make2[FinishID,State]("FinishResilientHC", FinishID.NULL);
     
     private static struct FinishID(placeId:Long,localId:Long) { // unique id
         public static val NULL = FinishID(-1,-1);
@@ -84,7 +38,7 @@ class FinishResilientHC extends FinishResilientBridge {
         def isAdopted() = (adopterId != FinishID.NULL);
         var numDead:Long = 0;
         def dump(msg:Any) {
-            val s = new x10.util.StringBuilder(); s.add(msg); s.add('\n');
+            val s = new StringBuilder(); s.add(msg); s.add('\n');
             s.add("           live:"); for (v in live          ) s.add(" " + v); s.add('\n');
             s.add("    liveAdopted:"); for (v in liveAdopted   ) s.add(" " + v); s.add('\n');
             s.add("        transit:"); for (v in transit       ) s.add(" " + v); s.add('\n');
@@ -105,8 +59,7 @@ class FinishResilientHC extends FinishResilientBridge {
     public def toString():String = System.identityToString(this) + "(id="+id+")";
     
     private def this(id:FinishID, latch:SimpleLatch) { this.id = id; this.latch = latch; }
-    public
-    static def make(parent:Any, latch:SimpleLatch):FinishResilientHC { // FinishState is inaccessible from another package ...
+    static def make(parent:FinishState, latch:SimpleLatch):FinishResilientHC {
         if (verbose>=1) debug(">>>> FinishResilientHC.make called, parent="+parent + " latch="+latch);
         val parentId = (parent instanceof FinishResilientHC) ? (parent as FinishResilientHC).id : FinishID.NULL; // ok to ignore other cases?
         
@@ -123,24 +76,23 @@ class FinishResilientHC extends FinishResilientBridge {
         // create State in ResilientStore
         val state = new State();
         state.live(here.id) = 1n; // for myself, will be decremented in waitForFinish
-       imap.lock(FinishID.NULL);
-        imap.put(id, state); // create
+       RS.lock();
+        RS.create(id, state);
         if (parentId != FinishID.NULL) {
-            val parentState = imap.get(parentId) as State;
+            val parentState = RS.getOrElse(parentId, null);
             parentState.children.add(id);
-            imap.put(parentId, parentState);
+            RS.put(parentId, parentState);
         }
-       imap.unlock(FinishID.NULL);
+       RS.unlock();
         
         if (verbose>=1) debug("<<<< FinishResilientHC.make returning fs="+fs);
         return fs;
     }
     
-    public
     static def notifyPlaceDeath():void {
         if (verbose>=1) debug(">>>> notifyPlaceDeath called");
         if (verbose>=2) debug("notifyPlaceDeath acquiring locks");
-       imap.lock(FinishID.NULL);
+       RS.lock();
        atomic {
         if (verbose>=2) debug("notifyPlaceDeath acquired locks, processing local fs");
         for (localId in 0..(ALL.size()-1)) {
@@ -150,7 +102,7 @@ class FinishResilientHC extends FinishResilientBridge {
             if (quiescent(fs.id)) releaseLatch(fs.id);
         }
        }
-       imap.unlock(FinishID.NULL);
+       RS.unlock();
         if (verbose>=2) debug("<<<< notifyPlaceDeath released locks and returning");
     }
     
@@ -165,102 +117,92 @@ class FinishResilientHC extends FinishResilientBridge {
     }
     
     private def getCurrentAdopterId():FinishID {
-        assert imap.isLocked(FinishID.NULL);
+        // assert RS.isLocked();
         var currentId:FinishID = id;
         while (true) {
             assert currentId!=FinishID.NULL;
-            val state = imap.get(currentId) as State;
+            val state = RS.getOrElse(currentId, null);
             if (!state.isAdopted()) break;
             currentId = state.adopterId;
         }
         return currentId;
     }
     
-    public
     def notifySubActivitySpawn(place:Place):void {
         val srcId = here.id, dstId = place.id;
         if (verbose>=1) debug(">>>> notifySubActivitySpawn(id="+id+") called, srcId="+srcId + " dstId="+dstId);
-       imap.lock(FinishID.NULL);
-        val state = imap.get(id) as State;
+       RS.lock();
+        val state = RS.getOrElse(id, null);
         if (!state.isAdopted()) {
             state.transit(srcId*Place.numPlaces() + dstId)++;
-            imap.put(id, state);
+            RS.put(id, state);
         } else {
             val adopterId = getCurrentAdopterId();
-            val adopterState = imap.get(adopterId) as State;
+            val adopterState = RS.getOrElse(adopterId, null);
             adopterState.transitAdopted(srcId*Place.numPlaces() + dstId)++;
-            imap.put(adopterId, adopterState);
+            RS.put(adopterId, adopterState);
         }
         if (verbose>=3) state.dump("DUMP id="+id);
-       imap.unlock(FinishID.NULL);
+       RS.unlock();
         if (verbose>=1) debug("<<<< notifySubActivitySpawn(id="+id+") returning");
     }
     
-    public
-    def notifyActivityCreation(srcPlace:Place, activity:Activity):Boolean {
+    def notifyActivityCreation(srcPlace:Place):Boolean {
         val srcId = srcPlace.id, dstId = here.id;
         if (verbose>=1) debug(">>>> notifyActivityCreation(id="+id+") called, srcId="+srcId + " dstId="+dstId);
         if (srcPlace.isDead()) {
             if (verbose>=1) debug("<<<< notifyActivityCreation(id="+id+") returning false");
             return false;
         }
-       imap.lock(FinishID.NULL);
-        val state = imap.get(id) as State;
+        RS.lock();
+        val state = RS.getOrElse(id, null);
         if (!state.isAdopted()) {
             state.live(dstId)++;
             state.transit(srcId*Place.numPlaces() + dstId)--;
-            imap.put(id, state);
+            RS.put(id, state);
         } else {
             val adopterId = getCurrentAdopterId();
-            val adopterState = imap.get(adopterId) as State;
+            val adopterState = RS.getOrElse(adopterId, null);
             adopterState.liveAdopted(dstId)++;
             adopterState.transitAdopted(srcId*Place.numPlaces() + dstId)--;
-            imap.put(adopterId, adopterState);
+            RS.put(adopterId, adopterState);
         }
         if (verbose>=3) state.dump("DUMP id="+id);
-       imap.unlock(FinishID.NULL);
+       RS.unlock();
         if (verbose>=1) debug("<<<< notifyActivityCreation(id="+id+") returning true");
         return true;
     }
     
-    public
-    def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity):Boolean {
-        return notifyActivityCreation(srcPlace, activity);
-    }
-
-    public
     def notifyActivityTermination():void {
         val dstId = here.id;
         if (verbose>=1) debug(">>>> notifyActivityTermination(id="+id+") called, dstId="+dstId);
-       imap.lock(FinishID.NULL);
-        val state = imap.get(id) as State;
+       RS.lock();
+        val state = RS.getOrElse(id, null);
         if (!state.isAdopted()) {
             state.live(dstId)--;
-            imap.put(id, state);
+            RS.put(id, state);
             if (quiescent(id)) releaseLatch(id);
         } else {
             val adopterId = getCurrentAdopterId();
-            val adopterState = imap.get(adopterId) as State;
+            val adopterState = RS.getOrElse(adopterId, null);
             adopterState.liveAdopted(dstId)--;
-            imap.put(adopterId, adopterState);
+            RS.put(adopterId, adopterState);
             if (quiescent(adopterId)) releaseLatch(adopterId);
         }
-       imap.unlock(FinishID.NULL);
+       RS.unlock();
         if (verbose>=1) debug("<<<< notifyActivityTermination(id="+id+") returning");
     }
     
-    public
     def pushException(t:CheckedThrowable):void {
         if (verbose>=1) debug(">>>> pushException(id="+id+") called, t="+t);
-       imap.lock(FinishID.NULL);
-        val state = imap.get(id) as State;
+       RS.lock();
+        val state = RS.getOrElse(id, null);
         state.excs.add(t); // need not consider the adopter
-        imap.put(id, state);
-       imap.unlock(FinishID.NULL);
+        RS.put(id, state);
+       RS.unlock();
         if (verbose>=1) debug("<<<< pushException(id="+id+") returning");
     }
     
-    public
     def waitForFinish():void { // can be called only for the original local FinishState returned by make
         assert id.placeId==here.id;
         assert latch!=null; // original local FinishState
@@ -272,24 +214,24 @@ class FinishResilientHC extends FinishResilientBridge {
         if (verbose>=2) debug("returned from latch.await for id="+id);
         
         var e:MultipleExceptions = null;
-       imap.lock(FinishID.NULL);
-        val state = imap.get(id) as State;
+       RS.lock();
+        val state = RS.getOrElse(id, null);
         if (!state.isAdopted()) {
             e = MultipleExceptions.make(state.excs); // may return null
-            imap.remove(id);
+            RS.remove(id);
         } else {
             //TODO: need to remove the state in future
         }
         atomic { ALL(id.localId) = null; }
-       imap.unlock(FinishID.NULL);
+       RS.unlock();
         if (verbose>=1) debug("<<<< waitForFinish(id="+id+") returning, exc="+e);
         if (e != null) throw e;
     }
     
     private static def quiescent(id:FinishID):Boolean {
         if (verbose>=2) debug("quiescent(id="+id+") called");
-        assert imap.isLocked(FinishID.NULL);
-        val state = imap.get(id) as State;
+        // assert RS.isLocked();
+        val state = RS.getOrElse(id, null);
         if (state==null) { // already finished
             if (verbose>=2) debug("quiescent(id="+id+") returning false, state==null");
             return false;
@@ -307,7 +249,7 @@ class FinishResilientHC extends FinishResilientBridge {
             for (var chIndex:Long = 0; chIndex < children.size(); ++chIndex) {
                 val childId = children(chIndex);
                 if (!Place.isDead(childId.placeId)) continue;
-                val childState = imap.get(childId) as State;
+                val childState = RS.getOrElse(childId, null);
                 if (childState==null) continue; // already finished
                 val lastChildId = children.removeLast();
                 if (chIndex < children.size()) children(chIndex) = lastChildId;
@@ -317,7 +259,7 @@ class FinishResilientHC extends FinishResilientBridge {
                 if (verbose>=3) childState.dump("DUMP childId="+childId);
                 assert !childState.isAdopted();
                 childState.adopterId = id;
-                imap.put(childId, childState);
+                RS.put(childId, childState);
                 state.children.addAll(childState.children); // will be checked in the following iteration
                 for (i in 0..(Place.numPlaces()-1)) {
                     state.liveAdopted(i) += (childState.live(i) + childState.liveAdopted(i));
@@ -349,7 +291,7 @@ class FinishResilientHC extends FinishResilientBridge {
             }
         }
         
-        imap.put(id, state);
+        RS.put(id, state);
         
         // 3 quiescent check
         if (verbose>=3) state.dump("DUMP id="+id);

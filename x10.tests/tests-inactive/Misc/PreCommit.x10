@@ -58,6 +58,7 @@ public class PreCommit extends x10Test {
         if (Place.numPlaces() >= 2) {
             result &= myExecute(new AsyncTest3());
             result &= myExecute(new AtCopy());
+
         }
 
         return result;
@@ -65,18 +66,26 @@ public class PreCommit extends x10Test {
 
 
     public def runHeatTransfer():boolean {
-	Console.OUT.print("Running HeatTransfer...");
-        val ht = new HeatTransfer_v1(11);
-        ht.run();
-	// Spot check result.  A(6,6) should be close to 0.25.
-        val tmp = at (ht.A.place(6,6)) ht.A(6,6);
-        if (tmp < 0.249 || tmp > 0.251) {
-            Console.OUT.println("FAILURE: The value of A(6,6) is "+tmp);
-            return false;
-        } else {
-            Console.OUT.println("SUCCESS");
-            return true;
+        Console.OUT.println("starting HeatTransfer computation");
+        val s = new HeatTransfer_v4();
+	Console.OUT.print("Beginning computation...");
+	val start = System.nanoTime();
+        s.run();
+	val stop = System.nanoTime();
+	Console.OUT.printf("...completed in %1.3f seconds.\n", (stop-start as double)/1e9);
+	s.prettyPrintResult();
+
+	// Spot check.  A(2,2) should be close to 0.25.
+        // Can't use epsilon as the ckeck because the termination
+        // condition is that the rate of change is less than epsilon.
+        val pt = Point.make(2,2);
+        at (s.BigD(pt)) {
+            val tmp = s.A(pt);
+            Console.OUT.println("The value of A(2,2) is "+tmp);
+            chk(tmp > 0.249);
+            chk(tmp < 0.251);
         }
+	return true;
     }
 
     public def run():boolean {

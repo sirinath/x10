@@ -16,7 +16,6 @@ import x10.compiler.Inline;
 import x10.compiler.Pragma;
 import x10.compiler.StackAllocate;
 import x10.compiler.NativeCPPInclude;
-import x10.compiler.Immediate;
 
 import x10.io.Serializer;
 import x10.io.Deserializer;
@@ -259,7 +258,6 @@ public final class Runtime {
     public static NTHREADS = Configuration.nthreads();
     public static MAX_THREADS = Configuration.max_threads();
     public static STATIC_THREADS = Configuration.static_threads();
-    public static NUM_IMMEDIATE_THREADS = Configuration.num_immediate_threads();
     public static WARN_ON_THREAD_CREATION = Configuration.warn_on_thread_creation();
     public static BUSY_WAITING = Configuration.busy_waiting();
     public static CANCELLABLE = Configuration.cancellable();
@@ -328,8 +326,6 @@ public final class Runtime {
         var epoch:Long = 42;
 
         val lock = new Lock(); // master lock for all thread pool adjustments
-
-        val inboundTasks = new Deque();
 
         // every x10 thread (including promoted native threads)
         private val workers = new Rail[Worker](MAX_THREADS);
@@ -441,17 +437,19 @@ public final class Runtime {
         def take(worker:Worker):Activity {
             if (multiplace && busyWaiting && (idleCount - spareNeeded >= NTHREADS - 1)) return null;
             lock.lock();
-            val task = inboundTasks.steal() as Activity;
-            if(task != null) {
-                lock.unlock();
-                return task;
-            }
+//            if(pool.workers(0n).promoted) {
+                val task = pool.workers(0n).steal();
+                if(task != null) {
+                    lock.unlock();
+                    return task;
+                }
+//            }
             convert();
             if (multiplace && busyWaiting && (idleCount >= NTHREADS - 1)) {
                 lock.unlock();
                 return null;
             }
-            if (multiplace && !busyWaiting && !probing && NUM_IMMEDIATE_THREADS == 0n) {
+            if (multiplace && !busyWaiting && !probing) {
                 probing = true;
                 lock.unlock();
                 x10rtBlockingProbe();
@@ -476,7 +474,7 @@ public final class Runtime {
             convert();
             if (idleCount <= 0n) {
                 val p = probing;
-                inboundTasks.push(activity);
+                pool.workers(0n).push(activity);
                 lock.unlock();
                 if (p && multiplace) x10rtUnblockProbe();
                 return;
@@ -511,9 +509,9 @@ public final class Runtime {
         }
 
         // account for terminated thread
-        def reclaim(promoted:Boolean):void {
+        def reclaim():void {
             lock.lock();
-            if (!promoted) deadCount++; // deadCount for promoted thread incremented when thread created.
+            deadCount++;
             while (idleCount > 0n) {
                 val i = spareCount + --idleCount;
                 val worker = parkedWorkers(i);
@@ -528,7 +526,6 @@ public final class Runtime {
             val p = probing;
             lock.unlock();
             if (p && multiplace) x10rtUnblockProbe();
-            if (NUM_IMMEDIATE_THREADS > 0) x10rtUnblockProbe();
         }
 
         public operator this(i:Int) = workers(i);
@@ -541,13 +538,11 @@ public final class Runtime {
                 for (var i:Int=0n; i<count; i++) {
                     if (workers(i) != null) while (workers(i).steal() != null);
                 }
-		while (inboundTasks.steal() != null) {};
             }
             finishStates.clear(e);
             val p = probing;
             lock.unlock();
             if (p && multiplace) x10rtUnblockProbe();
-            if (NUM_IMMEDIATE_THREADS > 0) x10rtUnblockProbe();
             for (var i:Int=0n; i<count; i++) {
                 if (workers(i) != null) workers(i).unpark();
             }
@@ -583,17 +578,6 @@ public final class Runtime {
             random = new Random(workerId + (workerId << 8n) + (workerId << 16n) + (workerId << 24n));
         }
 
-        // Horrible hack for @Immediate dedicated Worker
-        // For managed X10, if we pass a String to the superclass constructor it means
-	// "create a new thread"  if we don't pass a String it means "make the current thread 
-        // be a worker".  
-        def this(workerId:Int, promoted:Boolean, name:String) {
-            super(name);
-            this.promoted = promoted;
-            this.workerId = workerId;
-            random = new Random(workerId + (workerId << 8n) + (workerId << 16n) + (workerId << 24n));
-        }
-
         def this(workerId:Int, promoted:Boolean) {
             super();
             this.promoted = promoted;
@@ -625,17 +609,12 @@ public final class Runtime {
         // run pending activities
         public operator this():void {
             try {
-                if (promoted) {
-                    while (immediatePollLoop());
-                } else {
-                    while (loop());
-                }
+                while (loop());
             } catch (t:CheckedThrowable) {
                 println("Uncaught exception in worker thread");
                 t.printStackTrace();
             } finally {
-                pool.release(promoted);
-                if (NUM_IMMEDIATE_THREADS > 0) x10rtUnblockProbe();
+                pool.release();
             }
         }
 
@@ -654,23 +633,6 @@ public final class Runtime {
                 Unsafe.dealloc(activity);
             }
             return true;
-        }
-
-        // inner loop to help j9 jit
-        private def immediatePollLoop() {
-            for (var i:Int = 0n; i < BOUND; i++) {
-                // FIXME: Shutdown race here.
-		// Value of latch could change between when we check it
-		// and when we call x10rtBlockingProbe
-                if (pool.latch()) return false;
-                x10rtBlockingProbe();
-                for (var task:Activity = poll(); task != null; task = poll()) {
-                    if (task.epoch >= epoch()) {
-                        pool.workers.submit(task);
-                    }
-                }
-            } 
-            return !pool.latch();
         }
 
         def probe():void {
@@ -703,6 +665,10 @@ public final class Runtime {
                 if (activity == null) return false;
                 if (activity.epoch < epoch()) continue;
                 if (pool.deal(activity)) continue;
+//                if (activity.finishState().simpleLatch() != latch) {
+//                    push(activity);
+//                    return false;
+//                }
                 activity.run();
                 Unsafe.dealloc(activity);
             }
@@ -732,7 +698,7 @@ public final class Runtime {
         val latch = new Latch();
         val watcher = new Watcher();
         var cancelWatcher:Watcher = null;
-
+        
         var wsEnd:Boolean = false;
 
         val workers = new Workers();
@@ -755,13 +721,7 @@ public final class Runtime {
             for (var i:Int = 1n; i<n; i++) {
                 workers(i) = new Worker(i);
             }
-            // Create NUM_IMMEDIATE_THREADS dedicated to processing @Immediate asyncs
-	    for (j in 1..NUM_IMMEDIATE_THREADS) {
-                val id = workers.count++;
-                workers(id) = new Worker(id, true, "@ImmediateWorker-"+j);
-                workers.deadCount++; // ignore immediate threads in dynamic pool-size adjustment
-            }
-            for (var i:Int = 1n; i<workers.count; i++) {
+            for (var i:Int = 1n; i<n; i++) {
                 workers(i).start();
             }
         }
@@ -794,13 +754,13 @@ public final class Runtime {
         def decrease(n:Int):void {
             workers.reduce(n);
         }
- 
+
         // attempt to deal activity to idle worker
         def deal(activity:Activity):Boolean = workers.give(activity);
 
         // release permit (called by worker upon termination)
-        def release(promoted:Boolean):void {
-            workers.reclaim(promoted);
+        def release():void {
+            workers.reclaim();
             if (workers.count == workers.deadCount) pool.watcher.release();
         }
 
@@ -811,18 +771,10 @@ public final class Runtime {
             val init:Int = next;
             for (;;) {
                 if (null != activity || latch()) return activity;
-
                 // go to sleep if too many threads are running
                 activity = workers.yield(worker);
                 if (null != activity || latch()) return activity;
-
-                // look for an inbound task that is ready to execute
-                activity = workers.inboundTasks.steal() as Activity;
-                if (null != activity || latch()) {
-		    return activity;
-                }
-
-                // try the network ourselves
+                // try network
                 x10rtProbe();
                 if (Place.numDead() != numDead) {
                     atomic {
@@ -837,7 +789,6 @@ public final class Runtime {
                 }
                 activity = worker.poll();
                 if (null != activity || latch()) return activity;
-
                 do {
                     // try local worker
                     if (next < MAX_THREADS && null != workers(next)) { // avoid race with increase method
@@ -846,11 +797,6 @@ public final class Runtime {
                     if (null != activity || latch()) return activity;
                     if (++next == workers.count) next = 0n;
                 } while (next != init);
-                activity = workers.inboundTasks.steal() as Activity;
-                if (null != activity || latch()) {
-                    return activity;
-                }
-
                 // time to back off
                 activity = workers.take(worker);
             }
@@ -966,10 +912,7 @@ public final class Runtime {
      * @param job Job being submitted
      */
     public static def submitUncounted(job:()=>void):void {
-        val activity = new Activity(epoch(), job, here, FinishState.UNCOUNTED_FINISH);
-        if (FinishState.UNCOUNTED_FINISH.notifyActivityCreation(activity.srcPlace, activity)) {
-            pool.workers.submit(activity);
-        }
+        pool.workers.submit(new Activity(epoch(), job, here, FinishState.UNCOUNTED_FINISH));
     }
 
     /**
@@ -1138,13 +1081,10 @@ public final class Runtime {
                 val bodyCopy = deser.readAny() as ()=>void;
                 bodyCopy();
             };
-            submitLocalActivity(new Activity(epoch, asyncBody, here, state, clockPhases));
+            executeLocal(new Activity(epoch, asyncBody, here, state, clockPhases));
         } else {
             val src = here;
-            val closure = ()=> @x10.compiler.RemoteInvocation("runAsync") { 
-                val activity = new Activity(epoch, body, src, state, clockPhases);
-                submitRemoteActivity(epoch, activity, src, state);
-            };
+            val closure = ()=> @x10.compiler.RemoteInvocation("runAsync") { pushActivity(new Activity(epoch, body, src, state, clockPhases)); };
             val preSendAction = ()=> { state.notifySubActivitySpawn(place); };
             x10rtSendMessage(place.id, closure, prof, preSendAction);
             Unsafe.dealloc(closure);
@@ -1177,7 +1117,7 @@ public final class Runtime {
                 val bodyCopy = deser.readAny() as ()=>void;
                 bodyCopy();
             };
-            submitLocalActivity(new Activity(epoch, asyncBody, here, state));
+            executeLocal(new Activity(epoch, asyncBody, here, state));
         } else {
             val preSendAction = ()=>{ state.notifySubActivitySpawn(place); };
             x10rtSendAsync(place.id, body, state, prof, preSendAction); // optimized case
@@ -1197,7 +1137,7 @@ public final class Runtime {
         val state = a.finishState();
         val clockPhases = a.clockPhases().make(clocks);
         state.notifySubActivitySpawn(here);
-        submitLocalActivity(new Activity(epoch, body, here, state, clockPhases));
+        executeLocal(new Activity(epoch, body, here, state, clockPhases));
     }
 
     public static def runAsync(body:()=>void):void {
@@ -1208,12 +1148,12 @@ public final class Runtime {
         val epoch = a.epoch;
         val state = a.finishState();
         state.notifySubActivitySpawn(here);
-        submitLocalActivity(new Activity(epoch, body, here, state));
+        executeLocal(new Activity(epoch, body, here, state));
     }
 
-    public static def runFinish(body:()=>void):void {
-        finish body();
-    }
+	public static def runFinish(body:()=>void):void {
+	    finish body();
+	}
 
     /**
      * Run @Uncounted asyncat
@@ -1241,46 +1181,16 @@ public final class Runtime {
                 val bodyCopy = deser.readAny() as ()=>void;
                 bodyCopy();
             };
-            submitLocalActivity(new Activity(epoch, asyncBody, here, FinishState.UNCOUNTED_FINISH));
+            executeLocal(new Activity(epoch, asyncBody, here, FinishState.UNCOUNTED_FINISH));
         } else {
-            val src = here;
-            val closure = ()=> @x10.compiler.RemoteInvocation("runUncountedAsync") { 
-                val activity = new Activity(epoch, body, src, FinishState.UNCOUNTED_FINISH);
-                submitRemoteActivity(epoch, activity, src, FinishState.UNCOUNTED_FINISH);
-            };
+            // [DC] passing FIRST_PLACE instead of the correct src, since UNCOUNTED_FINISH does not use this value
+            // and it saves sending some bytes over the network
+            val closure = ()=> @x10.compiler.RemoteInvocation("runUncountedAsync") { pushActivity(new Activity(epoch, body, Place.FIRST_PLACE, FinishState.UNCOUNTED_FINISH)); };
             x10rtSendMessage(place.id, closure, prof);
             Unsafe.dealloc(closure);
         }
         Unsafe.dealloc(body);
     }
-
-
-    /**
-     * Run @Immediate asyncat
-     *
-     * This method is only intended to be targeted by the compiler.
-     * Therefore it is private.
-     *
-     * For correct operation, it requires that the body closure be 
-     * annotated with @Immediate so that it is given a network id;
-     * the compiler respects this invariant.
-     */
-    private static def runImmediateAsync(place:Place, body:()=>void, prof:Profile):void {
-        if (place.id == hereLong()) {
-            // copy body (at semantics) and then invoke immediately on current thread
-            val copiedBody = Runtime.deepCopy(body, prof);
-            try {
-                copiedBody();
-            } catch (e:CheckedThrowable) {
-                println("WARNING: Ignoring uncaught exception in @Immediate async.");
-                e.printStackTrace();
-            }
-        } else {
-            x10rtSendMessage(place.id, body, prof, null);
-        }
-        Unsafe.dealloc(body);
-    }
-
 
     /**
      * Run @Uncounted async
@@ -1291,7 +1201,7 @@ public final class Runtime {
         a.ensureNotInAtomic();
 
         val epoch = a.epoch;
-        submitLocalActivity(new Activity(epoch, body, here, new FinishState.UncountedFinish()));
+        executeLocal(new Activity(epoch, body, here, new FinishState.UncountedFinish()));
     }
 
     /**
@@ -1337,19 +1247,9 @@ public final class Runtime {
     //public static def pretendToThrow[T] () { T<: CheckedThrowable } : void throws T { }
     // work-around for XTENLANG-3086 is in CheckedThrowable.x10
 
-    /** 
-     * Implement the exception/blocking semantics of at(p) S by 
-     * combining the fundamental primitives of finish (for blocking)
-     * and at (p) async S (for remote task spawning). 
-     *
-     * We manipulate the finish state, clocks, and exception behavior of
-     * the remote async's body to obtain the X10 language semantics.
-     */
-    public static def runAt(place:Place, body:()=>void, prof:Profile):void {
+    /** Run an at statement in non-resilient X10 by using a local latch. */
+    public static def runAtNonResilient(place:Place, body:()=>void, prof:Profile):void {
         Runtime.ensureNotInAtomic();
-
-        // runAt to here is straightforward, execute a
-        // deep copy of the body closure synchronously.
         if (place.id == hereLong()) {
             try {
                 try {
@@ -1362,81 +1262,62 @@ public final class Runtime {
                 throwCheckedWithoutThrows(deepCopy(t, null));
             }
         }
-
-        // Carefully manipulate the finishState, etc. so that 
-        // asyncs spawned by body use the current finishState
-        // not the finishState of the finish we create intenally here to
-        // enable blocking on the completion of remote execution of body
-        val srcPlace = here;
-        val realActivity = activity();
-        val finishState = realActivity.finishState();
-        val clockPhases = realActivity.clockPhases;
-        val realActivityGR = GlobalRef[Activity](clockPhases == null ? null : realActivity);        
-        val ser = new x10.io.Serializer();
+        @StackAllocate val me = @StackAllocate new RemoteControl();
+        val box:GlobalRef[RemoteControl] = GlobalRef(me as RemoteControl);
+        val clockPhases = activity().clockPhases;
+        @StackAllocate val ser = @StackAllocate new x10.io.Serializer();
         ser.writeAny(body);
         val bytes = ser.toRail();
-
-        finishState.notifySubActivitySpawn(place);
-
-        try {
-	    @Pragma(Pragma.FINISH_ASYNC) finish @x10.compiler.Profile(prof) at(place) async {
-                if (finishState.notifyActivityCreationBlocking(srcPlace, null)) {
-                    activity().clockPhases = clockPhases;
-                    val syncFinishState = activity().swapFinish(finishState);
-                    var exc:CheckedThrowable = null;
-                    try {
-                        // Actually deserialize and evaluate user body
-                        val deser = new x10.io.Deserializer(bytes);
-                        val bodyPrime = deser.readAny() as ()=>void;
-                        bodyPrime();
-                    } catch (e:AtCheckedWrapper) {
-                        exc = e.getCheckedCause();
-                    } catch (e:WrappedThrowable) {
-                        exc = e.getCheckedCause();
-                    } catch (e:CheckedThrowable) {
-                        exc = e;
-                    }
-
-                    // Wind up internal activity created for synchronization
-                    try {
-                        activity().swapFinish(syncFinishState);
-
-                        // Transmit potentially modified clockPhases back to srcPlace.
-                        val finalClockPhases = activity().clockPhases;
-                        activity().clockPhases = null;
-                        if (finalClockPhases != null) {
-                            @Pragma(Pragma.FINISH_ASYNC) finish at (srcPlace) async {
-                                realActivityGR().clockPhases = finalClockPhases;
-                            }
-                        }
-                    } catch (e:CheckedThrowable) {
-                        // Suppress exceptions during windup of internal activity.
-                        // Should not be user-visible.
-                    } finally {
-                        finishState.notifyActivityTermination();
-                        if (exc != null) syncFinishState.pushException(exc);
-                    }
+        @x10.compiler.Profile(prof) at(place) async {
+            activity().clockPhases = clockPhases;
+            try {
+                try {
+                    // We use manual deserialization to get correct handling of exceptions
+                    @StackAllocate val deser = @StackAllocate new x10.io.Deserializer(bytes);
+                    val bodyPrime = deser.readAny() as ()=>void;
+                    bodyPrime();
+                    val closure = ()=> @x10.compiler.RemoteInvocation("runAt_1") { 
+                        val me2 = (box as GlobalRef[RemoteControl]{home==here})();
+                        me2.clockPhases = clockPhases;
+                        me2.release();
+                    };
+                    x10rtSendMessage(box.home.id, closure, null);
+                    Unsafe.dealloc(closure);
+                } catch (e:AtCheckedWrapper) {
+                    throw e.getCheckedCause();
                 }
+            } catch (e:CheckedThrowable) {
+                val closure = ()=> @x10.compiler.RemoteInvocation("runAt_2") { 
+                    val me2 = (box as GlobalRef[RemoteControl]{home==here})();
+                    me2.e = e;
+                    me2.clockPhases = clockPhases;
+                    me2.release();
+                };
+                x10rtSendMessage(box.home.id, closure, null);
+                Unsafe.dealloc(closure);
             }
-        } catch (e:MultipleExceptions) {
-            // Peel off the layer of ME wrapping caused by the internal finish above.
-            if (e.exceptions != null && e.exceptions.size == 1) {
-                throwCheckedWithoutThrows(e.exceptions(0));
-            }
-            // Unexpected.  Rethrow e to enable debugging.
-            throw e;
-        } finally {
-           realActivityGR.forget();
+            activity().clockPhases = null;
+        }
+        me.await();
+        Unsafe.dealloc(body);
+        Unsafe.dealloc(bytes);
+        activity().clockPhases = me.clockPhases;
+        if (null != me.e) {
+            throwCheckedWithoutThrows(me.e);
         }
     }
 
+    /**
+     * Run at statement
+     */
+    public static def runAt(place:Place, body:()=>void, prof:Profile):void {
+        activity().finishState().runAt(place, body, prof);
+    }
 
     /*
      * [GlobalGC] Special version of runAt, which does not use activity, clock, exceptions
      *            Used in GlobalRef.java to implement changeRemoteCount
      * [DC] do not allow profiling of this call: seems it is not for application use?
-     *
-     * DG: TODO: Get rid of this method by using @Immediate asyncs and/or lowlevel at.
      */
     public static def runAtSimple(place:Place, body:()=>void, toWait:Boolean):void {
         //Console.ERR.println("Runtime.runAtSimple: place=" + place + " toWait=" + toWait);
@@ -1493,18 +1374,10 @@ public final class Runtime {
         public def reset() { bytes = 0; serializationNanos = 0; communicationNanos = 0; }
     }
 
-    /** 
-     * Implement the exception/blocking/expression semantics of at(p) E by 
-     * wrapping the fundamental remote async primitive at(p) async S
-     * to modify its exception semantics and using a local latch
-     * to achieve the desired blocking semantics and communication 
-     * of return value.
-     *
-     * TODO: Resilient X10: Need to use a per-worker RemoteControl
-     *                      to enable notifyPlaceDeath to unblock
-     *                      stuck threads.
+    /**
+     * Eval at expression
      */
-    private static def evalAtImpl(place:Place, eval:()=>Any, prof:Profile):Any {
+    public static def evalAtNonResilient(place:Place, eval:()=>Any, prof:Profile):Any {
         Runtime.ensureNotInAtomic();
         if (place.id == hereLong()) {
             try {
@@ -1535,8 +1408,7 @@ public final class Runtime {
                     @StackAllocate val ser2 = @StackAllocate new x10.io.Serializer();
                     ser2.writeAny(result);
                     val bytes2 = ser2.toRail();
-
-                    at (box.home) @Immediate("evalAt_1") async {
+                    val closure = ()=> @x10.compiler.RemoteInvocation("evalAt_1") { 
                         val me2 = (box as GlobalRef[Remote[Any]]{home==here})();
                         // me2 has type Box[T{box.home==here}]... weird
                         me2.clockPhases = clockPhases;
@@ -1549,16 +1421,20 @@ public final class Runtime {
                         }
                         me2.release();
                     };
+                    x10rtSendMessage(box.home.id, closure, null);
+                    Unsafe.dealloc(closure);
                 } catch (t:AtCheckedWrapper) {
                     throw t.getCheckedCause();
                 }
             } catch (e:CheckedThrowable) {
-                at (box.home) @Immediate("evalAt_2") async {
+                val closure = ()=> @x10.compiler.RemoteInvocation("evalAt_2") { 
                     val me2 = (box as GlobalRef[Remote[Any]]{home==here})();
                     me2.e = e;
                     me2.clockPhases = clockPhases;
                     me2.release();
                 };
+                x10rtSendMessage(box.home.id, closure, null);
+                Unsafe.dealloc(closure);
             }
             activity().clockPhases = null;
         }
@@ -1571,20 +1447,13 @@ public final class Runtime {
         return me.t.value;
     }
 
-    /** 
-     * Implement the exception/blocking/expression semantics of at(p) E by 
-     * wrapping the fundamental remote async primitive at(p) async S
-     * to modify its exception semantics and using a local latch
-     * to achieve the desired blocking semantics and communication 
-     * of return value.
+    /**
+     * Eval at expression
      */
-    public static def evalAt[T](place:Place, eval:()=>T, prof:Profile):T {
-        // NOTE: We are wrapping a non-generic impl of the core functionality
-        //       to control codespace growth and limit the number of actual
-        //       remote closures (Native X10).
-        val eval2 = ()=>(eval() as Any);
-        val r:T = evalAtImpl(place, eval2, prof) as T;
-        Unsafe.dealloc(eval2); 
+    public static def evalAt[T](place:Place, body:()=>T, prof:Profile):T {
+        val body2 = ()=>(body() as Any);
+        val r = activity().finishState().evalAt(place, body, prof) as T;
+        Unsafe.dealloc(body2); // optimisation since we always run with gc, no need to put it in a finally
         return r;
     }
 
@@ -1681,26 +1550,20 @@ public final class Runtime {
 
     public static def startFinish(pragma:Int):FinishState {
         val f:FinishState;
-        if (RESILIENT_MODE == Configuration.RESILIENT_MODE_NONE ||
-            RESILIENT_MODE == Configuration.RESILIENT_MODE_X10RT_ONLY) {
-            switch (pragma) {
-            case Pragma.FINISH_ASYNC:
-                f = new FinishState.FinishAsync(); break;
-            case Pragma.FINISH_HERE:
-                f = new FinishState.FinishHere(); break;
-            case Pragma.FINISH_SPMD:
-                f = new FinishState.FinishSPMD(); break;
-            case Pragma.FINISH_LOCAL:
-                f = new FinishState.LocalFinish(); break;
-            case Pragma.FINISH_DENSE:
-                f = new FinishState.DenseFinish(); break;
-            default: 
-                f = new FinishState.Finish();
-            }
-        } else {
-            f = FinishResilient.make(null/*parent*/, null/*latch*/);
+        switch (pragma) {
+        case Pragma.FINISH_ASYNC:
+            f = new FinishState.FinishAsync(); break;
+        case Pragma.FINISH_HERE:
+            f = new FinishState.FinishHere(); break;
+        case Pragma.FINISH_SPMD:
+            f = new FinishState.FinishSPMD(); break;
+        case Pragma.FINISH_LOCAL:
+            f = new FinishState.LocalFinish(); break;
+        case Pragma.FINISH_DENSE:
+            f = new FinishState.DenseFinish(); break;
+        default: 
+            f = makeDefaultFinish();
         }
-
         return activity().swapFinish(f);
     }
 
@@ -1747,44 +1610,30 @@ public final class Runtime {
         return (state as FinishState.CollectingFinish[T]).waitForFinishExpr();
     }
 
-    static def submitLocalActivity(activity:Activity):void {
-        if (activity.srcPlace != here) {
-            throw new InternalError("submitLocalActivity at "+here+" called with activity from "+activity.srcPlace);
-        }
-        if (activity.epoch < epoch()) throw new DeadPlaceException("Cancelled");
-        if (activity.finishState().notifyActivityCreation(activity.srcPlace, activity)) {
-            if (!pool.deal(activity)) { 
-                worker().push(activity);
-            }
-        }
+    // submit an activity to the pool
+    static def pushActivity(activity:Activity):void {
+        worker().push(activity);
     }
 
-    // TODO: remove this variant of submitRemoteActivity once all backends and x10rt impls support epochs
-    public static def submitRemoteActivity(body:()=>void, src:Place, finishState:FinishState):void {
-        submitRemoteActivity(42, body, src, finishState);
+    static def executeLocal(activity:Activity):void {
+        if (activity().epoch < epoch()) throw new DeadPlaceException("Cancelled");
+        dealOrPush(activity);
     }
 
-    public static def submitRemoteActivity(epoch:Long, body:()=>void, src:Place, finishState:FinishState):void {
-        submitRemoteActivity(epoch, new Activity(epoch, body, src, finishState), src, finishState);
+    static def dealOrPush(activity:Activity):void {
+        if (!pool.deal(activity)) pushActivity(activity);
     }
 
-    /**
-     * Submit an activity origniating in a remote Place for execution
-     * by the local Runtime.
-     *
-     * IMPORTANT NOTE: This method can be invoked from an @Immediate worker thread,
-     *                 therefore execution of this method may not block or pause.
-     *                 (Same restrictions as the body of an @Immediate async).
-     */
-    public static def submitRemoteActivity(epoch:Long, activity:Activity, src:Place, finishState:FinishState):void {
+    // TODO: remove this once all backends and x10rt impls have epochs
+    public static def execute(body:()=>void, src:Place, finishState:FinishState):void {
+        pushActivity(new Activity(42, body, src, finishState));
+    }
+
+    public static def execute(epoch:Long, body:()=>void, src:Place, finishState:FinishState):void {
         if (epoch > epoch()) {
             pool.flush(epoch);
         }
-        if (epoch == epoch()) {
-            if (finishState.notifyActivityCreation(activity.srcPlace, activity)) {
-                worker().push(activity);
-            }
-        }
+        if (epoch == epoch()) pushActivity(new Activity(epoch, body, src, finishState));
     }
 
     public static def probe() {

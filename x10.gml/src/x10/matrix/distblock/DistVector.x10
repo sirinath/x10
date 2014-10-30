@@ -46,8 +46,8 @@ public class DistVector(M:Long) implements Snapshottable {
     
     public def this(m:Long, vs:PlaceLocalHandle[Vector], segsz:Rail[Long], pg:PlaceGroup) {
         property(m);
-        assert (segsz.size == pg.size()) :
-            "number of vector segments must be equal to number of places";
+        Debug.assure(segsz.size == pg.size(),
+            "number of vector segments must be equal to number of places");
         distV  = vs;
         segSize = segsz;
         places = pg;
@@ -152,11 +152,12 @@ public class DistVector(M:Long) implements Snapshottable {
                 return new Pair[Long,Long](i, pos);
             pos -= segments(i);
         }
-        throw new UnsupportedOperationException("Error in searching index in vector");
+        Debug.exit("Error in searching index in vector");
+        return new Pair[Long,Long](-1, -1);
     }
     
     protected def find(var pos:Long):Pair[Long, Long] {
-        assert (pos < M) : "Vector data access out of bounds";
+        Debug.assure(pos<M, "Vector data access out of bound");
         return find(pos, segSize);
     }
     
@@ -190,7 +191,7 @@ public class DistVector(M:Long) implements Snapshottable {
      * Concurrently perform cellwise addition on all copies.
      */
     public def cellAdd(that:DistVector(M))  {
-        //assert (this.M==A.M&&this.N==A.N);
+        //Debug.assure(this.M==A.M&&this.N==A.N);
         finish ateach(Dist.makeUnique(places)) {
             val dst = distV();
             val src = that.distV() as Vector(dst.M);
@@ -386,8 +387,7 @@ public class DistVector(M:Long) implements Snapshottable {
      * Remake the DistBlockMatrix over a new PlaceGroup
      */
     public def remake(segsz:Rail[Long], newPg:PlaceGroup){        
-        assert (segsz.size == newPg.size()) :
-            "number of vector segments must be equal to number of places";
+        Debug.assure(segsz.size == newPg.size(), "number of vector segments must be equal to number of places");
         PlaceLocalHandle.destroy(places, distV, (Place)=>true);
         distV = PlaceLocalHandle.make[Vector](newPg, ()=>Vector.make(segsz(newPg.indexOf(here))));
         segSize = segsz;        

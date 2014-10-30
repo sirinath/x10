@@ -14,6 +14,7 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.comm.mpi.WrapMPI;
 
 /**
@@ -45,7 +46,7 @@ public class ArrayBcast extends ArrayRemoteCopy {
      */
     public static def bcast(duplist:DataArrayPLH, pg: PlaceGroup) {
         @Ifdef("MPI_COMMU") {
-            throw new UnsupportedOperationException("No MPI implementation");
+            Debug.exit("No MPI implementation");
         }
         @Ifndef("MPI_COMMU") {
             val data = duplist();
@@ -60,12 +61,13 @@ public class ArrayBcast extends ArrayRemoteCopy {
      * @param dataCnt     count of double-precision data to broadcast
      */
     public static def bcast(duplist:DataArrayPLH, dataCnt:Long) : void {
-        assert (dataCnt <= duplist().size) : "Data overflow in data buffer";
+        Debug.assure(dataCnt <= duplist().size, "Data overflow in data buffer");
         
         @Ifdef("MPI_COMMU") {
             mpiBcast(duplist, dataCnt);
         }
         @Ifndef("MPI_COMMU") {
+            //Debug.flushln("start bcast to "+numPlaces);
             x10Bcast(duplist, dataCnt);
         }
     } 
@@ -177,12 +179,13 @@ public class ArrayBcast extends ArrayRemoteCopy {
      * @param dataCnt   number of data to broadcast
      */
     public static def bcast(smlist:CompArrayPLH, dataCnt:Long): void {
-        assert (dataCnt <= smlist().storageSize()) : "Data overflow in bcast";
+        Debug.assure(dataCnt <= smlist().storageSize(), "Data overflow in bcast");
         
         @Ifdef("MPI_COMMU") {
             mpiBcast(smlist, dataCnt);
         }
         @Ifndef("MPI_COMMU") {
+            //Debug.flushln("start bcast to "+numPlaces);
             x10Bcast(smlist, dataCnt);
         }
     } 

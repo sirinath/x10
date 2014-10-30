@@ -86,9 +86,9 @@ public class MessageHandlers {
     		if (X10RT.VERBOSE) System.out.println("runClosureAtReceive: after apply");
     		objStream.close();
     		if (X10RT.VERBOSE) System.out.println("runClosureAtReceive is done !");
-    	} catch(Throwable ex){
-            System.out.println("WARNING: Ignoring uncaught exception in @Immediate async.");
-            ex.printStackTrace();
+    	} catch(Exception ex){
+    		System.out.println("runClosureAtReceive error !!!");
+    		ex.printStackTrace();
     	}
     }
 
@@ -139,14 +139,16 @@ public class MessageHandlers {
                 }
             } catch (Throwable e) {
                 if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: handling exception during deserialization");
-                finishState.notifyActivityCreationFailed(src, new x10.io.SerializationException(e));
+                finishState.notifyActivityCreation$O(src);
+                finishState.pushException(new x10.io.SerializationException(e));
+                finishState.notifyActivityTermination();
                 if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: exception pushed; bookkeeping complete");
                 return;
             }
     		
     		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: after cast and deserialization");
-    		x10.lang.Runtime.submitRemoteActivity(actObj, src, finishState);
-    		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: after submitRemoteActivity");
+    		x10.lang.Runtime.execute(actObj, src, finishState);
+    		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: after apply");
     		objStream.close();
     		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive is done !");
     	} catch(Exception ex){
