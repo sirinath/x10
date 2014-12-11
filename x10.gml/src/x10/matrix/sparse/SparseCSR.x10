@@ -12,7 +12,9 @@
 package x10.matrix.sparse;
 
 import x10.util.Pair;
+import x10.util.StringBuilder;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.util.MathTool;
 import x10.matrix.DenseMatrix;
@@ -50,7 +52,7 @@ public class SparseCSR extends Matrix {
 	public def this(m:Long, n:Long, cd:Compress2D):SparseCSR(m,n) {
 		super(m, n);
 		crdata = cd;
-		assert cd.size() == m;
+		Debug.assure(cd.size() == m);
 		tmpcol = new Rail[Double](0);
 		tmprow = new Rail[Double](0);
 	}
@@ -105,9 +107,9 @@ public class SparseCSR extends Matrix {
 	 *              to the surface index at the same position in ja.
 	 */
 	public static def make(m:Long, n:Long,	
-						   ia:Rail[Long]{self!=null},
-						   ja:Rail[Long]{self!=null},
-						   av:Rail[Double]{self!=null,av.size==ja.size}
+						   ia:Rail[Long],
+						   ja:Rail[Long],
+						   av:Rail[Double]{av.size==ja.size}
 						   ):SparseCSR(m,n){
 		val crd = Compress2D.make(ia, ja, av);
 		return new SparseCSR(m, n, crd);
@@ -235,6 +237,7 @@ public class SparseCSR extends Matrix {
 	 */
 	public def clone():SparseCSR(M,N){
 		val cd = crdata.clone();
+		//Debug.flushln("Clone matrix "+M+" "+N+" "+crdata.size()+" "+cd.size());
 		return new SparseCSR(this.M, this.N, cd);
 	}
 
@@ -366,7 +369,7 @@ public class SparseCSR extends Matrix {
 	// Access temporary space
 	public def getTempCol():Rail[Double] {
 		if (tmpcol.size == 0L)
-			tmpcol = new Rail[Double](this.M);
+			tmpcol = new Rail[Double](this.M, 0.0);
 		else {
 			for (var i:Long=0; i<this.M; i++) tmpcol(i)=0.0;
 		}
@@ -375,7 +378,7 @@ public class SparseCSR extends Matrix {
 
 	public def getTempRow():Rail[Double] {
 		if (tmprow.size == 0L) 
-			tmprow = new Rail[Double](this.N);
+			tmprow = new Rail[Double](this.N, 0.0);
 		else {
 			// reset the temp array
 			for (var i:Long=0; i<this.N; i++) tmprow(i) = 0.0;
@@ -468,8 +471,8 @@ public class SparseCSR extends Matrix {
 						   num_row:Long, 
 						   dm:DenseMatrix{self.M==num_row,self.N==this.N}
 						   ) : void {
-		assert (num_row <= dm.M && this.N <= dm.N);
-
+		Debug.assure(num_row<=dm.M&&this.N<=dm.N);
+		//
 		for (var i:Long=0; i<dm.d.size; i++) dm.d(i) = 0.0;
 		for (var r:Long=start_row; r<start_row+num_row; r++) {
 			val rowln = getRow(r);
@@ -490,7 +493,7 @@ public class SparseCSR extends Matrix {
 						   num_col:Long, 
 						   dm:DenseMatrix{self.M==this.M,self.N==num_col}
 						   ) : void {
-		assert (this.M <= dm.M && num_col <= dm.N);
+		Debug.assure(this.M<=dm.M&&num_col<=dm.N);
 		var colst:Long = 0;//offset
 		for (var x:Long=0; x<this.N; x++, colst+=dm.M) {
 			val cl = crdata.getLine(x);
@@ -575,7 +578,7 @@ public class SparseCSR extends Matrix {
 	}
 	
 	public static def copyTo(sp:SparseCSR, dm:DenseMatrix, roff:Long, coff:Long): void {
-		throw new UnsupportedOperationException("SparseCSR.copyTo not implemented");
+		Debug.exit("Not implemented yet");
 	}
 	
 	public def copyTo(that:SparseCSR(M,N)) = copy(this, that);
@@ -586,7 +589,7 @@ public class SparseCSR extends Matrix {
 		else if (that instanceof SparseCSR)
 			copyTo(that as SparseCSR);
 		else
-			throw new UnsupportedOperationException("CopyTo: target matrix type not supported");	
+			Debug.exit("CopyTo: target matrix type not supported");	
 	}
 
 	/**
@@ -619,7 +622,7 @@ public class SparseCSR extends Matrix {
 	 * the provided storage of CSR. 
 	 */	
 	public def T(tm:SparseCSR(N,M)):void {
-		assert this.getStorageSize() <= tm.getStorageSize();
+		Debug.assure(this.getStorageSize() <= tm.getStorageSize());
 		val csc = new SparseCSC(M, N, tm.crdata);
 		toCSC(csc);
 	}
@@ -662,10 +665,10 @@ public class SparseCSR extends Matrix {
     /**
      * Return this = this - x, not supported
      */
-    public def cellSub(x:Matrix(M,N)):SparseCSR(this) {
-		throw new UnsupportedOperationException("Cell-wise subtraction does not support using SparseCSR to store result");
+    public def cellSub(x:Matrix(M,N)) {
+		Debug.exit("Cell-wise subtraction does not support using SparseCSR to store result");
+		return this;
     }
-
 	/**
 	 * x = x - this
 	 */
@@ -673,6 +676,11 @@ public class SparseCSR extends Matrix {
 		SparseSubToDense.comp(x, this);
 		return x;
 	}
+	
+	public def cellSubFrom(dv:Double):SparseCSR(this) {
+		throw new UnsupportedOperationException("Cell-wise multiplication does not support using SparseCSR to store result");
+	}
+	
 
     /**
      * Return this *= x, not supported
@@ -703,6 +711,12 @@ public class SparseCSR extends Matrix {
 		return dst;
 	}
 
+
+
+//     public def cellAddUpdate(A:Matrix(M,N), B:Matrix(M,N), addIn:Boolean):void {
+//     	Debug.exit("Cell-wise addition is not supported by sparse matrix");
+//     }
+
     /**
      * Scaling operation return this &#42 double in dense format
      */
@@ -713,6 +727,8 @@ public class SparseCSR extends Matrix {
     }
 
 	public operator (dblv:Double) * this = this * dblv;
+
+	// Add methods, return dense format result
 
 	/**
 	 *  Return this + that in a new dense 
@@ -778,6 +794,9 @@ public class SparseCSR extends Matrix {
 		return dm;
 	}
 	
+
+	// Sub operator overloading
+
 	/** Sub this with another matrix. */
 	public operator this - (that:SparseCSC(M,N))   = this.sub(that);
 	public operator this - (that:SparseCSR(M,N))   = this.sub(that);
@@ -789,28 +808,38 @@ public class SparseCSR extends Matrix {
 		return dm;
 	}
 
+
+	// Multiply method
+
     /**
      * Not support. Cannot use sparse matrix to store multiplication result.
      */
 	public def mult(A:Matrix(M), B:Matrix(A.N,N), plus:Boolean): SparseCSR(this) {
-		throw new UnsupportedOperationException("Not supported. Use SparseMultSparseToDense,"+
+		Debug.exit("Not supported. Use SparseMultSparseToDense,"+
 				   "or SparseMultDenseToDense or DenseMultSparseToDense " +
 				   "corresponding multiplication method");	
+		return this;
 	}
-
+	/** 
+	 * Not support
+	 */
 	public def transMult(
 			A:Matrix{self.N==this.M}, 
 			B:Matrix(A.M,this.N), 
 			plus:Boolean):SparseCSR(this) {
-	   throw new UnsupportedOperationException("SparseCSR.transMult not supported");			 
+	   Debug.exit("Not support");			 
+	   return this;
 	}
     
+	/** 
+	 * Not support
+	 */
 	public def multTrans(A:Matrix(M), 
 			B:Matrix{A.N==self.N,self.M==this.N}, 
 			plus:Boolean):SparseCSR(this) {
-	   throw new UnsupportedOperationException("SparseCSR.multTrans not supported");			 
+	   Debug.exit("Not support");			 
+	   return this;
     }
-
 	/**
 	 * Compute this sparse matrix &#42 sparseCSC matrix. Result stores in dense
 	 */

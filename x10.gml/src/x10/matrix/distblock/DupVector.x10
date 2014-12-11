@@ -24,7 +24,6 @@ import x10.matrix.comm.ArrayReduce;
 
 import x10.util.resilient.DistObjectSnapshot;
 import x10.util.resilient.Snapshottable;
-import x10.util.resilient.VectorSnapshotInfo;
 
 public type DupVector(m:Long)=DupVector{self.M==m};
 public type DupVector(v:DupVector)=DupVector{self==v};
@@ -128,11 +127,6 @@ public class DupVector(M:Long) implements Snapshottable {
             dupV().copyTo(dst.dupV());
         }
     }
-
-    public def copyFrom(vec:Vector(M)):void {
-        vec.copyTo(local());
-        sync();
-    }
     
     public  operator this(x:Long):Double = dupV()(x);
 
@@ -218,6 +212,17 @@ public class DupVector(M:Long) implements Snapshottable {
         }
         return this;
     }
+    
+    /**
+     * this = dv - this
+     */
+    protected def cellSubFrom(dv:Double):DupVector(this) {
+        finish ateach(Dist.makeUnique(places)) {
+            local().cellSubFrom(dv);
+        }
+        return this;
+    }
+
 
     // Cellwise multiplication
 
@@ -274,6 +279,7 @@ public class DupVector(M:Long) implements Snapshottable {
     public operator (v:Double) + this = clone().cellAdd(v)  as DupVector(M);
     public operator this + (v:Double) = clone().cellAdd(v)  as DupVector(M);
     public operator this - (v:Double) = clone().cellSub(v)  as DupVector(M);
+    public operator (v:Double) - this = clone().cellSubFrom(v) as DupVector(M);
     public operator this / (v:Double) = clone().scale(1.0/v)   as DupVector(M);
     
     public operator this * (alpha:Double) = clone().scale(alpha) as DupVector(M);
@@ -316,6 +322,7 @@ public class DupVector(M:Long) implements Snapshottable {
         /* Timing */ val st = Timer.milliTime();        
         ArrayBcast.bcast(dupData, places);
         /* Timing */ commTime += Timer.milliTime() - st;
+        //Debug.flushln("Calling sync "+commTime);
     }
 
     
@@ -388,7 +395,7 @@ public class DupVector(M:Long) implements Snapshottable {
         return output.toString();
     }
 
-    public def allToString() {
+    public def printAllCopies() {
         val output = new StringBuilder();
         output.add("-------- Duplicate vector :["+M+"] ---------\n");
         for (p in places) {
@@ -396,7 +403,8 @@ public class DupVector(M:Long) implements Snapshottable {
             output.add(at (p) { dupV().toString()});
         }
         output.add("--------------------------------------------------\n");
-        return output.toString();
+        Console.OUT.print(output.toString());
+        Console.OUT.flush();
     }
     
     /**
@@ -417,19 +425,18 @@ public class DupVector(M:Long) implements Snapshottable {
     /*
      * Snapshot mechanism
      */
-    private transient val DUMMY_KEY:Long = 8888L;
+    private transient val DUMMY_KEY:Long = 8888L;   
 
-    public def makeSnapshot():DistObjectSnapshot {
-        val snapshot = DistObjectSnapshot.make();        
+    public def makeSnapshot():DistObjectSnapshot[Any,Any] {        
+        val snapshot:DistObjectSnapshot[Any, Any] = DistObjectSnapshot.make[Any,Any]();        
         val data = dupV();
-        val placeIndex  = 0;
-        snapshot.save(DUMMY_KEY, new VectorSnapshotInfo(placeIndex, data.d));
+        snapshot.save(DUMMY_KEY, data);
         return snapshot;
     }
 
-    public def restoreSnapshot(snapshot:DistObjectSnapshot) {
-        val dupSnapshotInfo:VectorSnapshotInfo = snapshot.load(DUMMY_KEY) as VectorSnapshotInfo;
-        new Vector(dupSnapshotInfo.data).copyTo(dupV());
+    public def restoreSnapshot(snapshot:DistObjectSnapshot[Any,Any]) {
+        val data:Vector = snapshot.load(DUMMY_KEY) as Vector;
+        data.copyTo(dupV());
         sync();
-    }
+    }   
 }

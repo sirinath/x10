@@ -10,13 +10,15 @@
  */
 package linreg;
 
+import x10.util.Timer;
+
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
 
 /**
- * Sequential implementation of linear regression
+   Sequential implementation of linear regression
  */
-public class SeqLinearRegression {
+public class SeqLinearRegression{
 
 	public val iteration:Long;
 	public val w:Vector(V.N);
@@ -66,7 +68,7 @@ public class SeqLinearRegression {
 			alpha = norm_r2 / p.dotProd(q);
 			
 			// 12: w=w+alpha*p;
-			w.scaleAdd(alpha, p);
+			w.scaleAdd(p, alpha);
 			
 			// 13: old norm r2=norm r2;
 			old_norm_r2 = norm_r2;

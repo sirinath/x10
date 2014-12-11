@@ -27,6 +27,7 @@ import x10.matrix.dist.summa.SummaDense;
 import x10.matrix.dist.summa.SummaDenseMultSparse;
 import x10.matrix.dist.summa.SummaSparseMultDense;
 import x10.matrix.dist.summa.SummaSparse;
+import x10.matrix.util.Debug;
 import x10.matrix.util.VerifyTool;
 
 public type DistDenseMatrix(M:Long,N:Long)=DistDenseMatrix{self.M==M, self.N==N};
@@ -155,7 +156,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 			val roff= gp.startRow(rid);
 			val coff= gp.startCol(cid);
 			at(ddb.dist(p)) async {
-				val den = new DenseMatrix(m, n, da(p) as Rail[Double]{self!=null});
+				val den = new DenseMatrix(m, n, da(p) as Rail[Double]);
 				ddb(p) = new DenseBlock(rid, cid, roff, coff, den);
 			}
 		}
@@ -232,7 +233,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	 * @param n number of columns in matrix
 	 */
 	public  def alloc(m:Long, n:Long):DistDenseMatrix(m,n) {
-		//throw new UnsupportedOperationException("Allocation fail, matrix partition is unknown");
+		//Debug.exit("Allocation fail, matrix partition is unknown");
 		val g =  Grid.make(m, n, Place.numPlaces());
 		val nm = DistDenseMatrix.make(g);
 		return nm;
@@ -251,7 +252,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
     }
 
 	public def copyTo(that:DistDenseMatrix):void {
-		assert this.grid.equals(that.grid);		
+		Debug.assure(this.grid.equals(that.grid));		
 		finish ateach([p] in this.dist) {
 			val mypid = here.id();
 			val smat  = this.getMatrix(mypid);
@@ -266,8 +267,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	 * @param   blkden   the target dense block matrix.
 	 */
 	public def copyTo(blkden:DenseBlockMatrix(M,N)):void {
-		assert (this.grid.equals(blkden.grid)) :
-            "partitioning is not same";
+		Debug.assure(this.grid.equals(blkden.grid), "partitioning is not same");
 			
 		/* Timing */ val stt = Timer.milliTime();
 		MatrixGather.gather(this.distBs, blkden.listBs);
@@ -294,8 +294,8 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	 * @param  denmat   the target dense matrix.
 	 */
 	public def copyTo(denmat:DenseMatrix(M,N)):void {
-		assert (grid.numRowBlocks==1L||N==1L) :
-            "Source matrix is not single row block partitioning or matrix is not a vector";
+		Debug.assure(grid.numRowBlocks==1L||N==1L, 
+				"Source matrix is not single row block partitioning or matrix is not a vector");
 
 		MatrixGather.gatherRowBs(grid, distBs, denmat);
 	}
@@ -306,12 +306,15 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	 * @param ddm      duplicated dense matrix
 	 */
 	public def copyTo(dupden:DupDenseMatrix(M,N)):void {
-		assert (grid.numRowBlocks==1L||N==1L) :
-            "Number of row blocks is not 1 or matrix is not a vector";
+		Debug.assure(grid.numRowBlocks==1L||N==1L,
+					"Number of row blocks is not 1 or matrix is not a vector");
 
 		/* Timing */ val stt = Timer.milliTime();
+		//Debug.flushln("Starting gathering row Bs");
 		MatrixGather.gatherRowBs(grid, distBs, dupden.local());
+		//Debug.flushln("Starting bcast gathered result");
 		MatrixBcast.bcast(dupden.dupMs);
+		//Debug.flushln("Done bcast");
 		/* Timing */ dupden.commTime += Timer.milliTime() - stt;
 	}
 
@@ -321,7 +324,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	 * @param bdm      block dense matrix
 	 */
 	public def copyFrom(bdm:DenseBlockMatrix(M,N)):void {
-		assert (grid.equals(bdm.grid)) : "block partitioning mismatch";
+		Debug.assure(grid.equals(bdm.grid),	"block partitioning mismatch");
 
 		/* Timing */ val stt = Timer.milliTime();
 		MatrixScatter.scatter(bdm.listBs, distBs);
@@ -335,8 +338,8 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	 * @param den      source dense matrix
 	 */
 	public def copyFrom(den:DenseMatrix(M,N)):void {
-        assert (grid.numRowBlocks==1L||N==1L) :
-            "block partitioning is not single row block partitioning or matrix is not a vector";
+        Debug.assure(grid.numRowBlocks==1L||N==1L,	
+					"block partitioning is not single row block partitioning or matrix is not a vector");
 		/* Timing */ val stt = Timer.milliTime();
 		MatrixScatter.scatterRowBs(grid, den, distBs);
 		/* Timing */ distBs(here.id()).commTime += Timer.milliTime() - stt;
@@ -350,7 +353,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 		else if (mat instanceof DenseMatrix)
 			copyTo(mat as DenseMatrix);
 		else
-			throw new UnsupportedOperationException("CopyTo: target matrix is not supported");
+			Debug.exit("CopyTo: target matrix is not supported");
 	}
 	
 
@@ -533,6 +536,15 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	protected def cellSubFrom(x:DenseMatrix(M,N)):DenseMatrix(x) {
 		throw new UnsupportedOperationException("Not implemented");
 	}
+
+	public def cellSubFrom(dv:Double):DistDenseMatrix(this) {
+		finish ateach([p] in this.dist) {
+			//Remote capture: dv
+		   val d = this.local();
+		   d.cellSubFrom(dv);
+		}
+		return this;
+	}	
 
 	/**
 	 * Cellwise multiplication. Input A must be a DistDenseMatrix instance
@@ -835,6 +847,7 @@ public class DistDenseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix {
 	public operator this + (v:Double) = this.clone().cellAdd(v) as DistDenseMatrix(M,N);
 
 	public operator this - (v:Double) = this.clone().cellAdd(-v) as DistDenseMatrix(M,N);
+	public operator (v:Double) - this = this.clone().cellSubFrom(v) as DistDenseMatrix(M,N);
 	
 	public operator this / (v:Double) = this.clone().scale(1.0/v) as DistDenseMatrix(M,N);
 	//public operator (v:Double) / this = this.clone().cellDivBy(v) as DistDenseMatrix(M,N);

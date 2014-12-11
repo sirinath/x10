@@ -64,6 +64,8 @@ public class Activity {
         }
     }
 
+    //val parentActivity:Activity = Runtime.activity();
+
     /**
      * the finish state governing the execution of this activity (may be remote)
      */
@@ -84,13 +86,12 @@ public class Activity {
      */
     val shouldNotifyTermination:Boolean;
 
-    /**
-     * Src place from which the activity was spawned
+    /** Set to true unless this activity was spawned by a place that then immediately died
      */
-    val srcPlace:Place;
+    val confirmed:Boolean;
 
     /**
-     * Depth of enclosing atomic blocks
+     * Depth of enclosong atomic blocks
      */
     private var atomicDepth:Int = 0n;
     
@@ -102,14 +103,18 @@ public class Activity {
     def this(epoch:Long, body:()=>void, srcPlace:Place, finishState:FinishState) {
         this(epoch, body, srcPlace, finishState, true);
     }
-    // TODO: This constructor is only used by ResilientFinish.runAt.
-    //       Once that code is restructured to use @Immediate, it is likely we can
-    //       get rid of the shouldNotifyTermination flag.
-    def this(epoch:Long, body:()=>void, srcPlace:Place, finishState:FinishState, nt:Boolean) {
+    def this(epoch:Long, body:()=>void, srcPlace:Place, finishState:FinishState, nac:Boolean) {
+        this(epoch, body, srcPlace, finishState, nac, true);
+    }
+    def this(epoch:Long, body:()=>void, srcPlace:Place, finishState:FinishState, nac:Boolean, nt:Boolean) {
         this.epoch = epoch;
-        this.srcPlace = srcPlace;
         this.finishState = finishState;
         this.shouldNotifyTermination = nt;
+        if (nac) {
+            this.confirmed = finishState.notifyActivityCreation(srcPlace);
+        } else {
+            this.confirmed = true;
+        }
         this.body = body;
     }
 
@@ -163,18 +168,20 @@ public class Activity {
      * Run activity.
      */
     def run():void {
-        try {
-            body();
-        } catch (wt:WrappedThrowable) {
-            finishState.pushException(wt.getCheckedCause());
-        } catch (t:CheckedThrowable) {
-            finishState.pushException(t);
-        }
-        if (null != clockPhases) clockPhases.drop();
-        if (shouldNotifyTermination) {
+        if (confirmed) {
             try {
-                finishState.notifyActivityTermination();
-            } catch (DeadPlaceException) {}
+                body();
+            } catch (wt:WrappedThrowable) {
+                finishState.pushException(wt.getCheckedCause());
+            } catch (t:CheckedThrowable) {
+                finishState.pushException(t);
+            }
+            if (null != clockPhases) clockPhases.drop();
+            if (shouldNotifyTermination) {
+                try {
+                    finishState.notifyActivityTermination();
+                } catch (DeadPlaceException) {}
+            }
         }
         if (DEALLOC_BODY) Unsafe.dealloc(body);
     }

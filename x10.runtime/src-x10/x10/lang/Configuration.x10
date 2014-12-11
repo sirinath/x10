@@ -82,19 +82,10 @@ final class Configuration {
            v = Int.parse(Runtime.env.getOrElse("X10_MAX_THREADS", "0"));
        } catch (NumberFormatException) {
        }
-       if (v <= 0) v = nthreads() + num_immediate_threads();
+       if (v <= 0) v = nthreads();
        if (!static_threads() && v < 1000) v = 1000n;
        if (v > PLATFORM_MAX_THREADS) v = PLATFORM_MAX_THREADS;
        return v;
-    }
-
-    static def num_immediate_threads():Int {
-        var v:Int = 1n;
-        try {
-            v = Int.parse(Runtime.env.getOrElse("X10_NUM_IMMEDIATE_THREADS", "1"));
-        } catch (NumberFormatException) {
-        }
-        return v;
     }
     
     // Note that "X10_RESILIENT_MODE" is also checked in x10rt/sockets/Launcher.cc

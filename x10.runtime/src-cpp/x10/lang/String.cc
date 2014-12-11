@@ -338,7 +338,6 @@ class MyBuf {
     }
 };    
 
-/* FIXME: positional arguments support */
 String* String::format(String* format, x10::lang::Rail<Any*>* parms) {
     nullCheck(format);
     nullCheck(parms);

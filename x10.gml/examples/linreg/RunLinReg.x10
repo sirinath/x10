@@ -9,127 +9,23 @@
  *  (C) Copyright IBM Corporation 2011-2014.
  */
 
-import x10.util.Option;
-import x10.util.OptionsParser;
 import x10.util.Timer;
 
+import x10.matrix.util.Debug;
+import x10.matrix.util.MathTool;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
 import x10.matrix.block.BlockMatrix;
-import x10.matrix.util.Debug;
-import x10.matrix.util.MathTool;
-import x10.matrix.util.PlaceGroupBuilder;
 
 import linreg.LinearRegression;
 import linreg.SeqLinearRegression;
+import x10.matrix.util.PlaceGroupBuilder;
+import x10.matrix.distblock.DistBlockMatrix;
 
 /**
- * Test harness for Linear Regression using GML
+ * Demo of linear regression test
  */
 public class RunLinReg {
-
-    public static def main(args:Rail[String]): void {
-        val opts = new OptionsParser(args, [
-            Option("h","help","this information"),
-            Option("v","verify","verify the parallel result against sequential computation"),
-            Option("p","print","print matrix V, vectors d and w on completion")
-        ], [
-            Option("m","rows","number of rows, default = 10"),
-            Option("n","cols","number of columns, default = 10"),
-            Option("r","rowBlocks","number of row blocks, default = X10_NPLACES"),
-            Option("c","colBlocks","number of columnn blocks; default = 1"),
-            Option("d","density","nonzero density, default = 0.9"),
-            Option("i","iterations","number of iterations, default = 2"),
-            Option("s","skip","skip places count (at least one place should remain), default = 0"),
-            Option("f","checkpointFreq","checkpoint iteration frequency")
-        ]);
-
-        if (opts.filteredArgs().size!=0) {
-            Console.ERR.println("Unexpected arguments: "+opts.filteredArgs());
-            Console.ERR.println("Use -h or --help.");
-            System.setExitCode(1n);
-            return;
-        }
-        if (opts.wantsUsageOnly("Options:\n")) {
-            return;
-        }
-
-        val mV = opts("m", 10);
-        val nV = opts("n", 10);
-        val rowBlocks = opts("r", Place.numPlaces());
-        val colBlocks = opts("c", 1);
-        val nonzeroDensity = opts("d", 0.9);
-        val iterations = opts("i", 2n);
-        val verify = opts("v");
-        val print = opts("p");
-        val skipPlaces = opts("s", 0n);
-        val checkpointFrequency = opts("f", -1n);
-
-        Console.OUT.println("V: rows:"+mV+" cols:"+nV
-                           +" density:"+nonzeroDensity+" iterations:"+iterations);
-
-        if (mV<=0 || nV<=0 || iterations<1 || nonzeroDensity<0.0
-         || skipPlaces < 0 || skipPlaces >= Place.numPlaces()) {
-            Console.OUT.println("Error in settings");
-        } else {
-            if (skipPlaces > 0)
-                Console.OUT.println("Skipping "+skipPlaces+" places to reserve for failure.");
-            val places = (skipPlaces==0n) ? Place.places() 
-                                          : PlaceGroupBuilder.makeTestPlaceGroup(skipPlaces);
-
-            // Create parallel linear regression
-            val parLR = LinearRegression.make(mV, nV, 
-                                              rowBlocks, colBlocks, 
-                                              nonzeroDensity, iterations,
-                                              checkpointFrequency, places);
-
-            var V:DenseMatrix(mV, nV) = null;
-            var b:Vector(nV) = null;
-            if (verify) {
-                val bV:BlockMatrix(parLR.V.M, parLR.V.N);
-                if (nonzeroDensity < 0.1) {
-                    bV = BlockMatrix.makeSparse(parLR.V.getGrid(), nonzeroDensity);
-                } else {
-                    bV = BlockMatrix.makeDense(parLR.V.getGrid());
-                }
-                V = DenseMatrix.make(mV, nV);
-                b = Vector.make(nV);
-
-                parLR.V.copyTo(bV as BlockMatrix(parLR.V.M, parLR.V.N));
-                bV.copyTo(V);
-                parLR.b.copyTo(b as Vector(parLR.b.M));
-            }
-
-            //Run the parallel linear regression
-            Debug.flushln("Starting parallel linear regression");
-            val startTime = Timer.milliTime();
-            parLR.run();
-            val totalTime = Timer.milliTime() - startTime;
-			Console.OUT.printf("Parallel linear regression --- Total: %8d ms, parallel runtime: %8d ms, commu time: %8d ms\n",
-					totalTime, parLR.parCompT, parLR.commT);
-
-            if (print) {
-                Console.OUT.println("Input sparse matrix V\n" + parLR.V);
-                Console.OUT.println("Input dense matrix b\n" + parLR.b);
-                Console.OUT.println("Output dense matrix w\n" + parLR.w);
-            }
-
-            if (verify) {
-                // Create sequential version running on dense matrices
-                val seqLR = new SeqLinearRegression(V, b, iterations);
-
-                Debug.flushln("Starting sequential linear regression");
-                seqLR.run();
-                Debug.flushln("Verifying results against sequential version");
-
-                if (equalsRespectNaN(parLR.w, seqLR.w as Vector(parLR.w.M))) {
-                    Console.OUT.println("Verification passed.");
-                } else {
-                    Console.OUT.println("Verification failed!");
-                }
-            }
-        }
-    }
 
     /*
      * Vector.equals(Vector) modified to allow NaN.
@@ -144,5 +40,70 @@ public class RunLinReg {
                 return false;
             }
         return true;
+    }
+
+    public static def main(args:Rail[String]): void {
+        val mV = args.size > 0 ? Long.parse(args(0)):10; // Rows and columns of V
+        val nV = args.size > 1 ? Long.parse(args(1)):10; //column of V
+        val mB = args.size > 2 ? Long.parse(args(2)):5;
+        val nB = args.size > 3 ? Long.parse(args(3)):5;
+        val nZ = args.size > 4 ? Double.parse(args(4)):0.9; //V's nonzero density
+        val iT = args.size > 5 ? Long.parse(args(5)):2; //Iterations
+        val vf = args.size > 6 ? Int.parse(args(6)):0n; //Verify result or not
+        val pP = args.size > 7 ? Int.parse(args(7)):0n; // print V, d and w out
+        val sP = args.size > 8 ? Int.parse(args(8)):0n; // skip places count (at least 1 place should remain)
+        val cI = args.size > 9 ? Int.parse(args(9)):-1n; // checkpoint iteration frequency
+
+        Console.OUT.println("Set row V:"+mV+" col V:"+nV+" density:"+nZ+" iteration:"+iT+" skipPlaces:"+sP);
+
+        if (mV<=0 || nV<=0 || iT<1 || nZ<0.0 || sP < 0 || sP >= Place.numPlaces())
+            Console.OUT.println("Error in settings");
+        else {
+            val places:PlaceGroup = (sP==0n? Place.places() :PlaceGroupBuilder.makeTestPlaceGroup(sP));
+
+            // Create parallel linear regression
+            val parLR = LinearRegression.make(mV, nV, mB, nB, nZ, iT, cI, places);
+
+            //Run the parallel linear regression
+            Debug.flushln("Starting parallel linear regression");
+            val tt:Long = Timer.milliTime();
+            parLR.run();
+            val totaltime = Timer.milliTime() - tt;
+            Debug.flushln("Parallel linear regression --- total:"+totaltime+" ms "+
+                            "commuTime:"+parLR.commT+" ms " +
+                            "paraComp:"+parLR.parCompT + " ms");
+
+            if (pP != 0n) {
+                Console.OUT.println("Input sparse matrix V\n" + parLR.V);
+                Console.OUT.println("Input dense matrix b\n" + parLR.b);
+                Console.OUT.println("Output dense matrix w\n" + parLR.w);
+            }
+
+            if (vf > 0) {
+                // Create sequential version running on dense matrices
+                val bV = BlockMatrix.makeSparse(parLR.V.getGrid(), nZ);
+                val V = DenseMatrix.make(mV, nV);
+                val b = Vector.make(nV);
+
+                parLR.V.copyTo(bV as BlockMatrix(parLR.V.M, parLR.V.N));
+                bV.copyTo(V);
+                parLR.b.copyTo(b as Vector(parLR.b.M));
+                val seqLR = new SeqLinearRegression(V, b, iT);
+
+
+                // Result verification
+                Debug.flushln("Starting sequential linear regression");
+                seqLR.run();
+                // Verification of parallel against sequential
+                Debug.flushln("Start verifying results");
+
+                if (equalsRespectNaN(parLR.w, seqLR.w as Vector(parLR.w.M))) {
+                    Console.OUT.println("Verification passed! "+
+                                        "Parallel linear regression is same as sequential version");
+                } else {
+                    Console.OUT.println("Verification failed!");
+                }
+            }
+        }
     }
 }

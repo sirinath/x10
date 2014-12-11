@@ -14,6 +14,7 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.comm.mpi.WrapMPI;
 
 /**
@@ -45,7 +46,7 @@ public class ArrayBcast extends ArrayRemoteCopy {
      */
     public static def bcast(duplist:DataArrayPLH, pg: PlaceGroup) {
         @Ifdef("MPI_COMMU") {
-            throw new UnsupportedOperationException("No MPI implementation");
+            Debug.exit("No MPI implementation");
         }
         @Ifndef("MPI_COMMU") {
             val data = duplist();
@@ -60,12 +61,13 @@ public class ArrayBcast extends ArrayRemoteCopy {
      * @param dataCnt     count of double-precision data to broadcast
      */
     public static def bcast(duplist:DataArrayPLH, dataCnt:Long) : void {
-        assert (dataCnt <= duplist().size) : "Data overflow in data buffer";
+        Debug.assure(dataCnt <= duplist().size, "Data overflow in data buffer");
         
         @Ifdef("MPI_COMMU") {
             mpiBcast(duplist, dataCnt);
         }
         @Ifndef("MPI_COMMU") {
+            //Debug.flushln("start bcast to "+numPlaces);
             x10Bcast(duplist, dataCnt);
         }
     } 
@@ -128,17 +130,20 @@ public class ArrayBcast extends ArrayRemoteCopy {
         // Specify the remote buffer
         val srcbuf = new GlobalRail[Double](src as Rail[Double]{self!=null});
 
-        finish {
-            at(pg(mid)) async {
+        finish     {            
+            at(pg(mid)) {
                 val dstbuf = dmlist();
-                // remote get
-                finish Rail.asyncCopy[Double](srcbuf, 0, dstbuf, 0, dataCnt);     
-          
-                // right branch
+                // Using copyFrom style
+                finish Rail.asyncCopy[Double](srcbuf, 0, dstbuf, 0, dataCnt);               
+            }
+            // Perform binary bcast on the right brank
+            async {
                 binaryTreeCast(dmlist, dataCnt, pg, start, mid-1);
             }
-            // left branch
-            binaryTreeCast(dmlist, dataCnt, pg, mid+1, end);
+            // Perform binary bcast on the left branch
+            async {
+                binaryTreeCast(dmlist, dataCnt, pg, mid+1, end); 
+            }
         }
     }
 
@@ -174,12 +179,13 @@ public class ArrayBcast extends ArrayRemoteCopy {
      * @param dataCnt   number of data to broadcast
      */
     public static def bcast(smlist:CompArrayPLH, dataCnt:Long): void {
-        assert (dataCnt <= smlist().storageSize()) : "Data overflow in bcast";
+        Debug.assure(dataCnt <= smlist().storageSize(), "Data overflow in bcast");
         
         @Ifdef("MPI_COMMU") {
             mpiBcast(smlist, dataCnt);
         }
         @Ifndef("MPI_COMMU") {
+            //Debug.flushln("start bcast to "+numPlaces);
             x10Bcast(smlist, dataCnt);
         }
     } 
@@ -194,9 +200,11 @@ public class ArrayBcast extends ArrayRemoteCopy {
 
     /**
      * Using MPI routine to implement sparse matrix broadcast
+     * 
      */
     protected static def mpiBcast(smlist:CompArrayPLH, dataCnt:Long):void {
         @Ifdef("MPI_COMMU") {
+            
             if (Place.numPlaces() <= 1) return;
             
             val root   = here.id();
@@ -240,26 +248,32 @@ public class ArrayBcast extends ArrayRemoteCopy {
         val srcidx = new GlobalRail[Long  ](idxbuf as Rail[Long  ]{self!=null});
         val srcval = new GlobalRail[Double](valbuf as Rail[Double]{self!=null});
 
-        finish { 
-            at(pg(mid)) async {
+        finish {        
+            at(pg(mid)){
                 //Need: smlist, srcidx, srcval, srcOff, colOff, colCnt and datasz
                 val dstca = smlist();
                 finish Rail.asyncCopy[Long  ](srcidx, 0, 
                         dstca.index, 0, dataCnt);
                 finish Rail.asyncCopy[Double](srcval, 0, 
                         dstca.value, 0, dataCnt);
-            
-                // right branch
+            }
+            // Perform binary bcast on the right brank
+            async {
                 binaryTreeCast(smlist, dataCnt, pg, start, mid-1);
             }
-            // left branch
-            binaryTreeCast(smlist, dataCnt, pg, mid+1, end);
+            // Perform binary bcast on the left branch
+            async {
+                binaryTreeCast(smlist, dataCnt, pg, mid+1, end); 
+            }
         }
     }
+
     
+    //util
     public static def verify(srcplh:DataArrayPLH, dataCnt:Long):Boolean {
         var ret:Boolean = true;
         val buf=srcplh();
+        //for ([p] in Place.places()) {
         for (place in Place.places()) {
             val rmt= at(place) srcplh();//remote capture
             for (var i:Long=0; i<dataCnt; i++) ret &= (buf(i)==rmt(i));

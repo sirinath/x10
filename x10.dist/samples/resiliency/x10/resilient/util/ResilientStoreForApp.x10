@@ -24,11 +24,9 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
         return v;
     }
     public static def make[K,V](){V haszero}:ResilientStoreForApp[K,V] {
-        if (verbose>=1) Console.OUT.println("ResilientStoreForApp.make: mode="+mode);
         switch (mode) {
         case 0N: return new ResilientStoreForAppPlace0[K,V]();
         case 1N: return new ResilientStoreForAppDistributed[K,V]();
-        case 2N: return new ResilientStoreForAppHC[K,V]();
         default: throw new Exception("unknown mode");
         }
     }
@@ -36,13 +34,7 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
     public abstract def load(key:K):V;
     public abstract def delete(key:K):void;
     public abstract def deleteAll():void;
-
-    // HashMap-like I/F
-    public def put(key:K, value:V) { save(key, value); }
-    public def getOrThrow(key:K) { return load(key); }
-    public def get(key:K) { try { return load(key); } catch (e:x10.util.NoSuchElementException) { return Zero.get[V](); } }
-    public def getOrElse(key:K, orelse:V) { try { return load(key); } catch (e:x10.util.NoSuchElementException) { return orelse; } }
-    
+ 
     /**
      * Place0 implementation of ResilientStore
      */
@@ -52,26 +44,24 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
         public def save(key:K, value:V) {
             if (verbose>=1) DEBUG("save: key=" + key);
            finish //TODO: remove this workaround (see XTENLANG-3260)
-            at (hm) atomic { hm().put(key,value); } // value is deep-copied by "at"
+            at (hm) hm().put(key,value); // value is deep-copied by "at"
         }
         public def load(key:K) {
             if (verbose>=1) DEBUG("load: key=" + key);
             var value:V;
            finish //TODO: remove this workaround (see XTENLANG-3260)
-            value = at (hm) {
-              var v:V; atomic { v = hm().getOrThrow(key); } v
-            }; // value is deep-copied by "at"
+            value = at (hm) hm().getOrThrow(key); // value is deep-copied by "at"
             return value;
         }
         public def delete(key:K) {
             if (verbose>=1) DEBUG("delete: key=" + key);
            finish //TODO: remove this workaround (see XTENLANG-3260)
-            at (hm) atomic { hm().remove(key); }
+            at (hm) hm().remove(key);
         }
         public def deleteAll() {
             if (verbose>=1) DEBUG("deleteAll");
            finish //TODO: remove this workaround (see XTENLANG-3260)
-            at (hm) atomic { hm().clear(); }
+            at (hm) hm().clear();
         }
     }
     
@@ -84,29 +74,27 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
      *       Racing between multiple places are not also considered.
      */
     static class ResilientStoreForAppDistributed[K,V]{V haszero} extends ResilientStoreForApp[K,V] {
-        private static val MAX_PLACES = Place.numPlaces(); // TODO: remove the MAX_PLACES dependency to support elastic X10
         val hm = PlaceLocalHandle.make[x10.util.HashMap[K,V]](Place.places(), ()=>new x10.util.HashMap[K,V]());
         private def DEBUG(key:K, msg:String) { Console.OUT.println("At " + here + ": key=" + key + ": " + msg); }
         public def save(key:K, value:V) {
             if (verbose>=1) DEBUG(key, "save called");
             /* Store the copy of value locally */
            finish //TODO: remove this workaround (see XTENLANG-3260)
-            at (here) atomic { hm().put(key, value); } // value is deep-copied by "at"
+            at (here) hm().put(key, value); // value is deep-copied by "at"
             if (verbose>=1) DEBUG(key, "backed up locally");
             /* Backup the value in another place */
-            var backupPlace:Long = key.hashCode() % MAX_PLACES;
-            if (backupPlace < 0) backupPlace += MAX_PLACES;
+            var backupPlace:Long = key.hashCode() % Place.numPlaces();
             var trial:Long;
-            for (trial = 0L; trial < MAX_PLACES; trial++) {
+            for (trial = 0L; trial < Place.numPlaces(); trial++) {
                 if (backupPlace != here.id && !Place.isDead(backupPlace)) break; // found appropriate place
-                backupPlace = (backupPlace+1) % MAX_PLACES;
+                backupPlace = (backupPlace+1) % Place.numPlaces();
             }
-            if (trial == MAX_PLACES) {
+            if (trial == Place.numPlaces()) {
                 /* no backup place available */
                 if (verbose>=1) DEBUG(key, "no backup place available");
             } else {
                finish //TODO: remove this workaround (see XTENLANG-3260)
-                at (Place(backupPlace)) atomic { hm().put(key, value); }
+                at (Place(backupPlace)) hm().put(key, value);
                 if (verbose>=1) DEBUG(key, "backed up to place " + backupPlace);
             }
             if (verbose>=1) DEBUG(key, "save returning");
@@ -117,9 +105,7 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
             try {
                 var value:V;
                finish //TODO: remove this workaround (see XTENLANG-3260)
-                value = at (here) {
-                  var v:V; atomic { v = hm().getOrThrow(key); } v
-                }; // value is deep-copied by "at"
+                value = at (here) hm().getOrThrow(key); // value is deep-copied by "at"
                 if (verbose>=1) DEBUG(key, "restored locally");
                 if (verbose>=1) DEBUG(key, "load returning");
                 return value;
@@ -128,18 +114,15 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
                 /* falls through, check other places */
             }
             /* Try to load from another place */
-            var backupPlace:Long = key.hashCode() % MAX_PLACES;
-            if (backupPlace < 0) backupPlace += MAX_PLACES;
+            var backupPlace:Long = key.hashCode() % Place.numPlaces();
             var trial:Long;
-            for (trial = 0L; trial < MAX_PLACES; trial++) {
+            for (trial = 0L; trial < Place.numPlaces(); trial++) {
                 if (backupPlace != here.id && !Place.isDead(backupPlace)) {
                     if (verbose>=1) DEBUG(key, "checking backup place " + backupPlace);
                     try {
                         var value:V;
                        finish //TODO: remove this workaround (see XTENLANG-3260)
-                        value = at (Place(backupPlace)) {
-                          var v:V; atomic { v = hm().getOrThrow(key); } v
-                        };
+                        value = at (Place(backupPlace)) hm().getOrThrow(key);
                         if (verbose>=1) DEBUG(key, "restored from backup place " + backupPlace);
                         if (verbose>=1) DEBUG(key, "load returning");
                         return value;
@@ -148,7 +131,7 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
                         /* falls through, try next place */
                     }
                 }
-                backupPlace = (backupPlace+1) % MAX_PLACES;
+                backupPlace = (backupPlace+1) % Place.numPlaces();
             }
             if (verbose>=1) DEBUG(key, "no backup found, ERROR");
             if (verbose>=1) DEBUG(key, "load throwing exception");
@@ -157,45 +140,14 @@ public abstract class ResilientStoreForApp[K,V]{V haszero} {
         public def delete(key:K) {
             finish for (pl in Place.places()) {
                 if (pl.isDead()) continue;
-                at (pl) async atomic { hm().remove(key); }
+                at (pl) async hm().remove(key);
             }
         }
         public def deleteAll() {
             finish for (pl in Place.places()) {
                 if (pl.isDead()) continue;
-                at (pl) async atomic { hm().clear(); }
+                at (pl) async hm().clear();
             }
-        }
-    }
-    
-    /**
-     * Hazelcast-based implementation of ResilientStore
-     */
-    static class ResilientStoreForAppHC[K,V]{V haszero} extends ResilientStoreForApp[K,V] {
-        private static seqNum = new x10.util.concurrent.AtomicLong();
-        private def DEBUG(msg:String) { Console.OUT.println(msg); Console.OUT.flush(); }
-        private val uniqueName:String;
-        private transient var map:x10.util.resilient.ResilientMap[K,V] = null; // must be initialized at each place
-        private def this() { uniqueName = "ResilientStoreForAppHC_"+here.id+"_"+seqNum.incrementAndGet(); }
-        private def getMap() = (map!=null) ? map : x10.util.resilient.ResilientMap.getMap[K,V](uniqueName);
-
-        public def save(key:K, value:V) {
-            if (verbose>=1) DEBUG("save: key=" + key);
-            getMap().put(key, value);
-        }
-        public def load(key:K) {
-            if (verbose>=1) DEBUG("load: key=" + key);
-            val value = getMap().get(key); //TODO: throw NoSuchElementException?
-            if (verbose>=1) DEBUG("load returning "+value);
-            return value; 
-        }
-        public def delete(key:K):void {
-            if (verbose>=1) DEBUG("delete: key=" + key);
-            getMap().remove(key);
-        }
-        public def deleteAll() {
-            if (verbose>=1) DEBUG("deleteAll");
-            getMap().clear();
         }
     }
     

@@ -19,7 +19,6 @@ import x10.io.Reader;
 import x10.io.Writer;
 import x10.lang.DeadPlaceException;
 import x10.lang.FinishState;
-import x10.lang.Place;
 import x10.rtt.RuntimeType;
 import x10.rtt.Type;
 import x10.rtt.Types;
@@ -346,8 +345,8 @@ public abstract class Runtime implements VoidFun_0_0 {
             start = prof!=null ? System.nanoTime() : 0;
             if (X10RT.javaSockets != null) {
             	if (X10RT.javaSockets.sendMessage(place, SocketTransport.CALLBACKID.simpleAsyncMessageID.ordinal(), serializer.getDataBytes()) != RETURNCODE.X10RT_ERR_OK.ordinal()) {
-            		if (x10.lang.Runtime.get$RESILIENT_MODE() == 0) System.err.println("Unable to send an async to place "+place);
-            		throw new DeadPlaceException(new Place(place), "Unable to send an async to "+place);
+            		System.err.println("Unable to send a message to "+place);
+            		throw new DeadPlaceException("Unable to send a message to "+place);
             	}
             } else {
             	x10.x10rt.MessageHandlers.runSimpleAsyncAtSend(place, serializer.getDataBytes());
@@ -398,10 +397,7 @@ public abstract class Runtime implements VoidFun_0_0 {
 
 			start = prof!=null ? System.nanoTime() : 0;
 			if (X10RT.javaSockets != null) {
-				if (X10RT.javaSockets.sendMessage(place, SocketTransport.CALLBACKID.closureMessageID.ordinal(), serializer.getDataBytes()) != RETURNCODE.X10RT_ERR_OK.ordinal()) {
-					if (x10.lang.Runtime.get$RESILIENT_MODE() == 0) System.err.println("Unable to send a closure to place "+place);
-            		throw new DeadPlaceException(new Place(place), "Unable to send a closure to "+place);
-				}
+			    X10RT.javaSockets.sendMessage(place, SocketTransport.CALLBACKID.closureMessageID.ordinal(), serializer.getDataBytes());
 			} else {
 			    x10.x10rt.MessageHandlers.runClosureAtSend(place, serializer.getDataBytes());
 			}
@@ -411,9 +407,9 @@ public abstract class Runtime implements VoidFun_0_0 {
             if (TRACE_SER_DETAIL) {
                 System.out.println("Message sent for runAt " + body.getClass());
             }
-		} catch (Throwable e) {
-		    System.out.println("WARNING: Ignoring uncaught exception in sending of @Immediate async.");
+		} catch (java.io.IOException e) {
 			e.printStackTrace();
+			throw new x10.lang.WrappedThrowable(e);
 		}
 	}
 

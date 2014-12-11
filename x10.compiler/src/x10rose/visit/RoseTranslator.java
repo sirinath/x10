@@ -49,7 +49,6 @@ import polyglot.ast.Cast_c;
 import polyglot.ast.CharLit_c;
 import polyglot.ast.Conditional_c;
 import polyglot.ast.ConstructorCall.Kind;
-import polyglot.ast.Assign;
 import polyglot.ast.Block_c;
 import polyglot.ast.Branch_c;
 import polyglot.ast.Case_c;
@@ -219,40 +218,17 @@ import x10.util.StringResource;
 import x10.visit.X10DelegatingVisitor;
 import x10.visit.X10TypeChecker;
 import x10rose.ExtensionInfo;
+import x10rose.ExtensionInfo.FileStatus;
 
 public class RoseTranslator extends Translator {
 
     public static Set<String> package_traversed = new HashSet<String>();
-
-    public static int uniqMemberIndex = 0;
-    
-    /** 
-     * Key represents full path for a class, and the value for a key represents
-     * the package name for the class
-     */
-    public static HashMap<String, String> nestedClasses = new HashMap<String, String>();
     
     public RoseTranslator(Job job, TypeSystem ts, NodeFactory nf, TargetFactory tf) {
         super(job, ts, nf, tf);
         jobList.add(job);
         package_traversed.add("x10.lang");
         package_traversed.add("x10.io");
-    }
-    
-    public static void recordNestedClass(String package_name, String parentClass_name, String nestedClass_name) {
-        if (DEBUG) System.out.println("nested class=" + nestedClass_name + ", package=" + package_name + ", parent class=" + parentClass_name);
-        nestedClasses.put((package_name.length() == 0 ? "" : package_name + ".") + parentClass_name + "." + nestedClass_name,
-                            package_name);
-    }
-
-    public static boolean isNestedClass(String class_name, String[] package_name) {
-        for (String path : nestedClasses.keySet())
-            if (path.equals(class_name)) {
-                package_name[0] = nestedClasses.get(path);
-                return true;
-            }
-
-        return false;
     }
 
     protected boolean translateSource(SourceFile sfn) {
@@ -403,6 +379,8 @@ public class RoseTranslator extends Translator {
 
     static List<Job> jobList = new ArrayList<Job>();
 
+    static HashMap<String, HashMap<String, Integer>> classMemberMap = new HashMap<String, HashMap<String, Integer>>();
+
     static HashMap<String, Integer> memberMap = new HashMap<String, Integer>();
 
     static int fileIndex;
@@ -513,8 +491,7 @@ public class RoseTranslator extends Translator {
 
     private static HashMap<Binary.Operator, Integer> binaryOpTable = new HashMap<Binary.Operator, Integer>();
     private static HashMap<Unary.Operator, Integer> unaryOpTable = new HashMap<Unary.Operator, Integer>();
-    private static HashMap<Assign.Operator, Integer> assignOpTable = new HashMap<Assign.Operator, Integer>();
-    
+
     /**
      * 
      * operator code values are directly derived from ECJ.
@@ -565,26 +542,9 @@ public class RoseTranslator extends Translator {
             binaryOpTable.put(Binary.Operator.USHR, 19);
             binaryOpTable.put(Binary.Operator.DOT_DOT, 20);
             binaryOpTable.put(Binary.Operator.EQ, 21);
-            binaryOpTable.put(Binary.Operator.NE, 22);
             binaryOpTable.put(Binary.Operator.COND_OR, 100);
             binaryOpTable.put(Binary.Operator.COND_AND, 101);
         }
         return binaryOpTable.get(op);
-    }
-    
-    static int getOperatorKind(Assign.Operator op) {
-        if (assignOpTable.isEmpty()) {
-            assignOpTable.put(Assign.Operator.BIT_AND_ASSIGN, 2);
-            assignOpTable.put(Assign.Operator.BIT_OR_ASSIGN, 3);
-            assignOpTable.put(Assign.Operator.BIT_XOR_ASSIGN, 8);
-            assignOpTable.put(Assign.Operator.DIV_ASSIGN, 9);
-            assignOpTable.put(Assign.Operator.SHL_ASSIGN, 10);
-            assignOpTable.put(Assign.Operator.SUB_ASSIGN, 13);
-            assignOpTable.put(Assign.Operator.ADD_ASSIGN, 14);
-            assignOpTable.put(Assign.Operator.MUL_ASSIGN, 15);
-            assignOpTable.put(Assign.Operator.MOD_ASSIGN, 16);
-            assignOpTable.put(Assign.Operator.SHR_ASSIGN, 17);
-        }
-        return assignOpTable.get(op);
     }
 }

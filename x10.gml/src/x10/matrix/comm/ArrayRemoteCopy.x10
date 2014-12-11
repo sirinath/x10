@@ -16,6 +16,7 @@ import x10.compiler.Ifndef;
 
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.CompressArray;
+import x10.matrix.util.Debug;
 
 /**
  * This class supports inter-place communication for data arrays which are defined
@@ -58,10 +59,9 @@ public class ArrayRemoteCopy {
 			Rail.copy(src, srcOff, dstplh(), dstOff, dataCnt);
 			return;
 		}
-
-        assert (srcOff+dataCnt <= src.size) :
-            "At source place, illegal data offset:"+srcOff+
-            " or data count:"+dataCnt;
+		Debug.assure(srcOff+dataCnt <= src.size,
+				"At source place, illegal data offset:"+srcOff+
+				                                       " or data count:"+dataCnt);
 		
 		@Ifdef("MPI_COMMU") {
 			{
@@ -102,11 +102,12 @@ public class ArrayRemoteCopy {
 			dstplh:DataArrayPLH, dstpid:Long, dstOff:Long, 
 			dataCnt:Long) :void  {
 
-        val gr = GlobalRail[Double](src as Rail[Double]{self!=null});
-        finish at (Place(dstpid)) {
-            val dst = dstplh() as Rail[Double]{self!=null};
-            Rail.asyncCopy[Double](gr, srcOff, dst, dstOff, dataCnt);
-        }
+		val srcpid = here.id();
+		val dstbuf = at(Place(dstpid)) 
+			new GlobalRail[Double](dstplh() as Rail[Double]{self!=null});
+		finish {
+			Rail.asyncCopy[Double](src, srcOff, dstbuf, dstOff, dataCnt);
+		}
 	}
 	
 	//TODO: Check this code. Introduced to support a method in DistArrayScatter.
@@ -117,11 +118,12 @@ public class ArrayRemoteCopy {
 			dst:DistDataArray, dstpid:Long, dstOff:Long, 
 			dataCnt:Long) :void  {
 
-        val gr = GlobalRail[Double](src as Rail[Double]{self!=null});
-        finish at(Place(dstpid)) {
-            val dstLocal = dst.getLocalPortion()(0) as Rail[Double]{self!=null};
-            Rail.asyncCopy[Double](gr, srcOff, dstLocal, dstOff, dataCnt);
-        }
+		val srcpid = here.id();
+		val dstbuf = at(Place(dstpid)) 
+		new GlobalRail[Double](dst.getLocalPortion()(0) as Rail[Double]{self!=null});
+		finish {
+			Rail.asyncCopy[Double](src, srcOff, dstbuf, dstOff, dataCnt);
+		}
 	}
 
 	/**
@@ -145,9 +147,7 @@ public class ArrayRemoteCopy {
 			Rail.copy(src, srcOff, dst, dstOff, dataCnt);
 			return;
 		}
-
-		assert (dstOff+dataCnt <= dst.size):
-            "Receiving array overflow";
+		Debug.assure(dstOff+dataCnt <= dst.size, "Receiving array overflow");
 		
 		@Ifdef("MPI_COMMU") {
 			{
@@ -185,12 +185,12 @@ public class ArrayRemoteCopy {
 			dst:Rail[Double], dstOff:Long, 
 			dataCnt:Long): void {
 		
-        // TODO should be able to use asyncCopy to remote dst
-        val gr = at(Place(srcpid))
-            GlobalRail[Double](srcplh() as Rail[Double]{self!=null});
-        finish {
-            Rail.asyncCopy[Double](gr, srcOff, dst, dstOff, dataCnt);
-        }
+		val dstpid = here.id();
+		val srcbuf = at(Place(srcpid))
+			new GlobalRail[Double](srcplh() as Rail[Double]{self!=null});
+		finish {
+			Rail.asyncCopy[Double](srcbuf, srcOff, dst, dstOff, dataCnt);
+		}
 	}
 	
 
@@ -218,8 +218,7 @@ public class ArrayRemoteCopy {
 			return;
 		}
 
-		assert (srcOff+dataCnt <= src.storageSize()) :
-            "Sending side storage overflow";
+		Debug.assure(srcOff+dataCnt <= src.storageSize(), "Sending side storage overlfow");
 		
 		@Ifdef("MPI_COMMU") {
 			{
@@ -254,8 +253,7 @@ public class ArrayRemoteCopy {
 				// Need: dstlist, srcpid, dstOff, dataCnt;
 				val dst = dstplh();
 				val tag = srcpid * baseTagCopyIdxTo + here.id();
-				assert (dstOff+dataCnt <= dst.storageSize()) :
-                    "Receiving side arrays overflow";
+				Debug.assure(dstOff+dataCnt<=dst.storageSize(), "Receiving side arrays overflow");
 				WrapMPI.world.recv(dst.index, dstOff, dataCnt, srcpid, tag);
 				WrapMPI.world.recv(dst.value, dstOff, dataCnt, srcpid, tag+100001);
 			}
@@ -277,8 +275,7 @@ public class ArrayRemoteCopy {
 		at(Place(dstpid)) {
 			//Implicit copy:dstlist, dataCnt, rmtidx, rmtval, srcOff dstOff
 			val dst = dstplh();
-			assert (dstOff+dataCnt <= dst.storageSize()) :
-                "Receiving side arrays overflow";
+			Debug.assure(dstOff+dataCnt<=dst.storageSize(), "Receiving side arrays overflow");
 			finish Rail.asyncCopy[Long  ](rmtidx, srcOff, dst.index, dstOff, dataCnt);
 			finish Rail.asyncCopy[Double](rmtval, srcOff, dst.value, dstOff, dataCnt);
 		}

@@ -11,7 +11,7 @@
 
 import harness.x10Test;
 
-// SOURCEPATH: x10.dist/samples
+// SOURCEPATH: x10.dist/samples/tutorial
 
 public class FibonacciTest extends x10Test {
     public def run():boolean {

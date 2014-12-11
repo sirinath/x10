@@ -39,7 +39,7 @@ public class TestVector extends x10Test {
 		ret &= (testCellDiv());
 		ret &= (testNorms());
 		ret &= (testDotProduct());
-		ret &= (testMap());
+		ret &= (testExp());
 
         return ret;
 	}
@@ -83,16 +83,9 @@ public class TestVector extends x10Test {
 		val dm = Vector.make(M).initRandom();
 		val dm1:Vector(M) = -1 * dm;
 		val dm0 = dm + dm1;
-		var ret:Boolean = dm0.equals(0.0);
+		val ret = dm0.equals(0.0);
 		if (!ret)
 			Console.OUT.println("--------Vector Add: dm + dm*-1 test failed--------");
-
-        val c = Vector.make(M);
-        c.cellAdd(dm, dm1);
-        ret &= c.equals(0.0);
-		if (!ret)
-			Console.OUT.println("--------Vector Add: in place test failed--------");
-
 		return ret;
 	}
 
@@ -225,12 +218,11 @@ public class TestVector extends x10Test {
         return ret;
     }
 
-    public def testMap():Boolean {
-        Console.OUT.println("Vector map test");
+    public def testExp():Boolean {
+        Console.OUT.println("Vector exp test");
 
         val a = Vector.make(M).initRandom();
-        val aExp = a.clone();
-        aExp.map((x:Double)=>Math.exp(x));
+        val aExp = new Vector(a).exp();
         var ret:Boolean = true;
         for (i in 0..(a.M-1)) {
             ret &= (Math.exp(a(i)) == aExp(i));

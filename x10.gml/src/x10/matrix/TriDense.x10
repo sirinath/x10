@@ -14,6 +14,7 @@ package x10.matrix;
 import x10.util.StringBuilder;
 
 import x10.matrix.blas.DenseMatrixBLAS;
+import x10.matrix.util.Debug;
 import x10.matrix.util.RandTool;
 
 public type TriDense(m:Long, n:Long)=TriDense{m==n, self.M==m, m==n};
@@ -38,11 +39,11 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	 */
 	public var upper:Boolean = false; 
 	
-    public def this(n:Long, x:Rail[Double]{self!=null}):TriDense(n){
+    public def this(n:Long, x:Rail[Double]):TriDense(n){
 		super(n, n, x);
 	}
 	
-	public def this(up:Boolean, n:Long, x:Rail[Double]{self!=null}) : TriDense(n){
+	public def this(up:Boolean, n:Long, x:Rail[Double]) : TriDense(n){
 		super(n, n, x);
 		upper = up;
 	}	
@@ -78,7 +79,7 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	}
 	
 	public  def alloc(m:Long, n:Long):TriDense(m,n) {
-		assert m==n;
+		Debug.assure(m==n);
 		val x = new Rail[Double](m*n);
 		val nm = new TriDense(m, x);
 		return nm as TriDense(m,n);
@@ -109,7 +110,7 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 		else if (mat instanceof TriDense)
 			copyTo(mat as TriDense(N));
 		else
-			throw new UnsupportedOperationException("CopyTo: matrix type does not compatible");
+			Debug.exit("CopyTo: matrix type does not compatible");
 	}
 	
     /**
@@ -276,6 +277,24 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 		return x;
 	}
 
+	// Cell-wise matrix multiplication
+
+	public def cellSubFrom(v:Double):TriDense(this) {
+		var colstt:Long=0;
+		if (upper==false) {
+		    for (var c:Long=0; c < N; c++, colstt+=M+1)
+			    for (var i:Long=colstt; i<colstt+M-c; i++)
+					this.d(i) = v-this.d(i);
+		} else {
+		    for (var c:Long=0; c < N; c++, colstt+=M)
+			    for (var i:Long=colstt; i<colstt+c+1; i++)
+					this.d(i) = v-this.d(i);
+		}
+		return this;
+	}
+	
+	//public def cellSub(x:TriDense(M)): DenseMatrix(this) = cellSub(x as DenseMatrix(M,N));
+	
 	/**
 	 * x = x - this;
 	 */
@@ -363,17 +382,17 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	}
 	
 	//public def cellDivBy(v:Double):TriDense(this) {
-	//	throw new UnsupportedOperationException("Divide by 0 error");
+	//	Debug.exit("Divide by 0 error");
 	//	return this;
 	//}	
 	
 	//public def cellDiv(x:TriDense(M)):TriDense(this) {
-	//	throw new UnsupportedOperationException("Divide by 0 error");
+	//	Debug.exit("Divide by 0 error");
 	//	return this;
 	//}	
 	
 	//public def cellDivBy(x:DenseMatrix(M,N)):DenseMatrix(x) {
-	//	throw new UnsupportedOperationException("Divide by 0 error");
+	//	Debug.exit("Divide by 0 error");
 	//	return x;
 	//}
 	
@@ -412,6 +431,7 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public operator (v:Double) + this = this + v;
 
 	public operator this - (v:Double) = this.clone().cellSub(v)     as TriDense(M,N);
+	public operator (v:Double) - this = this.clone().cellSubFrom(v) as TriDense(M,N);
 	
 	public operator this / (v:Double) = this.clone().cellDiv(v)   as TriDense(M,N);
 	public operator (v:Double) / this = this.clone().cellDivBy(v) as TriDense(M,N);
@@ -424,7 +444,7 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	public operator this - (that:TriDense(M)) = this.toDense().cellSub(that)  as DenseMatrix(M,N);
 	public operator this * (that:TriDense(M)) = this.toDense().cellMult(that) as DenseMatrix(M,N);
 	public operator this / (that:TriDense(M)) {
-		throw new UnsupportedOperationException("Divide 0 error");
+		Debug.exit("Divide 0 error");
 	}
 
 	/**
@@ -439,7 +459,7 @@ public class TriDense extends DenseMatrix{self.M==self.N} {
 	// public operator (that:DenseMatrix(M,N)) - this = this.cellSubFrom(that.clone());
 	// public operator (that:DenseMatrix(M,N)) * this = this * that;
 	public operator (that:DenseMatrix(M,N)) / this { 
-		throw new UnsupportedOperationException("Divide by 0 error");
+		Debug.exit("Divide by 0 error");
 	}
 	
 	/**

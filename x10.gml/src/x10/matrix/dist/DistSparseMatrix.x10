@@ -15,6 +15,7 @@ import x10.regionarray.Dist;
 import x10.regionarray.DistArray;
 import x10.util.Timer;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.sparse.SparseCSC;
@@ -24,7 +25,6 @@ import x10.matrix.block.SparseBlock;
 import x10.matrix.block.SparseBlockMatrix;
 import x10.matrix.comm.MatrixGather;
 import x10.matrix.comm.MatrixScatter;
-import x10.matrix.util.Debug;
 
 public type DistSparseMatrix(M:Long)=DistSparseMatrix{self.M==M};
 public type DistSparseMatrix(M:Long,N:Long)=DistSparseMatrix{self.M==M, self.N==N};
@@ -49,8 +49,8 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
         dist = dbs.dist;
         distBs = dbs;
         //
-        //assert (dbs.dist.region.size() == g.size) :
-        //             "Partition sparse blocks and distribution region's size not match";
+        //Debug.assure(dbs.dist.region.size() == g.size, 
+        //             "Partition sparse blocks and distribution region's size not match");
     }
 
     // Each block is not allocated yet
@@ -65,8 +65,9 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
         property(g);
         dist   = d;
         distBs = DistArray.make[SparseBlock](d);
-        //assert (d.region.size() == g.size) :
-        //             "Partition block number and distribution region's size not match";        
+        //Debug.flushln("dist size:"+ d.region.size()+" grid size:"+ g.size);
+        //Debug.assure(d.region.size() == g.size, 
+        //             "Partition block number and distribution region's size not match");        
     }
 
     // Each block is not allocated yet
@@ -79,8 +80,8 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
         super(g.M, g.N);
         property(g);
         dist   = Dist.makeUnique();
-        assert (Place.numPlaces() == g.size) :
-            "Partition size and block size do not match";
+        Debug.assure(Place.numPlaces() == g.size,
+                     "Partition size and block size do not match");
         distBs = DistArray.make[SparseBlock](dist);
 
     }
@@ -300,7 +301,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
     public def alloc(m:Long, n:Long)= alloc(m, n, compSparsity());    
 
     public def copyTo(that:DistSparseMatrix(M,N)) : void {
-        assert this.grid.equals(that.grid);
+        Debug.assure(this.grid.equals(that.grid));
         finish ateach([p] in this.dist) {
             val s = this.distBs(p).getMatrix();
             val d = that.distBs(p).getMatrix();
@@ -325,7 +326,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param ddm      distributed dense matrix
      */
     public def copyTo(ddm:DistDenseMatrix(M,N)): void {
-        assert grid.equals(ddm.grid) : "Partitioning mismatch";
+        Debug.assure(grid.equals(ddm.grid), "Partitioning mismatch");
 
         finish ateach([p] in this.dist) {
             val dd = ddm.distBs(p).dense;
@@ -340,13 +341,13 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param sbm      sparse block matrix
      */
     public def copyTo(sbm:SparseBlockMatrix(M,N)): void {
-        assert grid.equals(sbm.grid) : "Partitioning mismatch";
+        Debug.assure(grid.equals(sbm.grid), "Partitioning mismatch");
         
         MatrixGather.gather(this.distBs, sbm.listBs);
     }
 
     public def copyTo(spm:SparseCSC(M,N)):void {
-        assert grid.numRowBlocks == 1L;
+        Debug.assure(grid.numRowBlocks==1L);
         MatrixGather.gatherRowBs(grid, this.distBs, spm);
     }
 
@@ -362,7 +363,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
         else if (that instanceof SparseCSC)
             copyTo(that as SparseCSC);
         else
-            throw new UnsupportedOperationException("copyTo: target matrix type is not supported");
+            Debug.exit("CopyTo: target matrix type is not supported");
     }
     
     /**
@@ -371,7 +372,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param sbm      block sparse matrix
      */
     public def copyFrom(sbm:SparseBlockMatrix(M,N)):void {
-        assert grid.equals(sbm.grid) : "block partitioning mismatch";
+        Debug.assure(grid.equals(sbm.grid),    "block partitioning mismatch");
 
         /* Timing */ val stt = Timer.milliTime();
         MatrixScatter.scatter(sbm.listBs, distBs);
@@ -385,7 +386,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param spa      source sparse matrix
      */
     public def copyFrom(spa:SparseCSC(M,N)):void {
-        assert grid.numRowBlocks == 1L : "Source matrix is not single row block partitioning";
+        Debug.assure(grid.numRowBlocks==1L,    "Source matrix is not single row block partitioning");
 
         /* Timing */ val stt = Timer.milliTime();
         MatrixScatter.scatterRowBs(grid, spa, distBs);
@@ -508,16 +509,19 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
     /**
      * Cellwise addition in DistSparseMatrix is not supported and
      */
-    public def cellAdd(A:DistSparseMatrix(M,N)):DistSparseMatrix(this) {
-        throw new UnsupportedOperationException("No implementation of cellwise add-in for DistSparseMatrix");
+    public def cellAdd(A:DistSparseMatrix(M,N))  {
+        Debug.exit("No implementation of cellwise add-in for DistSparseMatrix");
+        return this;
     }
 
-    public def cellAdd(d:Double):DistSparseMatrix(this) {
-        throw new UnsupportedOperationException("No implementation of cellwise add-in for DistSparseMatrix");
+    public def cellAdd(d:Double)  {
+        Debug.exit("No implementation of cellwise add-in for DistSparseMatrix");
+        return this;
     }
 
-    protected def cellAddTo(dst:DenseMatrix(M,N)):DenseMatrix(dst) {
-        throw new UnsupportedOperationException("Not available");
+    protected def cellAddTo(dst:DenseMatrix(M,N)) {
+        Debug.exit("Not available");
+        return dst;
     }
 
     /**
@@ -533,19 +537,28 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
     public def cellSub(x:Matrix(M,N)):DistSparseMatrix(this) {
         throw new UnsupportedOperationException("Not support using sparse matrix to store result");
     }
+
+    /**
+     * Perform cell-wise subtraction  this = dv - this. Not support;
+     */
+    public def cellSubFrom(dv:Double):DistSparseMatrix(this) {
+        throw new UnsupportedOperationException("Not support using sparse matrix to store result");
+    }    
     
     /**
      * Perform cell-wise subtraction  x = x - this.
      */
     protected def cellSubFrom(x:DenseMatrix(M,N)):DenseMatrix(x) {
-        throw new UnsupportedOperationException("Not implemented");
+        Debug.exit("Not implemented");
+        return x;
     }
 
     /**
      * Cellwise multiplication in DistSparseMatrix is not supported
      */
-    public def cellMult(A:DistSparseMatrix(M,N)):DistSparseMatrix(this) {
-        throw new UnsupportedOperationException("No implementation of cellwise mult-in for DistSparseMatrix");
+    public def cellMult(A:DistSparseMatrix(M,N))  {
+        Debug.exit("No implementation of cellwise mult-in for DistSparseMatrix");
+        return this;
     }
 
     /**
@@ -558,16 +571,19 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
         return this;
     }
 
-    protected def cellMultTo(dst:DenseMatrix(M,N)):DenseMatrix(dst) {
-        throw new UnsupportedOperationException("Not available");
+    protected def cellMultTo(dst:DenseMatrix(M,N)) {
+        Debug.exit("Not available");
+        return dst;
     }
 
     /**
      * Cellwise division in DistSparseMatrix is not supported and
      */
-    public def cellDiv(A:DistSparseMatrix(M,N)):DistSparseMatrix(this) {
-        throw new UnsupportedOperationException("No implementation of cellwise div-in for DistSparseMatrix");
+    public def cellDiv(A:DistSparseMatrix(M,N))   {
+        Debug.exit("No implementation of cellwise div-in for DistSparseMatrix");
+        return this;
     }
+
 
     /**
      * Cellwise division in DistSparseMatrix is not supported and
@@ -582,9 +598,11 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
     /**
      * Perform cellwise return x = this / x 
      */
-    protected def cellDivBy(x:DenseMatrix(M,N)):DenseMatrix(x) {
-        throw new UnsupportedOperationException("Not available");
+    protected def cellDivBy(x:DenseMatrix(M,N)) {
+        Debug.exit("Not available");
+        return x;
     }
+
 
     /**
      * Mult method is not supported
@@ -594,7 +612,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
             B:Matrix(A.N,this.N), 
             plus:Boolean):Matrix(this){
         
-         throw new UnsupportedOperationException("Not implemented");
+         throw new UnsupportedOperationException("Not supported, no implementation");
     }    
  
     /**
@@ -604,7 +622,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
             A:Matrix{self.N==this.M},
             B:Matrix(A.M,this.N), 
             plus:Boolean) :Matrix(this) {
-         throw new UnsupportedOperationException("Not implemented");
+         throw new UnsupportedOperationException("Not supported, no implementation");
     }
 
     /**
@@ -622,7 +640,9 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * Not supported
      */
     public def mult(A:DistSparseMatrix, B:DistSparseMatrix, plus:Boolean): Matrix(this) {
-        throw new UnsupportedOperationException("Not support using DistSparseMatrix to store DistSparseMatrix multplication result");
+        // size check
+        Debug.exit("Not support using DistSparseMatrix to store DistSparseMatrix multplication result");
+        return this;
     }
 
     // Profiling

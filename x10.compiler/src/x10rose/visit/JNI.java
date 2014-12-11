@@ -242,8 +242,7 @@ class JNI implements Callable<Boolean> {
 //MH-20140414
 //    public static native void cactionBuildClassSupportStart(String className, String externalName, boolean user_defined_class, boolean is_interface, boolean is_enum, boolean is_anonymous, JavaToken jToken);
     public static native void cactionBuildClassSupportStart(String className, String externalName, boolean user_defined_class, boolean has_conflicts, boolean is_interface, boolean is_enum, boolean is_anonymous, JavaToken jToken);
-    public static native void cactionPushNestedClass(String className, String parentName);
-    
+
     public static native void cactionUpdateClassSupportStart(String class_name, JavaToken jToken);
     public static native void cactionInsertTypeParameter(String name, JavaToken jToken);
     public static native void cactionBuildTypeParameterSupport(String package_name, String type_name, int method_index, String parameter_name, int num_bounds, JavaToken jToken);
@@ -254,7 +253,7 @@ class JNI implements Callable<Boolean> {
 	public static native void cactionBuildClassExtendsAndImplementsSupport(int num_type_parameters, String[] type_parameters, boolean has_super_class, String super_class_name, int num_interfaces, String[] interfaces, JavaToken jToken);
 //MH-20140414
 //    public static native void cactionBuildClassSupportEnd(String className, int num_class_members, JavaToken jToken);
-    public static native void cactionBuildClassSupportEnd(String className, int members, JavaToken jToken);
+    public static native void cactionBuildClassSupportEnd(String className, JavaToken jToken);
 
     public static native void cactionUpdateClassSupportEnd(String className, boolean has_super_class, int num_interfaces, int num_class_members, JavaToken jToken);
     public static native void cactionBuildInnerTypeSupport(String package_name, String type_name, JavaToken jToken);
@@ -276,38 +275,20 @@ class JNI implements Callable<Boolean> {
     public static native void cactionArgumentName(String name);
     public static native void cactionArgumentModifiers(int modifiers);
     
-    public static native void cactionSetCurrentClassName(String typename);
-    public static native void cactionSetCurrentClassNameWithCopyingStacks(String typename);
-    public static native String cactionGetCurrentClassName();
-    public static native void cactionSetCurrentFilePath(String filepath);
+	public static native void cactionSetCurrentClassName(String typename);
+	public static native String cactionGetCurrentClassName();
+	public static native void cactionSetCurrentFilePath(String filepath);
 
-    public static native void cactionAsync(JavaToken jToken);
-    public static native void cactionAsyncEnd(boolean isClocked, JavaToken jToken);
-    public static native void cactionFinish(JavaToken jToken);
-    public static native void cactionFinishEnd(boolean isClocked, JavaToken jToken);
-    public static native void cactionFinishExpr(JavaToken jToken);
-    public static native void cactionFinishExprEnd(JavaToken jToken);
-    public static native void cactionAt(JavaToken jToken);
-    public static native void cactionAtEnd(JavaToken jToken);
-    public static native void cactionAtExpr(JavaToken jToken);
-    public static native void cactionAtExprEnd(JavaToken jToken);
-    public static native void cactionHere(JavaToken jToken);
-    public static native void cactionAtomic(JavaToken jToken);
-    public static native void cactionAtomicEnd(JavaToken jToken);
-    
-    public static native void cactionAppendProperty(String name, boolean isRail, boolean isFinal, JavaToken jToken);
-    public static native void cactionSetProperties(int number_of_properties, JavaToken jToken);
-    
-    public static native void cactionAttachTypeParameterToType(String typeParam, JavaToken jToken);
-    public static native void cactionAttachTypeParameterToMethodDecl(String typeParam, JavaToken jToken);
-    public static native void cactionAttachTypeParameterToMethodCall(String typeParam, JavaToken jToken);
-    public static native void cactionAttachGuard(String typeParam, JavaToken jToken);
-    
-    public static native void cactionWhen(JavaToken jToken);
-    public static native void cactionWhenEnd(JavaToken jToken);
-    
-    public static native void cactionTuple(JavaToken jToken);
-    public static native void cactionTupleEnd(int tuple_size, JavaToken jToken);
+	public static native void cactionAsync(JavaToken jToken);
+	public static native void cactionAsyncEnd(JavaToken jToken);
+	public static native void cactionFinish(JavaToken jToken);
+	public static native void cactionFinishEnd(JavaToken jToken);
+	public static native void cactionAt(JavaToken jToken);
+	public static native void cactionAtEnd(JavaToken jToken);
+	public static native void cactionAtExpr(JavaToken jToken);
+	public static native void cactionAtExprEnd(JavaToken jToken);
+	public static native void cactionHere(JavaToken jToken);
+	
     //**********************************************************
     //*                                                        *
     //*    Start of JavaDoc Nodes.                             *

@@ -23,10 +23,7 @@ import x10.util.Timer;
 public class XTENLANG_3304 extends x10Test {
 
     public def run() {
-        if (Place.numPlaces() < 2) {
-            Console.OUT.println("2 places are necessary for this test");
-            return false;
-        }
+        if (Place.numPlaces() != 2) return false;
         val place1 = Place.places().next(here);
         val t = new Timer();
         val wokenupTime = GlobalCell.make[Long](0);

@@ -17,8 +17,8 @@ import x10.matrix.util.Debug;
 public class ResilientStoreForApp {
     class SnapshottableEntryKey(snapshottable:Snapshottable, keepOldSnapshot:Boolean) { }
 
-    private val snapshots = new Rail[HashMap[SnapshottableEntryKey,DistObjectSnapshot]](2, (Long)=>new x10.util.HashMap[SnapshottableEntryKey,DistObjectSnapshot]());
-    private var tempSnapshot:HashMap[SnapshottableEntryKey,DistObjectSnapshot] = null;
+    private val snapshots = new Rail[HashMap[SnapshottableEntryKey,DistObjectSnapshot[Any,Any]]](2, (Long)=>new x10.util.HashMap[SnapshottableEntryKey,DistObjectSnapshot[Any,Any]]());
+    private var tempSnapshot:HashMap[SnapshottableEntryKey,DistObjectSnapshot[Any,Any]] = null;
     private transient var commitCount:Long = 0L;
     
     public def startNewSnapshot() {
@@ -26,17 +26,12 @@ public class ResilientStoreForApp {
         val idx = (commitCount+1) % 2;
         tempSnapshot = snapshots(idx);
     }
-
-    /** Cancel the current snapshot, in case of failure during checkpoint. */
-    public def cancelSnapshot() {
-        tempSnapshot = null;
-    }
     
     public def save(distObject:Snapshottable) {
         save(distObject, false);
     }
     
-    public def save(distObject:Snapshottable, snapshot:DistObjectSnapshot) {
+    public def save(distObject:Snapshottable, snapshot:DistObjectSnapshot[Any,Any]) {
         save(distObject, snapshot, false);
     }
     
@@ -46,15 +41,15 @@ public class ResilientStoreForApp {
         save(distObject, snapshot, keepOldSnapshot);
     }
     
-    public def save(distObject:Snapshottable, snapshot:DistObjectSnapshot, keepOldSnapshot:Boolean) {
+    public def save(distObject:Snapshottable, snapshot:DistObjectSnapshot[Any,Any], keepOldSnapshot:Boolean) {
         Debug.assure(tempSnapshot != null, "New snapshot should be started first");
         val snapshotKey = new SnapshottableEntryKey(distObject,keepOldSnapshot);
-        atomic tempSnapshot.put(snapshotKey, snapshot);
+        tempSnapshot.put(snapshotKey, snapshot);
     }
     
     public def commit() {
         val idx = commitCount % 2;
-        commitCount++; // switch to the new snapshot
+        commitCount++; // swith to the new snapshot
         tempSnapshot = null;
 
         // delete the old snapshot
@@ -73,13 +68,11 @@ public class ResilientStoreForApp {
     public def restore() {
         val idx = commitCount % 2;
         val appSnapshot = snapshots(idx);
-        val iter = appSnapshot.keySet().iterator();
-        finish{
-            while (iter.hasNext()) {
-                val key = iter.next();
-                val distObjectSnapshot = appSnapshot.getOrElse(key, null);
-                async key.snapshottable.restoreSnapshot(distObjectSnapshot);
-            }
+        val iter = appSnapshot.keySet().iterator(); 
+        while (iter.hasNext()) {
+            val key = iter.next();
+            val distObjectSnapshot = appSnapshot.getOrElse(key, null);
+            key.snapshottable.restoreSnapshot(distObjectSnapshot);
         }
     }
 }

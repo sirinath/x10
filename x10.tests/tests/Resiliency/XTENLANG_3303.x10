@@ -13,7 +13,7 @@ import harness.x10Test;
 
 import x10.util.Timer;
 
-// NUM_PLACES: 2
+// NUM_PLACES: 4
 
 /**
  * at(p) async is executed in parallel ?
@@ -23,10 +23,7 @@ import x10.util.Timer;
 public class XTENLANG_3303 extends x10Test {
 
     public def run() {
-        if (Place.numPlaces() < 2) {
-            Console.OUT.println("2 places are necessary for this test");
-            return false;
-        }
+        if (Place.numPlaces() != 4) return false;
         val place1 = Place.places().next(here);
         val t = new Timer();
         val startTime = t.nanoTime();
@@ -38,14 +35,8 @@ public class XTENLANG_3303 extends x10Test {
             }
         }
         val elapsedTime = t.nanoTime() - startTime;
-        if (elapsedTime / 1000000 < 10500) {
-            Console.OUT.println("at(p) async is executed in parallel");
-            return true;
-        }
-        else {
-            Console.OUT.println("at(p) async is executed in serial");
-            return false;
-        }
+        if (elapsedTime / 1000000 < 5500) return true;
+        else return false;
     }
 
     public static def main(Rail[String]) {

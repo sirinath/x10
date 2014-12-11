@@ -287,6 +287,16 @@ public class DupBlockMatrix extends Matrix {
         }
         return this;
     }
+
+    /**
+     * this = v - this
+     */
+    public def cellSubFrom(v:Double):DupBlockMatrix(this) {
+        finish ateach(Dist.makeUnique()) {
+            local().cellSubFrom(v);
+        }
+        return this;
+    }
     
     /**
      * Perform cell-wise subtraction  x = x - this.
@@ -387,6 +397,7 @@ public class DupBlockMatrix extends Matrix {
     public operator this + (v:Double) = makeDense(this).cellAdd(v)  as DupBlockMatrix(M,N);
     public operator this - (v:Double) = makeDense(this).cellAdd(-v) as DupBlockMatrix(M,N);
     
+    public operator (v:Double) - this = makeDense(this).cellSubFrom(v) as DupBlockMatrix(M,N);
     public operator this / (v:Double) = makeDense(this).cellDiv(v)     as DupBlockMatrix(M,N);
     
     public operator this * (alpha:Double) = this.clone().scale(alpha) as DupBlockMatrix(M,N);
@@ -638,15 +649,28 @@ public class DupBlockMatrix extends Matrix {
         return output.toString();
     }
 
-    public def allToString() {
+    public def printAllCopies() {
         val output=new StringBuilder();
-        output.add("-------- Duplicated block matrix :["+M+" x "+N+"] ---------\n");
+        output.add("-------- Duplicate block matrix :["+M+" x "+N+"] ---------\n");
         for (p in Place.places()) {
             output.add("Copy at place " + p.id() +"\n");
             output.add(at (p) { handleDB().toString()});
         }
         output.add("--------------------------------------------------\n");
-        return output.toString();
+        Console.OUT.print(output.toString());
+        Console.OUT.flush();
+    }
+    
+    public def printAllMatrixCopies() {
+        val output = new StringBuilder();
+        output.add("-------- Duplicate block matrix:["+M+" x "+N+"] ---------\n");
+        for (p in Place.places()) {
+            output.add("Copy at place " + p.id() +"\n");
+            output.add(at (p) {(local() as Matrix).toString()});
+        }
+        output.add("--------------------------------------------------\n");
+        Console.OUT.print(output.toString());
+        Console.OUT.flush();
     }
 }
 

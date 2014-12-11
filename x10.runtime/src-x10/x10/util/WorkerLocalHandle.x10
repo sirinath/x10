@@ -82,12 +82,11 @@ public class WorkerLocalHandle[T]{T isref, T haszero} implements ()=>T,(T)=>void
     public def reduceLocal(op:(a:T,b:T)=>T):T {
         val localState = state();
         val localStore = localState.store;
-        var result:T = null;
+        var result:T = localState.init();
         for (i in 0..(localStore.size-1)) {
             val t = localStore(i);
             if (t != null) {
-                if (result == null) result = t;
-                else result = op(result, t);
+                result = op(result, t);
             }
         }
         return result;

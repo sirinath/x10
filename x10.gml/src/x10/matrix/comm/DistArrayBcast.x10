@@ -14,6 +14,7 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.comm.mpi.WrapMPI;
 
 /**
@@ -45,12 +46,13 @@ public class DistArrayBcast extends DistArrayRemoteCopy {
 	 * @param dataCnt    count of double-precision data to broadcast
 	 */
 	public static def bcast(duplist:DistDataArray, dataCnt:Long) : void {
-		assert (dataCnt <= duplist(here.id()).size) : "Data overflow in bcast";
+		Debug.assure(dataCnt <= duplist(here.id()).size, "Data overflow in bcast");
 		
 		@Ifdef("MPI_COMMU") {
 			mpiBcast(duplist, dataCnt);
 		}
 		@Ifndef("MPI_COMMU") {
+			//Debug.flushln("start bcast to "+numPlaces);
 			x10Bcast(duplist, dataCnt);
 		}
 	} 
@@ -138,15 +140,17 @@ public class DistArrayBcast extends DistArrayRemoteCopy {
 	 * @param dataCnt    count of nonzero data to broadcast
 	 */
 	public static def bcast(smlist:DistCompArray, dataCnt:Long): void {
-		assert (dataCnt <= smlist(here.id()).storageSize()) : "Data overflow in bcast";
+		Debug.assure(dataCnt <= smlist(here.id()).storageSize(), "Data overflow in bcast");
 		
 		@Ifdef("MPI_COMMU") {
 			mpiBcast(smlist, dataCnt);
 		}
 		@Ifndef("MPI_COMMU") {
+			//Debug.flushln("start bcast to "+numPlaces);
 			x10Bcast(smlist, dataCnt);
 		}
 	} 
+
 
 	/**
 	 * Broadcast data in compress array from here 

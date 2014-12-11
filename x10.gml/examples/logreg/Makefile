@@ -28,16 +28,10 @@ gml_path    = ../..
 # compile options
 X10_FLAG	= -sourcepath ../.  -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -O -NO_CHECKS
 
-# enable CPU profiling with google-perftools
-PROFILE ?=
-ifdef PROFILE
-  X10_FLAG += -gpt
-endif
-
 # runtime settings
 runtime_list = mpi sock java
 numplaces = 4
-test_args = -m 10000 -n 4 --rowBlocks 4 --colBlocks 1 --density 0.9 --iterations 10 --checkpointFreq 2 --skip 2 --verify 
+test_args = 
 
 ###################################################
 # Build rules

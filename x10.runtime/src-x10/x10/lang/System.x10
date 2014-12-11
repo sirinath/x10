@@ -59,54 +59,10 @@ public class System {
      * @see Configuration#resilient_mode
      */
     public static def killThere(victim:Place) {
-        at (victim) @x10.compiler.Immediate("killThere") async killHere();
-    }
-    
-    /**
-     * Requests the launcher to create N additional places asynchronously.
-     * Please note that since this is an asynchronous operation, a return 
-     * code greater than zero does not guarantee those places have actually
-     * started, as they may fail for reasons outside of the launcher's control
-     * 
-     * @param newPlaces the number of new places to add
-     * @return The number of new places that this request attempted to spawn.
-     * May be less than the number requested, if resources are not available, 
-     * or if the current launcher does not support adding places after startup.
-     */
-    
-    @Native("java", "x10.x10rt.X10RT.addPlaces(#newPlaces)")
-    public static def addPlaces(newPlaces:Long): Long {
-        return 0;
+        val cl = ()=> @x10.compiler.RemoteInvocation("killThere") { killHere(); };
+        Runtime.x10rtSendMessage(victim.id, cl, null);
     }
 
-    /**
-     * Requests the launcher to create N additional places synchronously, 
-     * waiting up to 'timeout' milliseconds for the places to join before 
-     * returning.
-     * 
-     * @param newPlaces the number of new places to add
-     * @param timeout how many milliseconds to wait for the places to join
-     * @return The number of new places that joined successfully.  This may be 
-     * fewer than the requested number of places if we timed out, or more than 
-     * the requested number of places if there were multiple overlapping calls
-     * to this method
-     */
-    public static def addPlacesAndWait(newPlaces:Long, timeout:Long): Long {
-        val initialPlaceCount = Place.numPlaces();
-        val launcherAdded = addPlaces(newPlaces);
-        if (launcherAdded == 0) return 0; // the launcher can't add places.  Don't bother waiting.
-
-        // clumsy wait for newPlaces to join
-        val timePlacesRequested = currentTimeMillis();
-        while (Place.numPlaces() < initialPlaceCount + launcherAdded) {
-            if (currentTimeMillis() > timePlacesRequested+timeout) {
-                // timeout
-                return (Place.numPlaces() - initialPlaceCount);
-            }
-            System.sleep(100);
-        }
-        return launcherAdded;
-    }
 
     /**
      * Sets the exit code with which the X10 program will exit.

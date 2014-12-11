@@ -28,7 +28,7 @@ import x10.util.*;
 //     def notifySubActivitySpawn(place:Place):void {
 //         if (verbose>=1) debug("notifySubActivitySpawn called, place.id=" + place.id);
 //     }
-//     def notifyActivityCreation(srcPlace:Place, activity:Activity):Boolean {
+//     def notifyActivityCreation(srcPlace:Place):Boolean {
 //         if (verbose>=1) debug("notifyActivityCreation called, srcPlace.id=" + srcPlace.id);
 //         if (srcPlace.isDead()) return false; return true;
 //     }
@@ -67,14 +67,11 @@ class FinishResilientSample extends FinishResilient implements Runtime.Mortal {
         // equals need not be overridden 
     }
     
-    // FIXME: Once we stabilize the implementation, switch to using Array_2
-    //        instead of Rail for the logically 2-D arrays.
     private static class State { // data stored into ResilientStore
-        val NUM_PLACES = Place.numPlaces();
-        val transit = new Rail[Int](NUM_PLACES * NUM_PLACES, 0n);
-        val transitAdopted = new Rail[Int](NUM_PLACES * NUM_PLACES, 0n);
-        val live = new Rail[Int](NUM_PLACES, 0n);
-        val liveAdopted = new Rail[Int](NUM_PLACES, 0n);
+        val transit = new Rail[Int](Place.numPlaces() * Place.numPlaces(), 0n);
+        val transitAdopted = new Rail[Int](Place.numPlaces() * Place.numPlaces(), 0n);
+        val live = new Rail[Int](Place.numPlaces(), 0n);
+        val liveAdopted = new Rail[Int](Place.numPlaces(), 0n);
         val excs = new GrowableRail[CheckedThrowable](); // exceptions to report
         val children = new GrowableRail[FinishID](); // children
         var adopterId:FinishID = FinishID.NULL; // adopter (if adopted)
@@ -181,12 +178,12 @@ class FinishResilientSample extends FinishResilient implements Runtime.Mortal {
        RS.lock();
         val state = RS.getOrElse(id, null);
         if (!state.isAdopted()) {
-            state.transit(srcId*state.NUM_PLACES + dstId)++;
+            state.transit(srcId*Place.numPlaces() + dstId)++;
             RS.put(id, state);
         } else {
             val adopterId = getCurrentAdopterId();
             val adopterState = RS.getOrElse(adopterId, null);
-            adopterState.transitAdopted(srcId*state.NUM_PLACES + dstId)++;
+            adopterState.transitAdopted(srcId*Place.numPlaces() + dstId)++;
             RS.put(adopterId, adopterState);
         }
         if (verbose>=3) state.dump("DUMP id="+id);
@@ -194,7 +191,7 @@ class FinishResilientSample extends FinishResilient implements Runtime.Mortal {
         if (verbose>=1) debug("<<<< notifySubActivitySpawn(id="+id+") returning");
     }
     
-    def notifyActivityCreation(srcPlace:Place, activity:Activity):Boolean {
+    def notifyActivityCreation(srcPlace:Place):Boolean {
         val srcId = srcPlace.id, dstId = here.id;
         if (verbose>=1) debug(">>>> notifyActivityCreation(id="+id+") called, srcId="+srcId + " dstId="+dstId);
         if (srcPlace.isDead()) {
@@ -205,34 +202,19 @@ class FinishResilientSample extends FinishResilient implements Runtime.Mortal {
         val state = RS.getOrElse(id, null);
         if (!state.isAdopted()) {
             state.live(dstId)++;
-            state.transit(srcId*state.NUM_PLACES + dstId)--;
+            state.transit(srcId*Place.numPlaces() + dstId)--;
             RS.put(id, state);
         } else {
             val adopterId = getCurrentAdopterId();
             val adopterState = RS.getOrElse(adopterId, null);
             adopterState.liveAdopted(dstId)++;
-            adopterState.transitAdopted(srcId*state.NUM_PLACES + dstId)--;
+            adopterState.transitAdopted(srcId*Place.numPlaces() + dstId)--;
             RS.put(adopterId, adopterState);
         }
         if (verbose>=3) state.dump("DUMP id="+id);
        RS.unlock();
         if (verbose>=1) debug("<<<< notifyActivityCreation(id="+id+") returning true");
         return true;
-    }
-
-    def notifyActivityCreationBlocking(srcPlace:Place, activity:Activity):Boolean {
-        return notifyActivityCreation(srcPlace, activity);
-    }
-
-    def notifyActivityCreationFailed(srcPlace:Place, t:CheckedThrowable):void { 
-        // TODO! A real implementation of this functionality.
-        debug("<<<< notifyActivityCreationFailed unimplemented. Program execution is likely dead in the water");
-        t.printStackTrace();
-    }
-
-    def notifyActivityCreatedAndTerminated(srcPlace:Place) {
-        notifyActivityCreation(srcPlace, null);
-        notifyActivityTermination();
     }
     
     def notifyActivityTermination():void {
@@ -323,27 +305,27 @@ class FinishResilientSample extends FinishResilient implements Runtime.Mortal {
                 childState.adopterId = id;
                 RS.put(childId, childState);
                 state.children.addAll(childState.children); // will be checked in the following iteration
-                for (i in 0..(state.NUM_PLACES-1)) {
+                for (i in 0..(Place.numPlaces()-1)) {
                     state.liveAdopted(i) += (childState.live(i) + childState.liveAdopted(i));
-                    for (j in 0..(state.NUM_PLACES-1)) {
-                        val idx = i*state.NUM_PLACES + j;
+                    for (j in 0..(Place.numPlaces()-1)) {
+                        val idx = i*Place.numPlaces() + j;
                         state.transitAdopted(idx) += (childState.transit(idx) + childState.transitAdopted(idx));
                     }
                 }
             } // for (chIndex)
         }
         // 2 delete dead entries
-        for (i in 0..(state.NUM_PLACES-1)) {
+        for (i in 0..(Place.numPlaces()-1)) {
             if (Place.isDead(i)) {
                 for (unused in 1..state.live(i)) {
                     if (verbose>=3) debug("adding DPE for live("+i+")");
                     addDeadPlaceException(state, i);
                 }
                 state.live(i) = 0n; state.liveAdopted(i) = 0n;
-                for (j in 0..(state.NUM_PLACES-1)) {
-                    val idx = i*state.NUM_PLACES + j;
+                for (j in 0..(Place.numPlaces()-1)) {
+                    val idx = i*Place.numPlaces() + j;
                     state.transit(idx) = 0n; state.transitAdopted(idx) = 0n;
-                    val idx2 = j*state.NUM_PLACES + i;
+                    val idx2 = j*Place.numPlaces() + i;
                     for (unused in 1..state.transit(idx2)) {
                         if (verbose>=3) debug("adding DPE for transit("+j+","+i+")");
                         addDeadPlaceException(state, i);
@@ -358,11 +340,11 @@ class FinishResilientSample extends FinishResilient implements Runtime.Mortal {
         // 3 quiescent check
         if (verbose>=3) state.dump("DUMP id="+id);
         var quiet:Boolean = true;
-        for (i in 0..(state.NUM_PLACES-1)) {
+        for (i in 0..(Place.numPlaces()-1)) {
             if (state.live(i) > 0) { quiet = false; break; }
             if (state.liveAdopted(i) > 0) { quiet = false; break; }
-            for (j in 0..(state.NUM_PLACES-1)) {
-                val idx = i*state.NUM_PLACES + j;
+            for (j in 0..(Place.numPlaces()-1)) {
+                val idx = i*Place.numPlaces() + j;
                 if (state.transit(idx) > 0) { quiet = false; break; }
                 if (state.transitAdopted(idx) > 0) { quiet = false; break; }
             }

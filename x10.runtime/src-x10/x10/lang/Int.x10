@@ -268,7 +268,6 @@ public struct Int implements Comparable[Int], Arithmetic[Int], Bitwise[Int], Ord
      */
     @Native("java", "((int)(double)(#x))")
     @Native("c++",  "::x10::lang::DoubleNatives::toInt(#x)")
-    @Native("cuda",  "((x10_int)(#x))")
     public native static operator (x:Double) as Int;
 
     /**
