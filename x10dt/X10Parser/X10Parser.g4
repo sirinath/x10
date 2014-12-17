@@ -1,5 +1,7 @@
 grammar X10Parser;
 
+import X10Lexer;
+
 accept:
       compilationUnit
     ;
@@ -102,6 +104,7 @@ type:
       functionType
     | constrainedType
     | void_
+    | type annotations
     ;
 functionType:
       typeParametersopt '(' formalParameterListopt ')' whereClauseopt oBSOLETE_Offersopt '=>' type
@@ -109,12 +112,8 @@ functionType:
 classType:
       namedType
     ;
-annotatedType:
-      type annotations
-    ;
 constrainedType:
       namedType
-    | annotatedType
     ;
 void_:
       'void'
@@ -258,28 +257,9 @@ expressionStatement:
     ;
 statementExpression:
       assignment
-    | preIncrementExpression
-    | preDecrementExpression
-    | postIncrementExpression
-    | postDecrementExpression
     | methodInvocation
     | classInstanceCreationExpression
-    | overloadableExpression
-    ;
-overloadableExpression:
-      overloadableUnaryExpressionPlusMinus
-    | overloadableUnaryExpression
-    | overloadableRangeExpression
-    | overloadableMultiplicativeExpression
-    | overloadableAdditiveExpression
-    | overloadableShiftExpression
-    | overloadableRelationalExpression
-    | overloadableEqualityExpression
-    | overloadableAndExpression
-    | overloadableExclusiveOrExpression
-    | overloadableInclusiveOrExpression
-    | overloadableConditionalAndExpression
-    | overloadableConditionalOrExpression
+    | conditionalExpression
     ;
 assertStatement:
       'assert' expression ';'
@@ -323,28 +303,9 @@ forInit:
     ;
 forUpdateExpression:
       assignment
-    | preIncrementExpression
-    | preDecrementExpression
-    | postIncrementExpression
-    | postDecrementExpression
     | methodInvocation
     | classInstanceCreationExpression
-    | forUpdateOverloadableExpression
-    ;
-forUpdateOverloadableExpression:
-      overloadableUnaryExpressionPlusMinus
-    | overloadableUnaryExpression
-    | overloadableRangeExpression
-    | overloadableMultiplicativeExpression
-    | overloadableAdditiveExpression
-    | overloadableShiftExpression
-    | overloadableRelationalExpression
-    | overloadableEqualityExpression
-    | overloadableAndExpression
-    | overloadableExclusiveOrExpression
-    | overloadableInclusiveOrExpression
-    | overloadableConditionalAndExpression
-    | overloadableConditionalOrExpression
+    | conditionalExpression
     ;
 forUpdateExpressionList:
       forUpdateExpression (',' forUpdateExpression)*
@@ -758,159 +719,34 @@ operatorPrefix:
     | 'super' '.' 'operator' '(' ')' '='
     | className '.' 'super' '.' 'operator' '(' ')' '='
     ;
-postfixExpression:
+conditionalExpression:
       castExpression
-    | postIncrementExpression
-    | postDecrementExpression
-    ;
-postIncrementExpression:
-      postfixExpression '++'
-    ;
-postDecrementExpression:
-      postfixExpression '--'
-    ;
-unannotatedUnaryExpression:
-      preIncrementExpression
-    | preDecrementExpression
-    | overloadableUnaryExpressionPlusMinus
-    | unaryExpressionNotPlusMinus
-    ;
-overloadableUnaryExpressionPlusMinus:
-      '+' unaryExpressionNotPlusMinus
-    | '-' unaryExpressionNotPlusMinus
-    ;
-unaryExpression:
-      unannotatedUnaryExpression
-    | annotations unannotatedUnaryExpression
-    ;
-preIncrementExpression:
-     '++' unaryExpressionNotPlusMinus
-    ;
-preDecrementExpression:
-      '--' unaryExpressionNotPlusMinus
-    ;
-unaryExpressionNotPlusMinus:
-      postfixExpression
-    | overloadableUnaryExpression
-    ;
-overloadableUnaryExpression:
-      '~' unaryExpression
-    | '!' unaryExpression
-    | '^' unaryExpression
-    | '|' unaryExpression
-    | '&' unaryExpression
-    | '*' unaryExpression
-    | '/' unaryExpression
-    | '%' unaryExpression
-    ;
-rangeExpression:
-      unaryExpression
-    | overloadableRangeExpression
-    ;
-overloadableRangeExpression:
-      rangeExpression '..' unaryExpression
-    ;
-multiplicativeExpression:
-      rangeExpression
-    | overloadableMultiplicativeExpression
-    ;
-overloadableMultiplicativeExpression:
-      multiplicativeExpression '*' rangeExpression
-    | multiplicativeExpression '/' rangeExpression
-    | multiplicativeExpression '%' rangeExpression
-    | multiplicativeExpression '**' rangeExpression
-    ;
-additiveExpression:
-      multiplicativeExpression
-    | overloadableAdditiveExpression
-    ;
-overloadableAdditiveExpression:
-      additiveExpression '+' multiplicativeExpression
-    | additiveExpression '-' multiplicativeExpression
-    ;
-shiftExpression:
-      additiveExpression
-    | overloadableShiftExpression
-    ;
-overloadableShiftExpression:
-      shiftExpression '<<' additiveExpression
-    | shiftExpression '>>' additiveExpression
-    | shiftExpression '>>>' additiveExpression
-    | shiftExpression '->' additiveExpression
-    | shiftExpression '<-' additiveExpression
-    | shiftExpression '-<' additiveExpression
-    | shiftExpression '>-' additiveExpression
-    | shiftExpression '!' additiveExpression
-    | shiftExpression '<>' additiveExpression
-    | shiftExpression '><' additiveExpression
-    ;
-relationalExpression:
-      shiftExpression
+    | conditionalExpression ('++'|'--')
+    | ('+'|'-'|'++'|'--') conditionalExpression
+    | ('~'|'!'|'^'|'|'|'&'|'*'|'/'|'%') conditionalExpression
+    | conditionalExpression '..' conditionalExpression
+    | conditionalExpression ('*'|'/'|'%'|'**') conditionalExpression
+    | conditionalExpression ('+'|'-') conditionalExpression
     | hasZeroConstraint
     | isRefConstraint
     | subtypeConstraint
-    | overloadableRelationalExpression
-    | relationalExpression 'instanceof' type
-    ;
-overloadableRelationalExpression:
-      relationalExpression '<' shiftExpression
-    | relationalExpression '>' shiftExpression
-    | relationalExpression '<=' shiftExpression
-    | relationalExpression '>=' shiftExpression
-    ;
-equalityExpression:
-      relationalExpression
-    | equalityExpression '==' relationalExpression
-    | equalityExpression '!=' relationalExpression
+    | conditionalExpression ('<<'|'>>'|'>>>'|'->'|'<-'|'-<'|'>-'|'!'|'<>'|'><') conditionalExpression
+    | conditionalExpression 'instanceof' type
+    | conditionalExpression ('<'|'>'|'<='|'>=') conditionalExpression
+    | conditionalExpression ('=='|'!=') conditionalExpression
+    | conditionalExpression ('~'|'!~') conditionalExpression
     | type '==' type
-    | overloadableEqualityExpression
-    ;
-overloadableEqualityExpression:
-      equalityExpression '~' relationalExpression
-    | equalityExpression '!~' relationalExpression
-    ;
-andExpression:
-      equalityExpression
-    | overloadableAndExpression
-    ;
-overloadableAndExpression:
-      equalityExpression ('&' equalityExpression)+
-    ;
-exclusiveOrExpression:
-      andExpression
-    | overloadableExclusiveOrExpression
-    ;
-overloadableExclusiveOrExpression:
-      andExpression ('^' andExpression)+
-    ;
-inclusiveOrExpression:
-      exclusiveOrExpression
-    | overloadableInclusiveOrExpression
-    ;
-overloadableInclusiveOrExpression:
-      exclusiveOrExpression ('|' exclusiveOrExpression)+
-    ;
-conditionalAndExpression:
-      inclusiveOrExpression
-    | overloadableConditionalAndExpression
-    ;
-overloadableConditionalAndExpression:
-      inclusiveOrExpression ('&&' inclusiveOrExpression)+
-    ;
-conditionalOrExpression:
-      conditionalAndExpression
-    | overloadableConditionalOrExpression
-    ;
-overloadableConditionalOrExpression:
-      conditionalAndExpression ('||' conditionalAndExpression)+
-    ;
-conditionalExpression:
-      conditionalOrExpression
+    | conditionalExpression '&' conditionalExpression
+    | conditionalExpression '^' conditionalExpression
+    | conditionalExpression '|' conditionalExpression
+    | conditionalExpression '&&' conditionalExpression
+    | conditionalExpression '||' conditionalExpression
     | closureExpression
     | atExpression
     | oBSOLETE_FinishExpression
-    | conditionalOrExpression '?' expression ':' conditionalExpression
+    | conditionalExpression '?' conditionalExpression ':' conditionalExpression
     ;
+
 assignmentExpression:
       assignment
     | conditionalExpression
@@ -1090,131 +926,3 @@ varKeywordopt:
 atCaptureDeclaratorsopt:
       atCaptureDeclarators?
     ;
-
-/* Terminals */
-
-IDENTIFIER: [a-z]+; // XXX TODO
-
-IntLiteral:
-      IntegerLiteral [nN]
-    ;
-LongLiteral:
-      IntegerLiteral [lL]?
-    ;
-ByteLiteral:
-      IntegerLiteral [yY]
-    ;
-ShortLiteral:
-      IntegerLiteral [sS]
-    ;
-UnsignedIntLiteral:
-      IntegerLiteral (([uU][nN]) | [nN]([uU]))
-    ;
-UnsignedLongLiteral:
-      IntegerLiteral (([uU][lL]?) | [lL?]([uU]))
-    ;
-UnsignedByteLiteral:
-      IntegerLiteral (([uU][yY]) | [yY]([uU]))
-    ;
-UnsignedShortLiteral:
-      IntegerLiteral (([uU][sS]) | [sS]([uU]))
-    ;
-FloatingPointLiteral:
-      Digits '.' Digits? ExponentPart? FloatingTypeSuffix
-    | '.' Digits ExponentPart? FloatingTypeSuffix
-    | Digits ExponentPart FloatingTypeSuffix
-    | Digits ExponentPart? FloatingTypeSuffix
-    ;
-ExponentPart:
-      ('e'|'E') ('+'|'-')? Digits
-    ;
-FloatingTypeSuffix:
-      'f' |  'F'
-    ;
-DoubleLiteral:
-      Digits '.' Digits? ExponentPart? DoubleTypeSuffix?
-    | '.' Digits ExponentPart? DoubleTypeSuffix?
-    | Digits ExponentPart DoubleTypeSuffix?
-    | Digits ExponentPart? DoubleTypeSuffix
-    ;
-DoubleTypeSuffix:
-      'd' | 'D'
-    ;
-Digits:
-      [0-9]+
-    ;
-IntegerLiteral: Digits; // XXX TODO
-
-CharacterLiteral: [a-z]; // XXX TODO -- the usual
-StringLiteral: [a-z]+;   // XXX TODO -- the usual
-
-MINUS_MINUS: '--';
-OR: '|';
-MINUS: '-';
-MINUS_EQUAL: '-=';
-NOT: '!';
-NOT_EQUAL: '!=';
-REMAINDER: '%';
-REMAINDER_EQUAL: '%=';
-AND: '&';
-AND_AND: '&&';
-AND_EQUAL: '&=';
-LPAREN: '(';
-RPAREN: ')';
-MULTIPLY: '*';
-MULTIPLY_EQUAL: '*=';
-COMMA: ',';
-DOT: '.';
-DIVIDE: '/';
-DIVIDE_EQUAL: '/=';
-COLON: ':';
-SEMICOLON: ';';
-QUESTION: '?';
-AT: '@';
-LBRACKET: '[';
-RBRACKET: ']';
-XOR: '^';
-XOR_EQUAL: '^=';
-LBRACE: '{';
-OR_OR: '||';
-OR_EQUAL: '|=';
-RBRACE: '}';
-TWIDDLE: '~';
-PLUS: '+';
-PLUS_PLUS: '++';
-PLUS_EQUAL: '+=';
-LESS: '<';
-LEFT_SHIFT: '<<';
-LEFT_SHIFT_EQUAL: '<<=';
-RIGHT_SHIFT: '>>';
-RIGHT_SHIFT_EQUAL: '>>=';
-UNSIGNED_RIGHT_SHIFT: '>>>';
-UNSIGNED_RIGHT_SHIFT_EQUAL: '>>>=';
-LESS_EQUAL: '<=';
-EQUAL: '=';
-EQUAL_EQUAL: '==';
-GREATER: '>';
-GREATER_EQUAL: '>=';
-ELLIPSIS: '...';
-
-RANGE: '..';
-ARROW: '->';
-DARROW: '=>';
-SUBTYPE: '<:';
-SUPERTYPE: ':>';
-STARSTAR: '**';
-NTWIDDLE: '!~';
-LARROW: '<-';
-FUNNEL: '-<';
-LFUNNEL: '>-';
-DIAMOND: '<>';
-BOWTIE: '><';
-RANGE_EQUAL: '..=';
-ARROW_EQUAL: '->=';
-STARSTAR_EQUAL: '**=';
-TWIDDLE_EQUAL: '~=';
-LARROW_EQUAL: '<-=';
-FUNNEL_EQUAL: '-<=';
-LFUNNEL_EQUAL: '>-=';
-DIAMOND_EQUAL: '<>=';
-BOWTIE_EQUAL: '><=';
