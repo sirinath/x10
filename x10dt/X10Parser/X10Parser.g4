@@ -121,8 +121,7 @@ void_:
 simpleNamedType:
       typeName
     | primary '.' identifier
-    | parameterizedNamedType '.' identifier
-    | depNamedType '.' identifier
+    | simpleNamedType typeArguments? arguments? depParameters? '.' identifier
     ;
 parameterizedNamedType:
       simpleNamedType arguments
