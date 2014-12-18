@@ -1,6 +1,71 @@
 lexer grammar X10Lexer;
 
-IDENTIFIER: [a-z]+; // XXX TODO
+ABSTRACT: 'abstract';
+AS: 'as';
+ASSERT: 'assert';
+ASYNC: 'async';
+AT: 'at';
+ATHOME: 'athome';
+ATEACH: 'ateach';
+ATOMIC: 'atomic';
+BREAK: 'break';
+CASE: 'case';
+CATCH: 'catch';
+CLASS: 'class';
+CLOCKED: 'clocked';
+CONTINUE: 'continue';
+DEF: 'def';
+DEFAULT: 'default';
+DO: 'do';
+ELSE: 'else';
+EXTENDS: 'extends';
+FALSE: 'false';
+FINAL: 'final';
+FINALLY: 'finally';
+FINISH: 'finish';
+FOR: 'for';
+GOTO: 'goto';
+HASZERO: 'haszero';
+HERE: 'here';
+IF: 'if';
+IMPLEMENTS: 'implements';
+IMPORT: 'import';
+IN: 'in';
+INSTANCEOF: 'instanceof';
+INTERFACE: 'interface';
+ISREF: 'isref';
+NATIVE: 'native';
+NEW: 'new';
+NULL: 'null';
+OFFER: 'offer';
+OFFERS: 'offers';
+OPERATOR: 'operator';
+PACKAGE: 'package';
+PRIVATE: 'private';
+PROPERTY: 'property';
+PROTECTED: 'protected';
+PUBLIC: 'public';
+RETURN: 'return';
+SELF: 'self';
+STATIC: 'static';
+STRUCT: 'struct';
+SUPER: 'super';
+SWITCH: 'switch';
+THIS: 'this';
+THROW: 'throw';
+THROWS: 'throws';
+TRANSIENT: 'transient';
+TRUE: 'true';
+TRY: 'try';
+TYPE: 'type';
+VAL: 'val';
+VAR: 'var';
+VOID: 'void';
+WHEN: 'when';
+WHILE: 'while';
+
+
+IDENTIFIER: [A-Za-z_] [0-9A-Za-z_]* ; // XXX TODO
 
 IntLiteral:
       IntegerLiteral [nN]
@@ -52,8 +117,20 @@ Digits:
     ;
 IntegerLiteral: Digits; // XXX TODO
 
-CharacterLiteral: [a-z]; // XXX TODO -- the usual
-StringLiteral: [a-z]+;   // XXX TODO -- the usual
+
+CharacterLiteral
+    :   '\'' SingleCharacter '\''
+//    |   '\'' EscapeSequence '\''
+    ;
+fragment
+SingleCharacter
+    :   ~['\\]
+    ;
+
+
+StringLiteral
+    :   '"' .*? '"' // XXX TODO
+    ;
 
 MINUS_MINUS: '--';
 OR: '|';
@@ -77,7 +154,7 @@ DIVIDE_EQUAL: '/=';
 COLON: ':';
 SEMICOLON: ';';
 QUESTION: '?';
-AT: '@';
+ATsymbol: '@';
 LBRACKET: '[';
 RBRACKET: ']';
 XOR: '^';
@@ -125,3 +202,15 @@ FUNNEL_EQUAL: '-<=';
 LFUNNEL_EQUAL: '>-=';
 DIAMOND_EQUAL: '<>=';
 BOWTIE_EQUAL: '><=';
+
+
+WS  :  [ \t\r\n\u000C]+ -> skip
+    ;
+
+COMMENT
+    :   '/*' .*? '*/' -> skip
+    ;
+
+LINE_COMMENT
+    :   '//' ~[\r\n]* -> skip
+    ;
