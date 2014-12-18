@@ -651,9 +651,27 @@ primary:
     | 'this'
     | className '.' 'this'
     | '(' expression ')'
-    | classInstanceCreationExpression
-    | fieldAccess
-    | methodInvocation
+//    | classInstanceCreationExpression
+    | 'new' typeName typeArgumentsopt '(' argumentListopt ')' classBodyopt
+    | primary '.' 'new' identifier typeArgumentsopt '(' argumentListopt ')' classBodyopt
+    | fullyQualifiedName '.' 'new' identifier typeArgumentsopt '(' argumentListopt ')' classBodyopt
+//    | fieldAccess
+    | primary '.' identifier
+    | 'super' '.' identifier
+    | className '.' 'super' '.' identifier
+//    | methodInvocation
+    | methodName typeArgumentsopt '(' argumentListopt ')'
+    | primary '.' identifier '(' argumentListopt ')'
+    | primary '.' identifier typeArguments '(' argumentListopt ')'
+    | 'super' '.' identifier '(' argumentListopt ')'
+    | 'super' '.' identifier typeArguments '(' argumentListopt ')'
+    | className '.' 'super' '.' identifier '(' argumentListopt ')'
+    | className '.' 'super' '.' identifier typeArguments '(' argumentListopt ')'
+    | primary typeArgumentsopt '(' argumentListopt ')'
+//    | operatorPrefix typeArgumentsopt '(' argumentListopt ')' // XXX TODO
+    | className '.' 'operator' 'as' '[' type ']' typeArgumentsopt '(' argumentListopt ')'
+    | className '.' 'operator' '[' type ']' typeArgumentsopt '(' argumentListopt ')'
+
     ;
 literal:
       IntLiteral
