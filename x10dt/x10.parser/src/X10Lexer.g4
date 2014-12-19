@@ -1,7 +1,7 @@
 lexer grammar X10Lexer;
 
 @lexer::header {
-  package x10.parser;
+  package x10.parserGen;
 }
 
 ABSTRACT: 'abstract';

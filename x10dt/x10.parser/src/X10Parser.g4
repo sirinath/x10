@@ -3,7 +3,7 @@ grammar X10Parser;
 
  
 @parser::header {
-  package x10.parser;
+  package x10.parserGen;
 } 
 
 import X10Lexer;
