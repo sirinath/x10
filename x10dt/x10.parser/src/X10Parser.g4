@@ -9,17 +9,10 @@ grammar X10Parser;
 import X10Lexer;
 
 
-
 accept:
       compilationUnit
     ;
 
-modifiersopt:
-      modifiers?
-    ;
-modifiers:
-      modifier+
-    ;
 modifier:
       'abstract'
     | annotation
@@ -34,13 +27,13 @@ modifier:
     | 'clocked'
     ;
 methodModifiersopt:
-      modifiersopt
-    | methodModifiersopt property
+      modifier*
+    | methodModifiersopt 'property'
     | methodModifiersopt modifier
     ;
 typeDefDeclaration:
-      modifiersopt 'type' identifier typeParametersopt whereClauseopt '=' type ';'
-    | modifiersopt 'type' identifier typeParametersopt '(' formalParameterList ')' whereClauseopt '=' type ';'
+      modifier* 'type' identifier typeParametersopt whereClauseopt '=' type ';'
+    | modifier* 'type' identifier typeParametersopt '(' formalParameterList ')' whereClauseopt '=' type ';'
     ;
 properties:
       '(' propertyList ')'
@@ -98,7 +91,7 @@ explicitConstructorInvocation:
     | primary '.' 'super' typeArgumentsopt '(' argumentListopt ')' ';'
     ;
 interfaceDeclaration:
-      modifiersopt 'interface' identifier typeParamsWithVarianceopt propertiesopt whereClauseopt extendsInterfacesopt interfaceBody
+      modifier* 'interface' identifier typeParamsWithVarianceopt propertiesopt whereClauseopt extendsInterfacesopt interfaceBody
     ;
 classInstanceCreationExpression:
       'new' typeName typeArgumentsopt '(' argumentListopt ')' classBodyopt
@@ -149,7 +142,7 @@ namedType:
     | depNamedType
     ;
 depParameters:
-      '{' fUTURE_ExistentialListopt constraintConjunctionopt '}'
+      '{' /* fUTURE_ExistentialListopt */ constraintConjunctionopt '}'
     ;
 typeParamsWithVariance:
       '[' typeParamWithVarianceList ']'
@@ -161,8 +154,7 @@ formalParameters:
       '(' formalParameterListopt ')'
     ;
 constraintConjunction:
-      expression
-    | constraintConjunction ',' expression
+      expression (',' expression)*
     ;
 hasZeroConstraint:
       type 'haszero'
@@ -180,20 +172,20 @@ whereClause:
 constraintConjunctionopt:
       constraintConjunction?
     ;
-fUTURE_ExistentialListopt:
-      fUTURE_ExistentialList?
-    ;
-fUTURE_ExistentialList:
-      formalParameter (';' formalParameter)*
-    ;
+// fUTURE_ExistentialListopt:
+//       fUTURE_ExistentialList?
+//     ;
+// fUTURE_ExistentialList:
+//       formalParameter (';' formalParameter)*
+//     ;
 classDeclaration:
-      modifiersopt 'class' identifier typeParamsWithVarianceopt propertiesopt whereClauseopt superExtendsopt interfacesopt classBody
+      modifier* 'class' identifier typeParamsWithVarianceopt propertiesopt whereClauseopt superExtendsopt interfacesopt classBody
     ;
 structDeclaration:
-      modifiersopt 'struct' identifier typeParamsWithVarianceopt propertiesopt whereClauseopt interfacesopt classBody
+      modifier* 'struct' identifier typeParamsWithVarianceopt propertiesopt whereClauseopt interfacesopt classBody
     ;
 constructorDeclaration:
-      modifiersopt 'def' 'this' typeParametersopt formalParameters whereClauseopt oBSOLETE_Offersopt throwsopt hasResultTypeopt constructorBody
+      modifier* 'def' 'this' typeParametersopt formalParameters whereClauseopt oBSOLETE_Offersopt throwsopt hasResultTypeopt constructorBody
     ;
 superExtends:
       'extends' classType
@@ -203,8 +195,8 @@ varKeyword:
     | 'var'
     ;
 fieldDeclaration:
-      modifiersopt varKeyword fieldDeclarators ';'
-    | modifiersopt fieldDeclarators ';'
+      modifier* varKeyword fieldDeclarators ';'
+    | modifier* fieldDeclarators ';'
     ;
 statement:
       annotationStatement
@@ -405,7 +397,7 @@ lastExpression:
     ;
 closureBody:
       expression
-    | annotationsopt '{' blockStatementsopt lastExpression '}'
+    | annotationsopt '{' blockStatements? lastExpression '}'
     | annotationsopt block
     ;
 atExpression:
@@ -454,16 +446,12 @@ fullyQualifiedName:
     | fullyQualifiedName '.' identifier
     ;
 compilationUnit:
-      packageDeclarationopt typeDeclarationsopt
-    | packageDeclarationopt importDeclarations typeDeclarationsopt
+      packageDeclarationopt typeDeclaration*
+    | packageDeclarationopt importDeclarations typeDeclaration*
     ;
 importDeclarations:
       importDeclaration
     | importDeclarations importDeclaration
-    ;
-typeDeclarations:
-      typeDeclaration
-    | typeDeclarations typeDeclaration
     ;
 packageDeclaration:
       annotationsopt 'package' packageName ';'
@@ -513,9 +501,6 @@ variableDeclaratorsWithType:
 variableDeclarators:
       variableDeclarator (',' variableDeclarator)*
     ;
-atCaptureDeclarators:
-      atCaptureDeclarator (',' atCaptureDeclarator)*
-    ;
 homeVariableList:
       homeVariable (',' homeVariable)
     ;
@@ -542,12 +527,12 @@ loopIndexDeclarator:
     | identifier '[' identifierList ']' hasResultTypeopt
     ;
 loopIndex:
-      modifiersopt loopIndexDeclarator
-    | modifiersopt varKeyword loopIndexDeclarator
+      modifier* loopIndexDeclarator
+    | modifier* varKeyword loopIndexDeclarator
     ;
 formalParameter:
-      modifiersopt formalDeclarator
-    | modifiersopt varKeyword formalDeclarator
+      modifier* formalDeclarator
+    | modifier* varKeyword formalDeclarator
     | type
     ;
 oBSOLETE_Offers:
@@ -561,7 +546,7 @@ throwsList:
     ;
 methodBody:
       '=' lastExpression ';'
-    | '=' annotationsopt '{' blockStatementsopt lastExpression '}'
+    | '=' annotationsopt '{' blockStatements? lastExpression '}'
     | '=' annotationsopt block
     | annotationsopt block
     | ';'
@@ -574,7 +559,7 @@ constructorBody:
     | ';'
     ;
 constructorBlock:
-      '{' explicitConstructorInvocationopt blockStatementsopt '}'
+      '{' explicitConstructorInvocationopt blockStatements? '}'
     ;
 arguments:
       '(' argumentList ')'
@@ -604,7 +589,7 @@ identifier:
       IDENTIFIER
     ;
 block:
-      '{' blockStatementsopt '}'
+      '{' blockStatements? '}'
     ;
 blockStatements:
       blockInteriorStatement+
@@ -638,18 +623,13 @@ variableDeclaratorWithType:
     | '[' identifierList ']' hasResultType '=' variableInitializer
     | identifier '[' identifierList ']' hasResultType '=' variableInitializer
     ;
-atCaptureDeclarator:
-      modifiersopt varKeywordopt variableDeclarator
-    | identifier
-    | 'this'
-    ;
 localVariableDeclarationStatement:
       localVariableDeclaration ';'
     ;
 localVariableDeclaration:
-      modifiersopt varKeyword variableDeclarators
-    | modifiersopt variableDeclaratorsWithType
-    | modifiersopt varKeyword formalDeclarators
+      modifier* varKeyword variableDeclarators
+    | modifier* variableDeclaratorsWithType
+    | modifier* varKeyword formalDeclarators
     ;
 primary:
       'here'
@@ -702,7 +682,7 @@ BooleanLiteral:
     | 'false'
     ;
 argumentList:
-      expression (',' expression)
+      expression (',' expression)*
     ;
 fieldAccess:
       primary '.' identifier
@@ -852,9 +832,9 @@ binOp:
     | '-<'
     | '>-'
     | '**'
-    | '~ '
+    | '~'
     | '!~'
-    | '! '
+    | '!'
     | '<>'
     | '><'
     ;
@@ -891,9 +871,6 @@ classBodyopt:
 argumentListopt:
       argumentList?
     ;
-blockStatementsopt:
-      blockStatements?
-    ;
 explicitConstructorInvocationopt:
       explicitConstructorInvocation?
     ;
@@ -924,9 +901,6 @@ formalParametersopt:
 annotationsopt:
       annotations?
     ;
-typeDeclarationsopt:
-      typeDeclarations?
-    ;
 importDeclarationsopt:
       importDeclarations?
     ;
@@ -948,6 +922,4 @@ propertiesopt:
 varKeywordopt:
       varKeyword?
     ;
-atCaptureDeclaratorsopt:
-      atCaptureDeclarators?
-    ;
+

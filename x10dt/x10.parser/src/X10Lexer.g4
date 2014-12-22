@@ -4,6 +4,16 @@ lexer grammar X10Lexer;
   package x10.parserGen;
 }
 
+@lexer::members {
+  boolean isDecimal() {
+      int next = _input.LA(1);
+      return  ('0' <= next && next <= '9') ||
+          // next == 'e' || next == 'E' ||
+          next == 'd' || next == 'D' ||
+          next == 'f' || next == 'f';
+  }
+}
+
 ABSTRACT: 'abstract';
 AS: 'as';
 ASSERT: 'assert';
@@ -108,7 +118,9 @@ FloatingTypeSuffix:
       'f' |  'F'
     ;
 DoubleLiteral:
-      Digits '.' Digits? ExponentPart? DoubleTypeSuffix?
+      Digits '.' Digits? ExponentPart DoubleTypeSuffix?
+    | Digits '.' Digits? DoubleTypeSuffix
+    | Digits '.' {isDecimal()}? Digits?
     | '.' Digits ExponentPart? DoubleTypeSuffix?
     | Digits ExponentPart DoubleTypeSuffix?
     | Digits ExponentPart? DoubleTypeSuffix
@@ -119,7 +131,107 @@ DoubleTypeSuffix:
 Digits:
       [0-9]+
     ;
-IntegerLiteral: Digits; // XXX TODO
+fragment IntegerLiteral:
+      DecimalNumeral
+    | HexNumeral
+    | OctalNumeral
+    | BinaryNumeral
+    ;
+fragment
+DecimalNumeral
+    :   '0'
+    |   NonZeroDigit (Digits? | Underscores Digits)
+    ;
+
+fragment
+Digits
+    :   Digit (DigitOrUnderscore* Digit)?
+    ;
+
+fragment
+Digit
+    :   '0'
+    |   NonZeroDigit
+    ;
+
+fragment
+NonZeroDigit
+    :   [1-9]
+    ;
+
+fragment
+DigitOrUnderscore
+    :   Digit
+    |   '_'
+    ;
+
+fragment
+Underscores
+    :   '_'+
+    ;
+
+fragment
+HexNumeral
+    :   '0' [xX] HexDigits
+    ;
+
+fragment
+HexDigits
+    :   HexDigit (HexDigitOrUnderscore* HexDigit)?
+    ;
+
+fragment
+HexDigit
+    :   [0-9a-fA-F]
+    ;
+
+fragment
+HexDigitOrUnderscore
+    :   HexDigit
+    |   '_'
+    ;
+
+fragment
+OctalNumeral
+    :   '0' Underscores? OctalDigits
+    ;
+
+fragment
+OctalDigits
+    :   OctalDigit (OctalDigitOrUnderscore* OctalDigit)?
+    ;
+
+fragment
+OctalDigit
+    :   [0-7]
+    ;
+
+fragment
+OctalDigitOrUnderscore
+    :   OctalDigit
+    |   '_'
+    ;
+
+fragment
+BinaryNumeral
+    :   '0' [bB] BinaryDigits
+    ;
+
+fragment
+BinaryDigits
+    :   BinaryDigit (BinaryDigitOrUnderscore* BinaryDigit)?
+    ;
+
+fragment
+BinaryDigit
+    :   [01]
+    ;
+
+fragment
+BinaryDigitOrUnderscore
+    :   BinaryDigit
+    |   '_'
+    ;
 
 
 CharacterLiteral
