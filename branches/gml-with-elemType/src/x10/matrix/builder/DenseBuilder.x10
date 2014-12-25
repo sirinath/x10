@@ -13,6 +13,8 @@ package x10.matrix.builder;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.util.Debug;
 import x10.matrix.util.RandTool;
 
@@ -56,7 +58,7 @@ public class DenseBuilder(M:Long, N:Long) implements MatrixBuilder {
 		Debug.assure(colOff+srcden.N<=dense.N, "Dense builder cannot using given matrix to initialize. Column overflow");
 		var stt:Long = rowOff;
 		for (var c:Long=colOff; c<colOff+srcden.N; c++, stt+= dense.M)
-			Rail.copy[Double](srcden.d, 0, dense.d, stt, srcden.M);
+			Rail.copy[ElemType](srcden.d, 0, dense.d, stt, srcden.M);
 		return this;
 	}
 	
@@ -65,7 +67,7 @@ public class DenseBuilder(M:Long, N:Long) implements MatrixBuilder {
 	/**
 	 * Initial dense matrix with initial function.
 	 */
-	public def init(initFunc:(Long,Long)=>Double):DenseBuilder(this) {
+	public def init(initFunc:(Long,Long)=>ElemType):DenseBuilder(this) {
 		var idx:Long=0;
 		for (var c:Long=0; c<dense.N; c++ )
 			for (var r:Long=0; r<dense.M; r++, idx++)
@@ -78,7 +80,7 @@ public class DenseBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * @param nzDensity    nonzero sparsity.
 	 * @param initFunc     nonzero value generating function.
 	 */
-	public def initRandom(nzDensity:Double, initFunc:(Long,Long)=>Double):DenseBuilder(this) {
+	public def initRandom(nzDensity:ElemType, initFunc:(Long,Long)=>ElemType):DenseBuilder(this) {
 		val maxdst:Long = ((1.0/nzDensity) as Long) * 2 - 1;
 		var idx:Long= RandTool.nextLong(maxdst/2);
 		for (; idx<dense.M*dense.N; idx+=RandTool.nextLong(maxdst)+1){
@@ -88,8 +90,8 @@ public class DenseBuilder(M:Long, N:Long) implements MatrixBuilder {
 	}
 
 	
-	public def initRandom(nzDensity:Double): DenseBuilder(this) =
-		initRandom(nzDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
+	public def initRandom(nzDensity:ElemType): DenseBuilder(this) =
+		initRandom(nzDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
 	
 	public def initTransposeFrom(src:DenseMatrix(N,M)):DenseBuilder(this) {
 		var src_idx:Long =0;
@@ -105,12 +107,12 @@ public class DenseBuilder(M:Long, N:Long) implements MatrixBuilder {
 		return this;
 	}
 	
-	public def set(r:Long, c:Long, dv:Double) : void {
+	public def set(r:Long, c:Long, dv:ElemType) : void {
 		dense(r, c) = dv;
 	}
 	
 	public def reset(r:Long, c:Long) : Boolean {
-		dense(r, c) =0.0;
+		dense(r, c) =0.0 as ElemType;
 		return true;
 	}
 

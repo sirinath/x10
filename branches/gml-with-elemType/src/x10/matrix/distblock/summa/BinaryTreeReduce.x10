@@ -17,6 +17,8 @@ import x10.compiler.Ifndef;
 import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.block.MatrixBlock;
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.distblock.BlockSet;
@@ -55,7 +57,7 @@ protected class BinaryTreeReduce {
 			select:(Long,Long)=>Long, opFunc:(DenseMatrix,DenseMatrix,Long)=>DenseMatrix,
 			leftPlist:Rail[Long], rightRoot:Long, rightPlist:Rail[Long]) {
 					
-		val rmtbuf:GlobalRail[Double];
+		val rmtbuf:GlobalRail[ElemType];
 		
 		finish {
 			//Left branch reduction
@@ -72,7 +74,7 @@ protected class BinaryTreeReduce {
 					//Only if there are more places to visit than remote pid
 					reduceToHere(distBS, tmpBS, rootbid, rmtblk, datCnt, select, opFunc, rightPlist);
 				}
-				new GlobalRail[Double](rmtblk.getData() as Rail[Double]{self!=null})
+				new GlobalRail[ElemType](rmtblk.getData() as Rail[ElemType]{self!=null})
 			};
 		}
 		
@@ -81,7 +83,7 @@ protected class BinaryTreeReduce {
 		val rcvden = rcvblk.getMatrix() as DenseMatrix;
 		val dstden = dstblk.getMatrix() as DenseMatrix;
 
-		finish Rail.asyncCopy[Double](rmtbuf, 0, rcvden.d, 0, datCnt);
+		finish Rail.asyncCopy[ElemType](rmtbuf, 0, rcvden.d, 0, datCnt);
 		//Debug.flushln("Perform reduction with data from place "+leftRoot);
 		opFunc(rcvden, dstden, datCnt);
 	}

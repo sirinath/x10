@@ -14,6 +14,8 @@ package x10.matrix.builder;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.TriDense;
+import x10.matrix.ElemType;
+
 import x10.matrix.util.Debug;
 import x10.matrix.util.RandTool;
 import x10.matrix.util.MathTool;
@@ -50,38 +52,38 @@ public class TriDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 	/**
 	 * Initial triangular dense matrix with initial function.
 	 */
-	public def initUpper(initFunc:(Long,Long)=>Double):TriDenseBuilder(this) {
-		var i:Long =0;
-		for (var c:Long=0; c<this.N; c++) {
-			var r:Long=0;
-			for (; r<=c; r++, i++ )   dense.d(i) = initFunc(r, c);
-			for (;r<this.M; r++, i++) dense.d(i) = 0.0;
-		}
-		return this;
+	public def initUpper(initFunc:(Long,Long)=>ElemType):TriDenseBuilder(this) {
+	    var i:Long =0;
+	    for (var c:Long=0; c<this.N; c++) {
+		var r:Long=0;
+		for (; r<=c; r++, i++ )   dense.d(i) = initFunc(r, c);
+		for (;r<this.M; r++, i++) dense.d(i) = (0.0 as ElemType);
+	    }
+	    return this;
 	}
 		
-	public def initLower(initFunc:(Long,Long)=>Double):TriDenseBuilder(this) {
-		var i:Long =0;
-		for (var c:Long=0; c<this.N; c++ ) {
-			var r:Long=0;
-			for (; r<c; r++, i++ )    dense.d(i) = 0.0;
-			for (;r<this.M; r++, i++) dense.d(i) = initFunc(r, c);
-		}
-		return this;
+	public def initLower(initFunc:(Long,Long)=>ElemType):TriDenseBuilder(this) {
+	    var i:Long =0;
+	    for (var c:Long=0; c<this.N; c++ ) {
+		var r:Long=0;
+		for (; r<c; r++, i++ )    dense.d(i) = (0.0 as ElemType);
+		for (;r<this.M; r++, i++) dense.d(i) = initFunc(r, c);
+	    }
+	    return this;
 	}
 		
-	public def init(initFunc:(Long,Long)=>Double):TriDenseBuilder(this) =
-		upper?initUpper(initFunc):initLower(initFunc);
+	public def init(initFunc:(Long,Long)=>ElemType):TriDenseBuilder(this) =
+	    upper?initUpper(initFunc):initLower(initFunc);
 
-    // replicated from superclass to workaround xlC bug with using & itables
+	// replicated from superclass to workaround xlC bug with using & itables
 	public def init(srcden:DenseMatrix) = init(0, 0, srcden);
 	public def init(rowOff:Long, colOff:Long, srcden:DenseMatrix) : DenseBuilder(this) {
-		Debug.assure(rowOff+srcden.M<=dense.M, "Dense builder cannot using given matrix to initialize. Row overflow");
-		Debug.assure(colOff+srcden.N<=dense.N, "Dense builder cannot using given matrix to initialize. Column overflow");
-		var stt:Long = rowOff;
-		for (var c:Long=colOff; c<colOff+srcden.N; c++, stt+= dense.M)
-			Rail.copy[Double](srcden.d, 0, dense.d, stt, srcden.M);
-		return this;
+	    Debug.assure(rowOff+srcden.M<=dense.M, "Dense builder cannot using given matrix to initialize. Row overflow");
+	    Debug.assure(colOff+srcden.N<=dense.N, "Dense builder cannot using given matrix to initialize. Column overflow");
+	    var stt:Long = rowOff;
+	    for (var c:Long=colOff; c<colOff+srcden.N; c++, stt+= dense.M)
+		Rail.copy[ElemType](srcden.d, 0, dense.d, stt, srcden.M);
+	    return this;
 	}
 
 	
@@ -90,7 +92,7 @@ public class TriDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 	 * @param nzDensity    nonzero sparsity.
 	 * @param initFunc     nonzero value generating function.
 	 */
-	public def initUpperRandom(nzDensity:Double, initFunc:(Long,Long)=>Double):TriDenseBuilder(this) {
+	public def initUpperRandom(nzDensity:ElemType, initFunc:(Long,Long)=>ElemType):TriDenseBuilder(this) {
 		val maxdst:Long = ((1.0/nzDensity) as Int) * 2 - 1;
 		var i:Long= RandTool.nextLong(maxdst/2);
 		var stt:Long=0;
@@ -102,7 +104,7 @@ public class TriDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 		return this;
 	}
 
-	public def initLowerRandom(nzDensity:Double, initFunc:(Long,Long)=>Double):TriDenseBuilder(this) {
+	public def initLowerRandom(nzDensity:ElemType, initFunc:(Long,Long)=>ElemType):TriDenseBuilder(this) {
 		val maxdst:Long = ((1.0/nzDensity) as Int) * 2 - 1;
 		var i:Long= RandTool.nextLong(maxdst/2);
 		var stt:Long=0;
@@ -114,14 +116,14 @@ public class TriDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 		return this;
 	}
 	
-	public def initRandom(nzDensity:Double, initFunc:(Long,Long)=>Double):TriDenseBuilder(this) =
+	public def initRandom(nzDensity:ElemType, initFunc:(Long,Long)=>ElemType):TriDenseBuilder(this) =
 		upper?initUpperRandom(nzDensity, initFunc):initLowerRandom(nzDensity, initFunc);
 
-	public def initRandom(nzDensity:Double): DenseBuilder(this) =
-		initRandom(nzDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
+	public def initRandom(nzDensity:ElemType): DenseBuilder(this) =
+		initRandom(nzDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
 	
 
-	public def set(r:Long, c:Long, dv:Double) : void {
+	public def set(r:Long, c:Long, dv:ElemType) : void {
 		if ((upper && r<=c)||(upper==false && r>=c))
 			dense(r, c) = dv;
 		else {
@@ -130,25 +132,25 @@ public class TriDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 	}
 	
 	public def reset(r:Long, c:Long) : Boolean {
-		dense(r, c) =0.0;
-		return true;
+	    dense(r, c) =(0.0 as ElemType);
+	    return true;
 	}
 
 	/**
 	 * copy from upper or lower triangular and its mirror part.
 	 */
 	public def initFrom(src:DenseMatrix) {
-		if (upper)
-			copyUpper(src, this.dense as DenseMatrix(src.N));
-		else
-			copyLower(src, this.dense as DenseMatrix(src.M));
+	    if (upper)
+		copyUpper(src, this.dense as DenseMatrix(src.N));
+	    else
+		copyLower(src, this.dense as DenseMatrix(src.M));
 	}
 	
 	public static def copyUpper(src:DenseMatrix, dst:DenseMatrix(src.N)) {
 		var srcoff:Long=0;
 		var dstoff:Long=0;
 		for (var len:Long=1; len<=src.N; len++, srcoff+=src.M, dstoff+=dst.M) {
-			Rail.copy[Double](src.d, srcoff, dst.d, dstoff, len);
+			Rail.copy[ElemType](src.d, srcoff, dst.d, dstoff, len);
 		}
 	}
 	
@@ -156,7 +158,7 @@ public class TriDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 		var srcoff:Long=0;
 		var dstoff:Long=0;
 		for (var len:Long=src.M; len>0; len--, srcoff+=src.M+1, dstoff+=dst.M+1) {
-			Rail.copy[Double](src.d, srcoff, dst.d, dstoff, len);
+			Rail.copy[ElemType](src.d, srcoff, dst.d, dstoff, len);
 		}		
 	}
 	

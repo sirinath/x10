@@ -14,6 +14,8 @@ package x10.matrix.builder.distblock;
 import x10.regionarray.Dist;
 
 import x10.matrix.Matrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.util.RandTool;
 
 import x10.matrix.block.Grid;
@@ -73,14 +75,14 @@ public class DistMatrixBuilder(M:Long,N:Long) implements MatrixBuilder {
         return this;
     }
     
-    public def allocAllSparseBlocks(nzd:Double): DistMatrixBuilder(this) {
+    public def allocAllSparseBlocks(nzd:ElemType): DistMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             dmat.handleBS().allocSparseBlocks(nzd);
         }
         return this;
     }
 
-    public def init(initFun:(Long,Long)=>Double) : DistMatrixBuilder(this) {
+    public def init(initFun:(Long,Long)=>ElemType) : DistMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             val itr = dmat.handleBS().iterator();
             while (itr.hasNext()) {
@@ -90,17 +92,17 @@ public class DistMatrixBuilder(M:Long,N:Long) implements MatrixBuilder {
         return this;
     }
         
-    public def initRandom(nonZeroDensity:Double):DistMatrixBuilder(this) {
+    public def initRandom(nonZeroDensity:ElemType):DistMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             val itr = dmat.handleBS().iterator();
             while (itr.hasNext()) {
-                itr.next().initRandom(nonZeroDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
+                itr.next().initRandom(nonZeroDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
             }
         }
         return this;
     }
     
-    public def initRandom(nzDensity:Double, initFun:(Long,Long)=>Double) : DistMatrixBuilder(this) {
+    public def initRandom(nzDensity:ElemType, initFun:(Long,Long)=>ElemType) : DistMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             val itr = dmat.handleBS().iterator();
             while (itr.hasNext()) {
@@ -120,7 +122,7 @@ public class DistMatrixBuilder(M:Long,N:Long) implements MatrixBuilder {
         return this;
     }
 
-    public def set(r:Long, c:Long, value:Double): void{
+    public def set(r:Long, c:Long, value:ElemType): void{
         val grid = dmat.handleBS().getGrid();
         val loc = grid.find(r, c);
         val bid = grid.getBlockId(loc(0), loc(1));

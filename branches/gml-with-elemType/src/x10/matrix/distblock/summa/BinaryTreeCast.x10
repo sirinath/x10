@@ -15,6 +15,8 @@ import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.block.MatrixBlock;
 import x10.matrix.comm.mpi.WrapMPI;
@@ -82,14 +84,14 @@ protected class BinaryTreeCast  {
 			plist:Rail[Long]) {
 			
 		val srcden = srcblk.getMatrix() as DenseMatrix;
-		val srcbuf = new GlobalRail[Double](srcden.d as Rail[Double]{self!=null});
+		val srcbuf = new GlobalRail[ElemType](srcden.d as Rail[ElemType]{self!=null});
 		at(Place(rmtpid)) {
 			//Remote capture:distBS, rootbid, datCnt, rtplist
 			val blk  = distBS().findFrontBlock(rootbid, select);
 			val dstden = blk.getMatrix() as DenseMatrix;
 			// Using copyFrom style
 			if (datCnt > 0) {
-				finish Rail.asyncCopy[Double](srcbuf, 0, dstden.d, 0, datCnt);
+				finish Rail.asyncCopy[ElemType](srcbuf, 0, dstden.d, 0, datCnt);
 			}
 			// Perform binary bcast on the right branch
 			if (plist.size > 0) {
@@ -105,7 +107,7 @@ protected class BinaryTreeCast  {
 		
 		val srcspa = srcblk.getMatrix() as SparseCSC;
 		val srcidx = new GlobalRail[Long](srcspa.getIndex() as Rail[Long]{self!=null});
-		val srcval = new GlobalRail[Double](srcspa.getValue() as Rail[Double]{self!=null});
+		val srcval = new GlobalRail[ElemType](srcspa.getValue() as Rail[ElemType]{self!=null});
 		
 		at(Place(rmtpid)) {
 			//Remote capture:distBS, rootbid, datCnt, rtplist
@@ -115,7 +117,7 @@ protected class BinaryTreeCast  {
 			dstspa.initRemoteCopyAtDest(datCnt);
 			if (datCnt > 0) {
 				finish Rail.asyncCopy[Long  ](srcidx, 0L, dstspa.getIndex(), 0L, datCnt);
-				finish Rail.asyncCopy[Double](srcval, 0L, dstspa.getValue(), 0L, datCnt);
+				finish Rail.asyncCopy[ElemType](srcval, 0L, dstspa.getValue(), 0L, datCnt);
 			}
 			// Perform binary bcast on the right branch
 			if (plist.size > 0) {

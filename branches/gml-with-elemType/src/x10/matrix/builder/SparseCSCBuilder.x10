@@ -17,6 +17,8 @@ import x10.util.ArrayList;
 
 import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.util.MathTool;
 import x10.matrix.util.RandTool;
 import x10.matrix.sparse.SparseCSC;
@@ -30,8 +32,8 @@ public type SparseCSCBuilder(m:Long)=SparseCSCBuilder{self.M==self.N,self.M==m};
  */
 public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	
-	public static struct NonZeroEntry(row:Long, value:Double) {
-		def this(r:Long, v:Double) { 
+	public static struct NonZeroEntry(row:Long, value:ElemType) {
+		def this(r:Long, v:ElemType) { 
 			property(r, v);
 		}
 		@Inline
@@ -45,7 +47,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 		
 	}
 	
-	static val zeroEntry = NonZeroEntry(0, 0.0);
+	static val zeroEntry = NonZeroEntry(0, 0.0 as ElemType);
 	
 	public var nzcount:Long=0;
 	public val nzcol:Rail[ArrayList[NonZeroEntry]];
@@ -121,7 +123,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * Initialize data of sparse matrix builder with matrix generating function.
 	 * @param initFunc       data value generating function.
 	 */
-	public def init(initFunc:(Long,Long)=>Double) : SparseCSCBuilder(this) {
+	public def init(initFunc:(Long,Long)=>ElemType) : SparseCSCBuilder(this) {
 		for (var c:Long=0; c<N; c++)
 			for (var r:Long=0; r<M; r++) {
 				val v = initFunc(r,c);
@@ -138,7 +140,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * @param nzd            nonzero sparsity
 	 * @param initFunc       data value generating function.
 	 */
-	public def initRandom(nzd:Double, initFunc:(Long,Long)=>Double) : SparseCSCBuilder(this) {
+	public def initRandom(nzd:ElemType, initFunc:(Long,Long)=>ElemType) : SparseCSCBuilder(this) {
 		val rgen = RandTool.getRandGen();
 		val maxdst:Long = ((1.0/nzd) as Int) * 2 - 1;
 		var r:Long = rgen.nextLong(maxdst/2);
@@ -160,13 +162,13 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	/**
 	 * Initial with random value in specified sparsity.
 	 */
-	public def initRandom(nzd:Double) : SparseCSCBuilder(this) =
-		initRandom(nzd, (r:Long,c:Long)=>RandTool.getRandGen().nextDouble());
+	public def initRandom(nzd:ElemType) : SparseCSCBuilder(this) =
+		initRandom(nzd, (r:Long,c:Long)=>RandTool.nextElemType[ElemType]());
 
 	/**
 	 * Generate half triangular matrix.
 	 */
-	// public def initRandomTri(halfNZD:Double, up:Boolean) : SparseCSCBuilder(this) {
+	// public def initRandomTri(halfNZD:ElemType, up:Boolean) : SparseCSCBuilder(this) {
 	// 	val rgen = RandTool.getRandGen();
 	// 	val maxdst:Int = ((1.0/halfNZD) as Int) * 2 - 1;
 	// 	var r:Long = rgen.nextLong(maxdst/2);
@@ -176,7 +178,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	// 		while (true) {
 	// 			val dia = (c < M)?c:M;
 	// 			if (r <= dia ){
-	// 				append(r, c, rgen.nextDouble());
+	// 				append(r, c, rgen.nextElemType());
 	// 				r+= rgen.nextLong(maxdst) + 1;
 	// 			} else {
 	// 				c++;
@@ -187,7 +189,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	// 	} else {
 	// 		while (true) {
 	// 			if (r < M ){
-	// 				append(r, c, rgen.nextDouble());
+	// 				append(r, c, rgen.nextElemType());
 	// 				r+= rgen.nextLong(maxdst) + 1;
 	// 			} else {
 	// 				c++;
@@ -199,7 +201,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	// 	return this;
 	// }
 	
-	// public def initRandomSym(halfNZD:Double) : SparseCSCBuilder(this) {
+	// public def initRandomSym(halfNZD:ElemType) : SparseCSCBuilder(this) {
 	// 	Debug.assure(M==N, "Not symmetric matrix");
 	// 	val rgen = RandTool.getRandGen();
 	// 	val maxdst:Int = ((1.0/halfNZD) as Int) * 2 - 1;
@@ -207,7 +209,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	// 	var c:Long = 0;
 	// 	while (true) {
 	// 		if (r < M ){
-	// 			val v = rgen.nextDouble();
+	// 			val v = rgen.nextElemType();
 	// 			append(r, c, v);
 	// 			if (r != c) 
 	// 				append(c, r, v);
@@ -228,7 +230,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * Add new nonzero entry at the ordered nonzero list of the specified column
 	 */
 	@Inline
-	public def insert(r:Long, c:Long, v:Double):Boolean {
+	public def insert(r:Long, c:Long, v:ElemType):Boolean {
 		val nz = NonZeroEntry(r, v);
 		
 		val idx = find(r, c);
@@ -248,7 +250,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * Append nonzero at the end of nonzero list of the specified column. 
 	 */
 	@Inline
-	public def append(r:Long, c:Long, v:Double) {
+	public def append(r:Long, c:Long, v:ElemType) {
 		if (MathTool.isZero(v)) return;
 		val nz = NonZeroEntry(r, v);
 		nzcol(c).add(nz);
@@ -259,7 +261,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * Return the value at given row and column; If not found in nonzero list, 0 is returned.
 	 */
 	@Inline
-	public def get(r:Long, c:Long) : Double {
+	public def get(r:Long, c:Long) : ElemType {
 		val foundnz = findEntry(r, c);
 		return foundnz.value;
 	}
@@ -269,7 +271,7 @@ public class SparseCSCBuilder(M:Long, N:Long) implements MatrixBuilder {
 	 * new nonzero entry at the end of nonzero list;
 	 */
 	@Inline
-	public def set(r:Long, c:Long, v:Double):void {
+	public def set(r:Long, c:Long, v:ElemType):void {
 		insert(r, c, v);
 	}
 	

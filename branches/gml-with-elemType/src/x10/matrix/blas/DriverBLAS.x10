@@ -14,7 +14,7 @@ package x10.matrix.blas;
 import x10.compiler.Native;
 import x10.compiler.NativeCPPInclude;
 import x10.compiler.NativeCPPCompilationUnit;
-   
+import x10.matrix.ElemType;   
 
 /**
  * This class provides a wrapper around the BLAS routines via native calls.
@@ -27,6 +27,9 @@ import x10.compiler.NativeCPPCompilationUnit;
  * Managed X10 when inlining Java methods from WrapBLAS.java in packages other
  * than x10.matrix.blas, which causes the compiler to complain that WrapBLAS
  * cannot be found.
+
+ * vjTODO: Need to check the native code and make it conform to ElemType rather than
+ * building in Double.
  */
 @NativeCPPInclude("wrap_blas.h")
 @NativeCPPCompilationUnit("wrap_blas.cc")
@@ -39,13 +42,14 @@ protected class DriverBLAS {
      * @param N        number of elements to operate on
      * @param alpha    scalar
      * @param x        data array
+     * vjTODO -- native code needs to be fixed for ElemType
      */
     @Native("java", "WrapBLAS.scale(#1, #2, (#3).getDoubleArray())")
     @Native("c++","scale(#1, #2, (#3)->raw)")
     public static native def scale(
             N:Long, 
-            alpha:Double, 
-            x:Rail[Double]):void;
+            alpha:ElemType, 
+            x:Rail[ElemType]):void;
 
     /**
      * Copy N contiguous elements from X to Y.
@@ -53,13 +57,14 @@ protected class DriverBLAS {
      * @param N        number of data to copy
      * @param X        source array
      * @param Y        destination array
+     * vjTODO -- native code needs to be fixed for ElemType
      */
     @Native("java", "WrapBLAS.copy(#1, (#2).getDoubleArray(), (#3).getDoubleArray())")
     @Native("c++", "copy(#1, (#2)->raw, (#3)->raw)")
     public static native def copy(
             N:Long, 
-            X:Rail[Double], 
-            Y:Rail[Double]):void;
+            X:Rail[ElemType], 
+            Y:Rail[ElemType]):void;
 
     /**
      * Return dot product of vectors X and Y. 
@@ -73,8 +78,8 @@ protected class DriverBLAS {
     @Native("c++","dot_prod(#1,(#2)->raw,(#3)->raw)")
     public static native def dot_prod(
             n:Long, 
-            X:Rail[Double],
-            Y:Rail[Double]):Double;    
+            X:Rail[ElemType],
+            Y:Rail[ElemType]):ElemType;    
 
     /**
      * Perform Euclidean norm. Incremental step is 1.
@@ -87,7 +92,7 @@ protected class DriverBLAS {
     @Native("c++","norm2(#1,(#2)->raw)")
     public static native def norm(
             n:Long, 
-            X:Rail[Double]):Double;
+            X:Rail[ElemType]):ElemType;
 
     /**
      * Sum of absolute values of array X for n number of data.
@@ -99,7 +104,7 @@ protected class DriverBLAS {
     @Native("c++","abs_sum(#1,(#2)->raw)")
     public static native def abs_sum(
             n:Long, 
-            X:Rail[Double]):Double;
+            X:Rail[ElemType]):ElemType;
 
     // Level Three
 
@@ -120,9 +125,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.matmatMultOff((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4),(#5).getDoubleArray(),(#6).getLongArray(),(#7).getLongArray(),(#8).getLongArray(),(#9).getIntArray())")
     @Native("c++","matrix_matrix_mult((#1),(#2)->raw,(#3)->raw,(#4),(#5)->raw,(#6)->raw,(#7)->raw,(#8)->raw,(#9)->raw)")
     public static native def matrix_matrix_mult(
-            alpha:Double, mA:Rail[Double], 
-                          mB:Rail[Double],
-            beta:Double,  mC:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+                          mB:Rail[ElemType],
+            beta:ElemType,  mC:Rail[ElemType],
             dim:Rail[Long], 
             ld:Rail[Long], 
             offset:Rail[Long],
@@ -144,9 +149,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.matmatMult((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4),(#5).getDoubleArray(),(#6).getLongArray(),(#7).getLongArray(),(#8).getIntArray())")
     @Native("c++","matrix_matrix_mult((#1),(#2)->raw,(#3)->raw,(#4),(#5)->raw,(#6)->raw,(#7)->raw,(#8)->raw)")
     public static native def matrix_matrix_mult(
-            alpha:Double, mA:Rail[Double], 
-                          mB:Rail[Double],
-            beta:Double,  mC:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+                          mB:Rail[ElemType],
+            beta:ElemType,  mC:Rail[ElemType],
             dim:Rail[Long], 
             ld:Rail[Long], 
             trans:Rail[Int]):void;
@@ -167,8 +172,8 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.symRankKUpdateOff((#1),(#2).getDoubleArray(),(#3),(#4).getDoubleArray(),(#5).getLongArray(),(#6).getLongArray(),(#7).getLongArray(),(#8),(#9))")
     @Native("c++","sym_rank_k_update((#1),(#2)->raw,(#3),(#4)->raw,(#5)->raw,(#6)->raw,(#7)->raw,(#8),(#9))")
     public static native def sym_rank_k_update(
-            alpha:Double, mA:Rail[Double], 
-            beta:Double,  mC:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+            beta:ElemType,  mC:Rail[ElemType],
             dim:Rail[Long],
             ld:Rail[Long],
             offset:Rail[Long],
@@ -191,8 +196,8 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.symRankKUpdate((#1),(#2).getDoubleArray(),(#3),(#4).getDoubleArray(),(#5).getLongArray(),(#6),(#7))")
     @Native("c++","sym_rank_k_update((#1),(#2)->raw,(#3),(#4)->raw,(#5)->raw,(#6),(#7))")
     public static native def sym_rank_k_update(
-            alpha:Double, mA:Rail[Double], 
-            beta:Double,  mC:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+            beta:ElemType,  mC:Rail[ElemType],
             dim:Rail[Long], 
             upper:Boolean,
             trans:Boolean
@@ -213,9 +218,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.symmatMult((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4),(#5).getDoubleArray(),(#6).getLongArray())")
     @Native("c++","sym_matrix_mult((#1),(#2)->raw,(#3)->raw,(#4),(#5)->raw,(#6)->raw)")
     public static native def sym_matrix_mult(
-            alpha:Double, mA:Rail[Double], 
-                          mB:Rail[Double], 
-            beta:Double,  mC:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+                          mB:Rail[ElemType], 
+            beta:ElemType,  mC:Rail[ElemType],
             dim:Rail[Long]):void;
 
     /**
@@ -225,9 +230,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.matsymMult((#1).getDoubleArray(),(#2),(#3).getDoubleArray(),(#4),(#5).getDoubleArray(),(#6).getLongArray())")
     @Native("c++","matrix_sym_mult((#1)->raw,(#2),(#3)->raw,(#4),(#5)->raw,(#6)->raw)")
     public static native def matrix_sym_mult(
-                          mB:Rail[Double], 
-            alpha:Double, mA:Rail[Double], 
-            beta:Double,  mC:Rail[Double],
+                          mB:Rail[ElemType], 
+            alpha:ElemType, mA:Rail[ElemType], 
+            beta:ElemType,  mC:Rail[ElemType],
             dim:Rail[Long]):void;
 
     /**
@@ -241,23 +246,23 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.trimatMult((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getLongArray(),#4)")
     @Native("c++","tri_matrix_mult((#1)->raw,(#2)->raw,(#3)->raw,#4)")
     public static native def tri_matrix_mult(
-            mA:Rail[Double], 
-            mB:Rail[Double], 
+            mA:Rail[ElemType], 
+            mB:Rail[ElemType], 
             dim:Rail[Long], 
             tranA:Int):void;
 
     /**
      * Compute mB =  mA &#42 op( mB ), mB is non-unit triangular matrix.
      *
-     * @param mA     Double precision array storing matrix mA and output matrix.
-     * @param mB     Double precision array storing triangular matrix mB.
+     * @param mA     ElemType precision array storing matrix mA and output matrix.
+     * @param mB     ElemType precision array storing triangular matrix mB.
      * @param dim    dimension array [M, N], which are rows of mB and columns of mB. 
      * @param tranB  transpose option for matrix mB
      */
     @Native("java","WrapBLAS.mattriMult((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getLongArray(),#4)")
     @Native("c++","matrix_tri_mult((#1)->raw,(#2)->raw,(#3)->raw,#4)")
-    public static native def matrix_tri_mult(mA:Rail[Double], 
-                                             mB:Rail[Double],
+    public static native def matrix_tri_mult(mA:Rail[ElemType], 
+                                             mB:Rail[ElemType],
                                              dim:Rail[Long], 
                                              tranB:Int):void;
 
@@ -281,9 +286,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.matvecMultOff((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4),(#5).getDoubleArray(),(#6).getLongArray(),#7,(#8).getLongArray(),#9)")
     @Native("c++","matrix_vector_mult((#1),(#2)->raw,(#3)->raw,(#4),(#5)->raw,(#6)->raw,#7,(#8)->raw,#9)")
     public static native def matrix_vector_mult(
-            alpha:Double, mA:Rail[Double], 
-                          x:Rail[Double], 
-            beta:Double,  y:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+                          x:Rail[ElemType], 
+            beta:ElemType,  y:Rail[ElemType],
             dim:Rail[Long], 
             lda:Long, 
             offset:Rail[Long],
@@ -304,9 +309,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.matvecMult((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4),(#5).getDoubleArray(),(#6).getLongArray(),#7)")
     @Native("c++","matrix_vector_mult((#1),(#2)->raw,(#3)->raw,(#4),(#5)->raw,(#6)->raw,#7)")
     public static native def matrix_vector_mult(
-            alpha:Double, mA:Rail[Double], 
-                          x:Rail[Double], 
-            beta:Double,  y:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+                          x:Rail[ElemType], 
+            beta:ElemType,  y:Rail[ElemType],
             dim:Rail[Long], 
             transA:Int):void;
 
@@ -325,9 +330,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.symvecMult(#1,(#2).getDoubleArray(),(#3).getDoubleArray(),#4,(#5).getDoubleArray(),(#6).getLongArray())")
     @Native("c++","sym_vector_mult(#1,(#2)->raw,(#3)->raw,#4,(#5)->raw,(#6)->raw)")
     public static native def sym_vector_mult(
-            alpha:Double, mA:Rail[Double], 
-                          x:Rail[Double], 
-            beta:Double,  y:Rail[Double],
+            alpha:ElemType, mA:Rail[ElemType], 
+                          x:Rail[ElemType], 
+            beta:ElemType,  y:Rail[ElemType],
             dim:Rail[Long]):void;
 
     /**
@@ -341,9 +346,9 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.trivecMult((#1).getDoubleArray(),#2,(#3).getDoubleArray(),#4,#5)")
     @Native("c++","tri_vector_mult((#1)->raw,#2,(#3)->raw,#4,#5)")
     public static native def tri_vector_mult(
-            mA:Rail[Double], 
+            mA:Rail[ElemType], 
             uplo:Int,
-            bx:Rail[Double], 
+            bx:Rail[ElemType], 
             lda:Long, tA:Int):void;
 
 
@@ -364,10 +369,10 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.rankOneUpdate((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4).getDoubleArray(),(#5).getLongArray(),(#6).getLongArray(),(#7).getLongArray(),#8)")
     @Native("c++","rank_one_update((#1),(#2)->raw,(#3)->raw,(#4)->raw,(#5)->raw,(#6)->raw,(#7)->raw,#8)")
     public static native def rank_one_update(
-            alpha:Double,
-            x:Rail[Double],
-            y:Rail[Double],
-            mA:Rail[Double],
+            alpha:ElemType,
+            x:Rail[ElemType],
+            y:Rail[ElemType],
+            mA:Rail[ElemType],
             dim:Rail[Long],
             offset:Rail[Long],
             inc:Rail[Long],
@@ -382,11 +387,11 @@ protected class DriverBLAS {
      * @param dim    leading dimension and order of mA 
      * @param transA transpose option for mA 
      */    
-    @Native("java","WrapBLAS.trivecSolve((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getLongArray(),#4)")
+    @Native("java","WrapBLAS.trivecSolve((#1).getElemTypeArray(),(#2).getDoubleArray(),(#3).getLongArray(),#4)")
     @Native("c++","tri_vector_solve((#1)->raw,(#2)->raw,(#3)->raw,#4)")
     public static native def tri_vector_solve(
-            mA:Rail[Double], 
-            bx:Rail[Double], 
+            mA:Rail[ElemType], 
+            bx:Rail[ElemType], 
             dim:Rail[Long], transA:Int):void;
 
     /**
@@ -400,8 +405,8 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.trimatSolve((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getLongArray(),#4)")
     @Native("c++","tri_matrix_solve((#1)->raw,(#2)->raw,(#3)->raw,#4)")
     public static native def tri_matrix_solve(
-            mA:Rail[Double], 
-            BX:Rail[Double], 
+            mA:Rail[ElemType], 
+            BX:Rail[ElemType], 
             dim:Rail[Long], transA:Int):void;
 
     /**
@@ -415,8 +420,8 @@ protected class DriverBLAS {
     @Native("java","WrapBLAS.mattriSolve((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getLongArray(),#4)")
     @Native("c++","matrix_tri_solve((#1)->raw,(#2)->raw,(#3)->raw,#4)")
     public static native def matrix_tri_solve(
-            BX:Rail[Double], 
-            mA:Rail[Double], 
+            BX:Rail[ElemType], 
+            mA:Rail[ElemType], 
             dim:Rail[Long], transA:Int):void;
 
 }

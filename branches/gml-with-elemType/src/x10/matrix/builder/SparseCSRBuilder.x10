@@ -1,3 +1,4 @@
+
 /*
  *  This file is part of the X10 project (http://x10-lang.org).
  *
@@ -16,8 +17,11 @@ import x10.util.StringBuilder;
 import x10.util.ArrayList;
 
 import x10.matrix.Matrix;
-import x10.matrix.util.MathTool;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
+import x10.matrix.util.MathTool;
+
 import x10.matrix.sparse.CompressArray;
 import x10.matrix.sparse.Compress2D;
 import x10.matrix.sparse.SparseCSC;
@@ -28,9 +32,9 @@ import x10.matrix.sparse.SparseCSR;
  */
 public class SparseCSRBuilder {
 	
-	static struct NonZeroEntry(col:Long, value:Double) {
+	static struct NonZeroEntry(col:Long, value:ElemType) {
 
-		def this(c:Long, v:Double) { 
+		def this(c:Long, v:ElemType) { 
 			property(c, v);
 		}
 		@Inline
@@ -42,7 +46,7 @@ public class SparseCSRBuilder {
 		
 	}
 	
-	static val zeroEntry = NonZeroEntry(0, 0.0);
+	static val zeroEntry = NonZeroEntry(0, 0.0 as ElemType);
 	
 	var nzcount:Long=0;
 	val nzrow:Rail[ArrayList[NonZeroEntry]];
@@ -102,7 +106,7 @@ public class SparseCSRBuilder {
 	/*
 	 * Add new nonzero entry at the ordered nonzero list of the specified column
 	 */
-	public def add(r:Long, c:Long, v:Double) {
+	public def add(r:Long, c:Long, v:ElemType) {
 		val nz = NonZeroEntry(c, v);
 		val idx = findIndex(r, c);
 		if (idx < 0)
@@ -115,7 +119,7 @@ public class SparseCSRBuilder {
 	/*
 	 * Append nonzero at the end of nonzero list of the specified column. 
 	 */
-	public def append(r:Long, c:Long, v:Double) {
+	public def append(r:Long, c:Long, v:ElemType) {
 		val nz = NonZeroEntry(c, v);
 		nzrow(r).add(nz);
 		nzcount ++;
@@ -124,7 +128,7 @@ public class SparseCSRBuilder {
 	/*
 	 * Return the value at given row and column; If not found in nonzero list, 0 is returned.
 	 */
-	public def get(r:Long, c:Long) : Double {
+	public def get(r:Long, c:Long) : ElemType {
 		val foundnz = find(r, c);
 		return foundnz.value;
 	}
@@ -133,7 +137,7 @@ public class SparseCSRBuilder {
 	 * Set the entry of given row and column to value, if it is found. Otherwise append
 	 * new nonzero entry at the end of nonzero list;
 	 */
-	public def set(r:Long, c:Long, v:Double) : Boolean {
+	public def set(r:Long, c:Long, v:ElemType) : Boolean {
 		val idx = findIndex(r, c);
 		if (idx < 0) {
 			add(r, c, v);

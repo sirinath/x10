@@ -13,6 +13,7 @@ package x10.matrix.sparse;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
 
 /**
  * Implementation of subtraction operations on sparse matrices and dense matrices.

@@ -16,6 +16,7 @@ import x10.util.Pair;
 import x10.matrix.Matrix;
 import x10.matrix.util.MathTool;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
 
 public type SparseCSR(M:Long)=SparseCSR{self.M==M};
 public type SparseCSR(M:Long,N:Long)=SparseCSR{self.M==M, self.N==N};
@@ -32,8 +33,8 @@ public class SparseCSR extends Matrix {
 	public val crdata:Compress2D;
 
 	// This temporary memory space is used for type conversion
-	private var tmprow:Rail[Double];
-	private var tmpcol:Rail[Double];
+	private var tmprow:Rail[ElemType];
+	private var tmpcol:Rail[ElemType];
 
 	// Used for serialization index value, reset or build 
 	private var copyRowOff:Long;
@@ -51,8 +52,8 @@ public class SparseCSR extends Matrix {
 		super(m, n);
 		crdata = cd;
 		assert cd.size() == m;
-		tmpcol = new Rail[Double](0);
-		tmprow = new Rail[Double](0);
+		tmpcol = new Rail[ElemType](0);
+		tmprow = new Rail[ElemType](0);
 	}
 
 	/**
@@ -67,8 +68,8 @@ public class SparseCSR extends Matrix {
 		crdata = Compress2D.make(m, ca);
 		//sparsity = 1.0*countNonZero() /m/n;
 
-		tmprow = new Rail[Double](0);
-		tmpcol = new Rail[Double](0);
+		tmprow = new Rail[ElemType](0);
+		tmpcol = new Rail[ElemType](0);
 	}
 
 	/**
@@ -85,7 +86,7 @@ public class SparseCSR extends Matrix {
 	 * Create a SparseCSR instance with specified dimension and storage
 	 * for specified sparsity.
 	 */	
-	public static def make(m:Long, n:Long, nzd:Double) {
+	public static def make(m:Long, n:Long, nzd:ElemType) {
 		val cnt = SparseCSC.compAllocSize(m, n, nzd);
 	    return SparseCSR.make(m, n, cnt);
 	}
@@ -107,7 +108,7 @@ public class SparseCSR extends Matrix {
 	public static def make(m:Long, n:Long,	
 						   ia:Rail[Long]{self!=null},
 						   ja:Rail[Long]{self!=null},
-						   av:Rail[Double]{self!=null,av.size==ja.size}
+						   av:Rail[ElemType]{self!=null,av.size==ja.size}
 						   ):SparseCSR(m,n){
 		val crd = Compress2D.make(ia, ja, av);
 		return new SparseCSR(m, n, crd);
@@ -118,59 +119,59 @@ public class SparseCSR extends Matrix {
 	 *
 	 * @param v      Initial value for all elements
 	 * @param sp     Nonzero sparsity
-	 * @see SparseCSC.init(v:Double, sp:Double)
+	 * @see SparseCSC.init(v:ElemType, sp:ElemType)
 	 */
-	public def init(v:Double, sp:Double):SparseCSR(this) {
+	public def init(v:ElemType, sp:ElemType):SparseCSR(this) {
 		val cnt = crdata.initConst(N, v, sp);
 		//sparsity = 1.0 * cnt/M/N;
 		return this;
 	} 
 	
-	public def init(v:Double):SparseCSR(this) {
-		val nzd = 1.0 * getStorageSize()/M/N;
-		init(v, nzd);
-		return this;
+	public def init(v:ElemType):SparseCSR(this) {
+	    val nzd = (1.0 * getStorageSize()/M/N) as ElemType;
+	    init(v, nzd);
+	    return this;
 	}
 
 	/**
 	 * For testing purpose,
 	 * 
 	 * @param sp     Nonzero sparsity
-	 * @see SparseCSC.initRandom(sp:Double)
+	 * @see SparseCSC.initRandom(sp:ElemType)
 	 */
-	public def initRandom(sp:Double) : SparseCSR(this) {
+	public def initRandom(sp:ElemType) : SparseCSR(this) {
 		val cnt = crdata.initRandomFast(N, sp);
 		//sparsity = 1.0 * cnt/M/N;
 		return this;
 	}
 
 	public def initRandom(): SparseCSR(this) {
-		val nzd = 1.0 * getStorageSize()/M/N;
-		initRandom(nzd);
-		return this;
+	    val nzd = (1.0 * getStorageSize()/M/N) as ElemType;
+	    initRandom(nzd);
+	    return this;
 	}
 	
-	public def initRandom(lo:Long, up:Long, nzp:Double): SparseCSR(this) {
+	public def initRandom(lo:Long, up:Long, nzp:ElemType): SparseCSR(this) {
 		crdata.initRandomFast(M, nzp, lo, up);
 		return this;
 	}
 	
 	public def initRandom(lo:Long, up:Long): SparseCSR(this) {
-		val nzd = 1.0 * getStorageSize()/M/N;
-		crdata.initRandomFast(M, nzd, lo, up);
-		return this;
+	    val nzd = (1.0 * getStorageSize()/M/N) as ElemType;
+	    crdata.initRandomFast(M, nzd, lo, up);
+	    return this;
 	}	
 	/**
 	 * Initialize with given function with range [0..M, 0..N]
 	 */
-	public def init(f:(Long, Long)=>Double): SparseCSR(this) {
+	public def init(f:(Long, Long)=>ElemType): SparseCSR(this) {
 		var offset:Long=0;
 		val ca = getStorage();
 		for (var r:Long=0; r<M; r++) {
 			val crow = crdata.cLine(r);
 			crow.offset = offset;
 			for (var c:Long=0; c<N; c++) {
-				val nzval:Double = f(r, c);
+				val nzval:ElemType = f(r, c);
 				if (! MathTool.isZero(nzval)) {
 					ca.index(offset)=c;
 					ca.value(offset)=nzval;
@@ -186,14 +187,14 @@ public class SparseCSR extends Matrix {
 	/**
 	 * Initial sparse matrix using function and row and column offsets.
 	 */
-	public def init(rowoff:Long, coloff:Long, f:(Long, Long)=>Double): SparseCSR(this) {
+	public def init(rowoff:Long, coloff:Long, f:(Long, Long)=>ElemType): SparseCSR(this) {
 		var offset:Long=0;
 		val ca = getStorage();
 		for (var r:Long=0; r<M; r++) {
 			val crow = crdata.cLine(r);
 			crow.offset = offset;
 			for (var c:Long=0; c<N&&offset<ca.index.size; c++) {
-				val nzval:Double = f(r+rowoff, c+coloff);
+				val nzval:ElemType = f(r+rowoff, c+coloff);
 				if (! MathTool.isZero(nzval)) {
 					ca.index(offset)=c;
 					ca.value(offset)=nzval;
@@ -209,7 +210,7 @@ public class SparseCSR extends Matrix {
 	/**
 	 * For testing purpose.
 	 */
-	public static def makeRand(m:Long, n:Long, nzd:Double): SparseCSR(m, n) {
+	public static def makeRand(m:Long, n:Long, nzd:ElemType): SparseCSR(m, n) {
 		val csr = SparseCSR.make(m, n, nzd);
 		csr.initRandom(nzd);
 		return csr;
@@ -274,8 +275,8 @@ public class SparseCSR extends Matrix {
 	 *
 	 * Modifying sparse matrix after creation is not advised
 	 */
-	public operator this(r:Long, c:Long) = (v:Double):Double {
-	    crdata(c)=Pair[Long,Double](r,v);
+	public operator this(r:Long, c:Long) = (v:ElemType):ElemType {
+	    crdata(c)=Pair[Long,ElemType](r,v);
 	    return v;
 	}
 
@@ -283,7 +284,7 @@ public class SparseCSR extends Matrix {
 			crdata.setLine(r, cl);
 	}
 
-	public def compressAt(r:Long, off:Long, d:Rail[Double]) =
+	public def compressAt(r:Long, off:Long, d:Rail[ElemType]) =
 		crdata.cLine(r).compressAt(off, d);
 
 
@@ -364,21 +365,21 @@ public class SparseCSR extends Matrix {
 
 
 	// Access temporary space
-	public def getTempCol():Rail[Double] {
-		if (tmpcol.size == 0L)
-			tmpcol = new Rail[Double](this.M);
-		else {
-			for (var i:Long=0; i<this.M; i++) tmpcol(i)=0.0;
-		}
-		return tmpcol;
+	public def getTempCol():Rail[ElemType] {
+	    if (tmpcol.size == 0L)
+		tmpcol = new Rail[ElemType](this.M);
+	    else {
+		for (var i:Long=0; i<this.M; i++) tmpcol(i)=0.0 as ElemType;
+	    }
+	    return tmpcol;
 	}
 
-	public def getTempRow():Rail[Double] {
+	public def getTempRow():Rail[ElemType] {
 		if (tmprow.size == 0L) 
-			tmprow = new Rail[Double](this.N);
+			tmprow = new Rail[ElemType](this.N);
 		else {
 			// reset the temp array
-			for (var i:Long=0; i<this.N; i++) tmprow(i) = 0.0;
+			for (var i:Long=0; i<this.N; i++) tmprow(i) = 0.0 as ElemType;
 		}
 		return tmprow;
 	}
@@ -429,11 +430,11 @@ public class SparseCSR extends Matrix {
 
 
 	// Extract data in the row to a Rail. The target array needs to reset first!!!
-	public def extractRow(r:Long, ln:Rail[Double]) {
+	public def extractRow(r:Long, ln:Rail[ElemType]) {
 		crdata.getLine(r).extract(ln);
 	}
 
-	public def extractCol(c:Long, cl:Rail[Double]) {
+	public def extractCol(c:Long, cl:Rail[ElemType]) {
 		for (var r:Long=0; r<this.M; r++) cl(r) = this(r, c);
 	}
 
@@ -442,12 +443,12 @@ public class SparseCSR extends Matrix {
 	/**
 	 * Extracting row to temp Rail. 
 	 */
-	public def extractRow(r:Long):Rail[Double] {
+	public def extractRow(r:Long):Rail[ElemType] {
 		val tr = getTempRow();
 		extractRow(r, tr);
 		return tr;
 	}
-	public def extractCol(c:Long):Rail[Double] {
+	public def extractCol(c:Long):Rail[ElemType] {
 		val tc = getTempCol();
 		extractCol(c, tc);
 		return tc;
@@ -465,18 +466,18 @@ public class SparseCSR extends Matrix {
 	 * @param dm            the target dense matrix to hold the expanded data
 	 */
 	public def extractRows(start_row:Long, 
-						   num_row:Long, 
-						   dm:DenseMatrix{self.M==num_row,self.N==this.N}
-						   ) : void {
-		assert (num_row <= dm.M && this.N <= dm.N);
+			       num_row:Long, 
+			       dm:DenseMatrix{self.M==num_row,self.N==this.N}
+			       ) : void {
+	    assert (num_row <= dm.M && this.N <= dm.N);
 
-		for (var i:Long=0; i<dm.d.size; i++) dm.d(i) = 0.0;
-		for (var r:Long=start_row; r<start_row+num_row; r++) {
-			val rowln = getRow(r);
-			for (var cidx:Long=0; cidx<rowln.length; cidx++) {
-			    dm(r, rowln.getIndex(cidx))=rowln.getValue(cidx);
-			}
+	    for (var i:Long=0; i<dm.d.size; i++) dm.d(i) = 0.0 as ElemType;
+	    for (var r:Long=start_row; r<start_row+num_row; r++) {
+		val rowln = getRow(r);
+		for (var cidx:Long=0; cidx<rowln.length; cidx++) {
+		    dm(r, rowln.getIndex(cidx))=rowln.getValue(cidx);
 		}
+	    }
 	}
 
 	/**
@@ -510,9 +511,9 @@ public class SparseCSR extends Matrix {
 	/**
 	 * Compute nonzero sparsity in storage
 	 */
-	public def compSparsity():Double {
-		val nz:Double = crdata.countNonZero() as Double;
-		return nz/(this.M*this.N as Double);
+	public def compSparsity():ElemType {
+		val nz:ElemType = crdata.countNonZero() as ElemType;
+		return nz/(this.M*this.N as ElemType);
 	}
 
 	/**
@@ -630,7 +631,7 @@ public class SparseCSR extends Matrix {
     /**
      * Multiply in place each element of this matrix by alpha.
      */
-	public def scale(alpha:Double) {
+	public def scale(alpha:ElemType) {
 		val ca = getStorage();
 		for (var row:Long=0; row<M; row++) {
 			val rln = getRow(row);
@@ -647,7 +648,7 @@ public class SparseCSR extends Matrix {
     	throw new UnsupportedOperationException("Cell-wise addition does not support using SparseCSR to store result");
     }
     
-    public def cellAdd(d:Double):SparseCSR(this) {
+    public def cellAdd(d:ElemType):SparseCSR(this) {
     	throw new UnsupportedOperationException("Cell-wise addition does not support using SparseCSC as output matrix");
     }   
     
@@ -706,13 +707,13 @@ public class SparseCSR extends Matrix {
     /**
      * Scaling operation return this &#42 double in dense format
      */
-    public operator this * (dblv:Double):SparseCSR(M,N) {
+    public operator this * (dblv:ElemType):SparseCSR(M,N) {
         val x = clone();
         x.scale(dblv);
         return x;
     }
 
-	public operator (dblv:Double) * this = this * dblv;
+	public operator (dblv:ElemType) * this = this * dblv;
 
 	/**
 	 *  Return this + that in a new dense 
@@ -841,22 +842,22 @@ public class SparseCSR extends Matrix {
 
 	public def toString() = crdata.toString();
 
-	// X10 Int MAX_VALUE is 2*10^10, change M*N to Double, in case
+	// X10 Int MAX_VALUE is 2*10^10, change M*N to ElemType, in case
 	// exceeding MAX_VALUE
-	public static def compAllocSize(m:Long, n:Long, nz:Double):Long {
-		var nzd:Double = nz;
-		if (nzd > 1.0) {
-			Console.OUT.println("Nonzero density > 1.0, reset to 1.0");
-			Console.OUT.flush();
-			nzd = 1.0;
-		}
-		var tc:Double = (n * m as Double) * nzd + 1.0;
-		if (tc > Long.MAX_VALUE) {
-			Console.OUT.printf("Warning: size %f exceeds maximum value %d\n", 
-							   tc, Long.MAX_VALUE);
-			Console.OUT.flush();
-			tc = Long.MAX_VALUE;
-		}
-		return tc as Long;
+	public static def compAllocSize(m:Long, n:Long, nz:ElemType):Long {
+	    var nzd:ElemType = nz;
+	    if (nzd > (1.0 as ElemType)) {
+		Console.OUT.println("Nonzero density > 1.0, reset to 1.0");
+		Console.OUT.flush();
+		nzd = 1.0 as ElemType;
+	    }
+	    var tc:ElemType = ((n * m) * nzd + 1.0) as ElemType;
+	    if (tc > Long.MAX_VALUE) {
+		Console.OUT.printf("Warning: size %f exceeds maximum value %d\n", 
+				   tc, Long.MAX_VALUE);
+		Console.OUT.flush();
+		tc = Long.MAX_VALUE;
+	    }
+	    return tc as Long;
 	}
 }

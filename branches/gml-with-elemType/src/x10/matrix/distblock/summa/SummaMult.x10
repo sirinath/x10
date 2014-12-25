@@ -16,10 +16,15 @@ import x10.util.Timer;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.util.Debug;
 import x10.matrix.util.MathTool;
+
 import x10.matrix.sparse.SparseCSC;
+
 import x10.matrix.block.Grid;
+
 import x10.matrix.distblock.BlockSet;
 import x10.matrix.distblock.DistBlockMatrix;
 
@@ -27,8 +32,8 @@ import x10.matrix.distblock.DistBlockMatrix;
  * SUMMA implementation on distributed block matrix
  */
 public class SummaMult {
-	//val alpha:Double;
-	val beta:Double;
+	//val alpha:ElemType;
+	val beta:ElemType;
     val panelSize:Long;
 	val A:DistBlockMatrix;
 	val B:DistBlockMatrix;
@@ -40,7 +45,7 @@ public class SummaMult {
 	public var calcTime:Long=0;
 	
 	public def this(
-			ps:Long, be:Double,
+			ps:Long, be:ElemType,
 			a:DistBlockMatrix, 
 			b:DistBlockMatrix, 
 			c:DistBlockMatrix,
@@ -78,12 +83,12 @@ public class SummaMult {
 			A:DistBlockMatrix, 
 			B:DistBlockMatrix, 
 			C:DistBlockMatrix, plus:Boolean) {
-		mult(10, plus?1.0:0.0, A, B, C);
+	    mult(10, (plus?1.0:0.0) as ElemType, A, B, C);
 	}
 	
 	public static def mult(
 			var ps:Long,  /* Panel size*/
-			beta:Double, 
+			beta:ElemType, 
 			A:DistBlockMatrix, 
 			B:DistBlockMatrix, 
 			C:DistBlockMatrix) {

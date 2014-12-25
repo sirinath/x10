@@ -16,6 +16,8 @@ import x10.compiler.Ifndef;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.distblock.BlockSet;
@@ -135,7 +137,7 @@ protected class RingCast  {
 		//Check place list 
 		val srcblk = distBS().findFrontBlock(rootbid, select);
 		val srcden = srcblk.getMatrix() as DenseMatrix;	
-		val srcbuf = new GlobalRail[Double](srcden.d as Rail[Double]{self!=null});
+		val srcbuf = new GlobalRail[ElemType](srcden.d as Rail[ElemType]{self!=null});
 
 		val nxtpid = plist(0);
 		val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
@@ -146,17 +148,17 @@ protected class RingCast  {
 		
 	}
 	
-    private static def copyDenseToHere(rmtbuf:GlobalRail[Double], distBS:PlaceLocalHandle[BlockSet], 
+    private static def copyDenseToHere(rmtbuf:GlobalRail[ElemType], distBS:PlaceLocalHandle[BlockSet], 
 			rootbid:Long, datCnt:Long, select:(Long,Long)=>Long, plist:Rail[Long]) {
 		
 		val rcvblk = distBS().findFrontBlock(rootbid, select);
 		val rcvden = rcvblk.getMatrix() as DenseMatrix;
-		finish Rail.asyncCopy[Double](rmtbuf, 0, rcvden.d, 0, datCnt);
+		finish Rail.asyncCopy[ElemType](rmtbuf, 0, rcvden.d, 0, datCnt);
 
 		if (plist.size > 0) {
 			val nxtpid = plist(0); // Get next place id in the list
 			val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
-			val srcbuf = new GlobalRail[Double](rcvden.d as Rail[Double]{self!=null});
+			val srcbuf = new GlobalRail[ElemType](rcvden.d as Rail[ElemType]{self!=null});
 
             at(Place(nxtpid)) {
 				//Need: srcbuf, distBS, ootbid, datCnt, nplist
@@ -172,7 +174,7 @@ protected class RingCast  {
 		val srcblk = distBS().findFrontBlock(rootbid, select);
 		val srcmat = srcblk.getMatrix() as SparseCSC;
 		val srcidx = new GlobalRail[Long](srcblk.getIndex() as Rail[Long]{self!=null});
-		val srcdat = new GlobalRail[Double](srcblk.getData() as Rail[Double]{self!=null});
+		val srcdat = new GlobalRail[ElemType](srcblk.getData() as Rail[ElemType]{self!=null});
 		//Remove root from place list
 		
 		val nxtpid = plist(0);
@@ -183,7 +185,7 @@ protected class RingCast  {
 		}
 	}
 	
-	private static def copySparseToHere(rmtidx:GlobalRail[Long], rmtdat:GlobalRail[Double],
+	private static def copySparseToHere(rmtidx:GlobalRail[Long], rmtdat:GlobalRail[ElemType],
 			distBS:PlaceLocalHandle[BlockSet], rootbid:Long, datCnt:Long, select:(Long,Long)=>Long,
 			plist:Rail[Long]) {
 		
@@ -193,14 +195,14 @@ protected class RingCast  {
 		spa.initRemoteCopyAtDest(datCnt);
 		if (datCnt > 0) {
 			finish Rail.asyncCopy[Long](rmtidx, 0L,   spa.getIndex(), 0L, datCnt);
-			finish Rail.asyncCopy[Double](rmtdat, 0L, spa.getValue(), 0L, datCnt);
+			finish Rail.asyncCopy[ElemType](rmtdat, 0L, spa.getValue(), 0L, datCnt);
 		}
 		
 		if (plist.size > 0) {
 			val nxtpid = plist(0); // Get next place id in the list
 			val nplist = new Rail[Long](plist.size-1, (i:Long)=>plist(i+1));
 			val srcidx = new GlobalRail[Long](rcvblk.getIndex() as Rail[Long]{self!=null});
-			val srcdat = new GlobalRail[Double](rcvblk.getData() as Rail[Double]{self!=null});
+			val srcdat = new GlobalRail[ElemType](rcvblk.getData() as Rail[ElemType]{self!=null});
 
             at(Place(nxtpid)) {
 				//Need: srcidx, srcdat, distBS, rootbid, datCnt, nplist

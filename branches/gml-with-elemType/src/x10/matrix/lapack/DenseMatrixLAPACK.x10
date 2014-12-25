@@ -16,6 +16,7 @@ import x10.util.StringBuilder;
 import x10.matrix.util.Debug;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
+import x10.matrix.ElemType;
 
 /**
  * This class provides static methods to perform LAPACK routines using dense
@@ -60,7 +61,7 @@ public class DenseMatrixLAPACK {
      * @param work a work array, size >= 8*A.N
      * @param iwork a work array, size == 5*A.N
 	 */
-	public static def compEigenvalues(A:DenseMatrix, W:Vector(A.N), work:Rail[Double], iwork:Rail[Int]) {
+	public static def compEigenvalues(A:DenseMatrix, W:Vector(A.N), work:Rail[ElemType], iwork:Rail[Int]) {
         Debug.assure(A.N < Int.MAX_VALUE, "32-bit LAPACK only supports matrix dimension < 2^31");
 		Debug.assure(work.size >= 8*A.N, "Work space used to compute eigenvalues is too small");
 		Debug.assure(iwork.size >= 5*A.N, "Integer work space used to compute eigenvalues is too small");
@@ -75,7 +76,7 @@ public class DenseMatrixLAPACK {
      * @param W on return, the eigenvalues of A in ascending order
 	 */
 	public static def compEigenvalues(A:DenseMatrix, W:Vector(A.N)) {
-        val work = new Rail[Double](8*A.N);
+        val work = new Rail[ElemType](8*A.N);
         val iwork = new Rail[Int](5*A.N);
 		compEigenvalues(A, W, work, iwork);
 	}
@@ -89,7 +90,7 @@ public class DenseMatrixLAPACK {
      * @param work a work array, size >= 8*A.N
      * @param iwork a work array, size == 5*A.N
 	 */
-	public static def compEigenvectors(A:DenseMatrix, W:Vector(A.N), Z:DenseMatrix(A.M,A.N), work:Rail[Double], iwork:Rail[Int]) {
+	public static def compEigenvectors(A:DenseMatrix, W:Vector(A.N), Z:DenseMatrix(A.M,A.N), work:Rail[ElemType], iwork:Rail[Int]) {
         Debug.assure(A.N < Int.MAX_VALUE, "32-bit LAPACK only supports matrix dimension < 2^31");
 		Debug.assure(work.size >= 8*A.N, "Work space used to compute eigenvectors is too small");
 		Debug.assure(iwork.size >= 5*A.N, "Integer work space used to compute eigenvectors is too small");
@@ -117,7 +118,7 @@ public class DenseMatrixLAPACK {
      * @param Z on return, the eigenvectors of A corresponding to eigenvalues
 	 */
 	public static def compEigenvectors(A:DenseMatrix, W:Vector(A.N), Z:DenseMatrix(A.M,A.N)) {
-        val work = new Rail[Double](8*A.N);
+        val work = new Rail[ElemType](8*A.N);
         val iwork = new Rail[Int](5*A.N);
 		compEigenvectors(A, W, Z, work, iwork);
 	}

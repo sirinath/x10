@@ -14,6 +14,7 @@ package x10.matrix.sparse;
 import x10.matrix.util.MathTool;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
 
 /**
  * Implementation of sparse multiplies dense operations.
@@ -41,7 +42,7 @@ public class SparseMultDenseToDense {
 		var v2idx:Long = 0;
 		for (var c:Long=0; c<m2.N; c++, startcol +=m3.M) {			
 			if (! plus) {
-				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0;
+			    for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0 as ElemType;
 			}
 			v1idx = 0;
 			for (var k:Long=0; k<m1.N; k++) {
@@ -81,7 +82,7 @@ public class SparseMultDenseToDense {
 		var v2idx:Long = 0;
 		for (var c:Long=0; c<m2.M; c++, startcol +=m3.M) {			
 			if (! plus) {
-				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0;
+				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0 as ElemType;
 			}
 			v2idx = c;
 			for (var k:Long=0; k<m1.N; k++, v2idx+=m2.M) {
@@ -150,7 +151,7 @@ public class SparseMultDenseToDense {
 			val m1row = m1.getRow(r);
 			m2stcol = 0;
 			for (var c:Long=0; c<m2.N; c++, m2stcol+=m2.M) {			
-				var v3:Double = 0.0;
+				var v3:ElemType = 0.0 as ElemType;
 				for (var kidx:Long=0; kidx<m1row.size(); kidx++) {
 					val k = m1row.getIndex(kidx);
 					val v1= m1row.getValue(kidx); //m1(r, k);
@@ -182,7 +183,7 @@ public class SparseMultDenseToDense {
 		var dstidx:Long=0;
 		for (var r:Long=0; r<m1.M; r++) {			
 			if (! plus) {
-				for (var i:Long=r; i<m3.M*m3.N; i+=m3.M) m3.d(i) = 0.0;
+				for (var i:Long=r; i<m3.M*m3.N; i+=m3.M) m3.d(i) = 0.0 as ElemType;
 			}
 			val m1row = m1.getRow(r);
 			for (var kidx:Long=0; kidx<m1row.size(); kidx++) {

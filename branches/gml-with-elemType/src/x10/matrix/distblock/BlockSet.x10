@@ -28,7 +28,7 @@ import x10.matrix.util.Debug;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.DenseMatrix;
 import x10.matrix.builder.SparseCSCBuilder;
-
+import x10.matrix.ElemType;	
 /**
  * This class provides implementation of list of matrix blocks stored in on place.
  */
@@ -132,7 +132,7 @@ public class BlockSet  {
         return this;
     }
     
-    public def allocSparseBlocks(nzd:Double) : BlockSet {
+    public def allocSparseBlocks(nzd:ElemType) : BlockSet {
         val placeIndex = places.indexOf(here.id);
         val itr = dmap.buildBlockIteratorAtPlace(placeIndex);
         while (itr.hasNext()) {
@@ -155,10 +155,10 @@ public class BlockSet  {
     public static def makeDense(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, places:PlaceGroup) =
         make(m, n, rowBs, colBs, rowPs, colPs, places).allocDenseBlocks();
 
-    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Double) =
+    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:ElemType) =
         makeSparse(m, n, rowBs, colBs, rowPs, colPs, nzd, Place.places());    
 
-    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Double, places:PlaceGroup) =
+    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:ElemType, places:PlaceGroup) =
         make(m, n, rowBs, colBs, rowPs, colPs, places).allocSparseBlocks(nzd);
 
 
@@ -169,11 +169,11 @@ public class BlockSet  {
         new BlockSet(g,d,places).allocDenseBlocks();
     
     
-    public static def makeSparse(g:Grid, d:DistMap, nzd:Double) =
+    public static def makeSparse(g:Grid, d:DistMap, nzd:ElemType) =
         makeSparse(g, d, nzd, Place.places());
     
 
-    public static def makeSparse(g:Grid, d:DistMap, nzd:Double, places:PlaceGroup) =
+    public static def makeSparse(g:Grid, d:DistMap, nzd:ElemType, places:PlaceGroup) =
         new BlockSet(g,d,places).allocSparseBlocks(nzd);
     
 
@@ -859,12 +859,12 @@ public class BlockSet  {
         }
     }
     
-    public def flattenValue(allBlocksValue:Rail[Double]){
+    public def flattenValue(allBlocksValue:Rail[ElemType]){
         val blkitr = this.iterator();
         var destIndex:Long = 0;
         while (blkitr.hasNext()){
             val src = blkitr.next();
-            val valbuf = src.getData() as Rail[Double]{self!=null};
+            val valbuf = src.getData() as Rail[ElemType]{self!=null};
             Rail.copy(valbuf, 0, allBlocksValue,destIndex,valbuf.size);
             destIndex+= src.getData().size;
         }
@@ -888,14 +888,14 @@ public class BlockSet  {
         }
     }
     
-    public static def remoteMakeSparseBlockSet(blocksCount:Long, metaDataSize:Long, totalSize:Long, mGR:GlobalRail[Long], idxGR:GlobalRail[Long], valGR:GlobalRail[Double]):BlockSet{
+    public static def remoteMakeSparseBlockSet(blocksCount:Long, metaDataSize:Long, totalSize:Long, mGR:GlobalRail[Long], idxGR:GlobalRail[Long], valGR:GlobalRail[ElemType]):BlockSet{
         val metaDataTarget = new Rail[Long](metaDataSize);
         val allIndexTarget = new Rail[Long](totalSize);
-        val allValueTarget = new Rail[Double](totalSize);
+        val allValueTarget = new Rail[ElemType](totalSize);
         finish{
             Rail.asyncCopy[Long](mGR, 0, metaDataTarget, 0, metaDataSize);
             Rail.asyncCopy[Long](idxGR, 0, allIndexTarget, 0, totalSize);
-            Rail.asyncCopy[Double](valGR, 0, allValueTarget, 0, totalSize);
+            Rail.asyncCopy[ElemType](valGR, 0, allValueTarget, 0, totalSize);
         }    
         val blocksList = BlockSet.makeBlocksFromMetaData(metaDataTarget, blocksCount, true);                
         var offset:Long = 0;
@@ -919,12 +919,12 @@ public class BlockSet  {
         return newBlockSet;
     }
    
-    public static def remoteMakeDenseBlockSet(blocksCount:Long, metaDataSize:Long, totalSize:Long, mGR:GlobalRail[Long], valGR:GlobalRail[Double]):BlockSet{
+    public static def remoteMakeDenseBlockSet(blocksCount:Long, metaDataSize:Long, totalSize:Long, mGR:GlobalRail[Long], valGR:GlobalRail[ElemType]):BlockSet{
         val metaDataTarget = new Rail[Long](metaDataSize);
-        val allValueTarget = new Rail[Double](totalSize);
+        val allValueTarget = new Rail[ElemType](totalSize);
         finish{
             Rail.asyncCopy[Long](mGR, 0, metaDataTarget, 0, metaDataSize);    
-            Rail.asyncCopy[Double](valGR, 0, allValueTarget, 0, totalSize);
+            Rail.asyncCopy[ElemType](valGR, 0, allValueTarget, 0, totalSize);
         }
         val blocksList = BlockSet.makeBlocksFromMetaData(metaDataTarget, blocksCount, false);                
         var offset:Long = 0;
@@ -939,7 +939,7 @@ public class BlockSet  {
         return newBlockSet;
     }
     
-    public def allocAndInitNonUniformSparseBlocks(f:(Long,Long)=>Double): BlockSet {        
+    public def allocAndInitNonUniformSparseBlocks(f:(Long,Long)=>ElemType): BlockSet {        
         val placeIndex = places.indexOf(here.id);
         val itr = dmap.buildBlockIteratorAtPlace(placeIndex);
         while (itr.hasNext()) {

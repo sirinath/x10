@@ -13,6 +13,7 @@ package x10.matrix.sparse;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
 
 /**
  * Implementation of sparse matrices mutliply sparse matrices.
@@ -53,7 +54,7 @@ public class SparseMultSparseToDense {
 		var col_st:Long = 0;
 		for (var c:Long=0; c<m2.N; c++, col_st+=m3.M) {
 			if (!plus) { //reset the column if no plus is required
-				for (var i:Long=col_st; i<col_st+m3.M; i++) dst(i) = 0.0;
+				for (var i:Long=col_st; i<col_st+m3.M; i++) dst(i) = 0.0 as ElemType;
 			}
 			// Compute the the c-column in result, using all of m1 and c-col of m2
 			val m2col = m2.getCol(c);
@@ -143,7 +144,7 @@ public class SparseMultSparseToDense {
 		var col_st:Long = 0;
 		for (var c:Long=0; c<m2.N; c++, col_st+=m3.M) {
 			if (!plus) {
-				for (var i:Long=col_st; i<col_st+m3.M; i++) dst(i) = 0.0;
+				for (var i:Long=col_st; i<col_st+m3.M; i++) dst(i) = 0.0 as ElemType;
 			}
 			//
 			val m2col= m2.getCol(c); //Expensive conversion
@@ -214,7 +215,7 @@ public class SparseMultSparseToDense {
 
 			for (var c:Long=0; c<m2.N; c++) {
 				val m2col = m2.getCol(c);
-				var v3:Double = 0.0;
+				var v3:ElemType = 0.0 as ElemType;
 				if (plus) v3 = m3(r, c); 
 				for (var kidx:Long=0; kidx<m2col.size(); kidx++) {
 					val k = m2col.getIndex(kidx);
@@ -267,7 +268,7 @@ public class SparseMultSparseToDense {
 				val m1row = m1.getRow(r);
 				var m1kidx:Long = 0;
 				var m2kidx:Long = 0;
-				var v3:Double = 0;
+				var v3:ElemType = 0;
 				if (m1kidx < m1row.length && m2kidx < m2col.length) {
 					var m1k:Long = m1row.getIndex(0L);
 					var m2k:Long = m2col.getIndex(0L);
@@ -352,7 +353,7 @@ public class SparseMultSparseToDense {
 		val dst = m3.d;//new Compress2D(m2.N);
 		for (var r:Long=0; r<m1.M; r++) {
 			if (!plus) { //reset the column if no plus is required
-				for (var i:Long=r; i<m3.N*m3.M; i+=m3.M) dst(i) = 0.0;
+				for (var i:Long=r; i<m3.N*m3.M; i+=m3.M) dst(i) = 0.0 as ElemType;
 			}
 			// Compute the the c-column in result, using all of m1 and c-col of m2
 			val m1row = m1.getRow(r);

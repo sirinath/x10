@@ -16,9 +16,12 @@ import x10.util.Timer;
 import x10.util.StringBuilder;
 
 import x10.matrix.Matrix;
-import x10.matrix.util.Debug;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
+import x10.matrix.ElemType;
+
+import x10.matrix.util.Debug;
+
 import x10.matrix.comm.ArrayBcast;
 import x10.matrix.comm.ArrayReduce;
 
@@ -31,8 +34,8 @@ public type DupVector(v:DupVector)=DupVector{self==v};
 
 public class DupVector(M:Long) implements Snapshottable {
     public var dupV:PlaceLocalHandle[Vector];
-    private var dupData:PlaceLocalHandle[Rail[Double]];//Repackage vector.d
-    public  var tmpData:PlaceLocalHandle[Rail[Double]];
+    private var dupData:PlaceLocalHandle[Rail[ElemType]];//Repackage vector.d
+    public  var tmpData:PlaceLocalHandle[Rail[ElemType]];
     private transient var tmpReady:Boolean;
     /*
      * Time profiling
@@ -49,7 +52,7 @@ public class DupVector(M:Long) implements Snapshottable {
         dupV  = vs;
         tmpReady = false;
         places = pg;
-        dupData = PlaceLocalHandle.make[Rail[Double]](places, ()=>vs().d);
+        dupData = PlaceLocalHandle.make[Rail[ElemType]](places, ()=>vs().d);
     }
 
     public static def make(v:Vector, pg:PlaceGroup):DupVector(v.M){
@@ -90,10 +93,10 @@ public class DupVector(M:Long) implements Snapshottable {
     public def allocTmp() : void {
         if (tmpReady) return;
         tmpReady = true;
-        tmpData = PlaceLocalHandle.make[Rail[Double]](places, ()=>new Rail[Double](dupV().M));
+        tmpData = PlaceLocalHandle.make[Rail[ElemType]](places, ()=>new Rail[ElemType](dupV().M));
     }
 
-    public def init(dv:Double) : DupVector(this) {
+    public def init(dv:ElemType) : DupVector(this) {
         
         finish ateach(Dist.makeUnique(places)) {
             dupV().init(dv);
@@ -113,7 +116,7 @@ public class DupVector(M:Long) implements Snapshottable {
         return this;
     }
     
-    public def init(f:(Long)=>Double) : DupVector(this) {
+    public def init(f:(Long)=>ElemType) : DupVector(this) {
         dupV().init(f);
         sync();
         return this;
@@ -134,9 +137,9 @@ public class DupVector(M:Long) implements Snapshottable {
         sync();
     }
     
-    public  operator this(x:Long):Double = dupV()(x);
+    public  operator this(x:Long):ElemType = dupV()(x);
 
-    public operator this(x:Long)=(dv:Double):Double {
+    public operator this(x:Long)=(dv:ElemType):ElemType {
         finish ateach(Dist.makeUnique(places)) {
             //Remote capture: x, y, d
             dupV()(x) = dv;    
@@ -149,7 +152,7 @@ public class DupVector(M:Long) implements Snapshottable {
     /**
      * Scaling method. All copies are updated concurrently
      */
-    public def scale(a:Double) {
+    public def scale(a:ElemType) {
         finish ateach(Dist.makeUnique(places)) {
             local().scale(a);
         }
@@ -180,7 +183,7 @@ public class DupVector(M:Long) implements Snapshottable {
         return this;
     }
 
-    public def cellAdd(dv:Double)  {
+    public def cellAdd(dv:ElemType)  {
         finish ateach(Dist.makeUnique(places)) {
             local().cellAdd(dv);
         }
@@ -212,7 +215,7 @@ public class DupVector(M:Long) implements Snapshottable {
     /**
      * Perform cell-wise subtraction  this = this - dv.
      */
-    public def cellSub(dv:Double):DupVector(this) {
+    public def cellSub(dv:ElemType):DupVector(this) {
         finish ateach(Dist.makeUnique(places)) {
             local().cellSub(dv);
         }
@@ -270,14 +273,14 @@ public class DupVector(M:Long) implements Snapshottable {
     // Operator overloading cellwise operations
 
 
-    public operator - this            = clone().scale(-1.0) as DupVector(M);
-    public operator (v:Double) + this = clone().cellAdd(v)  as DupVector(M);
-    public operator this + (v:Double) = clone().cellAdd(v)  as DupVector(M);
-    public operator this - (v:Double) = clone().cellSub(v)  as DupVector(M);
-    public operator this / (v:Double) = clone().scale(1.0/v)   as DupVector(M);
+    public operator - this            = clone().scale(-1.0 as ElemType) as DupVector(M);
+    public operator (v:ElemType) + this = clone().cellAdd(v)  as DupVector(M);
+    public operator this + (v:ElemType) = clone().cellAdd(v)  as DupVector(M);
+    public operator this - (v:ElemType) = clone().cellSub(v)  as DupVector(M);
+    public operator this / (v:ElemType) = clone().scale((1.0/v) as ElemType)   as DupVector(M);
     
-    public operator this * (alpha:Double) = clone().scale(alpha) as DupVector(M);
-    public operator (alpha:Double) * this = this * alpha;
+    public operator this * (alpha:ElemType) = clone().scale(alpha) as DupVector(M);
+    public operator (alpha:ElemType) * this = this * alpha;
     
     public operator this + (that:DupVector(M)) = clone().cellAdd(that)  as DupVector(M);
     public operator this - (that:DupVector(M)) = clone().cellSub(that)  as DupVector(M);
@@ -319,7 +322,7 @@ public class DupVector(M:Long) implements Snapshottable {
     }
 
     
-    public def reduce(opFunc:(Rail[Double],Rail[Double],Long)=>Int): void {
+    public def reduce(opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int): void {
         allocTmp();
         /* Timing */ val st = Timer.milliTime();
         ArrayReduce.reduce(dupData, tmpData, this.M, places, opFunc);
@@ -368,7 +371,7 @@ public class DupVector(M:Long) implements Snapshottable {
         return ret;
     }
     
-    public def equals(dval:Double):Boolean {
+    public def equals(dval:ElemType):Boolean {
         var ret:Boolean = true;
         for (var p:Long=0; p<places.size() &&ret; p++) {
             ret &= at(places(p)) this.local().equals(dval);
@@ -410,7 +413,7 @@ public class DupVector(M:Long) implements Snapshottable {
             PlaceLocalHandle.destroy(places, tmpData, (Place)=>true);
         }
         PlaceLocalHandle.destroy(places, dupData, (Place)=>true);
-        dupData = PlaceLocalHandle.make[Rail[Double]](newPg, ()=>dupV().d); 
+        dupData = PlaceLocalHandle.make[Rail[ElemType]](newPg, ()=>dupV().d); 
         places = newPg;
     }
     

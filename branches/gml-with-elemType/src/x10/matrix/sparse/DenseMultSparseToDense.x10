@@ -14,6 +14,7 @@ package x10.matrix.sparse;
 import x10.matrix.util.MathTool;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
 
 /**
  * Implementation of Dense multiplies with CSC. Result is put in a dense matrix.
@@ -48,7 +49,7 @@ public class DenseMultSparseToDense {
 		var v1idx:Long = 0;
 		for (var c:Long=0; c<m2.N; c++, startcol +=m3.M) {			
 			if (! plus) {
-				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0;
+				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0 as ElemType;
 			}
 			val m2col = m2.getCol(c);
 			for (var kidx:Long=0; kidx<m2col.size(); kidx++) {
@@ -85,7 +86,7 @@ public class DenseMultSparseToDense {
 		var v1idx:Long = 0;
 		for (var c:Long=0; c<m2.N; c++, startcol +=m3.M) {			
 			if (! plus) {
-				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0;
+				for (var i:Long=startcol; i<startcol+m3.M; i++) m3.d(i) = 0.0 as ElemType;
 			}
 			val m2col = m2.getCol(c);
 			for (var kidx:Long=0; kidx<m2col.size(); kidx++) {
@@ -116,7 +117,7 @@ public class DenseMultSparseToDense {
 			m1stcol = 0;
 			val m2col = m2.getCol(c);
 			for (var r:Long=0; r<m1.N; r++, m1stcol+=m1.M) {
-				var v3:Double = 0.0;
+				var v3:ElemType = 0.0 as ElemType;
 				for (var kidx:Long=0; kidx<m2col.size(); kidx++) {
 					val k = m2col.getIndex(kidx);
 					val v2= m2col.getValue(kidx); // m2(k, c);
@@ -196,7 +197,7 @@ public class DenseMultSparseToDense {
 		var v1idx:Long =0;
 		for (var r:Long=0; r<m1.M; r++, startcol+=m1.M) { // Outer-most iterates on row 
 			// Reset the tmp memory space
-			for (var i:Long=0; i<m2.N; i++) tmprow(i) = 0.0D;
+			for (var i:Long=0; i<m2.N; i++) tmprow(i) = 0.0D as ElemType;
 			v1idx = r;
 			for (var k:Long=0; k<m2.M; k++, v1idx+=m1.M) {
 				val v1 = m1.d(v1idx); // m1(r, k);
@@ -239,7 +240,7 @@ public class DenseMultSparseToDense {
 		var startcol:Long=0;
 		for (var r:Long=0; r<m1.N; r++, startcol+=m1.M) { // Outer-most iterates on row 
 			// Reset the tmp memory space
-			for (var i:Long=0; i<m2.N; i++) tmprow(i) = 0.0D;
+			for (var i:Long=0; i<m2.N; i++) tmprow(i) = 0.0D as ElemType;
 
 			for (var k:Long=0; k<m2.M; k++) {
 				val v1 = m1.d(startcol+k); // m1(k, r);

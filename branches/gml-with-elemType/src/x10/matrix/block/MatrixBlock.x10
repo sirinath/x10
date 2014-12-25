@@ -19,6 +19,7 @@ import x10.matrix.Matrix;
 import x10.matrix.builder.MatrixBuilder;
 import x10.matrix.DenseMatrix;
 import x10.matrix.sparse.SparseCSC;
+import x10.matrix.ElemType;
 
 /**
  * Matrix block class serves as the base class for dense block matrix and 
@@ -70,7 +71,7 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	 *
 	 * @param  ival 	the constant value
 	 */
-	abstract public def init(ival:Double) : void;
+	abstract public def init(ival:ElemType) : void;
 
 	/**
 	 * Initialize block matrix data using function, which maps global row and column
@@ -78,7 +79,7 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	 * 
 	 * @param f         function given global row and column indexes returns a double value
 	 */
-	public def init(f:(Long,Long)=>Double) : void {
+	public def init(f:(Long,Long)=>ElemType) : void {
 		// see XTENLANG-3167
 		// must apply f to offset row,column for this block
 		val offsetF = (a:Long,b:Long)=> f(a+rowOffset,b+colOffset);
@@ -88,9 +89,9 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	/**
 	 * Initial block matrix with given function in nonzero density randomly
 	 * @param nzDensity    Nonzero density, which is used to control row index distance between two adjacent nonzero  entries in the same column.
-	 * @param f:(Long,Long)=>Double   Matrix entry value generator function, mapping row and column to a double value.
+	 * @param f:(Long,Long)=>ElemType   Matrix entry value generator function, mapping row and column to a double value.
 	 */
-	public def initRandom(nzDensity:Double, f:(Long,Long)=>Double) : void {
+	public def initRandom(nzDensity:ElemType, f:(Long,Long)=>ElemType) : void {
 		getBuilder().initRandom(nzDensity, f);
 	}                                      
 
@@ -100,7 +101,7 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	 * <p> Initial matrix data in blocks with random values.
 	 */
 	abstract public def initRandom() : void ;
-	abstract public def initRandom(nzDensity:Double) : void;
+	abstract public def initRandom(nzDensity:ElemType) : void;
 
 	/**
 	 * Initialize matrix block data with random values between given
@@ -114,8 +115,8 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	abstract public def getBuilder() : MatrixBuilder;
 	abstract public def getSymBuilder() : MatrixBuilder;
 	abstract public def getTriBuilder(up:Boolean) : MatrixBuilder;
-	//abstract public def initRandomSym(halfDensity:Double) : void;
-	//abstract public def initRandomTri(up:Boolean, halfDensity:Double) : void;
+	//abstract public def initRandomSym(halfDensity:ElemType) : void;
+	//abstract public def initRandomTri(up:Boolean, halfDensity:ElemType) : void;
 
 	/**
 	 * Allocate memory space for the same matrix block of this
@@ -137,7 +138,7 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	/**
 	 * Return the underlying matrix element data storage.
 	 */
-	abstract public def getData():Rail[Double]{self!=null};
+	abstract public def getData():Rail[ElemType]{self!=null};
 
 	/**
 	 * Return the index array, the surface indices for the sparse matrix.
@@ -149,7 +150,7 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	/**
 	 * Return the matrix data of specified row and column index.
 	 */
-	abstract public operator this(r:Long, c:Long):Double;
+	abstract public operator this(r:Long, c:Long):ElemType;
 
 	public def copyTo(that:MatrixBlock): void {
 		val smat = this.getMatrix();

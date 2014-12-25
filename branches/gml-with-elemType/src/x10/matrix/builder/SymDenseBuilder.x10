@@ -14,6 +14,9 @@ package x10.matrix.builder;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.SymDense;
+import x10.matrix.ElemType;
+
+
 import x10.matrix.util.Debug;
 import x10.matrix.util.RandTool;
 
@@ -47,7 +50,7 @@ public class SymDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 	/**
 	 * Initial dense matrix with initial function.
 	 */
-	public def init(initFunc:(Long,Long)=>Double):SymDenseBuilder(this) {
+	public def init(initFunc:(Long,Long)=>ElemType):SymDenseBuilder(this) {
 		var stt:Long=0;
 		for (var c:Long=0; c<this.N; c++, stt+=1+dense.M ) {
 			var i:Long = stt;
@@ -66,7 +69,7 @@ public class SymDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 		Debug.assure(colOff+srcden.N<=dense.N, "Dense builder cannot using given matrix to initialize. Column overflow");
 		var stt:Long = rowOff;
 		for (var c:Long=colOff; c<colOff+srcden.N; c++, stt+= dense.M)
-			Rail.copy[Double](srcden.d, 0, dense.d, stt, srcden.M);
+			Rail.copy[ElemType](srcden.d, 0, dense.d, stt, srcden.M);
 		return this;
 	}
 	
@@ -75,7 +78,7 @@ public class SymDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 	 * @param nzDensity    nonzero sparsity.
 	 * @param initFunc     nonzero value generating function.
 	 */
-	public def initRandom(nzDensity:Double, initFunc:(Long,Long)=>Double):SymDenseBuilder(this) {
+	public def initRandom(nzDensity:ElemType, initFunc:(Long,Long)=>ElemType):SymDenseBuilder(this) {
 		val maxdst:Long = ((1.0/nzDensity) as Int) * 2 - 1;
 		var i:Long= RandTool.nextLong(maxdst/2);
 		var stt:Long=0;
@@ -92,18 +95,18 @@ public class SymDenseBuilder extends DenseBuilder{self.M==self.N} implements Mat
 	}
 
 	
-	public def initRandom(nzDensity:Double): SymDenseBuilder(this) =
-		initRandom(nzDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
+	public def initRandom(nzDensity:ElemType): SymDenseBuilder(this) =
+		initRandom(nzDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
 	
 
-	public def set(r:Long, c:Long, dv:Double) : void {
+	public def set(r:Long, c:Long, dv:ElemType) : void {
 		dense(r, c) = dv;
 		dense(c, r) = dv;
 	}
 	
 	public def reset(r:Long, c:Long) : Boolean {
-		dense(r, c) =0.0;
-		dense(c, r) =0.0;
+		dense(r, c) =0.0 as ElemType;
+		dense(c, r) =0.0 as ElemType;
 		return true;
 	}
 

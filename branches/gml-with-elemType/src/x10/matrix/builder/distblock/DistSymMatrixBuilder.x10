@@ -16,6 +16,8 @@ import x10.compiler.Inline;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.block.Grid;
 import x10.matrix.block.SymGrid;
 import x10.matrix.builder.MatrixBuilder;
@@ -69,7 +71,7 @@ public class DistSymMatrixBuilder extends DistMatrixBuilder{self.M==self.N} impl
      * Initialize distributed symmetric matrix using symmetric initial function.
      * @param initFun   Matrix entry value generator function, mapping row-column to double. 
      */
-    public def init(initFun:(Long,Long)=>Double) : DistSymMatrixBuilder(this) {
+    public def init(initFun:(Long,Long)=>ElemType) : DistSymMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             val itr = dmat.handleBS().iterator();
             val pgrid = dmat.handleBS().getGrid();
@@ -93,7 +95,7 @@ public class DistSymMatrixBuilder extends DistMatrixBuilder{self.M==self.N} impl
      * @param halfDensity       nonzero sparsity
      * @param f                 nonzero value generator function.
      */
-    public def initRandom(nzDensity:Double, f:(Long,Long)=>Double) : DistSymMatrixBuilder(this) {
+    public def initRandom(nzDensity:ElemType, f:(Long,Long)=>ElemType) : DistSymMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             val itr = dmat.handleBS().iterator();
             while (itr.hasNext()) {
@@ -116,11 +118,11 @@ public class DistSymMatrixBuilder extends DistMatrixBuilder{self.M==self.N} impl
     }
 
     // replicated from superclass to workaround xlC bug with using & itables
-    public def initRandom(nonZeroDensity:Double):DistMatrixBuilder(this) {
+    public def initRandom(nonZeroDensity:ElemType):DistMatrixBuilder(this) {
         finish ateach(d in Dist.makeUnique(dmat.getPlaces())) {
             val itr = dmat.handleBS().iterator();
             while (itr.hasNext()) {
-                itr.next().initRandom(nonZeroDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
+                itr.next().initRandom(nonZeroDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
             }
         }
         return this;
@@ -160,7 +162,7 @@ public class DistSymMatrixBuilder extends DistMatrixBuilder{self.M==self.N} impl
                     }
                 } else if (dstmat instanceof SparseCSC) {
                     val dst = dstmat as SparseCSC;
-                    val rcvmat = SparseCSC.make(dst.N, dst.M, 1.0*dst.getStorageSize()/(dst.M*dst.N));
+                    val rcvmat = SparseCSC.make(dst.N, dst.M, (dst.getStorageSize()/(dst.M*dst.N)) as ElemType);
                     BlockSetRemoteCopy.copy(dmat.handleBS, srcbid, rcvmat);
                     blk.transposeFrom(rcvmat);
                     
@@ -180,7 +182,7 @@ public class DistSymMatrixBuilder extends DistMatrixBuilder{self.M==self.N} impl
         mirror(false);
     }
 
-    public def set(r:Long, c:Long, value:Double): void{
+    public def set(r:Long, c:Long, value:ElemType): void{
         super.set(r, c, value);
         if (r != c)
             super.set(c, r, value);

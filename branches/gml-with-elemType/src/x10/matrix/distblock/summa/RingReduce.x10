@@ -15,7 +15,10 @@ import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
 import x10.matrix.util.Debug;
+
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.block.MatrixBlock;
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.distblock.BlockSet;
@@ -55,13 +58,13 @@ protected class RingReduce {
 			//Debug.flushln("Visiting block("+rmtblk.myRowId+","+rmtblk.myColId+")");
 			if (nplist.size > 0)
 				x10ReduceToHere(distBS, tmpBS, rootbid, datblk, datCnt, select, opFunc, nplist);
-			new GlobalRail[Double](datblk.getData() as Rail[Double]{self!=null})
+			new GlobalRail[ElemType](datblk.getData() as Rail[ElemType]{self!=null})
 		};
 	
 		val rcvblk = tmpBS().findFrontBlock(rootbid, select);
 		val rcvden = rcvblk.getMatrix() as DenseMatrix;
 		val dstden = dstblk.getMatrix() as DenseMatrix;
-		finish Rail.asyncCopy[Double](rmtbuf, 0, rcvden.d, 0, datCnt);
+		finish Rail.asyncCopy[ElemType](rmtbuf, 0, rcvden.d, 0, datCnt);
 		//Debug.flushln("Perform reduction with data from place "+leftRoot);
 		opFunc(rcvden, dstden, datCnt);
 	}

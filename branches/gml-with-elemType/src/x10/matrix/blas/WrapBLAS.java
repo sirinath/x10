@@ -20,6 +20,7 @@ package x10.matrix.blas;
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
  *  (C) Copyright IBM Corporation 2011-2014.
+ * vjTODO: Need to update for ElemType.
  */
 
 /**
@@ -37,7 +38,7 @@ public class WrapBLAS {
 	public static native double norm2(long n, double[] x);
 	public static native double absSum(long n, double[] x);
 
-    public static native void matmatMultOff(double alpha, double[] A, double[] B, double beta, double[] C, long[] dim, long[] ld, long[] off, int[] trans);
+        public static native void matmatMultOff(double alpha, double[] A, double[] B, double beta, double[] C, long[] dim, long[] ld, long[] off, int[] trans);
 	public static native void matmatMult(double alpha, double[] A, double[] B, double beta, double[] C, long[] dim, long[] ld, int[] trans);
 
 	public static native void symRankKUpdateOff(double alpha, double[] A, double beta, double[] C, long[] dim, long[] ld, long[] off, boolean upper, boolean trans);

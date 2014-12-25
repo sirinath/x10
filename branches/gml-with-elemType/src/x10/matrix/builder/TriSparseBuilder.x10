@@ -14,6 +14,8 @@ package x10.matrix.builder;
 import x10.compiler.Inline;
 
 import x10.matrix.Matrix;
+import x10.matrix.ElemType;
+
 import x10.matrix.util.Debug;
 import x10.matrix.util.MathTool;
 import x10.matrix.util.RandTool;
@@ -71,7 +73,7 @@ public class TriSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 			if (cpylen > 0) {
 				val srcoff = up?srcln.offset:srcln.offset+srcln.length-cpylen;
 				Rail.copy[Long  ](src.index, srcoff, dst.index, dstln.offset, cpylen);
-				Rail.copy[Double](src.value, srcoff, dst.value, dstln.offset, cpylen);
+				Rail.copy[ElemType](src.value, srcoff, dst.value, dstln.offset, cpylen);
 			}
 			dstln.length = cpylen;
 			nzcnt += cpylen;
@@ -82,7 +84,7 @@ public class TriSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	/**
 	 * Initialize symmetric sparse builder using matrix data generator function.
 	 */
-    public def init(fval:(Long,Long)=>Double):TriSparseBuilder(this) {
+    public def init(fval:(Long,Long)=>ElemType):TriSparseBuilder(this) {
 		for (var c:Long=0; c<N; c++) {
 			val stt = up?0L:c;
 			val end = up?c:M;
@@ -101,7 +103,7 @@ public class TriSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * @param nzd    nonzero sparsity. Used to computing row index distance between two nonzeros.
 	 * @param fval   return a double value using row and column index as inputs. 
 	 */
-    public def initRandom(halfNZD:Double, fval:(Long,Long)=>Double):TriSparseBuilder(this) {
+    public def initRandom(halfNZD:ElemType, fval:(Long,Long)=>ElemType):TriSparseBuilder(this) {
 		val rgen = RandTool.getRandGen();
         val maxdst:Long = ((1.0/halfNZD) as Int) * 2 - 1;
         var r:Long = rgen.nextLong(maxdst/2);
@@ -123,8 +125,8 @@ public class TriSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 		return this;
 	}
 	
-	public def initRandom(halfNZD:Double):TriSparseBuilder(this) =
-		initRandom(halfNZD, (Long,Long)=>(RandTool.getRandGen().nextDouble()));
+	public def initRandom(halfNZD:ElemType):TriSparseBuilder(this) =
+		initRandom(halfNZD, (Long,Long)=>(RandTool.nextElemType[ElemType]()));
 
 	/**
 	 * Initialize builder using existing sparse matrix. 
@@ -152,18 +154,18 @@ public class TriSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * Return the value at given row and column; If not found in nonzero list, 0 is returned.
 	 */
 	@Inline
-	public def get(r:Long, c:Long) : Double {
-		if (up) {
-			if ( r <= c)
-				return findEntry(r,c).value;
-			else
-				return 0.0;
-		} else {
-			if ( r >= c)
-				return findEntry(r,c).value;
-			else
-				return 0.0;
-		}
+	public def get(r:Long, c:Long) : ElemType {
+	    if (up) {
+		if ( r <= c)
+		    return findEntry(r,c).value;
+		else
+		    return 0.0 as ElemType;
+	    } else {
+		if ( r >= c)
+		    return findEntry(r,c).value;
+		else
+		    return 0.0 as ElemType;
+	    }
 	}
 	
 	/**
@@ -171,7 +173,7 @@ public class TriSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * new nonzero entry at the end of nonzero list;
 	 */
 	@Inline
-	public def set(r:Long, c:Long, v:Double) : void {
+	public def set(r:Long, c:Long, v:ElemType) : void {
 		if ((up && r <= c) || (up==false && r >= c))
 			set(r, c, v);
 		else {
