@@ -24,13 +24,13 @@ import x10.matrix.ElemType;
 @NativeCPPInclude("wrap_lapack.h")
 @NativeCPPCompilationUnit("wrap_lapack.cc")
 protected class DriverLAPACK {
-	@Native("java","WrapLAPACK.solveLinearEquation((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getIntArray(),(#4).getIntArray())")
-	@Native("c++","solve_linear_equation((#1)->raw,(#2)->raw,(#3)->raw,(#4)->raw)")
-		public static native def solveLinearEquation(
-				A:Rail[ElemType], 
-				BX:Rail[ElemType], 
-				ip:Rail[Int],
-				dim:Rail[Int]):Int;
+    @Native("java","WrapLAPACK.solveLinearEquation((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getIntArray(),(#4).getIntArray())")
+    @Native("c++","solve_linear_equation((#1)->raw,(#2)->raw,(#3)->raw,(#4)->raw)")
+	public static native def solveLinearEquation(
+	     A:Rail[ElemType], 
+	     BX:Rail[ElemType], 
+	     ip:Rail[Int],
+	     dim:Rail[Int]):Int;
 
     @Native("java","WrapLAPACK.compEigenvalues((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4).getIntArray(),(#5).getIntArray())")
     @Native("c++","comp_eigenvalues((#1)->raw,(#2)->raw,(#3)->raw,(#4)->raw,(#5)->raw)")

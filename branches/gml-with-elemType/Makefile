@@ -20,26 +20,30 @@ native_mpi	: native_mpi_gml
 managed		: managed_gml
 
 ## Source files
+matrix_path =$(src_path)/x10/matrix
 bwrap_path =$(src_path)/x10/matrix/blas
 lwrap_path =$(src_path)/x10/matrix/lapack
 
 base_src=\
+	x10/matrix/DenseMatrix.x10 \
 	x10/matrix/DenseMultXTen.x10 \
+	x10/matrix/ElemType.x10 \
+	x10/matrix/Matrix.x10 \
+	x10/matrix/MatrixMultXTen.x10  \
 	x10/matrix/SymDense.x10 \
 	x10/matrix/TriDense.x10 \
 	x10/matrix/Vector.x10 \
-	x10/matrix/Matrix.x10 \
-	x10/matrix/DenseMatrix.x10 \
 	x10/matrix/VectorMult.x10 \
-	x10/matrix/MatrixMultXTen.x10  \
     x10/matrix/regression/RegressionInputData.x10 \
 	x10/matrix/util/Debug.x10 \
 	x10/matrix/util/DistPConsole.x10	\
+	x10/matrix/util/ElemTypeTool.x10 \
 	x10/matrix/util/MathTool.x10 \
 	x10/matrix/util/PConsole.x10 \
-	x10/matrix/util/RandTool.x10 \
-	x10/matrix/util/VerifyTool.x10 \
 	x10/matrix/util/PlaceGroupBuilder.x10 \
+	x10/matrix/util/RandTool.x10 \
+	x10/matrix/util/StringTool.x10 \
+	x10/matrix/util/VerifyTool.x10 \
 	x10/util/resilient/DistObjectSnapshot.x10 \
 	x10/util/resilient/ResilientExecutor.x10 \
 	x10/util/resilient/ResilientIterativeApp.x10 \
@@ -187,6 +191,7 @@ VPATH		=$(bwrap_path):$(lwrap_path):$(src_path)
 
 
 X10FLAGS	+= -VERBOSE_CHECKS -O -NO_CHECKS -g
+#X10FLAGS	+= -VERBOSE_CHECKS 
 ifdef COVERAGE
     X10CXXFLAGS += --coverage
 endif
@@ -210,6 +215,7 @@ jlib : $(src) chk_dir $(add_jblas) $(add_jlapack)
 
 ## build for native backend
 clib : $(clib_src) chk_dir
+	@echo "---vj clib_src=$(clib_src)-----"
 	@echo "------------------ build lib for $(target) on $(HOSTNAME) -------------------"
 	cd $(src_path) && $(X10CXX) $(X10FLAGS) -report postcompile=1 $(X10CXX_PREARGS) $(X10CXX_POSTARGS) $(extra_opts) -buildx10lib ../. $(src) -d ../include -o $(target)
 	@echo "-------- Packaging source files into jar for $(target)--------"
@@ -243,6 +249,7 @@ chk_jblas	: chk_blas jblas
 
 chk_blas	: 
 			mkdir -p $(build_path)/x10/matrix/blas 
+			cp $(matrix_path)/elem_type.h $(build_path)/x10/matrix/
 
 wrap_blas.o	: wrap_blas.cc
 			$(CXX) -c -fPIC -DENABLE_BLAS $< -o $@
@@ -284,6 +291,12 @@ srctar		: $(lib_src)
 chk_dir:
 		mkdir -p lib
 		mkdir -p include/x10/matrix/comm/mpi
+		cp $(matrix_path)/elem_type.h $(build_path)/x10/matrix/	
+		cp $(matrix_path)/lapack/wrap_lapack_float.cc $(build_path)/x10/matrix/lapack
+		cp $(matrix_path)/lapack/wrap_lapack_double.cc $(build_path)/x10/matrix/lapack
+		cp $(matrix_path)/blas/wrap_blas_float.cc $(build_path)/x10/matrix/blas
+		cp $(matrix_path)/blas/wrap_blas_double.cc $(build_path)/x10/matrix/blas
+
 
 ###------------------------------------------------
 clean	::

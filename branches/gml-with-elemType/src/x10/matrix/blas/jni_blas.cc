@@ -38,6 +38,21 @@ extern "C" {
 	}	
   }
 
+  // public static native void scale(int n,  float alpha, float[] x);
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_scale_f
+  (JNIEnv *env, jclass cls, jint n, jfloat alpha, jfloatArray x) {
+	jboolean isCopy;
+	jfloat* xmat = env->GetFloatArrayElements(x, &isCopy);
+
+        // vj: need the float version of this
+	scale(n, alpha, xmat);
+
+	if (isCopy == JNI_TRUE) {
+	  //printf("Copying data from c library back to original data in JVM\n");
+	  env->ReleaseFloatArrayElements(x, xmat, 0);
+	}	
+  }
+
   //-------------------------------------------------------------
   // public static native void copy(int n, double[] x, double[] y);
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_copy
@@ -53,12 +68,37 @@ extern "C" {
 	}
   }
 
+  // public static native void copy(int n, float[] x, float[] y);
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_copy_f
+  (JNIEnv *env, jclass cls, jint n, jfloatArray x, jfloatArray y) {
+	jboolean isCopy;
+	jfloat* xmat = env->GetDoubleArrayElements(x, NULL);
+	jfloat* ymat = env->GetDoubleArrayElements(y, &isCopy);
+
+	// vjTODO: need the float version of this
+	copy(n, xmat, ymat);
+
+	if (isCopy == JNI_TRUE) {
+	  //printf("Copying data from c library back to original data in JVM\n");
+	  env->ReleaseFloatArrayElements(y, ymat, 0);
+	}
+  }
+
   //-------------------------------------------------------------
   // public static native double dotProd(int n, double[] x, double[] y);
   JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_dotProd
   (JNIEnv *env, jclass cls, jint n, jdoubleArray x, jdoubleArray y) {
 	jdouble* xmat = env->GetDoubleArrayElements(x, NULL);
 	jdouble* ymat = env->GetDoubleArrayElements(y, NULL);
+	return dot_prod(n, xmat, ymat);
+  }
+
+  // public static native double dotProd(int n, float[] x, float[] y);
+  JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_dotProd_f
+  (JNIEnv *env, jclass cls, jint n, jfloatArray x, jfloatArray y) {
+	jfloat* xmat = env->GetFloatArrayElements(x, NULL);
+	jfloat* ymat = env->GetFloatArrayElements(y, NULL);
+	// vjTODO: the float version
 	return dot_prod(n, xmat, ymat);
   }
 
@@ -70,11 +110,29 @@ extern "C" {
 	return norm2(n, xmat);
   }
 
+  //public static native double norm2(int n, float[] x);
+  JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_norm2_f
+  (JNIEnv *env, jclass cls, jint n, jfloatArray x) {
+	jfloat* xmat = env->GetFloatArrayElements(x, NULL);
+
+	// vjTODO: the float version
+	return norm2(n, xmat);
+  }
+
   //-------------------------------------------------------------
   //public static native double absSum(int n, double[] x);
   JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_absSum
   (JNIEnv *env, jclass cls, jint n, jdoubleArray x) {
 	jdouble* xmat = env->GetDoubleArrayElements(x, NULL);
+	return abs_sum(n, xmat);
+  }
+
+  //public static native double absSum(int n, float[] x);
+  JNIEXPORT double JNICALL Java_x10_matrix_blas_WrapBLAS_absSum_f
+  (JNIEnv *env, jclass cls, jint n, jfloatArray x) {
+	jfloat* xmat = env->GetFloatArrayElements(x, NULL);
+
+	// vjTODO: the float version
 	return abs_sum(n, xmat);
   }
 
@@ -105,24 +163,48 @@ extern "C" {
     }
   }
 
-  //-------------------------------------------------------------
-  // public static native void matvecMult(double[] A, double[] x, double[] y, ....)
-  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMult
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim, jint tranA) {
+  // public static native void matvecMultOff(double[] A, double[] x, double[] y, ....)
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMultOff
+  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim, jlong lda, jlongArray off, jint tranA) {
+
     jboolean isCopy;
     jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
     jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
     jlong dimlist[2];
+    jlong offlist[4];
     // This line is necessary, since Java arrays are not guaranteed
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
+    env->GetLongArrayRegion(off, 0, 4, offlist);
 
-    matrix_vector_mult(alpha, amat, xvec, beta, yvec, (blas_long*)dimlist, tranA);
+    matrix_vector_mult(alpha, amat, xvec, beta, yvec, (blas_long*)dimlist, lda, (blas_long*)offlist, tranA);
 
     if (isCopy == JNI_TRUE) {
        //printf("Copying data from c library back to original data in JVM\n");
        env->ReleaseDoubleArrayElements(y, yvec, 0);
+    }
+  }
+
+  //-------------------------------------------------------------
+  // public static native void matvecMult(float[] A, float[] x, float[] y, ....)
+  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMult
+  (JNIEnv *env, jclass cls, jfloat alpha, jfloatArray A, jfloatArray x, jfloat beta, jfloatArray y, jlongArray dim, jint tranA) {
+    jboolean isCopy;
+    jfloat* amat = env->GetFloatArrayElements(A, NULL);
+    jfloat* xvec = env->GetFloatArrayElements(x, NULL);
+    jfloat* yvec = env->GetFloatArrayElements(y, &isCopy);
+    jlong dimlist[2];
+    // This line is necessary, since Java arrays are not guaranteed
+    // to have a continuous memory layout like C arrays.
+    env->GetLongArrayRegion(dim, 0, 2, dimlist);
+
+    // vjtodo: Get the float version
+    matrix_vector_mult(alpha, amat, xvec, beta, yvec, (blas_long*)dimlist, tranA);
+
+    if (isCopy == JNI_TRUE) {
+       //printf("Copying data from c library back to original data in JVM\n");
+       env->ReleaseFloatArrayElements(y, yvec, 0);
     }
   }
 
