@@ -10,11 +10,12 @@
  */
 
 // Key file that needs to be changed when ElemType
-// is changed from Float to Double.
+// is changed from Float to Double. Please see ElemType.x10 for details.
 
 #ifndef ELEM_TYPE_H
 #define ELEM_TYPE_H
 #endif
+
 
 // Comment the next two lines, and uncomment the two lines after this
 // to change ElemType from Float to Double. Also change the X10 typedef

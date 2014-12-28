@@ -191,7 +191,6 @@ VPATH		=$(bwrap_path):$(lwrap_path):$(src_path)
 
 
 X10FLAGS	+= -VERBOSE_CHECKS -O -NO_CHECKS -g
-#X10FLAGS	+= -VERBOSE_CHECKS 
 ifdef COVERAGE
     X10CXXFLAGS += --coverage
 endif
@@ -215,7 +214,6 @@ jlib : $(src) chk_dir $(add_jblas) $(add_jlapack)
 
 ## build for native backend
 clib : $(clib_src) chk_dir
-	@echo "---vj clib_src=$(clib_src)-----"
 	@echo "------------------ build lib for $(target) on $(HOSTNAME) -------------------"
 	cd $(src_path) && $(X10CXX) $(X10FLAGS) -report postcompile=1 $(X10CXX_PREARGS) $(X10CXX_POSTARGS) $(extra_opts) -buildx10lib ../. $(src) -d ../include -o $(target)
 	@echo "-------- Packaging source files into jar for $(target)--------"
@@ -249,7 +247,6 @@ chk_jblas	: chk_blas jblas
 
 chk_blas	: 
 			mkdir -p $(build_path)/x10/matrix/blas 
-			cp $(matrix_path)/elem_type.h $(build_path)/x10/matrix/
 
 wrap_blas.o	: wrap_blas.cc
 			$(CXX) -c -fPIC -DENABLE_BLAS $< -o $@
@@ -291,11 +288,17 @@ srctar		: $(lib_src)
 chk_dir:
 		mkdir -p lib
 		mkdir -p include/x10/matrix/comm/mpi
+		mkdir -p include/x10/matrix/blas
+		mkdir -p include/x10/matrix/lapack
 		cp $(matrix_path)/elem_type.h $(build_path)/x10/matrix/	
 		cp $(matrix_path)/lapack/wrap_lapack_float.cc $(build_path)/x10/matrix/lapack
 		cp $(matrix_path)/lapack/wrap_lapack_double.cc $(build_path)/x10/matrix/lapack
 		cp $(matrix_path)/blas/wrap_blas_float.cc $(build_path)/x10/matrix/blas
 		cp $(matrix_path)/blas/wrap_blas_double.cc $(build_path)/x10/matrix/blas
+		cp $(matrix_path)/lapack/jni_lapack_float.cc $(build_path)/x10/matrix/lapack
+		cp $(matrix_path)/lapack/jni_lapack_double.cc $(build_path)/x10/matrix/lapack
+		cp $(matrix_path)/blas/jni_blas_double.cc $(build_path)/x10/matrix/blas
+		cp $(matrix_path)/blas/jni_blas_float.cc $(build_path)/x10/matrix/blas
 
 
 ###------------------------------------------------
