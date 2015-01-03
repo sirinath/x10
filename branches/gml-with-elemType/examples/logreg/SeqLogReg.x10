@@ -10,6 +10,7 @@
  */
 package logreg;
 
+import x10.matrix.ElemType;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
 import x10.matrix.util.Debug;
@@ -19,7 +20,7 @@ import x10.matrix.util.Debug;
  */
 public class SeqLogReg {
 	val C = 2;
-	val tol = 0.000001;
+	val tol = 0.000001f;
 	val maxIterations:Long;
 	val maxinneriter:Long;
 	
@@ -30,13 +31,13 @@ public class SeqLogReg {
     /** Learned model weight vector, used for future predictions */
 	val w:Vector(X.N);
 	
-	val eta0 = 0.0;
-	val eta1 = 0.25;
-	val eta2 = 0.75;
-	val sigma1 = 0.25;
-	val sigma2 = 0.5;
-	val sigma3 = 4.0;
-	val psi = 0.1; 	
+	val eta0 = 0.0f;
+	val eta1 = 0.25f;
+	val eta2 = 0.75f;
+	val sigma1 = 0.25f;
+	val sigma2 = 0.5f;
+	val sigma3 = 4.0f;
+	val psi = 0.1f; 	
 	
 	val tmp_y:Vector(X.M);
 	
@@ -58,19 +59,19 @@ public class SeqLogReg {
 		compute_XmultB(o, w);
 		//logistic = 1.0/(1.0 + exp( -y * o))
 		val logistic = Vector.make(X.M);
-		logistic.map(y, o, (y_i:Double, o_i:Double)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
+		logistic.map(y, o, (y_i:ElemType, o_i:ElemType)=> { 1.0f / (1.0f + Math.exp(-y_i * o_i)) });
 		//obj = 0.5 * t(w) %*% w + C*sum(logistic)
-		val obj = 0.5 * w.norm() + C*logistic.sum();
+		val obj = 0.5f * w.dot(w) + C*logistic.sum();
 		
 		//grad = w + C*t(X) %*% ((logistic - 1)*y)
 		val grad = Vector.make(X.N);
 		compute_grad(grad, logistic);
 				
 		//logisticD = logistic*(1-logistic)
-        val logisticD = new Vector(logistic.M, (i:Long)=> {logistic(i)*(1.0-logistic(i))});
+        val logisticD = new Vector(logistic.M, (i:Long)=> {logistic(i)*(1.0f-logistic(i))});
 
 		//delta = sqrt(sum(grad*grad))
-		var delta:Double = Math.sqrt(grad.norm());
+		var delta:ElemType = grad.norm();
 		
 		//# number of iterations
 		//iter = 0
@@ -82,9 +83,9 @@ public class SeqLogReg {
 		//converge = (delta < tol) | (iter > maxiter)
 		var converge:Boolean = (delta < tol) | (iter > maxIterations);
 		//norm_r2 = sum(grad*grad)
-		var norm_r2:Double = grad.norm();
+		var norm_r2:ElemType = grad.dot(grad);
 		//alpha = t(w) %*% w
-		var alpha:Double = w.norm();
+		var alpha:ElemType = w.dot(w);
 		// Add temp memory space
 		val s = Vector.make(X.N);
 		val r = Vector.make(X.N);
@@ -96,45 +97,45 @@ public class SeqLogReg {
 		Debug.flushln("Done initialization. Starting converging iteration");
 		while(!converge) {
 // 			norm_grad = sqrt(sum(grad*grad))
-			val norm_grad = Math.sqrt(grad.norm());
+			val norm_grad = grad.norm();
 // 			# SOLVE TRUST REGION SUB-PROBLEM
 // 			s = zeros_D
 			s.reset();
 // 			r = -grad
-			r.scale(-1.0, grad);
+			r.scale(-1.0f, grad);
 // 			d = r
 			r.copyTo(d);
 // 			inneriter = 0
 			val inneriter:Long=0;
 // 			innerconverge = ( sqrt(sum(r*r)) <= psi * norm_grad) 
-			var innerconverge:Boolean;// = (Math.sqrt(r.norm(r)) <= psi * norm_grad);
+			var innerconverge:Boolean;// = (r.norm() <= psi * norm_grad);
  			innerconverge = false;
  			while (!innerconverge) {
 // 				norm_r2 = sum(r*r)
- 				norm_r2 = r.norm();
+ 				norm_r2 = r.dot(r);
 // 				Hd = d + C*(t(X) %*% (logisticD*(X %*% d)))
  				compute_Hd(Hd, logisticD, d);
 
 // 				alpha_deno = t(d) %*% Hd 
- 				val alpha_deno = d.norm(Hd);
+ 				val alpha_deno = d.dot(Hd);
 // 				alpha = norm_r2 / alpha_deno
  				alpha = norm_r2 / alpha_deno;
 // 				s = s + castAsScalar(alpha) * d
  				s.scaleAdd(alpha, d);
 // 				sts = t(s) %*% s
- 				val sts = s.norm();
+ 				val sts = s.dot(s);
 // 				delta2 = delta*delta 
  				val delta2 = delta*delta;
 // 				shouldBreak = false;
  				var shouldBreak:Boolean = false;
  				if (sts > delta2) {
 // 					std = t(s) %*% d
- 					val std = s.norm(d);
+ 					val std = s.dot(d);
 // 					dtd = t(d) %*% d
- 					val dtd = d.norm();
+ 					val dtd = d.dot(d);
 // 					rad = sqrt(std*std + dtd*(delta2 - sts))
  					val rad = Math.sqrt(std*std+dtd*(delta2-sts));
- 					var tau:Double;
+ 					var tau:ElemType;
  					if(std >= 0) {
  						tau = (delta2 - sts)/(std + rad);
  					} else {
@@ -157,7 +158,7 @@ public class SeqLogReg {
 // 					old_norm_r2 = norm_r2 
  					val old_norm_r2 = norm_r2;
 // 					norm_r2 = sum(r*r)
- 					norm_r2 = r.norm();
+ 					norm_r2 = r.dot(r);
 // 					beta = norm_r2/old_norm_r2
  					val beta = norm_r2/old_norm_r2;
 // 					d = r + beta*d
@@ -169,21 +170,21 @@ public class SeqLogReg {
 // 			# END TRUST REGION SUB-PROBLEM
 // 			# compute rho, update w, obtain delta
 // 			qk = -0.5*(t(s) %*% (grad - r))
- 			val qk = -0.5 * s.norm(grad-r);
+ 			val qk = -0.5f * s.dot(grad-r);
 // 			
 // 			wnew = w + s
  			wnew.cellAdd(w, s);
 // 			onew = X %*% wnew
  			compute_XmultB(onew, wnew);
 // 			logisticnew = 1.0/(1.0 + exp(-y * o ))
-            logisticnew.map(y, o, (y_i:Double, o_i:Double)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
+            logisticnew.map(y, o, (y_i:ElemType, o_i:ElemType)=> { 1.0f / (1.0f + Math.exp(-y_i * o_i)) });
 // 			objnew = 0.5 * t(wnew) %*% wnew + C * sum(logisticnew)
- 			val objnew = 0.5 * wnew.norm() + C * logisticnew.sum();
+ 			val objnew = 0.5f * wnew.dot(wnew) + C * logisticnew.sum();
 
 // 			rho = (objnew - obj) / qk
  			val rho = (objnew - obj)/qk;
 // 			snorm = sqrt(sum( s * s ))
- 			val snorm = Math.sqrt(s.norm());
+ 			val snorm = s.norm();
  			if (rho > eta0) {
 // 				w = wnew
  				wnew.copyTo(w);
@@ -224,7 +225,7 @@ public class SeqLogReg {
 	
 	protected def compute_grad(grad:Vector(X.N), logistic:Vector(X.M)):void {
 		//grad = w + C*t(X) %*% ((logistic - 1)*y)
-        logistic.map(y, (x:Double, v:Double)=> {(x - 1.0) * v});
+        logistic.map(y, (x:ElemType, v:ElemType)=> {(x - 1.0f) * v});
 		compute_tXmultB(grad, logistic);
 		grad.scale(C);
 		grad.cellAdd(w);

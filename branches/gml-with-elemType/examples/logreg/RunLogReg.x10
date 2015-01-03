@@ -57,7 +57,7 @@ public class RunLogReg {
         val nX = opts("n", 10);
         val rowBlocks = opts("r", Place.numPlaces());
         val colBlocks = opts("c", 1);
-        val nonzeroDensity = opts("d", 0.5);
+        val nonzeroDensity = opts("d", 0.5f);
         val iterations = opts("i", 2n);
         val verify = opts("v");
         val print = opts("p");
