@@ -1267,7 +1267,7 @@ void tri_vector_mult(ElemType* A, blas_long ul, ElemType* bx, blas_long lda, int
   error_missing_blas();
 #endif
 }
- = alpha*x*y**T + A
+// = alpha*x*y**T + A
 void rank_one_update(ElemType alpha, ElemType* x, ElemType* y, ElemType* A, blas_long* dim, blas_long* offset, blas_long* inc, blas_long lda)
 {
 #ifdef ENABLE_BLAS
@@ -1508,7 +1508,7 @@ void tri_matrix_mult(ElemType* A, ElemType* B, blas_long* dim, int tranA)
   error_missing_blas();
 #endif
 }
- := alpha*A*op( B ), B is lower-non-unit triangular
+// := alpha*A*op( B ), B is lower-non-unit triangular
 void matrix_tri_mult(ElemType* B, ElemType* A, blas_long* dim, int tranB)
 {
 #ifdef ENABLE_BLAS
