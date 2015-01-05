@@ -4,6 +4,8 @@
 # build_path  --- the directory to store the compiling object files
 # gml_path    --- GML library path
 
+base_dir_elem   =native_$(GML_ELEM_TYPE)
+build_path_elem =native_$(GML_ELEM_TYPE)/include
 
 # runtime settings
 # numplaces = 1
@@ -44,7 +46,7 @@ clean	::
 
 clean_all:: 
 		rm -rf $(build_path)
-		$(foreach f, $(target_list), rm -f $(f)_mpi $(f)_sock $(f)_pami $(f)_bgp;)
+		$(foreach f, $(target_list), rm -rf $(f)_mpi_* $(f)_sock_* $(f)_pami_* $(f)_bgp_*;)
 
 ###-----------------------------------------
 ##  build library

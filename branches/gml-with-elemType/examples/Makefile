@@ -90,6 +90,19 @@ runalltests_sock :
 	cd distblock && $(MAKE) clean_all && $(MAKE) runall_sock
 	cd distmult && $(MAKE) clean_all && $(MAKE) runall_sock
 
+clean_everything:
+	cd logreg && $(MAKE) clean_all
+	cd linreg && $(MAKE) clean_all
+	cd gnmf && $(MAKE) clean_all 
+	cd pagerank && $(MAKE) clean_all
+	cd logreg_nonblocking && $(MAKE) clean_all
+	cd linreg_nonblocking && $(MAKE) clean_all
+	cd gnmf_nonblocking && $(MAKE) clean_all 
+	cd pagerank_nonblocking && $(MAKE) clean_all 
+	cd dist && $(MAKE) clean_all 
+	cd distblock && $(MAKE) clean_all
+	cd distmult && $(MAKE) clean_all 
+
 help ::
 	@echo "------------------------ Help on building/running page rank app ------------------";
 	@echo " 1) make     --- make default targets: $(target) for managed backend"

@@ -4,11 +4,10 @@ include scripts/system_setting.mk
 src_path	=src
 lib_path	=lib
 #build_path	=include
-base_dir_elem   =native_$(GML_ELEM_TYPE)
-build_path_elem =native_$(GML_ELEM_TYPE)/include
+#base_dir_elem   =native_$(GML_ELEM_TYPE)
+#build_path_elem =native_$(GML_ELEM_TYPE)/include
 # Output libs, properties, and tar files
 target		= native_gml
-target 	+= $(GML_ELEM_TYPE)
 
 default	: help 
 
@@ -215,7 +214,6 @@ jlib : $(src) chk_elem_type chk_dir $(add_jblas) $(add_jlapack)
 
 ## build for native backend
 clib : $(clib_src) chk_elem_type chk_dir
-	@echo "target is |$(target)|"
 	cp $(matrix_path)/elem_type.h $(build_path_elem)/x10/matrix/	
 	cp $(matrix_path)/lapack/wrap_lapack_float.cc $(build_path_elem)/x10/matrix/lapack
 	cp $(matrix_path)/lapack/wrap_lapack_double.cc $(build_path_elem)/x10/matrix/lapack
@@ -225,19 +223,19 @@ clib : $(clib_src) chk_elem_type chk_dir
 	cp $(matrix_path)/lapack/jni_lapack_double.cc $(build_path_elem)/x10/matrix/lapack
 	cp $(matrix_path)/blas/jni_blas_double.cc $(build_path_elem)/x10/matrix/blas
 	cp $(matrix_path)/blas/jni_blas_float.cc $(build_path_elem)/x10/matrix/blas
-	@echo "------------------ build lib for $(target)_$(GML_ELEM_TYPE) on $(HOSTNAME) -------------------"
-	cd $(src_path) && $(X10CXX) $(X10FLAGS) -report postcompile=1 $(X10CXX_PREARGS) $(X10CXX_POSTARGS) $(extra_opts) -buildx10lib ../$(base_dir_elem) -d ../$(build_path_elem) -o $(target) $(src) 
-	@echo "-------- Packaging source files into jar for $(target)_$(GML_ELEM_TYPE)--------"
-	cd $(src_path) && $(JAR) -cf ../$(base_dir_elem)/lib/$(target).jar $(src) $(mpi_wrap) # bundle mpi source
+	@echo "------------------ build lib for $(base_dir_elem) on $(HOSTNAME) -------------------"
+	cd $(src_path) && $(X10CXX) $(X10FLAGS) -report postcompile=1 $(X10CXX_PREARGS) $(X10CXX_POSTARGS) $(extra_opts) -buildx10lib ../$(base_dir_elem) -d ../$(build_path_elem) -o native_gml $(src) 
+	@echo "-------- Packaging source files into jar for $(base_dir_elem) --------"
+	cd $(src_path) && $(JAR) -cf ../$(base_dir_elem)/lib/native_gml.jar $(src) $(mpi_wrap) # bundle mpi source
 	@echo "------------ making properties file for $(target)_$(GML_ELEM_TYPE) ------------"
 	@echo "X10LIB_SRC_JAR=lib/$(target).jar" >> $(base_dir_elem)/$(target).properties
 
 ##-----------------------------------------------------------------------
 managed_gml		: $(lib_src)
-		@($(MAKE) jlib target=$@ src="$(lib_src)") 
+		@($(MAKE) jlib target=managed_gml src="$(lib_src)") 
 ## native on socket
 native_gml		: $(lib_src) 
-		@($(MAKE) clib target=$@ src="$(lib_src)")
+		@($(MAKE) clib target=native_gml src="$(lib_src)")
 
 native_mpi_gml	: $(lib_src) $(mpi_wrap) 
 		@($(MAKE) clib target=$@ src="$(lib_src) $(mpi_wrap)" extra_opts='$(MPI_X10CXXFLAGS)')

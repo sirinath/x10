@@ -15,8 +15,8 @@ target_list = DistDenseBench
 
 #-------------------------------------
 # GML path
-#gml_path    = ../../..
-gml_path    = ~/tmp
+gml_path    = ../../..
+
 
 # build path
 build_path	= build
