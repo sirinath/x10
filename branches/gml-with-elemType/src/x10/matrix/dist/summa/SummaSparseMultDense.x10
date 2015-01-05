@@ -98,14 +98,14 @@ public class SummaSparseMultDense {
         
         val s = new SummaSparseMultDense(ps, beta, A, B, C);
 
-        val wk1:DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
-        val wk2:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+        val wk1 <: DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
+        val wk2 <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
         finish for ([placeId] in C.dist) {
             val p = placeId as Long;
             val rn = A.grid.getRowSize(p);
             val cn = B.grid.getColSize(p);
             at(C.dist(p)) async {
-                wk1(here.id()) = SparseCSC.make(rn, s.panelSize, 1.0 as ElemType);
+                wk1(here.id()) = SparseCSC.make(rn, s.panelSize, 1.0f);
                 wk2(here.id()) = DenseMatrix.make(s.panelSize, cn);
             }
         }
@@ -130,9 +130,9 @@ public class SummaSparseMultDense {
         if (ps < 1) ps = estPanelSize(A, B);
         val s = new SummaSparseMultDense(ps, beta, A, B, C);
 
-        val wk1:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
-        val wk2:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
-        val tmp:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+        val wk1 <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+        val wk2 <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+        val tmp <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
 
         finish for ([placeId] in C.dist) {
             val p = placeId as Long;

@@ -482,6 +482,7 @@ public class Vector(M:Long) implements (Long) => ElemType, Snapshottable {
             if (MathTool.isZero(this.d(c) - v.d(c)) == false) {
                 Console.OUT.println("Diff found [" + c + "] : "+ 
                                     this.d(c) + " <> "+ v.d(c));
+		Console.OUT.println(" the values are of type v.d(.) " + v.d(c).typeName() + " d(.) " + d(c).typeName());
                 return false;
             }
         return true;

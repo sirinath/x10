@@ -57,7 +57,7 @@ public class SeqLogReg {
 		compute_XmultB(o, w);
 		//logistic = 1.0/(1.0 + exp( -y * o))
 		val logistic = y.clone();
-        logistic.map(y, o, (y_i:Double, o_i:Double)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
+		logistic.map(y, o, (y_i:ElemType, o_i:ElemType)=> (1.0 / (1.0 + Math.exp(-y_i * o_i))) as ElemType);
 
 		//obj = 0.5 * t(w) %*% w + C*sum(logistic)
 		val obj = 0.5 * w.norm(w) + C*logistic.sum(); 
@@ -68,11 +68,11 @@ public class SeqLogReg {
 				
 		//logisticD = logistic*(1-logistic)
 		val logisticD = logistic.clone();
-        logisticD.map((x:Double)=> {x*(1.0-x)});
+		logisticD.map((x:ElemType)=> (x*(1.0-x)) as ElemType);
 
 		//delta = sqrt(sum(grad*grad))
 		val sq = grad.norm(grad);
-		var delta:Double = Math.sqrt(grad.norm(grad));
+		var delta:ElemType = Math.sqrt(grad.norm(grad));
 		
 		//# number of iterations
 		//iter = 0
@@ -80,14 +80,14 @@ public class SeqLogReg {
 		
 		//# starting point for CG
 		//zeros_D = Rand(rows = D, cols = 1, min = 0.0, max = 0.0);
-		val zeros_D = DenseMatrix.make(X.N, 1, 0.0);
+		val zeros_D = DenseMatrix.make(X.N, 1, 0.0 as ElemType);
 		//# boolean for convergence check
 		//converge = (delta < tol) | (iter > maxiter)
 		var converge:Boolean = (delta < tol) | (iter > maxiter);
 		//norm_r2 = sum(grad*grad)
-		var norm_r2:Double = grad.norm(grad);
+		var norm_r2:ElemType = grad.norm(grad);
 		//alpha = t(w) %*% w
-		var alpha:Double = w.norm(w);
+		var alpha:ElemType = w.norm(w);
 		// Add temp memory space
 		val s = DenseMatrix.make(X.N,1);
 		val r = DenseMatrix.make(X.N,1);
@@ -99,12 +99,12 @@ public class SeqLogReg {
 		Debug.flushln("Done initialization. Starting converging iteration");
 		while(!converge) {
 // 			norm_grad = sqrt(sum(grad*grad))
-			var norm_grad:Double=Math.sqrt(grad.norm(grad));
+			var norm_grad:ElemType=Math.sqrt(grad.norm(grad));
 // 			# SOLVE TRUST REGION SUB-PROBLEM
 // 			s = zeros_D
 			s.reset();
 // 			r = -grad
-			r.scale(-1.0, grad);
+			r.scale(-1.0 as ElemType, grad);
 // 			d = r
 			r.copyTo(d);
 // 			inneriter = 0
@@ -125,7 +125,7 @@ public class SeqLogReg {
 // 				s = s + castAsScalar(alpha) * d
  				s.cellAdd(alpha * d);
 // 				sts = t(s) %*% s
- 				val sts:Double = s.norm(s);
+ 				val sts:ElemType = s.norm(s);
 // 				delta2 = delta*delta 
  				val delta2 = delta*delta;
 // 				shouldBreak = false;
@@ -138,7 +138,7 @@ public class SeqLogReg {
  					val dtd = d.norm(d);
 // 					rad = sqrt(std*std + dtd*(delta2 - sts))
  					val rad = Math.sqrt(std*std+dtd*(delta2-sts));
- 					var tau:Double;
+ 					var tau:ElemType;
  					if(std >= 0) {
  						tau = (delta2 - sts)/(std + rad);
  					} else {
@@ -182,7 +182,7 @@ public class SeqLogReg {
 // 			onew = X %*% wnew
  			compute_XmultB(onew, wnew);
 // 			logisticnew = 1.0/(1.0 + exp(-y * o ))
- 			logisticnew.map(y, o, (y_i:Double, o_i:Double)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
+ 			logisticnew.map(y, o, (y_i:ElemType, o_i:ElemType)=> (1.0 / (1.0 + Math.exp(-y_i * o_i))) as ElemType);
 			
 // 			objnew = 0.5 * t(wnew) %*% wnew + C * sum(logisticnew)
  			val objnew = 0.5 * wnew.norm(wnew) + C * logisticnew.sum();
@@ -206,15 +206,15 @@ public class SeqLogReg {
  			converge = (norm_r2 < (tol * tol)) | (iter > maxiter);
 // 
  			if (rho < eta0){
- 				delta = Math.min(Math.max(alpha, sigma1) * snorm, sigma2 * delta );
+ 				delta = Math.min(Math.max(alpha, sigma1) * snorm, sigma2 * delta ) as ElemType;
  			} else {
  				if (rho < eta1){
- 					delta = Math.max(sigma1 * delta, Math.min(alpha * snorm, sigma2 * delta));
+ 					delta = Math.max(sigma1 * delta, Math.min(alpha * snorm, sigma2 * delta)) as ElemType;
  				} else { 
  					if (rho < eta2) {
- 						delta = Math.max(sigma1 * delta, Math.min(alpha * snorm, sigma3 * delta));
+ 						delta = Math.max(sigma1 * delta, Math.min(alpha * snorm, sigma3 * delta)) as ElemType;
  					} else {
- 						delta = Math.max(delta, Math.min(alpha * snorm, sigma3 * delta));
+ 						delta = Math.max(delta, Math.min(alpha * snorm, sigma3 * delta)) as ElemType;
  					}
  				}
  			}
@@ -237,7 +237,7 @@ public class SeqLogReg {
 	protected def compute_grad(grad:DenseMatrix(X.N, 1), logistic:DenseMatrix(X.M, 1)):void {
 		//grad = w + C*t(X) %*% ((logistic - 1)*y)
 		logistic.copyTo(tmp_y);
-		tmp_y.cellSub(1.0).cellMult(y);
+		tmp_y.cellSub(1.0 as ElemType).cellMult(y);
 		compute_tXmultB(grad, tmp_y);
 		grad.scale(C);
 		grad.cellAdd(w);

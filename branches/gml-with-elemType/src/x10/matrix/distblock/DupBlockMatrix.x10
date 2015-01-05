@@ -72,7 +72,7 @@ public class DupBlockMatrix extends Matrix {
         return new DupBlockMatrix(hdl) as DupBlockMatrix(g.M, g.N);
     }
     
-    public static def makeSparse(g:Grid, nzd:ElemType) {
+    public static def makeSparse(g:Grid, nzd:Float) {
         val hdl = PlaceLocalHandle.make[BlockSet](Place.places(), 
                 ()=>BlockSet.makeSparse(g, DistMap.makeConstant(g.size, here.id()), nzd));
         return new DupBlockMatrix(hdl) as DupBlockMatrix(g.M, g.N);
@@ -92,7 +92,7 @@ public class DupBlockMatrix extends Matrix {
         return new DupBlockMatrix(hdl) as DupBlockMatrix(m, n);
     }
     
-    public static def makeSparse(m:Long, n:Long, blkM:Long, blkN:Long, nzd:ElemType) {
+    public static def makeSparse(m:Long, n:Long, blkM:Long, blkN:Long, nzd:Float) {
         val hdl = PlaceLocalHandle.make[BlockSet](Place.places(), 
                 ()=>BlockSet.makeSparse(new Grid(m, n, blkM, blkN),
                         DistMap.makeConstant(blkM*blkN, here.id()), nzd));
@@ -100,7 +100,7 @@ public class DupBlockMatrix extends Matrix {
     }
 
     public static def makeDense(m:Long, n:Long) = makeDense(m, n, 1, 1);
-    public static def makeSparse(m:Long, n:Long, nzd:ElemType) = makeSparse(m, n, 1, 1, nzd);
+    public static def makeSparse(m:Long, n:Long, nzd:Float) = makeSparse(m, n, 1, 1, nzd);
     
     public static def makeDense(dmat:DupBlockMatrix) {
         val hdl = PlaceLocalHandle.make[BlockSet](Place.places(), 

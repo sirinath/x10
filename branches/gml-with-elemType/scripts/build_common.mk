@@ -22,8 +22,8 @@ x10src		= $(target).x10
 ###################################################
 
 # lib source
-gml_inc		= $(gml_path)/include
-gml_lib		= $(gml_path)/lib
+#gml_inc		= $(gml_path)/include
+#gml_lib		= ~/tmp/lib
 gml_scripts	= $(gml_path)/scripts
 ###################################################
 # Build rules
@@ -34,7 +34,7 @@ include $(gml_scripts)/system_setting.mk
 #include $(gml_scripts)/build_native.mk
 #include $(gml_scripts)/build_native_mpi.mk
 
-#Build defautl target for all runtime backend and runtime transports
+#Build default target for all runtime backend and runtime transports
 all	:
 	$(foreach rt, $(runtime_list), $(MAKE) all_$(rt); )
 

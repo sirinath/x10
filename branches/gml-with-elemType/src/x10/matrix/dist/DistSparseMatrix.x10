@@ -97,7 +97,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param  g        matrix partitioning grid
      * @param  nzd     nonzero elements sparsity
      */
-    public static def make(g:Grid, d:Dist(1), nzd:ElemType) {
+    public static def make(g:Grid, d:Dist(1), nzd:Float) {
         val dsm:DistSparseMatrix(g.M, g.N) = new DistSparseMatrix(g, d);
         finish for([p] in dsm.dist) {
             val r = dsm.grid.getRowBlockId(p);
@@ -116,7 +116,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param  d        blocks partition distribution 
      * @param  nzd     nonzero elements sparsity
      */
-    public static def make(g:Grid, nzd:ElemType) =
+    public static def make(g:Grid, nzd:Float) =
         make(g,  Dist.makeUnique(), nzd);
     
     /**
@@ -127,7 +127,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param  n       matrix columns
      * @param  nzd     nonzero elements sparsity
      */
-    public static def make(m:Long, n:Long, nzd:ElemType) =
+    public static def make(m:Long, n:Long, nzd:Float) =
         make(Grid.make(m, n, Place.numPlaces()), 
              Dist.makeUnique(), nzd);
 
@@ -164,7 +164,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param n     number of columns
      * @param nzd     nonzero sparsity 
      */
-    public static def makeRand(m:Long, n:Long, nzd:ElemType) {
+    public static def makeRand(m:Long, n:Long, nzd:Float) {
         val g =  Grid.make(m, n, Place.numPlaces());
         val d =  Dist.makeUnique();
         val dsm = make(g, d, nzd);
@@ -183,7 +183,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param nzd     nonzero sparsity for all distributed blocks
      *
      */
-    public static def makeRand(g:Grid,  nzd:ElemType) {
+    public static def makeRand(g:Grid,  nzd:Float) {
         val d =  Dist.makeUnique();
         val dsm:DistSparseMatrix(g.M, g.N) = make(g, d, nzd);
         dsm.initRandom();
@@ -192,7 +192,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
 
     public static def make(rowbs:Rail[Long], 
                            colbs:Rail[Long],
-                           nzd:ElemType) {
+                           nzd:Float) {
         val g = new Grid(rowbs, colbs);
         return DistSparseMatrix.make(g, Dist.makeUnique(), nzd);
     }
@@ -238,14 +238,14 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * @param ub      upper bound of random value 
      * @param sp     sparsity used for initialization
      */
-    public def initRandom(lb:Long, ub:Long, sp:ElemType) :DistSparseMatrix(this) {
+    public def initRandom(lb:Long, ub:Long, sp:Float) :DistSparseMatrix(this) {
         finish ateach([p] in this.dist) {
             distBs(p).sparse.initRandom(lb, ub, sp);
         }
         return this;
     }
     
-    public def initRandom(sp:ElemType) : DistSparseMatrix(this) {
+    public def initRandom(sp:Float) : DistSparseMatrix(this) {
         finish ateach([p] in this.dist) {
             distBs(p).sparse.initRandom(sp);
         }
@@ -293,7 +293,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
      * Allocate memory space for distributed sparse matrix.
      *
      */
-    public def alloc(m:Long, n:Long, nzd:ElemType):DistSparseMatrix(m,n) {
+    public def alloc(m:Long, n:Long, nzd:Float):DistSparseMatrix(m,n) {
         val g =  Grid.make(m, n, Place.numPlaces());
         val nm = DistSparseMatrix.make(g, this.dist, nzd);
         return nm;
@@ -634,7 +634,7 @@ public class DistSparseMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix/*(g
     /**
      * Return the average sparsity of all distributed blocks.
      */
-    public def compSparsity():ElemType = (1.0 * countNonZero()/M/N) as ElemType;
+    public def compSparsity():Float = 1.0f * countNonZero()/M/N;
 
     /**
      * Compute total number of nonzero in all blocks

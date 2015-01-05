@@ -109,7 +109,7 @@ public class SparseCSC extends Matrix {
 	 * @param n     Number of columns in the CSC sparse matrix
 	 * @param nzd     The nonzero density or sparsity.
 	 */
-	public static def make(m:Long, n:Long, nzd:ElemType) : SparseCSC(m,n) {
+	public static def make(m:Long, n:Long, nzd:Float) : SparseCSC(m,n) {
 		val cnt = compAllocSize(m, n, nzd);
 		val spa = SparseCSC.make(m, n, cnt);
 
@@ -170,7 +170,7 @@ public class SparseCSC extends Matrix {
      * @param sp     Nonzero sparsity
      * @see Compress2D.initConst()
      */
-	public def init(v:ElemType, sp:ElemType):SparseCSC(this) {
+	public def init(v:ElemType, sp:Float):SparseCSC(this) {
 		val cnt = ccdata.initConst(M, v, sp);
 		return this;
 	}
@@ -182,7 +182,7 @@ public class SparseCSC extends Matrix {
 	 * @param v     initial value for all nonzero elements.
 	 */
 	public def init(v:ElemType):SparseCSC(this) {
-	    val nzd = (1.0*getStorageSize()/M/N) as ElemType;
+	    val nzd = 1.0f*getStorageSize()/M/N;
 	    init(v, nzd);
 	    return this;
 	}
@@ -199,12 +199,12 @@ public class SparseCSC extends Matrix {
 	 * @param sp     Nonzero sparsity
 	 * @see init(v:ElemType, sp:ElemType)
 	 */
-	public def initRandom(lb:Long, ub:Long, sp:ElemType) : SparseCSC(this) {
+	public def initRandom(lb:Long, ub:Long, sp:Float) : SparseCSC(this) {
 		val cnt = ccdata.initRandomFast(M, sp, lb, ub);
 		return this;
 	}
 	
-	public def initRandom(sp:ElemType) : SparseCSC(this) {
+	public def initRandom(sp:Float) : SparseCSC(this) {
 		val cnt = ccdata.initRandomFast(M, sp);
 		return this;
 	}
@@ -219,13 +219,13 @@ public class SparseCSC extends Matrix {
      * @see initRandom(lb:Long, ub:Long, sp:ElemType)
      */
 	public def initRandom(lb:Long, ub:Long): SparseCSC(this) { 
-	    val nzd = (1.0 * getStorageSize() /M/N) as ElemType;
+	    val nzd = 1.0f * getStorageSize() /M/N;
 	    initRandom(lb, ub, nzd);
 	    return this;
 	}
 	
 	public def initRandom(): SparseCSC(this) { 
-	    val nzd = (1.0 * getStorageSize() /M/N) as ElemType;
+	    val nzd = 1.0f * getStorageSize() /M/N;
 	    initRandom(nzd);
 	    return this;
 	}
@@ -240,7 +240,7 @@ public class SparseCSC extends Matrix {
 			val ccol = ccdata.cLine(c);
 			ccol.offset = offset;
 			for (var r:Long=0; r<M&&offset<ca.index.size; r++) {
-				val nzval:ElemType = f(r, c);
+				val nzval  = f(r, c);
 				if (! MathTool.isZero(nzval)) {
 					ca.index(offset)=r;
 					ca.value(offset)=nzval;
@@ -292,7 +292,7 @@ public class SparseCSC extends Matrix {
 			val ccol = ccdata.cLine(c);
 			ccol.offset = offset;
 			for (var r:Long=0; r<M&&offset<ca.index.size; r++) {
-				val nzval:ElemType = f(r+rowoff, c+coloff);
+				val nzval = f(r+rowoff, c+coloff);
 				if (! MathTool.isZero(nzval)) {
 					ca.index(offset)=r;
 					ca.value(offset)=nzval;
@@ -316,7 +316,7 @@ public class SparseCSC extends Matrix {
 	 * @param nzd     Nonzero sparsity
 	 * @see make() and initRandom() 
 	 */
-	public static def makeRand(m:Long, n:Long, nzd:ElemType) : SparseCSC(m,n) {
+	public static def makeRand(m:Long, n:Long, nzd:Float) : SparseCSC(m,n) {
 		val csc = SparseCSC.make(m, n, nzd);
 		csc.initRandom(nzd);
 
@@ -784,9 +784,9 @@ public class SparseCSC extends Matrix {
 	/**
 	 * Compute nonzero sparsity in storage
 	 */
-	public def compSparsity():ElemType {
-		val nz:ElemType = ccdata.countNonZero() as ElemType;
-		return nz/(this.M*this.N as ElemType);
+	public def compSparsity():Float {
+		val nz:Float = ccdata.countNonZero();
+		return nz/(this.M*this.N);
 	}
 
 	/**
@@ -1282,14 +1282,14 @@ public class SparseCSC extends Matrix {
 
 	// X10 Long MAX_VALUE, change M*N to ElemType, in case
 	// exceeding MAX_VALUE
-	public static def compAllocSize(m:Long, n:Long, nz:ElemType):Long {
-		var nzd:ElemType = nz;
+	public static def compAllocSize(m:Long, n:Long, nz:Float):Long {
+		var nzd:Float = nz;
 		if (nzd > 1.0) {
 			Debug.flushln("Nonzero density "+nzd+" > 1.0, reset to 1.0");
-			nzd = 1.0 as ElemType;
+			nzd = 1.0f;
 		}
 		
-		var tc:ElemType = nzd * n * m;
+		var tc:Double = nzd * n * m;
 		if (tc > Long.MAX_VALUE) {
 			Console.OUT.printf("Warning: size %f exceeds maximum value %ld\n", 
 							   tc, Long.MAX_VALUE);

@@ -76,7 +76,7 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * @param nzd    nonzero sparsity. Used to computing row index distance between two nonzeros.
 	 * @param fval   return a double value using row and column index as inputs. 
 	 */
-	public def initRandom(nzd:ElemType, fval:(Long,Long)=>ElemType):SymSparseBuilder(this) {
+	public def initRandom(nzd:Float, fval:(Long,Long)=>ElemType):SymSparseBuilder(this) {
 		val rgen = RandTool.getRandGen();
 		val maxdst:Long = ((1.0/nzd) as Int) * 2 - 1;
 		var r:Long = rgen.nextLong(maxdst/2);
@@ -98,7 +98,7 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	/**
      * Initialize with random values in specified sparsity.
 	 */
-	public def initRandom(nzd:ElemType) : SymSparseBuilder(this) =
+	public def initRandom(nzd:Float) : SymSparseBuilder(this) =
 		initRandom(nzd, (r:Long,c:Long)=>RandTool.nextElemType[ElemType]());
 	
 	/**

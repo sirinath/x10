@@ -113,7 +113,7 @@ public class DenseBlock extends MatrixBlock {
 	public def getSymBuilder():DenseBuilder{self.M==self.N} = new SymDenseBuilder(dense as DenseMatrix{self.M==self.N});
 	public def getTriBuilder(up:Boolean):DenseBuilder{self.M==self.N} = new TriDenseBuilder(up, dense as DenseMatrix{self.M==self.N});
 
-	public def initRandom(nonZeroDensity:ElemType):void {
+	public def initRandom(nonZeroDensity:Float):void {
 	    getBuilder().initRandom(nonZeroDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
 	}
 

@@ -14,6 +14,8 @@ import x10.util.Timer;
 
 import x10.matrix.util.Debug;
 import x10.matrix.Vector;
+import x10.matrix.ElemType;
+
 import x10.matrix.block.Grid;
 import x10.matrix.distblock.DistGrid;
 import x10.matrix.distblock.DistMap;
@@ -43,7 +45,7 @@ import x10.util.resilient.ResilientStoreForApp;
 public class PageRank implements ResilientIterativeApp {
     static val pN:Long = 1;
     public val iterations:Long;
-    public val alpha:Double= 0.85;
+    public val alpha:ElemType= 0.85 as ElemType;
 
     public val G:DistBlockMatrix{self.M==self.N};
     public val P:DupVector(G.N);
@@ -64,7 +66,7 @@ public class PageRank implements ResilientIterativeApp {
     var iter:Long;
     
     private val chkpntIterations:Long;
-    private val nzd:Double;
+    private val nzd:Float;
     private var places:PlaceGroup;
 
     public def this(
@@ -73,7 +75,7 @@ public class PageRank implements ResilientIterativeApp {
             e:Vector(g.N), 
             u:Vector(g.N), 
             it:Long,
-            sparseDensity:Double,
+            sparseDensity:Float,
             chkpntIter:Long,
             places:PlaceGroup) {
         Debug.assure(DistGrid.isVertical(g.getGrid(), g.getMap()), 
@@ -94,7 +96,7 @@ public class PageRank implements ResilientIterativeApp {
         this.places = places;
     }
 
-    public static def make(gN:Long, nzd:Double, it:Long, numRowBs:Long, numColBs:Long, chkpntIter:Long, places:PlaceGroup) {
+    public static def make(gN:Long, nzd:Float, it:Long, numRowBs:Long, numColBs:Long, chkpntIter:Long, places:PlaceGroup) {
         //---- Distribution---
         val numRowPs = places.size();
         val numColPs = 1;
@@ -106,7 +108,7 @@ public class PageRank implements ResilientIterativeApp {
         return new PageRank(g, p, e, u, it, nzd, chkpntIter, places);
     }
     
-    public static def make(gridG:Grid, blockMap:DistMap, nzd:Double, it:Int, chkpntIter:Long, places:PlaceGroup) {
+    public static def make(gridG:Grid, blockMap:DistMap, nzd:Float, it:Int, chkpntIter:Long, places:PlaceGroup) {
         //gridG, distG, gridP, gridE and gridU are remote captured in all places
         val g = DistBlockMatrix.makeSparse(gridG, blockMap, nzd, places) as DistBlockMatrix(gridG.M, gridG.M);
         val p = DupVector.make(gridG.N, places) as DupVector(g.N);
@@ -134,8 +136,8 @@ public class PageRank implements ResilientIterativeApp {
     }
 
     public def printInfo() {
-        val nzc:Float =  G.getTotalNonZeroCount() as Float;
-        val nzd:Float =  nzc / (G.M * G.N as Float);
+        val nzc =  G.getTotalNonZeroCount() ;
+        val nzd =  nzc / (G.M * G.N);
         Console.OUT.printf("Input Matrix G:(%dx%d), partition:(%dx%d) blocks, ",
                 G.M, G.N, G.getGrid().numRowBlocks, G.getGrid().numColBlocks);
         Console.OUT.printf("distribution:(%dx%d), nonzero density:%f count:%f\n", 

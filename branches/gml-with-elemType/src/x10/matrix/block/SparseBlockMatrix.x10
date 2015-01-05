@@ -68,7 +68,7 @@ public class SparseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param  gp   	block partitioning of matrix
 	 * @param nzd   	sparsity
 	 */
-	public static def make(gp:Grid, nzd:ElemType):SparseBlockMatrix(gp.M, gp.N) {
+	public static def make(gp:Grid, nzd:Float):SparseBlockMatrix(gp.M, gp.N) {
 		val dbm = new SparseBlockMatrix(gp) as SparseBlockMatrix(gp.M, gp.N);
 		dbm.alloc(nzd);
 		return dbm;
@@ -82,7 +82,7 @@ public class SparseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param nzd  	nonzero sparsity for all blocks
 	 *
 	 */
-	public static def makeRand(gp:Grid, nzd:ElemType) : SparseBlockMatrix(gp.M, gp.N) {
+	public static def makeRand(gp:Grid, nzd:Float) : SparseBlockMatrix(gp.M, gp.N) {
 		val dbm = new SparseBlockMatrix(gp);
 		dbm.alloc(nzd);
 		dbm.initRandom();
@@ -94,7 +94,7 @@ public class SparseBlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 * @param nzd 		sparsity for all blocks
 	 */
-	public def alloc(nzd:ElemType):void {
+	public def alloc(nzd:Float):void {
 		for(var c:Long=0; c<grid.numColBlocks; c++) {
 			for (var r:Long=0; r<grid.numRowBlocks; r++) {
 				val p = grid.getBlockId(r, c);
@@ -132,7 +132,7 @@ public class SparseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param ival 	constant value for all elements
 	 * @param nzd  	sparsity for all blocks
 	 */
-	public def init(ival:ElemType, nzd:ElemType):void {
+	public def init(ival:ElemType, nzd:Float):void {
 		for (p in 0..(listBs.size-1)) {
 			listBs(p).sparse.init(ival, nzd);
 		}
@@ -167,7 +167,7 @@ public class SparseBlockMatrix(grid:Grid) extends Matrix  {
 	 * 
 	 * @param nzd  	sparsity for all blocks
 	 */
-	public def initRandom(nzd:ElemType):SparseBlockMatrix(this) {
+	public def initRandom(nzd:Float):SparseBlockMatrix(this) {
 		for (p in 0..(listBs.size-1)) {
 			listBs(p).sparse.initRandom(nzd);
 		}

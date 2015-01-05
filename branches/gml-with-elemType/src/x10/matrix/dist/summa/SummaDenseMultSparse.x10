@@ -104,27 +104,26 @@ public class SummaDenseMultSparse {
 	 * @see SummaDense.parallelMult(wk1, wk2)
 	 */
 	public static def mult(var ps:Long,
-						   beta:ElemType, 
-						   A:DistDenseMatrix, 
-						   B:DistSparseMatrix, 
-						   C:DistDenseMatrix) {
-		if (ps < 1) ps = estPanelSize(A, B);
+			       beta:ElemType, 
+			       A:DistDenseMatrix, 
+			       B:DistSparseMatrix, 
+			       C:DistDenseMatrix) {
+	    if (ps < 1) ps = estPanelSize(A, B);
 		
-		val s = new SummaDenseMultSparse(ps, beta, A, B, C);
+	    val s = new SummaDenseMultSparse(ps, beta, A, B, C);
 
-		val wk1:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
-		val wk2:DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
-		finish for ([placeId] in C.dist) {
-            val p = placeId as Long;
-			val rn = A.grid.getRowSize(p);
-			val cn = B.grid.getColSize(p);
-			at(C.dist(p)) async {
-				wk1(here.id()) = DenseMatrix.make(rn, s.panelSize);
-				wk2(here.id()) = SparseCSC.make(s.panelSize, cn, 1.0 as ElemType);
-			}
+	    val wk1 <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+	    val wk2 <: DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
+	    finish for ([placeId] in C.dist) {
+		val p = placeId as Long;
+		val rn = A.grid.getRowSize(p);
+		val cn = B.grid.getColSize(p);
+		at(C.dist(p)) async {
+		    wk1(here.id()) = DenseMatrix.make(rn, s.panelSize);
+		    wk2(here.id()) = SparseCSC.make(s.panelSize, cn, 1.0f);
 		}
-		
-		s.parallelMult(wk1, wk2);
+	    }
+	    s.parallelMult(wk1, wk2);
 	}
 	
 	/**
@@ -141,24 +140,24 @@ public class SummaDenseMultSparse {
 								A:DistDenseMatrix, 
 								B:DistSparseMatrix, 
 								C:DistDenseMatrix) {
-		if (ps < 1) ps = estPanelSize(A, B);
-		val s = new SummaDenseMultSparse(ps, beta, A, B, C);
+	    if (ps < 1) ps = estPanelSize(A, B);
+	    val s = new SummaDenseMultSparse(ps, beta, A, B, C);
 
-		val wk1:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
-		val wk2:DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
-		val tmp:DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
-
-		finish for ([placeId] in C.dist) {
-            val p = placeId as Long;
-			val rn = A.grid.getRowSize(p);
-			val cn = B.grid.getColSize(p);
-            at(C.dist(p)) async {
-				wk1(here.id()) = DenseMatrix.make(rn, s.panelSize);
-				wk2(here.id()) = SparseCSC.make(s.panelSize, cn, 1.0 as ElemType);
-				tmp(here.id()) = DenseMatrix.make(rn, s.panelSize);
-			}
+	    val wk1 <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+	    val wk2 <: DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
+	    val tmp <: DistArray[DenseMatrix](1) = DistArray.make[DenseMatrix](C.dist);
+	    
+	    finish for ([placeId] in C.dist) {
+		val p = placeId as Long;
+		val rn = A.grid.getRowSize(p);
+		val cn = B.grid.getColSize(p);
+		at(C.dist(p)) async {
+		    wk1(here.id()) = DenseMatrix.make(rn, s.panelSize);
+		    wk2(here.id()) = SparseCSC.make(s.panelSize, cn, 1.0f);
+		    tmp(here.id()) = DenseMatrix.make(rn, s.panelSize);
 		}
-		s.parallelMultTrans(wk1, wk2, tmp);
+	    }
+	    s.parallelMultTrans(wk1, wk2, tmp);
 	}
 
 	public def parallelMult(work1:DistArray[DenseMatrix](1),

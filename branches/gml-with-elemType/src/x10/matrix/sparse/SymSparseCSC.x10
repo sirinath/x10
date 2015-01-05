@@ -43,7 +43,7 @@ public class SymSparseCSC extends SparseCSC{self.M==self.N} {
 		return new SymSparseCSC(m, ca); 
 	}
 	
-	public static def make(m:Long, nzd:ElemType):SymSparseCSC(m) {
+	public static def make(m:Long, nzd:Float):SymSparseCSC(m) {
 		val nzc = ((nzd*m*m +m) /2) as Long;
 		val ca = new CompressArray(nzc); 
 		return new SymSparseCSC(m, ca); 
@@ -56,37 +56,37 @@ public class SymSparseCSC extends SparseCSC{self.M==self.N} {
 		return this;
 	}
 	
-	public def init(v:ElemType, sp:ElemType):SparseCSC(this) {
+	public def init(v:ElemType, sp:Float):SparseCSC(this) {
 		val cnt = ccdata.initConst(false, M, v, sp);
 		return this;
 	}
 		
 	public def init(v:ElemType):SparseCSC(this) {
-	    val nzp = (1.0*getStorageSize()/M/N) as ElemType;
-		val cnt = ccdata.initConst(false, M, v, nzp);
-		return this;
+	    val nzp = 1.0f*getStorageSize()/M/N;
+	    val cnt = ccdata.initConst(false, M, v, nzp);
+	    return this;
 	}
 	
-	public def initRandom(lb:Long, ub:Long, sp:ElemType) : SparseCSC(this) {
+	public def initRandom(lb:Long, ub:Long, sp:Float) : SparseCSC(this) {
 		val cnt = ccdata.initRandomFast(false, M, sp, lb, ub);
 		//sparsity = 1.0 * cnt/M/N;
 		return this;
 	}
 	
-	public def initRandom(sp:ElemType) : SparseCSC(this) {
+	public def initRandom(sp:Float) : SparseCSC(this) {
 		val cnt = ccdata.initRandomFast(false, M, sp);
 		//sparsity = 1.0 * cnt/M/N;
 		return this;
 	}
 	
 	public def initRandom(lb:Long, ub:Long): SparseCSC(this) { 
-	    val nzd = (1.0 * getStorageSize() /M/N) as ElemType;
+	    val nzd = 1.0f * getStorageSize() /M/N;
 	    initRandom(lb, ub, nzd);
 	    return this;
 	}
 	
 	public def initRandom(): SparseCSC(this) { 
-	    val nzd = (1.0 * getStorageSize() /M/N) as ElemType;
+	    val nzd = 1.0f * getStorageSize() /M/N;
 	    initRandom(nzd);
 	    return this;
 	}
@@ -98,7 +98,7 @@ public class SymSparseCSC extends SparseCSC{self.M==self.N} {
 			val ccol = ccdata.cLine(c);
 			ccol.offset = offset;
 			for (var r:Long=c; r<M&&offset<ca.index.size; r++) {
-				val nzval:ElemType = f(r, c);
+				val nzval = f(r, c);
 				if (! MathTool.isZero(nzval)) {
 					ca.index(offset)=r;
 					ca.value(offset)=nzval;

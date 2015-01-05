@@ -20,106 +20,105 @@ import x10.matrix.ElemType;
  * Results are stored in a dense matrices
  */
 public class SparseMultSparseToDense {
-
-
-	// CSC format multiply with CSC 
-
-	// This is the fastest approach, no conversion. All iterations are based on indexes
-	// of non-zero elements
-
-	/**
-	 * Return sparse multiplication result of m1 &#42 m2 in dense format
-	 */
-	public static def comp(m1:SparseCSC, m2:SparseCSC{self.M==m1.N}):DenseMatrix(m1.M,m2.N) =
-		comp(m1, m2, new DenseMatrix(m1.M, m2.N), false);
-
-	/**
-	 * If plus true, perform m3 += m1 &#42 m2 else m3 = m2 &#42 m3 
-	 */
-	public static def comp(m1:SparseCSC, m2:SparseCSC{self.M==m1.N}, 
-						   m3:DenseMatrix{self.M==m1.M,self.N==m2.N}, 
-						   plus:Boolean):DenseMatrix(m3) {
-		//if (m1.isTransposed()) {
-		//	SparseMultToDense.comp(m1.TtoCSR(), m2, m3, plus); 
-		//	return;
-		//}
-		//if (m2.isTransposed()) {
-		//	SparseMultToDense.comp(m1, m2.TtoCSR(), m3, plus); 
-		//	return;
-		//}
-		//
-		assert (m3.M>=m1.M&&m1.N == m2.M&&m2.N<=m3.N);
-		//
-		val dst = m3.d;//new Compress2D(m2.N);
-		var col_st:Long = 0;
-		for (var c:Long=0; c<m2.N; c++, col_st+=m3.M) {
-			if (!plus) { //reset the column if no plus is required
-				for (var i:Long=col_st; i<col_st+m3.M; i++) dst(i) = 0.0 as ElemType;
-			}
-			// Compute the the c-column in result, using all of m1 and c-col of m2
-			val m2col = m2.getCol(c);
-			for (var kidx:Long=0; kidx<m2col.size(); kidx++) {
-				val k     = m2col.getIndex(kidx);
-				val v2    = m2col.getValue(kidx);//m2(k, c);
-				// 
-				val m1col = m1.getCol(k);
-				for (var ridx:Long=0; ridx<m1col.size(); ridx++) {
-					val r = m1col.getIndex(ridx);
-					val v1= m1col.getValue(ridx); //m1(r, k);
-					dst(col_st+r) += v1 * v2;
-				}
-			}
+    
+    
+    // CSC format multiply with CSC 
+    
+    // This is the fastest approach, no conversion. All iterations are based on indexes
+    // of non-zero elements
+    
+    /**
+     * Return sparse multiplication result of m1 &#42 m2 in dense format
+     */
+    public static def comp(m1:SparseCSC, m2:SparseCSC{self.M==m1.N}):DenseMatrix(m1.M,m2.N) =
+								     comp(m1, m2, new DenseMatrix(m1.M, m2.N), false);
+    
+    /**
+     * If plus true, perform m3 += m1 &#42 m2 else m3 = m2 &#42 m3 
+     */
+    public static def comp(m1:SparseCSC, m2:SparseCSC{self.M==m1.N}, 
+			   m3:DenseMatrix{self.M==m1.M,self.N==m2.N}, 
+			   plus:Boolean):DenseMatrix(m3) {
+	//if (m1.isTransposed()) {
+	//	SparseMultToDense.comp(m1.TtoCSR(), m2, m3, plus); 
+	//	return;
+	//}
+	//if (m2.isTransposed()) {
+	//	SparseMultToDense.comp(m1, m2.TtoCSR(), m3, plus); 
+	//	return;
+	//}
+	//
+	assert (m3.M>=m1.M&&m1.N == m2.M&&m2.N<=m3.N);
+	//
+	val dst = m3.d;//new Compress2D(m2.N);
+	var col_st:Long = 0;
+	for (var c:Long=0; c<m2.N; c++, col_st+=m3.M) {
+	    if (!plus) { //reset the column if no plus is required
+		for (var i:Long=col_st; i<col_st+m3.M; i++) dst(i) = 0.0 as ElemType;
+	    }
+	    // Compute the the c-column in result, using all of m1 and c-col of m2
+	    val m2col = m2.getCol(c);
+	    for (var kidx:Long=0; kidx<m2col.size(); kidx++) {
+		val k     = m2col.getIndex(kidx);
+		val v2    = m2col.getValue(kidx);//m2(k, c);
+		// 
+		val m1col = m1.getCol(k);
+		for (var ridx:Long=0; ridx<m1col.size(); ridx++) {
+		    val r = m1col.getIndex(ridx);
+		    val v1= m1col.getValue(ridx); //m1(r, k);
+		    dst(col_st+r) += v1 * v2;
 		}
-		return m3;//new SparseCSC(m1.M, m2.N, ccdata);
+	    }
 	}
+	return m3;//new SparseCSC(m1.M, m2.N, ccdata);
+    }
+    
+    
+    // Transpose mult and mult transpose
+    
+    /**
+     * If plus true, perform m3 += m1<sup>T</sup> &#42 m2 else m3 = m2<sup>T</sup> &#42 m3 
+     */
+    public static def compTransMult(m1:SparseCSC, 
+				    m2:SparseCSC{self.M==m1.M},m3:DenseMatrix{self.M==m1.N,self.N==m2.N}, plus:Boolean):DenseMatrix(m3) =
+															comp(m1.TtoCSR(), m2, m3, plus);
 
+    public static def compTransMult(m1:SparseCSC, m2:SparseCSC{self.M==m1.M}, 
+				    m3:DenseMatrix{self.M==m1.N,self.N==m2.N}):DenseMatrix(m3) =
+									       comp(m1.TtoCSR(), m2, m3, false);	
+    
+    /**
+     * Return m1<sup>T</sup> &#42 m2 
+     */
+    public static def compTransMult(m1:SparseCSC,m2:SparseCSC{self.M==m1.M}):DenseMatrix(m1.N,m2.N) = 
+									     comp(m1.TtoCSR(), m2);
+    
+    /**
+     * If plus true, perform m3 += m1 &#42 m2<sup>T</sup> else m3 = m2 &#42 m3<sup>T</sup>
+     */
+    public static def compMultTrans(m1:SparseCSC, m2:SparseCSC{self.N==m1.N}, 
+				    m3:DenseMatrix{self.M==m1.M,self.N==m2.M}, 
+				    plus:Boolean) : DenseMatrix(m3) =
+						    comp(m1, m2.TtoCSR(), m3, plus);
+    
+    /**
+     * Return m1 &#42 m2<sup>T</sup> 
+     */
+    public static def compMultTrans(m1:SparseCSC, m2:SparseCSC{self.N==m1.N}):DenseMatrix(m1.M,m2.M) 
+									      = comp(m1, m2.TtoCSR());
+    
+    
+    // CSC format multiply with CSR 
+    
+    // Slow. m2 needs conversion from compressed-row to compress-column
+    
+    /**
+     * Return sparse multiplication result of m1 &#42 m2 in dense format
+     */
+    public static def comp(m1:SparseCSC, m2:SparseCSR{self.M==m1.N}):DenseMatrix(m1.M,m2.N) =
+								     comp(m1, m2, new DenseMatrix(m1.M, m2.N), false);
 
-	// Transpose mult and mult transpose
-
-	/**
-	 * If plus true, perform m3 += m1<sup>T</sup> &#42 m2 else m3 = m2<sup>T</sup> &#42 m3 
-	 */
-	public static def compTransMult(m1:SparseCSC, 
-			m2:SparseCSC{self.M==m1.M},m3:DenseMatrix{self.M==m1.N,self.N==m2.N}, plus:Boolean):DenseMatrix(m3) =
-		comp(m1.TtoCSR(), m2, m3, plus);
-									
-
-	public static def compTransMult(m1:SparseCSC, m2:SparseCSC{self.M==m1.M}, 
-			m3:DenseMatrix{self.M==m1.N,self.N==m2.N}):DenseMatrix(m3) =
-		comp(m1.TtoCSR(), m2, m3, false);	
-
-	/**
-	 * Return m1<sup>T</sup> &#42 m2 
-	 */
-	public static def compTransMult(m1:SparseCSC,m2:SparseCSC{self.M==m1.M}):DenseMatrix(m1.N,m2.N) = 
-		comp(m1.TtoCSR(), m2);
-
-	/**
-	 * If plus true, perform m3 += m1 &#42 m2<sup>T</sup> else m3 = m2 &#42 m3<sup>T</sup>
-	 */
-	public static def compMultTrans(m1:SparseCSC, m2:SparseCSC{self.N==m1.N}, 
-			m3:DenseMatrix{self.M==m1.M,self.N==m2.M}, 
-			plus:Boolean) : DenseMatrix(m3) =
-		comp(m1, m2.TtoCSR(), m3, plus);
-	
-	/**
-	 * Return m1 &#42 m2<sup>T</sup> 
-	 */
-	public static def compMultTrans(m1:SparseCSC, m2:SparseCSC{self.N==m1.N}):DenseMatrix(m1.M,m2.M) 
-		= comp(m1, m2.TtoCSR());
-
-
-	// CSC format multiply with CSR 
-
-	// Slow. m2 needs conversion from compressed-row to compress-column
-	
-	/**
-	 * Return sparse multiplication result of m1 &#42 m2 in dense format
-	 */
-	public static def comp(m1:SparseCSC, m2:SparseCSR{self.M==m1.N}):DenseMatrix(m1.M,m2.N) =
-		comp(m1, m2, new DenseMatrix(m1.M, m2.N), false);
-
-	/**
+/**
 	 * If plus true, perform m3 += m1 &#42 m2 else m3 = m2 &#42 m3 
 	 * Performance note: m2 is expanded to dense format column by column,
 	 * using additional memory space is used in m2.

@@ -12,12 +12,13 @@ package linreg;
 
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
+import x10.matrix.ElemType;
 
 /**
  * Sequential implementation of linear regression
  */
 public class SeqLinearRegression {
-    static val lambda = 1e-6; // regularization parameter
+    static val lambda = 1e-6 as Float; // regularization parameter
 
     /** Matrix of training examples */
 	public val V:DenseMatrix;
@@ -45,7 +46,7 @@ public class SeqLinearRegression {
 		p  = Vector.make(V.N);
 		q  = Vector.make(V.N);
 		w  = Vector.make(V.N);
-		w.init(0.0);
+		w.init(0.0 as ElemType);
 	}
 	
 	public def run():Vector {
@@ -54,9 +55,9 @@ public class SeqLinearRegression {
         // 5: p=-r
         r.copyTo(p);
         // 4: r=-(t(V) %*% y)
-        r.scale(-1.0);
+        r.scale(-1.0 as ElemType);
         // 6: norm_r2=sum(r*r)
-        var norm_r2:Double = r.norm();
+        var norm_r2:ElemType = r.norm();
 
 		for (1..maxIterations) {
 			// 10: q=((t(V) %*% (V %*% p)) + lambda*p)

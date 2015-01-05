@@ -87,7 +87,7 @@ public class SparseBlock extends MatrixBlock {
 	 * @param  cid      block's column id
 	 * @param  nzd      sparsity in block
 	 */
-	public static def make(gp:Grid, rid:Long, cid:Long, nzd:ElemType) : SparseBlock {
+	public static def make(gp:Grid, rid:Long, cid:Long, nzd:Float) : SparseBlock {
 	    val m = gp.rowBs(rid);
 	    val n = gp.colBs(cid);
 	    val nzcnt = (nzd*m*n) as Long;
@@ -106,7 +106,7 @@ public class SparseBlock extends MatrixBlock {
 	 * @param  n        columns in block
 	 * @param  nzd      sparsity in block
 	 */
-    public static def make(rid:Long, cid:Long, roff:Long, coff:Long, m:Long, n:Long, nzd:ElemType) : SparseBlock {
+    public static def make(rid:Long, cid:Long, roff:Long, coff:Long, m:Long, n:Long, nzd:Float) : SparseBlock {
 	val nzcnt = (nzd*m*n) as Long;
 	val smat = SparseCSC.make(m, n, nzcnt);
 	return new SparseBlock(rid, cid, roff, coff, smat);
@@ -166,7 +166,7 @@ public class SparseBlock extends MatrixBlock {
 	    sparse.initRandom();
 	}
 
-	public def initRandom(nzDensity:ElemType):void {
+	public def initRandom(nzDensity:Float):void {
 	    getBuilder().initRandom(nzDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
 	}
 	
@@ -225,7 +225,7 @@ public class SparseBlock extends MatrixBlock {
 	public def alloc(m:Long, n:Long) = new SparseBlock(myRowId, myColId, rowOffset, colOffset, sparse.alloc(m, n));	
 	public def alloc() = new SparseBlock(myRowId, myColId, rowOffset, colOffset, sparse.alloc(sparse.M, sparse.N));
 	
-	public def allocFull(m:Long, n:Long) = make(myRowId, myColId, rowOffset, colOffset, m, n, 1.0 as ElemType);
+	public def allocFull(m:Long, n:Long) = make(myRowId, myColId, rowOffset, colOffset, m, n, 1.0f);
 	
 	
 	/**

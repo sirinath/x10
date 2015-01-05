@@ -132,7 +132,7 @@ public class BlockSet  {
         return this;
     }
     
-    public def allocSparseBlocks(nzd:ElemType) : BlockSet {
+    public def allocSparseBlocks(nzd:Float) : BlockSet {
         val placeIndex = places.indexOf(here.id);
         val itr = dmap.buildBlockIteratorAtPlace(placeIndex);
         while (itr.hasNext()) {
@@ -155,10 +155,10 @@ public class BlockSet  {
     public static def makeDense(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, places:PlaceGroup) =
         make(m, n, rowBs, colBs, rowPs, colPs, places).allocDenseBlocks();
 
-    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:ElemType) =
+    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Float) =
         makeSparse(m, n, rowBs, colBs, rowPs, colPs, nzd, Place.places());    
 
-    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:ElemType, places:PlaceGroup) =
+    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Float, places:PlaceGroup) =
         make(m, n, rowBs, colBs, rowPs, colPs, places).allocSparseBlocks(nzd);
 
 
@@ -169,11 +169,11 @@ public class BlockSet  {
         new BlockSet(g,d,places).allocDenseBlocks();
     
     
-    public static def makeSparse(g:Grid, d:DistMap, nzd:ElemType) =
+    public static def makeSparse(g:Grid, d:DistMap, nzd:Float) =
         makeSparse(g, d, nzd, Place.places());
     
 
-    public static def makeSparse(g:Grid, d:DistMap, nzd:ElemType, places:PlaceGroup) =
+    public static def makeSparse(g:Grid, d:DistMap, nzd:Float, places:PlaceGroup) =
         new BlockSet(g,d,places).allocSparseBlocks(nzd);
     
 

@@ -97,37 +97,15 @@ extern "C" {
     }
   }
 
-  // public static native void matvecMultOff(double[] A, double[] x, double[] y, ....)
-  JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMultOff
-  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim, jlong lda, jlongArray off, jint tranA) {
-
-    jboolean isCopy;
-    jdouble* amat = env->GetDoubleArrayElements(A, NULL);
-    jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
-    jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
-    jlong dimlist[2];
-    jlong offlist[4];
-    // This line is necessary, since Java arrays are not guaranteed
-    // to have a continuous memory layout like C arrays.
-    env->GetLongArrayRegion(dim, 0, 2, dimlist);
-    env->GetLongArrayRegion(off, 0, 4, offlist);
-
-    matrix_vector_mult(alpha, amat, xvec, beta, yvec, (blas_long*)dimlist, lda, (blas_long*)offlist, tranA);
-
-    if (isCopy == JNI_TRUE) {
-       //printf("Copying data from c library back to original data in JVM\n");
-       env->ReleaseDoubleArrayElements(y, yvec, 0);
-    }
-  }
 
   //-------------------------------------------------------------
   // public static native void matvecMult(float[] A, float[] x, float[] y, ....)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_matvecMult
-  (JNIEnv *env, jclass cls, jfloat alpha, jfloatArray A, jfloatArray x, jfloat beta, jfloatArray y, jlongArray dim, jint tranA) {
+  (JNIEnv *env, jclass cls, jdouble alpha, jdoubleArray A, jdoubleArray x, jdouble beta, jdoubleArray y, jlongArray dim, jint tranA) {
     jboolean isCopy;
-    jfloat* amat = env->GetFloatArrayElements(A, NULL);
-    jfloat* xvec = env->GetFloatArrayElements(x, NULL);
-    jfloat* yvec = env->GetFloatArrayElements(y, &isCopy);
+    jdouble* amat = env->GetDoubleArrayElements(A, NULL);
+    jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
+    jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
     jlong dimlist[2];
     // This line is necessary, since Java arrays are not guaranteed
     // to have a continuous memory layout like C arrays.
@@ -138,7 +116,7 @@ extern "C" {
 
     if (isCopy == JNI_TRUE) {
        //printf("Copying data from c library back to original data in JVM\n");
-       env->ReleaseFloatArrayElements(y, yvec, 0);
+       env->ReleaseDoubleArrayElements(y, yvec, 0);
     }
   }
 

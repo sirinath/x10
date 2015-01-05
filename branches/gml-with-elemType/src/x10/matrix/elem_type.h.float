@@ -11,13 +11,17 @@
 
 // Key file that needs to be changed when ElemType
 // is changed from Float to Double. Please see ElemType.x10 for details.
-// Makefile automatically moves elem_type.h.double --> elem_type.h
-// or elem_type.h.float --> elem_type.h
 
 #ifndef ELEM_TYPE_H
 #define ELEM_TYPE_H
 #endif
 
-#define __ElemTypeIsDouble__
-typedef double ElemType;
 
+// Comment the next two lines, and uncomment the two lines after this
+// to change ElemType from Float to Double. Also change the X10 typedef
+// in x10/matrix/ElemType.x10. Recompile.
+#define __ElemTypeIsFloat__
+typedef float ElemType;
+
+// #define __ElemTypeIsDouble__
+// typedef double ElemType;

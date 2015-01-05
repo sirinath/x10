@@ -28,7 +28,7 @@ public class RunLogReg {
         ], [
             Option("m","rows","number of rows, default = 10"),
             Option("n","cols","number of columns, default = 10"),
-            Option("d","density","nonzero density, default = 0.5"),
+            Option("d","density","nonzero density, default = 0.5f"),
             Option("i","iterations","number of iterations, default = 2")
         ]);
 
@@ -45,7 +45,7 @@ public class RunLogReg {
 
         val mX = opts("m", 10);
         val nX = opts("n", 10);
-        val nonzeroDensity = opts("d", 0.5);
+        val nonzeroDensity = opts("d", 0.5f);
         val iterations = opts("i", 2n);
         val verify = opts("v");
 

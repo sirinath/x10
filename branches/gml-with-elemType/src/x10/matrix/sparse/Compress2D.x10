@@ -118,7 +118,7 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity
 	 * @return        number of nonzero count
 	 */
-	public def initConst(ldm:Long, v:ElemType, nzp:ElemType):Long {
+	public def initConst(ldm:Long, v:ElemType, nzp:Float):Long {
 		var offset:Long=0;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -128,7 +128,7 @@ public class Compress2D {
 		return offset;
 	}
 	
-	public def initConst(up:Boolean, ldm:Long, v:ElemType, nzp:ElemType):Long {
+	public def initConst(up:Boolean, ldm:Long, v:ElemType, nzp:Float):Long {
 		var offset:Long=0;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -148,7 +148,7 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity 
 	 * @return        number of nonzero count;
 	 */
-	public def initRandom(ldm:Long, nzp:ElemType):Long {
+	public def initRandom(ldm:Long, nzp:Float):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -166,7 +166,7 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity 
 	 * @return        number of nonzero count;
 	 */
-	public def initRandom(up:Boolean, ldm:Long, nzp:ElemType):Long {
+	public def initRandom(up:Boolean, ldm:Long, nzp:Float):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -189,7 +189,7 @@ public class Compress2D {
 	 * @param up      upper bound of random value
 	 * @return        number of nonzero count
 	 */
-	public def initRandomFast(ldm:Long, nzp:ElemType, lb:Long, ub:Long):Long {
+	public def initRandomFast(ldm:Long, nzp:Float, lb:Long, ub:Long):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		val nl = cLine.size;
@@ -200,7 +200,7 @@ public class Compress2D {
 		return offset;
 	}
 	
-	public def initRandomFast(up:Boolean, ldm:Long, nzp:ElemType, lb:Long, ub:Long):Long {
+	public def initRandomFast(up:Boolean, ldm:Long, nzp:Float, lb:Long, ub:Long):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		val nl = cLine.size;
@@ -222,10 +222,10 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity
 	 * @return        number of nonzero count
 	 */
-	public def initRandomFast(ldm:Long, nzp:ElemType) =
+	public def initRandomFast(ldm:Long, nzp:Float) =
 		initRandomFast(ldm, nzp, 0L, 0L);
 
-	public def initRandomFast(up:Boolean, ldm:Long, nzp:ElemType) =
+	public def initRandomFast(up:Boolean, ldm:Long, nzp:Float) =
 		initRandomFast(up, ldm, nzp, 0L, 0L);
 
 	/**
@@ -236,7 +236,7 @@ public class Compress2D {
 	 * @param nzp          Nonzero sparsity
 	 * @param ca           The data storage for compress array.
 	 */
-	public static def makeRand(n:Long, maxIndex:Long, nzp:ElemType, ca:CompressArray):Compress2D {
+	public static def makeRand(n:Long, maxIndex:Long, nzp:Float, ca:CompressArray):Compress2D {
 		val c2d = Compress2D.make(n, ca);
 		c2d.initRandom(maxIndex, nzp);
 		return c2d;
@@ -249,7 +249,7 @@ public class Compress2D {
 	 * @param nzp          Nonzero percentage
 	 * @param ca           The data storage for compress array.
 	 */
-	public static def makeRandomFast(n:Long, maxIndex:Long, nzp:ElemType, ca:CompressArray):Compress2D {
+	public static def makeRandomFast(n:Long, maxIndex:Long, nzp:Float, ca:CompressArray):Compress2D {
 		val c2d = Compress2D.make(n, ca);
 		c2d.initRandomFast(maxIndex, nzp);
 		return c2d;

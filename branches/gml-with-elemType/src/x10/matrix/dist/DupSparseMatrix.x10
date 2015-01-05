@@ -106,7 +106,7 @@ public class DupSparseMatrix extends Matrix {
 	 * @param n     number of columns
 	 * @param nzd     nonzero density or sparsity.
 	 */
-	public static def make(m:Long, n:Long, nzd:ElemType): DupSparseMatrix(m,n) {
+	public static def make(m:Long, n:Long, nzd:Float): DupSparseMatrix(m,n) {
 		return make(m, n, (nzd * m * n) as Long);
 	}
 
@@ -132,7 +132,7 @@ public class DupSparseMatrix extends Matrix {
 	 * @param n     number of columns
 	 * @param nzd     sparsity
 	 */
-	public static def makeRand(m:Long, n:Long, nzd:ElemType) = make(m, n, nzd).initRandom();
+	public static def makeRand(m:Long, n:Long, nzd:Float) = make(m, n, nzd).initRandom();
 
 	/**
 	 * For testing purpose.
@@ -169,7 +169,7 @@ public class DupSparseMatrix extends Matrix {
 	 *
 	 * @param nzd     the sparsity used int initialzation.
 	 */
-	public def initRandom(nzd:ElemType) : DupSparseMatrix(this) {
+	public def initRandom(nzd:Float) : DupSparseMatrix(this) {
 		local().initRandom(nzd);
 		sync();
 		return this;

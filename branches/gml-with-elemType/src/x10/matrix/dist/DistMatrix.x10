@@ -122,7 +122,7 @@ public class DistMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix{
      * @param  gp      Matrix partitioning
      * @param  nzd     nonzero sparsity of each block
      */    
-    public static def makeSparse(gp:Grid, nzd:ElemType) : DistMatrix(gp.M, gp.N) {
+    public static def makeSparse(gp:Grid, nzd:Float) : DistMatrix(gp.M, gp.N) {
         val ddm = new DistMatrix(gp);
         ddm.allocSparseBlocks(nzd);
         return ddm;
@@ -138,7 +138,7 @@ public class DistMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix{
      * @param  nzd      nonzero sparsity    of each block
      * @return
      */    
-    public static def makeSparse(m:Long, n:Long, nzd:ElemType) : DistMatrix(m, n) {
+    public static def makeSparse(m:Long, n:Long, nzd:Float) : DistMatrix(m, n) {
         val g =  Grid.make(m, n, Place.numPlaces());
         return makeSparse(g, nzd);
     }
@@ -161,7 +161,7 @@ public class DistMatrix(grid:Grid){grid.M==M,grid.N==N} extends Matrix{
      *
      * @param  nzd      Nonzero sparsity of each block
      */
-    public def allocSparseBlocks(nzd:ElemType):void {
+    public def allocSparseBlocks(nzd:Float):void {
         finish for([p] in this.dist) {
             val rid = this.grid.getRowBlockId(p);
             val cid = this.grid.getColBlockId(p);

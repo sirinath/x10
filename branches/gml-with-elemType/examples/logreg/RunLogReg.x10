@@ -25,23 +25,23 @@ import logreg.LogisticRegression;
  * Test harness for Logistic Regression using GML
  */
 public class RunLogReg {
-
-	public static def main(args:Rail[String]): void {
+    
+    public static def main(args:Rail[String]): void {
         val opts = new OptionsParser(args, [
-            Option("h","help","this information"),
-            Option("v","verify","verify the parallel result against sequential computation"),
-            Option("p","print","print matrix V, vectors d and w on completion")
-        ], [
-            Option("m","rows","number of rows, default = 10"),
-            Option("n","cols","number of columns, default = 10"),
-            Option("r","rowBlocks","number of row blocks, default = X10_NPLACES"),
-            Option("c","colBlocks","number of columnn blocks; default = 1"),
-            Option("d","density","nonzero density, default = 0.5"),
-            Option("i","iterations","number of iterations, default = 2"),
-            Option("s","skip","skip places count (at least one place should remain), default = 0"),
-            Option("", "checkpointFreq","checkpoint iteration frequency")
-        ]);
-
+					    Option("h","help","this information"),
+					    Option("v","verify","verify the parallel result against sequential computation"),
+					    Option("p","print","print matrix V, vectors d and w on completion")
+					    ], [
+						Option("m","rows","number of rows, default = 10"),
+						Option("n","cols","number of columns, default = 10"),
+						Option("r","rowBlocks","number of row blocks, default = X10_NPLACES"),
+						Option("c","colBlocks","number of columnn blocks; default = 1"),
+						Option("d","density","nonzero density, default = 0.5"),
+						Option("i","iterations","number of iterations, default = 2"),
+						Option("s","skip","skip places count (at least one place should remain), default = 0"),
+						Option("", "checkpointFreq","checkpoint iteration frequency")
+						]);
+	
         if (opts.filteredArgs().size!=0) {
             Console.ERR.println("Unexpected arguments: "+opts.filteredArgs());
             Console.ERR.println("Use -h or --help.");
@@ -52,7 +52,7 @@ public class RunLogReg {
             Console.OUT.println(opts.usage(""));
             return;
         }
-
+	
         val mX = opts("m", 10);
         val nX = opts("n", 10);
         val rowBlocks = opts("r", Place.numPlaces());
@@ -63,19 +63,19 @@ public class RunLogReg {
         val print = opts("p");
         val skipPlaces = opts("s", 0n);
         val checkpointFreq = opts("checkpointFreq", -1n);
-
+	
         Console.OUT.println("X: rows:"+mX+" cols:"+nX
-                           +" density:"+nonzeroDensity+" iterations:"+iterations);
-		if ((mX<=0) ||(nX<=0) || skipPlaces < 0 || skipPlaces >= Place.numPlaces())
-			Console.OUT.println("Error in settings");
-		else {
+			    +" density:"+nonzeroDensity+" iterations:"+iterations);
+	if ((mX<=0) ||(nX<=0) || skipPlaces < 0 || skipPlaces >= Place.numPlaces())
+	    Console.OUT.println("Error in settings");
+	else {
             if (skipPlaces > 0)
                 Console.OUT.println("Skipping "+skipPlaces+" places to reserve for failure.");
             val places = (skipPlaces==0n) ? Place.places() 
-                                          : PlaceGroupBuilder.makeTestPlaceGroup(skipPlaces);
-
+		: PlaceGroupBuilder.makeTestPlaceGroup(skipPlaces);
+	    
             val prun = LogisticRegression.make(mX, nX, rowBlocks, colBlocks, nonzeroDensity, iterations, iterations, checkpointFreq, places);
-
+	    
             var denX:DenseMatrix(mX,nX) = null;
             var y:Vector(mX) = null;
             var w:Vector(nX) = null;
@@ -85,28 +85,28 @@ public class RunLogReg {
                 prun.y.copyTo(y); // gather
                 w = prun.w.clone();// as Vector(nX);
             }
-
+	    
             Debug.flushln("Starting logistic regression");
-			val startTime = Timer.milliTime();
-			prun.run();
-			val totalTime = Timer.milliTime() - startTime;
-
-			Console.OUT.printf("Parallel logistic regression --- Total: %8d ms, parallel runtime: %8d ms, commu time: %8d ms\n",
-					totalTime, prun.paraRunTime, prun.commUseTime); 
-			
-			if (verify) { /* Sequential run */
-				val seq = new SeqLogReg(denX, y, w, iterations, iterations);
-
-		        Debug.flushln("Starting sequential logistic regression");
-				seq.run();
+	    val startTime = Timer.milliTime();
+	    prun.run();
+	    val totalTime = Timer.milliTime() - startTime;
+	    
+	    Console.OUT.printf("Parallel logistic regression --- Total: %8d ms, parallel runtime: %8d ms, commu time: %8d ms\n",
+			       totalTime, prun.paraRunTime, prun.commUseTime); 
+	    
+	    if (verify) { /* Sequential run */
+		val seq = new SeqLogReg(denX, y, w, iterations, iterations);
+		
+		Debug.flushln("Starting sequential logistic regression");
+		seq.run();
                 Debug.flushln("Verifying results against sequential version");
-				
-				if (prun.w.equals(w)) {
-					Console.OUT.println("Verification passed.");
-				} else {
+		
+		if (prun.w.equals(w)) {
+		    Console.OUT.println("Verification passed.");
+		} else {
                     Console.OUT.println("Verification failed!");
-				}
-			}
 		}
+	    }
 	}
+    }
 }

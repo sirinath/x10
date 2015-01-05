@@ -69,7 +69,13 @@ import x10.rtt.FloatType;
 public class WrapBLAS {
 
     static { 
-	System.loadLibrary("jblas");
+	String lib = "jblas";
+	java.util.Map<String,String> env = System.getenv();
+	String ext = env.get("GML_ELEM_TYPE");
+	if (ext != null) lib+= "_" + ext;
+	System.out.println("Loading " + lib);
+	
+	System.loadLibrary(lib);
     }
 
     static float getFloat(Object o) { return x10.core.Float.$unbox((x10.core.Float) o);}
@@ -106,9 +112,9 @@ public class WrapBLAS {
            static native float  dotProd(long n,  float[] x,  float[] y);
     public static <T> T dotProdET(long n, Rail<T> x, Rail<T> y) {
 	if (x.$getParam(0) instanceof DoubleType) {
-	    return (T) new Double(dotProd(n, x.getDoubleArray(), y.getDoubleArray()));
+	    return (T) x10.core.Double.$box(dotProd(n, x.getDoubleArray(), y.getDoubleArray()));
 	}
-	return (T) new Float(dotProd(n, x.getFloatArray(), y.getFloatArray()));
+	return (T) x10.core.Float.$box(dotProd(n, x.getFloatArray(), y.getFloatArray()));
     }
 
 
@@ -116,9 +122,9 @@ public class WrapBLAS {
      static native  float norm2(long n, float[] x);
     public static <T> T  norm2ET(long n, Rail<T> x) {
 	if (x.$getParam(0) instanceof DoubleType) {
-	    return (T) new Double(norm2(n, x.getDoubleArray()));
+	    return (T) x10.core.Double.$box(norm2(n, x.getDoubleArray()));
 	}
-	return (T) new Float(norm2(n, x.getFloatArray()));
+	return (T) x10.core.Float.$box(norm2(n, x.getFloatArray()));
     }
 
 
@@ -126,9 +132,9 @@ public class WrapBLAS {
            static native  float absSum(long n, float[] x);
     public static <T> T  absSumET(long n, Rail<T> x) {
 	if (x.$getParam(0) instanceof DoubleType) {
-	    return (T) new Double(absSum(n, x.getDoubleArray()));
+	    return (T) x10.core.Double.$box(absSum(n, x.getDoubleArray()));
 	}
-	return (T) new Float(absSum(n, x.getFloatArray()));
+	return (T) x10.core.Float.$box(absSum(n, x.getFloatArray()));
     }
 
            static native void matmatMultOff(double alpha, double[] A, double[] B, double beta, double[] C, long[] dim, long[] ld, long[] off, int[] trans);

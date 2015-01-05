@@ -53,10 +53,10 @@ public class Compress1D {
 	 * @param ca     The storage for the compressed data
 	 */
 	@Inline
-	public def initConst(ldm:Long, v:ElemType, nzp:ElemType, off:Long, ca:CompressArray):void {
+	public def initConst(ldm:Long, v:ElemType, nzp:Float, off:Long, ca:CompressArray):void {
 		initConst(0, ldm, v, nzp, off, ca);
 	}
-	public def initConst(sttIndex:Long, ldm:Long, v:ElemType, nzp:ElemType, off:Long, ca:CompressArray):void {
+	public def initConst(sttIndex:Long, ldm:Long, v:ElemType, nzp:Float, off:Long, ca:CompressArray):void {
 		val cnt = ca.initConstValue(sttIndex, off, ldm, v, nzp);
 		this.offset = off;
 		this.length = cnt;
@@ -70,11 +70,11 @@ public class Compress1D {
 	 * @param off     Offset for the storage
 	 * @param ca     The storage of compressed array
 	 */
-	@Inline	public def initRandom(maxIndex:Long, nzp:ElemType, offset:Long, ca:CompressArray):void {
+	@Inline	public def initRandom(maxIndex:Long, nzp:Float, offset:Long, ca:CompressArray):void {
 		initRandom(0, maxIndex, nzp, offset, ca);
 	}
 	
-	public def initRandom(sttIndex:Long, maxIndex:Long, nzp:ElemType, offset:Long, ca:CompressArray):void {
+	public def initRandom(sttIndex:Long, maxIndex:Long, nzp:Float, offset:Long, ca:CompressArray):void {
 		val cnt=ca.initRandom(offset, sttIndex, maxIndex, nzp);
 		this.offset = offset;
 		this.length = cnt;		
@@ -86,7 +86,7 @@ public class Compress1D {
 	 * @see initRandom()
 	 */
 	public static def makeRand(maxIndex:Long, 
-							   nzp:ElemType, 
+							   nzp:Float, 
 							   offset:Long,
 							   ca:CompressArray):Compress1D {
 		val cnt=ca.initRandom(offset, maxIndex, nzp);
@@ -105,7 +105,7 @@ public class Compress1D {
 	 * @param up      upper bound
 	 */
 	public def initRandomFast(ldm:Long,      // Maximum index
-							  nzp:ElemType,   // Nonzero percentage
+							  nzp:Float,   // Nonzero percentage
 							  off:Long,      // Offset for the storage
 							  ca:CompressArray, // The shared storage 
 							  lb:Long, ub:Long):void {
@@ -116,7 +116,7 @@ public class Compress1D {
 	
 	public def initRandomFast(sttIndex:Long, //Starting index value,
 			ldm:Long,      // Maximum index
-			nzp:ElemType,   // Nonzero percentage
+			nzp:Float,   // Nonzero percentage
 			off:Long,      // Offset for the storage
 			ca:CompressArray, // The shared storage 
 			lb:Long, ub:Long):void {
@@ -134,11 +134,11 @@ public class Compress1D {
 	 * @param off     Offset for the storage
 	 * @param ca      The shared storage
 	 */
-	public def initRandomFast(ldm:Long, nzp:ElemType, off:Long, ca:CompressArray):void {
+	public def initRandomFast(ldm:Long, nzp:Float, off:Long, ca:CompressArray):void {
 		initRandomFast(0, ldm, nzp, off, ca, 0, 0);
 	}
 	
-	public def initRandomFast(sttIndex:Long, ldm:Long, nzp:ElemType, off:Long, ca:CompressArray):void {
+	public def initRandomFast(sttIndex:Long, ldm:Long, nzp:Float, off:Long, ca:CompressArray):void {
 		initRandomFast(sttIndex, ldm, nzp, off, ca, 0, 0);
 	}
 	/**
@@ -147,7 +147,7 @@ public class Compress1D {
 	 * @see initRandomFast()
 	 */
 	public static def makeRandomFast(maxIndex:Long, 
-									 nzp:ElemType, 
+									 nzp:Float, 
 									 offset:Long,
 									 ca:CompressArray):Compress1D {
 		val cnt=ca.initRandomFast(offset, maxIndex, nzp);

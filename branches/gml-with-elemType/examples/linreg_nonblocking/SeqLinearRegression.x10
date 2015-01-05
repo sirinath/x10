@@ -11,6 +11,7 @@
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+import x10.matrix.ElemType;
 
 /**
  * Sequential implementation of linear regression
@@ -18,7 +19,7 @@ import x10.matrix.DenseMatrix;
 public class SeqLinearRegression{
 	public val iteration:Long;
 	public val w:DenseMatrix(V.N, 1L);
-	val lambda:Double;
+	val lambda:ElemType;
 
 	public val V:DenseMatrix;
 	public val b:DenseMatrix;
@@ -35,7 +36,7 @@ public class SeqLinearRegression{
 		b = inb; 
 		iteration = it;
 
-		lambda = 0.000001;
+		lambda = (ElemType==Double)?0.000001 as ElemType: 0.0001 as ElemType;
 
 		Vp = DenseMatrix.make(V.M, 1L);
 		r  = DenseMatrix.make(V.N, 1L);
@@ -43,19 +44,19 @@ public class SeqLinearRegression{
 		p1 = DenseMatrix.make(V.N, 1L);
 		q  = DenseMatrix.make(V.N, 1L);
 		w  = DenseMatrix.make(V.N, 1L);
-		w.init(0.0);
+		w.init(0.0 as ElemType);
 	}
 	
 	public def run():DenseMatrix {
-		var alpha:Double=0.0;
-		var beta:Double =0.0;
+		var alpha:ElemType=0.0 as ElemType;
+		var beta:ElemType =0.0 as ElemType;
 					  
 	    b.copyTo(r as DenseMatrix(b.M, b.N));
-		r.scale(-1.0);
+		r.scale(-1.0 as ElemType);
 		b.copyTo(p as DenseMatrix(b.M, b.N));
 
-		var norm_r2:Double = r.norm(r);
-		var old_norm_r2:Double;
+		var norm_r2:ElemType = r.norm(r);
+		var old_norm_r2:ElemType;
 		val pq = DenseMatrix.make(1, 1);
 
 		for (1..iteration) {

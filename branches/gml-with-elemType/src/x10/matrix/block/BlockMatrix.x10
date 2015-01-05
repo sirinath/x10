@@ -91,13 +91,13 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
      * @param  gp  partitioning of matrix
      * @param  nzd  nonzero density or sparsity for all sparse blocks
      */
-    public static def makeSparse(gp:Grid, nzd:ElemType): BlockMatrix(gp.M, gp.N) {
+    public static def makeSparse(gp:Grid, nzd:Float): BlockMatrix(gp.M, gp.N) {
         val bm = new BlockMatrix(gp) as BlockMatrix(gp.M,gp.N);
         bm.allocSparseBlocks(nzd);
         return bm;
     }
 
-    public static def makeSparse(m:Long, n:Long, rowbs:Long, colbs:Long, nzd:ElemType):BlockMatrix(m,n) =
+    public static def makeSparse(m:Long, n:Long, rowbs:Long, colbs:Long, nzd:Float):BlockMatrix(m,n) =
         makeSparse(new Grid(m,n,rowbs,colbs), nzd);
 
     public static def makeDense(that:BlockMatrix): BlockMatrix(that.M, that.N) {
@@ -138,7 +138,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
         return this;
     }
 
-    public def allocSparseBlocks(nzd:ElemType): BlockMatrix(this) {
+    public def allocSparseBlocks(nzd:Float): BlockMatrix(this) {
         for(var p:Long=0; p<grid.size; p++) {
             val rid = this.grid.getRowBlockId(p);
             val cid = this.grid.getColBlockId(p);

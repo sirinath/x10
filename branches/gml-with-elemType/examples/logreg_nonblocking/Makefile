@@ -12,7 +12,8 @@ depend_src  = SeqLogReg.x10 LogisticRegression.x10
 build_path	= build
 
 # GML path
-gml_path    = ../..
+#gml_path    = ../..
+gml_path    = ~/tmp
 
 # compile options
 X10_FLAG	= -sourcepath ../.  -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -O -NO_CHECKS

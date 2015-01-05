@@ -73,8 +73,6 @@ protected class DriverBLAS {
      * @param Y        left side array of dot product
      * @return         dot-product result
      */
-    //    public static def dot_prod(n:Long, X:Rail[ElemType], Y:Rail[ElemType])=dot_prodET[ElemType](n, X, Y);
-
     @Native("java", "WrapBLAS.<#T$box>dotProdET(#n, #X, #Y)")
     @Native("c++","dot_prod(#n,(#X)->raw,(#Y)->raw)")
     public static native def dot_prod[T](

@@ -10,14 +10,18 @@
  */
 package logreg;
 
-import x10.util.Timer;
-
 import x10.matrix.ElemType;
 import x10.matrix.Vector;
+import x10.matrix.ElemType;
+
 import x10.matrix.distblock.DistVector;
 import x10.matrix.distblock.DupVector;
 import x10.matrix.distblock.DistBlockMatrix;
+
+import x10.util.Timer;
+
 import x10.matrix.util.Debug;
+
 import x10.util.resilient.ResilientIterativeApp;
 import x10.util.resilient.ResilientExecutor;
 import x10.util.resilient.ResilientStoreForApp;
@@ -95,7 +99,7 @@ public class LogisticRegression implements ResilientIterativeApp {
         onew   = DistVector.make(X.M, rowBs, places);
         wnew   = Vector.make(X.N);
         logisticnew = DistVector.make(X.M, rowBs, places);
-
+        
         maxIterations = it;
         maxinneriter =nit;
         chkpntIterations = chkpntIter;
@@ -113,32 +117,32 @@ public class LogisticRegression implements ResilientIterativeApp {
         }
         val w = Vector.make(X.N);
         val y = DistVector.make(X.M, X.getAggRowBs(), places);
-
+        
         //X = Rand(rows = 1000, cols = 1000, min = 1, max = 10, pdf = "uniform");
         X.initRandom(1, 10);
         y.initRandom(1, 10);
         //w = Rand(rows=D, cols=1, min=0.0, max=0.0);
         w.initRandom();
-
+        
         return new LogisticRegression(X, y, w, it, nit, nzd, chkpntIter, places);
     }
-
+    
     public def run() {
         //o = X %*% w
         compute_XmultB(o, w);
         //logistic = 1.0/(1.0 + exp( -y * o))
         val logistic = DistVector.make(X.M, X.getAggRowBs(), X.places());
-        logistic.map(y, o, (y_i:ElemType, o_i:ElemType)=> { 1.0f / (1.0f + Math.exp(-y_i * o_i)) });
-
+        logistic.map(y, o, (y_i:ElemType, o_i:ElemType)=> (1.0 / (1.0 + Math.exp(-y_i * o_i))) as ElemType);
+        
         //obj = 0.5 * t(w) %*% w + C*sum(logistic)
-        obj = 0.5f * w.dot(w) + C*logistic.sum();
-
+        obj = (0.5 * w.dot(w) + C*logistic.sum()) as ElemType;
+        
         //grad = w + C*t(X) %*% ((logistic - 1)*y)        
         compute_grad(grad, logistic);
-
+        
         //logisticD = logistic*(1-logistic)
         logisticD = logistic.clone();
-        logisticD.map((x:ElemType)=> {x*(1.0f-x)});
+        logisticD.map((x:ElemType)=> (x*(1.0-x)) as ElemType);
 
         //delta = sqrt(sum(grad*grad))
         delta = grad.norm();
@@ -152,12 +156,12 @@ public class LogisticRegression implements ResilientIterativeApp {
         //alpha = t(w) %*% w
         alpha = w.dot(w);
         Debug.flushln("Done initialization. Starting converging iteration");
-
+        
         new ResilientExecutor(chkpntIterations, places).run(this);
         
         commUseTime += dup_w.getCommTime()+y.getCommTime();
     }
-
+    
     public def step():void{
         //             norm_grad = sqrt(sum(grad*grad))
         val norm_grad = grad.norm();
@@ -166,7 +170,7 @@ public class LogisticRegression implements ResilientIterativeApp {
         //             s = zeros_D
         s.reset();
         //             r = -grad
-        r.scale(-1.0f, grad);
+        r.scale(-1.0 as ElemType, grad);
         //             d = r
         r.copyTo(d);
         //             inneriter = 0
@@ -232,18 +236,21 @@ public class LogisticRegression implements ResilientIterativeApp {
         //             # END TRUST REGION SUB-PROBLEM
         //             # compute rho, update w, obtain delta
         //             qk = -0.5*(t(s) %*% (grad - r))
-        val qk = -0.5f * s.dot(grad-r);
+        val qk = (-0.5 * s.dot(grad-r)) as ElemType;
+
         //             wnew = w + s
         wnew.cellAdd(w, s);
         //             onew = X %*% wnew
         compute_XmultB(onew, wnew); 
         //             logisticnew = 1.0/(1.0 + exp(-y * o ))
         val stt = Timer.milliTime();
-        logisticnew.map(y, o, (y_i:ElemType, o_i:ElemType)=> { 1.0f / (1.0f + Math.exp(-y_i * o_i)) });
+        logisticnew.map(y, o, (y_i:ElemType, o_i:ElemType)=> ( (1.0 / (1.0 + Math.exp(-y_i * o_i))) as ElemType ));
+
         paraRunTime += Timer.milliTime() - stt;
         
         //             objnew = 0.5 * t(wnew) %*% wnew + C * sum(logisticnew)
-        val objnew = 0.5f * wnew.dot(wnew) + C * logisticnew.sum();
+        val objnew = (0.5 * wnew.dot(wnew) + C * logisticnew.sum()) as ElemType;
+
         //             
         //             rho = (objnew - obj) / qk
         val rho = (objnew - obj)/qk;
@@ -260,20 +267,20 @@ public class LogisticRegression implements ResilientIterativeApp {
         iter = iter + 1;
         converge = (norm_r2 < (tol * tol)) | (iter > maxIterations);
         if (rho < eta0){
-            delta = Math.min(Math.max(alpha , sigma1) * snorm, sigma2 * delta );            
+            delta = Math.min(Math.max(alpha , sigma1) * snorm, sigma2 * delta ) as ElemType;            
         } else {
             if (rho < eta1){
-                delta = Math.max(sigma1 * delta, Math.min(alpha  * snorm, sigma2 * delta));                
+                delta = Math.max(sigma1 * delta, Math.min(alpha  * snorm, sigma2 * delta)) as ElemType;                
             } else { 
                 if (rho < eta2) {
-                    delta = Math.max(sigma1 * delta, Math.min(alpha * snorm, sigma3 * delta));                    
+                    delta = Math.max(sigma1 * delta, Math.min(alpha * snorm, sigma3 * delta)) as ElemType;                    
                 } else {
-                    delta = Math.max(delta, Math.min(alpha * snorm, sigma3 * delta));                    
+                    delta = Math.max(delta, Math.min(alpha * snorm, sigma3 * delta)) as ElemType;                    
                 }
             }
         }
     }
-
+    
     private def compute_XmultB(result:DistVector(X.M), opB:Vector(X.N)):void {
         // o = X %*% w
         val stt = Timer.milliTime();
@@ -285,7 +292,8 @@ public class LogisticRegression implements ResilientIterativeApp {
     private def compute_grad(grad:Vector(X.N), logistic:DistVector(X.M)):void {
         // grad = w + C*t(X) %*% ((logistic - 1)*y)
         val stt = Timer.milliTime();
-        logistic.map(y, (x:ElemType, v:ElemType)=> {(x - 1.0f) * v});
+        logistic.map(y, (x:ElemType, v:ElemType)=> ((x - 1.0) * v) as ElemType);
+
         compute_tXmultB(grad, logistic);
         paraRunTime += Timer.milliTime() - stt;
         grad.scale(C).cellAdd(w);
@@ -305,11 +313,11 @@ public class LogisticRegression implements ResilientIterativeApp {
         dup_w.mult(B, X, false);
         dup_w.local().copyTo(result);
     }
-
+    
     public def isFinished():Boolean{
         return converge;
     }
-
+    
     public def checkpoint(store:ResilientStoreForApp):void {        
         store.startNewSnapshot();
         store.saveReadOnly(X);
@@ -321,12 +329,12 @@ public class LogisticRegression implements ResilientIterativeApp {
         store.commit();
         lastCheckpointDelta = delta;
     }
-
+    
     public def restore(newPlaces:PlaceGroup, store:ResilientStoreForApp, lastCheckpointIter:Long):void{        
         val newRowPs = newPlaces.size();
         val newColPs = 1;
         Console.OUT.println("Going to restore LogisticRegression app, newRowPs["+newRowPs+"], newColPs["+newColPs+"] ...");
-
+        
         // redistribute all matrices / vectors to new PlaceGroup
         if (nzd < MAX_SPARSE_DENSITY) {
             X.remakeSparse(newRowPs, newColPs, nzd, newPlaces, true);
@@ -337,12 +345,12 @@ public class LogisticRegression implements ResilientIterativeApp {
         y.remake(rowBs, newPlaces);
         o.remake(rowBs, newPlaces);
         onew.remake(rowBs, newPlaces);
-
+        
         tmp_y.remake(rowBs, newPlaces);
         logisticD.remake(rowBs, newPlaces);
         logisticnew.remake(rowBs, newPlaces);
         dup_w.remake(newPlaces);
-
+        
         store.restore();
         iter = lastCheckpointIter;
         delta = lastCheckpointDelta;

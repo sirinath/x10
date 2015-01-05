@@ -84,10 +84,10 @@ public class CompressArray {
 	 * @param nzd             Percentage of nonzero entries or sparsity
 	 * @return                number of non-zero added 
 	 */
-	protected def init(offset:Long, maxIndex:Long, init:(ci:Long,rg:Random)=>ElemType, nzd:ElemType) =
+	protected def init(offset:Long, maxIndex:Long, init:(ci:Long,rg:Random)=>ElemType, nzd:Float) =
 		init(offset, 0, maxIndex, init, nzd);
 
-	protected def init(offset:Long, sttIndex:Long, maxIndex:Long, init:(ci:Long,rg:Random)=>ElemType, nzd:ElemType):Long {
+	protected def init(offset:Long, sttIndex:Long, maxIndex:Long, init:(ci:Long,rg:Random)=>ElemType, nzd:Float):Long {
 		val size = storageSize();
 		if (offset >= size)	return 0; 
 		val rg = RandTool.getRandGen();  
@@ -116,9 +116,9 @@ public class CompressArray {
 	 * @param nzd            nonzero density
 	 * @param return         number of nonzeros added
 	 */
-	public def initConstValue(offset:Long, maxIndex:Long, v:ElemType, nzd:ElemType):Long =
+	public def initConstValue(offset:Long, maxIndex:Long, v:ElemType, nzd:Float):Long =
 		init(offset, maxIndex, (ci:Long, rg:Random)=>(v), nzd);
-	public def initConstValue(offset:Long, sttIndex:Long, maxIndex:Long, v:ElemType,	nzd:ElemType):Long =
+	public def initConstValue(offset:Long, sttIndex:Long, maxIndex:Long, v:ElemType,	nzd:Float):Long =
 		init(offset, sttIndex, (ci:Long, rg:Random)=>(v), nzd);
 	
 	/**
@@ -190,10 +190,10 @@ public class CompressArray {
 	 * @param nzd            nonzero density
 	 * @param return         number of non-zeros added 
 	 */
-	public def initRandom(offset:Long, maxIndex:Long, nzd:ElemType):Long =
+	public def initRandom(offset:Long, maxIndex:Long, nzd:Float):Long =
 	    init(offset, 0, maxIndex, (ci:Long, rg:Random)=>RandTool.nextElemType[ElemType](rg), nzd);
 
-	public def initRandom(offset:Long, sttIndex:Long, maxIndex:Long, nzd:ElemType):Long =
+	public def initRandom(offset:Long, sttIndex:Long, maxIndex:Long, nzd:Float):Long =
 		init(offset, sttIndex, maxIndex, (ci:Long, rg:Random)=>RandTool.nextElemType[ElemType](rg), nzd);
 
 	/**
@@ -208,10 +208,10 @@ public class CompressArray {
 	 * @param ub		-- upper random value bound
 	 * @param return   	-- number of nonzeros added
 	 */
-	public def initRandomFast(offset:Long, maxIndex:Long, nzd:ElemType, lb:Long, ub:Long):Long =
+	public def initRandomFast(offset:Long, maxIndex:Long, nzd:Float, lb:Long, ub:Long):Long =
 		initRandomFast(offset, 0, maxIndex, nzd, lb, ub);
 	
-	public def initRandomFast(offset:Long, sttIndex:Long, maxIndex:Long, nzd:ElemType, lb:Long, ub:Long):Long { 
+	public def initRandomFast(offset:Long, sttIndex:Long, maxIndex:Long, nzd:Float, lb:Long, ub:Long):Long { 
 	    val sts = storageSize();
 	    //val cnt = maxIndex*nzd > sts ? sts: ((maxIndex*nzd) as Long); 
 	    if (offset >=  sts) return 0;
@@ -266,7 +266,7 @@ public class CompressArray {
 	 * @param nzd      	-- Nonzero percentage for each entry, must >= 1.0
 	 * @param return   	-- number of nonzeros added
 	 */
-	public def initRandomFast(offset:Long, maxIndex:Long, nzd:ElemType) =
+	public def initRandomFast(offset:Long, maxIndex:Long, nzd:Float) =
 		initRandomFast(offset, 0, maxIndex, nzd, 0, -1);
 
 	/**

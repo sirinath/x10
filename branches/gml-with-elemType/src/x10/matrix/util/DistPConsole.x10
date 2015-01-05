@@ -16,8 +16,8 @@ import x10.regionarray.DistArray;
 import x10.matrix.ElemType;
 
 public class DistPConsole {
-	public val pconsole:DistArray[PConsole](1);
-
+       	public val pconsole:DistArray[PConsole](1);
+	
 	public def this() {
 		val dist = Dist.makeUnique();
 		pconsole = DistArray.make[PConsole](dist, ([i]:Point)=>(new PConsole()));

@@ -5,4 +5,5 @@ package x10.matrix;
    which currently does not perform well in the managed backend. 
 */
 
-public type ElemType=Double;
+public type ElemType=Float;
+
