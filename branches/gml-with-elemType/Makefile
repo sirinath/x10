@@ -1,5 +1,4 @@
 # Makefile for X10 global matrix library - GML
-include scripts/system_setting.mk
 
 src_path	=src
 lib_path	=lib
@@ -8,6 +7,10 @@ lib_path	=lib
 #build_path_elem =native_$(GML_ELEM_TYPE)/include
 # Output libs, properties, and tar files
 target		= native_gml
+gml_path        = .
+
+include scripts/system_setting.mk
+include scripts/build_common.mk
 
 default	: help 
 

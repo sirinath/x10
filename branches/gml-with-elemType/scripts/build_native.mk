@@ -43,6 +43,7 @@ endif
 
 #vj: used to depend on gml_inc
 $(target)_sock	: $(x10src) $(depend_src) 
+	        @echo "X10_HOME is |$(X10_HOME)|"
 		$(X10CXX) -g -x10rt sockets $(GML_NAT_OPT) $(X10_FLAG) $< -o $@_$(GML_ELEM_TYPE) \
 		-post ' \# $(POST_PATH) \# $(POST_LIBS)'
 
