@@ -124,7 +124,7 @@ public class TestCSC extends x10Test {
     public def testScaleAdd():Boolean {
         Console.OUT.println("CSC Scaling-Add test");
         val a = SparseCSC.make(M, N, 0.3f);
-        a.initRandom(ET(0.3));
+        a.initRandom();
         val a1= a * ET(0.2);
         val a2= a * ET(0.8);
         val aa=a1+a2;
