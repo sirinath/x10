@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  *  (C) Copyright Sara Salem Hamouda 2014.
  */
 package linreg;
@@ -21,6 +21,7 @@ import x10.matrix.distblock.DupVector;
 import x10.matrix.distblock.DistVector;
 
 import x10.matrix.util.PlaceGroupBuilder;
+import x10.util.resilient.DistObjectSnapshot;
 import x10.util.resilient.ResilientIterativeApp;
 import x10.util.resilient.ResilientExecutor;
 import x10.util.resilient.ResilientStoreForApp;
@@ -30,17 +31,16 @@ import x10.util.resilient.ResilientStoreForApp;
  * dense/sparse matrix
  */
 public class LinearRegression implements ResilientIterativeApp {
-    public static val MAX_SPARSE_DENSITY = 0.1;
-    static val lambda = 1e-6; // regularization parameter
+    static val MAX_SPARSE_DENSITY = 0.1;
 
-    /** Matrix of training examples */
+    //Input matrix
     public val V:DistBlockMatrix;
-    /** Vector of training regression targets */
-    public val y:DistVector(V.M);
-    /** Learned model weight vector, used for future predictions */
-    public val w:Vector(V.N);
+    public val b:Vector(V.N);
+    //Parameters
+    public val iterations:Long;
+    static val lambda:Double = 0.000001;
 
-    public val maxIterations:Long;
+    public val w:Vector(V.N);
 
     val d_p:DupVector(V.N);
     val Vp:DistVector(V.M);
@@ -48,7 +48,7 @@ public class LinearRegression implements ResilientIterativeApp {
     val r:Vector(V.N);
     val d_q:DupVector(V.N);
 
-    private val checkpointFreq:Long;
+    private val chkpntIterations:Long;
 
     var norm_r2:Double;
     var lastCheckpointNorm:Double;
@@ -59,12 +59,14 @@ public class LinearRegression implements ResilientIterativeApp {
     public var seqCompT:Long=0;
     public var commT:Long;
     private val nzd:Double;
-    private var places:PlaceGroup;
 
-    public def this(v:DistBlockMatrix, y:DistVector(v.M), it:Long, chkpntIter:Long, sparseDensity:Double, places:PlaceGroup) {
-        maxIterations = it;
-        this.V = v;
-        this.y = y;
+    //the matrix snapshot should be taken only once
+    private var V_snapshot:DistObjectSnapshot;
+
+    public def this(v:DistBlockMatrix, b_:Vector(v.N), it:Long, chkpntIter:Long, sparseDensity:Double, places:PlaceGroup) {
+        iterations = it;
+        V =v;
+        b =b_ as Vector(V.N);
 
         Vp = DistVector.make(V.M, V.getAggRowBs(), places);
 
@@ -75,32 +77,44 @@ public class LinearRegression implements ResilientIterativeApp {
 
         w  = Vector.make(V.N);
 
-        this.checkpointFreq = chkpntIter;
+        this.chkpntIterations = chkpntIter;
 
         nzd = sparseDensity;
-        this.places = places;        
+    }
+
+    public static def make(mV:Long, nV:Long, nRowBs:Long, nColBs:Long, nzd:Double, it:Long, chkpntIter:Long, places:PlaceGroup) {
+        //First dist block matrix must have vertical distribution
+        val V:DistBlockMatrix(mV, nV);
+        if (nzd < MAX_SPARSE_DENSITY) {
+            V = DistBlockMatrix.makeSparse(mV, nV, nRowBs, nColBs, places.size(), 1, nzd, places);
+        } else {
+            Console.OUT.println("using dense matrix as non-zero density = " + nzd);
+            V = DistBlockMatrix.makeDense(mV, nV, nRowBs, nColBs, places.size(), 1, places);
+        }
+        val b = Vector.make(nV);
+
+        Console.OUT.printf("Start init matrix V(%d,%d) blocks(%dx%d) ", mV, nV, nRowBs, nColBs);
+        Console.OUT.printf("dist(%dx%d) nzd:%f\n", places.size(), 1, nzd);
+        V.initRandom();
+
+        Debug.flushln("Done. Start init other matrices, b, r, p, q, and w");
+        b.initRandom();
+
+        return new LinearRegression(V, b, it, chkpntIter, nzd, places);
     }
 
     public def isFinished() {
-        return iter >= maxIterations;
+        return iter >= iterations;
     }
 
     public def run() {
-        val dupR = DupVector.make(V.N, Vp.places());
-        // 4: r=-(t(V) %*% y)
-        dupR.mult(y, V);
-        dupR.local().copyTo(r);
-        // 5: p=-r
-        r.copyTo(d_p.local());
-        // 4: r=-(t(V) %*% y)
+        b.copyTo(r);
+        b.copyTo(d_p.local());
         r.scale(-1.0);
-        // 6: norm_r2=sum(r*r)
-        norm_r2 = r.dot(r);
 
-        new ResilientExecutor(checkpointFreq, places).run(this);
+        norm_r2 = r.norm();
 
-        parCompT = dupR.getCalcTime() + d_q.getCalcTime() + Vp.getCalcTime();
-        commT = dupR.getCommTime() + d_q.getCommTime() + d_p.getCommTime() + Vp.getCommTime();
+        new ResilientExecutor(chkpntIterations).run(this);
 
         return w;
     }
@@ -110,12 +124,16 @@ public class LinearRegression implements ResilientIterativeApp {
 
         // Parallel computing
 
+        var ct:Long = Timer.milliTime();
         // 10: q=((t(V) %*% (V %*% p)) )
+
         d_q.mult(Vp.mult(V, d_p), V);
+
+        parCompT += Timer.milliTime() - ct;
 
         // Sequential computing
 
-        var ct:Long = Timer.milliTime();
+        ct = Timer.milliTime();
         //q = q + lambda*p
         val p = d_p.local();
         val q = d_q.local();
@@ -132,25 +150,36 @@ public class LinearRegression implements ResilientIterativeApp {
 
         // 14: r=r+alpha*q;
         r.scaleAdd(alpha, q);
-        // 15: norm_r2=sum(r*r);
-        norm_r2 = r.dot(r);
-        // 16: beta=norm_r2/old_norm_r2;
+        norm_r2 = r.norm();
+
+        // 15: beta=norm r2/old norm r2;
         val beta = norm_r2/old_norm_r2;
-        // 17: p=-r+beta*p;
+
+        // 16: p=-r+beta*p;
         p.scale(beta).cellSub(r);
 
         seqCompT += Timer.milliTime() - ct;
+        // 17: i=i+1;
+
+        commT = d_q.getCommTime() + d_p.getCommTime();
+        //w.print("Parallel result");
 
         iter++;
     }
 
     public def checkpoint(resilientStore:ResilientStoreForApp) {       
-        resilientStore.startNewSnapshot();
-        resilientStore.saveReadOnly(V);
-        resilientStore.save(d_p);
-        resilientStore.save(d_q);
-        resilientStore.save(r);
-        resilientStore.save(w);
+        resilientStore.startNewSnapshot();        
+        finish{
+            async {
+                if (V_snapshot == null)                    
+                    V_snapshot = V.makeSnapshot();                
+                resilientStore.save(V, V_snapshot, true);
+            }
+            async resilientStore.save(d_p);
+            async resilientStore.save(d_q);
+            async resilientStore.save(r);
+            async resilientStore.save(w);
+        }
         resilientStore.commit();
         lastCheckpointNorm = norm_r2;
     }
@@ -170,14 +199,16 @@ public class LinearRegression implements ResilientIterativeApp {
         d_p.remake(newPg);
         Vp.remake(V.getAggRowBs(), newPg);
         d_q.remake(newPg);
+
         store.restore();
 
         //adjust the iteration number and the norm value
         iter = lastCheckpointIter;
         norm_r2 = lastCheckpointNorm;
-        places = newPg;        
         Console.OUT.println("Restore succeeded. Restarting from iteration["+iter+"] norm["+norm_r2+"] ...");
-        Console.OUT.println("Load Balance After Restore: ");
-        V.printLoadStatistics();
+    }
+    
+    public def getMaxIterations():Long{
+        return iterations;
     }
 }

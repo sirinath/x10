@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  *  (C) Copyright Australian National University 2013.
  */
 
@@ -41,6 +41,14 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
 	 * Record the communication time involved in sending/receiving the block.
 	 */
 	public var commTime:Long = 0;
+
+	/**
+	 * Neighbor block places
+	 */
+	public var placeEast:Long=-1;
+	public var placeWest:Long=-1;
+	public var placeNorth:Long=-1;
+	public var placeSouth:Long=-1;
 
 	/**
 	 * Construct a instance of matrix block with specified row and column index

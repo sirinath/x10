@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 #include <stdio.h>
@@ -1270,26 +1270,27 @@ void tri_vector_mult(double* A, blas_long ul, double* bx, blas_long lda, int tra
 }
 
 // A = alpha*x*y**T + A
-void rank_one_update(double alpha, double* x, double* y, double* A, blas_long* dim, blas_long* offset, blas_long* inc, blas_long lda)
+void rank_one_update(double* A, double* x, double* y, blas_long* dim, blas_long* offset, blas_long* inc, blas_long lda, double alpha)
 {
 #ifdef ENABLE_BLAS
   blas_long m    = dim[0];
   blas_long n    = dim[1];
-  blas_long offsetX = offset[0];
-  blas_long offsetY = offset[1];
-  blas_long offsetA = offset[0] + offset[1]*lda;
+  blas_long offx = offset[0];
+  blas_long offy = offset[1];
+  double* xStart = x + offx;
+  double* yStart = y + offy;
   blas_long incx = inc[0];
   blas_long incy = inc[1];
 #if defined(__essl__)
   dger(&m, &n,
-		 &alpha, x+offsetX, &incx,
-		         y+offsetY, &incy,
-		         A+offsetA, &lda);
+		 &alpha, xStart, &incx,
+		         yStart, &incy,
+		         A, &lda);
 #else
   dger_(&m, &n,
-		 &alpha, x+offsetX, &incx,
-		         y+offsetY, &incy,
-		         A+offsetA, &lda);
+		 &alpha, xStart, &incx,
+		         yStart, &incy,
+		         A, &lda);
 #endif
 #else
   error_missing_blas();

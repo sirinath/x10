@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.sparse;
@@ -137,7 +137,7 @@ public class DenseMultSparseToDense {
 	public static def compTransMult_newT(m1:DenseMatrix, m2:SparseCSC{self.M==m1.M}, 
 		m3:DenseMatrix{self.M==m1.N,self.N==m2.N}, plus:Boolean) : DenseMatrix(m3) {
 		val tm1 = DenseMatrix.make(m1.N,m1.M);
-		tm1.T(m1);
+		m1.T(tm1);
 		return comp(tm1, m2, m3, plus);
 	}
 	/**
@@ -147,7 +147,7 @@ public class DenseMultSparseToDense {
 	 */
 	public static def compTransMult(m1:DenseMatrix,m2:SparseCSC{self.M==m1.M}, 
 		m3:DenseMatrix(m1.N,m2.N), m1T:DenseMatrix(m1.N,m1.M), plus:Boolean) : DenseMatrix(m3) {
-		m1T.T(m1);
+		m1.T(m1T);
 		return comp(m1T, m2, m3, plus);
 	}
 	

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.block;
@@ -304,20 +304,20 @@ public class DenseBlock extends MatrixBlock {
 	public def transposeFrom(srcblk:DenseBlock) {
 		val src = srcblk.dense;
 		val dst = this.dense as DenseMatrix(src.N,src.M); 
-		dst.T(src);
+		src.T(dst);
 	}
 	
 	public def transposeTo(dstblk:DenseBlock) {
 		val src = this.dense;
 		val dst = dstblk.dense as DenseMatrix(src.N,src.M); 
-		dst.T(src);
+		src.T(dst);
 	}
 	
 	public def transposeFrom(srcmat:Matrix) {
 		if (srcmat instanceof DenseMatrix) {
 			val src = srcmat as DenseMatrix;
 			val dst = dense as DenseMatrix(src.N,src.M);
-			dst.T(src);
+			src.T(dst);
 		} else {
 			throw new UnsupportedOperationException("Matrix types are not supported in transpose method");
 		}

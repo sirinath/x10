@@ -11,7 +11,6 @@
 
 package x10.util;
 
-import x10.xrx.Runtime;
 
 /**
  * A place-local worker-local storage facility.

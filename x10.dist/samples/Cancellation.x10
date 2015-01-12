@@ -6,10 +6,8 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
-
-import x10.xrx.Runtime;
 
 /**
  * Demonstrate how to instantiate the X10 runtime as an executor service
@@ -18,6 +16,7 @@ import x10.xrx.Runtime;
  * Compile with: x10c -O -EXECUTOR_MODE=true Cancellation.x10
  * Run with:     X10_CANCELLABLE=true X10_NPLACES=4 x10 -DX10RT_IMPL=JavaSockets Cancellation
  */
+
 class Cancellation {
     static def job(id:Long, iterations:Long) = ()=>{
         at (Place.places().next(here)) async {

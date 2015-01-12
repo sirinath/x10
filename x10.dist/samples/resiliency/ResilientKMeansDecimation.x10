@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 import x10.regionarray.*;
 import x10.util.*;
@@ -39,7 +39,7 @@ class ResilientKMeansDecimation {
         
         /*
         finish for (p in Place.places()) at (p) {
-            Console.OUT.println(here+" running in "+x10.xrx.Runtime.getName());
+            Console.OUT.println(here+" running in "+Runtime.getName());
         }
         */
 

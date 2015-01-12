@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  *  (C) Copyright Sara Salem Hamouda 2014.
  */
 
@@ -21,6 +21,8 @@ import x10.matrix.distblock.DistMap;
 import x10.matrix.distblock.DistVector;
 import x10.matrix.distblock.DupVector;
 import x10.matrix.distblock.DistBlockMatrix;
+
+import x10.util.resilient.DistObjectSnapshot;
 import x10.util.resilient.ResilientIterativeApp;
 import x10.util.resilient.ResilientExecutor;
 import x10.util.resilient.ResilientStoreForApp;
@@ -64,9 +66,10 @@ public class PageRank implements ResilientIterativeApp {
     var iter:Long;
     
     private val chkpntIterations:Long;
-    private val nzd:Double;
-    private var places:PlaceGroup;
-
+    private val nzd:Double;    
+    
+    private var G_snapshot:DistObjectSnapshot;
+    
     public def this(
             g:DistBlockMatrix{self.M==self.N}, 
             p:DupVector(g.N), 
@@ -91,7 +94,6 @@ public class PageRank implements ResilientIterativeApp {
         
         chkpntIterations = chkpntIter;
         nzd = sparseDensity;
-        this.places = places;
     }
 
     public static def make(gN:Long, nzd:Double, it:Long, numRowBs:Long, numColBs:Long, chkpntIter:Long, places:PlaceGroup) {
@@ -123,7 +125,7 @@ public class PageRank implements ResilientIterativeApp {
     }
 
     public def run():Vector(G.N) {
-        new ResilientExecutor(chkpntIterations, places).run(this);
+        new ResilientExecutor(chkpntIterations).run(this);
 
         val mulTime = GP.getCalcTime();
 
@@ -177,10 +179,16 @@ public class PageRank implements ResilientIterativeApp {
 
     public def checkpoint(store:ResilientStoreForApp):void {
         store.startNewSnapshot();
-        store.saveReadOnly(G);
-        store.save(P);
-        store.save(E);
-        store.save(U);
+        finish {
+            async {
+                if (G_snapshot == null)
+                    G_snapshot = G.makeSnapshot();
+                store.save(G, G_snapshot, true);
+            }
+            async store.save(P);
+            async store.save(E);
+            async store.save(U);
+        }
         store.commit();
     }
 
@@ -188,7 +196,7 @@ public class PageRank implements ResilientIterativeApp {
         val newRowPs = newPlaces.size();
         val newColPs = 1;
         Console.OUT.println("Going to restore PageRank app, newRowPs["+newRowPs+"], newColPs["+newColPs+"] ...");
-        G.remakeSparse(newRowPs, newColPs, nzd, newPlaces, true);
+        G.remakeSparse(newRowPs, newColPs, nzd, newPlaces);
         P.remake(newPlaces);
         vP = P.local();
         
@@ -198,5 +206,9 @@ public class PageRank implements ResilientIterativeApp {
         
         iter = lastCheckpointIter;
         Console.OUT.println("Restore succeeded. Restarting from iteration["+iter+"] ...");
+    }
+    
+    public def getMaxIterations():Long {
+        return iterations;
     }
 }

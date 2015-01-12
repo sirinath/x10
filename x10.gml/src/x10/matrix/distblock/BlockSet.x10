@@ -1,4 +1,5 @@
 /*
+ * 
  *  This file is part of the X10 project (http://x10-lang.org).
  *
  *  This file is licensed to You under the Eclipse Public License (EPL);
@@ -6,7 +7,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.distblock;
@@ -26,7 +27,6 @@ import x10.matrix.block.MatrixBlock;
 import x10.matrix.util.Debug;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.DenseMatrix;
-import x10.matrix.builder.SparseCSCBuilder;
 
 /**
  * This class provides implementation of list of matrix blocks stored in on place.
@@ -127,6 +127,7 @@ public class BlockSet  {
             val coff   = grid.startCol(colbid);
             add(DenseBlock.make(rowbid, colbid, roff, coff, m, n));
         }
+        assignNeighborPlaces();
         return this;
     }
     
@@ -143,6 +144,7 @@ public class BlockSet  {
             val coff   = grid.startCol(colbid);
             add(SparseBlock.make(rowbid, colbid, roff, coff, m, n, nzd));
         }
+        assignNeighborPlaces();        
         return this;
     }
 
@@ -323,7 +325,53 @@ public class BlockSet  {
         blockMap = new Array[MatrixBlock](Region.makeRectangular(minRow..maxRow, minCol..maxCol), 
                 (p:Point)=>blocklist.get((p(0)-minRow+(p(1)-minCol)*numRowBlk) as Long));
         
-    }  
+    }
+    
+    /**
+     * Build neighboring places for all blocks.
+     * If nieghbor place ID < 0, it does not have neighbor in that direction.
+     */
+    public def assignNeighborPlaces() {
+        val itr = iterator();
+        while (itr.hasNext()) {
+            val blk = itr.next();
+            blk.placeNorth = findNorthPlace(blk);
+            blk.placeSouth = findSouthPlace(blk);
+            blk.placeEast = findEastPlace(blk);
+            blk.placeWest = findWestPlace(blk);
+        }
+    }
+    
+    /**
+     * Find neighboring block's place
+     */
+    public def findNorthPlace(blk:MatrixBlock) = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>n);
+    public def findSouthPlace(blk:MatrixBlock) = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>s);
+    public def findEastPlace(blk:MatrixBlock)  = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>e);
+    public def findWestPlace(blk:MatrixBlock)  = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>w);
+
+    @Inline 
+    private final def findNeighborPlace(blk:MatrixBlock, select:(Long, Long, Long, Long)=>Long):Long {
+        val nbid = select(
+                grid.getNorthId(blk.myRowId, blk.myColId),
+                grid.getSouthId(blk.myRowId, blk.myColId),
+                grid.getEastId( blk.myRowId, blk.myColId),
+                grid.getWestId( blk.myRowId, blk.myColId));
+        if (nbid < 0 ) return -1;
+        return findPlace(nbid);
+    }
+
+    /**
+     * Build ring cast place list map
+     */    
+    public def buildCastPlaceMap() {
+        
+        if (rowCastPlaceMap != null)
+            rowCastPlaceMap = CastPlaceMap.buildRowCastMap(grid, dmap, places);
+        
+        if (colCastPlaceMap != null)
+            colCastPlaceMap = CastPlaceMap.buildColCastMap(grid, dmap, places);
+    }    
     
     protected def search(rid:Long, cid:Long):Long {        
         if (blocklist.size() == 0L) return -1;
@@ -357,6 +405,17 @@ public class BlockSet  {
         }
         return blocklist.get(idx);
     }
+    
+    // public def find(rid:Long, cid:Long): MatrixBlock {
+    //     val it = this.iterator();
+    //     while (it.hasNext()) {
+    //         val blk = it.next();
+    //         if (blk.myRowId == rid &&
+    //             blk.myColId == cid ) return blk;
+    //     }
+    //     throw new UnsupportedOperationException("Cannot find block ("+rid+","+cid+") at place "+here.id());
+    //     return null;
+    // }
     
     @Inline
     public def findBlock(bid:Long) = find(bid);
@@ -878,23 +937,4 @@ public class BlockSet  {
         newBlockSet.blocklist.addAll(blocksList);
         return newBlockSet;
     }
-    
-    public def allocAndInitNonUniformSparseBlocks(f:(Long,Long)=>Double): BlockSet {        
-        val placeIndex = places.indexOf(here.id);
-        val itr = dmap.buildBlockIteratorAtPlace(placeIndex);
-        while (itr.hasNext()) {
-            val bid    = itr.next();
-            val rowbid = grid.getRowBlockId(bid);
-            val colbid = grid.getColBlockId(bid);
-            val m      = grid.rowBs(rowbid);
-            val n      = grid.colBs(colbid);            
-            val roff   = grid.startRow(rowbid);
-            val coff   = grid.startCol(colbid);            
-            val builder = SparseCSCBuilder.make(m,n);            
-            val offsetF = (a:Long,b:Long)=> f(a+roff,b+coff);            
-            builder.init(offsetF);
-            add(new SparseBlock(rowbid, colbid, roff, coff, builder.toSparseCSC()));
-        }
-        return this;
-    }   
 }

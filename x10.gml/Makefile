@@ -32,7 +32,6 @@ base_src=\
 	x10/matrix/DenseMatrix.x10 \
 	x10/matrix/VectorMult.x10 \
 	x10/matrix/MatrixMultXTen.x10  \
-    x10/matrix/regression/RegressionInputData.x10 \
 	x10/matrix/util/Debug.x10 \
 	x10/matrix/util/DistPConsole.x10	\
 	x10/matrix/util/MathTool.x10 \
@@ -47,8 +46,7 @@ base_src=\
 	x10/util/resilient/Snapshot.x10 \
 	x10/util/resilient/Snapshottable.x10 \
 	x10/util/resilient/VectorSnapshotInfo.x10 \
-	x10/util/resilient/BlockSetSnapshotInfo.x10 \
-	x10/util/resilient/PlaceHammer.x10
+	x10/util/resilient/BlockSetSnapshotInfo.x10
 
 comm_src=\
 	x10/matrix/comm/ArrayBcast.x10 \
@@ -186,7 +184,7 @@ lib_src     = $(seq_src) $(dist_src) $(builder_src) $(comm_src) $(summa_src)
 VPATH		=$(bwrap_path):$(lwrap_path):$(src_path)
 
 
-override X10FLAGS += -VERBOSE_CHECKS -O -g # -NO_CHECKS
+X10FLAGS	+= -VERBOSE_CHECKS -O -NO_CHECKS -g
 ifdef COVERAGE
     X10CXXFLAGS += --coverage
 endif
@@ -250,10 +248,10 @@ wrap_blas.o	: wrap_blas.cc
 jni_blas.o 	: jni_blas.cc
 			$(CXX) $(JNI_INCLUDES) -c -fPIC $< -o $@
 
-$(JBLAS_JNILIB)	: wrap_blas.o jni_blas.o
+libjblas.so	: wrap_blas.o jni_blas.o
 			$(CXX) $(JNI_INCLUDES) -shared -fPIC $^ $(X10CXX_POSTARGS:-cxx-postarg=) -o $@ 
 
-jblas		: $(JBLAS_JNILIB)
+jblas		: libjblas.so
 			cp $< $(lib_path)/.
 
 ###------------------------------------------------
@@ -269,10 +267,10 @@ wrap_lapack.o: wrap_lapack.cc
 jni_lapack.o: jni_lapack.cc
 			g++ $(JNI_INCLUDES) -c -fPIC $< -o $@
 
-$(JLAPACK_JNILIB): wrap_lapack.o jni_lapack.o
+libjlapack.so: wrap_lapack.o jni_lapack.o
 			g++ -shared -fPIC $^ -o $@ $(X10CXX_POSTARGS:-cxx-postarg=)
 
-jlapack		: $(JLAPACK_JNILIB)
+jlapack		: libjlapack.so
 			cp $< $(lib_path)/.
 
 ###------------------------------------------------

@@ -49,8 +49,6 @@ namespace x10 {
 
             virtual void skip(x10_long bytes);
 
-            virtual long offset();
-
             ::x10::lang::String* readLine();
             
             // Serialization

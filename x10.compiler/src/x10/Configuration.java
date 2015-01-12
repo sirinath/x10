@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10;
@@ -130,6 +130,9 @@ public final class Configuration extends x10.config.Configuration {
     public boolean OPTIMIZE_COMMUNICATIONS = false;
     private static final String OPTIMIZE_COMMUNICATIONS_desc = "Communication optimizations, i.e. scalar replacement";
     
+    public boolean APGAS_LIB_MODE = false;
+    private static final String APGAS_LIB_MODE_desc = "Allow compilation with incomplete X10 libraries for building APGAS Library";
+
     public boolean EXECUTOR_MODE = false;
     private static final String EXECUTOR_MODE_desc = "Allow main method to submit and cancel jobs";
 

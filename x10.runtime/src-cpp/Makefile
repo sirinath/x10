@@ -187,8 +187,10 @@ ALL_XRCPP_OBJECTS = \
 	x10/lang/RuntimeNatives.o \
 	x10/lang/Short.o \
 	x10/lang/String.o \
+	x10/lang/Deque.o \
 	x10/lang/Lock__ReentrantLock.o \
 	x10/lang/PlaceLocalHandle_Impl.o \
+	x10/lang/Thread.o \
 	x10/lang/UByte.o \
 	x10/lang/UInt.o \
 	x10/lang/ULong.o \
@@ -198,9 +200,7 @@ ALL_XRCPP_OBJECTS = \
 	x10/util/concurrent/AtomicBooleanNatives.o \
 	x10/util/concurrent/AtomicIntegerNatives.o \
 	x10/util/concurrent/AtomicLongNatives.o \
-	x10/util/concurrent/AtomicReference.o \
-	x10/xrx/Deque.o \
-	x10/xrx/Thread.o
+	x10/util/concurrent/AtomicReference.o
 
 ALL_MANUAL_OBJECTS=$(ALL_XRCPP_OBJECTS)
 

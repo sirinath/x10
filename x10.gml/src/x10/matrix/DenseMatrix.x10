@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  *  (C) Copyright Australian National University 2012-2013.
  */
 
@@ -470,21 +470,22 @@ public class DenseMatrix extends Matrix {
     }
 
     /**
-     * Transpose the input matrix and store in this matrix.
-     * @param X source matrix to transpose; may not be the same as this matrix
+     * Transpose this dense matrix and store in the input dense matrix.
+     * 
+     * @param m        object to store the transposed matrix
      */
-    public def T(X:DenseMatrix{self!=this,self.M==this.N,self.N==this.M}):DenseMatrix(this) {
+    public def T(m:DenseMatrix(N,M)) : void {
         var src_idx:Long =0;
         var dst_idx:Long =0;
         //Need to be more efficient
         //Possible idea is to tranpose or copy small block each time.
-        for (var c:Long=0; c < X.N; c++) {
+        //Debug.assure(this.M==m.N&&this.N==m.M);
+        for (var c:Long=0; c < this.N; c++) {
             dst_idx = c;
-            for (var r:Long=0; r < X.M; r++, dst_idx+=this.M, src_idx++) {
-                this.d(dst_idx) = X.d(src_idx);
+            for (var r:Long=0; r < this.M; r++, dst_idx+=m.M, src_idx++) {
+                m.d(dst_idx) = this.d(src_idx);
             }
         }
-        return this;
     }
 
     /*
@@ -492,14 +493,16 @@ public class DenseMatrix extends Matrix {
      */
     public def T(): DenseMatrix(N,M) {
         val nm = DenseMatrix.make(N,M);
-        return nm.T(this);
+        T(nm);
+        return nm;
     }
     
     /*
      * Transpose this matrix in place.
      * This operation can only be performed on a square matrix.
      */
-    public def selfT(){this.M==this.N}:DenseMatrix(this) {
+    public def selfT():DenseMatrix(this) {
+        Debug.assure(this.M==this.N, "Cannot perform transpose for non-square matrix");
         var src_idx:Long =0;
         var dst_idx:Long =0;
         var swaptmp:Double = 0;
@@ -518,18 +521,15 @@ public class DenseMatrix extends Matrix {
 
     /**
      * Raise each element in the matrix by a factor.
-     * this = alpha * this
+     *
      * @param alpha the scaling factor
-     * @return this = alpha * this
+     * @return this = this * alpha
      */
     public def scale(alpha:Double):DenseMatrix(this)
         = map((x:Double)=>{alpha * x});
 
     /**
      * this = alpha * X
-     * @param alpha the scaling factor
-     * @param X the source matrix, may be the same as this matrix
-     * @return this = alpha * X
      */
     public def scale(alpha:Double, X:DenseMatrix(M,N)):DenseMatrix(this)
         = map(X, (x:Double)=> {alpha * x});
@@ -540,7 +540,7 @@ public class DenseMatrix extends Matrix {
      * @param x matrix object
      * @return Euclidean distance
      */
-    public def distance(x:Matrix(M,N)):Double {
+    public def norm(x:Matrix(M,N)):Double {
         return Math.sqrt(frobeniusProduct(x));
     }
 
@@ -1196,33 +1196,6 @@ public class DenseMatrix extends Matrix {
      */
     public final @Inline def reduce(op:(a:Double,b:Double)=>Double, unit:Double):Double
         = RailUtils.reduce(this.d, op, unit);
-
-    /**
-     * Reduce the rows of this matrix using the provided reducer function.
-     * @param op a binary reducer function to combine elements of this matrix
-     * @param unit the identity value for the reduction function
-     * @return a Vector whose i'th element is the reduction of all the elements in the i'th row
-     */
-    public final @Inline def reduce0(op:(a:Double,b:Double)=>Double, unit:Double)
-        = new Vector(M, (i:Long)=> {
-            var accum:Double = unit;
-            for (j in 0..(N-1)) accum = op(accum, this(i,j));
-            accum
-        });
-
-    /**
-     * Reduce the columns of this matrix using the provided reducer function.
-     * @param op a binary reducer function to combine elements of this matrix
-     * @param unit the identity value for the reduction function
-     * @return a Vector whose j'th element is the reduction of all the elements in the j'th column
-     */
-    public final @Inline def reduce1(op:(a:Double,b:Double)=>Double, unit:Double)
-        = new Vector(N, (j:Long)=> {
-            var accum:Double = unit;
-            for (i in 0..(M-1)) accum = op(accum, this(i,j));
-            accum
-        });
-
 
     /**
      * Convert the whole dense matrix into a string

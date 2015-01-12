@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -161,13 +161,13 @@ public class ArrayReduce extends ArrayRemoteCopy {
             val lfcnt  = pcnt - rtcnt;
             val rtroot = root + lfcnt;
             finish {
+                if (lfcnt > 0) async {
+                    x10ReduceToHere(dat, tmp, datCnt, lfcnt, root,places, opFunc);
+                }
                 if (rtcnt > 1) {
                     at(places(rtroot)) async {
-                        x10ReduceToHere(dat, tmp, datCnt, rtcnt, rtroot, places, opFunc);
+                        x10ReduceToHere(dat, tmp, datCnt, rtcnt, rtroot,places, opFunc);
                     }
-                }
-                if (lfcnt > 0) {
-                    x10ReduceToHere(dat, tmp, datCnt, lfcnt, root, places, opFunc);
                 }
             }
             val dstbuf = dat();

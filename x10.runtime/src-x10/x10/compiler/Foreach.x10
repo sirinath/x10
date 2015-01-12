@@ -14,8 +14,6 @@ package x10.compiler;
 import x10.array.BlockingUtils;
 import x10.array.DenseIterationSpace_2;
 
-import x10.xrx.Runtime;
-
 /**
  * Parallel iteration over a set of indices using different patterns of
  * local activity creation; this is intended to be used by the compiler to
@@ -39,98 +37,6 @@ import x10.xrx.Runtime;
  * </ul>
  */
 public final class Foreach {
-    /**
-     * Iterate over a range of indices in sequence in a single activity.
-     * This may be used for debugging purposes or as a compiler target where
-     * there is no benefit to be gained from parallelizing an iteration.
-     * @param min the minimum value of the index
-     * @param max the maximum value of the index
-     * @param body a closure that executes over a single value of the index
-     */
-    public static @Inline def sequential(min:Long, max:Long,
-                                    body:(i:Long)=>void) {
-        for (i in min..max) body(i);
-    }
-
-    /**
-     * Iterate over a range of indices in sequence in a single activity.
-     * @param min0 the minimum value of the first index dimension
-     * @param max0 the maximum value of the first index dimension
-     * @param min1 the minimum value of the second index dimension
-     * @param max1 the maximum value of the second index dimension
-     * @param body a closure that executes over a single value of the index [i,j]
-     */
-    public static @Inline def sequential(min0:Long, max0:Long,
-                                    min1:Long, max1:Long,
-                                    body:(i:Long, j:Long)=>void) {
-        for (i in min0..max0) {
-            for (j in min1..max1) {
-                body(i, j);
-            }
-        }
-    }
-
-    /**
-     * Iterate over a range of indices in sequence in a single activity.
-     * This may be used for debugging purposes or as a compiler target where
-     * there is no benefit to be gained from parallelizing an iteration.
-     * @param min the minimum value of the index
-     * @param max the maximum value of the index
-     * @param body a closure that executes over a contiguous range of indices
-     */
-    public static @Inline def sequential(min:Long, max:Long,
-                                    body:(min:Long, max:Long)=>void) {
-        body(min, max);
-    }
-
-    /**
-     * Iterate over a dense rectangular block of indices in single sequence in a
-     * single activity.
-     * @param space the 2D dense space over which to iterate
-     * @param body a closure that executes over a single index [i,j]
-     */
-    public static @Inline def sequential(space:DenseIterationSpace_2,
-                                    body:(i:Long, j:Long)=>void) {
-        Foreach.sequential(space.min0, space.max0, space.min1, space.max1, body);
-    }
-
-    /**
-     * Reduce over a range of indices in sequence in a single activity.
-     * @param min the minimum value of the index
-     * @param max the maximum value of the index
-     * @param body a closure that executes over a single value of the index
-     * @param reduce the reduction operation
-     * @param identity the identity value for the reduction operation such that reduce(identity,f)=f
-     */
-    public static @Inline def sequentialReduce[T](min:Long, max:Long,
-                                    body:(i:Long)=>T,
-                                    reduce:(a:T,b:T)=>T, identity:T):T{
-        var myRes:T = identity;
-        for (i in min..max) {
-            myRes = reduce(myRes, body(i));
-        }
-        return myRes;
-    }
-
-    /**
-     * Reduce over a range of indices in sequence in a single activity.
-     * @param space the 2D dense space over which to reduce
-     * @param body a closure that executes over a single index [i,j]
-     * @param reduce the reduction operation
-     * @param identity the identity value for the reduction operation such that reduce(identity,f)=f
-     */
-    public static @Inline def sequentialReduce[T](space:DenseIterationSpace_2,
-                                    body:(i:Long, j:Long)=>T,
-                                    reduce:(a:T,b:T)=>T, identity:T):T{
-        var myRes:T = identity;
-        for (i in space.min0..space.max0) {
-            for (j in space.min1..space.max1) {
-                myRes = reduce(myRes, body(i, j));
-            }
-        }
-        return myRes;
-    }
-
     /**
      * Iterate over a range of indices in parallel using a basic async
      * transformation. A separate async is started for every index in min..max
@@ -193,7 +99,9 @@ public final class Foreach {
      */
     public static @Inline def block(min:Long, max:Long,
                                     body:(i:Long)=>void) {
-        val executeRange = (start:Long, end:Long)=> { sequential(start, end, body); };
+        val executeRange = (start:Long, end:Long) => {
+            for (i in start..end) body(i);
+        };
         Foreach.block(min, max, executeRange);
     }
 
@@ -234,8 +142,6 @@ public final class Foreach {
      * @param min the minimum value of the index
      * @param max the maximum value of the index
      * @param body a closure that executes over a single value of the index
-     * @param reduce the reduction operation
-     * @param identity the identity value for the reduction operation such that reduce(identity,f)=f
      */
     public static @Inline def blockReduce[T](min:Long, max:Long,
                                     body:(i:Long)=>T,
@@ -283,7 +189,9 @@ public final class Foreach {
             val myT = t;
             async {
                 val block = BlockingUtils.partitionBlockBlock(space, Runtime.NTHREADS, myT);
-                Foreach.sequential(block, body);
+                for (i in block.min0..block.max0)
+                    for (j in block.min1..block.max1)
+                        body(i, j);
             }
         }
     }
@@ -304,8 +212,16 @@ public final class Foreach {
         val results = Unsafe.allocRailUninitialized[T](Runtime.NTHREADS);
         finish for (var t:Long = Runtime.NTHREADS-1; t >= 0; t--) {
             val myT = t;
-            val block = BlockingUtils.partitionBlockBlock(space, Runtime.NTHREADS, myT);
-            async results(myT) = Foreach.sequentialReduce(block, body, reduce, identity);
+            async {
+                var myRes:T = identity;
+                val block = BlockingUtils.partitionBlockBlock(space, Runtime.NTHREADS, myT);
+                for (i in block.min0..block.max0) {
+                    for (j in block.min1..block.max1) {
+                        myRes = reduce(myRes, body(i, j));
+                    }
+                }
+                results(myT) = myRes;
+            }
         }
         var res:T = results(0);
         for (myT in 1..(Runtime.NTHREADS-1)) {

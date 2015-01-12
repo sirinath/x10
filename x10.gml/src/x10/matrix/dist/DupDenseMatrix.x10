@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.dist;
@@ -324,9 +324,9 @@ public class DupDenseMatrix extends Matrix {
 	}
 
 	/**
-	 * Transpose input matrix and store the result in this matrix.
+	 * Transpose matrix and all copies and store the result at user provided ddm.
 	 */
-	public def T(ddm:DupDenseMatrix(N,M)):void {
+	public def T(ddm:DupDenseMatrix(N,M)): void{
 		finish ateach(val [p]:Point in this.dupMs) {
 			val tm = ddm.local();
 			val m  = local();
@@ -336,11 +336,11 @@ public class DupDenseMatrix extends Matrix {
 	}
 
 	/**
-	 * Transpose this matrix and store in a new DupDenseMatrix instance.
+	 * Transpose matrix and all copies and store a new DupDenseMatrix instance.
 	 */
 	public def T():DupDenseMatrix(N,M) {
 		val tm = DupDenseMatrix.make(this.N, this.M);
-		tm.T(this);
+		this.T(tm);
 		return tm;
 	}
 

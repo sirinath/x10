@@ -1,12 +1,7 @@
 /*
- *  This file is part of the X10 project (http://x10-lang.org).
+ *  This file is part of the X10 Applications project.
  *
- *  This file is licensed to You under the Eclipse Public License (EPL);
- *  You may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *      http://www.opensource.org/licenses/eclipse-1.0.php
- *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011.
  */
 
 #include <stdio.h>
@@ -167,24 +162,24 @@ extern "C" {
   }
 
   //-------------------------------------------------------------
-  // public static native void rankOneUpdate(double[] x, double[] y, double[] A, ....)
+  // public static native void rankOneUpdate(double[] A, double[] x, double[] y, ....)
   JNIEXPORT void JNICALL Java_x10_matrix_blas_WrapBLAS_rankOneUpdate
-  (JNIEnv *env, jobject obj, jdoubleArray x, jdoubleArray y, jdoubleArray A, jlongArray dim, jlongArray offset, jlongArray inc, jint lda, jdouble alpha) {
+  (JNIEnv *env, jobject obj, jdoubleArray A, jdoubleArray x, jdoubleArray y, jlongArray dim, jlongArray offset, jlongArray inc, jint lda, jdouble alpha) {
 
     jboolean isCopy;
-    jdouble* amat = env->GetDoubleArrayElements(A, &isCopy);
+    jdouble* amat = env->GetDoubleArrayElements(A, NULL);
     jdouble* xvec = env->GetDoubleArrayElements(x, NULL);
-    jdouble* yvec = env->GetDoubleArrayElements(y, NULL);
+    jdouble* yvec = env->GetDoubleArrayElements(y, &isCopy);
     jlong dimlist[2];
-    jlong offsetlist[4];
+    jlong offsetlist[2];
     jlong inclist[2];
     // This line is necessary, since Java arrays are not guaranteed
     // to have a continuous memory layout like C arrays.
     env->GetLongArrayRegion(dim, 0, 2, dimlist);
-    env->GetLongArrayRegion(offset, 0, 4, offsetlist);
+    env->GetLongArrayRegion(offset, 0, 2, offsetlist);
     env->GetLongArrayRegion(inc, 0, 2, inclist);
 
-    rank_one_update(alpha, xvec, yvec, amat, (blas_long*)dimlist, (blas_long*)offsetlist, (blas_long*)inclist, lda);
+    rank_one_update(amat, xvec, yvec, (blas_long*)dimlist, (blas_long*)offsetlist, (blas_long*)inclist, lda, alpha);
 
     if (isCopy == JNI_TRUE) {
        //printf("Copying data from c library back to original data in JVM\n");

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix;
@@ -246,14 +246,12 @@ public class Vector(M:Long) implements (Long) => Double, Snapshottable {
         BLAS.compDotProd(this.M, this.d, x.d);
     
 
-    public def dot(v:Vector(M)):Double {
+    public def dotProd(v:Vector(M)):Double {
         var d:Double = 0.0;
          for (i in 0..(M-1))
             d += this.d(i) * v.d(i);
         return d;
     }
-
-    public def dotProd(v:Vector(M)) = dot(v);
 
     // Using Blas routines: self = op(A)* b, self += op(A) * b,
 
@@ -373,54 +371,60 @@ public class Vector(M:Long) implements (Long) => Double, Snapshottable {
      * L1-norm (Manhattan norm, taxicab norm) of this vector,
      * i.e. the sum of the absolute values of all elements of this vector.
      */
-    public def l1Norm():Double {
-        var d:Double = 0.0;
-        for (i in 0..(M-1))
-            d += Math.abs(this.d(i));
-        return d;
-    }
+     public def l1Norm():Double {
+         var d:Double = 0.0;
+         for (i in 0..(M-1))
+             d += Math.abs(this.d(i));
+         return d;
+     }
 
-    /**
+     /**
      * Manhattan distance ||a - b||_1 (L1-distance, taxicab distance)
      * between vectors a and b
      */
-    public static def manhattanDistance(a:Vector, b:Vector(a.M)):Double {
-        var d:Double = 0.0;
-        for (i in 0..(a.M-1))
-            d += Math.abs(a.d(i)-b.d(i));
-        return d;
-    }
+     public static def manhattanDistance(a:Vector, b:Vector(a.M)):Double {
+         var d:Double = 0.0;
+         for (i in 0..(a.M-1))
+             d += Math.abs(a.d(i)-b.d(i));
+         return d;
+     }
 
     /* Manhattan distance between this vector and another vector V */
-    public def manhattanDistance(V:Vector(M)) = manhattanDistance(this, V);
+     public def manhattanDistance(V:Vector(M)) = manhattanDistance(this, V);
 
-    /**
-     * L2-norm (Euclidean norm) of this vector, i.e. the square root of the
+    public static def l1Norm(a:Vector, b:Vector(a.M)) = manhattanDistance(a,b);
+     public def l1Norm(V:Vector(M)) = manhattanDistance(this, V);
+
+     /**
+      * L2-norm (Euclidean norm) of this vector, i.e. the square root of the
      * sum of squares of all elements
-     */
-    public def norm():Double = BLAS.compNorm(this.M, this.d);
+      */
+     public def norm():Double = BLAS.compNorm(this.M, this.d);
     public def l2Norm() = norm();
      
-    /*
+     /*
      * Euclidean distance ||a - b||_2 (L2-distance) between vectors a and b
      */
-    public static def distance(a:Vector, b:Vector(a.M)):Double {
-        var d:Double = 0.0;
-        for (i in 0..(a.M-1))
-            d += (a.d(i)-b.d(i)) * (a.d(i)-b.d(i));
-        return Math.sqrt(d);
-    }
+     public static def distance(a:Vector, b:Vector(a.M)):Double {
+         var d:Double = 0.0;
+         for (i in 0..(a.M-1))
+             d += (a.d(i)-b.d(i)) * (a.d(i)-b.d(i));
+         return Math.sqrt(d);
+     }
      
-    /* Euclidean distance between this vector and another vector V */
-    public def distance(V:Vector(M)) = distance(this, V);
+     /* Euclidean distance between this vector and another vector V */
+     public def distance(V:Vector(M)) = distance(this, V);
+     
+     public static def norm(a:Vector, b:Vector(a.M)) = distance(a,b);
+     public def norm(V:Vector(M)) = distance(this, V);
 
     /**
      * L_{Inf} norm (uniform norm, Chebyshev norm) of this vector, i.e.
      * the maximum absolute value of all elements of this vector
      */
     public def maxNorm():Double {
-        var max:Double = 0.0;
-        for (i in 0..(M-1))
+         var max:Double = 0.0;
+         for (i in 0..(M-1))
             max = Math.max(Math.abs(d(i)), max);
         return max;
     }
@@ -431,13 +435,16 @@ public class Vector(M:Long) implements (Long) => Double, Snapshottable {
      * Chebyshev distance ||a - b||_{Inf} (L_{Inf}-distance, maximum metric)
      * between vectors a and b
      */
-    public static def chebyshevDistance(a:Vector, b:Vector(a.M)):Double {
-        var d:Double = 0.0;
-        for (i in 0..(a.M-1))
-            d = Math.max(d, Math.abs(a.d(i)-b.d(i)));
-        return d;
-    }
+     public static def chebyshevDistance(a:Vector, b:Vector(a.M)):Double {
+         var d:Double = 0.0;
+         for (i in 0..(a.M-1))
+             d = Math.max(d, Math.abs(a.d(i)-b.d(i)));
+         return d;
+     }
 
+    public static def lInfNorm(a:Vector, b:Vector(a.M)) = chebyshevDistance(a,b);
+    public def lInfNorm(V:Vector(M)) = chebyshevDistance(this, V);
+     
     /** Sum of all elements of this vector */
     public def sum():Double = reduce((a:Double,b:Double)=> {a+b}, 0.0);
      

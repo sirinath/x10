@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.block;
@@ -607,7 +607,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	public operator this / (that:DenseBlockMatrix(M,N)) = this.clone().cellDiv(that) as DenseBlockMatrix(M,N);
 
 	/**
-	 * Transpose input matrix and store in this matrix.
+	 * Transpose matrix
 	 */
 	public def T(dbm:DenseBlockMatrix(N,M)): void {
 		assert (grid.numRowBlocks==dbm.grid.numColBlocks &&
@@ -615,11 +615,11 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		
 		for (var c:Long=0; c<grid.numColBlocks; c++) {
 			for (var r:Long=0; r<grid.numRowBlocks; r++) {
-				val dst = listBs(grid.getBlockId(r, c)).dense;
-				val src = dbm.listBs(dbm.grid.getBlockId(c, r)).dense 
-					as DenseMatrix(dst.N, dst.M);
+				val src = listBs(grid.getBlockId(r, c)).dense;
+				val dst = dbm.listBs(dbm.grid.getBlockId(c, r)).dense 
+					as DenseMatrix(src.N, src.M);
 
-				dst.T(src);
+				src.T(dst);
 			}
 		}
 	}

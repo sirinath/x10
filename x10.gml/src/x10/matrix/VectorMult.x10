@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix;
@@ -135,7 +135,7 @@ public class VectorMult {
 
     private static struct RecursiveBisection1D(start:Long, end:Long, grainSize:Long) {
         public def this(start:Long, end:Long) {
-            val grainSize = (end-start) / (x10.xrx.Runtime.NTHREADS*8);
+            val grainSize = (end-start) / (Runtime.NTHREADS*8);
             property(start, end, grainSize);
         }
 

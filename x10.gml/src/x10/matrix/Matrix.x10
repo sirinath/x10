@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix;
@@ -353,7 +353,7 @@ public abstract class Matrix(M:Long, N:Long) {
         for (var r:Long=0; r<M; r++) {
             dstr.add(r.toString()+"\t[ ");
             for (var c:Long=0; c<N; c++)
-                dstr.add(this(r,c).toString()+" ");
+                dstr.add(String.format("%05.3f ", [this(r,c) as Any]));
             dstr.add("]\n");
         }
         dstr.add("---------------------------------------");

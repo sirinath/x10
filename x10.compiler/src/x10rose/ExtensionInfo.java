@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10rose;
@@ -72,7 +72,6 @@ import x10.visit.ErrChecker;
 import x10.visit.IfdefVisitor;
 import x10.visit.X10TypeBuilder;
 import x10.visit.X10TypeChecker;
-import x10rose.visit.FileStatus;
 import x10rose.visit.RoseTranslator;
 import x10rose.visit.SourceVisitor;
 
@@ -109,6 +108,32 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 		return new X10Scheduler(this);
 	}
     
+    public static class FileStatus {
+    	private SourceFile_c file;
+    	private boolean isDeclHandled;
+    	private boolean isDefHandled;
+    	
+    	public FileStatus(SourceFile_c filename) {
+    		file = filename;
+    	}
+    	
+    	public void handleDecl() {
+    		isDeclHandled = true;
+    	}
+    	
+    	public void handleDef() {
+    		isDefHandled = true;
+    	}
+    	
+    	public boolean isDeclHandled() {
+    		return isDeclHandled;
+    	}
+    	
+    	public boolean isDefHandled() {
+    		return isDefHandled;
+    	}
+    }
+
 	public static HashMap<SourceFile_c, FileStatus> fileHandledMap = new HashMap<SourceFile_c, FileStatus>();
 
 	public static class X10Scheduler extends JLScheduler {
@@ -178,7 +203,7 @@ public class ExtensionInfo extends x10.ExtensionInfo {
 				protected boolean invokePostCompiler(Options options, Compiler compiler, ErrorQueue eq)  {
 			    	SourceVisitor.isGatheringFile = false;
 		    		SourceVisitor roseVisitor = new SourceVisitor(null, null);
-
+		    		
 			    	for (int i = 0; i < sourceList.size(); ++i) {
 			    		SourceFile_c file = sourceList.get(i);
 			    		FileStatus fileStatus = fileHandledMap.get(file);

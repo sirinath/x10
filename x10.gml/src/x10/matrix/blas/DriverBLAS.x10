@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.blas;
@@ -351,28 +351,26 @@ protected class DriverBLAS {
     /**
      * Compute A = alpha &#42 x &#42 y &#42 &#42 T + A, general rank-1 update.
      *
-     * @param alpha  scalar alpha
-     * @param x      vector of dimension at least M+offsetX
-     * @param y      output vector
      * @param mA     the first matrix (right-side)
+     * @param x      left-side operand vector
+     * @param y      output vector
      * @param dim    dimension array [M, N], which are rows and columns of mA
-     * @param offset row and column offsets [xr, yr, Ar, Ac] into matrix/vectors
+     * @param offset starting offsets [offsetX, offsetY] for elements of X and Y
      * @param inc    increments [incX, incY] for elements of X and Y
      * @param lda    leading dimension of A
-
+     * @param alpha  scalar alpha
      */
-    @Native("java","WrapBLAS.rankOneUpdate((#1),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4).getDoubleArray(),(#5).getLongArray(),(#6).getLongArray(),(#7).getLongArray(),#8)")
-    @Native("c++","rank_one_update((#1),(#2)->raw,(#3)->raw,(#4)->raw,(#5)->raw,(#6)->raw,(#7)->raw,#8)")
+    @Native("java","WrapBLAS.rankOneUpdate((#1).getDoubleArray(),(#2).getDoubleArray(),(#3).getDoubleArray(),(#4).getLongArray(),(#5).getLongArray(),(#6).getLongArray(),#7,#8)")
+    @Native("c++","rank_one_update((#1)->raw,(#2)->raw,(#3)->raw,(#4)->raw,(#5)->raw,(#6)->raw,#7,#8)")
     public static native def rank_one_update(
-            alpha:Double,
+            mA:Rail[Double],
             x:Rail[Double],
             y:Rail[Double],
-            mA:Rail[Double],
             dim:Rail[Long],
             offset:Rail[Long],
             inc:Rail[Long],
-            lda:Long
-            ):void;
+            lda:Long,
+            alpha:Double):void;
 
     /**
      * Solve equation  mA &#42 x = b, where mA is unit lower-triangular matrix.

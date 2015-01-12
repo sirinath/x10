@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  */
 
 import harness.x10Test;
@@ -43,7 +43,7 @@ public class TestDistBlock extends x10Test {
         bN= args.size > 5 ? Long.parse(args(5)):5;
         
         grid = new Grid(M, N, bM, bN);
-        if (x10.xrx.Runtime.RESILIENT_MODE > 0 && Place.numPlaces() > 2) {
+        if (Runtime.RESILIENT_MODE > 0 && Place.numPlaces() > 2) {
             skipPlaces = 2;
         } else {
             skipPlaces = 0;
@@ -236,7 +236,7 @@ public class TestDistBlock extends x10Test {
         val grid1 = grid;
         val dmap1 = DistGrid.make(grid, places.size()).dmap;
         
-        a.remakeDense(grid1, dmap1, places);
+        a.remakeDense(grid1, dmap1, places); //without allocate
         a.restoreSnapshot(a_snapshot);
         
         ret &= a.equals(1.0);        
@@ -246,7 +246,7 @@ public class TestDistBlock extends x10Test {
         val c_snapshot = c.makeSnapshot();
         c.init((r:Long,c:Long)=>5.0);        
         
-        c.remakeSparse(grid1, dmap1, nzp, places);
+        c.remakeSparse(grid1, dmap1, nzp, places);//without allocate        
         c.restoreSnapshot(c_snapshot);
         for (var i:Long=0; i< c.M; i++)
             for (var j:Long=0; j< c.N; j++)            
