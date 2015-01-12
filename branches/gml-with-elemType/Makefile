@@ -2,9 +2,7 @@
 
 src_path	=src
 lib_path	=lib
-#build_path	=include
-#base_dir_elem   =native_$(GML_ELEM_TYPE)
-#build_path_elem =native_$(GML_ELEM_TYPE)/include
+build_path	=include
 # Output libs, properties, and tar files
 target		= native_gml
 gml_path        = .
@@ -324,6 +322,8 @@ endif
 
 chk_dir:
 		mkdir -p $(base_dir_elem)/lib
+		mkdir -p $(build_path)/x10/matrix/blas
+		mkdir -p $(build_path)/x10/matrix/lapack
 		mkdir -p $(build_path_elem)/x10/matrix/comm/mpi
 		mkdir -p $(build_path_elem)/x10/matrix/blas
 		mkdir -p $(build_path_elem)/x10/matrix/lapack
