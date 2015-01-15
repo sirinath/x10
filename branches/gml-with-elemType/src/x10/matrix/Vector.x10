@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix;
@@ -174,69 +174,68 @@ public class Vector(M:Long) implements (Long) => ElemType, Snapshottable {
      * this *= alpha
      * Product of a vector and a scalar: Mx1 * 1
      */
-    public def scale(alpha:ElemType):Vector(this)
+    public def scale(alpha:ElemType)
         = map((x:ElemType)=>{alpha * x});
 
     /**
      * this = alpha * V
      */
-    public def scale(alpha:ElemType, V:Vector(M)):Vector(this)
+    public def scale(alpha:ElemType, V:Vector(M))
         = map(V, (v:ElemType)=> {alpha * v});
 
     /**
      * this += alpha * V
      */
-    public def scaleAdd(alpha:ElemType, V:Vector(M)):Vector(this)
-        = map(V, (x:ElemType, v:ElemType)=> {x + alpha * v});
+    public def scaleAdd(alpha:ElemType, V:Vector(M))
+        = map(this, V, (x:ElemType, v:ElemType)=> {x + alpha * v});
 
     /**
      * Cell-wise mulitply of two vectors
      */
-    public def cellMult(V:Vector(M)): Vector(this)
-        = map(V, (x:ElemType, v:ElemType)=> {x * v});
-     
+    public def cellMult(V:Vector(M))
+        = map(this, V, (x:ElemType, v:ElemType)=> {x * v});
 
     /**
      * Addition of two vectors: Mx1 + Mx1
      */
-    public def cellAdd(V:Vector(M)):Vector(this)
-        = map(V, (x:ElemType, v:ElemType)=> {x + v});
+    public def cellAdd(V:Vector(M))
+        = map(this, V, (x:ElemType, v:ElemType)=> {x + v});
 
-    public def cellAdd(d:ElemType):Vector(this)
+    public def cellAdd(d:ElemType)
         = map((x:ElemType)=> {x + d});
 
     /**
      * this = A + B
      * Cellwise addition of two vectors, storing the result in this vector.
      */
-    public def cellAdd(A:Vector(M), B:Vector(M)):Vector(this)
+    public def cellAdd(A:Vector(M), B:Vector(M))
         = map(A, B, (a:ElemType, b:ElemType)=> {a + b});
 
     /** 
      * Subtract vector V from this vector
      */
-    public def cellSub(V:Vector(M)):Vector(this)
-        = map(V, (x:ElemType, v:ElemType)=> {x - v});
+    public def cellSub(V:Vector(M))
+        = map(this, V, (x:ElemType, v:ElemType)=> {x - v});
 
     /**
      * Subtract the scalar d from this vector
      */
-    public def cellSub(d:ElemType):Vector(this)
+    public def cellSub(d:ElemType)
         = map((x:ElemType)=> {x - d});
 
     /**
      * cellwise division: this = this / d;
      */
-    public  def cellDiv(d:ElemType):Vector(this)
+    public  def cellDiv(d:ElemType)
         = map((x:ElemType)=> {x / d});
 
-    public def cellDiv(V:Vector(this.M)):Vector(this)
-        = map(V, (x:ElemType, v:ElemType)=> {x / v});
+    public def cellDiv(V:Vector(this.M))
+        = map(this, V, (x:ElemType, v:ElemType)=> {x / v});
 
     /**
      * cellwise division: this = d / this;
      */
-    public def cellDivBy(d:ElemType) : Vector(this)
+    public def cellDivBy(d:ElemType)
         = map((x:ElemType)=> {d / x});
 
     /**
@@ -381,7 +380,7 @@ public class Vector(M:Long) implements (Long) => ElemType, Snapshottable {
          return d;
      }
 
-     /**
+    /**
      * Manhattan distance ||a - b||_1 (L1-distance, taxicab distance)
      * between vectors a and b
      */
@@ -393,41 +392,35 @@ public class Vector(M:Long) implements (Long) => ElemType, Snapshottable {
      }
 
     /* Manhattan distance between this vector and another vector V */
-     public def manhattanDistance(V:Vector(M)) = manhattanDistance(this, V);
+    public def manhattanDistance(V:Vector(M)) = manhattanDistance(this, V);
 
-    public static def l1Norm(a:Vector, b:Vector(a.M)) = manhattanDistance(a,b);
-     public def l1Norm(V:Vector(M)) = manhattanDistance(this, V);
-
-     /**
-      * L2-norm (Euclidean norm) of this vector, i.e. the square root of the
+    /**
+     * L2-norm (Euclidean norm) of this vector, i.e. the square root of the
      * sum of squares of all elements
-      */
-     public def norm():ElemType = BLAS.compNorm(this.M, this.d);
+     */
+    public def norm():ElemType = BLAS.compNorm(this.M, this.d);
     public def l2Norm() = norm();
      
-     /*
+    /*
      * Euclidean distance ||a - b||_2 (L2-distance) between vectors a and b
      */
-     public static def distance(a:Vector, b:Vector(a.M)):ElemType {
-         var d:ElemType = ElemTypeTool.zero;
-         for (i in 0..(a.M-1))
-             d += (a.d(i)-b.d(i)) * (a.d(i)-b.d(i));
-         return Math.sqrt(d);
-     }
+    public static def distance(a:Vector, b:Vector(a.M)):ElemType {
+        var d:ElemType = ElemTypeTool.zero;
+        for (i in 0..(a.M-1))
+            d += (a.d(i)-b.d(i)) * (a.d(i)-b.d(i));
+        return Math.sqrt(d);
+    }
      
-     /* Euclidean distance between this vector and another vector V */
-     public def distance(V:Vector(M)) = distance(this, V);
-     
-     public static def norm(a:Vector, b:Vector(a.M)) = distance(a,b);
-     public def norm(V:Vector(M)) = distance(this, V);
+    /* Euclidean distance between this vector and another vector V */
+    public def distance(V:Vector(M)) = distance(this, V);
 
     /**
      * L_{Inf} norm (uniform norm, Chebyshev norm) of this vector, i.e.
      * the maximum absolute value of all elements of this vector
      */
     public def maxNorm():ElemType {
-         var max:ElemType = ElemTypeTool.zero;
-         for (i in 0..(M-1))
+        var max:ElemType = ElemTypeTool.zero;
+        for (i in 0..(M-1))
             max = Math.max(Math.abs(d(i)), max);
         return max;
     }
@@ -438,16 +431,13 @@ public class Vector(M:Long) implements (Long) => ElemType, Snapshottable {
      * Chebyshev distance ||a - b||_{Inf} (L_{Inf}-distance, maximum metric)
      * between vectors a and b
      */
-     public static def chebyshevDistance(a:Vector, b:Vector(a.M)):ElemType {
-         var d:ElemType = ElemTypeTool.zero;
-         for (i in 0..(a.M-1))
-             d = Math.max(d, Math.abs(a.d(i)-b.d(i)));
-         return d;
-     }
+    public static def chebyshevDistance(a:Vector, b:Vector(a.M)):ElemType {
+        var d:ElemType = ElemTypeTool.zero;
+        for (i in 0..(a.M-1))
+            d = Math.max(d, Math.abs(a.d(i)-b.d(i)));
+        return d;
+    }
 
-    public static def lInfNorm(a:Vector, b:Vector(a.M)) = chebyshevDistance(a,b);
-    public def lInfNorm(V:Vector(M)) = chebyshevDistance(this, V);
-     
     /** Sum of all elements of this vector */
     public def sum():ElemType = reduce((a:ElemType,b:ElemType)=> {a+b}, ElemTypeTool.zero);
      
@@ -533,20 +523,6 @@ public class Vector(M:Long) implements (Long) => ElemType, Snapshottable {
      */
     public final @Inline def map(a:Vector(M), op:(x:ElemType)=>ElemType):Vector(this) {
         RailUtils.map(a.d, this.d, op);
-        return this;
-    }
-
-    /**
-     * Apply the map function <code>op</code> to combine each element of this
-     * vector with the corresponding element of vector <code>a</code>,
-     * overwriting the element of this vector with the result.
-     * @param a a vector of the same size as this vector
-     * @param op a binary map function to apply to each element of this vector
-     *   and the corresponding element of <code>a</code>
-     * @return this vector, containing the result of the map
-     */
-    public final @Inline def map(a:Vector(M), op:(x:ElemType,y:ElemType)=>ElemType):Vector(this) {
-        RailUtils.map(this.d, a.d, this.d, op);
         return this;
     }
 

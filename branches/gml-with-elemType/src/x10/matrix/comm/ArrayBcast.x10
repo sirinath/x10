@@ -245,10 +245,10 @@ public class ArrayBcast extends ArrayRemoteCopy {
             at(pg(mid)) async {
                 //Need: smlist, srcidx, srcval, srcOff, colOff, colCnt and datasz
                 val dstca = smlist();
-                finish Rail.asyncCopy[Long  ](srcidx, 0, 
-                        dstca.index, 0, dataCnt);
-                finish Rail.asyncCopy[ElemType](srcval, 0, 
-                        dstca.value, 0, dataCnt);
+                finish {
+                    Rail.asyncCopy[Long  ](srcidx, 0, dstca.index, 0, dataCnt);
+                    Rail.asyncCopy[ElemType](srcval, 0, dstca.value, 0, dataCnt);
+                }
             
                 // right branch
                 binaryTreeCast(smlist, dataCnt, pg, start, mid-1);

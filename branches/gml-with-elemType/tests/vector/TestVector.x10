@@ -42,9 +42,9 @@ public class TestVector extends x10Test {
         ret &= (testCellMult());
         ret &= (testCellDiv());
         ret &= (testNorms());
+        ret &= (testSum());
         ret &= (testDotProduct());
         ret &= (testMap());
-        
         return ret;
     }
     
@@ -216,6 +216,17 @@ public class TestVector extends x10Test {
         return ret;
     }
     
+    public def testSum():Boolean {
+        Console.OUT.println("Vector sum test");
+
+        val a = Vector.make(M).init((i:Long)=>((i+1) as Double));
+        val x = a.sum();
+        var ret:Boolean = (x == M*(M+1)/2.0);
+        if (!ret)
+            Console.OUT.println("--------Vector sum test failed!--------");
+        return ret;
+    }
+
     public def testDotProduct():Boolean {
         Console.OUT.println("Vector dot product test");
         

@@ -78,6 +78,7 @@ public class TestGridReduce extends x10Test {
 			//Debug.flushln("Done row-wise cast from column block "+colId+" over "+pN+" places row-wise");
 		}
 		
+                x10.matrix.util.VerifyTool.testSame(distmat, pN);
 		retval &= distmat.equals(pN as Double);//verifyRowReduceSum(pN as Double, 1, colId, work1);
 		if (!retval) Console.OUT.println(distmat);
 		if (!retval)
@@ -99,7 +100,8 @@ public class TestGridReduce extends x10Test {
 		    //Debug.flushln("Done col-wise cast from row block "+rowId+" over "+pM+" places column-wise");
 
 		}
-		retval &= distmat.equals(pN);
+retval &=                x10.matrix.util.VerifyTool.testSame(distmat, pN);
+	//	retval &= distmat.equals(pN);
 
 		if (!retval)
 		    Console.OUT.println("-----Test ring reduce col-wise for dist block matrix failed!-----");

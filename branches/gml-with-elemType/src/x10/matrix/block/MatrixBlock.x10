@@ -43,26 +43,18 @@ public abstract class MatrixBlock(myRowId:Long, myColId:Long) {
          */
         public var commTime:Long = 0;
 
-        /**
-         * Neighbor block places
-         */
-        public var placeEast:Long=-1;
-        public var placeWest:Long=-1;
-        public var placeNorth:Long=-1;
-        public var placeSouth:Long=-1;
-
-        /**
-         * Construct a instance of matrix block with specified row and column index
-         * of its partitioning.
-         * 
-         * @param rid    row block index in partitioning grid
-         * @param cid    column block index in partitioning grid
-         */
-        public def this(rid:Long, cid:Long, roff:Long, coff:Long) {
-                property(rid, cid);
-                rowOffset=roff;
-                colOffset=coff;
-        }
+	/**
+	 * Construct a instance of matrix block with specified row and column index
+	 * of its partitioning.
+	 * 
+	 * @param rid    row block index in partitioning grid
+	 * @param cid    column block index in partitioning grid
+	 */
+	public def this(rid:Long, cid:Long, roff:Long, coff:Long) {
+		property(rid, cid);
+		rowOffset=roff;
+		colOffset=coff;
+	}
 
         /**
          * For testing purpose.
