@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 
@@ -144,7 +144,7 @@ public class ServerLauncher {
         // monitor the change of children
         zk.getChildren("/", new ChildrenChangedWatcher(zk));
 
-        val name = x10.xrx.Runtime.getName(); // pid@hostname
+        val name = Runtime.getName(); // pid@hostname
         val split = name.split("@");      
         val data = "host=" + split(1) + ", pid=" + split(0);
         // create an ephemeral node representing this Java VM

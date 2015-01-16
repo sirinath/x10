@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 // import x10.resilient.regionarray.DistArray;
 // import x10.regionarray.Dist;
@@ -37,7 +37,7 @@ public class ResilientSimpleHeatTransfer {
     public static def main(args:Rail[String]) {
         val n = (args.size>=1) ? Long.parseLong(args(0)) : 10L;
         Console.OUT.println("HeatTransfer for " + n + "x" + n + ", epsilon=" + epsilon);
-        for (p in Place.places()) at (p) Console.OUT.println(here+" running in "+x10.xrx.Runtime.getName());
+        for (p in Place.places()) at (p) Console.OUT.println(here+" running in "+Runtime.getName());
         
         /*
          * Initialize the data

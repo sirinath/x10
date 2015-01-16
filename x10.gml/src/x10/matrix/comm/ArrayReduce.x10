@@ -6,15 +6,13 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
 
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
-
-import x10.matrix.ElemType;
 
 import x10.matrix.comm.mpi.WrapMPI;
 
@@ -31,7 +29,7 @@ import x10.matrix.comm.mpi.WrapMPI;
  */
 public class ArrayReduce extends ArrayRemoteCopy {
     /** Reduce data from all places to here via PlaceLocalHandle */
-    public static def arraySum(src:Rail[ElemType],dst:Rail[ElemType], cnt:Long):Int {
+    public static def arraySum(src:Rail[Double],dst:Rail[Double], cnt:Long):Int {
         for (var i:Long=0; i<cnt; i++) dst(i) += src(i);
         return 1n;
     }
@@ -44,7 +42,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
      * @param datcnt    count of double-precision data elements
      */
     public static def reduce(dat:DataArrayPLH, tmp:DataArrayPLH, datCnt:Long, 
-            opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int):void {
+            opFunc:(Rail[Double],Rail[Double],Long)=>Int):void {
         @Ifdef("MPI_COMMU") {
             throw new UnsupportedOperationException("No MPI implementation");
         }
@@ -65,7 +63,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
      * @param opFunc    the reduction function
      */
     public static def reduce(dat:DataArrayPLH, tmp:DataArrayPLH, datCnt:Long, places:PlaceGroup,
-                opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int):void {                    
+                opFunc:(Rail[Double],Rail[Double],Long)=>Int):void {                    
         @Ifdef("MPI_COMMU") {
             throw new UnsupportedOperationException("No MPI implementation");
         }
@@ -88,7 +86,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
         }
         @Ifndef("MPI_COMMU") {
             x10ReduceToHere(dat, tmp, datCnt, Place.numPlaces(), 
-                    (src:Rail[ElemType], dst:Rail[ElemType], c:Long)=>arraySum(src,dst,c));
+                    (src:Rail[Double], dst:Rail[Double], c:Long)=>arraySum(src,dst,c));
         }
     }
 
@@ -107,7 +105,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
         }
         @Ifndef("MPI_COMMU") {
             x10ReduceToHere(dat, tmp, datCnt, places.size(), here.id,places, 
-               (src:Rail[ElemType], dst:Rail[ElemType], c:Long)=>arraySum(src,dst,c));
+               (src:Rail[Double], dst:Rail[Double], c:Long)=>arraySum(src,dst,c));
         }
     }
 
@@ -138,7 +136,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
      * Notice dat is input and output data array.
      */
         protected static def x10ReduceToHere(dat:DataArrayPLH, tmp:DataArrayPLH, datCnt:Long, pcnt:Long, 
-            opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int) {
+            opFunc:(Rail[Double],Rail[Double],Long)=>Int) {
             x10ReduceToHere(dat, tmp, datCnt, pcnt, here.id, Place.places(), opFunc);
     }
 
@@ -156,20 +154,20 @@ public class ArrayReduce extends ArrayRemoteCopy {
          * @param opFunc    the reduction function
          */
         protected static def x10ReduceToHere(dat:DataArrayPLH, tmp:DataArrayPLH, datCnt:Long, pcnt:Long, root:Long,places:PlaceGroup, 
-            opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int) {
+            opFunc:(Rail[Double],Rail[Double],Long)=>Int) {
                     
             if (pcnt <= 1) return;        
             val rtcnt  = (pcnt+1) / 2; // make sure right part is larger, if cnt is odd 
             val lfcnt  = pcnt - rtcnt;
             val rtroot = root + lfcnt;
             finish {
+                if (lfcnt > 0) async {
+                    x10ReduceToHere(dat, tmp, datCnt, lfcnt, root,places, opFunc);
+                }
                 if (rtcnt > 1) {
                     at(places(rtroot)) async {
-                        x10ReduceToHere(dat, tmp, datCnt, rtcnt, rtroot, places, opFunc);
+                        x10ReduceToHere(dat, tmp, datCnt, rtcnt, rtroot,places, opFunc);
                     }
-                }
-                if (lfcnt > 0) {
-                    x10ReduceToHere(dat, tmp, datCnt, lfcnt, root, places, opFunc);
                 }
             }
             val dstbuf = dat();
@@ -190,7 +188,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
             dat:DataArrayPLH,
             tmp:DataArrayPLH, 
             datCnt:Long, 
-            opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int) {
+            opFunc:(Rail[Double],Rail[Double],Long)=>Int) {
         
         @Ifdef("MPI_COMMU")    {
             throw new UnsupportedOperationException("No MPI implementation");
@@ -215,7 +213,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
         }
         @Ifndef("MPI_COMMU") {
             x10AllReduce(dat, tmp, datCnt, 
-                    (src:Rail[ElemType], dst:Rail[ElemType], c:Long)=>arraySum(src,dst,c));
+                    (src:Rail[Double], dst:Rail[Double], c:Long)=>arraySum(src,dst,c));
         }
     } 
 
@@ -237,7 +235,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
         }
         @Ifndef("MPI_COMMU") {
                x10AllReduce(dat, tmp, datCnt, places,
-               (src:Rail[ElemType], dst:Rail[ElemType], c:Long)=>arraySum(src,dst,c));
+               (src:Rail[Double], dst:Rail[Double], c:Long)=>arraySum(src,dst,c));
         }
     } 
 
@@ -270,7 +268,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
     }
     
     protected static def x10AllReduce(dat:DataArrayPLH, tmp:DataArrayPLH, datCnt:Long,
-            opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int){
+            opFunc:(Rail[Double],Rail[Double],Long)=>Int){
     
         x10ReduceToHere(dat, tmp, datCnt, Place.numPlaces(), opFunc);
         ArrayBcast.x10Bcast(dat, datCnt);
@@ -289,7 +287,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
      * @param opFunc   the reduction function
      */
     protected static def x10AllReduce(dat:DataArrayPLH, tmp:DataArrayPLH, datCnt:Long, places:PlaceGroup,
-                  opFunc:(Rail[ElemType],Rail[ElemType],Long)=>Int){
+                  opFunc:(Rail[Double],Rail[Double],Long)=>Int){
           x10ReduceToHere(dat, tmp, datCnt, places.size(), here.id, places, opFunc);
            ArrayBcast.bcast(dat, places);
     }
@@ -306,7 +304,7 @@ public class ArrayReduce extends ArrayRemoteCopy {
      */
     public static def reduceSum(
             dat:DataArrayPLH,
-            tmp:Rail[ElemType], datCnt:Long,
+            tmp:Rail[Double], datCnt:Long,
             plist:Rail[Long]):void{
 
         val root = here.id();

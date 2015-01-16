@@ -20,19 +20,19 @@ public abstract class InitDispatcher {
     public static final int EXCEPTION_RAISED = 3;
 
     public static void lockInitialized() {
-        x10.xrx.Runtime.StaticInitBroadcastDispatcherLock();
+        x10.lang.Runtime.StaticInitBroadcastDispatcherLock();
     }
 
     public static void unlockInitialized() {
-        x10.xrx.Runtime.StaticInitBroadcastDispatcherUnlock();
+        x10.lang.Runtime.StaticInitBroadcastDispatcherUnlock();
     }
 
     public static void awaitInitialized() {
-        x10.xrx.Runtime.StaticInitBroadcastDispatcherAwait();
+        x10.lang.Runtime.StaticInitBroadcastDispatcherAwait();
     }
 
     public static void notifyInitialized() {
-        x10.xrx.Runtime.StaticInitBroadcastDispatcherNotify();
+        x10.lang.Runtime.StaticInitBroadcastDispatcherNotify();
     }
 
     public static void printStaticInitMessage(String message) {

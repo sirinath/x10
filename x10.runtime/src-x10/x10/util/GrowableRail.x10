@@ -81,20 +81,13 @@ public final class GrowableRail[T] implements CustomSerialization {
     }
 
     /**
-     * Add all elements from the argument Rail to this.
+     * Add all elements from the argument GrowableRail to this.
      */
-    public def addAll(x:Rail[T]) {
+    public def addAll(x:GrowableRail[T]) {
        if (size+x.size > capacity()) grow(size+x.size);
        for (i in 0..(x.size-1)) {
            data(size++) = x(i);
        }
-    }
-
-    /**
-     * Add all elements from the argument GrowableRail to this.
-     */
-    public def addAll(x:GrowableRail[T]) {
-       addAll(x.data);
     }
 
     /** 

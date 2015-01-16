@@ -6,15 +6,13 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
 
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
-
-import x10.matrix.ElemType;
 
 import x10.matrix.comm.mpi.WrapMPI;
 
@@ -209,7 +207,7 @@ public class DistArrayReduce extends DistArrayRemoteCopy {
 	 */
 	public static def reduceSum(
 			ddmat:DistDataArray,
-			tmp:Rail[ElemType], 
+			tmp:Rail[Double], 
 			datCnt:Long,
 			plist:Rail[Long]):void{
 		

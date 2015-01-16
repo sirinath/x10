@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -14,8 +14,6 @@ package x10.matrix.comm;
 import x10.regionarray.Dist;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
-
-import x10.matrix.ElemType;
 
 import x10.matrix.comm.mpi.WrapMPI;
 
@@ -40,7 +38,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * @param dst      target distributed arrays
      */
     public static def scatter(
-            src:Rail[Rail[ElemType]], 
+            src:Rail[Rail[Double]], 
             dst:DataArrayPLH) : void {
         val nb = Place.numPlaces();
         assert (nb==src.size) :
@@ -69,7 +67,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * Scatter single-row partitioning blocks from here to all places
      */
     public static def scatter(
-            src:Rail[ElemType], 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             gp:Rail[Long]): void {
         assert gp.size == Place.numPlaces();
@@ -87,7 +85,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * Scatter single-row partitioning blocks from here to a place group
      */
     public static def scatter(
-            src:Rail[ElemType], 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             gp:Rail[Long],
             places:PlaceGroup): void {
@@ -111,7 +109,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * @param gp          size list, or partitioning of array for scattering
      */
     public static def mpiScatter(
-            src:Rail[ElemType],
+            src:Rail[Double],
             dst:DataArrayPLH, 
             szlist:Rail[Long]): void {
         
@@ -129,7 +127,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
                         //val tmpbuf= null; //fake
                         //val tmplst=null;//   //fake
                         /*******************************************/
-                        val tmpbuf = new Rail[ElemType](0); //fake
+                        val tmpbuf = new Rail[Double](0); //fake
                         val tmplst = new Rail[Long](0);   //fake
                         WrapMPI.world.scatterv(tmpbuf, tmplst, dstbuf, datcnt, root);
                     }
@@ -155,7 +153,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * @param szlist       list of sizes of blocks held at each place
      */
     public static def x10Scatter(
-            src:Rail[ElemType], 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             szlist:Rail[Long]):void {
 
@@ -184,7 +182,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * @param places       scatter place group 
      */
     public static def x10Scatter(
-            src:Rail[ElemType], 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             szlist:Rail[Long],
             places:PlaceGroup):void {
@@ -207,14 +205,14 @@ public class ArrayScatter extends ArrayRemoteCopy {
     }
 
     public static def verify(
-        src:Rail[ElemType], 
+        src:Rail[Double], 
         dstplh:DataArrayPLH, 
         szlist:Rail[Long]):Boolean {        
         return verify(src, dstplh, szlist, Place.places());
     }
     
     public static def verify(
-            src:Rail[ElemType], 
+            src:Rail[Double], 
             dstplh:DataArrayPLH, 
             szlist:Rail[Long],
             places:PlaceGroup):Boolean {

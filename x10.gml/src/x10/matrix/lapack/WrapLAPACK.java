@@ -6,14 +6,13 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  */
 
 package x10.matrix.lapack;
 
 /**
  * JNI wrappers for corresponding functions in wrap_lapack.cc
- * vjTODO: Support ElemType for native code.
  */
 public class WrapLAPACK {
 	static { 

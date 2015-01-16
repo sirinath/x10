@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -14,7 +14,6 @@ package x10.matrix.comm;
 import x10.regionarray.DistArray;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
-import x10.matrix.ElemType;
 
 import x10.matrix.DenseMatrix;
 import x10.matrix.comm.mpi.WrapMPI;
@@ -117,25 +116,25 @@ public class MatrixBcast {
 		val rtroot = root + lfcnt;
 
 		// Specify the remote buffer
-		val srcbuf = new GlobalRail[ElemType](srcden.d as Rail[ElemType]{self!=null});
+		val srcbuf = new GlobalRail[Double](srcden.d as Rail[Double]{self!=null});
 		val srcoff = srcden.M * colOff; //Source offset is determined by local M
 			
 		finish {
-			at(dmlist.dist(rtroot)) async {
+			at(dmlist.dist(rtroot)) {
 				val dstden = dmlist(here.id());
 				val dstoff = colOff * dstden.M; //Destination offset is determined by local M
 				val datasz = dstden.M * colCnt;
 				// Using copyFrom style
-				finish Rail.asyncCopy[ElemType](srcbuf, srcoff, dstden.d, dstoff, datasz);
+				finish Rail.asyncCopy[Double](srcbuf, srcoff, dstden.d, dstoff, datasz);
 							
-				// right branch
-				if (rtcnt > 1) {
+				// Perform binary bcast on the right brank
+				if (rtcnt > 1 ) async {
 					binaryTreeCast(dmlist, colOff, colCnt, rtcnt);
 				}
 			}
 
-			// left branch
-			if (lfcnt > 1) {
+			// Perform binary bcast on the left branch
+			if (lfcnt > 1) async {
 				binaryTreeCast(dmlist, colOff, colCnt, lfcnt); 
 			}
 		}
@@ -255,10 +254,10 @@ public class MatrixBcast {
         val idxbuf = srcspa.getIndex();
         val valbuf = srcspa.getValue();
         val srcidx = new GlobalRail[Long  ](idxbuf as Rail[Long  ]{self!=null});
-        val srcval = new GlobalRail[ElemType](valbuf as Rail[ElemType]{self!=null});
+        val srcval = new GlobalRail[Double](valbuf as Rail[Double]{self!=null});
 	
 		finish {		
-			at(smlist.dist(rtroot)) async {
+			at(smlist.dist(rtroot)) {
 				//Need: smlist, srcidx, srcval, srcOff, colOff, colCnt and datasz
 				val dstspa = smlist(here.id());
 				val dstoff = dstspa.getNonZeroOffset(colOffset); 
@@ -269,11 +268,11 @@ public class MatrixBcast {
 				dstspa.initRemoteCopyAtDest(colOffset, colCnt, dataCnt);
 				finish Rail.asyncCopy[Long  ](srcidx, srcOffset, 
 											   dstspa.getIndex(), dstoff, dataCnt);
-				finish Rail.asyncCopy[ElemType](srcval, srcOffset, 
+				finish Rail.asyncCopy[Double](srcval, srcOffset, 
 											   dstspa.getValue(), dstoff, dataCnt);
 
-				// right branch
-				if (rtcnt > 1) {
+				// Perform binary bcast on the right brank
+				if (rtcnt > 1) async {
 					binaryTreeCast(smlist, colOffset, dstoff, colCnt, dataCnt, rtcnt);
 					dstspa.finalizeRemoteCopyAtDest();
 				} else {
@@ -281,8 +280,8 @@ public class MatrixBcast {
 				}
 			}
 
-			// left branch
-			if (lfcnt > 1) {
+			// Perform binary bcast on the left branch
+			if (lfcnt > 1) async {
 				binaryTreeCast(smlist, colOffset, srcOffset, colCnt, dataCnt, lfcnt); 
 			}
 		}

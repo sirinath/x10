@@ -12,7 +12,6 @@
 package x10.util.concurrent;
 
 import x10.compiler.Pinned;
-import x10.xrx.Runtime;
 
 /**
  * Boolean latch.

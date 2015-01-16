@@ -1,7 +1,7 @@
 /*
  *  This file is part of the X10 Applications project.
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  */
 
 import harness.x10Test;
@@ -10,8 +10,6 @@ import x10.regionarray.DistArray;
 import x10.compiler.Ifndef;
 
 import x10.matrix.Matrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.util.Debug;
 import x10.matrix.DenseMatrix;
 import x10.matrix.block.Grid;
@@ -27,9 +25,6 @@ import x10.matrix.dist.DupDenseMatrix;
    This class contains test cases for dense and sparse matrix broadcast and other collective functions.
  */
 public class TestColl extends x10Test {
-    static def ET(a:Double)= a as ElemType;
-    static def ET(a:Float)= a as ElemType;
-
 	public val M:Long;
 	public val N:Long;
 
@@ -205,7 +200,9 @@ public class TestColl extends x10Test {
 		val tmpDA = DupDenseMatrix.make(M,N);
 		dupDA.reduceSum();
 		
-		denDA.scale(numplace);
+		//MatrixReduce.reduceSum(dupDA.dupMs, tmpDA.dupMs);
+
+		denDA.scale(numplace as Double);
 		ret = denDA.equals(dupDA.local() as Matrix(denDA.M, denDA.N));
 
 		if (!ret)
@@ -224,6 +221,7 @@ public class TestColl extends x10Test {
 
 		val tmpDA = DupDenseMatrix.make(M,N);
 		dupDA.allReduceSum();
+		//MatrixReduce.allReduceSum(dupDA.dupMs, tmpDA.dupMs);
 		denDA.scale(numplace);
 		
 		ret = denDA.equals(dupDA.local() as Matrix(denDA.M, denDA.N));

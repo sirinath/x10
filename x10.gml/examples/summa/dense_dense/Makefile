@@ -17,7 +17,6 @@ target_list = DistDenseBench
 # GML path
 gml_path    = ../../..
 
-
 # build path
 build_path	= build
 

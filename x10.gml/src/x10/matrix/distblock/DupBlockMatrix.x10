@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.distblock;
@@ -16,8 +16,6 @@ import x10.util.StringBuilder;
 import x10.util.Timer;
 
 import x10.matrix.Matrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.util.Debug;
 import x10.matrix.DenseMatrix;
 import x10.matrix.block.Grid;
@@ -72,7 +70,7 @@ public class DupBlockMatrix extends Matrix {
         return new DupBlockMatrix(hdl) as DupBlockMatrix(g.M, g.N);
     }
     
-    public static def makeSparse(g:Grid, nzd:Float) {
+    public static def makeSparse(g:Grid, nzd:Double) {
         val hdl = PlaceLocalHandle.make[BlockSet](Place.places(), 
                 ()=>BlockSet.makeSparse(g, DistMap.makeConstant(g.size, here.id()), nzd));
         return new DupBlockMatrix(hdl) as DupBlockMatrix(g.M, g.N);
@@ -92,7 +90,7 @@ public class DupBlockMatrix extends Matrix {
         return new DupBlockMatrix(hdl) as DupBlockMatrix(m, n);
     }
     
-    public static def makeSparse(m:Long, n:Long, blkM:Long, blkN:Long, nzd:Float) {
+    public static def makeSparse(m:Long, n:Long, blkM:Long, blkN:Long, nzd:Double) {
         val hdl = PlaceLocalHandle.make[BlockSet](Place.places(), 
                 ()=>BlockSet.makeSparse(new Grid(m, n, blkM, blkN),
                         DistMap.makeConstant(blkM*blkN, here.id()), nzd));
@@ -100,7 +98,7 @@ public class DupBlockMatrix extends Matrix {
     }
 
     public static def makeDense(m:Long, n:Long) = makeDense(m, n, 1, 1);
-    public static def makeSparse(m:Long, n:Long, nzd:Float) = makeSparse(m, n, 1, 1, nzd);
+    public static def makeSparse(m:Long, n:Long, nzd:Double) = makeSparse(m, n, 1, 1, nzd);
     
     public static def makeDense(dmat:DupBlockMatrix) {
         val hdl = PlaceLocalHandle.make[BlockSet](Place.places(), 
@@ -140,7 +138,7 @@ public class DupBlockMatrix extends Matrix {
         }
     }
 
-    public def init(dv:ElemType) : DupBlockMatrix(this) {
+    public def init(dv:Double) : DupBlockMatrix(this) {
         finish ateach(Dist.makeUnique()) {
             val it = handleDB().iterator();
             while (it.hasNext()) {
@@ -168,7 +166,7 @@ public class DupBlockMatrix extends Matrix {
         return this;
     }
     
-    public def init(f:(Long,Long)=>ElemType) : DupBlockMatrix(this) {
+    public def init(f:(Long,Long)=>Double) : DupBlockMatrix(this) {
         val it = handleDB().iterator();
         while (it.hasNext()) {
             it.next().init(f);
@@ -191,9 +189,9 @@ public class DupBlockMatrix extends Matrix {
         local().copyTo(mat);
     }
     
-    public  operator this(x:Long, y:Long):ElemType = local()(x,y);
+    public  operator this(x:Long, y:Long):Double = local()(x,y);
 
-    public operator this(x:Long, y:Long)=(dv:ElemType):ElemType {
+    public operator this(x:Long, y:Long)=(dv:Double):Double {
         finish ateach(Dist.makeUnique()) {
             //Remote capture: x, y, d
             local()(x,y) = dv;    
@@ -206,7 +204,7 @@ public class DupBlockMatrix extends Matrix {
     /**
      * Scaling method. All copies are updated concurrently
      */
-    public def scale(a:ElemType) {
+    public def scale(a:Double) {
         finish ateach(Dist.makeUnique()) {
             local().scale(a);
         }
@@ -242,7 +240,7 @@ public class DupBlockMatrix extends Matrix {
         return this;
     }
 
-    public def cellAdd(d:ElemType)  {
+    public def cellAdd(d:Double)  {
         //Debug.assure(this.M==A.M&&this.N==A.N);
         finish ateach(Dist.makeUnique()) {
             local().cellAdd(d);
@@ -338,7 +336,7 @@ public class DupBlockMatrix extends Matrix {
     /**
      * this = this /v
      */
-    public def cellDiv(v:ElemType): DupBlockMatrix(this) {
+    public def cellDiv(v:Double): DupBlockMatrix(this) {
         finish ateach(Dist.makeUnique()) {
             local().cellDiv(v);
         }
@@ -384,15 +382,15 @@ public class DupBlockMatrix extends Matrix {
     }
 
     // Operator overload
-    public operator - this            = this.clone().scale(-1.0 as ElemType)    as DupBlockMatrix(M,N);
-    public operator (v:ElemType) + this = makeDense(this).cellAdd(v)  as DupBlockMatrix(M,N);
-    public operator this + (v:ElemType) = makeDense(this).cellAdd(v)  as DupBlockMatrix(M,N);
-    public operator this - (v:ElemType) = makeDense(this).cellAdd(-v) as DupBlockMatrix(M,N);
+    public operator - this            = this.clone().scale(-1.0)    as DupBlockMatrix(M,N);
+    public operator (v:Double) + this = makeDense(this).cellAdd(v)  as DupBlockMatrix(M,N);
+    public operator this + (v:Double) = makeDense(this).cellAdd(v)  as DupBlockMatrix(M,N);
+    public operator this - (v:Double) = makeDense(this).cellAdd(-v) as DupBlockMatrix(M,N);
     
-    public operator this / (v:ElemType) = makeDense(this).cellDiv(v)  as DupBlockMatrix(M,N);
+    public operator this / (v:Double) = makeDense(this).cellDiv(v)     as DupBlockMatrix(M,N);
     
-    public operator this * (alpha:ElemType) = this.clone().scale(alpha) as DupBlockMatrix(M,N);
-    public operator (alpha:ElemType) * this = this * alpha;
+    public operator this * (alpha:Double) = this.clone().scale(alpha) as DupBlockMatrix(M,N);
+    public operator (alpha:Double) * this = this * alpha;
     
     public operator this + (that:DupBlockMatrix(M,N)) = makeDense(this).cellAdd(that)  as DupBlockMatrix(M,N);
     public operator this - (that:DupBlockMatrix(M,N)) = makeDense(this).cellSub(that)  as DupBlockMatrix(M,N);

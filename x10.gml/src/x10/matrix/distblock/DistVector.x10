@@ -19,10 +19,8 @@ import x10.util.StringBuilder;
 
 import x10.matrix.Matrix;
 import x10.matrix.util.Debug;
-import x10.matrix.ElemType;
-import x10.matrix.Vector;
-
 import x10.matrix.util.MathTool;
+import x10.matrix.Vector;
 import x10.matrix.block.Grid;
 import x10.matrix.block.BlockMatrix;
 import x10.matrix.comm.DataArrayPLH;
@@ -52,7 +50,7 @@ public class DistVector(M:Long) implements Snapshottable {
     public def places() = places;
     
     //oldSegSize used only for remake and restore
-    private var snapshotSegSize:Rail[Long];
+    private var oldSegSize:Rail[Long];
 
     public def this(m:Long, vs:PlaceLocalHandle[Vector], segsz:Rail[Long], pg:PlaceGroup) {
         property(m);
@@ -61,7 +59,7 @@ public class DistVector(M:Long) implements Snapshottable {
         distV  = vs;
         segSize = segsz;
         places = pg;
-        distData = PlaceLocalHandle.make[Rail[ElemType]](places, ()=>vs().d);
+        distData = PlaceLocalHandle.make[Rail[Double]](places, ()=>vs().d);
     }
 
     public static def make(m:Long, segNum:Long, pg:PlaceGroup):DistVector(m) {
@@ -103,7 +101,7 @@ public class DistVector(M:Long) implements Snapshottable {
         }
     }
 
-    public def init(dv:ElemType) : DistVector(this) {
+    public def init(dv:Double) : DistVector(this) {
         finish ateach(Dist.makeUnique(places)) {
             distV().init(dv);
         }
@@ -130,7 +128,7 @@ public class DistVector(M:Long) implements Snapshottable {
         return this;
     }
     
-    public def init(f:(Long)=>ElemType):DistVector(this) {
+    public def init(f:(Long)=>Double):DistVector(this) {
         finish ateach(Dist.makeUnique(places)) {
             distV().init(f);
         }
@@ -176,7 +174,7 @@ public class DistVector(M:Long) implements Snapshottable {
         return find(pos, segSize);
     }
     
-    public  operator this(x:Long):ElemType {
+    public  operator this(x:Long):Double {
         val loc = find(x);
         val seg = loc.first as Int;
         val off = loc.second;
@@ -184,7 +182,7 @@ public class DistVector(M:Long) implements Snapshottable {
         return dat;
     }
 
-    public operator this(x:Long)=(dv:ElemType):ElemType {
+    public operator this(x:Long)=(dv:Double):Double {
         val loc = find(x);
         val seg = loc.first as Int;
         val off = loc.second;
@@ -195,7 +193,7 @@ public class DistVector(M:Long) implements Snapshottable {
     /**
      * Scaling method. All copies are updated concurrently
      */
-    public def scale(a:ElemType) {
+    public def scale(a:Double) {
         finish ateach(Dist.makeUnique(places)) {
             distV().scale(a);
         }
@@ -215,12 +213,15 @@ public class DistVector(M:Long) implements Snapshottable {
         return this;
     }
 
-    public def cellAdd(dv:ElemType)  {
+    public def cellAdd(dv:Double)  {
         finish ateach(Dist.makeUnique(places)) {
             distV().cellAdd(dv);
         }
         return this;
     }
+
+    // Cellwise subtraction
+
 
     /**
      * Concurrently perform cellwise subtraction on all copies
@@ -238,13 +239,16 @@ public class DistVector(M:Long) implements Snapshottable {
     /**
      * Perform cell-wise subtraction  this = this - dv.
      */
-    public def cellSub(dv:ElemType):DistVector(this) {
+    public def cellSub(dv:Double):DistVector(this) {
         finish ateach(Dist.makeUnique(places)) {
             distV().cellSub(dv);
         }
         return this;
     }
 
+    // Cellwise multiplication
+
+    
     /**
      * Cellwise multiplication. All copies are modified with
      * the corresponding vector copies.
@@ -257,6 +261,9 @@ public class DistVector(M:Long) implements Snapshottable {
         }
         return this;
     }
+
+
+    // Cellwise division
 
     /**
      * Cellwise division. All copies are modified with
@@ -274,39 +281,19 @@ public class DistVector(M:Long) implements Snapshottable {
 
     // Operator overloading cellwise operations
 
-    public operator - this            = clone().scale(-1.0 as ElemType) as DistVector(M);
-    public operator (v:ElemType) + this = clone().cellAdd(v)  as DistVector(M);
-    public operator this + (v:ElemType) = clone().cellAdd(v)  as DistVector(M);
-    public operator this - (v:ElemType) = clone().cellSub(v)  as DistVector(M);
-    public operator this / (v:ElemType) = clone().scale((1.0/v) as ElemType)   as DistVector(M);
+    public operator - this            = clone().scale(-1.0) as DistVector(M);
+    public operator (v:Double) + this = clone().cellAdd(v)  as DistVector(M);
+    public operator this + (v:Double) = clone().cellAdd(v)  as DistVector(M);
+    public operator this - (v:Double) = clone().cellSub(v)  as DistVector(M);
+    public operator this / (v:Double) = clone().scale(1.0/v)   as DistVector(M);
     
-    public operator this * (alpha:ElemType) = clone().scale(alpha) as DistVector(M);
-    public operator (alpha:ElemType) * this = this * alpha;
+    public operator this * (alpha:Double) = clone().scale(alpha) as DistVector(M);
+    public operator (alpha:Double) * this = this * alpha;
     
     public operator this + (that:DistVector(M)) = clone().cellAdd(that)  as DistVector(M);
     public operator this - (that:DistVector(M)) = clone().cellSub(that)  as DistVector(M);
     public operator this * (that:DistVector(M)) = clone().cellMult(that) as DistVector(M);
     public operator this / (that:DistVector(M)) = clone().cellDiv(that)  as DistVector(M);
-
-    public def dot(v:DupVector(M)):Double {
-        val dot = finish(Reducible.SumReducer[Double]()) {
-            var off:Long=0;
-            for (p in 0..(places.size()-1)) {
-                val offset = off;
-                val s = segSize(p);
-                at(places(p)) async {
-                    val dist = distV();
-                    val dup = v.local();
-                    var d:Double = 0.0;
-                    for (i in 0..(s-1))
-                        d += dist(i) * dup(offset+i);
-                    offer d;
-                }
-                off += s;
-            }
-        };
-        return dot;
-    }
         
 
     // Multiplication operations 
@@ -328,7 +315,7 @@ public class DistVector(M:Long) implements Snapshottable {
         DistDupVectorMult.comp(that, this, DupVector.make(that.M, places), false);
 
     /** Get the sum of all elements in this vector. */
-    public def sum():ElemType = reduce((a:ElemType,b:ElemType)=>{a+b}, 0.0 as ElemType);
+    public def sum():Double = reduce((a:Double,b:Double)=>{a+b}, 0.0);
     
     public def likeMe(that:DistVector): Boolean  {
         if (this.M!=that.M) return false;
@@ -363,7 +350,7 @@ public class DistVector(M:Long) implements Snapshottable {
         return ret;
     }
     
-    public def equals(dval:ElemType):Boolean {
+    public def equals(dval:Double):Boolean {
         var ret:Boolean = true;
         for (var p:Long=0; p<places.size() &&ret; p++) {
             val pindx = p;
@@ -378,13 +365,11 @@ public class DistVector(M:Long) implements Snapshottable {
      * @param op a unary map function to apply to each element of this vector
      * @return this vector, containing the result of the map
      */
-    public final @Inline def map(op:(x:ElemType)=>ElemType):DistVector(this) {
-        val stt = Timer.milliTime();
+    public final @Inline def map(op:(x:Double)=>Double):DistVector(this) {
         finish ateach(Dist.makeUnique(places)) {
             val d = distV();
             d.map(op);
         }
-        calcTime += Timer.milliTime() - stt;
         return this;
     }
 
@@ -395,15 +380,32 @@ public class DistVector(M:Long) implements Snapshottable {
      * @param op a unary map function to apply to each element of vector <code>a</code>
      * @return this vector, containing the result of the map
      */
-    public final @Inline def map(a:DistVector(M), op:(x:ElemType)=>ElemType):DistVector(this) {
+    public final @Inline def map(a:DistVector(M), op:(x:Double)=>Double):DistVector(this) {
         assert(likeMe(a));
-        val stt = Timer.milliTime();
         finish ateach(Dist.makeUnique(places)) {
             val d = distV();
             val ad = a.distV() as Vector(d.M);
             d.map(ad, op);
         }
-        calcTime += Timer.milliTime() - stt;
+        return this;
+    }
+
+    /**
+     * Apply the map function <code>op</code> to combine each element of this
+     * vector with the corresponding element of vector <code>a</code>,
+     * overwriting the element of this vector with the result.
+     * @param a a vector of the same distribution as this vector
+     * @param op a binary map function to apply to each element of this vector
+     *   and the corresponding element of <code>a</code>
+     * @return this vector, containing the result of the map
+     */
+    public final @Inline def map(a:DistVector(M), op:(x:Double,y:Double)=>Double):DistVector(this) {
+        assert(likeMe(a));
+        finish ateach(Dist.makeUnique(places)) {
+            val d = distV();
+            val ad = a.distV() as Vector(d.M);
+            d.map(d, ad, op);
+        }
         return this;
     }
 
@@ -417,16 +419,14 @@ public class DistVector(M:Long) implements Snapshottable {
      *   <code>a</code> and the corresponding element of <code>b</code>
      * @return this vector, containing the result of the map
      */
-    public final @Inline def map(a:DistVector(M), b:DistVector(M), op:(x:ElemType,y:ElemType)=>ElemType):DistVector(this) {
+    public final @Inline def map(a:DistVector(M), b:DistVector(M), op:(x:Double,y:Double)=>Double):DistVector(this) {
         assert(likeMe(a));
-        val stt = Timer.milliTime();
         finish ateach(Dist.makeUnique(places)) {
             val d = distV();
             val ad = a.distV() as Vector(d.M);
             val bd = b.distV() as Vector(d.M);
             d.map(ad, bd, op);
         }
-        calcTime += Timer.milliTime() - stt;
         return this;
     }
 
@@ -436,20 +436,18 @@ public class DistVector(M:Long) implements Snapshottable {
      * @param unit the identity value for the reduction function
      * @return the result of the reducer function applied to all elements
      */
-    public final @Inline def reduce(op:(a:ElemType,b:ElemType)=>ElemType, unit:ElemType):ElemType {
-        class Reducer implements Reducible[ElemType] {
+    public final @Inline def reduce(op:(a:Double,b:Double)=>Double, unit:Double):Double {
+        class Reducer implements Reducible[Double] {
             public def zero() = unit;
-            public operator this(a:ElemType, b:ElemType) = op(a,b); 
+            public operator this(a:Double, b:Double) = op(a,b); 
         }
-        val stt = Timer.milliTime();
         val reducer = new Reducer();
         val result = finish (reducer) {
             ateach(Dist.makeUnique(places)) {
                 val d = distV();
-                offer d.reduce(op, unit);
+                d.reduce(op, unit);
             }
         };
-        calcTime += Timer.milliTime() - stt;
         return result;
     }
 
@@ -481,34 +479,29 @@ public class DistVector(M:Long) implements Snapshottable {
      * Snapshot mechanism
      */
     /**
-     * Remake the DistVector over a new PlaceGroup
+     * Remake the DistBlockMatrix over a new PlaceGroup
      */
     public def remake(segsz:Rail[Long], newPg:PlaceGroup){        
         assert (segsz.size == newPg.size()) :
             "number of vector segments must be equal to number of places";
         PlaceLocalHandle.destroy(places, distV, (Place)=>true);
-        distV = PlaceLocalHandle.make[Vector](newPg, ()=>Vector.make(segsz(newPg.indexOf(here))));        
+        distV = PlaceLocalHandle.make[Vector](newPg, ()=>Vector.make(segsz(newPg.indexOf(here))));
+        oldSegSize = segSize;
         segSize = segsz;
         PlaceLocalHandle.destroy(places, distData, (Place)=>true);
-        distData = PlaceLocalHandle.make[Rail[ElemType]](newPg, ()=>distV().d);
+        distData = PlaceLocalHandle.make[Rail[Double]](newPg, ()=>distV().d);
         places = newPg;
     }
     
-    /**
-     * Remake the DistVector over a new PlaceGroup
-     */
     public def remake(newPg:PlaceGroup){
-        val m = M;        
+        val m = M;
+        oldSegSize = segSize;
         val segNum = newPg.size;
         val slst = new Rail[Long](segNum, (i:Long)=>Grid.compBlockSize(m, segNum, i as Int));
         remake (slst, newPg);
     }
 
-    /**
-     * Create a snapshot for the DistVector data 
-     * @return a snapshot for the DistVector data stored in a resilient store
-     */
-    public def makeSnapshot():DistObjectSnapshot {
+    public def makeSnapshot():DistObjectSnapshot{
         //val startTime = Timer.milliTime();
         val snapshot = DistObjectSnapshot.make();
         finish ateach(pl in Dist.makeUnique(places)){
@@ -518,58 +511,13 @@ public class DistVector(M:Long) implements Snapshottable {
             val distVecInfo = new VectorSnapshotInfo(i, data.d);
             snapshot.save(i, distVecInfo);
         }
-        snapshotSegSize = segSize;
         //Console.OUT.println("DistVector.SnapshotTime["+(Timer.milliTime() - startTime)+"]");
         return snapshot;
     }
     
-    /**
-     * Restore the DistVector data using the provided snapshot object 
-     * @param snapshot a snapshot from which to restore the data
-     */
     public def restoreSnapshot(snapshot:DistObjectSnapshot) {
         //val startTime = Timer.milliTime();
-        val currentSegSizes = segSize;
-
-        assert (snapshotSegSize != null && currentSegSizes != null) : "Invalid segments rails";
-        
-        var segmentsChanged:Boolean = false;
-        if (snapshotSegSize.size == currentSegSizes.size) {
-            for (var i:Long = 0; i < snapshotSegSize.size; i++) {
-                if (snapshotSegSize(i) != currentSegSizes(i)) {
-                    segmentsChanged = true;
-                    break;
-                }
-            }
-        }
-        else
-            segmentsChanged = true;
-
-        if (!segmentsChanged)
-            restoreSnapshotSegmentBySegment(snapshot);
-        else
-            restoreSnapshotElementByElement(snapshot);
-        //Console.OUT.println("DistVector.RestoreTime["+(Timer.milliTime() - startTime)+"]");
-    }
-    
-    private def restoreSnapshotSegmentBySegment(snapshot:DistObjectSnapshot) {
-        //val startTime = Timer.milliTime();
-        finish ateach(Dist.makeUnique(places)) {
-            //segments should be stored in places with the same order 
-            //segment place index will remain the same
-            val segmentPlaceIndex = places.indexOf(here);
-            val storedSegment = snapshot.load(segmentPlaceIndex) as VectorSnapshotInfo;
-            val srcRail = storedSegment.data;
-            val dstRail = distV().d;
-            Rail.copy(srcRail, 0, dstRail, 0, srcRail.size);
-        }        
-        //Console.OUT.println("DistVector.RestoreTimeSegmentBySegment["+(Timer.milliTime() - startTime)+"]");
-    }
-    
-    private def restoreSnapshotElementByElement(snapshot:DistObjectSnapshot) {
-        //val startTime = Timer.milliTime();
-        val segmentSizes = snapshotSegSize;
-        Console.OUT.println("OldSegments = " + segmentSizes.toString());
+        val segmentSizes = oldSegSize;
         val newSegmentsOffsets = new Rail[Long](places.size());
         newSegmentsOffsets(0) = 0;
         for (var i:Long = 1; i < places.size(); i++){
@@ -577,24 +525,22 @@ public class DistVector(M:Long) implements Snapshottable {
                 newSegmentsOffsets(i) += segSize(j);
             }
         }
-        Console.OUT.println("NewSegments = " + segSize.toString());
-        Console.OUT.println("NewSegmentsOffset = " + newSegmentsOffsets.toString());
-        
         val cached = PlaceLocalHandle.make[Cell[VectorSnapshotInfo]](places, ()=>new Cell[VectorSnapshotInfo](null));    
         val initFunc = (i:Long)=>{
             val myPlaceSegmentOffset = newSegmentsOffsets(places.indexOf(here));
-            val loc = find(i+myPlaceSegmentOffset, segmentSizes);
-
+            val loc = find(i+myPlaceSegmentOffset, segmentSizes);    
             val loadPlaceIndex = loc.first;
             val offset = loc.second;
             var cashedObj:VectorSnapshotInfo = cached()();            
             if ( (cashedObj==null) || (cashedObj.placeIndex!=loadPlaceIndex))
                 cashedObj = snapshot.load(loadPlaceIndex) as VectorSnapshotInfo;
             val data =cashedObj.data;
-            return data(offset);
+        
+            return data(offset);            
         };
         init(initFunc);
-        PlaceLocalHandle.destroy(places, cached, (Place)=>true);      
-        //Console.OUT.println("DistVector.RestoreTimeElementByElement["+(Timer.milliTime() - startTime)+"]");
+        PlaceLocalHandle.destroy(places, cached, (Place)=>true);       
+        oldSegSize = null;
+        //Console.OUT.println("DistVector.RestoreTime["+(Timer.milliTime() - startTime)+"]");
     }
 }

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.dist;
@@ -17,8 +17,6 @@ import x10.util.Timer;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.MatrixBcast;
 import x10.matrix.comm.MatrixReduce;
 
@@ -112,11 +110,11 @@ public class DupDenseMatrix extends Matrix {
 	 * @param da     distributed arrays of array in double
 	 */
 	public static def make(m:Long, n:Long, 
-						   da:DistArray[Rail[ElemType]](1)): DupDenseMatrix(m,n) {
+						   da:DistArray[Rail[Double]](1)): DupDenseMatrix(m,n) {
 		val dms = DistArray.make[DenseMatrix](da.dist);
 		finish ateach(val [p]:Point in dms.dist) {
 			val mypid = here.id();
-			dms(mypid) = new DenseMatrix(m, n, da(mypid) as Rail[ElemType]{self!=null});
+			dms(mypid) = new DenseMatrix(m, n, da(mypid) as Rail[Double]{self!=null});
 		}
 		val dm  = new DupDenseMatrix(dms) as DupDenseMatrix(m,n);
 		return dm;
@@ -162,7 +160,7 @@ public class DupDenseMatrix extends Matrix {
 	 *
 	 * @param ival     initial value for all elements
 	 */
-	public def init(ival:ElemType) : DupDenseMatrix(this) {
+	public def init(ival:Double) : DupDenseMatrix(this) {
 		local().init(ival);
 		sync();
 		return this;
@@ -174,7 +172,7 @@ public class DupDenseMatrix extends Matrix {
 	 * @param f    The function to use to initialize the matrix, mapping (row, column) => double
 	 * @return this object
 	 */
-	public def init(f:(Long,Long)=>ElemType): DupDenseMatrix(this) {
+	public def init(f:(Long,Long)=>Double): DupDenseMatrix(this) {
 		finish ateach(val [p]:Point in dupMs.dist) {
 			val pid=here.id();
 			dupMs(pid).init(f);
@@ -250,13 +248,13 @@ public class DupDenseMatrix extends Matrix {
 	/**
 	 * Access data at(x, y)
 	 */
-    public operator this(x:Long, y:Long):ElemType=local()(y*this.M+x);
+    public operator this(x:Long, y:Long):Double=local()(y*this.M+x);
 
 	/**
 	 * Assign v to (x, y) in the copy at here. Other copies are not
 	 * modified.
 	 */
-	public operator this(x:Long,y:Long) = (v:ElemType):ElemType{
+	public operator this(x:Long,y:Long) = (v:Double):Double{
 		local()(x, y) = v;
 		return v;
 	}
@@ -326,9 +324,9 @@ public class DupDenseMatrix extends Matrix {
 	}
 
 	/**
-	 * Transpose input matrix and store the result in this matrix.
+	 * Transpose matrix and all copies and store the result at user provided ddm.
 	 */
-	public def T(ddm:DupDenseMatrix(N,M)):void {
+	public def T(ddm:DupDenseMatrix(N,M)): void{
 		finish ateach(val [p]:Point in this.dupMs) {
 			val tm = ddm.local();
 			val m  = local();
@@ -338,18 +336,18 @@ public class DupDenseMatrix extends Matrix {
 	}
 
 	/**
-	 * Transpose this matrix and store in a new DupDenseMatrix instance.
+	 * Transpose matrix and all copies and store a new DupDenseMatrix instance.
 	 */
 	public def T():DupDenseMatrix(N,M) {
 		val tm = DupDenseMatrix.make(this.N, this.M);
-		tm.T(this);
+		this.T(tm);
 		return tm;
 	}
 
 	/**
 	 * Scaling method. All copies are updated concurrently
 	 */
- 	public def scale(a:ElemType) {
+ 	public def scale(a:Double) {
 		finish ateach(val [p] :Point in this.dupMs) {
 			this.local().scale(a);
 		}
@@ -389,7 +387,7 @@ public class DupDenseMatrix extends Matrix {
 		return this;
 	}
 
-	public def cellAdd(d:ElemType)  {
+	public def cellAdd(d:Double)  {
 		//assert (this.M==A.M && this.N==A.N);
 	    finish ateach([p]  in this.dupMs) {
 	        val dm = local();
