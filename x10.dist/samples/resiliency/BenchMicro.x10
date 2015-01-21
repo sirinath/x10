@@ -9,8 +9,6 @@
  *  (C) Copyright IBM Corporation 2006-2014.
  */
 
-import x10.xrx.Runtime;
-
 /**
  * This is a microbenchmark used to isolate the
  * overheads of different resilient finish implementations

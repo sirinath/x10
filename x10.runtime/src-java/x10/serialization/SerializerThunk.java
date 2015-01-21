@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 package x10.serialization;
 
@@ -124,7 +124,8 @@ abstract class SerializerThunk {
             return new X10JavaSerializableSerializerThunk(clazz);
         }
 
-        // We are going to serialize it via reflective access to its instance fields.
+        // A vanilla Java class that doesn't implement a special protocol.
+        // We are going to serialize if via reflective access to its instance fields.
         Class<?> superclass = clazz.getSuperclass();
         SerializerThunk superThunk = null;
         if (!("java.lang.Object".equals(superclass.getName()) || "x10.core.Ref".equals(superclass.getName()) || "x10.core.Struct".equals(superclass.getName()))) {
@@ -159,7 +160,8 @@ abstract class SerializerThunk {
             serializeMethod.invoke(obj, xjs);
         }
     }
-    
+
+
     private static class FieldBasedSerializerThunk extends SerializerThunk {
         protected final Field[] fields;
 

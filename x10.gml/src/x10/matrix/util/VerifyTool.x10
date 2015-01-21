@@ -12,10 +12,9 @@
 package x10.matrix.util;
 
 import x10.matrix.Matrix;
-import x10.matrix.Vector;
-import x10.matrix.ElemType;	
+
 /**
- * This class is used to verify matrix and vector properties and operations. 
+ * This class is used to verify matrix multiplication result. 
  */
 public class VerifyTool {
     /**
@@ -54,7 +53,7 @@ public class VerifyTool {
 		for (var x:Long=0; x<C.M; x++) {
 			for (var y:Long=0; y<C.N; y++){
 				val cv   = C(x,y);
-				var v:ElemType = 0.0 as ElemType;
+				var v:Double = 0.0D;
 				for (var k:Long=0; k<A.N; k++) v += A(x, k) * B(k, y);
 				if (! MathTool.equals(v, cv)) {
 					Console.OUT.printf("Check fail (%5d, %5d) Computed:%.8f Verified:%.8f\n", 
@@ -82,7 +81,7 @@ public class VerifyTool {
 	public static def verifyMatMult(x:Long, y:Long, A:Matrix, B:Matrix, C:Matrix):Boolean {
 
 		val cv       = C(x,y);
-		var v:ElemType = 0.0 as ElemType;
+		var v:Double = 0.0D;
 		for (var k:Long=0; k<A.N; k++) v += A(x, k) * B(k, y);
 		Console.OUT.printf("Check (%5d, %5d) Computed:%.8f Verified:%.8f\n", 
 						   x, y, cv, v);
@@ -101,7 +100,7 @@ public class VerifyTool {
 	 */
 	 public static def verifyTransMultMatrix(x:Long, y:Long, A:Matrix, B:Matrix, C:Matrix):Boolean {
 		val cv   = C(x,y);
-		var v:ElemType = 0.0 as ElemType;
+		var v:Double = 0.0D;
 		
 		for (var k:Long=0; k<A.M; k++) v += A(k, x) * B(k, y);
 		Console.OUT.printf("Check (%5d, %5d) Computed:%.8f Verified:%.8f\n", 
@@ -120,7 +119,7 @@ public class VerifyTool {
 	 */
 	public static def verifyMatrixMultTrans(x:Long, y:Long, A:Matrix, B:Matrix, C:Matrix):Boolean {
 		val cv   = C(x,y);
-		var v:ElemType = 0.0 as ElemType;
+		var v:Double = 0.0D;
 
 		for (var k:Long=0; k<A.N; k++) v += A(x, k) * B(y, k);
 		Console.OUT.printf("Check (%5d, %5d) Computed:%.8f Verified:%.8f\n", 
@@ -144,6 +143,7 @@ public class VerifyTool {
 	 * @return if elements in two matrices are all same
 	 */
 	public static def testSame(m1:Matrix, m2:Matrix(m1.M, m1.N)):Boolean {
+		
 		for (var c:Long=0; c< m1.N; c++)
 			for (var r:Long=0; r< m1.M; r++) {
 				val v1=	m1(r,c);
@@ -198,7 +198,7 @@ public class VerifyTool {
 	 * @param v -- testing value
 	 * @return true if all elements in matrix equal to v.
 	 */
-	public static def testSame(m:Matrix, v:ElemType):Boolean {
+	public static def testSame(m:Matrix, v:Double):Boolean {
 		for (var c:Long=0; c< m.N; c++)
 			for (var r:Long=0; r< m.M; r++) {
 				val v1=	m(r,c);
@@ -209,22 +209,6 @@ public class VerifyTool {
 					Console.OUT.flush();
 					return false;
 				}
-			}
-		return true;
-	}
-
-	/**
-	 * Test for (near) equality of two vectors.
-	 * @param v1 first vector
-	 * @param v2 second vector
-	 * @return true if each element in v1 is equal to the corresponding element in v2, within tolerance
-	 */
-	public static def testSame(v1:Vector, v2:Vector(v1.M)):Boolean {
-		for (m in 0..(v1.M-1))
-			if (MathTool.equals(v1(m), v2(m)) == false) {
-                Console.OUT.println("element " + m + " " + v1(m) + " != " + v2(m));
-				Console.OUT.flush();
-				return false;
 			}
 		return true;
 	}

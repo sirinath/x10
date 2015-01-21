@@ -14,8 +14,7 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
-import x10.matrix.ElemType;
-
+import x10.matrix.util.Debug;
 import x10.matrix.comm.mpi.WrapMPI;
 
 /**
@@ -42,11 +41,11 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	 */
 	public static def gather(
 			src:DistDataArray, 
-			dst:Rail[Rail[ElemType]]) : void {
+			dst:Rail[Rail[Double]]) : void {
 		
 		val nb = src.region.size();
-        assert (nb==dst.size) :
-            "Number of blocks in dist and local array do not match";
+		Debug.assure(nb==dst.size, 
+					 "Number blocks in dist and local array not match");
 		
 		finish for (var bid:Long=0; bid<nb; bid++) {
 			val dstbuf = dst(bid);
@@ -79,7 +78,7 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	 */
 	public static def gather(
 			src:DistDataArray, 
-			dst:Rail[ElemType],
+			dst:Rail[Double],
 			szlist:Rail[Long]):void {
 
 		@Ifdef("MPI_COMMU") {
@@ -100,7 +99,7 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	 */
 	public static def mpiGather(
 			src:DistDataArray, 
-			dst:Rail[ElemType], 
+			dst:Rail[Double], 
 			szlist:Rail[Int]):void {
 		
 		@Ifdef("MPI_COMMU") {
@@ -116,8 +115,9 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Array[ElemType](0); //fake
+							val tmpbuf = new Array[Double](0); //fake
 							val tmplst = new Array[Int](0);   //fake
+							//Debug.flushln("P"+p+" starting non root gather :"+datcnt);
 							WrapMPI.world.gatherv(srcbuf, 0, datcnt, tmpbuf, 0, tmplst, root);
 						}
 					} 
@@ -129,6 +129,8 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 					// MPI process will hang, Cause is not clear
 					/**********************************************/	
 					val srcbuf = src(root);
+					//Debug.flushln("P"+root+" starting root gather:"+szlist.toString());
+				
 					WrapMPI.world.gatherv(srcbuf, 0, szlist(root), dst, 0, szlist, root);
 				}
 			
@@ -145,7 +147,7 @@ public class DistArrayGather extends DistArrayRemoteCopy {
 	 */
 	public static def x10Gather(
 			src:DistDataArray, 
-			dstbuf:Rail[ElemType],
+			dstbuf:Rail[Double],
 			gp:Rail[Long]): void {
 
 		val root = here.id();

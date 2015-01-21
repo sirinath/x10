@@ -11,7 +11,6 @@
 
 package x10.matrix.comm;
 
-import x10.matrix.ElemType;
 /**
  * This struct is used to pack information of sparse matrix from the destination place.
  * The data fields are transferred to the local place where the remote array copy uses 
@@ -19,16 +18,16 @@ import x10.matrix.ElemType;
  *
  */
 protected struct DenseRemoteDestInfo {
-	public val valbuf:GlobalRail[ElemType];
+	public val valbuf:GlobalRail[Double];
 	public val offset:Long;
 	
-	public def this(vlu:GlobalRail[ElemType], off:Long) {
+	public def this(vlu:GlobalRail[Double], off:Long) {
 		valbuf = vlu;	
 		offset = off; 
 	}
 
-	public def this(vlu:Rail[ElemType], off:Long) {
-		valbuf = new GlobalRail[ElemType](vlu as Rail[ElemType]{self!=null});	
+	public def this(vlu:Rail[Double], off:Long) {
+		valbuf = new GlobalRail[Double](vlu as Rail[Double]{self!=null});	
 		offset = off; 
 	}
 }

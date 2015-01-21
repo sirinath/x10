@@ -6,13 +6,13 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 #include <x10/lang/GlobalRef.h>
 #include <x10aux/reference_logger.h>
-#include <x10/xrx/Runtime.h>
-#include <x10/xrx/Activity.h>
+#include <x10/lang/Runtime.h>
+#include <x10/lang/Activity.h>
 
 x10aux::RuntimeType x10::lang::GlobalRef<void>::rtt;
 
@@ -20,9 +20,9 @@ namespace x10 {
     namespace lang {
 
         x10_long globalref_getInitialEpoch() {
-            x10::xrx::Activity* activity = x10::xrx::Runtime::activity();
+            Activity* activity = x10::lang::Runtime::activity();
             if (NULL == activity) {
-                return x10::xrx::Runtime::epoch();
+                return x10::lang::Runtime::epoch();
             } else {
                 return activity->FMGL(epoch);
             }
@@ -32,14 +32,6 @@ namespace x10 {
             #if defined(X10_USE_BDWGC) || defined(X10_DEBUG_REFERENCE_LOGGER)
             if (!obj->_isMortal()) {
                 x10aux::ReferenceLogger::log(obj);
-            }
-            #endif
-        }
-
-        void forgetGlobalReference(x10::lang::Reference* obj) {
-            #if defined(X10_USE_BDWGC) || defined(X10_DEBUG_REFERENCE_LOGGER)
-            if (!obj->_isMortal()) {
-                x10aux::ReferenceLogger::forget(obj);
             }
             #endif
         }

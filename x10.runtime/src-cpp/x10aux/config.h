@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 #ifndef X10AUX_CONFIG_H
@@ -78,6 +78,8 @@
 #else
 #define PLACE_CHECK_BOOL true
 #endif
+
+#define DEFAULT_STATIC_THREADS false
 
 #define ENV_CONGRUENT_BASE "X10_CONGRUENT_BASE"
 #define ENV_CONGRUENT_SIZE "X10_CONGRUENT_SIZE"

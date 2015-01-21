@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  * 
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.array;
@@ -33,8 +33,6 @@ public abstract class IterationSpace(rank:Long,rect:Boolean) implements Iterable
     public abstract def max(i:Long):Long;
 
     public abstract def isEmpty():Boolean;
-
-    public abstract def size():Long;
 
     public def toString() {
         val sb = new x10.util.StringBuilder();

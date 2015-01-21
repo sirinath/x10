@@ -11,7 +11,6 @@
 
 package x10.matrix.comm;
 
-import x10.matrix.ElemType;
 /**
  * This struct is used to pack information of sparse matrix from the source place.
  * The data fields of the struct are captured and copied to here, which are needed
@@ -19,20 +18,20 @@ import x10.matrix.ElemType;
  */
 protected struct SparseRemoteSourceInfo {
 	public val idxbuf:GlobalRail[Long];
-	public val valbuf:GlobalRail[ElemType];
+	public val valbuf:GlobalRail[Double];
 	public val offset:Long;
 	public val length:Long;
 	
-	public def this(idx:GlobalRail[Long], vlu:GlobalRail[ElemType], off:Long, len:Long) {
+	public def this(idx:GlobalRail[Long], vlu:GlobalRail[Double], off:Long, len:Long) {
 		idxbuf = idx; 
 		valbuf = vlu;	
 		offset = off; 
 		length = len;
 	}
 
-	public def this(idx:Rail[Long], vlu:Rail[ElemType], off:Long, len:Long) {
+	public def this(idx:Rail[Long], vlu:Rail[Double], off:Long, len:Long) {
 		idxbuf = new GlobalRail[Long](idx as Rail[Long]{self!=null}); 
-		valbuf = new GlobalRail[ElemType](vlu as Rail[ElemType]{self!=null});	
+		valbuf = new GlobalRail[Double](vlu as Rail[Double]{self!=null});	
 		offset = off; 
 		length = len;
 	}

@@ -12,7 +12,7 @@
 package x10.matrix.sparse;
 
 import x10.util.Pair;
-import x10.matrix.ElemType;
+import x10.matrix.util.Debug;
 
 /**
  * This class provides abstraction of 2-dimension compressed array based on Rail
@@ -73,8 +73,8 @@ public class Compress2D {
 	 * @param aval     Rail of matrix nonzero values.
 	 */
 	public static def make(ia:Rail[Long],
-						   ja:Rail[Long]{self!=null},
-						   aval:Rail[ElemType]{self!=null,self.size==ja.size}
+						   ja:Rail[Long],
+						   aval:Rail[Double]{self.size==ja.size}
 						   ):Compress2D {
 		val len = ia.size-1;
 		val cpd = new Rail[Compress1D](len);
@@ -98,7 +98,7 @@ public class Compress2D {
 	 * @param lineSize     Rail of sizes of lines.
 	 */
 	public static def make(ca:CompressArray, start:Long, count:Long, lineSize:Rail[Long]):Compress2D {
-		assert start+count <= lineSize.size;
+		Debug.assure(start+count <= lineSize.size);
 		val cd = new Rail[Compress1D](count);
 		var sourceLine:Long = start;
 		var offset:Long = 0;
@@ -118,7 +118,7 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity
 	 * @return        number of nonzero count
 	 */
-	public def initConst(ldm:Long, v:ElemType, nzp:Float):Long {
+	public def initConst(ldm:Long, v:Double, nzp:Double):Long {
 		var offset:Long=0;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -128,7 +128,7 @@ public class Compress2D {
 		return offset;
 	}
 	
-	public def initConst(up:Boolean, ldm:Long, v:ElemType, nzp:Float):Long {
+	public def initConst(up:Boolean, ldm:Long, v:Double, nzp:Double):Long {
 		var offset:Long=0;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -148,7 +148,7 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity 
 	 * @return        number of nonzero count;
 	 */
-	public def initRandom(ldm:Long, nzp:Float):Long {
+	public def initRandom(ldm:Long, nzp:Double):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -166,7 +166,7 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity 
 	 * @return        number of nonzero count;
 	 */
-	public def initRandom(up:Boolean, ldm:Long, nzp:Float):Long {
+	public def initRandom(up:Boolean, ldm:Long, nzp:Double):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		for (l in 0L..(cLine.size-1)) {
@@ -189,22 +189,26 @@ public class Compress2D {
 	 * @param up      upper bound of random value
 	 * @return        number of nonzero count
 	 */
-	public def initRandomFast(ldm:Long, nzp:Float, lb:Long, ub:Long):Long {
+	public def initRandomFast(ldm:Long, nzp:Double, lb:Long, ub:Long):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		val nl = cLine.size;
+		//val ll:Long = nl /100 >0?nl/100:1;
 		for (var l:Long=0L; l<nl; l++) {
+			//Debug.flushln("Random initial compress line "+l);
 			cLine(l).initRandomFast(ldm, nzp, offset, ca, lb, ub);
 			offset += cLine(l).length;
 		}
 		return offset;
 	}
 	
-	public def initRandomFast(up:Boolean, ldm:Long, nzp:Float, lb:Long, ub:Long):Long {
+	public def initRandomFast(up:Boolean, ldm:Long, nzp:Double, lb:Long, ub:Long):Long {
 		var offset:Long=0L;
 		val ca = getStorage();
 		val nl = cLine.size;
+		//val ll:Long = nl /100 >0?nl/100:1;
 		for (var l:Long=0L; l<nl; l++) {
+			//Debug.flushln("Random initial compress line "+l);
 			if (up)
 				cLine(l).initRandomFast(0L, l>ldm?ldm:l, nzp, offset, ca, lb, ub);
 			else
@@ -222,10 +226,10 @@ public class Compress2D {
 	 * @param nzp     Nonzero sparsity
 	 * @return        number of nonzero count
 	 */
-	public def initRandomFast(ldm:Long, nzp:Float) =
+	public def initRandomFast(ldm:Long, nzp:Double) =
 		initRandomFast(ldm, nzp, 0L, 0L);
 
-	public def initRandomFast(up:Boolean, ldm:Long, nzp:Float) =
+	public def initRandomFast(up:Boolean, ldm:Long, nzp:Double) =
 		initRandomFast(up, ldm, nzp, 0L, 0L);
 
 	/**
@@ -236,7 +240,7 @@ public class Compress2D {
 	 * @param nzp          Nonzero sparsity
 	 * @param ca           The data storage for compress array.
 	 */
-	public static def makeRand(n:Long, maxIndex:Long, nzp:Float, ca:CompressArray):Compress2D {
+	public static def makeRand(n:Long, maxIndex:Long, nzp:Double, ca:CompressArray):Compress2D {
 		val c2d = Compress2D.make(n, ca);
 		c2d.initRandom(maxIndex, nzp);
 		return c2d;
@@ -249,7 +253,7 @@ public class Compress2D {
 	 * @param nzp          Nonzero percentage
 	 * @param ca           The data storage for compress array.
 	 */
-	public static def makeRandomFast(n:Long, maxIndex:Long, nzp:Float, ca:CompressArray):Compress2D {
+	public static def makeRandomFast(n:Long, maxIndex:Long, nzp:Double, ca:CompressArray):Compress2D {
 		val c2d = Compress2D.make(n, ca);
 		c2d.initRandomFast(maxIndex, nzp);
 		return c2d;
@@ -377,7 +381,7 @@ public class Compress2D {
 	 * This operator should be used with caution. 
 	 * Modifying compressed data after it is created should be avoided.
 	 */
-	public operator this(i:Long)=(w:Pair[Long,ElemType]):void{
+	public operator this(i:Long)=(w:Pair[Long,Double]):void{
 	    val idx = w.first;
 	    val v = w.second;
 		val pos = cLine(i).find(idx);
@@ -408,7 +412,7 @@ public class Compress2D {
 	 * @param d     The source for the compressed data
 	 * @returns     The number of elements copied.
      */
-	public def compressAt(i:Long, offset:Long, d:Rail[ElemType]) = 
+	public def compressAt(i:Long, offset:Long, d:Rail[Double]) = 
 		cLine(i).compressAt(offset, d);
 
 	/**
@@ -416,7 +420,7 @@ public class Compress2D {
 	 */
 	public def toCompressSparse(ia:Rail[Long], 
 								ja:Rail[Long], 
-								aval:Rail[ElemType]
+								aval:Rail[Double]
 								):void {
 		var pos:Long = 0L;
 		var i:Long = 0L;
@@ -435,7 +439,7 @@ public class Compress2D {
 	public def addLinesToArray(lst:Long,   // starting line
 							   lcnt:Long,  // number of lines
 							   ldm:Long,   // maximum index
-							   dst:Rail[ElemType] //destination Rail
+							   dst:Rail[Double] //destination Rail
 							   ):void {
 		var dstoff:Long=0;
 		for (var i:Long=lst; i<lst+lcnt; i++, dstoff+=ldm)
@@ -447,7 +451,7 @@ public class Compress2D {
 	//public def getLines(st:Long, 
 	//					num:Long, 
 	//					comp2d:Compress2D) : void {
-	//	assert num <= comp2d.size();
+	//	Debug.assure(num <= comp2d.size());
 	//	for (var i:Long=0; i<num; i++) {
 	//		comp2d.setLine(i, cLine(st+i));
 	//	}
@@ -463,8 +467,8 @@ public class Compress2D {
 		val nl = this.size(); //Get number of compressed lines
 		val ca = dst.getStorage();//
 		var dstoff:Long=0;
-        assert (nl==dst.size()) : 
-            "Cannot perform section copy, compress2D size mismatch";
+		Debug.assure(nl==dst.size(), 
+					  "Cannot perform section copy, compress2D size mismatch");
 		for (var i:Long=0; i<nl; i++) {
 			val nc = cLine(i).copyPart(start, len, dstoff, ca);
 			dst.cLine(i).offset = dstoff;
@@ -494,7 +498,7 @@ public class Compress2D {
 							  dst:Compress2D   //Target Compress2D
 							  ):Long {         //Return number of data copied
 		val ca = dst.getStorage();
-		assert (start+cnt <= this.size() && cnt <= dst.size());
+		Debug.assure(start+cnt <= this.size() && cnt <= dst.size());
 		var dstline:Long = 0;
 		var dstoff:Long = 0;
 		for (var srcline:Long=start; srcline<start+cnt; srcline++, dstline++) {
@@ -514,9 +518,9 @@ public class Compress2D {
 								 cnt:Long,         // Number of lines
 								 ca:CompressArray // Target CompressArray
 								 ):Long {          // Return number of data copied
-        assert start+cnt <= this.size();
-        assert (countNonZero(start, cnt) <= ca.storageSize()) : 
-            "Not enough space in CompressArray";
+		Debug.assure(start+cnt <= this.size());
+		Debug.assure(countNonZero(start, cnt) <= ca.storageSize(), 
+					  "Not enough space in CompressArray");
 		var dsti:Long = 0;
 		var dstoff:Long = 0;
 		for (var srci:Long=start; srci<start+cnt; srci++, dsti++) {
@@ -544,8 +548,8 @@ public class Compress2D {
 		val srcend:Long = srcLineOffset+lineCnt;
 		val dstend:Long = dstLineOffset+lineCnt;
 		//Make sure the source and destination are bounded.
-        assert (dstend <= dstC2D.size() && srcend <= srcC2D.size()) : 
-            "Illegal line offset in source or target";
+		Debug.assure(dstend <= dstC2D.size() && srcend <= srcC2D.size(), 
+					 "Illegal line offset in source or target");
 
 		// Get the starting offset by looking previous compress line
 		val sttoff:Long=(dstLineOffset==0L)?0L:dstC2D.cLine(dstLineOffset-1).offset +
@@ -597,12 +601,15 @@ public class Compress2D {
 	public static def copySection(srcC2D:Compress2D, idxStart:Long,
 								  dstC2D:Compress2D, idxCount:Long):Long {
 
+		//Debug.assure(srcC2D.size()==dstC2D.size(), 
+		//			 "Cannot perform section copy, compress2D size mismatch");
 		var ln:Long =0;
 		var dstoff:Long=0;
 		for (; ln < srcC2D.size(); ln++) {
 			//Set the target compress line offset
 			dstC2D.cLine(ln).offset = dstoff;
 			//Make copy
+			//Debug.flushln("Copy section compress line:"+ln+" dst offset:"+dstoff );
 			Compress1D.copySection(srcC2D.cLine(ln), idxStart, 
 								   dstC2D.cLine(ln), idxCount);
 			//Reset the total offset in compress array
@@ -615,6 +622,7 @@ public class Compress2D {
 		}
 		//Reset the target compress array count
 		dstC2D.getStorage().count = dstoff;
+		//Debug.flushln("Done copy 2D");
 		return dstoff;
 	}
 
@@ -629,7 +637,8 @@ public class Compress2D {
 	 * @param source -- The source
 	 */
 	public def resetCols(startLine:Long, count:Long, source: Compress2D){ 
-		assert (startLine+count <= source.size() && count <= this.size());
+		Debug.assure(startLine+count <= source.size() && count <= this.size());
+		//Debug.println("Reset columns from "+startln+" cnt:"+cnt);
 		for (var di:Long=0, si:Long=startLine; si<startLine+count; si++, di++) {
 			this.cLine(di).offset = source.cLine(si).offset;
 			this.cLine(di).length = source.cLine(si).length;
@@ -663,8 +672,10 @@ public class Compress2D {
 
 		for (var c:Long=lineOff; c<lineOff+lineCnt; c++) {
 			pos = cLine(c).offset;
+			//Debug.flushln("Reset column:"+c+" start index:"+pos);
 			if (pos >= ca.index.size) break; //This condition is used to guarde when the last line is empty
 			ca.index(pos) -= ldm;            //Mark the index value
+			//Debug.flushln("To value:"+ ca.index(pos));
 		}
 		return pos-sttpos+cLine(lineOff+lineCnt-1).length;
 	}
@@ -719,8 +730,8 @@ public class Compress2D {
 		var pos:Long = lineOff==0L?0L:cLine(lineOff-1).offset+cLine(lineOff-1).length;
 		var len:Long = 0L;
 
-        assert ((pos+dataCnt)<=ca.index.size) :
-            "Building index fail - data count exceeds the storage size"; 
+		Debug.assure((pos+dataCnt)<=ca.index.size, 
+					 "Building index fail - data count exceeds the storage size"); 
 		
 		if (ca.index(pos) < 0L) 
 			ca.index(pos) += ldm; 			// Adjust for the starting line
@@ -779,11 +790,11 @@ public class Compress2D {
 
 	// Randomness info
 
-	public def compAvgLineSize():ElemType = getStorage().count/this.size();
+	public def compAvgLineSize():Double = getStorage().count/this.size();
 
-	public def compLineSizeSumDvn(avg:ElemType):ElemType {
-		var stdd:ElemType = 0.0 as ElemType;
-		var df:ElemType = 0.0 as ElemType;
+	public def compLineSizeSumDvn(avg:Double):Double {
+		var stdd:Double = 0.0;
+		var df:Double = 0.0;
 		for (var cl:Long=0; cl<size(); cl++) {
 			df = cLine(cl).length - avg;
 			stdd += df*df;
@@ -791,21 +802,21 @@ public class Compress2D {
 		return stdd;
 	}
 
-	public def compLineSizeStdDvn():ElemType {
+	public def compLineSizeStdDvn():Double {
 		val avg  = compAvgLineSize();
 		val stdd = compLineSizeSumDvn(avg);
 		return x10.lang.Math.sqrt(stdd / this.size());
 	}
 
-	public def compAvgIndexDst() :ElemType {
-		var avgd:ElemType = 0.0 as ElemType;
+	public def compAvgIndexDst() :Double {
+		var avgd:Double = 0.0;
 		for (var cl:Long=0; cl<this.size(); cl++) {
 			avgd += cLine(cl).compAvgIndexDst();
 		}
 		return avgd / this.size();
 	}
-	public def compIndexDstSumDvn(avg:ElemType) :ElemType {
-		var td:ElemType = 0.0 as ElemType;
+	public def compIndexDstSumDvn(avg:Double) :Double {
+		var td:Double = 0.0;
 		for (var cl:Long=0; cl<this.size(); cl++) {
 			td += cLine(cl).compIndexDstSumDvn(avg);
 		}
@@ -819,10 +830,10 @@ public class Compress2D {
 		}
 		return cnt;
 	}
-	public def compIndexDstStdDvn() : ElemType {
+	public def compIndexDstStdDvn() : Double {
 		val td = compIndexDstSumDvn(compAvgIndexDst());
 		val cnt= getIndexDstCnt();
-		if (cnt <= 0) return 0.0 as ElemType;
+		if (cnt <= 0) return 0.0;
 		return x10.lang.Math.sqrt(td/cnt);
 	}
 }

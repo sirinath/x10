@@ -22,16 +22,16 @@ depend_src  = SeqLogReg.x10 LogisticRegression.x10
 # build path
 build_path	= build
 
-# GML path relative to current directory
+# GML path
 gml_path    = ../..
 
 # compile options
-X10_FLAG	=  -sourcepath ../. -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -O -NO_CHECKS
+X10_FLAG	= -sourcepath ../.  -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -O -NO_CHECKS
 
 # runtime settings
 runtime_list = mpi sock java
 numplaces = 4
-test_args = -m 10000 -n 4 --density 0.9 --iterations 10 --verify 
+test_args = 
 
 ###################################################
 # Build rules

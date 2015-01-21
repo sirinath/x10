@@ -38,7 +38,7 @@ class ResilientKMeans {
                             + CLUSTERS + " clusters, using " + Place.numPlaces() + " places");
         
         finish for (p in Place.places()) at (p) {
-            Console.OUT.println(here+" running in "+x10.xrx.Runtime.getName());
+            Console.OUT.println(here+" running in "+Runtime.getName());
         }
 
         val place0 = here;
@@ -171,6 +171,7 @@ class ResilientKMeans {
                                     }
                                     local_cluster_counts()(closest)++;
                                 //}
+                                //Runtime.probe(); // probably not necessary since load is statically balanced
                             }
                         } /* for (j) */
                         //val actual_work_after = System.nanoTime();
@@ -181,7 +182,7 @@ class ResilientKMeans {
                         val tmp_new_clusters = local_new_clusters();
                         val tmp_cluster_counts = local_cluster_counts();
                         val tmp_processed_points = e - s;
-                        /*val prof = new x10.xrx.Runtime.Profile();
+                        /*val prof = new Runtime.Profile();
                         @Profile(prof) */ at (place0) async atomic {
                             for (var j:Long=0L ; j<CLUSTERS*DIM; ++j) {
                                 central_clusters_gr()(j) += tmp_new_clusters(j);

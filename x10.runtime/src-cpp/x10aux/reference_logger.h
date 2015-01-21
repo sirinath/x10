@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 #ifndef X10AUX_REFERENCE_LOGGER_H
@@ -47,11 +47,6 @@ namespace x10aux {
         static void log(void *x) {
         	if (NULL == it) it = initMe();
         	it->log_(x);
-        }
-        void forget_(void *x);
-        static void forget(void *x) {
-        	if (NULL == it) return;
-        	it->forget_(x);
         }
         template<class T> friend const char *::x10aux::typeName();
     };

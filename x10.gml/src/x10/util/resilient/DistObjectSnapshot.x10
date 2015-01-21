@@ -11,146 +11,54 @@
  */
 package x10.util.resilient;
 
-import x10.util.HashMap;
-import x10.util.Timer;
-import x10.xrx.Runtime;
-
-/**
- * A distributed snapshot of an object, which can be used to restore the
- * object to a previous correct state in case of a place failure.
- *
- * TODO this type should be parametrized by [Key,Value] types, but this is
- * not possible due to limitation of Native X10: XTENLANG-3472
- */
-public abstract class DistObjectSnapshot {
+public abstract class DistObjectSnapshot[K,V] {V haszero} {
     static val mode = getEnvInt("X10_RESILIENT_STORE_MODE");
     static val verbose = getEnvInt("X10_RESILIENT_STORE_VERBOSE");
-    
-    static val localCopy = getEnvString("X10_RESILIENT_STORE_LOCAL_COPY", "clone"); // at, deep, clone
-    static val remoteCopy = getEnvString("X10_RESILIENT_STORE_REMOTE_COPY", "at"); // at, dma
-    static val forceDeepCopy = 0N;
-    
     static def getEnvInt(name:String) {
         val env = System.getenv(name);
         val v = (env!=null) ? Int.parseInt(env) : 0N;
         if (here==Place.FIRST_PLACE) Console.OUT.println(name + "=" + v);
         return v;
     }
-    static def getEnvString(name:String, defaultValue:String) {
-        val env = System.getenv(name);
-        val v = (env!=null) ? env : defaultValue;
-        if (here==Place.FIRST_PLACE) Console.OUT.println(name + "=" + v);
-        return v;
-    }
-
-    public static def make():DistObjectSnapshot {
+    public static def make[K,V](){V haszero}:DistObjectSnapshot[K,V] {
         switch (mode) {
-            case 0N: return new DistObjectSnapshotPlace0();
-            case 1N: return new DistObjectSnapshotDistributed();
-            default: throw new Exception("unknown mode");
+        case 0N: return new DistObjectSnapshotPlace0[K,V]();
+        case 1N: return new DistObjectSnapshotDistributed[K,V]();
+        default: throw new Exception("unknown mode");
         }
     }
-
-    public abstract def save(key:Any, value:Any):void;
-    public abstract def load(key:Any):Any;
-    public abstract def delete(key:Any):void;
+    public abstract def save(key:K, value:V):void;
+    public abstract def load(key:K):V;
+    public abstract def delete(key:K):void;
     public abstract def deleteAll():void;
-
+ 
     /**
      * Place0 implementation of ResilientStore
      */
-    static class DistObjectSnapshotPlace0 extends DistObjectSnapshot {
-        val hm = at(Place.FIRST_PLACE) GlobalRef(new HashMap[Any,Any]());
+    static class DistObjectSnapshotPlace0[K,V] {V haszero} extends DistObjectSnapshot[K,V] {
+        val hm = at (Place.FIRST_PLACE) GlobalRef(new x10.util.HashMap[K,V]());
         private def DEBUG(msg:String) { Console.OUT.println(msg); Console.OUT.flush(); }
-
-        public def save(key:Any, value:Any) {
+        public def save(key:K, value:V) {
             if (verbose>=1) DEBUG("save: key=" + key);
-            if (hm.home == here)
-                saveLocal(key, value);
-            else
-                saveRemote(key, value);
+           finish //TODO: remove this workaround (see XTENLANG-3260)
+            at (hm) hm().put(key,value); // value is deep-copied by "at"
         }
-
-        public def load(key:Any) {
+        public def load(key:K) {
             if (verbose>=1) DEBUG("load: key=" + key);
-            if (hm.home == here)
-                return loadLocal(key);
-            else
-                return loadRemote(key);
+            var value:V;
+           finish //TODO: remove this workaround (see XTENLANG-3260)
+            value = at (hm) hm().getOrThrow(key); // value is deep-copied by "at"
+            return value;
         }
-
-        public def delete(key:Any) {
+        public def delete(key:K) {
             if (verbose>=1) DEBUG("delete: key=" + key);
-            at(hm) atomic { hm().remove(key); }
+           finish //TODO: remove this workaround (see XTENLANG-3260)
+            at (hm) hm().remove(key);
         }
-
         public def deleteAll() {
             if (verbose>=1) DEBUG("deleteAll");
-            at(hm) atomic { hm().clear(); }
-        }
-        
-        private def saveLocal(key:Any, value:Any){hm.home==here} {
-            if (localCopy.equals("at")) {
-                at(hm) atomic { hm().put(key,value); } // value is deep-copied by "at"
-            } else if (localCopy.equals("deep")) {
-                val copiedValue = Runtime.deepCopy(value);
-                atomic { hm().put(key, copiedValue ); }
-            } else if (localCopy.equals("clone")) {
-                val copiedValue = (value as Snapshot).clone();
-                atomic { hm().put(key, copiedValue); }
-            } else {
-                throw new Exception("unknown local copy mode");
-            }
-        }
-        
-        private def saveRemote(key:Any, value:Any) {
-            if (remoteCopy.equals("at")) {
-                at(hm) atomic hm().put(key,value); // value is deep-copied by "at"
-            } else if (remoteCopy.equals("dma")) {
-                val hmGR = at(hm.home) GlobalRef[HashMap[Any,Any]](hm());
-                (value as Snapshot).remoteCopyAndSave(key, hmGR);
-            } else {
-                throw new Exception("unknown remote copy mode");
-            }
-        }
-        
-        public def loadLocal(key:Any){hm.home==here}:Any {
-            if (localCopy.equals("at")) {
-                val value = at(hm) {
-                    var v:Any; atomic { v = hm().getOrThrow(key); } v
-                }; // value is deep-copied by "at"
-                return value;
-            } else if (localCopy.equals("deep")) {
-                var v:Any;
-                atomic { v = hm().getOrThrow(key); }
-                return Runtime.deepCopy(v);
-            } else if (localCopy.equals("clone")) {
-                var v:Any;
-                atomic { v = hm().getOrThrow(key); }
-                return (v as Snapshot).clone();
-            } else {
-                throw new Exception("unknown local copy mode");
-            }
-        }
-        
-        public def loadRemote(key:Any):Any {
-            if (remoteCopy.equals("at")) {
-                val value = at(hm) {
-                    var v:Any; atomic { v = hm().getOrThrow(key); } v
-                };
-                return value;
-            } else if (remoteCopy.equals("dma")) { // dma
-                val destPlace = here;
-                val gr = at(hm) {
-                    var v:Any;
-                    atomic { v = hm().getOrThrow(key); }
-                    (v as Snapshot).remoteClone(destPlace)
-                };
-                val value = gr();
-                return value;
-            } else {
-                throw new Exception("unknown remote copy mode");
-            }
+           finish //TODO: remove this workaround (see XTENLANG-3260)
+            at (hm) hm().clear();
         }
     }
     
@@ -162,16 +70,17 @@ public abstract class DistObjectSnapshot {
      *       For it, delete(key) is or deleteAll() must be called first.
      *       Racing between multiple places are not also considered.
      */
-    static class DistObjectSnapshotDistributed extends DistObjectSnapshot {
-        val hm = PlaceLocalHandle.make[HashMap[Any,Any]](Place.places(), ()=>new x10.util.HashMap[Any,Any]());
-        private def DEBUG(key:Any, msg:String) { Console.OUT.println("At " + here + ": key=" + key + ": " + msg); }
-        public def save(key:Any, value:Any) {
+    static class DistObjectSnapshotDistributed[K,V] {V haszero} extends DistObjectSnapshot[K,V] {
+        val hm = PlaceLocalHandle.make[x10.util.HashMap[K,V]](Place.places(), ()=>new x10.util.HashMap[K,V]());
+        private def DEBUG(key:K, msg:String) { Console.OUT.println("At " + here + ": key=" + key + ": " + msg); }
+        public def save(key:K, value:V) {
             if (verbose>=1) DEBUG(key, "save called");
             /* Store the copy of value locally */
-            saveLocal(key, value);
+           finish //TODO: remove this workaround (see XTENLANG-3260)
+            at (here) hm().put(key, value); // value is deep-copied by "at"
             if (verbose>=1) DEBUG(key, "backed up locally");
             /* Backup the value in another place */
-            var backupPlace:Long = Math.abs(key.hashCode()) % Place.numPlaces();
+            var backupPlace:Long = key.hashCode() % Place.numPlaces();
             var trial:Long;
             for (trial = 0L; trial < Place.numPlaces(); trial++) {
                 if (backupPlace != here.id && !Place.isDead(backupPlace)) break; // found appropriate place
@@ -181,29 +90,39 @@ public abstract class DistObjectSnapshot {
                 /* no backup place available */
                 if (verbose>=1) DEBUG(key, "no backup place available");
             } else {
-                saveRemote(key, value, backupPlace);
+               finish //TODO: remove this workaround (see XTENLANG-3260)
+                at (Place(backupPlace)) hm().put(key, value);
                 if (verbose>=1) DEBUG(key, "backed up to place " + backupPlace);
             }
             if (verbose>=1) DEBUG(key, "save returning");
         }
-
-        public def load(key:Any) {
+        public def load(key:K) {
             if (verbose>=1) DEBUG(key, "load called");
             /* First, try to load locally */
             try {
-                return loadLocal(key);
+                var value:V;
+               finish //TODO: remove this workaround (see XTENLANG-3260)
+                value = at (here) hm().getOrThrow(key); // value is deep-copied by "at"
+                if (verbose>=1) DEBUG(key, "restored locally");
+                if (verbose>=1) DEBUG(key, "load returning");
+                return value;
             } catch (e:Exception) {
                 if (verbose>=1) DEBUG(key, "local restore failed with exception " + e);
                 /* falls through, check other places */
             }
             /* Try to load from another place */
-            var backupPlace:Long = Math.abs(key.hashCode()) % Place.numPlaces();
+            var backupPlace:Long = key.hashCode() % Place.numPlaces();
             var trial:Long;
             for (trial = 0L; trial < Place.numPlaces(); trial++) {
                 if (backupPlace != here.id && !Place.isDead(backupPlace)) {
                     if (verbose>=1) DEBUG(key, "checking backup place " + backupPlace);
                     try {
-                        return loadRemote(key, backupPlace);
+                        var value:V;
+                       finish //TODO: remove this workaround (see XTENLANG-3260)
+                        value = at (Place(backupPlace)) hm().getOrThrow(key);
+                        if (verbose>=1) DEBUG(key, "restored from backup place " + backupPlace);
+                        if (verbose>=1) DEBUG(key, "load returning");
+                        return value;
                     } catch (e:Exception) {
                         if (verbose>=1) DEBUG(key, "failed with exception " + e);
                         /* falls through, try next place */
@@ -215,83 +134,57 @@ public abstract class DistObjectSnapshot {
             if (verbose>=1) DEBUG(key, "load throwing exception");
             throw new Exception("No data for key " + key);
         }
-        public def delete(key:Any) {
+        public def delete(key:K) {
             finish for (pl in Place.places()) {
                 if (pl.isDead()) continue;
-                at(pl) async atomic { hm().remove(key); }
+                at (pl) async hm().remove(key);
             }
         }
         public def deleteAll() {
             finish for (pl in Place.places()) {
                 if (pl.isDead()) continue;
-                at(pl) async atomic { hm().clear(); }
+                at (pl) async hm().clear();
+            }
+        }
+    }
+    
+    /**
+     * Test program, should print "0 1 2 ..."
+     * 
+     * Usage: [X10_RESILIENT_STORE_MODE=1] [X10_RESILIENT_STORE_VERBOSE=1] \
+     *         X10_RESILIENT_MODE=1 X10_NPLACES=4 \
+     *         x10 x10.resilient.util.DistObjectSnapshot
+     */
+    public static def main(ars:Rail[String]) {
+        val MAX_PLACES = Place.numPlaces();
+        if (MAX_PLACES < 3) throw new Exception("numPlaces should be >=3");
+       
+        val rs = DistObjectSnapshot.make[Place,Rail[String]]();
+        
+        /* Store at each place */
+        finish for (i in 0..(MAX_PLACES-1)) {
+            val pl = Place(i);
+            at (pl) async {
+                val data = new Rail[String](1); data(0) = pl.id.toString();
+                rs.save(pl, data);
             }
         }
         
-        private def saveLocal(key:Any, value:Any) {
-            if (localCopy.equals("at")) {
-                at(here) atomic { hm().put(key, value); } // value is deep-copied by "at"
-            }                
-            else if (localCopy.equals("deep")) {
-                val copiedValue = Runtime.deepCopy(value);
-                atomic { hm().put(key, copiedValue); }
-            }                    
-            else if (localCopy.equals("clone")) {
-                val copiedValue = (value as Snapshot).clone();
-                atomic { hm().put(key, copiedValue); }
-            }
-            else
-                throw new Exception("unknown local copy mode");
+        /* Kill place1 */
+        try {
+            at (Place(1)) System.killHere();
+        } catch (e:DeadPlaceException) {
+            Console.OUT.println("Place " + e.place + " died");
         }
         
-        private def saveRemote(key:Any, value:Any, backupPlace:Long) {
-            if (remoteCopy.equals("at")) {
-                at(Place(backupPlace)) atomic { hm().put(key, value); }
-            } else if (remoteCopy.equals("dma")) {
-                val hmGR = at(Place(backupPlace)) GlobalRef[HashMap[Any,Any]](hm());
-                (value as Snapshot).remoteCopyAndSave(key, hmGR);
-            } else {
-                throw new Exception("unknown remote copy mode");
+        /* Load at place2 */
+        at (Place(2)) {
+            for (i in 0..(MAX_PLACES-1)) {
+                val pl = Place(i);
+                val data = rs.load(pl);
+                Console.OUT.print(data(0) + " ");
             }
-        }
-
-        public def loadLocal(key:Any):Any {
-            if (localCopy.equals("at")) {
-                val value = at(here) {
-                    var v:Any; atomic { v = hm().getOrThrow(key); } v
-                };
-                return value;
-            } else if (localCopy.equals("deep")) {
-                var v:Any;
-                atomic { v = hm().getOrThrow(key); }
-                return Runtime.deepCopy(v);
-            } else if (localCopy.equals("clone")) {
-                var v:Any;
-                atomic { v = hm().getOrThrow(key); }
-                return (v as Snapshot).clone();
-            } else {
-                throw new Exception("unknown local copy mode");
-            }
-        }
-        
-        public def loadRemote(key:Any, backupPlace:Long):Any {
-            if (remoteCopy.equals("at")) {
-                val value = at(Place(backupPlace)) {
-                    var v:Any; atomic { v = hm().getOrThrow(key); } v
-                };
-                return value;
-            } else if (remoteCopy.equals("dma")) {
-                val destPlace = here;
-                val gr = at(Place(backupPlace)) {
-                    var v:Any;
-                    atomic { v = hm().getOrThrow(key); }
-                    (v as Snapshot).remoteClone(destPlace)
-                };
-                val value = gr();
-                return value;
-            } else {
-                throw new Exception("unknown remote copy mode");
-            }
+            Console.OUT.println();
         }
     }
 }

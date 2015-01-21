@@ -71,8 +71,6 @@ public abstract class GlobalRuntime {
     }
   }
 
-  public abstract void setPlaceFailureHandler(Handler handler);
-
   /**
    * Shuts down the {@link GlobalRuntime} instance.
    */
@@ -112,19 +110,6 @@ public abstract class GlobalRuntime {
    *          the function to run
    */
   protected abstract void asyncat(Place p, Job f);
-
-  /**
-   * Submits an uncounted task to the global runtime to be run at {@link Place}
-   * {@code p} with body {@code f} and returns immediately. The termination of
-   * this task is not tracked by the enclosing finish. If an exception is thrown
-   * by the task it is logged to System.err and ignored.
-   *
-   * @param p
-   *          the place of execution
-   * @param f
-   *          the function to run
-   */
-  protected abstract void uncountedasyncat(Place p, Job f);
 
   /**
    * Runs {@code f} at {@link Place} {@code p} and waits for all the tasks

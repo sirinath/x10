@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  * 
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.array;
@@ -159,15 +159,6 @@ public abstract class DistArray[T] (
      * @see #operator(Point)
      */
     public abstract operator this(p:Point(this.rank()))=(v:T):T{self==v};
-
-    /**
-     * Returns the specified rectangular patch of this array as a Rail.
-     * 
-     * @param space the IterationSpace representing the portion of this array to copy
-     * @throws ArrayIndexOutOfBoundsException if the specified region is not
-     *        contained in this array
-     */
-    public abstract def getPatch(space:IterationSpace(this.rank){rect}):Rail[T];
 
     /**
      * Reduce this array using the given function and the given initial value.

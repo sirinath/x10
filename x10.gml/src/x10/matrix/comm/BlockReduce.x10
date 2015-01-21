@@ -16,10 +16,9 @@ import x10.regionarray.Dist;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.block.MatrixBlock;
 import x10.matrix.distblock.BlockSet;
@@ -81,6 +80,7 @@ public class BlockReduce extends BlockRemoteCopy {
 		val rootpid:Long = dmap.findPlace(rootbid);
 		var leftpcnt:Long = Place.numPlaces();
 		
+		//Debug.assure(here.id() == 0);
 		if (here.id() != rootpid) {
 			at(Place(rootpid)) {
 				x10Reduce(distBS, tmpBS, rootbid, opFunc);
@@ -104,7 +104,7 @@ public class BlockReduce extends BlockRemoteCopy {
 			rootblk:MatrixBlock, rootPCnt:Long,
 			remotepid:Long, remotePCnt:Long,
 			opFunc:(DenseMatrix, DenseMatrix)=>DenseMatrix) {
-		var rmtbuf:GlobalRail[ElemType];
+		var rmtbuf:GlobalRail[Double];
 		finish {
 			//Left branch reduction
 			rmtbuf =  at(Place(remotepid)) {
@@ -113,7 +113,7 @@ public class BlockReduce extends BlockRemoteCopy {
 				async {
 					reduceToHere(distBS, tmpBS, blk, remotePCnt, opFunc);
 				}
-				new GlobalRail[ElemType](blk.getData() as Rail[ElemType]{self!=null})
+				new GlobalRail[Double](blk.getData() as Rail[Double]{self!=null})
 			};
 			//Right branch reduction
 			async {
@@ -124,7 +124,7 @@ public class BlockReduce extends BlockRemoteCopy {
 		val dstden = rootblk.getMatrix() as DenseMatrix;
 		val rcvden = tmpblk.getMatrix() as DenseMatrix;
 		val datcnt = dstden.M*dstden.N;
-		finish Rail.asyncCopy[ElemType](rmtbuf, 0, rcvden.d, 0, datcnt);
+		finish Rail.asyncCopy[Double](rmtbuf, 0, rcvden.d, 0, datcnt);
 		
 		opFunc(rcvden, dstden);
 		//dstmat.cellAdd(rcvmat as DenseMatrix(dstmat.M, dstmat.N));
@@ -230,6 +230,7 @@ public class BlockReduce extends BlockRemoteCopy {
 	 * @param ddtmp     temp matrix storing the inter-place communication data.
 	 */
 	protected static def mpiAllReduceSum(distBS:BlocksPLH, tmpBS:BlocksPLH): void {
+		//Debug.flushln("Start all reduce");
 		@Ifdef("MPI_COMMU") {
 			finish ateach([p] in Dist.makeUnique()) {
 			

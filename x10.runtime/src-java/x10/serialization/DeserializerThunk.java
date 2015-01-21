@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.serialization;
@@ -213,6 +213,8 @@ abstract class DeserializerThunk {
                 } else {
                     throw new SerializationException(cause != null ? cause : e);
                 }
+            } catch (SerializationException e) {
+                throw e;
             } catch (RuntimeException e) {
                 throw e; // don't wrap
             } catch (Throwable e) {
@@ -277,6 +279,8 @@ abstract class DeserializerThunk {
                         Object value = jds.readObject();
                         field.set(obj, value);
                     }
+                } catch (SerializationException e) {
+                    throw e;
                 } catch (RuntimeException e) {
                     throw e; // don't wrap
                 } catch (Throwable e) {
@@ -346,6 +350,8 @@ abstract class DeserializerThunk {
                 } else {
                     throw new SerializationException(cause != null ? cause : e);
                 }
+            } catch (SerializationException e) {
+                throw e;
             } catch (RuntimeException e) {
                 throw e; // don't wrap
             } catch (Throwable e) {
@@ -420,6 +426,8 @@ abstract class DeserializerThunk {
                         Field detailMessageField = java.lang.Throwable.class.getDeclaredField("detailMessage");
                         detailMessageField.setAccessible(true);
                         detailMessageField.set(obj, message);
+                    } catch (SerializationException e) {
+                        throw e;
                     } catch (RuntimeException e) {
                         throw e; // don't wrap
                     } catch (Throwable e) {
@@ -454,6 +462,8 @@ abstract class DeserializerThunk {
                         Field causeField = java.lang.Throwable.class.getDeclaredField("cause");
                         causeField.setAccessible(true);
                         causeField.set(obj, cause);
+                    } catch (SerializationException e) {
+                        throw e;
                     } catch (RuntimeException e) {
                         throw e; // don't wrap
                     } catch (Throwable e) {

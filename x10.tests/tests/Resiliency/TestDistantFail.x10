@@ -10,7 +10,6 @@
  */
 
 import harness.x10Test;
-import x10.xrx.Runtime;
 
 // NUM_PLACES: 3
 // RESILIENT_X10_ONLY
@@ -42,10 +41,7 @@ public class TestDistantFail extends x10Test {
     }
 
     public def run() {
-        if (Place.numPlaces() < 3) {
-            Console.OUT.println("3 places are necessary for this test");
-            return false;
-        }
+        if (Place.numPlaces() != 3) return false;
         val p1 = Place.places().next(here);
         val p2 = Place.places().next(p1);
 
@@ -69,11 +65,13 @@ public class TestDistantFail extends x10Test {
 
         } catch (e:MultipleExceptions) {
 
-            val dpes = e.getExceptionsOfType[DeadPlaceException]();
-            assert dpes.size >= 1;
-            for (dpe in dpes) {
-                assert dpe.place == p2;
-            }
+            assert e.exceptions.size == 1l : e.exceptions;
+
+            val e2 = e.exceptions(0);
+
+            val e3 = e2 as DeadPlaceException;
+
+            assert e3.place == p2;
 
             good_dec();
 

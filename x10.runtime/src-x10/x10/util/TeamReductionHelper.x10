@@ -6,12 +6,10 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.util;
-
-import x10.xrx.Runtime;
 
 /**
  * We want to get highly efficient code for reductions on both Managed 

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package apgas.impl;
@@ -33,7 +33,7 @@ final class ResilientFinish implements Finish, Serializable {
       .getRuntime().transport.<GlobalID, State> getMap("_APGAS_FINISH_");
 
   GlobalID id;
-  transient List<Throwable> exceptions;
+  List<Throwable> exceptions;
 
   static final class State implements Serializable {
     private static final long serialVersionUID = 4155719029376056951L;

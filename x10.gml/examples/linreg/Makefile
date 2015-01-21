@@ -25,16 +25,25 @@ build_path	= build
 # GML path
 gml_path    = ../..
 
-
 # compile options
-X10_FLAG	= -sourcepath ../.  -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -g -O -NO_CHECKS
-
-HAMMER_FILE ?= ./hammer_iter.txt
+X10_FLAG	= -sourcepath ../.  -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -O -NO_CHECKS
 
 # runtime settings
 runtime_list = mpi sock java
-numplaces = 8
-test_args = -m 1000 -n 1000 --density 0.09 --iterations 30 --verify
+numplaces = 4
+test_args = 10 10 5 1 0.6 6 1 1 0 2
+#test_args = 10 10 5 1 0.9 2 1
+#mV = V rows
+#nV = V columns
+#mB = row blocks
+#nB = column blocks
+#nZ = V's nonzero density
+#iT = Iterations
+#vf = Verify result or not
+#pP = print V, d and w out
+#sP = skip places count (at least 1 place should remain)
+#cI = checkpoint iteration frequency
+
 
 ###################################################
 # Build rules

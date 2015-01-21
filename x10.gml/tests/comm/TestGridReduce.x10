@@ -9,7 +9,6 @@ import harness.x10Test;
 import x10.compiler.Ifndef;
 import x10.regionarray.Dist;
 
-import x10.matrix.ElemType;
 import x10.matrix.util.Debug;
 import x10.matrix.block.Grid;
 import x10.matrix.distblock.DistBlockMatrix;
@@ -19,12 +18,9 @@ import x10.matrix.distblock.DistGrid;
 import x10.matrix.distblock.summa.AllGridReduce;
 
 public class TestGridReduce extends x10Test {
-
-    static def ET(a:Double)= a as ElemType;
-    static def ET(a:Float)= a as ElemType;
 	public val M:Long;
 	public val N:Long;
-	public val nzdensity:Float;
+	public val nzdensity:Double;
 	public val bM:Long;
 	public val bN:Long;
 	public val pM:Long;
@@ -39,7 +35,7 @@ public class TestGridReduce extends x10Test {
 	public distmap:DistMap;
 	public distgrid:DistGrid;
 	
-    public def this(m:Long, n:Long, bm:Long, bn:Long, d:Float) {
+    public def this(m:Long, n:Long, bm:Long, bn:Long, d:Double) {
 		M=m; N=n;
 		nzdensity = d;
 		bM = bm; bN = bn;
@@ -73,12 +69,11 @@ public class TestGridReduce extends x10Test {
 		distmat.reset();
 		
 		for (var colId:Long=0; colId<partgrid.numColBlocks; colId++) {
-		    initFrontBlocks(ET(1.0), work1);
+			initFrontBlocks(1.0, work1);
 			finish AllGridReduce.startRowReduceSum(0, 1, colId, distmat, work1, tmp);			
 			//Debug.flushln("Done row-wise cast from column block "+colId+" over "+pN+" places row-wise");
 		}
 		
-                x10.matrix.util.VerifyTool.testSame(distmat, pN);
 		retval &= distmat.equals(pN as Double);//verifyRowReduceSum(pN as Double, 1, colId, work1);
 		if (!retval) Console.OUT.println(distmat);
 		if (!retval)
@@ -95,20 +90,19 @@ public class TestGridReduce extends x10Test {
 		val work2 = distmat.makeTempFrontRowBlocks(1);
 		
 		for (var rowId:Long=0; rowId<grid.numRowBlocks; rowId++) {
-		    initFrontBlocks(ET(1.0), work2);
-		    finish AllGridReduce.startColReduceSum(0, 1, rowId, distmat, work2, tmp);
-		    //Debug.flushln("Done col-wise cast from row block "+rowId+" over "+pM+" places column-wise");
+			initFrontBlocks(1.0, work2);
+			finish AllGridReduce.startColReduceSum(0, 1, rowId, distmat, work2, tmp);
+			//Debug.flushln("Done col-wise cast from row block "+rowId+" over "+pM+" places column-wise");
 
 		}
-retval &=                x10.matrix.util.VerifyTool.testSame(distmat, pN);
-	//	retval &= distmat.equals(pN);
+		retval &= distmat.equals(pN as Double);
 
 		if (!retval)
-		    Console.OUT.println("-----Test ring reduce col-wise for dist block matrix failed!-----");
+			Console.OUT.println("-----Test ring reduce col-wise for dist block matrix failed!-----");
 		return retval;
 	}
 
-	public static def initFrontBlocks(dv:ElemType, work:PlaceLocalHandle[BlockSet]) {
+	public static def initFrontBlocks(dv:Double, work:PlaceLocalHandle[BlockSet]) {
 		finish ateach(Dist.makeUnique()) {
 			val itr = work().iterator();
 			while (itr.hasNext()) {
@@ -123,7 +117,7 @@ retval &=                x10.matrix.util.VerifyTool.testSame(distmat, pN);
 		val n = args.size > 1 ? Long.parse(args(1)):5;
 		val bm= args.size > 2 ? Long.parse(args(2)):4;
 		val bn= args.size > 3 ? Long.parse(args(3)):5;
-		val d = args.size > 4 ? Float.parse(args(4)):0.9f;
+		val d = args.size > 4 ? Double.parse(args(4)):0.9;
 		new TestGridReduce(m, n, bm, bn, d).execute();
 	}
 }

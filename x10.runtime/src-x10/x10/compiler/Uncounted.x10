@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.compiler;
@@ -43,7 +43,7 @@ import x10.lang.annotations.StatementAnnotation;
  *         @Uncounted async (here.next()) {
  *             Runtime.println("HELLO");
  *             @Uncounted async (box) {
- *                 atomic box.t = true;
+ *             atomic box.t = true;
  *             }
  *         }
  *         await box.t;

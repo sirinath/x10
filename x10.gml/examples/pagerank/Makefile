@@ -26,14 +26,13 @@ build_path	= build
 # GML path
 gml_path    = ../..
 
-
 # compile options
 X10_FLAG	= -sourcepath ../.  -d $(build_path) -report postcompile=2 -v -errors 5 -VERBOSE_CHECKS -O -NO_CHECKS
 
 # runtime settings
 runtime_list = mpi sock java
 numplaces = 4
-test_args = -m 100 --density 0.01 --iterations 20 --verify
+test_args = 
 
 ###################################################
 # Build rules

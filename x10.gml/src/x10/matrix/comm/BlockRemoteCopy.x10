@@ -13,10 +13,9 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.distblock.BlockSet;
@@ -83,7 +82,8 @@ public class BlockRemoteCopy {
 		else if (src instanceof SparseCSC)
 			return copy(src as SparseCSC, srcColOff, dstBS, dstpid, dstbid, dstColOff, colCnt);
 		else
-			throw new UnsupportedOperationException("Matrix type is not supported in remote block copy");
+			Debug.exit("Matrix type is not supported in remote block copy");
+		return 0;
 	}
 	
 	public static def copy(srcBS:BlocksPLH, srcpid:Long, srcbid:Long, srcColOff:Long, 
@@ -93,7 +93,8 @@ public class BlockRemoteCopy {
 		else if (dst instanceof SparseCSC)
 			return copy(srcBS, srcpid, srcbid, srcColOff, dst as SparseCSC, dstColOff, colCnt);
 		else
-			throw new UnsupportedOperationException("Matrix type is not supported in remote block copy");
+			Debug.exit("Matrix type is not supported in remote block copy");
+		return 0;
 	}
 
 
@@ -111,9 +112,8 @@ public class BlockRemoteCopy {
 	protected static def copyOffset(src:DenseMatrix, srcIdxOff:Long, 
 			dst:BlocksPLH, dstpid:Long, bid:Long, dstIdxOff:Long, datCnt:Long): void {
 		
-        assert (srcIdxOff+datCnt<=src.d.size) :
-            "Source starting offset:"+srcIdxOff+" plus data count:"+datCnt+
-            " is larger source matrix data buffer size:"+src.d.size;
+		Debug.assure(srcIdxOff+datCnt<=src.d.size, "Source starting offset:"+srcIdxOff+" plus data count:"+datCnt+
+				" is larger source matrix data buffer size:"+src.d.size);
 		
 		if (here.id() == dstpid) {
 			val blk = dst().find(bid);
@@ -148,9 +148,9 @@ public class BlockRemoteCopy {
 					val blk = dstBS().find(bid);
 					val dstden = blk.getMatrix() as DenseMatrix;
 			
-                    assert (dstIdxOff+datCnt <= dstden.d.size) :
-                        "Receive buffer offset:"+dstIdxOff+" plus data count:"+datCnt+
-                        " is larger than receive buffer size:"+dstden.d.size;
+					Debug.assure(dstIdxOff+datCnt<=dstden.d.size, 
+							"Receive buffer offset:"+dstIdxOff+" plus data count:"+datCnt+
+							" is larger than receive buffer size:"+dstden.d.size);
 					val tag    = srcpid * baseTagCopyTo + here.id()+bid;
 					WrapMPI.world.recv(dstden.d, dstIdxOff, datCnt, srcpid, tag);
 				}
@@ -161,17 +161,17 @@ public class BlockRemoteCopy {
 	protected static def x10CopyOffset(src:DenseMatrix, srcIdxOff:Long, 
 			dstBS:BlocksPLH, dstpid:Long, bid:Long, dstIdxOff:Long, datCnt:Long): void {
 		
-		val buf = src.d as Rail[ElemType]{self!=null};
-		val srcbuf = new GlobalRail[ElemType](buf);
+		val buf = src.d as Rail[Double]{self!=null};
+		val srcbuf = new GlobalRail[Double](buf);
 
 		at(Place(dstpid)) {
 			//Remote copy: dst, srcbuf, srcIdxOff, dstIdxOff, datCnt,
 			val blk = dstBS().find(bid);
 			val dstden = blk.getMatrix() as DenseMatrix;
-            assert (dstIdxOff+datCnt <= dstden.d.size) :
-                "Receive buffer offset:"+dstIdxOff+" plus data count:"+datCnt+
-                " is larger than receive buffer size:"+dstden.d.size;
-			finish Rail.asyncCopy[ElemType](srcbuf, srcIdxOff, dstden.d, dstIdxOff, datCnt);
+			Debug.assure(dstIdxOff+datCnt<=dstden.d.size, 
+					"Receive buffer offset:"+dstIdxOff+" plus data count:"+datCnt+
+					                        " is larger than receive buffer size:"+dstden.d.size);
+			finish Rail.asyncCopy[Double](srcbuf, srcIdxOff, dstden.d, dstIdxOff, datCnt);
 		}
 	}
 
@@ -191,9 +191,9 @@ public class BlockRemoteCopy {
 	protected static def copyOffset(srcBS:BlocksPLH, srcpid:Long, srcbid:Long, srcIdxOff:Long, 
 			dst:DenseMatrix, dstIdxOff:Long, datCnt:Long): void {
 
-        assert (dstIdxOff+datCnt <= dst.d.size) :
-            "Receive buffer offset:"+dstIdxOff+" plus data count:"+datCnt+
-            " is larger than receive buffer size:"+dst.d.size;
+		Debug.assure(dstIdxOff+datCnt<=dst.d.size, 
+				"Receive buffer offset:"+dstIdxOff+" plus data count:"+datCnt+
+                " is larger than receive buffer size:"+dst.d.size);
 		
 		if (here.id() == srcpid) {
 			val blk = srcBS().find(srcbid);
@@ -225,9 +225,9 @@ public class BlockRemoteCopy {
 					val srcden = blk.getMatrix() as DenseMatrix;				
 					val tag = here.id() * baseTagCopyFrom + dstpid + bid;
 					
-                    assert (srcIdxOff + datCnt <= srcden.d.size) :
-                        "Sending offset:"+srcIdxOff+" plus data count:"+datCnt+
-                        " is larger than sending matrix size:"+srcden.d.size;
+					Debug.assure(srcIdxOff + datCnt <= srcden.d.size, 
+							"Sending offset:"+srcIdxOff+" plus data count:"+datCnt+
+ 		                    " is larger than sending matrix size:"+srcden.d.size);
 					WrapMPI.world.send(srcden.d, srcIdxOff, datCnt, dstpid, tag);
 				}
 				async {
@@ -249,13 +249,13 @@ public class BlockRemoteCopy {
 			val blk = srcBS().find(bid);
 			val srcden = blk.getMatrix() as DenseMatrix;
 			
-            assert (srcIdxOff + datCnt <= srcden.d.size) :
-                "Sending offset:"+srcIdxOff+" plus data count:"+datCnt+
-                " is larger than sending matrix size:"+srcden.d.size;
+			Debug.assure(srcIdxOff + datCnt <= srcden.d.size, 
+					"Sending offset:"+srcIdxOff+" plus data count:"+datCnt+
+					                 " is larger than sending matrix size:"+srcden.d.size);
 			new DenseRemoteSourceInfo(srcden.d, srcIdxOff, datCnt)
 
 		};
-		finish Rail.asyncCopy[ElemType](rmt.valbuf, rmt.offset, dst.d, dstIdxOff, rmt.length);
+		finish Rail.asyncCopy[Double](rmt.valbuf, rmt.offset, dst.d, dstIdxOff, rmt.length);
 	}
 
 
@@ -265,9 +265,9 @@ public class BlockRemoteCopy {
 	protected static def copy(src:SparseCSC, srcColOff:Long, 
 			dstBS:BlocksPLH, dstpid:Long, dstbid:Long, dstColOff:Long, colCnt:Long):Long {
 		
-        assert(srcColOff+colCnt <= src.N) :
-            "Source column offset:"+srcColOff+" column colunt:"+colCnt+
-            " larger than source column size:"+src.N;
+		Debug.assure(srcColOff+colCnt <= src.N, 
+				"Source column offset:"+srcColOff+" column colunt:"+colCnt+
+			    " larger than source column size:"+src.N);
 		
 		if (here.id() == dstpid) {
 			val blk = dstBS().find(dstbid);
@@ -299,9 +299,9 @@ public class BlockRemoteCopy {
 					// Need: srcpid, dstColOff, datasz;
 					val blk = dstBS().find(bid);
 					val dstspa = blk.getMatrix() as SparseCSC;
-                    assert (dstColOff+colCnt <= dstspa.N) :
-                        "Receive offset:"+dstColOff+" plus column count:"+colCnt+
-                        " larger than receiving matrix column size:"+dstspa.N;
+					Debug.assure(dstColOff+colCnt<=dstspa.N, 
+							"Receive offset:"+dstColOff+" plus column count:"+colCnt+
+							" larger than receiving matrix column size:"+dstspa.N);
 					
 					val dstoff = dstspa.getNonZeroOffset(dstColOff);
 					val idxtag    = baseTagCopyIdxTo + srcpid * 10000 + here.id();
@@ -338,10 +338,10 @@ public class BlockRemoteCopy {
         if (datcnt == 0L) return 0L;
 		
 		val idxbuf = src.getIndex() as Rail[Long]{self!=null};
-		val valbuf = src.getValue() as Rail[ElemType]{self!=null};
+		val valbuf = src.getValue() as Rail[Double]{self!=null};
 		val datoff = src.getNonZeroOffset(srcColOff);
 		val rmtidx = new GlobalRail[Long](idxbuf);
-		val rmtval = new GlobalRail[ElemType](valbuf);
+		val rmtval = new GlobalRail[Double](valbuf);
 
 		at(Place(dstpid)) {
 			//Remote capture: datcnt, rmtidx, rmtval, datoff			
@@ -353,7 +353,7 @@ public class BlockRemoteCopy {
 			dstspa.initRemoteCopyAtDest(dstColOff, colCnt, datcnt);
 			val dstoff = dstspa.getNonZeroOffset(dstColOff);
 			finish Rail.asyncCopy[Long  ](rmtidx, datoff, dstspa.getIndex(), dstoff, datcnt);
-			finish Rail.asyncCopy[ElemType](rmtval, datoff, dstspa.getValue(), dstoff, datcnt);
+			finish Rail.asyncCopy[Double](rmtval, datoff, dstspa.getValue(), dstoff, datcnt);
 			dstspa.finalizeRemoteCopyAtDest();
 		}
 
@@ -365,9 +365,8 @@ public class BlockRemoteCopy {
 	protected static def copy(srcBS:BlocksPLH, srcpid:Long, srcbid:Long, srcColOff:Long,
 			dst:SparseCSC, dstColOff:Long, colCnt:Long):Long {
 
-        assert (dstColOff+colCnt <= dst.N) :
-            "Receive offset:"+dstColOff+" plus column count:"+colCnt+
-            " larger than receive matrix column size:"+dst.N;
+		Debug.assure(dstColOff+colCnt<=dst.N, "Receive offset:"+dstColOff+" plus column count:"+colCnt+
+				" larger than receive matrix column size:"+dst.N);
 		
 		if (here.id() == srcpid) {
 			val blk = srcBS().find(srcbid);
@@ -463,7 +462,7 @@ public class BlockRemoteCopy {
 		val dstoff = dst.getNonZeroOffset(dstColOff);
 		dst.initRemoteCopyAtDest(dstColOff, colCnt, rmt.length);
 		finish Rail.asyncCopy[Long  ](rmt.idxbuf, rmt.offset, dst.getIndex(), dstoff, rmt.length);
-		finish Rail.asyncCopy[ElemType](rmt.valbuf, rmt.offset, dst.getValue(), dstoff, rmt.length);
+		finish Rail.asyncCopy[Double](rmt.valbuf, rmt.offset, dst.getValue(), dstoff, rmt.length);
 
 		finish {
 			at(Place(srcpid)) async {

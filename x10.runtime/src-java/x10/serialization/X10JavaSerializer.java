@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.serialization;
@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import x10.core.GlobalRef;
 import x10.core.Rail;
 import x10.core.StructI;
-import x10.io.SerializationException;
 import x10.rtt.Types;
 import x10.runtime.impl.java.Runtime;
 import x10.serialization.SerializationDictionary.LocalSerializationDictionary;
@@ -141,7 +140,7 @@ public final class X10JavaSerializer implements SerializationConstants {
             out.writeShort(RESET_OBJECT_GRAPH_BOUNDARY_ID);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         }
         objectMap.clear();
         counter = 0;
@@ -150,7 +149,7 @@ public final class X10JavaSerializer implements SerializationConstants {
     public void addDeserializeCount(long extraCount) {
         // [GlobalGC] Adjust speculative increment of remoteCounts of GlobalRefs
         if (extraCount < 0L || extraCount > Integer.MAX_VALUE)
-            throw new SerializationException("extraCount " + extraCount + " is out of range");
+            throw new RuntimeException("extraCount " + extraCount + " is out of range");
         x10.core.GlobalRef.adjustRemoteCountsInMap(getGrefMap(), (int)extraCount);
     }
     
@@ -162,7 +161,7 @@ public final class X10JavaSerializer implements SerializationConstants {
             write(v);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         }
     }
         
@@ -269,39 +268,36 @@ public final class X10JavaSerializer implements SerializationConstants {
             }
         }
 
+        writeSerializationId(sid);
         if (obj instanceof X10JavaSerializable) {
-            writeSerializationId(sid);
-            if (Runtime.TRACE_SER) {
+             if (Runtime.TRACE_SER) {
                 Runtime.printTraceMessage("Serializing a " + Runtime.ANSI_CYAN + Runtime.ANSI_BOLD + obj.getClass().getName() + Runtime.ANSI_RESET);
             }
             ((X10JavaSerializable)obj).$_serialize(this);
-        } else if (Runtime.USE_JAVA_SERIALIZATION && obj instanceof java.io.Serializable) {
-            writeSerializationId(JAVA_OBJECT_STREAM_ID);
-            writeUsingObjectOutputStream(obj); 
         } else {
             try {
-                writeSerializationId(sid);
                 SerializerThunk st = SerializerThunk.getSerializerThunk(objClass);
                 st.serializeObject(obj, objClass, this);
             } catch (SecurityException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (NoSuchFieldException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
-                throw new SerializationException(e);
+                throw new RuntimeException(e);
             }
+
         }
     }
 
@@ -345,22 +341,22 @@ public final class X10JavaSerializer implements SerializationConstants {
             st.serializeObject(obj, clazz, this);
         } catch (SecurityException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
-            throw new SerializationException(e);
+            throw new RuntimeException(e);
         }       
     }
 
@@ -449,7 +445,7 @@ public final class X10JavaSerializer implements SerializationConstants {
     private void serializeSpecialType(short sid, Object obj) throws IOException {
         switch (sid) {
         case STRING_ID:
-            // Preserve reference identity for Strings by looking for repeated objects
+            // Preseve reference identity for Strings by looking for repeated objects
             Integer pos = previous_position(obj, true);
             if (pos != null) {
                 return; 
@@ -547,14 +543,13 @@ public final class X10JavaSerializer implements SerializationConstants {
 
         default:
             System.err.println("Unhandled hard-wired serialization id "+sid);
-            throw new SerializationException("Unhandled hard-wired serialization id "+sid+" (class is "+obj.getClass()+")");    
+            throw new RuntimeException("Unhandled hard-wired serialization id "+sid+" (class is "+obj.getClass()+")");    
         }            
 
     }
 
     // Write an object using java serialization. 
     // This is used by Rail to optimize the serialization of primitive arrays
-    // and to allow optional forcing of usage of Java serialization for Java types.
     public void writeUsingObjectOutputStream(Object obj) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(this.out);
         oos.writeObject(obj);

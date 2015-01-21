@@ -6,11 +6,10 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.glb;
-
 /**
  * <p>Class that collects lifeline statistics of GLB
  * </p>
@@ -122,7 +121,7 @@ public final class Logger {
      */
     public def get(verbose:Boolean) {
         if (verbose) {
-            Console.OUT.println("" + here.id + " -> " +
+            Console.OUT.println("" + Runtime.hereLong() + " -> " +
                 sub("" + (timeAlive/1E9), 0n, 6n) + " : " +
                 sub("" + (timeDead/1E9), 0n, 6n) + " : " + 
                 sub("" + ((timeAlive + timeDead)/1E9), 0n, 6n) + " : " + 

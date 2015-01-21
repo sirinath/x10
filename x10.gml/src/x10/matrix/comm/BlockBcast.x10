@@ -15,10 +15,9 @@ import x10.regionarray.Dist;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.block.MatrixBlock;
@@ -57,7 +56,7 @@ public class BlockBcast extends BlockRemoteCopy {
 			} else if (mat0.isSparse()) {
 				dsz= mpiBcastSparse(distBS, rootbid, coloff, colcnt);
 			} else {
-				throw new UnsupportedOperationException("Block type is not supported");
+				Debug.exit("Block type is not supported");
 			}
 		}
 		
@@ -193,14 +192,14 @@ public class BlockBcast extends BlockRemoteCopy {
 		
 		if (srcblk.isDense()) {
 			val srcden = srcblk.getMatrix() as DenseMatrix;
-			val srcbuf = new GlobalRail[ElemType](srcden.d as Rail[ElemType]{self!=null});
+			val srcbuf = new GlobalRail[Double](srcden.d as Rail[Double]{self!=null});
 			val srcoff = srcden.M * colOff;
 			at(Place(sttpl)) {
 				//Remote capture: distBS, srcbuf, colOff, colCnt, datCnt, plcnt
 				val dstblk = distBS().getFirst();
 				val dstden = dstblk.getMatrix() as DenseMatrix;
 				val dstoff = dstden.M * colOff;
-				finish Rail.asyncCopy[ElemType](srcbuf, srcoff, dstden.d, dstoff, datCnt);
+				finish Rail.asyncCopy[Double](srcbuf, srcoff, dstden.d, dstoff, datCnt);
 
 				if (plcnt > 1)
 					castToBranch(distBS, dstblk, colOff, colCnt, datCnt, plcnt);
@@ -213,7 +212,7 @@ public class BlockBcast extends BlockRemoteCopy {
 			val idxbuf   = srcspa.getIndex();
 			val valbuf = srcspa.getValue();
 			val srcidx = new GlobalRail[Long  ](idxbuf as Rail[Long  ]{self!=null});
-			val srcval = new GlobalRail[ElemType](valbuf as Rail[ElemType]{self!=null});		
+			val srcval = new GlobalRail[Double](valbuf as Rail[Double]{self!=null});		
 
 			at(Place(sttpl)) {
 				//Remote capture: distBS, srcidx, srcval, srcoff, colOff, colCnt, datCnt
@@ -223,7 +222,7 @@ public class BlockBcast extends BlockRemoteCopy {
 
 				dstspa.initRemoteCopyAtDest(colOff, colCnt, datCnt);
 				finish Rail.asyncCopy[Long  ](srcidx, srcoff, dstspa.getIndex(), dstoff, datCnt);
-				finish Rail.asyncCopy[ElemType](srcval, srcoff, dstspa.getValue(), dstoff, datCnt);
+				finish Rail.asyncCopy[Double](srcval, srcoff, dstspa.getValue(), dstoff, datCnt);
 				
 				if (plcnt > 1)
 					castToBranch(distBS, dstblk, colOff, colCnt, datCnt, plcnt);
@@ -232,7 +231,7 @@ public class BlockBcast extends BlockRemoteCopy {
 				distBS().sync(dstblk, colOff, colCnt);
 			}
 		} else {
-			throw new UnsupportedOperationException("Matrix block type is not supported");
+			Debug.exit("Matrix block type is not supported");
 		}
 	}	
 

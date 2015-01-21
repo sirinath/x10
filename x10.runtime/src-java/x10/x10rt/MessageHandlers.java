@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 package x10.x10rt;
 
@@ -14,7 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 
 import x10.core.fun.VoidFun_0_0;
-import x10.xrx.FinishState;
+import x10.lang.FinishState;
 import x10.lang.Place;
 import x10.runtime.impl.java.Runtime;
 import x10.serialization.X10JavaDeserializer;
@@ -86,11 +86,9 @@ public class MessageHandlers {
     		if (X10RT.VERBOSE) System.out.println("runClosureAtReceive: after apply");
     		objStream.close();
     		if (X10RT.VERBOSE) System.out.println("runClosureAtReceive is done !");
-    	} catch(Throwable ex){
-            if (!x10.xrx.Configuration.silenceInternalWarnings$O()) {
-                System.out.println("WARNING: Ignoring uncaught exception in @Immediate async.");
-                ex.printStackTrace();
-            }
+    	} catch(Exception ex){
+    		System.out.println("runClosureAtReceive error !!!");
+    		ex.printStackTrace();
     	}
     }
 
@@ -141,21 +139,21 @@ public class MessageHandlers {
                 }
             } catch (Throwable e) {
                 if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: handling exception during deserialization");
-                finishState.notifyActivityCreationFailed(src, new x10.io.SerializationException(e));
+                finishState.notifyActivityCreation$O(src);
+                finishState.pushException(new x10.io.SerializationException(e));
+                finishState.notifyActivityTermination();
                 if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: exception pushed; bookkeeping complete");
                 return;
             }
     		
     		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: after cast and deserialization");
-    		x10.xrx.Runtime.submitRemoteActivity(actObj, src, finishState);
-    		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: after submitRemoteActivity");
+    		x10.lang.Runtime.execute(actObj, src, finishState);
+    		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive: after apply");
     		objStream.close();
     		if (X10RT.VERBOSE) System.out.println("runSimpleAsyncAtReceive is done !");
     	} catch(Exception ex){
-            if (!x10.xrx.Configuration.silenceInternalWarnings$O()) {
-                System.out.println("runSimpleAsyncAtReceive error !!!");
-                ex.printStackTrace();
-            }
+    		System.out.println("runSimpleAsyncAtReceive error !!!");
+    		ex.printStackTrace();
     	}
     }
 }

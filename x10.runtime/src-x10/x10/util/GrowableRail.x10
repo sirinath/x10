@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.util;
@@ -81,20 +81,13 @@ public final class GrowableRail[T] implements CustomSerialization {
     }
 
     /**
-     * Add all elements from the argument Rail to this.
+     * Add all elements from the argument GrowableRail to this.
      */
-    public def addAll(x:Rail[T]) {
+    public def addAll(x:GrowableRail[T]) {
        if (size+x.size > capacity()) grow(size+x.size);
        for (i in 0..(x.size-1)) {
            data(size++) = x(i);
        }
-    }
-
-    /**
-     * Add all elements from the argument GrowableRail to this.
-     */
-    public def addAll(x:GrowableRail[T]) {
-       addAll(x.data);
     }
 
     /** 
@@ -175,7 +168,9 @@ public final class GrowableRail[T] implements CustomSerialization {
      */
     public def removeLast():T {
         val res = this(size-1);
-        shrink(size-1);
+        Unsafe.clearRail(data, size-1, 1);
+        size = size-1;
+        shrink(size+1);
         return res;
     }
 
@@ -198,10 +193,12 @@ public final class GrowableRail[T] implements CustomSerialization {
     public def moveSectionToRail(i:Long, j:Long):Rail[T] {
         val len = j - i + 1;
         if (len < 1) return Unsafe.allocRailUninitialized[T](0);
-        val tmp = Unsafe.allocRailUninitialized[T](len);
+	val tmp = Unsafe.allocRailUninitialized[T](len);
         Rail.copy(data, i, tmp, 0, len);
         Rail.copy(data, j+1, data, i, size-j-1);
-        shrink(size-len);
+        Unsafe.clearRail(data, size-len, len);
+        size-=len;
+        shrink(size+1);
         return tmp;
     }
 
@@ -214,15 +211,7 @@ public final class GrowableRail[T] implements CustomSerialization {
        return ans;
     }
 
-    /** 
-     * Grow the capacity of this GrowableRail to at least 
-     * <code>newCapacity</code>, automatically reallocating storage.
-     * On return, capacity is max(newCapacity, oldCapacity*2, 8).
-     * The size (number of elements) is unchanged.
-     * @param newCapacity the minimum new capacity for this GrowableRail
-     */
     public def grow(var newCapacity:Long):void {
-        assert (newCapacity >= capacity());
         var oldCapacity:Long = capacity();
         if (newCapacity < oldCapacity*2) {
             newCapacity = oldCapacity*2;
@@ -234,30 +223,20 @@ public final class GrowableRail[T] implements CustomSerialization {
         val tmp = Unsafe.allocRailUninitialized[T](newCapacity);
         Rail.copy(data, 0, tmp, 0, size);
         Unsafe.clearRail(tmp, size, newCapacity-size);
-        Unsafe.dealloc(data);
+	Unsafe.dealloc(data);
         data = tmp;
     }
 
-    /** 
-     * Shrink the capacity of this GrowableRail and remove all elements
-     * above <code>newCapacity</code>.
-     * On return, capacity == max(newCapacity, 8) and size == newCapacity.
-     * @param newCapacity the new capacity for this GrowableRail
-     */
-    public def shrink(newCapacity:Long):void {
-        assert (newCapacity <= capacity());
-        val oldSize = size;
-        size = Math.min(size, newCapacity);
-
-        val cap = Math.max(newCapacity, 8);
-        if (cap <= capacity()/4) {
-            val tmp = Unsafe.allocRailUninitialized[T](cap);        
-            Rail.copy(data, 0, tmp, 0, cap);
-            Unsafe.dealloc(data);
-            data = tmp;
-        } else if (size < oldSize) {
-            Unsafe.clearRail(data, size, oldSize-size);
-        }
+    public def shrink(var newCapacity:Long):void {
+        if (newCapacity > capacity()/4 || newCapacity < 8)
+            return;
+        newCapacity = x10.lang.Math.max(newCapacity, size);
+        newCapacity = x10.lang.Math.max(newCapacity, 8);
+        val tmp = Unsafe.allocRailUninitialized[T](newCapacity);        
+        Rail.copy(data, 0, tmp, 0, size);
+        Unsafe.clearRail(tmp, size, newCapacity-size);
+        Unsafe.dealloc(data);
+        data = tmp;
     }
 
     private static @NoInline @NoReturn def raiseIndexOutOfBounds(idx:Long, size:Long) {
