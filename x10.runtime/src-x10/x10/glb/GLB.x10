@@ -10,7 +10,6 @@
  */
 
 package x10.glb;
-
 import x10.util.Team;
 import x10.compiler.Inline;
 
@@ -140,7 +139,7 @@ public final class GLB[Queue, R]{Queue<:TaskQueue[Queue, R]} {
         //val groupSize:Long = 128;
         if (P >= 1024) {
             logs = new Rail[Logger](P/32, (i:Long)=>at (Place(i*32)) {
-                val h = here.id;
+                val h = Runtime.hereLong();
                 val n = min(32, P-h);
                 val logs = new Rail[Logger](n, (i:Long)=>at (Place(h+i)) st().logger.get((this.glbParams.v & GLBParameters.SHOW_GLB_FLAG)!=0n));
                 val log = new Logger(false);

@@ -152,7 +152,6 @@ struct x10rt_pami_state
 	pami_context_t *context; // PAMI context associated with the client
 	x10rt_pami_team *teams;
 	uint32_t lastTeamIndex;
-	size_t a2achunks;
 	pthread_mutex_t stateLock; // used when creating a new context or a new team
 	int numParallelContexts; // When X10_STATIC_THREADS=true, this is set to the value of X10_NTHREADS. Otherwise it's 0.
 #if !defined(__bgq__)
@@ -261,8 +260,7 @@ void determineCollectiveAlgorithms(x10rt_pami_team* team)
 	if (userChoiceInt < 0)
 	{
 		userChoice = getenv(X10RT_PAMI_ALLTOALL_CHUNKS);
-		team->algorithm[PAMI_XFER_ALLTOALL] = PAMI_ALGORITHM_NULL;
-		state.a2achunks = userChoice?atoi(userChoice):1; // default to 1 chunk
+		team->algorithm[PAMI_XFER_ALLTOALL] = -1*(userChoice?atoi(userChoice):1); // default to 1 chunk
 		// initialize random order array
 		state.stepOrder = (pami_task_t *)malloc(state.numPlaces*sizeof(pami_task_t));
 		if (state.stepOrder == NULL) error("Unable to allocate memory for internal alltoall step order");
@@ -277,12 +275,11 @@ void determineCollectiveAlgorithms(x10rt_pami_team* team)
 			state.stepOrder[i] = tmp;
 		}
 		#ifdef DEBUG
-			fprintf(stderr, "Switching AllToAll to internal implementation, messages will be sent as %u parallel chunks\n", state.a2achunks);
+			fprintf(stderr, "Switching AllToAll to internal implementation, chunksize = %u bytes\n", -1*team->algorithm[PAMI_XFER_ALLTOALL]);
 		#endif
 	}
 	else {
 		queryAvailableAlgorithms(team, PAMI_XFER_ALLTOALL, userChoiceInt);
-		state.a2achunks = 0;
 		state.stepOrder = NULL;
 	}
 
@@ -955,8 +952,7 @@ x10rt_error x10rt_net_init (int *argc, char ***argv, x10rt_msg_type *counter)
 	// determine the level of parallelism we need to support
 	char* value = getenv("X10_STATIC_THREADS");
 	char* nthreads = getenv("X10_NTHREADS");
-	char* ithreads = getenv("X10_NUM_IMMEDIATE_THREADS");
-	if (nthreads && ithreads && checkBoolEnvVar(value) && state.numParallelContexts >= atoi(nthreads) && 0 == atoi(ithreads))
+	if (nthreads && checkBoolEnvVar(value) && state.numParallelContexts >= atoi(nthreads))
 	{
 		state.numParallelContexts = atoi(nthreads); // use specified nthreads, not possible nthreads
 		// We have as many endpoints as we have X10_NTHREADS
@@ -1334,7 +1330,7 @@ void x10rt_net_send_put (x10rt_msg_params *p, void *buf, x10rt_copy_sz len)
 		parameters.events.remote_fn     = NULL;
 
 		#ifdef DEBUG
-			fprintf(stderr, "Preparing to send a PUT message from place %u to %u, endpoint %u, type=%i, msglen=%u, len=%u, buf=%p\n", state.myPlaceId, p->dest_place, p->dest_endpoint, p->type, p->len, len, buf);
+			fprintf(stderr, "Preparing to send a PUT message from place %u to %u, endpoint %u, type=%i, msglen=%u, len=%u, buf=%p\n", state.myPlaceId, p->dest_endpoint, p->dest_place, p->type, p->len, len, buf);
 		#endif
 
 		if (state.numParallelContexts)
@@ -2138,13 +2134,13 @@ void x10rt_net_alltoall (x10rt_team team, x10rt_place role, const void *sbuf, vo
 		if (status != PAMI_SUCCESS) error("Unable to lock the context to send a message");
 	}
 
-	if (state.teams[team].algorithm[PAMI_XFER_ALLTOALL] == PAMI_ALGORITHM_NULL) // use our own algorithm, not PAMI's.  The value is -1*chunksize
+	if (((int)state.teams[team].algorithm[PAMI_XFER_ALLTOALL]) < 0) // use our own algorithm, not PAMI's.  The value is -1*chunksize
 	{
 		// TODO - the code below only works with world, and only when the src and dst arrays are symmetric!
 		if (team != 0) error("Internal implementation of ALLTOALL only works with world\n");
 
 		#ifdef DEBUG
-			fprintf(stderr, "Place %u, role %u executing internal AllToAll with team %u. chunksize=%lu\n", state.myPlaceId, role, team, el*count/state.a2achunks);
+			fprintf(stderr, "Place %u, role %u executing internal AllToAll with team %u. chunksize=%lu\n", state.myPlaceId, role, team, el*count);
 		#endif
 		x10rt_pami_internal_alltoall *tcb = (x10rt_pami_internal_alltoall *)malloc(sizeof(x10rt_pami_internal_alltoall));
 		if (tcb == NULL) error("Unable to allocate memory for the all-to-all cookie");
@@ -2154,7 +2150,7 @@ void x10rt_net_alltoall (x10rt_team team, x10rt_place role, const void *sbuf, vo
 		tcb->dbuf = dbuf;
 		tcb->teamid = team;
 		tcb->dataSize = el*count;
-		tcb->chunksize = tcb->dataSize / state.a2achunks;
+		tcb->chunksize = tcb->dataSize / (-1*((int)state.teams[team].algorithm[PAMI_XFER_ALLTOALL]));
 		tcb->currentChunkOffset = 0;
 		tcb->currentPlaceOffset = 0;
 		memset(&tcb->parameters, 0, sizeof (tcb->parameters));

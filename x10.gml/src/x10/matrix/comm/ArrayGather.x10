@@ -6,15 +6,13 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
 
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
-
-import x10.matrix.ElemType;
 
 import x10.matrix.comm.mpi.WrapMPI;
 
@@ -41,7 +39,7 @@ public class ArrayGather extends ArrayRemoteCopy {
      */
     public static def gather(
             src:DataArrayPLH, 
-            dst:Rail[Rail[ElemType]{self!=null}]) : void {
+            dst:Rail[Rail[Double]]) : void {
         
         val nb = Place.numPlaces();
         assert (nb==dst.size) :
@@ -77,7 +75,7 @@ public class ArrayGather extends ArrayRemoteCopy {
      */
     public static def gather( 
             src:DataArrayPLH, 
-            dst:Rail[ElemType]{self!=null},
+            dst:Rail[Double],
             gp:Rail[Long]) : void {
 
         @Ifdef("MPI_COMMU") {
@@ -99,7 +97,7 @@ public class ArrayGather extends ArrayRemoteCopy {
      */
     public static def gather( 
             src:DataArrayPLH, 
-            dst:Rail[ElemType]{self!=null},
+            dst:Rail[Double],
             gp:Rail[Long],
             places:PlaceGroup) : void {
         
@@ -121,7 +119,7 @@ public class ArrayGather extends ArrayRemoteCopy {
      */
     public static def mpiGather(
             src:DataArrayPLH, 
-            dst:Rail[ElemType],
+            dst:Rail[Double],
             szlist:Rail[Long]):void {
         
         @Ifdef("MPI_COMMU") {
@@ -137,7 +135,7 @@ public class ArrayGather extends ArrayRemoteCopy {
                             //val tmpbuf= null; //fake
                             //val tmplst=null;//   //fake
                             /*******************************************/
-                            val tmpbuf = new Rail[ElemType](0); //fake
+                            val tmpbuf = new Rail[Double](0); //fake
                             val tmplst = new Rail[Long](0);   //fake
                             WrapMPI.world.gatherv(srcbuf, 0, datcnt, tmpbuf, 0, tmplst, root);
                         }
@@ -167,7 +165,7 @@ public class ArrayGather extends ArrayRemoteCopy {
      */
     public static def x10Gather(
             src:DataArrayPLH, 
-            dstbuf:Rail[ElemType]{self!=null},
+            dstbuf:Rail[Double],
             gp:Rail[Long]): void {
 
         x10Gather(src, dstbuf, gp, Place.places());        
@@ -183,7 +181,7 @@ public class ArrayGather extends ArrayRemoteCopy {
      */
     public static def x10Gather(
             src:DataArrayPLH, 
-            dstbuf:Rail[ElemType]{self!=null},
+            dstbuf:Rail[Double],
             gp:Rail[Long],
             places:PlaceGroup): void {
 
@@ -208,12 +206,12 @@ public class ArrayGather extends ArrayRemoteCopy {
     }
 
     public static def verify(
-            src:DataArrayPLH, buf:Rail[ElemType], 
+            src:DataArrayPLH, buf:Rail[Double], 
             szlist:Rail[Long]):Boolean =
             ArrayScatter.verify(buf, src, szlist);
 
     public static def verify(
-            src:DataArrayPLH, buf:Rail[ElemType], 
+            src:DataArrayPLH, buf:Rail[Double], 
             szlist:Rail[Long], places:PlaceGroup):Boolean =
             ArrayScatter.verify(buf, src, szlist, places);
 

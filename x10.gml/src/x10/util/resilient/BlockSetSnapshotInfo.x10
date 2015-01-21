@@ -13,7 +13,6 @@ package x10.util.resilient;
 
 import x10.util.HashMap;
 import x10.matrix.distblock.BlockSet;
-import x10.matrix.ElemType;
 
 public class BlockSetSnapshotInfo(placeIndex:Long, blockSet:BlockSet) implements Snapshot {
     public def clone():Any {
@@ -31,11 +30,11 @@ public class BlockSetSnapshotInfo(placeIndex:Long, blockSet:BlockSet) implements
         if (isSparse) {
             copyBlockSet.initSparseBlocksRemoteCopyAtSource();
             val allIndex = new Rail[Long](totalSize);
-            val allValue = new Rail[ElemType](totalSize);
+            val allValue = new Rail[Double](totalSize);
             copyBlockSet.flattenIndex(allIndex);
             copyBlockSet.flattenValue(allValue);
             val idxGR = new GlobalRail[Long](allIndex);
-            val valGR = new GlobalRail[ElemType](allValue);
+            val valGR = new GlobalRail[Double](allValue);
             val mGR = new GlobalRail[Long](metaDataRail);
             at(hm) {
                 val newBlockSet = BlockSet.remoteMakeSparseBlockSet(blocksCount, metaDataSize, totalSize, mGR, idxGR, valGR);                    
@@ -45,9 +44,9 @@ public class BlockSetSnapshotInfo(placeIndex:Long, blockSet:BlockSet) implements
             //no need to call finalize because the object will not be used again
             //copyBlockSet.finalizeSparseBlocksRemoteCopyAtSource();
         } else {
-            val allValue = new Rail[ElemType](totalSize);
+            val allValue = new Rail[Double](totalSize);
             copyBlockSet.flattenValue(allValue);
-            val valGR = new GlobalRail[ElemType](allValue);
+            val valGR = new GlobalRail[Double](allValue);
             val mGR = new GlobalRail[Long](metaDataRail);
             at(hm) {
                 val newBlockSet = BlockSet.remoteMakeDenseBlockSet(blocksCount, metaDataSize, totalSize, mGR, valGR);
@@ -68,11 +67,11 @@ public class BlockSetSnapshotInfo(placeIndex:Long, blockSet:BlockSet) implements
         if (isSparse) {
             copyBlockSet.initSparseBlocksRemoteCopyAtSource();
             val allIndex = new Rail[Long](totalSize);
-            val allValue = new Rail[ElemType](totalSize);                
+            val allValue = new Rail[Double](totalSize);                
             copyBlockSet.flattenIndex(allIndex);                                
             copyBlockSet.flattenValue(allValue);                        
             val idxGR = new GlobalRail[Long](allIndex);
-            val valGR = new GlobalRail[ElemType](allValue);
+            val valGR = new GlobalRail[Double](allValue);
             val mGR = new GlobalRail[Long](metaDataRail);
 
             val resultGR = at(targetPlace) {
@@ -84,9 +83,9 @@ public class BlockSetSnapshotInfo(placeIndex:Long, blockSet:BlockSet) implements
             //copyBlockSet.finalizeSparseBlocksRemoteCopyAtSource();
             return resultGR;
         } else {
-            val allValue = new Rail[ElemType](totalSize);
+            val allValue = new Rail[Double](totalSize);
             copyBlockSet.flattenValue(allValue);
-            val valGR = new GlobalRail[ElemType](allValue);
+            val valGR = new GlobalRail[Double](allValue);
             val mGR = new GlobalRail[Long](metaDataRail);
             val resultGR = at(targetPlace) {
                 val newBlockSet = BlockSet.remoteMakeDenseBlockSet(blocksCount, metaDataSize, totalSize, mGR, valGR);

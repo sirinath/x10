@@ -6,11 +6,10 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  */
 package logreg;
 
-import x10.matrix.ElemType;
 import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
 import x10.matrix.util.Debug;
@@ -19,16 +18,18 @@ import x10.matrix.util.Debug;
  * Sequential implementation of logistic regression
  */
 public class SeqLogReg {
-        val C = 2;
-        val tol = 0.000001f;
-        val maxIterations:Long;
-        val maxinneriter:Long;
-        
-    /** Matrix of training examples */
-        val X:DenseMatrix;
-    /** Vector of training regression targets */
-        val y:Vector(X.M);
-    /** Learned model weight vector, used for future predictions */
+	val C = 2;
+	val tol = 0.000001;
+	val maxiter:Long;
+	val maxinneriter:Long;
+	
+	//X = Rand(rows = 1000, cols = 1000, min = 1, max = 10, pdf = "uniform");
+	val X:DenseMatrix;
+	//N = nrow(X)
+	//D = ncol(X)
+	//y = Rand(rows = 1000, cols = 1, min = 1, max = 10, pdf = "uniform");
+	val y:Vector(X.M);
+	//w = Rand(rows=D, cols=1, min=0.0, max=0.0);
 	val w:Vector(X.N);
 	
 	val eta0 = 0.0;
@@ -49,7 +50,7 @@ public class SeqLogReg {
 		
 		tmp_y = Vector.make(X.M);
 		
-		maxIterations = it;
+		maxiter = it;
 		maxinneriter=nit;
 	}
 	
@@ -59,9 +60,9 @@ public class SeqLogReg {
 		compute_XmultB(o, w);
 		//logistic = 1.0/(1.0 + exp( -y * o))
 		val logistic = Vector.make(X.M);
-		logistic.map(y, o, (y_i:ElemType, o_i:ElemType)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
+		logistic.map(y, o, (y_i:Double, o_i:Double)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
 		//obj = 0.5 * t(w) %*% w + C*sum(logistic)
-		val obj = 0.5 * w.dot(w) + C*logistic.sum();
+		val obj = 0.5 * w.norm() + C*logistic.sum();
 		
 		//grad = w + C*t(X) %*% ((logistic - 1)*y)
 		val grad = Vector.make(X.N);
@@ -71,7 +72,7 @@ public class SeqLogReg {
         val logisticD = new Vector(logistic.M, (i:Long)=> {logistic(i)*(1.0-logistic(i))});
 
 		//delta = sqrt(sum(grad*grad))
-		var delta:ElemType = grad.norm();
+		var delta:Double = Math.sqrt(grad.norm());
 		
 		//# number of iterations
 		//iter = 0
@@ -81,11 +82,11 @@ public class SeqLogReg {
 		//zeros_D = Rand(rows = D, cols = 1, min = 0.0, max = 0.0);
 		//# boolean for convergence check
 		//converge = (delta < tol) | (iter > maxiter)
-		var converge:Boolean = (delta < tol) | (iter > maxIterations);
+		var converge:Boolean = (delta < tol) | (iter > maxiter);
 		//norm_r2 = sum(grad*grad)
-		var norm_r2:ElemType = grad.dot(grad);
+		var norm_r2:Double = grad.norm();
 		//alpha = t(w) %*% w
-		var alpha:ElemType = w.dot(w);
+		var alpha:Double = w.norm();
 		// Add temp memory space
 		val s = Vector.make(X.N);
 		val r = Vector.make(X.N);
@@ -97,7 +98,7 @@ public class SeqLogReg {
 		Debug.flushln("Done initialization. Starting converging iteration");
 		while(!converge) {
 // 			norm_grad = sqrt(sum(grad*grad))
-			val norm_grad = grad.norm();
+			val norm_grad = Math.sqrt(grad.norm());
 // 			# SOLVE TRUST REGION SUB-PROBLEM
 // 			s = zeros_D
 			s.reset();
@@ -108,49 +109,49 @@ public class SeqLogReg {
 // 			inneriter = 0
 			val inneriter:Long=0;
 // 			innerconverge = ( sqrt(sum(r*r)) <= psi * norm_grad) 
-			var innerconverge:Boolean;// = (r.norm() <= psi * norm_grad);
+			var innerconverge:Boolean;// = (Math.sqrt(r.norm(r)) <= psi * norm_grad);
  			innerconverge = false;
  			while (!innerconverge) {
 // 				norm_r2 = sum(r*r)
- 				norm_r2 = r.dot(r);
+ 				norm_r2 = r.norm();
 // 				Hd = d + C*(t(X) %*% (logisticD*(X %*% d)))
  				compute_Hd(Hd, logisticD, d);
 
 // 				alpha_deno = t(d) %*% Hd 
- 				val alpha_deno = d.dot(Hd);
+ 				val alpha_deno = d.norm(Hd);
 // 				alpha = norm_r2 / alpha_deno
  				alpha = norm_r2 / alpha_deno;
 // 				s = s + castAsScalar(alpha) * d
  				s.scaleAdd(alpha, d);
 // 				sts = t(s) %*% s
- 				val sts = s.dot(s);
+ 				val sts = s.norm();
 // 				delta2 = delta*delta 
  				val delta2 = delta*delta;
 // 				shouldBreak = false;
  				var shouldBreak:Boolean = false;
  				if (sts > delta2) {
 // 					std = t(s) %*% d
- 					val std = s.dot(d);
+ 					val std = s.norm(d);
 // 					dtd = t(d) %*% d
- 					val dtd = d.dot(d);
+ 					val dtd = d.norm();
 // 					rad = sqrt(std*std + dtd*(delta2 - sts))
  					val rad = Math.sqrt(std*std+dtd*(delta2-sts));
- 					var tau:ElemType;
+ 					var tau:Double;
  					if(std >= 0) {
  						tau = (delta2 - sts)/(std + rad);
  					} else {
  						tau = (rad - std)/dtd;
  					}
 
-//                                      s = s + castAsScalar(tau) * d
-                                        s.scaleAdd(tau, d);
-//                                      r = r - castAsScalar(tau) * Hd
-                                        r.scaleAdd(-tau, Hd);
+// 					s = s + castAsScalar(tau) * d
+ 					s.scaleAdd(tau, d);
+// 					r = r - castAsScalar(tau) * Hd
+ 					r.scaleAdd(-tau, Hd);
 
-//                                      #break
-                                        shouldBreak = true;
-                                        innerconverge = true;
-                                } 
+// 					#break
+ 					shouldBreak = true;
+ 					innerconverge = true;
+ 				} 
 
  				if (!shouldBreak) {
 // 					r = r - castAsScalar(alpha) * Hd
@@ -158,7 +159,7 @@ public class SeqLogReg {
 // 					old_norm_r2 = norm_r2 
  					val old_norm_r2 = norm_r2;
 // 					norm_r2 = sum(r*r)
- 					norm_r2 = r.dot(r);
+ 					norm_r2 = r.norm();
 // 					beta = norm_r2/old_norm_r2
  					val beta = norm_r2/old_norm_r2;
 // 					d = r + beta*d
@@ -170,21 +171,21 @@ public class SeqLogReg {
 // 			# END TRUST REGION SUB-PROBLEM
 // 			# compute rho, update w, obtain delta
 // 			qk = -0.5*(t(s) %*% (grad - r))
- 			val qk = -0.5 * s.dot(grad - r);
+ 			val qk = -0.5 * s.norm(grad-r);
 // 			
 // 			wnew = w + s
  			wnew.cellAdd(w, s);
 // 			onew = X %*% wnew
  			compute_XmultB(onew, wnew);
 // 			logisticnew = 1.0/(1.0 + exp(-y * o ))
-            logisticnew.map(y, o, (y_i:ElemType, o_i:ElemType)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
+            logisticnew.map(y, o, (y_i:Double, o_i:Double)=> { 1.0 / (1.0 + Math.exp(-y_i * o_i)) });
 // 			objnew = 0.5 * t(wnew) %*% wnew + C * sum(logisticnew)
- 			val objnew = 0.5 * wnew.dot(wnew) + C * logisticnew.sum();
-
+ 			val objnew = 0.5 * wnew.norm() + C * logisticnew.sum();
+// 			
 // 			rho = (objnew - obj) / qk
  			val rho = (objnew - obj)/qk;
 // 			snorm = sqrt(sum( s * s ))
- 			val snorm = s.norm();
+ 			val snorm = Math.sqrt(s.norm());
  			if (rho > eta0) {
 // 				w = wnew
  				wnew.copyTo(w);
@@ -193,9 +194,9 @@ public class SeqLogReg {
 // 				grad = w + C*t(X) %*% ((logisticnew - 1) * y )
  				compute_grad(grad, logisticnew);
  			} 
-
-                        iter = iter + 1;
-                        converge = (norm_r2 < (tol * tol)) | (iter > maxIterations);
+// 			
+ 			iter = iter + 1;
+ 			converge = (norm_r2 < (tol * tol)) | (iter > maxiter);
 
  			if (rho < eta0){
  				delta = Math.min(Math.max(alpha, sigma1) * snorm, sigma2 * delta );
@@ -225,7 +226,7 @@ public class SeqLogReg {
 	
 	protected def compute_grad(grad:Vector(X.N), logistic:Vector(X.M)):void {
 		//grad = w + C*t(X) %*% ((logistic - 1)*y)
-        logistic.map(logistic, y, (x:ElemType, v:ElemType)=> {(x - 1.0) * v});
+        logistic.map(y, (x:Double, v:Double)=> {(x - 1.0) * v});
 		compute_tXmultB(grad, logistic);
 		grad.scale(C);
 		grad.cellAdd(w);

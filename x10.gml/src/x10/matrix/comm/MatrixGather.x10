@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -18,8 +18,6 @@ import x10.compiler.Ifndef;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 
@@ -143,7 +141,7 @@ public class MatrixGather {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[ElemType](0); //fake
+							val tmpbuf = new Rail[Double](0); //fake
 							val tmplst = new Rail[Long](0);   //fake
                             WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
                                 tmpbuf, 0, tmplst, root);
@@ -171,7 +169,7 @@ public class MatrixGather {
 	public static def mpiGatherVector(
 			gp:Grid{self.N==1L}, 
 			src:DistArray[DenseBlock](1),
-			dst:Rail[ElemType]): void {
+			dst:Rail[Double]): void {
 				
 		//Only one row block partition
 		val szlist = gp.rowBs;
@@ -189,7 +187,7 @@ public class MatrixGather {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[ElemType](0); //fake
+							val tmpbuf = new Rail[Double](0); //fake
 							val tmplst = new Rail[Long](0);   //fake
 							WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
 												  tmpbuf, 0, tmplst, root);
@@ -220,7 +218,7 @@ public class MatrixGather {
 			dstden:DenseMatrix): void {
 
 		val root = here.id();
-		val dstbuf = new GlobalRail[ElemType](dstden.d as Rail[ElemType]{self!=null});
+		val dstbuf = new GlobalRail[Double](dstden.d as Rail[Double]{self!=null});
 
 		var startoffset:Long = 0;
 		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
@@ -230,14 +228,14 @@ public class MatrixGather {
 				val startrcvoff = startoffset;
 				at(src.dist(pid)) async {
 					val srcden = src(here.id()).dense;
-					Rail.asyncCopy[ElemType](srcden.d, 0, dstbuf, startrcvoff, 
+					Rail.asyncCopy[Double](srcden.d, 0, dstbuf, startrcvoff, 
 											srcden.M*srcden.N);
 				} 
 			} else {
 				//Make local copying
 				var rcvoff:Long = startoffset;
 				val srcden = src(pid).dense;
-				Rail.copy[ElemType](srcden.d, 0, dstden.d, rcvoff, srcden.M*srcden.N);
+				Rail.copy[Double](srcden.d, 0, dstden.d, rcvoff, srcden.M*srcden.N);
 			}
 			startoffset += gp.rowBs(0) * gp.colBs(pid);
 		}
@@ -276,7 +274,7 @@ public class MatrixGather {
 	public static def x10GatherVector(
             gp:Grid{self.N==1L}, 
             src:DistArray[DenseBlock](1),
-            dst:Rail[ElemType]):void {
+            dst:Rail[Double]):void {
 
 		val root = here.id();
 		var rowoff:Long=0;
@@ -414,7 +412,7 @@ public class MatrixGather {
 							//val tmplst = null;
 
 							val tmpidx = new Rail[Long](0); 
-							val tmpval = new Rail[ElemType](0);
+							val tmpval = new Rail[Double](0);
 							val tmplst = new Rail[Long](0);
 					
 							srcspa.initRemoteCopyAtSource();

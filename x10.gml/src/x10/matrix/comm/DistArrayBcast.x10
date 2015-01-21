@@ -6,15 +6,13 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
 
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
-
-import x10.matrix.ElemType;
 
 import x10.matrix.comm.mpi.WrapMPI;
 
@@ -101,13 +99,13 @@ public class DistArrayBcast extends DistArrayRemoteCopy {
 		val rtroot = root + lfcnt;
 
 		// Specify the remote buffer
-		val srcbuf = new GlobalRail[ElemType](src as Rail[ElemType]{self!=null});
+		val srcbuf = new GlobalRail[Double](src as Rail[Double]{self!=null});
 			
 		finish {
 			at(dmlist.dist(rtroot)) {
 				val dstbuf = dmlist(here.id());
 				// Using copyFrom style
-				finish Rail.asyncCopy[ElemType](srcbuf, 0, dstbuf, 0, dataCnt);
+				finish Rail.asyncCopy[Double](srcbuf, 0, dstbuf, 0, dataCnt);
 							
 				// Perform binary bcast on the right brank
 				if (rtcnt > 1 ) async {
@@ -198,7 +196,7 @@ public class DistArrayBcast extends DistArrayRemoteCopy {
 		val idxbuf    = srcca.index;
 		val valbuf = srcca.value;
 		val srcidx = new GlobalRail[Long](idxbuf as Rail[Long]{self!=null});
-		val srcval = new GlobalRail[ElemType](valbuf as Rail[ElemType]{self!=null});
+		val srcval = new GlobalRail[Double](valbuf as Rail[Double]{self!=null});
 	
 		finish {		
 			at(smlist.dist(rtroot)) {
@@ -206,7 +204,7 @@ public class DistArrayBcast extends DistArrayRemoteCopy {
 				val dstca = smlist(here.id());
 				finish Rail.asyncCopy[Long](srcidx, 0, 
 											   dstca.index, 0, dataCnt);
-				finish Rail.asyncCopy[ElemType](srcval, 0, 
+				finish Rail.asyncCopy[Double](srcval, 0, 
 											   dstca.value, 0, dataCnt);
 
 				// Perform binary bcast on the right brank

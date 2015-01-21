@@ -69,7 +69,6 @@ namespace x10aux {
 
     void initialize_xrx();
     int real_x10_main(int, char**, ApplicationMainFunction);
-    void apgas_main(int, char**);
     
     template<class T> int template_main(int ac, char **av) {
         return x10aux::real_x10_main(ac, av, &T::main);

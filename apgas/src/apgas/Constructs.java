@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package apgas;
@@ -63,21 +63,6 @@ public final class Constructs {
    */
   public static void asyncat(Place p, Job f) {
     GlobalRuntime.getRuntime().asyncat(p, f);
-  }
-
-  /**
-   * Submits an uncounted task to the global runtime to be run at {@link Place}
-   * {@code p} with body {@code f} and returns immediately. The termination of
-   * this task is not tracked by the enclosing finish. If an exception is thrown
-   * by the task it is logged to System.err and ignored.
-   *
-   * @param p
-   *          the place of execution
-   * @param f
-   *          the function to run
-   */
-  public static void uncountedasyncat(Place p, Job f) {
-    GlobalRuntime.getRuntime().uncountedasyncat(p, f);
   }
 
   /**

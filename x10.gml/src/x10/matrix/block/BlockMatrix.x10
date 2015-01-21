@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.block;
@@ -19,7 +19,6 @@ import x10.util.StringBuilder;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
 import x10.matrix.sparse.SparseCSC;
-import x10.matrix.ElemType;
 import x10.matrix.util.Debug;
 
 public type BlockMatrix(M:Long)=BlockMatrix{self.M==M};
@@ -91,13 +90,13 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
      * @param  gp  partitioning of matrix
      * @param  nzd  nonzero density or sparsity for all sparse blocks
      */
-    public static def makeSparse(gp:Grid, nzd:Float): BlockMatrix(gp.M, gp.N) {
+    public static def makeSparse(gp:Grid, nzd:Double): BlockMatrix(gp.M, gp.N) {
         val bm = new BlockMatrix(gp) as BlockMatrix(gp.M,gp.N);
         bm.allocSparseBlocks(nzd);
         return bm;
     }
 
-    public static def makeSparse(m:Long, n:Long, rowbs:Long, colbs:Long, nzd:Float):BlockMatrix(m,n) =
+    public static def makeSparse(m:Long, n:Long, rowbs:Long, colbs:Long, nzd:Double):BlockMatrix(m,n) =
         makeSparse(new Grid(m,n,rowbs,colbs), nzd);
 
     public static def makeDense(that:BlockMatrix): BlockMatrix(that.M, that.N) {
@@ -138,7 +137,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
         return this;
     }
 
-    public def allocSparseBlocks(nzd:Float): BlockMatrix(this) {
+    public def allocSparseBlocks(nzd:Double): BlockMatrix(this) {
         for(var p:Long=0; p<grid.size; p++) {
             val rid = this.grid.getRowBlockId(p);
             val cid = this.grid.getColBlockId(p);
@@ -161,7 +160,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
     /**
      * Initialize dense block matrix with a constant value
      */
-    public def init(ival:ElemType):BlockMatrix(this) {
+    public def init(ival:Double):BlockMatrix(this) {
         for (var p:Long=0; p<grid.size; p++) {
             listBs(p).init(ival);
         }
@@ -172,7 +171,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
      * Given initial function which maps matrix (row, column) index to
      * a double value.
      */
-    public def init(f:(Long, Long)=>ElemType):BlockMatrix(this) {
+    public def init(f:(Long, Long)=>Double):BlockMatrix(this) {
         for (var cb:Long=0; cb<grid.numColBlocks; cb++)
             for (var rb:Long=0; rb<grid.numRowBlocks; rb++ ) {
                 listBs(grid.getBlockId(rb, cb)).init(f);
@@ -256,7 +255,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
      * @return    element value
      * 
      */
-    public operator this(x:Long, y:Long):ElemType {
+    public operator this(x:Long, y:Long):Double {
         val loc = grid.find(x, y);
         val bid = grid.getBlockId(loc(0), loc(1));
         return this.getMatrix(bid)(loc(2), loc(3));
@@ -269,7 +268,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
      * @param y   column index
      * @param v   the new value for the element
      */
-    public operator this(x:Long, y:Long)=(v:ElemType):ElemType {
+    public operator this(x:Long, y:Long)=(v:Double):Double {
         val loc = grid.find(x, y);
         val bid = grid.getBlockId(loc(0), loc(1));
         this.getMatrix(bid)(loc(2), loc(3))=v;
@@ -378,11 +377,11 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
     }
 
     /**
-     * Raise each cell in the matrix by the factor of a:ElemType.
+     * Raise each cell in the matrix by the factor of a:Double.
      *
      * @param  a  -- the scaling factor
      */
-    public  def scale(a:ElemType) {
+    public  def scale(a:Double) {
         for (var b:Long=0; b<grid.size; b++) {
             listBs(b).getMatrix().scale(a);
         }
@@ -430,7 +429,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
         return this;
     }
     
-    public def cellAdd(d:ElemType):BlockMatrix(this) {
+    public def cellAdd(d:Double):BlockMatrix(this) {
         for (var p:Long=0; p<grid.size; p++) {
             val dst = listBs(p).getMatrix();
             dst.cellAdd(d);
@@ -465,7 +464,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
     /**
      * this = this -v;
      */
-    public def cellSub(v:ElemType) = this.cellAdd(-v);
+    public def cellSub(v:Double) = this.cellAdd(-v);
 
 
     /**
@@ -546,7 +545,7 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
         throw new UnsupportedOperationException("Not implemented");
     }
     
-    public def cellDivBy(v:ElemType):BlockMatrix(this) {
+    public def cellDivBy(v:Double):BlockMatrix(this) {
         throw new UnsupportedOperationException("No implementation");
     }
     
@@ -568,10 +567,10 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
     /**
      * this = this /v
      */
-    public def cellDiv(v:ElemType): BlockMatrix(this) {
+    public def cellDiv(v:Double): BlockMatrix(this) {
         for (var p:Long=0; p<grid.size; p++) {
             val dst = this.listBs(p).getMatrix();
-            dst.scale((1.0/v) as ElemType);
+            dst.scale(1.0/v);
         }
         return this;
     }
@@ -637,22 +636,22 @@ public class BlockMatrix(grid:Grid) extends Matrix  {
 
     //Operator overload
 
-    public operator - this = this.clone().scale((-1.0) as ElemType) as BlockMatrix(M,N);
+    public operator - this = this.clone().scale(-1.0) as BlockMatrix(M,N);
     /**
      * Operation result is stored in block matrix using dense block as storage.
      */
-    public operator (v:ElemType) + this = makeDense(this).cellAdd(v) as BlockMatrix(M,N);
-    public operator this + (v:ElemType) = makeDense(this).cellAdd(v) as BlockMatrix(M,N);
-    public operator this - (v:ElemType) = makeDense(this).cellSub(v) as BlockMatrix(M,N);
+    public operator (v:Double) + this = makeDense(this).cellAdd(v) as BlockMatrix(M,N);
+    public operator this + (v:Double) = makeDense(this).cellAdd(v) as BlockMatrix(M,N);
+    public operator this - (v:Double) = makeDense(this).cellSub(v) as BlockMatrix(M,N);
     
-    public operator this / (v:ElemType) = makeDense(this).cellDiv(v) as BlockMatrix(M,N);
-    public operator (v:ElemType) / this = makeDense(this).cellDivBy(v) as BlockMatrix(M,N);
+    public operator this / (v:Double) = makeDense(this).cellDiv(v) as BlockMatrix(M,N);
+    public operator (v:Double) / this = makeDense(this).cellDivBy(v) as BlockMatrix(M,N);
     
     /**
      * Operator overloading for cell-wise scaling operation and return result in a new dense matrix. 
      */
-    public operator this * (alpha:ElemType) = this.clone().scale(alpha) as BlockMatrix(M,N);
-    public operator (alpha:ElemType) * this = this * alpha;
+    public operator this * (alpha:Double) = this.clone().scale(alpha) as BlockMatrix(M,N);
+    public operator (alpha:Double) * this = this * alpha;
     
     public operator this + (that:BlockMatrix(M,N)) = makeDense(this).cellAdd(that) as BlockMatrix(M,N);
     public operator this - (that:DenseMatrix(M,N)) = makeDense(this).cellSub(that) as BlockMatrix(M,N);

@@ -11,7 +11,6 @@
 
 package x10.compiler.ws;
 
-import x10.xrx.*;
 import x10.compiler.Abort;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;

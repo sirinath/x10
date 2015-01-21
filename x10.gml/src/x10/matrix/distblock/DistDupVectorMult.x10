@@ -1,4 +1,5 @@
 /*
+ * 
  *  This file is part of the X10 project (http://x10-lang.org).
  *
  *  This file is licensed to You under the Eclipse Public License (EPL);
@@ -35,7 +36,7 @@ public class DistDupVectorMult  {
             }
         }
         vC.calcTime += Timer.milliTime() - stt;
-        vC.allReduceSum();
+        vC.reduceSum();
         return vC;
     }
     
@@ -72,7 +73,7 @@ public class DistDupVectorMult  {
             }
         }
         vC.calcTime += Timer.milliTime() - stt;        
-        vC.allReduceSum();
+        vC.reduceSum();
         return vC;
     }
     
@@ -121,7 +122,6 @@ public class DistDupVectorMult  {
             vC.calcTime += Timer.milliTime() - stt;
             vC.reduceSum();
         }
-        vC.sync();
         return vC;
     }
     
@@ -153,7 +153,6 @@ public class DistDupVectorMult  {
             vC.calcTime += Timer.milliTime() - stt;
             vC.reduceSum();    
         }
-        vC.sync();
         return vC;
     }
 }

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.visit;
@@ -1174,7 +1174,7 @@ public class Lowerer extends ContextVisitor {
     }
 
     //  offer e ->
-    //  x10.xrx.Runtime.offer(e);      
+    //  x10.lang.Runtime.offer(e);      
     private Stmt visitOffer(Offer n) throws SemanticException {		
     	Position pos = n.position();
     	Expr offerTarget = n.expr();

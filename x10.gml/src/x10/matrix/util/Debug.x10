@@ -6,12 +6,11 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.util;
 
-import x10.matrix.ElemType;
 /**
  * This debug tool provides self defined assertion and print methods.
  * 
@@ -38,19 +37,19 @@ public class Debug {
 	// Append input string at the tail of the last line
     public static def print(s:String)        { console.print(s);}
     public static def print(d:Rail[Int])     { console.print(d);}
-    public static def print(d:Rail[ElemType])  { console.print(d);}
+    public static def print(d:Rail[Double])  { console.print(d);}
 
 	// Use a new line in buffer, and then append the input string with time stamp
 	// at the front
     public static def println(s:String)       { console.println(s); }
     public static def println(d:Rail[Int])    { console.println(d); }
-    public static def println(d:Rail[ElemType]) { console.println(d); }
+    public static def println(d:Rail[Double]) { console.println(d); }
 
 	public static def println(s:String, d:Rail[Int]) {
 		Debug.println(s); 
 		Debug.print(d);
 	}
-	public static def println(s:String, d:Rail[ElemType]) {
+	public static def println(s:String, d:Rail[Double]) {
 		Debug.println(s); 
 		Debug.print(d);
 	}
