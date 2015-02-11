@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.x10rt;
@@ -40,9 +40,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import x10.core.fun.VoidFun_0_0;
-import x10.xrx.FinishState;
+import x10.lang.FinishState;
 import x10.lang.Place;
-import x10.xrx.Runtime;
+import x10.lang.Runtime;
 import x10.serialization.X10JavaDeserializer;
 
 /**
@@ -60,12 +60,8 @@ public class SocketTransport {
 	static final String UTF8 = "UTF-8";
 	private static final String DEAD = "DEAD";
 	private static enum PROBE_TYPE {ACCEPT, ACCEPTORWRITE, ALL};
-	private static enum CTRL_MSG_TYPE {HELLO, GOODBYE, PORT_REQUEST, PORT_RESPONSE, LAUNCH_REQUEST, LAUNCH_RESPONSE}; // Correspond to values in Launcher.h
-	static enum MSGTYPE {STANDARD(0), PUT(1), GET(2), GET_COMPLETED(3), GET_PLACE_REQUEST(6), GET_PLACE_RESPONSE(7), CONNECT_DATASTORE(8);
-	    private int value;
-	    private MSGTYPE(int value) {this.value = value;}
-	    public int getValue(){return this.value;}
-	}; // note that GET_PLACE_REQUEST does not overlap with CTRL_MSG_TYPE
+	private static enum CTRL_MSG_TYPE {HELLO, GOODBYE, PORT_REQUEST, PORT_RESPONSE}; // Correspond to values in Launcher.h
+	static enum MSGTYPE {STANDARD, PUT, GET, GET_COMPLETED, GET_PLACE_REQUEST, GET_PLACE_RESPONSE, CONNECT_DATASTORE}; // note that GET_PLACE_REQUEST does not overlap with CTRL_MSG_TYPE
 	public static enum CALLBACKID {closureMessageID, simpleAsyncMessageID};
 	public static enum RETURNCODE { // see matching list of error codes "x10rt_error" in x10rt_types.h 
 	    X10RT_ERR_OK,   /* No error */
@@ -231,12 +227,12 @@ public class SocketTransport {
 		if (socketTimeout != -1) sc.socket().setSoTimeout(socketTimeout);
 		sc.socket().setTcpNoDelay(true); // disable Nagle's algorithm
 		if (DEBUG) {
-			System.err.println("TCPDelay = "+sc.socket().getTcpNoDelay());
-			System.err.println("ReceiveBufferSize = "+sc.socket().getReceiveBufferSize());
-			System.err.println("SendBufferSize = "+sc.socket().getSendBufferSize());
-			System.err.println("Linger = "+sc.socket().getSoLinger());
-			System.err.println("Timeout = "+sc.socket().getSoTimeout());
-			System.err.println("Keepalive = "+sc.socket().getKeepAlive());
+			System.out.println("TCPDelay = "+sc.socket().getTcpNoDelay());
+			System.out.println("ReceiveBufferSize = "+sc.socket().getReceiveBufferSize());
+			System.out.println("SendBufferSize = "+sc.socket().getSendBufferSize());
+			System.out.println("Linger = "+sc.socket().getSoLinger());
+			System.out.println("Timeout = "+sc.socket().getSoTimeout());
+			System.out.println("Keepalive = "+sc.socket().getKeepAlive());
 		}
 	}
 	
@@ -304,49 +300,6 @@ public class SocketTransport {
     				lowestValidPlaceId++;
     		}
     	}
-    }
-    
-    // request to start more places.  Forward to the launcher, if possible
-    long addPlaces(long newPlaces) {
-    	CommunicationLink launcherLink = channels.get(myPlaceId);
-    	if (launcherLink == null)
-    	    return 0; // no launcher to ask
-    	
-		ByteBuffer addPlacesRequest = ByteBuffer.allocateDirect(24);
-		addPlacesRequest.order(ByteOrder.nativeOrder());
-		addPlacesRequest.putInt(CTRL_MSG_TYPE.LAUNCH_REQUEST.ordinal());
-		addPlacesRequest.putInt(myPlaceId);
-		addPlacesRequest.putInt(myPlaceId);
-		addPlacesRequest.putInt(8);
-		addPlacesRequest.putLong(newPlaces);
-		addPlacesRequest.flip();
-		launcherLink.writeLock.lock();
-		try {
-			writeNBytes(launcherLink.sc, addPlacesRequest);
-			addPlacesRequest.clear();
-			while (!readNBytes(launcherLink.sc, addPlacesRequest, addPlacesRequest.capacity()));
-		}
-		catch (IOException e) {
-			if (DEBUG) {
-				System.err.println("Error requesting more places:");
-				e.printStackTrace();
-			}
-			return 0;
-		}
-		finally {
-			launcherLink.writeLock.unlock();
-		}
-		addPlacesRequest.flip();
-		int type = addPlacesRequest.getInt();
-		int to = addPlacesRequest.getInt();
-		int from = addPlacesRequest.getInt();
-		int bodylen = addPlacesRequest.getInt();
-		if (type != CTRL_MSG_TYPE.LAUNCH_RESPONSE.ordinal() || 
-				to != myPlaceId || from != myPlaceId || bodylen != 8)
-			return 0; // invalid response
-		long numPlacesAttempted = addPlacesRequest.getLong();
-		if (DEBUG) System.err.println("Place "+myPlaceId+" requested startup of "+newPlaces+" new places, and launcher started "+numPlacesAttempted);
-		return numPlacesAttempted;
     }
     
     // this method will cause the establishLinks method to return, even if it is 
@@ -457,8 +410,6 @@ public class SocketTransport {
     			selectorLock.unlock();
     		}
 			if (key.isAcceptable()) {
-				if (DEBUG) System.err.println("Place "+myPlaceId+" detected a connection request");
-
 				ServerSocketChannel ssc = (ServerSocketChannel)key.channel();
 				SocketChannel sc = ssc.accept();
 				if (sc == null)
@@ -537,7 +488,7 @@ public class SocketTransport {
 								
 								// send this to the next place, in case I die before the new place links to it
 								ByteBuffer nextPlaceUpdate = ByteBuffer.allocateDirect(12);
-								nextPlaceUpdate.putInt(MSGTYPE.GET_PLACE_RESPONSE.getValue());
+								nextPlaceUpdate.putInt(MSGTYPE.GET_PLACE_RESPONSE.ordinal());
 								nextPlaceUpdate.putInt(remote);
 								nextPlaceUpdate.putInt(myPlaceId);
 								nextPlaceUpdate.flip();
@@ -638,7 +589,7 @@ public class SocketTransport {
 							datalen = controlData.getInt();
 							if (DEBUG) System.err.print("Place "+myPlaceId+" processing an incoming message of type "+callbackId+" and size "+datalen+"...");
 		
-							if (msgType == MSGTYPE.STANDARD.getValue()) {
+							if (msgType == MSGTYPE.STANDARD.ordinal()) {
 								m = new Message(callbackId, datalen);
 								sc.read(m.data);
 								if (m.data.hasRemaining()) // more left to read later
@@ -648,11 +599,11 @@ public class SocketTransport {
 									toProcess = m;
 								}
 							}
-							else if (msgType == MSGTYPE.GET_PLACE_REQUEST.getValue()) {
+							else if (msgType == MSGTYPE.GET_PLACE_REQUEST.ordinal()) {
 								// this comes into the lowest numbered place, which is responsible for place assignment
 								// assign a new place id, increment nplaces
 								controlData.clear();
-								controlData.putInt(MSGTYPE.GET_PLACE_RESPONSE.getValue());
+								controlData.putInt(MSGTYPE.GET_PLACE_RESPONSE.ordinal());
 								synchronized (deadPlaces) {
 									controlData.putInt(this.nplaces++);
 								}
@@ -677,7 +628,7 @@ public class SocketTransport {
 								controlData.rewind();
 								writeNBytes(sc, controlData);
 							}
-							else if (msgType == MSGTYPE.GET_PLACE_RESPONSE.getValue()) {
+							else if (msgType == MSGTYPE.GET_PLACE_RESPONSE.ordinal()) {
 								// get the socket channel we stashed earlier
 								int remote = callbackId;
 								CommunicationLink newPlace = null;
@@ -721,15 +672,15 @@ public class SocketTransport {
 								}
 								else if (DEBUG) System.err.println("Taking note of new num places: "+remote);
 							}
-							else if (msgType == MSGTYPE.CONNECT_DATASTORE.getValue()) {
+							else if (msgType == MSGTYPE.CONNECT_DATASTORE.ordinal()) {
 								byte[] linkdata = new byte[datalen];
 								ByteBuffer bb = ByteBuffer.wrap(linkdata);
 								while (!readNBytes(sc, bb, datalen));
 								String linkString = new String(linkdata, UTF8);
 								X10RT.initDataStore(linkString);
 							}
-							else
-								throw new IOException("Read in a corrupted message type: "+msgType);
+							else 
+								System.err.println("Unknown message type: "+msgType);
 						}
 					}
 					catch (IOException e) {
@@ -799,7 +750,7 @@ public class SocketTransport {
     	// write out the x10SocketMessage data
     	// Format: type, p.type, p.len, p.msg
     	ByteBuffer controlData = ByteBuffer.allocateDirect(12);
-    	controlData.putInt(msgtype.getValue());
+    	controlData.putInt(msgtype.ordinal());
     	controlData.putInt(msg_id);
     	int len = 0; 
     	if (buffer != null)
@@ -871,29 +822,23 @@ public class SocketTransport {
     			placeRequest.putInt(myPlaceId);
     			placeRequest.putInt(0);
     			placeRequest.flip();
-    			launcherLink.writeLock.lock();
-    			try {
-	    			writeNBytes(launcherLink.sc, placeRequest);
-	    			placeRequest.clear();
-	    			while (!readNBytes(launcherLink.sc, placeRequest, placeRequest.capacity()));
-	    			placeRequest.flip();
-	    			int type = placeRequest.getInt();
-	    			if (type != CTRL_MSG_TYPE.PORT_RESPONSE.ordinal()) 
-	    				throw new IOException("Invalid response to launcher lookup for place "+remotePlace);
-	    			placeRequest.getInt();
-	    			placeRequest.getInt();
-	    			int strlen = placeRequest.getInt();
-	    			if (strlen <=0)
-	    				throw new IOException("Invalid response length to launcher lookup for place "+remotePlace);
-	    			byte[] chars = new byte[strlen];
-	    			ByteBuffer bb = ByteBuffer.wrap(chars);
-	    			while (!readNBytes(launcherLink.sc, bb, strlen));
-	    			connectionInfo = new String(chars);
-	    			if (DEBUG) System.err.println("Place "+myPlaceId+" lookup of place "+remotePlace+" returned \""+connectionInfo+"\" (len="+strlen+")");
-    			}
-    			finally {
-    				launcherLink.writeLock.unlock();
-    			}
+    			writeNBytes(launcherLink.sc, placeRequest);
+    			placeRequest.clear();
+    			while (!readNBytes(launcherLink.sc, placeRequest, placeRequest.capacity()));
+    			placeRequest.flip();
+    			int type = placeRequest.getInt();
+    			if (type != CTRL_MSG_TYPE.PORT_RESPONSE.ordinal()) 
+    				throw new IOException("Invalid response to launcher lookup for place "+remotePlace);
+    			placeRequest.getInt();
+    			placeRequest.getInt();
+    			int strlen = placeRequest.getInt();
+    			if (strlen <=0)
+    				throw new IOException("Invalid response length to launcher lookup for place "+remotePlace);
+    			byte[] chars = new byte[strlen];
+    			ByteBuffer bb = ByteBuffer.wrap(chars);
+    			while (!readNBytes(launcherLink.sc, bb, strlen));
+    			connectionInfo = new String(chars);
+    			if (DEBUG) System.err.println("Place "+myPlaceId+" lookup of place "+remotePlace+" returned \""+connectionInfo+"\" (len="+strlen+")");
     		}
 		String[] split = connectionInfo.split(":");
 		if (split.length < 2) {
@@ -908,19 +853,14 @@ public class SocketTransport {
     	// wait for the remote place to become available.  It may be starting up still.
     	int delay = connectionTimeout;
     	do {
-	    	try {
-	    		if (DEBUG) System.err.println("Trying to connect to "+addr.toString());
-	    		sc = SocketChannel.open(addr);
+	    	try { sc = SocketChannel.open(addr);
 	    	} catch (ConnectException e) {
 	    		try {
 	    			if (channels.containsKey(remotePlace)) return; // connection was established in the background
 					Thread.sleep(100);
 					delay-=100;
-					if (delay <= 0 || shuttingDown) {
-						markPlaceDead(remotePlace); // mark it as dead
-						if (DEBUG) e.printStackTrace();
+					if (delay <= 0 || shuttingDown)
 						throw new IOException("Place "+myPlaceId+" unable to connect to place "+remotePlace);
-					}
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1145,10 +1085,8 @@ public class SocketTransport {
             VoidFun_0_0 actObj = (VoidFun_0_0) deserializer.readObject();
             actObj.$apply();
         } catch (Throwable e) {
-            if (!x10.xrx.Configuration.silenceInternalWarnings$O()) {
-                System.out.println("WARNING: Ignoring uncaught exception in @Immediate async.");
-                e.printStackTrace();
-            }
+            System.out.println("WARNING: Ignoring uncaught exception in incoming closure");
+            e.printStackTrace();
         }
     }
     
@@ -1162,10 +1100,12 @@ public class SocketTransport {
     	    actObj = (VoidFun_0_0) deserializer.readObject();
     	} catch (Throwable e) {
     	    // TODO: handle epoch?
-            finishState.notifyActivityCreationFailed(src, new x10.io.SerializationException(e));
+            finishState.notifyActivityCreation$O(src);
+            finishState.pushException(new x10.io.SerializationException(e));
+            finishState.notifyActivityTermination();
             return;
     	}
-    	x10.xrx.Runtime.submitRemoteActivity(epoch, actObj, src, finishState);
+    	x10.lang.Runtime.execute(epoch, actObj, src, finishState);
     }
     
     private class BackgroundLinkInitializer implements Runnable {

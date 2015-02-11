@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 /* MPICH2 mpi.h wants to not have SEEK_SET etc defined for C++ bindings */
@@ -63,6 +63,7 @@ static void x10rt_net_coll_init(int *argc, char ** *argv, x10rt_msg_type *counte
 #define X10RT_DATATYPE_TBL_SIZE         (256)
 
 #define X10RT_MPI_DEBUG_PRINT "X10RT_MPI_DEBUG_PRINT"
+#define X10RT_MPI_THREAD_MULTIPLE "X10RT_MPI_THREAD_MULTIPLE"
 #define X10RT_MPI_FORCE_COLLECTIVES "X10RT_MPI_FORCE_COLLECTIVES"
 
 /* Generic utility funcs */
@@ -487,38 +488,34 @@ x10rt_error x10rt_net_init(int *argc, char ** *argv, x10rt_msg_type *counter) {
     global_state.Init();
 
     int provided;
-
-    // special case: if using static threads, and the thread count is exactly 1 we don't need multi-thread MPI
-    char* sthreads = getenv("X10_STATIC_THREADS");
-    char* nthreads = getenv("X10_NTHREADS");
-    char* ithreads = getenv("X10_NUM_IMMEDIATE_THREADS");
-    if (checkBoolEnvVar(sthreads) && nthreads && ithreads && (atoi(nthreads) == 1) && (atoi(ithreads) == 0)) {
-        global_state.is_mpi_multithread = false;
-        if (MPI_SUCCESS != MPI_Init(argc, argv)) {
-            fprintf(stderr, "[%s:%d] Error in MPI_Init\n", __FILE__, __LINE__);
-            abort();
-        }
-    } else {
+    if(checkBoolEnvVar(getenv(X10RT_MPI_THREAD_MULTIPLE))) {
         global_state.is_mpi_multithread = true;
         if (MPI_SUCCESS != MPI_Init_thread(argc, argv, 
                     MPI_THREAD_MULTIPLE, &provided)) {
-            fprintf(stderr, "[%s:%d] Error in MPI_Init_Thread\n", __FILE__, __LINE__);
+            fprintf(stderr, "[%s:%d] Error in MPI_Init\n", __FILE__, __LINE__);
             abort();
         }
         MPI_Comm_rank(MPI_COMM_WORLD, &global_state.rank);
         if (MPI_THREAD_MULTIPLE != provided) {
             if (0 == global_state.rank) {
                 fprintf(stderr, "[%s:%d] Underlying MPI implementation"
-                        " does not provide MPI_THREAD_MULTIPLE threading level\n",
+                        " needs to provide "X10RT_MPI_THREAD_MULTIPLE" threading level\n",
                         __FILE__, __LINE__);
-                fprintf(stderr, "Unable to support requested level of X10 threading; exiting\n");
+                fprintf(stderr, "[%s:%d] Alternatively, you could unset env var "
+                        X10RT_MPI_THREAD_MULTIPLE" from you environment\n",
+                        __FILE__, __LINE__);
             }
             if (MPI_SUCCESS != MPI_Finalize()) {
                 fprintf(stderr, "[%s:%d] Error in MPI_Finalize\n",
                         __FILE__, __LINE__);
                 abort();
             }
-	    abort();
+        }
+    } else {
+        global_state.is_mpi_multithread = false;
+        if (MPI_SUCCESS != MPI_Init(argc, argv)) {
+            fprintf(stderr, "[%s:%d] Error in MPI_Init\n", __FILE__, __LINE__);
+            abort();
         }
     }
 

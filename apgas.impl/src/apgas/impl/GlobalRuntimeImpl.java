@@ -6,32 +6,28 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package apgas.impl;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
-import java.util.function.Consumer;
 
 import apgas.Configuration;
 import apgas.Constructs;
+import apgas.Fun;
 import apgas.GlobalRuntime;
 import apgas.Job;
 import apgas.MultipleException;
 import apgas.Place;
-import apgas.SerializableCallable;
-import apgas.SerializableJob;
 import apgas.util.GlobalID;
 
 /**
@@ -50,11 +46,6 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
   final boolean resilient;
 
   /**
-   * The finish factory.
-   */
-  final Finish.Factory factory;
-
-  /**
    * The transport for this global runtime instance.
    */
   final Transport transport;
@@ -70,9 +61,9 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
   final Place home;
 
   /**
-   * The pool for this global runtime instance.
+   * The scheduler for this global runtime instance.
    */
-  final ForkJoinPool pool;
+  final Scheduler scheduler;
 
   /**
    * The mutable set of places in this global runtime instance.
@@ -95,18 +86,13 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
    */
   int dying;
 
-  /**
-   * The registered place failure handler.
-   */
-  Consumer<Place> handler;
-
   private static Worker currentWorker() {
     final Thread t = Thread.currentThread();
     return t instanceof Worker ? (Worker) t : null;
   }
 
-  private static Process exec(List<String> command) throws IOException {
-    final ProcessBuilder pb = new ProcessBuilder(command);
+  private static Process exec(String command) throws IOException {
+    final ProcessBuilder pb = new ProcessBuilder(command.split(" "));
     pb.redirectOutput(Redirect.INHERIT);
     pb.redirectError(Redirect.INHERIT);
     return pb.start();
@@ -125,39 +111,17 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
   public GlobalRuntimeImpl() throws IOException {
     // parse configuration
     final int p = Integer.getInteger(Configuration.APGAS_PLACES, 1);
-    final int threads = Integer.getInteger(Configuration.APGAS_THREADS, Runtime
-        .getRuntime().availableProcessors());
     final String master = System.getProperty(Configuration.APGAS_MASTER);
     final boolean daemon = Boolean.getBoolean(Configuration.APGAS_DAEMON);
     serializationException = Boolean
         .getBoolean(Configuration.APGAS_SERIALIZATION_EXCEPTION);
     resilient = Boolean.getBoolean(Configuration.APGAS_RESILIENT);
-    Finish.Factory factory = null;
-    final String finishConfig = System.getProperty(Configuration.APGAS_FINISH);
-    if (finishConfig != null) {
-      final String className = finishConfig + "$Factory";
-      try {
-        factory = (Finish.Factory) Class.forName(className).newInstance();
-      } catch (InstantiationException | IllegalAccessException
-          | ExceptionInInitializerError | ClassNotFoundException
-          | NoClassDefFoundError | ClassCastException e) {
-        System.err.println("[APGAS] Unable to instantiate finish factory: "
-            + className + ". Using default factory.");
-      }
-    }
-    if (factory == null) {
-      this.factory = resilient ? new ResilientFinish.Factory()
-          : new DefaultFinish.Factory();
-    } else {
-      this.factory = factory;
-    }
-    final boolean compact = Boolean.getBoolean(Configuration.APGAS_COMPACT);
     final String localhost = System.getProperty(Configuration.APGAS_LOCALHOST,
         InetAddress.getLocalHost().getHostAddress());
 
     // initialize scheduler and transport
-    pool = new ForkJoinPool(threads, new WorkerFactory(), null, false);
-    transport = new Transport(this, master, localhost, compact);
+    scheduler = new Scheduler();
+    transport = new Transport(this, master, localhost);
 
     // initialize here
     here = transport.here();
@@ -192,31 +156,22 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
     if (p > 1) {
       // launch additional places
       try {
-        final ArrayList<String> command = new ArrayList<String>();
-        command.add("java");
-        command.add("-cp");
-        command.add(System.getProperty("java.class.path"));
+        String command = getClass().getSuperclass().getCanonicalName();
         if (resilient) {
-          command.add("-D" + Configuration.APGAS_RESILIENT + "=true");
+          command = "-D" + Configuration.APGAS_RESILIENT + "=true " + command;
         }
         if (serializationException) {
-          command.add("-D" + Configuration.APGAS_SERIALIZATION_EXCEPTION
-              + "=true");
+          command = "-D" + Configuration.APGAS_SERIALIZATION_EXCEPTION
+              + "=true " + command;
         }
-        if (compact) {
-          command.add("-D" + Configuration.APGAS_COMPACT + "=true");
-          command.add("-XX:CICompilerCount=3");
-          command.add("-XX:ParallelGCThreads=2");
-        }
-        if (factory != null) {
-          command.add("-D" + Configuration.APGAS_FINISH + "=" + finishConfig);
-        }
-        command.add("-D" + Configuration.APGAS_THREADS + "=" + threads);
-        command.add("-D" + Configuration.APGAS_DAEMON + "=true");
-        command.add("-D" + Configuration.APGAS_MASTER + "="
-            + (master == null ? transport.getAddress() : master));
-        command.add("-D" + Configuration.APGAS_LOCALHOST + "=" + localhost);
-        command.add(getClass().getSuperclass().getCanonicalName());
+        command = "-D" + Configuration.APGAS_DAEMON + "=true " + command;
+        command = "-D" + Configuration.APGAS_MASTER + "="
+            + (master == null ? transport.getAddress() : master) + " "
+            + command;
+        command = "-D" + Configuration.APGAS_LOCALHOST + "=" + localhost + " "
+            + command;
+        command = "java -cp " + System.getProperty("java.class.path") + " "
+            + command;
         for (int i = 0; i < p - 1; i++) {
           Process process = exec(command);
           synchronized (processes) {
@@ -249,6 +204,9 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
         throw t;
       }
     }
+
+    // start scheduler
+    scheduler.start();
   }
 
   /**
@@ -264,50 +222,48 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
   }
 
   /**
-   * Updates the place collections.
+   * Initializes the place collections.
    *
-   * @param added
-   *          added places
-   * @param removed
-   *          removed places
+   * @param set
+   *          the set of live place ids in the global runtime.
    */
-  void updatePlaces(List<Integer> added, List<Integer> removed) {
-    for (final int id : added) {
+  void initPlaces(Set<Integer> set) {
+    for (final int id : set) {
       placeSet.add(new Place(id));
-    }
-    for (final int id : removed) {
-      placeSet.remove(new Place(id));
     }
     places = Collections
         .<Place> unmodifiableList(new ArrayList<Place>(placeSet));
-    if (removed.isEmpty()) {
-      return;
-    }
+  }
+
+  /**
+   * Notifies the runtime of a new place.
+   *
+   * @param place
+   *          the ID of the added place
+   */
+  void addPlace(int place) {
+    placeSet.add(new Place(place));
+    places = Collections
+        .<Place> unmodifiableList(new ArrayList<Place>(placeSet));
+  }
+
+  /**
+   * Notifies the runtime of a dead place.
+   *
+   * @param place
+   *          the ID of the removed place
+   */
+  void removePlace(int place) {
     if (!resilient) {
       shutdown();
       return;
     }
-    final Consumer<Place> handler = this.handler;
-    pool.execute(new RecursiveAction() {
-      private static final long serialVersionUID = 1052937749744648347L;
-
-      @Override
-      public void compute() {
-        for (final int id : removed) {
-          ResilientFinishState.purge(id);
-        }
-        if (handler != null) {
-          for (final int id : removed) {
-            handler.accept(new Place(id));
-          }
-        }
-      }
-    });
-  }
-
-  @Override
-  public void setPlaceFailureHandler(Consumer<Place> handler) {
-    this.handler = handler;
+    placeSet.remove(new Place(place));
+    places = Collections
+        .<Place> unmodifiableList(new ArrayList<Place>(placeSet));
+    if (here == 0 && resilient) {
+      ResilientFinish.purge(place);
+    }
   }
 
   /**
@@ -321,19 +277,32 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
       }
       dying = 1;
     }
-    pool.shutdown();
+    scheduler.shutdown();
     transport.shutdown();
+  }
+
+  /**
+   * Constructs a new finish instance.
+   *
+   * @param parent
+   *          the parent finish or null
+   * @param place
+   *          the place ID of the main task
+   * @return the finish instance
+   */
+  Finish newFinish(Finish parent, int place) {
+    return resilient ? new ResilientFinish((ResilientFinish) parent, place)
+        : new DefaultFinish(place);
   }
 
   @Override
   public void finish(Job f) {
     final Worker worker = currentWorker();
-    final Finish finish = factory.make(worker == null ? NullFinish.SINGLETON
-        : worker.task.finish);
+    final Finish finish = newFinish(worker == null ? null : worker.task.finish,
+        here);
     new Task(finish, f, here).finish(worker);
-    final List<Throwable> exceptions = finish.exceptions();
-    if (exceptions != null) {
-      throw new MultipleException(exceptions);
+    if (finish.exceptions() != null) {
+      throw new MultipleException(finish.exceptions());
     }
   }
 
@@ -342,7 +311,7 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
     final Worker worker = currentWorker();
     final Finish finish;
     if (worker == null) {
-      finish = NullFinish.SINGLETON;
+      finish = newFinish(null, here);
     } else {
       finish = worker.task.finish;
       finish.spawn(here);
@@ -351,11 +320,11 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
   }
 
   @Override
-  public void asyncat(Place p, SerializableJob f) {
+  public void asyncat(Place p, Job f) {
     final Worker worker = currentWorker();
     final Finish finish;
     if (worker == null) {
-      finish = NullFinish.SINGLETON;
+      finish = newFinish(null, p.id);
     } else {
       finish = worker.task.finish;
       finish.spawn(p.id);
@@ -364,18 +333,13 @@ final class GlobalRuntimeImpl extends GlobalRuntime {
   }
 
   @Override
-  public void uncountedasyncat(Place p, SerializableJob f) {
-    new UncountedTask(f).uncountedasyncat(p);
-  }
-
-  @Override
-  public void at(Place p, SerializableJob f) {
+  public void at(Place p, Job f) {
     Constructs.finish(() -> Constructs.asyncat(p, f));
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T extends Serializable> T at(Place p, SerializableCallable<T> f) {
+  public <T> T at(Place p, Fun<T> f) {
     final GlobalID id = new GlobalID();
     final Place home = here();
     Constructs.finish(() -> Constructs.asyncat(p, () -> {

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  * 
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.array;
@@ -144,10 +144,6 @@ public final class DistArray_Unique[T] extends DistArray[T]{this.rank()==1} impl
      * @see #operator(Point)
      */
     public @Inline operator this(p:Point(this.rank()))=(v:T):T{self==v} = this(p(0)) = v;
-
-    public def getPatch(space:IterationSpace(1){self.rect}):Rail[T] {
-        throw new UnsupportedOperationException("getPatch not supported for DistArray_Unique");
-    }
 
     /*
      * Order of tests is designed to minimize the dynamic number of comparisons

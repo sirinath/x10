@@ -6,11 +6,11 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 #include <apgas/Task.h>
-#include <apgas/Runtime.h>
+#include <apgas/Pool.h>
 
 #include <stdio.h>
 
@@ -31,7 +31,7 @@ class FibAsync : public Task {
             Task* myTasks[2];
             myTasks[0] = &child1;
             myTasks[1] = &child2;
-            myRuntime->runFinish(2, myTasks);
+            myPool->runFinish(2, myTasks);
             result = child1.result + child2.result;
         }
     }
@@ -39,23 +39,16 @@ class FibAsync : public Task {
     
     
 int main(int argc, char **argv) {
-    Runtime* rt = Runtime::getRuntime();
-    rt->start(argc, argv);
-
-    if (rt->here() == 0) {
-        int N = 10;
-        if (argc > 1) {
-            int n2 = atoi(argv[1]);
-            N = n2;
-        }
-
-        printf("Computing Fib of %d\n", N);
-    
-        FibAsync fibTask(N);
-
-        rt->runSync(&fibTask);
-        rt->terminate();
-
-        printf("Fib(%d) = %d\n", N, fibTask.result);
+    int N = 10;
+    if (argc > 1) {
+        int n2 = atoi(argv[1]);
+        N = n2;
     }
+    printf("Computing Fib of %d\n", N);
+    
+    FibAsync fibTask(N);
+    apgas::Pool aPool(&fibTask);
+    aPool.start();
+
+    printf("Fib(%d) = %d\n", N, fibTask.result);
 }

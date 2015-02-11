@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 #include <x10aux/config.h>
@@ -15,7 +15,7 @@
 #include <x10aux/network.h>
 #include <x10aux/atomic_ops.h>
 
-#include <x10/xrx/Runtime.h>
+#include <x10/lang/Runtime.h>
 #include <x10/lang/ExceptionInInitializer.h>
 
 #include <assert.h>
@@ -90,19 +90,19 @@ WAIT:
 
 
 void StaticInitController::lock() {
-    x10::xrx::Runtime::StaticInitBroadcastDispatcherLock();
+    x10::lang::Runtime::StaticInitBroadcastDispatcherLock();
 }
 
 void  StaticInitController::await() {
-    x10::xrx::Runtime::StaticInitBroadcastDispatcherAwait();
+    x10::lang::Runtime::StaticInitBroadcastDispatcherAwait();
 }
 
 void  StaticInitController::unlock() {
-    x10::xrx::Runtime::StaticInitBroadcastDispatcherUnlock();
+    x10::lang::Runtime::StaticInitBroadcastDispatcherUnlock();
 }
 
 void  StaticInitController::notify() {
-    x10::xrx::Runtime::StaticInitBroadcastDispatcherNotify();
+    x10::lang::Runtime::StaticInitBroadcastDispatcherNotify();
 }
 
 // vim:tabstop=4:shiftwidth=4:expandtab

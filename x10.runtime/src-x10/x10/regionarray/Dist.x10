@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.regionarray;
@@ -89,45 +89,25 @@ public abstract class Dist(
     public static def makeBlock(r:Region, axis:Long):Dist(r) = makeBlock(r, axis, Place.places());
 
     /**
-     * Creates a block, block distribution across the specified PlaceGroup pg.
+     * Creates a block, block distribution across all places.
      * The coordinates are split along axis0 into M divisions such that M is the minimum of:
      *   - 2^q where q is the next integer above log2(P) / 2
      *   - the length of axis0
-     * and split along axis1 into N divisions such that M*(N-1) <= pg.size() <= M*N.
+     * and split along axis1 into N divisions such that M*(N-1) <= P <= M*N.
      * Thus there are M*N blocks of size (axis0/M, axis1/N).
      * The blocks are not necessarily of integer size in either dimension.
-     * Places 0..(M*N-pg.size()) are each assigned two such blocks, contiguous in axis0.
+     * Places 0..(M*N-P) are each assigned two such blocks, contiguous in axis0.
      * The remaining places are assigned a single block.
      * Block min and max coordinates are rounded to create subregions for each place,
      * e.g. a block [1.0..1.5,2.25..2.75] is rounded to a subregion [1..2,2..2].
      * @param r the given region
      * @param axis0 the first dimension to block over
      * @param axis1 the second dimension to block over
-     * @param pg the set of places
-     * @return a "block,block" distribution of region r over the places in pg
+     * @return a "block,block" distribution over r.
      */
-    public static def makeBlockBlock(r:Region, axis0:Long, axis1:Long, pg:PlaceGroup):Dist(r) {
+    public static def makeBlockBlock(r:Region, axis0:Long, axis1:Long):Dist(r) {
         return new BlockBlockDist(r, axis0, axis1, Place.places());
     }
-
-    /**
-     * Creates a block, block distribution across all places.
-     * @param r the given region
-     * @param axis0 the first dimension to block over
-     * @param axis1 the second dimension to block over
-     * @see makeBlockBlock(Region, Long, Long, PlaceGroup)
-     */
-    public static def makeBlockBlock(r:Region, axis0:Long, axis1:Long):Dist(r)
-        = makeBlockBlock(r, axis0, axis1, Place.places());
-
-    /**
-     * Creates a block, block distribution across all places that varies in
-     * place along the 0-th and 1st axes.
-     * @param r the given region
-     * @see makeBlockBlock(Region, Long, Long, PlaceGroup)
-     */
-    public static def makeBlockBlock(r:Region):Dist(r)
-        = makeBlockBlock(r, 0, 1, Place.places());
 
     /**
      * Create a distribution of the specified region over all places that varies in
@@ -290,6 +270,94 @@ public abstract class Dist(
      * @see #operator(Point)
      */
     public operator this(i0:Long, i1:Long, i2:Long, i3:Long){rank==4}:Place = this(Point.make(i0,i1,i2,i3));
+
+
+
+    /**
+     * Return the offset in linearized place-local storage of the given point.
+     * Throw a BadPlaceException if the given point is not mapped to 
+     * the current place.  Primarily intended to be used by the DistArray implementation,
+     * but may be useful for other data structures as well that need to associate 
+     * Points in a Distribution with a dense, zero-based numbering.
+     *
+     * @param pt the given point
+     * @return the storage offset assigned to pt by this distribution
+     */
+    abstract public def offset(pt:Point(rank)):Long;
+
+    /**
+     * Return the offset in linearized place-local storage of the point [i0]
+     * Throw a BadPlaceException if the given point is not mapped to 
+     * the current place.  Primarily intended to be used by the DistArray implementation,
+     * but may be useful for other data structures as well that need to associate 
+     * Points in a Distribution with a dense, zero-based numbering.
+     *
+     * Only applies to one-dimensional distributions.
+     *
+     * @param i0 the given index in the first dimension
+     * @return the storage offset assigned to [i0] by this distribution
+     * @see #offset(Point)
+     */
+    public def offset(i0:Long){rank==1}:Long = offset(Point.make(i0));
+
+    /**
+     * Return the offset in linearized place-local storage of the point [i0,i1].
+     * Throw a BadPlaceException if the given point is not mapped to 
+     * the current place.  Primarily intended to be used by the DistArray implementation,
+     * but may be useful for other data structures as well that need to associate 
+     * Points in a Distribution with a dense, zero-based numbering.
+     *
+     * Only applies to two-dimensional distributions.
+     *
+     * @param i0 the given index in the first dimension
+     * @param i1 the given index in the second dimension
+     * @return the storage offset assigned to [i0,i1] by this distribution
+     * @see #offset(Point)
+     */
+    public def offset(i0:Long, i1:Long){rank==2}:Long = offset(Point.make(i0, i1));
+
+    /**
+     * Return the offset in linearized place-local storage of the point [i0,i1,i2].
+     * Throw a BadPlaceException if the given point is not mapped to 
+     * the current place.  Primarily intended to be used by the DistArray implementation,
+     * but may be useful for other data structures as well that need to associate 
+     * Points in a Distribution with a dense, zero-based numbering.
+     *
+     * Only applies to three-dimensional distributions.
+     *
+     * @param i0 the given index in the first dimension
+     * @param i1 the given index in the second dimension
+     * @param i2 the given index in the third dimension
+     * @return the storage offset assigned to [i0,i1,i2] by this distribution
+     * @see #offset(Point)
+     */
+    public def offset(i0:Long, i1:Long, i2:Long){rank==3}:Long = offset(Point.make(i0, i1, i2));
+
+    /**
+     * Return the offset in linearized place-local storage of the point [i0,i1,i2,i3].
+     * Throw a BadPlaceException if the given point is not mapped to 
+     * the current place.  Primarily intended to be used by the DistArray implementation,
+     * but may be useful for other data structures as well that need to associate 
+     * Points in a Distribution with a dense, zero-based numbering.
+     *
+     * Only applies to four-dimensional distributions.
+     *
+     * @param i0 the given index in the first dimension
+     * @param i1 the given index in the second dimension
+     * @param i2 the given index in the third dimension
+     * @param i3 the given index in the fourth dimension
+     * @return the storage offset assigned to [i0,i1,i2,i3] by this distribution
+     * @see #offset(Point)
+     */
+    public def offset(i0:Long, i1:Long, i2:Long, i3:Long){rank==4}:Long = offset(Point.make(i0,i1,i2,i3));
+
+    /**
+     * @return the maximum value returned by the offset method for
+     *         the current place for any possible argument Point
+     * @see #offset(Point)
+     */
+    public abstract def maxOffset():Long;
+
 
     //
     //
@@ -514,14 +582,6 @@ public abstract class Dist(
     public operator this - (r:Region(rank)):Dist(rank) = difference(r);
 */
 
-    /** 
-     * @param ghostWidth the width of the ghost region in all dimensions
-     * @param periodic whether periodic boundary conditions apply
-     * @return a ghost manager for this distribution at the current place 
-     */
-    public def getLocalGhostManager(ghostWidth:Long, periodic:Boolean):GhostManager {
-        throw new UnsupportedOperationException("" + this.typeName() + ".getLocalGhostManager()");
-    }
 
     public def toString():String {
         var s:String = "Dist(";
@@ -563,7 +623,22 @@ public abstract class Dist(
     protected static @NoInline @NoReturn def raiseBoundsError(pt:Point) {
         throw new ArrayIndexOutOfBoundsException("point " + pt + " not contained in distribution");
     }    
-   
+
+    protected static @NoInline @NoReturn def raisePlaceError(i0:Long) {
+        throw new BadPlaceException("point (" + i0 + ") not defined at " + here);
+    }    
+    protected static @NoInline @NoReturn def raisePlaceError(i0:Long, i1:Long) {
+        throw new BadPlaceException("point (" + i0 + ", "+i1+") not defined at " + here);
+    }    
+    protected static @NoInline @NoReturn def raisePlaceError(i0:Long, i1:Long, i2:Long) {
+        throw new BadPlaceException("point (" + i0 + ", "+i1+", "+i2+") not defined at " + here);
+    }    
+    protected static @NoInline @NoReturn def raisePlaceError(i0:Long, i1:Long, i2:Long, i3:Long) {
+        throw new BadPlaceException("point (" + i0 + ", "+i1+", "+i2+", "+i3+") not defined at " + here);
+    }    
+    protected static @NoInline @NoReturn def raisePlaceError(pt:Point) {
+        throw new BadPlaceException("point " + pt + " not defined at " + here);
+    }    
 }
 public type Dist(r:Long) = Dist{self.rank==r};
 public type Dist(r:Region) = Dist{self.region==r};

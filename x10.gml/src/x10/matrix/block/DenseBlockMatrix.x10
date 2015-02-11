@@ -13,10 +13,9 @@ package x10.matrix.block;
 
 import x10.util.StringBuilder;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.util.VerifyTool;
 
 public type DenseBlockMatrix(M:Long)=DenseBlockMatrix{self.M==M};
@@ -125,14 +124,14 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * Initialize dense block matrix with a constant value
 	 *
 	 */
-	public def init(ival:ElemType):DenseBlockMatrix(this) {
+	public def init(ival:Double):DenseBlockMatrix(this) {
 		for (p in 0..(listBs.size-1)) {
 			listBs(p).init(ival);
 		}
 		return this;
 	}
 	
-	public def init(f:(Long, Long)=>ElemType):DenseBlockMatrix(this) {
+	public def init(f:(Long, Long)=>Double):DenseBlockMatrix(this) {
 		for (var cb:Long=0; cb<grid.numColBlocks; cb++)
 			for (var rb:Long=0; rb<grid.numRowBlocks; rb++ ) {
 				listBs(grid.getBlockId(rb, cb)).init(f);
@@ -187,7 +186,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 				var srcoff:Long = 0;
 				var dstoff:Long = dstblkidx;
 				for (var col:Long=0; col<src.N; col++, srcoff+=src.M, dstoff+=dst.M)
-					Rail.copy[ElemType](src.d, srcoff, dst.d, dstoff, src.M);
+					Rail.copy[Double](src.d, srcoff, dst.d, dstoff, src.M);
 				dstblkidx += src.M;
 			}
 
@@ -196,8 +195,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	}
 
 	public def copyTo(that:DenseBlockMatrix(M,N)):void {
-		assert (this.grid.equals(that.grid)) :
-            "Data partitioning is not compatible";
+		Debug.assure(this.grid.equals(that.grid), "Data partitioning is not compatible");
 		
 		for (p in 0..(listBs.size-1)) {
 			this.listBs(p).copyTo(that.listBs(p));
@@ -210,7 +208,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		} else if (that instanceof DenseMatrix) {
 			copyTo(that as DenseMatrix(M,N));
 		} else {
-			throw new UnsupportedOperationException("copyTo: target matrix is not compatible");
+			Debug.exit("CopyTo: target matrix is not compatible");
 		}		
 	}
 	
@@ -232,7 +230,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 					val dst = listBs(grid.getBlockId(rb, cb)).dense;
 					val dstoff = col*dst.M;
 
-					Rail.copy[ElemType](dm.d, srcoff, dst.d, dstoff, dst.M);
+					Rail.copy[Double](dm.d, srcoff, dst.d, dstoff, dst.M);
 					srcoff += dst.M;
 			}
 		}
@@ -266,7 +264,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param  r  the r-th rows in the matrix
 	 * @param  c  the c-th columns in the matrix
 	 */
-	public operator this(r:Long, c:Long):ElemType {
+	public operator this(r:Long, c:Long):Double {
 		val loc = grid.find(r, c);
 		val bid = grid.getBlockId(loc(0), loc(1));
 		return listBs(bid).dense(loc(2), loc(3));
@@ -278,7 +276,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 * @param  r  the index of rows in the matrix
 	 * @param  c  the index of columns in the matrix
 	 */
-	public  operator this(x:Long,y:Long)=(v:ElemType):ElemType {
+	public  operator this(x:Long,y:Long)=(v:Double):Double {
 		val loc = grid.find(x, y);
 		val bid = grid.getBlockId(loc(0), loc(1));
 		listBs(bid).dense(loc(2), loc(3))=v;
@@ -286,11 +284,11 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	}
 
 	/**
-	 * Raise each cell in the matrix by the factor of a:ElemType.
+	 * Raise each cell in the matrix by the factor of a:Double.
 	 *
 	 * @param  a  	 the scaling factor
 	 */
-	public def scale(a:ElemType) {
+	public def scale(a:Double) {
 		for (p in 0..(listBs.size-1)) {
 			listBs(p).dense.scale(a);
 		}
@@ -348,9 +346,10 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def cellAdd(x:DenseBlockMatrix(M,N)) {
-		assert (likeMe(x)) :
-			"Dense block matrix add fails - matrix type not match";
+		if (! likeMe(x)) 
+			Debug.exit("Dense block matrix add fails - matrix type not match");
 		
+		//Debug.flushln("Here ");
 		for (p in 0..(listBs.size-1)) {
 			val dst = listBs(p).dense;
 			val src = x.listBs(p).getMatrix() as DenseMatrix(dst.M, dst.N);
@@ -363,7 +362,7 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	/**
 	 * Cell-wise add this = this + double
 	 */
-	public def cellAdd(d:ElemType):DenseBlockMatrix(this) {
+	public def cellAdd(d:Double):DenseBlockMatrix(this) {
 		for (p in 0..(listBs.size-1)) {
 			val dst = listBs(p).dense;
 			dst.cellAdd(d);
@@ -422,8 +421,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def cellSub(that:DenseBlockMatrix(M,N)) {
-		assert (likeMe(that)) :
-			"Dense block matrix substract fails - matrices not match";
+		if (! likeMe(that)) 
+			Debug.exit("Dense block matrix substract fails - matrices not match");
 		
 		for (p in 0..(listBs.size-1)) {
 			val dst = listBs(p).dense;
@@ -432,6 +431,18 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		}		
 		return this;
 	}
+
+	/**
+	 * Cell-wise add this = double - this
+	 */
+	public def cellSubFrom(d:Double):DenseBlockMatrix(this) {
+		for (p in 0..(listBs.size-1)) {
+			val dst = listBs(p).dense;
+			dst.cellSubFrom(d);
+		}		
+		return this;
+	}
+
 
 
     /**
@@ -484,8 +495,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def cellMult(x:DenseBlockMatrix(M,N)) {
-		assert (likeMe(x)) :
-			"Dense block matrix cell mult fails - matrices not match";
+		if (! likeMe(x)) 
+			Debug.exit("Dense block matrix cell mult fails - matrices not match");
 		
 		for (p in 0..(listBs.size-1)) {
 			val dst = listBs(p).dense;
@@ -546,8 +557,8 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 	 *
 	 */
 	public def cellDiv(x:DenseBlockMatrix(M,N)) {
-		assert (likeMe(x)) :
-			"Dense block matrix cell divide fails - matrices not match";
+		if (! likeMe(x)) 
+			Debug.exit("Dense block matrix cell divide fails - matrices not match");
 		
 		for (p in 0..(listBs.size-1)) {
 			val dst = listBs(p).dense;
@@ -558,70 +569,84 @@ public class DenseBlockMatrix(grid:Grid) extends Matrix  {
 		return this;
 	}
 
+
+	// Matrix multiplication 
+
+
     /**
-     * Block matrix multiplication has not been implemented yet. 
+     * Block matrix multiplication has not been implementated yet. 
      */
 	public def mult(
 			A:Matrix(this.M), 
 			B:Matrix(A.N,this.N), 
 			plus:Boolean):DenseBlockMatrix(this){
-		throw new UnsupportedOperationException("Not implemented yet");
+		
+		Debug.exit("Not implemented yet");
+		return this;	
 	}
 
 	/** 
-	 * Not implemented yet.
+	 * Not implementated yet.
 	 */
 	public def transMult(
 			A:Matrix{self.N==this.M}, 
 			B:Matrix(A.M,this.N),
 			plus:Boolean):DenseBlockMatrix(this) {
-		throw new UnsupportedOperationException("Not implemented yet");
+		
+		Debug.exit("Not implemented yet");
+		return this;		
     }
 	
 	/** 
-	 * Not implemented yet. 
+	 * Not implementated yet. 
 	 */
 	public def multTrans(
 			A:Matrix(this.M), 
 			B:Matrix(this.N, A.N), 
 			plus:Boolean):DenseBlockMatrix(this)	{
 		
-		throw new UnsupportedOperationException("Not implemented yet");
+		Debug.exit("Not implemented yet");
+		return this;		
     }
 
 	// Operator overload
 
-    public operator - this = clone().scale((-1.0) as ElemType) as DenseBlockMatrix(M,N);
-    public operator (v:ElemType) + this = this.clone().cellAdd(v) as DenseBlockMatrix(M,N);
-    public operator this + (v:ElemType) = this.clone().cellAdd(v) as DenseBlockMatrix(M,N);
+	public operator - this = clone().scale(-1.0) as DenseBlockMatrix(M,N);
+	public operator (v:Double) + this = this.clone().cellAdd(v) as DenseBlockMatrix(M,N);
+	public operator this + (v:Double) = this.clone().cellAdd(v) as DenseBlockMatrix(M,N);
 
-    public operator this - (v:ElemType) = this.clone().cellAdd(-v) as DenseBlockMatrix(M,N);
+	public operator this - (v:Double) = this.clone().cellAdd(-v) as DenseBlockMatrix(M,N);
+	public operator (v:Double) - this = this.clone().cellSubFrom(v) as DenseBlockMatrix(M,N);
 	
-    public operator this / (v:ElemType) = this.clone().scale((1.0/v) as ElemType) as DenseBlockMatrix(M,N);
-    //public operator (v:ElemType) / this = this.clone().cellDivBy(v) as DenseBlockMatrix(M,N);
+	public operator this / (v:Double) = this.clone().scale(1.0/v) as DenseBlockMatrix(M,N);
+	//public operator (v:Double) / this = this.clone().cellDivBy(v) as DenseBlockMatrix(M,N);
 	
-    public operator this * (alpha:ElemType) = this.clone().scale(alpha) as DenseBlockMatrix(M,N);
-    public operator (alpha:ElemType) * this = this * alpha;
+	public operator this * (alpha:Double) = this.clone().scale(alpha) as DenseBlockMatrix(M,N);
+	public operator (alpha:Double) * this = this * alpha;
 
-    public operator this + (that:DenseBlockMatrix(M,N)) = this.clone().cellAdd(that) as DenseBlockMatrix(M,N);
-    public operator this - (that:DenseBlockMatrix(M,N)) = this.clone().cellSub(that) as DenseBlockMatrix(M,N);
-    public operator this * (that:DenseBlockMatrix(M,N)) = this.clone().cellMult(that) as DenseBlockMatrix(M,N);
-    public operator this / (that:DenseBlockMatrix(M,N)) = this.clone().cellDiv(that) as DenseBlockMatrix(M,N);
+	public operator this + (that:DenseBlockMatrix(M,N)) = this.clone().cellAdd(that) as DenseBlockMatrix(M,N);
+	public operator this - (that:DenseBlockMatrix(M,N)) = this.clone().cellSub(that) as DenseBlockMatrix(M,N);
+	public operator this * (that:DenseBlockMatrix(M,N)) = this.clone().cellMult(that) as DenseBlockMatrix(M,N);
+	public operator this / (that:DenseBlockMatrix(M,N)) = this.clone().cellDiv(that) as DenseBlockMatrix(M,N);
+
+
+	// Utils
 
 	/**
-	 * Transpose input matrix and store in this matrix.
+	 * Transpose matrix
 	 */
 	public def T(dbm:DenseBlockMatrix(N,M)): void {
-		assert (grid.numRowBlocks==dbm.grid.numColBlocks &&
+
+		Debug.assure(grid.numRowBlocks==dbm.grid.numColBlocks &&
 					 grid.numColBlocks==dbm.grid.numRowBlocks);
 		
 		for (var c:Long=0; c<grid.numColBlocks; c++) {
 			for (var r:Long=0; r<grid.numRowBlocks; r++) {
-				val dst = listBs(grid.getBlockId(r, c)).dense;
-				val src = dbm.listBs(dbm.grid.getBlockId(c, r)).dense 
-					as DenseMatrix(dst.N, dst.M);
+				val src = listBs(grid.getBlockId(r, c)).dense;
+				val dst = dbm.listBs(dbm.grid.getBlockId(c, r)).dense 
+					as DenseMatrix(src.N, src.M);
 
-				dst.T(src);
+				src.T(dst);
 			}
 		}
 	}

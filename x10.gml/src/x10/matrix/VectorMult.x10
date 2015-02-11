@@ -11,16 +11,16 @@
 
 package x10.matrix;
 
-import x10.array.BlockingUtils;
-
 import x10.matrix.blas.BLAS;
 import x10.matrix.blas.DenseMatrixBLAS;
 import x10.matrix.sparse.SparseCSC;
+import x10.matrix.util.Debug;
 
 /**
  * Performs matrix-vector multiplication.
  */
 public class VectorMult {
+	
 	/**
 	 * Matrix-vector multiply, C = A * B, where A is matrix, B and C are vectors.
 	 */
@@ -90,12 +90,12 @@ public class VectorMult {
 	 * Multiply matrix with a segment of vector and store result in a segment of output vector
 	 */
 	public static def comp(A:DenseMatrix, B:Vector, var offsetB:Long, C:Vector, offsetC:Long, plus:Boolean):Vector(C) {
-		assert (offsetB+A.N <= B.M) :
-            "Second input vector overflow, offset:"+offsetB+" A.N:"+A.N+" > B.M:"+B.M;
-		assert (offsetC+A.M <= C.M) :
-            "Output vector overflow, offset:"+offsetC+" A.M:"+A.M+" C.M:"+C.M;
-
-        if (!plus) C.d.clear(offsetC, A.M);
+		
+		Debug.assure(offsetB+A.N<=B.M, "Second input vector overflow, offset:"+offsetB+" A.N:"+A.N+" > B.M:"+B.M);
+		Debug.assure(offsetC+A.M<=C.M, "Output vector overflow, offset:"+offsetC+" A.M:"+A.M+" C.M:"+C.M);
+		if (!plus) {
+			for (var i:Long=offsetC; i< offsetC+A.M; i++) C.d(i) =0;
+		}
 		var idxA:Long=0;
 		for (var c:Long=0; c<A.N; c++, offsetB++) {
 			val  v2  = B.d(offsetB);
@@ -113,17 +113,17 @@ public class VectorMult {
 	/**
 	 * Multiply matrix with a segment of vector and store result in a segment of output vector
 	 */
-	public static def comp(A:SparseCSC, B:Vector, offsetB:Long, C:Vector, offsetC:Long, plus:Boolean):Vector(C) {
-		assert (offsetB+A.N <= B.M) :
-            "Input vector overflow, offsetB:"+offsetB+" len:"+A.N+" B size:"+B.M;
-		assert (offsetC+A.M <= C.M) :
-            "Output vector overflow, offset:"+offsetC+" len:"+A.M+" output size:"+C.M;
-
-		if (!plus) C.d.clear(offsetC, A.M);
-		for (col in 0..(A.N-1)) {
-			val colA = A.getCol(col);
-			val v2 = B.d(offsetB+col);
-			for (ridx in 0..(colA.size()-1)) {
+	public static def comp(A:SparseCSC, B:Vector, var offsetB:Long, C:Vector, offsetC:Long, plus:Boolean):Vector(C) {
+		
+		Debug.assure(offsetB+A.N<=B.M, "Input vector overflow, offsetB:"+offsetB+" len:"+A.N+" B size:"+B.M);
+		Debug.assure(offsetC+A.M<=C.M, "Output vector overflow, offset:"+offsetC+" len:"+A.M+" output size:"+C.M);
+		if (!plus) {
+			for (var i:Long=offsetC; i< offsetC+A.M; i++) C.d(i) =0;		
+		}
+		for (var c:Long=0; c<A.N; c++, offsetB++) {
+			val colA = A.getCol(c);
+			val  v2  = B.d(offsetB);
+			for (var ridx:Long=0; ridx < colA.size(); ridx++) {
 				val r = colA.getIndex(ridx);
 				val v1 = colA.getValue(ridx);
 				C.d(r+offsetC) += v1 * v2;
@@ -132,28 +132,6 @@ public class VectorMult {
 		
 		return C;
 	}
-
-    private static struct RecursiveBisection1D(start:Long, end:Long, grainSize:Long) {
-        public def this(start:Long, end:Long) {
-            val grainSize = (end-start) / (x10.xrx.Runtime.NTHREADS*8);
-            property(start, end, grainSize);
-        }
-
-        public def this(start:Long, end:Long, grainSize:Long) {
-            property(start, end, grainSize);
-        }
-
-        public def execute(body:(min_i:Long, max_i:Long)=> void) {
-            if ((end-start) > grainSize) {
-                val secondHalf=RecursiveBisection1D((start+end)/2L, end, grainSize);
-                async secondHalf.execute(body);
-                val firstHalf=RecursiveBisection1D(start, (start+end)/2L, grainSize);
-                firstHalf.execute(body);
-            } else {
-                body(start, end-1);
-            }
-        }
-    }
 	
 	public static def x10Mult(B:Vector, A:DenseMatrix(B.M), C:Vector(A.N), plus:Boolean) =
 		comp(B, 0, A, C, 0, plus);
@@ -162,15 +140,14 @@ public class VectorMult {
 		comp(B, 0, A, C, 0, plus);
 
 	public static def comp(B:Vector, var offsetB:Long, A:DenseMatrix, C:Vector, var offsetC:Long, plus:Boolean):Vector(C) {
-		assert (offsetB+A.M <= B.M) :
-            "Input vector overflow, offset:"+offsetB+" len:"+A.M+" length:"+B.M;
-		assert (offsetC+A.N <= C.M) :
-            "Output vector overflow, output offset:"+offsetC+" A.N:"+A.N+" C.M:"+C.M;
-
-        if (!plus) C.d.clear(offsetC, A.N);
+		Debug.assure(offsetB+A.M<=B.M, "Input vector overflow, offset:"+offsetB+" len:"+A.M+" length:"+B.M);
+		Debug.assure(offsetC+A.N<=C.M, "Output vector overflow, output offset:"+offsetC+" A.N:"+A.N+" C.M:"+C.M);
+		if (!plus) {
+			for (var i:Long=offsetC; i<offsetC+A.N; i++) C.d(i) =0;
+		}
 		var idxA:Long = 0;
 		for (var c:Long=0; c<A.N; c++, offsetC++) {
-			var v:ElemType = 0;
+			var v:Double = 0;
 			var idxB:Long = offsetB;
 			for (var r:Long=0; r<A.M; r++, idxB++, idxA++) {
 				v += B.d(idxB) * A.d(idxA);
@@ -181,15 +158,14 @@ public class VectorMult {
 	}
 
 	public static def comp(B:Vector, var offsetB:Long, A:SparseCSC, C:Vector, var offsetC:Long, plus:Boolean):Vector(C) {
-		assert (offsetB+A.M <= B.M) :
-            "Input vector overflow, offset:"+offsetB+" len:"+A.M+" length:"+B.M;
-		assert (offsetC+A.N <= C.M) :
-            "Output vector overflow, output offset:"+offsetC+" A.N:"+A.N+" C.M:"+C.M;
-
-        if (!plus) C.d.clear(offsetC, A.N);
+		Debug.assure(offsetB+A.M<=B.M, "Input vector overflow, offset:"+offsetB+" len:"+A.M+" length:"+B.M);
+		Debug.assure(offsetC+A.N<=C.M, "Output vector overflow, output offset:"+offsetC+" A.N:"+A.N+" C.M:"+C.M);
+		if (!plus) {
+			for (var i:Long=offsetC; i<offsetC+A.N; i++) C.d(i) =0;
+		}
 		for (var c:Long=0; c<A.N; c++, offsetC++) {
 			val colA = A.getCol(c);
-			var v:ElemType = 0;
+			var v:Double = 0;
 			for (var idxA:Long=0; idxA<colA.size(); idxA++) {
 				val r = colA.getIndex(idxA);
 				val v2= colA.getValue(idxA);
@@ -204,8 +180,8 @@ public class VectorMult {
 	 * Using BLAS routine: C = A * B or C = A * B + C
 	 */
 	public static def comp(A:DenseMatrix, B:Vector(A.N), C:Vector(A.M), plus:Boolean):Vector(C) {
-		val alpha = 1 as ElemType;
-		val beta = (plus?1:0) as ElemType;
+		val alpha = 1.0;
+		val beta = plus?1.0:0.0;
 		DenseMatrixBLAS.comp(alpha, A, B, beta, C);
 		return C;
 	}
@@ -214,15 +190,16 @@ public class VectorMult {
 	 * Using BLAS routine: C = B * A or C = B * A + C
 	 */
 	public static def comp(B:Vector, A:DenseMatrix(B.M), C:Vector(A.N), plus:Boolean):Vector(C) {
-		val alpha = 1 as ElemType;
-		val beta = (plus?1:0) as ElemType;
+		val alpha = 1.0;
+		val beta = plus?1.0:0.0;
 		DenseMatrixBLAS.compTransMult(alpha, A, B, beta, C);
 		return C;
 	}
 
 	public static def comp(A:SymDense, B:Vector(A.N), C:Vector(A.M), plus:Boolean):Vector(C) {
-		val beta = (plus?1:0) as ElemType;
-		BLAS.compSymMultVec(1 as ElemType, A.d, B.d, beta, C.d, [A.M, A.N]);
+		val beta = plus?1.0:0.0;
+		BLAS.compSymMultVec(1.0, A.d, B.d, beta, C.d, 
+				[A.M, A.N]);
 		return C;
 	}
 	

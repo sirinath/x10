@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.serialization;
@@ -83,6 +83,8 @@ public final class X10JavaDeserializer implements SerializationConstants {
     public Object readAny() {
         try {
             return readObject();
+        } catch (SerializationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw e; // don't wrap
         } catch (Throwable e) {
@@ -174,13 +176,6 @@ public final class X10JavaDeserializer implements SerializationConstants {
             return (T)deserializeArray();
         }
         
-        if (serializationID == JAVA_OBJECT_STREAM_ID) {
-            if (Runtime.TRACE_SER) {
-                Runtime.printTraceMessage("Deserializing an object using Java deserialization");
-            }
-            return (T)readUsingObjectInputStream(true);
-        }
-        
         if (Runtime.TRACE_SER) {
             Runtime.printTraceMessage("Deserializing non-null value with id " + serializationID);
         }
@@ -202,6 +197,8 @@ public final class X10JavaDeserializer implements SerializationConstants {
             } else {
                 throw new SerializationException(cause != null ? cause : e);
             }
+        } catch (SerializationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw e; // don't wrap
         } catch (Throwable e) {
@@ -391,6 +388,8 @@ public final class X10JavaDeserializer implements SerializationConstants {
         try {
             DeserializerThunk thunk = DeserializerThunk.getDeserializerThunk(clazz);
             return thunk.deserializeObject(clazz, obj, i, this);
+        } catch (SerializationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw e; // don't wrap
         } catch (Throwable e) {
@@ -400,13 +399,10 @@ public final class X10JavaDeserializer implements SerializationConstants {
     
     // Read an object using java serialization. 
     // This is used to optimize the serialization of primitive arrays
-    // and to allow optional forcing of usage of Java serialization for Java types.
-    public Object readUsingObjectInputStream(boolean recordReference) throws IOException {
+    public Object readUsingObjectInputStream() throws IOException {
         ObjectInputStream ois = new ObjectInputStream(this.in);
         try {
-            Object ans = ois.readObject();
-            if (recordReference) record_reference(ans);
-            return ans;
+            return ois.readObject();
         } catch (ClassNotFoundException e) {
             throw new SerializationException(e);
         }

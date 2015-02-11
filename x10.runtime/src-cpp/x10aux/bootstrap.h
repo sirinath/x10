@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 #ifndef X10AUX_BOOTSTRAP_H
@@ -69,7 +69,6 @@ namespace x10aux {
 
     void initialize_xrx();
     int real_x10_main(int, char**, ApplicationMainFunction);
-    void apgas_main(int, char**);
     
     template<class T> int template_main(int ac, char **av) {
         return x10aux::real_x10_main(ac, av, &T::main);

@@ -6,13 +6,12 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.compiler;
 
 import x10.lang.annotations.*;
-import x10.xrx.Runtime;
 
 /**
  * This annotation on an at statement makes profiling information relating to
@@ -20,12 +19,12 @@ import x10.xrx.Runtime;
  *
  * EXAMPLE:
  *
- *      val x = new x10.xrx.Runtime.Profile();
+ *      val x = new Runtime.Profile();
  *      @Profile(x) at (here.next()) {
  *      }
  *      // x now populated with profiling data
  *
- * @see x10.xrx.Runtime.Profile
+ * @see x10.lang.Runtime.Profile
  */
-public interface Profile(prof:x10.xrx.Runtime.Profile) extends StatementAnnotation, ExpressionAnnotation {
+public interface Profile(prof:Runtime.Profile) extends StatementAnnotation, ExpressionAnnotation {
 }

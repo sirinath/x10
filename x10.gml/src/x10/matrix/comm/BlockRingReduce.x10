@@ -14,10 +14,9 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.block.MatrixBlock;
@@ -65,11 +64,10 @@ public class BlockRingReduce extends BlockRemoteCopy {
 			//Romte capture: distBS(), rootbid, colCnt
 			val dmap = distBS().getDistMap();
 			val grid = distBS().getGrid();
-			// TODO: is Place.places() the proper parameter below?
-			val plst =  CastPlaceMap.buildPlaceList(grid, dmap, rootbid, select, Place.places()); 
+			val plst =  CastPlaceMap.buildPlaceList(grid, dmap, rootbid, select); 
 			//Root is the first in the list
-			assert (plst(0)==rootpid) :
-                "RingCast place list must starts with root place id";
+			Debug.assure(plst(0)==rootpid, "RingCast place list must starts with root place id");
+			//Debug.flushln("Ring cast to "+plst.toString());
 			if (plst.size >= 1) {
 				val rootblk = distBS().findBlock(rootbid);
 				reduceToHere(distBS, tmpBS, rootblk, colCnt, select, opFunc, plst);
@@ -86,7 +84,7 @@ public class BlockRingReduce extends BlockRemoteCopy {
         //val leftRoot = here.id();
         val pcnt = plst.size;
         if (pcnt > 1) {
-            assert here.id() == plst(0);
+            Debug.assure(here.id()==plst(0));
             val leftPCnt  = (pcnt+1) / 2; // make sure left part is larger, if cnt is odd 
             val rightPCnt  = pcnt - leftPCnt;
             val rightplst = new Rail[Long](rightPCnt, (i:Long)=>plst(leftPCnt+i));
@@ -112,7 +110,7 @@ public class BlockRingReduce extends BlockRemoteCopy {
 			nearbyPlcList:Rail[Long], 
 			remotePlcList:Rail[Long]) {
 		
-		var rmtbuf:GlobalRail[ElemType];
+		var rmtbuf:GlobalRail[Double];
 		finish {
 			//Left branch reduction
 			val remotepid = remotePlcList(0);
@@ -124,7 +122,7 @@ public class BlockRingReduce extends BlockRemoteCopy {
 					reduceToHere(distBS, tmpBS, rmtblk, colCnt, select, opFunc, remotePlcList);
 				}
 				
-				new GlobalRail[ElemType](rmtblk.getData() as Rail[ElemType]{self!=null})
+				new GlobalRail[Double](rmtblk.getData() as Rail[Double]{self!=null})
 			};
 			//Right branch reduction
 			async {
@@ -137,7 +135,7 @@ public class BlockRingReduce extends BlockRemoteCopy {
 		val dstden = rootblk.getMatrix() as DenseMatrix;
 
 		val datcnt = dstden.M*colCnt;
-		finish Rail.asyncCopy[ElemType](rmtbuf, 0, rcvden.d, 0, datcnt);
+		finish Rail.asyncCopy[Double](rmtbuf, 0, rcvden.d, 0, datcnt);
 		
 		opFunc(rcvden, dstden, colCnt);
 		//dstmat.cellAdd(rcvmat as DenseMatrix(dstmat.M, dstmat.N));

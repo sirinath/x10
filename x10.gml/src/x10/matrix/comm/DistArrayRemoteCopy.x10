@@ -14,8 +14,7 @@ package x10.matrix.comm;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
-import x10.matrix.ElemType;
-
+import x10.matrix.util.Debug;
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.CompressArray;
 
@@ -51,7 +50,7 @@ public class DistArrayRemoteCopy {
 	 * @param dstOff   -- starting column offset in target matrix at destination place
 	 * @param dataCnt  -- count of columns to be copied from source dense matrix
 	 */
-	public static def copy(src:Rail[ElemType], srcOff:Long, dstlist:DistDataArray, 
+	public static def copy(src:Rail[Double], srcOff:Long, dstlist:DistDataArray, 
 			dstpid:Long, dstOff:Long, dataCnt:Long): void {
 		
 		if (here.id() == dstpid) {
@@ -59,9 +58,9 @@ public class DistArrayRemoteCopy {
 			return;
 		}
 		
-        assert (srcOff+dataCnt <= src.size) :
-            "At source place, illegal data offset:"+srcOff+
-            " or data count:"+dataCnt;
+		Debug.assure(srcOff+dataCnt <= src.size,
+				"At source place, illegal data offset:"+srcOff+
+				" or data count:"+dataCnt);
 		
 		@Ifdef("MPI_COMMU") {
 			{
@@ -79,7 +78,7 @@ public class DistArrayRemoteCopy {
 	 * Copy vector from here to remote dense matrix
 	 */
 	protected static def mpiCopy(
-			src:Rail[ElemType], srcOff:Int, 
+			src:Rail[Double], srcOff:Int, 
 			dstlist:DistDataArray, dstpid:Int,
 			dstOff:Int,			 	dataCnt:Long) :void  {
 		
@@ -96,8 +95,7 @@ public class DistArrayRemoteCopy {
 			at(dstlist.dist(dstpid)) async {
 				val dst = dstlist(here.id());
 				//Need: dmlist, srcpid, dstColOff, datasz
-				assert (dstOff+dataCnt <= dst.size) :
-                    "Receiving side data overflow";
+				Debug.assure(dstOff+dataCnt<=dst.size, "The receiving side data overflow"); 
 				val tag    = srcpid * baseTagCopyTo + here.id();
 				WrapMPI.world.recv(dst, dstOff, dataCnt, srcpid, tag);
 			}
@@ -108,18 +106,18 @@ public class DistArrayRemoteCopy {
 	 * Copy vector from here to remote dense matrix
 	 */
 	protected static def x10Copy(
-			src:Rail[ElemType], srcOff:Long,
+			src:Rail[Double], srcOff:Long,
 			dstlist:DistDataArray, dstpid:Long,
 			dstOff:Long, dataCnt:Long): void {
 		
-		val buf = src as Rail[ElemType]{self!=null};
-		val srcbuf = new GlobalRail[ElemType](buf);
+		val buf = src as Rail[Double]{self!=null};
+		val srcbuf = new GlobalRail[Double](buf);
 
 		at(dstlist.dist(dstpid)) {
 			//Implicit copy: dst, srcbuf, srcOff, dataCnt
 			val dst = dstlist(here.id());
-			assert dstOff+dataCnt <= dst.size;
-			finish Rail.asyncCopy[ElemType](srcbuf, srcOff, dst, dstOff, dataCnt);		
+			Debug.assure(dstOff+dataCnt <= dst.size);
+			finish Rail.asyncCopy[Double](srcbuf, srcOff, dst, dstOff, dataCnt);		
 		}
 	}
 	
@@ -139,15 +137,14 @@ public class DistArrayRemoteCopy {
 	 */
 	public static def copy(
 			srclist:DistDataArray, srcpid:Long, srcOff:Long, 
-			dst:Rail[ElemType], dstOff:Long, dataCnt:Long): void {
+			dst:Rail[Double], dstOff:Long, dataCnt:Long): void {
 
 		if (here.id() == srcpid) {
 			val src = srclist(srcpid);
 			Rail.copy(src, srcOff, dst, dstOff, dataCnt);
 			return;
 		}
-		assert (dstOff+dataCnt <= dst.size) :
-            "Receiving array overflow";
+		Debug.assure(dstOff+dataCnt <= dst.size, "Receiving array overflow");
 		
 		@Ifdef("MPI_COMMU") {
 			{
@@ -166,7 +163,7 @@ public class DistArrayRemoteCopy {
 	 */
 	protected static def mpiCopy(
 			srclist:DistDataArray, srcpid:Int, srcOff:Int,
-			dst:Rail[ElemType], dstOff:Int, dataCnt:Long): void {
+			dst:Rail[Double], dstOff:Int, dataCnt:Long): void {
 		
 	@Ifdef("MPI_COMMU") {
 		val dstpid = here.id();
@@ -175,8 +172,7 @@ public class DistArrayRemoteCopy {
 				//Need: dstlist, dstpid, srcOff, dataCnt, 
 				val src = srclist(here.id());
 				val tag = here.id() * baseTagCopyFrom + dstpid;
-				assert (srcOff + dataCnt <= src.size) :
-                    "Sending array overflow";
+				Debug.assure(srcOff + dataCnt <= src.size, "Sending array overflow");
 				
 				WrapMPI.world.send(src, srcOff, dataCnt, dstpid, tag);
 			}
@@ -192,16 +188,15 @@ public class DistArrayRemoteCopy {
 	 */
 	protected static def x10Copy(
 			srclist:DistDataArray, srcpid:Long, srcOff:Long,
-			dst:Rail[ElemType], dstOff:Long, dataCnt:Long): void {
+			dst:Rail[Double], dstOff:Long, dataCnt:Long): void {
 
-		val rmt:GlobalRail[ElemType]  = at(srclist.dist(srcpid)) { 
+		val rmt:GlobalRail[Double]  = at(srclist.dist(srcpid)) { 
 			//Need: dstlist, srcOff, dataCnt
 			val src = srclist(here.id());
-			assert (srcOff + dataCnt <= src.size) :
-                "Sending array overflow";
-			new GlobalRail[ElemType](src as Rail[ElemType]{self!=null})
+			Debug.assure(srcOff + dataCnt <= src.size, "Sending array overflow");
+			new GlobalRail[Double](src as Rail[Double]{self!=null})
 		};
-		finish Rail.asyncCopy[ElemType](rmt, srcOff, dst, dstOff, dataCnt);
+		finish Rail.asyncCopy[Double](rmt, srcOff, dst, dstOff, dataCnt);
 	}
 	
 
@@ -233,8 +228,7 @@ public class DistArrayRemoteCopy {
 			return;
 		}
 
-		assert (srcOff+dataCnt <= src.storageSize()) :
-            "Sending side overflow";
+		Debug.assure(srcOff+dataCnt <= src.storageSize(), "Sending side storage overlfow");
 		
 		@Ifdef("MPI_COMMU") {
 			{
@@ -271,8 +265,7 @@ public class DistArrayRemoteCopy {
 				// Need: dstlist, srcpid, dstOff, dataCnt;
 				val dst = dstlist(here.id());
 				val tag = srcpid * baseTagCopyIdxTo + here.id();
-				assert (dstOff+dataCnt <= dst.storageSize()) :
-                    "Receiving side arrays overflow";
+				Debug.assure(dstOff+dataCnt<=dst.storageSize(), "Receiving side arrays overflow");
 				WrapMPI.world.recv(dst.index, dstOff, dataCnt, srcpid, tag);
 				WrapMPI.world.recv(dst.value, dstOff, dataCnt, srcpid, tag+100001);
 			}
@@ -288,17 +281,16 @@ public class DistArrayRemoteCopy {
 			dataCnt:Long): void {
 
 		val idxbuf = src.index as Rail[Long]{self!=null};
-		val valbuf = src.value as Rail[ElemType]{self!=null};
+		val valbuf = src.value as Rail[Double]{self!=null};
 		val rmtidx = new GlobalRail[Long](idxbuf);
-		val rmtval = new GlobalRail[ElemType](valbuf);
+		val rmtval = new GlobalRail[Double](valbuf);
 
 		at(dstlist.dist(dstpid)) {
 			//Implicit copy:dstlist, dataCnt, rmtidx, rmtval, srcOff dstOff
 			val dst = dstlist(here.id());
-			assert (dstOff+dataCnt <= dst.storageSize()) :
-                "Receiving side arrays overflow";
+			Debug.assure(dstOff+dataCnt<=dst.storageSize(), "Receiving side arrays overflow");
 			finish Rail.asyncCopy[Long](rmtidx, srcOff, dst.index, dstOff, dataCnt);
-			finish Rail.asyncCopy[ElemType](rmtval, srcOff, dst.value, dstOff, dataCnt);
+			finish Rail.asyncCopy[Double](rmtval, srcOff, dst.value, dstOff, dataCnt);
 		}
 	}
 
@@ -375,13 +367,13 @@ public class DistArrayRemoteCopy {
 			//Need: srclist
 			val src = srclist(here.id());
 			val idxbuf = src.index as Rail[Long]{self!=null};
-			val valbuf = src.value as Rail[ElemType]{self!=null};
+			val valbuf = src.value as Rail[Double]{self!=null};
 			val rmtidx = new GlobalRail[Long](idxbuf);
-			val rmtval = new GlobalRail[ElemType](valbuf);
+			val rmtval = new GlobalRail[Double](valbuf);
 			RemotePair(rmtidx, rmtval)
 		};
 
 		finish Rail.asyncCopy[Long](rmt.first,  srcOff, dst.index, dstOff, dataCnt);
-		finish Rail.asyncCopy[ElemType](rmt.second, dstOff, dst.value, dstOff, dataCnt);
+		finish Rail.asyncCopy[Double](rmt.second, dstOff, dst.value, dstOff, dataCnt);
 	}
 }

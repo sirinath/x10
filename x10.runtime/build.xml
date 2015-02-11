@@ -16,11 +16,11 @@
     <property name="lib" location="${x10.dist.location}/lib"/>
     <property name="stdlib" location="${x10.dist.location}/stdlib"/>
     <property name="jar" value="x10.jar"/>
-	<property name="gen-java.zip" value="gen-java.zip"/>
-    <property name="ecj.jar" value="${lib}/ecj-4.4.1.jar"/>
+    <property name="ecj.jar" value="${lib}/ecj-4.4.jar"/>
+    <property name="gen-java.zip" value="gen-java.zip"/>
     <property name="math.jar" value="${lib}/commons-math3-3.3.jar"/>
     <property name="log.jar" value="${lib}/commons-logging-1.2.jar"/>
-    <property name="hazelcast.jar" value="${lib}/hazelcast-3.3.1.jar"/>
+    <property name="hazelcast.jar" value="${lib}/hazelcast-3.3.jar"/>
     <property name="shrike.jar" value="${lib}/com.ibm.wala.shrike_1.3.1.201101071300.jar"/>
     <property name="bdwgc.dir" location="${basedir}/src-cpp/bdwgc-${bdwgc.version}"/>
     <property name="bdwgc.tar" value="bdwgc-${bdwgc.version}.tar.gz"/>
@@ -98,16 +98,15 @@
     </condition>
 
     <condition property="x10rt.jnibindings.disabled">
-      <or>
-        <istrue value="${CROSS_COMPILE_BGQ}" />
-        <istrue value="${CROSS_COMPILE_MODULES}" />
-        <and>
-	  <istrue value="${CROSS_COMPILE_FX10}" />
-	  <not>
-	    <isset property="env.TARGET_JAVA_HOME"/>
-	  </not>
-	</and>
-      </or>
+        <or>
+            <istrue value="${CROSS_COMPILE_BGQ}" />
+            <and>
+		       <istrue value="${CROSS_COMPILE_FX10}" />
+		       <not>
+		 		 <isset property="env.TARGET_JAVA_HOME"/>
+		       </not>
+		     </and>
+        </or>
     </condition>
 
     <!-- darwin architectures -->
@@ -148,7 +147,6 @@
         <or>
             <istrue value="${X10RT_MPI}" />
             <istrue value="${CROSS_COMPILE_BGQ}" />
-            <istrue value="${CROSS_COMPILE_MODULES}" />
         </or>
     </condition>
     <condition property="cppmake.x10rt_pami" value="ENABLE_X10RT_PAMI=1" else="DISABLE_X10RT_PAMI=1">
@@ -163,21 +161,11 @@
     <condition property="cppmake.gcc_symbols" value="ENABLE_GCC_SYMBOLS=1" else="DISABLE_GCC_SYMBOLS=1">
         <istrue value="${GCC_SYMBOLS}" />
     </condition>
-    <condition property="cppmake.cross_compile_any" value="ENABLE_CROSS_COMPILE_ANY=1" else="DISABLE_CROSS_COMPILE_ANY=1">
-      <or>
-        <istrue value="${CROSS_COMPILE_BGQ}" />
-        <istrue value="${CROSS_COMPILE_FX10}" />
-        <istrue value="${CROSS_COMPILE_MODULES}" />
-      </or>
-    </condition>
     <condition property="cppmake.cross_compile_bgq" value="ENABLE_CROSS_COMPILE_BGQ=1" else="DISABLE_CROSS_COMPILE_BGQ=1">
         <istrue value="${CROSS_COMPILE_BGQ}" />
     </condition>
     <condition property="cppmake.cross_compile_fx10" value="ENABLE_CROSS_COMPILE_FX10=1" else="DISABLE_CROSS_COMPILE_FX10=1">
         <istrue value="${CROSS_COMPILE_FX10}" />
-    </condition>
-    <condition property="cppmake.cross_compile_modules" value="ENABLE_CROSS_COMPILE_MODULES=1" else="DISABLE_CROSS_COMPILE_MODULES=1">
-        <istrue value="${CROSS_COMPILE_MODULES}" />
     </condition>
     <condition property="cppmake.homogeneous" value="HOMOGENEOUS=1" else="DUMMY_ARG=1">
         <istrue value="${HOMOGENEOUS}" />
@@ -217,10 +205,8 @@
         <exec executable="${make.exe}" failonerror="true" dir="${basedir}/src-cpp">
             <arg value="-j1" />
             <arg value="clean"/>
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
     <target name="prepare-clean-bdwgc" if="bdwgc.enabled">
@@ -239,10 +225,8 @@
             <arg value="${cppmake.x10rt_mpi}" />
             <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_cuda}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
 
@@ -258,10 +242,8 @@
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_cuda}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
     <target name="dist-java" depends="jar,dist-stdlibprops">
@@ -283,10 +265,8 @@
             <arg value="${cppmake.debug}" />
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
     <target name="dist-cpp-no-x10rt" depends="build-cpp,available-procs">
@@ -300,10 +280,8 @@
             <arg value="${cppmake.debug}" />
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
     <target name="dist-stdlibprops" depends="init">
@@ -316,10 +294,8 @@
             <arg value="${cppmake.debug}" />
             <arg value="${cppmake.gcc_symbols}" />
             <arg value="${cppmake.no_checks}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
     <target name="dist" depends="dist-java,dist-cpp" description="generate part of the distribution">
@@ -480,10 +456,8 @@
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_cuda}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
 
@@ -499,10 +473,8 @@
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_cuda}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
 
@@ -521,10 +493,8 @@
             <arg value="${cppmake.x10rt_mpi}" />
        	    <arg value="${cppmake.x10rt_pami}" />
             <arg value="${cppmake.x10rt_cuda}" />
-            <arg value="${cppmake.cross_compile_any}" />
             <arg value="${cppmake.cross_compile_bgq}" />
             <arg value="${cppmake.cross_compile_fx10}" />
-            <arg value="${cppmake.cross_compile_modules}" />
         </exec>
     </target>
 
@@ -656,6 +626,25 @@
             </if>
             <if>
               <conditions>
+                <os family="unix" name="aix"/>
+              </conditions>
+              <then>
+                <echo message="Configuring BDWGC for aix"/>
+                <exec executable="${bash.exe}" dir="${bdwgc.dir}/src" failonerror="true">
+                  <env key="OBJECT_MODE" value="32_64" />
+                  <env key="CFLAGS" value="-Wa,-mppc64 -Wa,-a64 -maix64 -D__ppc64__" />
+                  <env key="CXXFLAGS" value="-Wa,-mppc64 -Wa,-a64 -maix64 -D__ppc64__" />
+                  <arg value="${bdwgc.dir}/src/configure" />
+                  <arg value="-enable-threads=aix" />
+                  <arg value="--enable-large-config" />
+                  <!-- TODO: <arg value="- - enable-parallel-mark" /> -->
+                  <!-- TODO: <arg value="-enable-thread-local-alloc" /> -->
+                  <arg value="--prefix=${bdwgc.platform.dir}/install" />
+                </exec>
+              </then>
+            </if>
+            <if>
+              <conditions>
                 <os family="windows"/>
               </conditions>
               <then>
@@ -702,17 +691,8 @@
     <target name="dist-bdwgc" depends="build-bdwgc" if="bdwgc.enabled">
       <sequential>
         <mkdir dir="${lib}"/>
-      	<if><conditions><istrue value="${env.X10_STATIC_LIB}"/></conditions><then>
-      		<!-- Skip shared libraries when using static linking -->
-            <copy todir="${lib}" preservelastmodified="true" flatten="true" >
-               <fileset dir="${bdwgc.dir}/install" includes="lib/*gc*.a,lib/*gc*.dylib"/>
-            </copy></then>
-        <else>
-        	<copy todir="${lib}" preservelastmodified="true" flatten="true" >
-               <fileset dir="${bdwgc.dir}/install" includes="lib/*gc*.a,lib/*gc*.so,lib/*gc*.so.*,lib/*gc*.dylib"/>
-        	</copy></else>
-        </if>
         <copy todir="${lib}" preservelastmodified="true" flatten="true" >
+           <fileset dir="${bdwgc.dir}/install" includes="lib/*gc*.a,lib/*gc*.so,lib/*gc*.so.*,lib/*gc*.dylib"/>
            <fileset dir="${bdwgc.dir}/install" includes="bin/*.dll"/> <!-- Cygwin -->
         </copy>
         <mkdir dir="${inc}"/>
@@ -767,10 +747,6 @@
 		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/pthread_support.patch.txt"
                        dir="${bdwgc.dir}/src" strip="1" />
 		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/machdep.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/clang.patch.txt"
-                       dir="${bdwgc.dir}/src" strip="1" />
-		<patch patchfile="${basedir}/src-cpp/bdwgc-patches-${bdwgc.version}/gc_markers.patch.txt"
                        dir="${bdwgc.dir}/src" strip="1" />
 	      </then>
 	    </if>

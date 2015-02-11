@@ -15,10 +15,9 @@ import x10.regionarray.DistArray;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 
 /**
@@ -55,6 +54,7 @@ public class MatrixReduce {
 			datasz = mpiReduceSum(ddmat, ddtmp);
 		}
 		@Ifndef("MPI_COMMU") {
+			//Debug.flushln("start bcast");
 			datasz = x10ReduceSum(ddmat, ddtmp);
 		}
 		return datasz;
@@ -130,13 +130,13 @@ public class MatrixReduce {
 		val rtroot = root + lfcnt;
 		if (pcnt > 2) {
 			finish {
-				if (rtcnt > 1) {
+				if (lfcnt > 1) async {
+					reduceSumToHere(ddmat, ddtmp, lfcnt); 
+				}
+				if (rtcnt > 1 ) {
 					at(ddmat.dist(rtroot)) async {
 						reduceSumToHere(ddmat, ddtmp, rtcnt);
 					}
-				}
-				if (lfcnt > 1) {
-					reduceSumToHere(ddmat, ddtmp, lfcnt);
 				}
 			}
 		}
@@ -165,6 +165,7 @@ public class MatrixReduce {
 			datasz = mpiAllReduceSum(ddmat, ddtmp);
 		}
 		@Ifndef("MPI_COMMU") {
+			//Debug.flushln("start bcast to "+numPlaces);
 			datasz = x10AllReduceSum(ddmat, ddtmp);
 		}
 		return datasz;
@@ -183,6 +184,7 @@ public class MatrixReduce {
 			ddtmp:DistArray[DenseMatrix](1)):Long {
 		
 		val root = here.id();
+		//Debug.flushln("Start all reduce");
 		@Ifdef("MPI_COMMU") {
 			finish ateach([p] in ddmat) {
 				val pid = here.id();
@@ -204,7 +206,9 @@ public class MatrixReduce {
 				WrapMPI.world.reduceSum(src.d, dst.d, sz, root);
 				WrapMPI.world.bcast(dst.d, 0, sz, root);
 			}
+			
 		}
+		//Debug.flushln("All reduce complete");
 		
 		return ddmat(root).M * ddmat(root).N;
 	}

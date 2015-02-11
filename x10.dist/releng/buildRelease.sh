@@ -76,7 +76,7 @@ case "$UNAME" in
   Linux,*86*,*) X10_PLATFORM='linux_x86';;
   Linux,ppc64*,*) X10_PLATFORM='linux_ppc64'
       SHORT_HOSTNAME=`hostname -s`
-      if [[ "$SHORT_HOSTNAME" == "loginf1c3" || "$SHORT_HOSTNAME" == "loginf1c9" ]]; then 
+      if [[ "$SHORT_HOSTNAME" == "f01c08n02-hf0" ]]; then 
           EXTRA_X10RT_BUILD_ARG="-DX10RT_PAMI=true -DX10RT_PAMI_IS_DEFAULT=true"
           export USE_XLC=1
       fi
@@ -85,6 +85,10 @@ case "$UNAME" in
 	  X10_PLATFORM='linux_bgq'
 	  SKIP_DEBUG_BUILD=1
       fi
+      ;;
+  AIX,*,powerpc) 
+      X10_PLATFORM='aix_ppc'
+      SKIP_DEBUG_BUILD=1
       ;;
   Darwin,*,i*86) 
       X10_PLATFORM='macosx_x86'

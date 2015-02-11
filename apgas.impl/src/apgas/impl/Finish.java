@@ -1,26 +1,17 @@
 package apgas.impl;
 
 import java.util.List;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * The {@link Finish} interface.
  */
-interface Finish extends ForkJoinPool.ManagedBlocker {
-
+interface Finish {
   /**
-   * The abstract {@link Factory} class is the template of all finish factories.
+   * Returns the home place of this {@link Finish} instance.
+   *
+   * @return the finish place
    */
-  abstract class Factory {
-    /**
-     * Makes a new {@link Finish} instance.
-     *
-     * @param parent
-     *          the parent finish object
-     * @return the {@link Finish} instance
-     */
-    abstract Finish make(Finish parent);
-  }
+  int home();
 
   /**
    * Must be called before a task is enqueued for execution (local task or
@@ -51,11 +42,8 @@ interface Finish extends ForkJoinPool.ManagedBlocker {
 
   /**
    * Must be called once a task has completed its execution.
-   *
-   * @param p
-   *          the place of the parent task
    */
-  void tell(int p);
+  void tell();
 
   /**
    * Reports an uncaught exception to this finish object.
@@ -65,16 +53,26 @@ interface Finish extends ForkJoinPool.ManagedBlocker {
    */
   void addSuppressed(Throwable exception);
 
-  @Override
-  boolean isReleasable();
-
-  @Override
-  boolean block();
+  /**
+   * Returns true if the code and tasks in the finish scope have completed.
+   * <p>
+   * This method is intentionally not synchronized.
+   *
+   * @return true if terminated
+   */
+  boolean waiting();
 
   /**
-   * Must be called exactly once upon completion of the finish.
+   * Waits for the termination of the code and tasks in scope of the finish.
+   * <p>
+   * Blocks the calling thread.
+   */
+  void await();
+
+  /**
+   * Returns the list of exceptions collected by this finish object.
    *
-   * @return the exceptions collected by the finish
+   * @return the collected exceptions
    */
   List<Throwable> exceptions();
 }

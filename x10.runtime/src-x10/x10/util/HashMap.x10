@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.util;
@@ -57,7 +57,6 @@ public class HashMap[K,V] {V haszero} implements Map[K,V], CustomSerialization {
     }
     
     public def this(var sz:Long) {
-        if (sz > (1<<60)) throw new OutOfMemoryError("Cannot allocate backing Rail of size "+sz);
         var pow2:Long = MIN_SIZE;
         while (pow2 < sz)
             pow2 <<= 1n;

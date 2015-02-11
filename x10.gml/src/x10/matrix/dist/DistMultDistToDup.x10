@@ -16,8 +16,6 @@ import x10.util.Timer;
 import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.blas.DenseMatrixBLAS;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.sparse.DenseMultSparseToDense;
@@ -224,9 +222,9 @@ public class DistMultDistToDup {
             val dmC = C.local() as DenseMatrix(dmA.N, dmB.N);
             
             if (p != rootpid || !plus)
-                DenseMatrixBLAS.compTransMult(1.0 as ElemType, dmA, dmB, 0.0 as ElemType, dmC);
+                DenseMatrixBLAS.compTransMult(1.0, dmA, dmB, 0.0, dmC);
             else 
-                DenseMatrixBLAS.compTransMult(1.0 as ElemType, dmA, dmB, 1.0 as ElemType, dmC);
+                DenseMatrixBLAS.compTransMult(1.0, dmA, dmB, 1.0, dmC);
         }
         /* TIMING */ C.calcTime += Timer.milliTime() - stt;
 

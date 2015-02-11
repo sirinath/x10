@@ -1,4 +1,5 @@
 /*
+ * 
  *  This file is part of the X10 project (http://x10-lang.org).
  *
  *  This file is licensed to You under the Eclipse Public License (EPL);
@@ -19,15 +20,13 @@ import x10.util.StringBuilder;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
+
+import x10.matrix.util.Debug;
 import x10.matrix.block.Grid;
 import x10.matrix.block.DenseBlock;
 import x10.matrix.block.SparseBlock;
 import x10.matrix.block.MatrixBlock;
-import x10.matrix.util.Debug;
-import x10.matrix.sparse.SparseCSC;
-import x10.matrix.DenseMatrix;
-import x10.matrix.builder.SparseCSCBuilder;
-import x10.matrix.ElemType;	
+
 /**
  * This class provides implementation of list of matrix blocks stored in on place.
  */
@@ -97,16 +96,16 @@ public class BlockSet  {
     public static def make(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, places:PlaceGroup) {
         //val gd = new Grid(m, n, rowBs, colBs); not balanced when considering distribution among rowPs and colPs
         val gd = DistGrid.makeGrid(m, n, rowBs, colBs, rowPs, colPs);
-        assert (rowPs*colPs == places.size()) :
-              "number of distributions groups of blocks must equal to number of places";
+        Debug.assure(rowPs*colPs == places.size(),
+              "number of distributions groups of blocks must equal to number of places");
         val dp = new DistGrid(gd, rowPs, colPs);
         return new BlockSet(gd, dp.dmap, places);
     }
 
     public static def make(gd:Grid, rowPs:Long, colPs:Long, places:PlaceGroup) {
         //val gd = new Grid(m, n, rowBs, colBs); not balanced when considering distribution among rowPs and colPs    
-        assert (rowPs*colPs == places.size()) :
-            "number of distributions groups of blocks must equal to number of places";
+        Debug.assure(rowPs*colPs == places.size(),
+            "number of distributions groups of blocks must equal to number of places");
         val dp = new DistGrid(gd, rowPs, colPs);
         return new BlockSet(gd, dp.dmap, places);
     }
@@ -127,10 +126,11 @@ public class BlockSet  {
             val coff   = grid.startCol(colbid);
             add(DenseBlock.make(rowbid, colbid, roff, coff, m, n));
         }
+        assignNeighborPlaces();
         return this;
     }
     
-    public def allocSparseBlocks(nzd:Float) : BlockSet {
+    public def allocSparseBlocks(nzd:Double) : BlockSet {
         val placeIndex = places.indexOf(here.id);
         val itr = dmap.buildBlockIteratorAtPlace(placeIndex);
         while (itr.hasNext()) {
@@ -143,6 +143,7 @@ public class BlockSet  {
             val coff   = grid.startCol(colbid);
             add(SparseBlock.make(rowbid, colbid, roff, coff, m, n, nzd));
         }
+        assignNeighborPlaces();        
         return this;
     }
 
@@ -152,10 +153,10 @@ public class BlockSet  {
     public static def makeDense(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, places:PlaceGroup) =
         make(m, n, rowBs, colBs, rowPs, colPs, places).allocDenseBlocks();
 
-    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Float) =
+    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Double) =
         makeSparse(m, n, rowBs, colBs, rowPs, colPs, nzd, Place.places());    
 
-    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Float, places:PlaceGroup) =
+    public static def makeSparse(m:Long, n:Long, rowBs:Long, colBs:Long, rowPs:Long, colPs:Long, nzd:Double, places:PlaceGroup) =
         make(m, n, rowBs, colBs, rowPs, colPs, places).allocSparseBlocks(nzd);
 
 
@@ -166,11 +167,11 @@ public class BlockSet  {
         new BlockSet(g,d,places).allocDenseBlocks();
     
     
-    public static def makeSparse(g:Grid, d:DistMap, nzd:Float) =
+    public static def makeSparse(g:Grid, d:DistMap, nzd:Double) =
         makeSparse(g, d, nzd, Place.places());
     
 
-    public static def makeSparse(g:Grid, d:DistMap, nzd:Float, places:PlaceGroup) =
+    public static def makeSparse(g:Grid, d:DistMap, nzd:Double, places:PlaceGroup) =
         new BlockSet(g,d,places).allocSparseBlocks(nzd);
     
 
@@ -314,7 +315,8 @@ public class BlockSet  {
         }
         val numColBlk:Long = (blocklist.size() as Long)/nrb;
         val numRowBlk:Long = nrb;
-        assert numRowBlk*numColBlk == (blocklist.size() as Long);
+        //Debug.flushln("Build block "+numRowBlk+"x"+numColBlk);
+        Debug.assure(numRowBlk*numColBlk==(blocklist.size() as Long));
         // Assuming all blocks forms in rectangle 
         val minRow = blocklist.get(0).myRowId;
         val minCol = blocklist.get(0).myColId;
@@ -323,7 +325,53 @@ public class BlockSet  {
         blockMap = new Array[MatrixBlock](Region.makeRectangular(minRow..maxRow, minCol..maxCol), 
                 (p:Point)=>blocklist.get((p(0)-minRow+(p(1)-minCol)*numRowBlk) as Long));
         
-    }  
+    }
+    
+    /**
+     * Build neighboring places for all blocks.
+     * If nieghbor place ID < 0, it does not have neighbor in that direction.
+     */
+    public def assignNeighborPlaces() {
+        val itr = iterator();
+        while (itr.hasNext()) {
+            val blk = itr.next();
+            blk.placeNorth = findNorthPlace(blk);
+            blk.placeSouth = findSouthPlace(blk);
+            blk.placeEast = findEastPlace(blk);
+            blk.placeWest = findWestPlace(blk);
+        }
+    }
+    
+    /**
+     * Find neighboring block's place
+     */
+    public def findNorthPlace(blk:MatrixBlock) = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>n);
+    public def findSouthPlace(blk:MatrixBlock) = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>s);
+    public def findEastPlace(blk:MatrixBlock)  = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>e);
+    public def findWestPlace(blk:MatrixBlock)  = findNeighborPlace(blk, (n:Long, s:Long, e:Long, w:Long)=>w);
+
+    @Inline 
+    private final def findNeighborPlace(blk:MatrixBlock, select:(Long, Long, Long, Long)=>Long):Long {
+        val nbid = select(
+                grid.getNorthId(blk.myRowId, blk.myColId),
+                grid.getSouthId(blk.myRowId, blk.myColId),
+                grid.getEastId( blk.myRowId, blk.myColId),
+                grid.getWestId( blk.myRowId, blk.myColId));
+        if (nbid < 0 ) return -1;
+        return findPlace(nbid);
+    }
+
+    /**
+     * Build ring cast place list map
+     */    
+    public def buildCastPlaceMap() {
+        
+        if (rowCastPlaceMap != null)
+            rowCastPlaceMap = CastPlaceMap.buildRowCastMap(grid, dmap, places);
+        
+        if (colCastPlaceMap != null)
+            colCastPlaceMap = CastPlaceMap.buildColCastMap(grid, dmap, places);
+    }    
     
     protected def search(rid:Long, cid:Long):Long {        
         if (blocklist.size() == 0L) return -1;
@@ -353,10 +401,21 @@ public class BlockSet  {
         if (idx < 0 ) {
             Debug.flushln(toString());
             Debug.flushln(dmap.toString());
-            throw new UnsupportedOperationException("Cannot find block ("+rid+","+cid+") at place "+here.id());
+            Debug.exit("Cannot find block ("+rid+","+cid+") at place "+here.id());
         }
         return blocklist.get(idx);
     }
+    
+    // public def find(rid:Long, cid:Long): MatrixBlock {
+    //     val it = this.iterator();
+    //     while (it.hasNext()) {
+    //         val blk = it.next();
+    //         if (blk.myRowId == rid &&
+    //             blk.myColId == cid ) return blk;
+    //     }
+    //     Debug.exit("Cannot find block ("+rid+","+cid+") at place "+here.id());
+    //     return null;
+    // }
     
     @Inline
     public def findBlock(bid:Long) = find(bid);
@@ -426,7 +485,8 @@ public class BlockSet  {
                 return blk;
         }
         //This should be error
-        throw new UnsupportedOperationException("Error in searching front block ("+rowId+","+colId+")\n"+toString());
+        Debug.exit("Error in searching front block ("+rowId+","+colId+")\n"+toString());
+        return null;
     }    
     
     /**
@@ -500,7 +560,7 @@ public class BlockSet  {
     public def sync(rtbid:Long) : void {
         val it = this.blocklist.iterator();
         val rtblk = find(rtbid);
-        assert (rtblk!=null) : "Cannot find root block in local block list";
+        Debug.assure(rtblk!=null, "Cannot find root block in local block list");
         sync(rtblk);
     }
     
@@ -531,6 +591,7 @@ public class BlockSet  {
             if (blk != rootblk) {
                 val chkid = select(blk.myRowId, blk.myColId);
                 if (target == chkid) {
+                    //Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
                     rootblk.copyCols(0, colCnt, blk.getMatrix());
                 }
             }
@@ -604,6 +665,7 @@ public class BlockSet  {
             if (blk != rootblk) {
                 val chkid = select(blk.myRowId, blk.myColId);
                 if (target == chkid) {
+                    //Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
                     //rootblk.copyCols(0, colCnt, blk.getMatrix());
                     opFunc(blk.getMatrix() as DenseMatrix, rootden, colCnt);
                 }
@@ -628,6 +690,7 @@ public class BlockSet  {
             if (blk != dstblk) {
                 val chkid = select(blk.myRowId, blk.myColId);
                 if (target == chkid) {
+                    //Debug.flushln("Copy root to ("+blk.myRowId+","+blk.myColId+")");
                     //rootblk.copyCols(0, colCnt, blk.getMatrix());
                     opFunc(blk.getMatrix() as DenseMatrix, dstden, datCnt);
                 }
@@ -661,7 +724,7 @@ public class BlockSet  {
     
     public def getBlockDataCount(bid:Long):Long {
         val blk = findBlock(bid);
-        assert (blk != null) :  "Cannot locate block "+bid+" in block set at " +here.id();
+        Debug.assure(blk!=null, "Cannot locate block "+bid+" in block set at " +here.id());
         return blk.getDataCount();
     }
     
@@ -723,178 +786,4 @@ public class BlockSet  {
         Console.OUT.println(outstr.toString());
         Console.OUT.flush();
     }
-    
-    ////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////Utility Methods to Remote Copy Blockset/////////////////////////////
-    private static val META_DATA_SIZE=7;
-    public def getBlocksMetaData() {
-        val blocksCount = blocklist.size();
-        val metaDataRail = new Rail[Long](blocksCount*META_DATA_SIZE);
-        var metaDataRailIndex:Long = 0;        
-        val blkitr = this.iterator();        
-        val srcColOff = 0;
-        while (blkitr.hasNext()){
-            val src = blkitr.next();
-            val srcmat = src.getMatrix();
-            metaDataRail(metaDataRailIndex++) = src.myRowId;  
-            metaDataRail(metaDataRailIndex++) = src.myColId;
-            metaDataRail(metaDataRailIndex++) = src.rowOffset;
-            metaDataRail(metaDataRailIndex++) = src.colOffset;                 
-            metaDataRail(metaDataRailIndex++) = srcmat.M;
-            metaDataRail(metaDataRailIndex++) = srcmat.N;            
-            if (src instanceof SparseBlock){
-                val sparsemat:SparseCSC = srcmat as SparseCSC;                
-                metaDataRail(metaDataRailIndex++) =  src.getIndex().size;                
-            }
-            else{
-                val densemat:DenseMatrix = srcmat as DenseMatrix;
-                metaDataRail(metaDataRailIndex++) = densemat.d.size;                
-            }
-            
-        }
-        return metaDataRail;
-    }
-    
-    public static def makeBlocksFromMetaData(metaDataRail:Rail[Long], blocksCount:Long, isSparse:Boolean) {
-        val blocksList = new ArrayList[MatrixBlock]();
-        var remoteMetaDataRailIndex:Long = 0;
-        for (var i:Long = 0; i < blocksCount; i++){        
-            val mIndex = i*META_DATA_SIZE;
-            val rowBlockId:Long = metaDataRail(mIndex);
-            val colBlockId:Long = metaDataRail(mIndex+1);
-            val rowOffset:Long = metaDataRail(mIndex+2);
-            val colOffset:Long = metaDataRail(mIndex+3);
-            val matM = metaDataRail(mIndex+4);
-            val matN = metaDataRail(mIndex+5);            
-            val datcnt = metaDataRail(mIndex+6); // the block's data count can be less than the index size of the block                        
-            var blk:MatrixBlock;
-            if (isSparse)
-                blk = SparseBlock.make(rowBlockId, colBlockId, rowOffset, colOffset, matM, matN, datcnt);
-            else
-                blk = DenseBlock.make(rowBlockId, colBlockId, rowOffset, colOffset, matM, matN);            
-            blocksList.add(blk);
-        }
-        return blocksList;
-    }
-    
-    
-    public def getStorageSize():Long{
-        var totalSize:Long = 0;
-        val blkitr = this.iterator();       
-        while (blkitr.hasNext()){
-            val blk = blkitr.next();            
-            totalSize += blk.getStorageSize();
-        }
-        return totalSize;
-    }
-    
-    public def flattenIndex(allBlocksIndex:Rail[Long]){
-        val blkitr = this.iterator();
-        var destIndex:Long = 0;
-        while (blkitr.hasNext()){
-            val src = blkitr.next();
-            val idxbuf = src.getIndex() as Rail[Long]{self!=null};
-            Rail.copy(idxbuf, 0, allBlocksIndex,destIndex,idxbuf.size);
-            destIndex+= src.getIndex().size;
-        }
-    }
-    
-    public def flattenValue(allBlocksValue:Rail[ElemType]){
-        val blkitr = this.iterator();
-        var destIndex:Long = 0;
-        while (blkitr.hasNext()){
-            val src = blkitr.next();
-            val valbuf = src.getData() as Rail[ElemType]{self!=null};
-            Rail.copy(valbuf, 0, allBlocksValue,destIndex,valbuf.size);
-            destIndex+= src.getData().size;
-        }
-    }
-    
-    public def initSparseBlocksRemoteCopyAtSource(){
-        val blkitr = this.iterator();       
-        while (blkitr.hasNext()){
-            val blk = blkitr.next();
-            val sparsemat:SparseCSC = blk.getMatrix() as SparseCSC;
-            sparsemat.initRemoteCopyAtSource(0, sparsemat.N);
-        }
-    }
-    
-    public def finalizeSparseBlocksRemoteCopyAtSource(){
-        val blkitr = this.iterator();       
-        while (blkitr.hasNext()){
-            val blk = blkitr.next();
-            val sparsemat:SparseCSC = blk.getMatrix() as SparseCSC;
-            sparsemat.finalizeRemoteCopyAtSource();
-        }
-    }
-    
-    public static def remoteMakeSparseBlockSet(blocksCount:Long, metaDataSize:Long, totalSize:Long, mGR:GlobalRail[Long], idxGR:GlobalRail[Long], valGR:GlobalRail[ElemType]):BlockSet{
-        val metaDataTarget = new Rail[Long](metaDataSize);
-        val allIndexTarget = new Rail[Long](totalSize);
-        val allValueTarget = new Rail[ElemType](totalSize);
-        finish{
-            Rail.asyncCopy[Long](mGR, 0, metaDataTarget, 0, metaDataSize);
-            Rail.asyncCopy[Long](idxGR, 0, allIndexTarget, 0, totalSize);
-            Rail.asyncCopy[ElemType](valGR, 0, allValueTarget, 0, totalSize);
-        }    
-        val blocksList = BlockSet.makeBlocksFromMetaData(metaDataTarget, blocksCount, true);                
-        var offset:Long = 0;
-        for (var i:Long = 0; i < blocksCount; i++){        
-            val blk = blocksList.get(i);
-            val dstspa = blk.getMatrix() as SparseCSC;
-            val indexValueSize = blk.getIndex().size;
-            val dstColOff = 0;
-            val colCnt = dstspa.N;   
-            val datcnt = indexValueSize;
-            dstspa.initRemoteCopyAtDest(dstColOff, colCnt, datcnt);  
-            finish{
-                async Rail.copy(allIndexTarget, offset, dstspa.getIndex(),0 , indexValueSize);    
-                async Rail.copy(allValueTarget, offset, dstspa.getValue(),0 , indexValueSize);                
-            }
-            dstspa.finalizeRemoteCopyAtDest();
-            offset += indexValueSize;
-        }
-        val newBlockSet = new BlockSet(null, null, null);
-        newBlockSet.blocklist.addAll(blocksList);
-        return newBlockSet;
-    }
-   
-    public static def remoteMakeDenseBlockSet(blocksCount:Long, metaDataSize:Long, totalSize:Long, mGR:GlobalRail[Long], valGR:GlobalRail[ElemType]):BlockSet{
-        val metaDataTarget = new Rail[Long](metaDataSize);
-        val allValueTarget = new Rail[ElemType](totalSize);
-        finish{
-            Rail.asyncCopy[Long](mGR, 0, metaDataTarget, 0, metaDataSize);    
-            Rail.asyncCopy[ElemType](valGR, 0, allValueTarget, 0, totalSize);
-        }
-        val blocksList = BlockSet.makeBlocksFromMetaData(metaDataTarget, blocksCount, false);                
-        var offset:Long = 0;
-        for (var i:Long = 0; i < blocksCount; i++){        
-            val blk = blocksList.get(i);
-            val dataSize = blk.getStorageSize();
-            Rail.copy(allValueTarget, offset, blk.getData(), 0, dataSize);
-            offset += dataSize;
-        }
-        val newBlockSet = new BlockSet(null, null, null);
-        newBlockSet.blocklist.addAll(blocksList);
-        return newBlockSet;
-    }
-    
-    public def allocAndInitNonUniformSparseBlocks(f:(Long,Long)=>ElemType): BlockSet {        
-        val placeIndex = places.indexOf(here.id);
-        val itr = dmap.buildBlockIteratorAtPlace(placeIndex);
-        while (itr.hasNext()) {
-            val bid    = itr.next();
-            val rowbid = grid.getRowBlockId(bid);
-            val colbid = grid.getColBlockId(bid);
-            val m      = grid.rowBs(rowbid);
-            val n      = grid.colBs(colbid);            
-            val roff   = grid.startRow(rowbid);
-            val coff   = grid.startCol(colbid);            
-            val builder = SparseCSCBuilder.make(m,n);            
-            val offsetF = (a:Long,b:Long)=> f(a+roff,b+coff);            
-            builder.init(offsetF);
-            add(new SparseBlock(rowbid, colbid, roff, coff, builder.toSparseCSC()));
-        }
-        return this;
-    }   
 }

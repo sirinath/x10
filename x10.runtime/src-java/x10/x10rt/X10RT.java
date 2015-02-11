@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package x10.x10rt;
@@ -15,7 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 import com.hazelcast.core.IMap;
-import com.hazelcast.core.HazelcastInstance;
 
 import x10.lang.GlobalRail;
 import x10.x10rt.SocketTransport.RETURNCODE;
@@ -418,14 +417,6 @@ public class X10RT {
     	else
     		return null;
     }
-
-	public static HazelcastInstance getHazelcastInstance() {
-		if (hazelcastDatastore != null)
-			return hazelcastDatastore.getHazelcastInstance();
-		else
-			return null;
-	}
-
     
     // this form of initDataStore is called as a part of normal startup.
     private static void initDataStore() {
@@ -503,16 +494,6 @@ public class X10RT {
     }
     public static void remoteXor__1$u(GlobalRail target, long idx, long val) {
         throw new UnsupportedOperationException("remoteXor not implemented for Managed X10");
-    }
-    
-    /*
-     * Forward a request to add more places to the launcher, if supported
-     */
-    public static long addPlaces(long newPlaces) {
-    	if (X10RT.javaSockets != null)
-    		return X10RT.javaSockets.addPlaces(newPlaces);
-    	else
-    		return 0;
     }
 
     /*

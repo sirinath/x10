@@ -44,6 +44,9 @@ case $PLATFORM in
     linux_*)
         PLAT_LIBPAT="lib*.*"
         ;;
+    aix_*)
+        PLAT_LIBPAT="lib*.*"
+        ;;
     macosx_*)
         PLAT_LIBPAT="lib*.*"
         ;;

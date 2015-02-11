@@ -23,10 +23,6 @@ function printUsage {
 	printf "  Run tests with Native X10 (default)\n\n"
         printf -- "-managed\n"
 	printf "  Run tests with Managed X10\n\n"
-        printf -- "-managed-cp <path>\n"
-	printf "  Pass -cp <path> as an argument to the x10 script\n\n"
-        printf -- "-managed-lib <path>\n"
-	printf "  Pass -libpath <path> as an argument to the x10 script\n\n"
         printf -- "-nopt\n"
 	printf "  Compile the test cases without optimization\n\n"
         printf -- "-opt\n"
@@ -82,33 +78,17 @@ function parseCmdLine {
 	    tcreportdir=$2
 	    shift 2
 	elif [[ "$1" == "-debug" ]]; then
-	    tccompiler_options="$tccompiler_options -DEBUG"
+	    tccompiler_options="$tccompile_options -DEBUG"
 	    shift
 	elif [[ "$1" == "-noopt" ]]; then
             # nothing to do
 	    shift
 	elif [[ "$1" == "-opt" ]]; then
-	    tccompiler_options="$tccompiler_options -O"
+	    tccompiler_options="$tccompile_options -O"
 	    shift
 	elif [[ "$1" == "-x10lib" ]]; then
 	    if (( $# >= 2 )); then
-		tccompiler_options="$tccompiler_options -x10lib $2"
-		shift 2
-	    else
-		printf "\n[${prog}: err]: Option $1 needs argument\n\n"
-		printUsage 1 0
-	    fi
-	elif [[ "$1" == "-managed-cp" ]]; then
-	    if (( $# >= 2 )); then
-		managed_x10_extra_args="$managed_x10_extra_args -cp $2"
-		shift 2
-	    else
-		printf "\n[${prog}: err]: Option $1 needs argument\n\n"
-		printUsage 1 0
-	    fi
-	elif [[ "$1" == "-managed-lib" ]]; then
-	    if (( $# >= 2 )); then
-		managed_x10_extra_args="$managed_x10_extra_args -libpath $2"
+		tccompiler_options="$tccompile_options -x10lib $2"
 		shift 2
 	    else
 		printf "\n[${prog}: err]: Option $1 needs argument\n\n"
@@ -263,12 +243,10 @@ function resolveParams {
     fi
     ${EGREP} -q 'RESILIENT_X10_ONLY' $1
     if [[ $? == 0 ]]; then
-        tcresilient_x10_only=1
-        if [[ "$tcresilient_modes" == "0" ]]; then
-            tcvcode=SKIPPED
-        fi
-    else 
-        tcresilient_x10_only=0
+    tcresilient_x10_only=1
+    if [[ "$tcresilient_modes" == "0" ]]; then
+        tcvcode=SKIPPED
+    fi
     fi
 
     # update expected counters
@@ -328,7 +306,7 @@ prog=runTest.sh
 # platform independent abstraction for certain commands
 EGREP=egrep
 egrep --version 2>/dev/null 1>/dev/null
-if [[ $? == 0 && $(uname -s) != CYGWIN* && $(uname -s) != Linux* ]]; then
+if [[ $? == 0 && $(uname -s) != Sun* && $(uname -s) != CYGWIN* && $(uname -s) != Linux* ]]; then
     EGREP="egrep -E"
 fi
 
@@ -363,7 +341,7 @@ thrunstate="UNKNOWN_STATE"
 tcbackend="native"
 
 # resiliency modes
-tc_all_resilient_modes="0 1 12 99"
+tc_all_resilient_modes="0 1 99"
 tc_default_resilient_mode="0"
 tcresilient_modes="$tc_default_resilient_mode"
 typeset -i tcresilient_x10_only=0
@@ -756,9 +734,6 @@ function main {
 		11) 
 		    mode_name="place_zero_resilient_finish"
 		    ;;
-		12) 
-		    mode_name="hc_resilient_finish"
-		    ;;
 		99) 
 		    mode_name="resilient_x10rt"
 		    ;;
@@ -766,16 +741,6 @@ function main {
 		    mode_name="resilient_mode_${jen_resiliency_mode}"
 		    ;;
 	    esac
-
-	    if [[ $tcresilient_x10_only == 1 && ( "$mode_name" == "main" || "$mode_name" == "resilient_x10rt" ) ]]; then
-		printf "\nSupressing execution of RESILIENT_X10_ONLY test case in mode $mode_name\n";
-		continue;
-	    fi
-
-            if [[ "$tcbackend" == "native" && "$mode_name" == "hc_resilient_finish" ]]; then
-		printf "\nSkipping hc_resilient_finish mode for Native X10\n";
-		continue;
-	    fi
 
 	    __jen_test_start_time=$(perl -e 'print time;')
 
@@ -791,13 +756,9 @@ function main {
 	    else
 		managed_x10_extra_resiliency_args=""
 		if [[ "$jen_resiliency_mode" != "0" ]]; then
-		    if [[ $"$jen_resiliency_mode" == "12" ]]; then
-			managed_x10_extra_resiliency_args="-DX10RT_IMPL=JavaSockets -DX10RT_DATASTORE=Hazelcast"
-		    else
-			managed_x10_extra_resiliency_args="-DX10RT_IMPL=JavaSockets"
-		    fi
+		    managed_x10_extra_resiliency_args="-DX10RT_IMPL=JavaSockets"
 		fi
-		run_cmd="X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $X10_HOME/x10.dist/bin/x10 -ms128M -mx512M ${managed_x10_extra_resiliency_args} ${managed_x10_extra_args} -t -v -J-ea ${className}"
+		run_cmd="X10_RESILIENT_MODE=${jen_resiliency_mode} X10_NPLACES=${my_nplaces} X10_HOSTLIST=localhost $X10_HOME/x10.dist/bin/x10 -ms128M -mx512M ${managed_x10_extra_resiliency_args} -t -v -J-ea ${className}"
 	    fi
 	    printf "\n${run_cmd}\n" >> $tcoutdat
 
@@ -807,6 +768,18 @@ function main {
 	    else
 		__jen_test_x10_command="$(echo execTimeOut $tctoutval $tcoutdat \"${run_cmd}\")"
 	    fi
+
+        if [[ $tcresilient_x10_only == 1 && ( "$mode_name" == "main" || "$mode_name" == "resilient_x10rt" ) ]]; then
+        printf "\n ++ E [EXECUTION]"
+        let 'tcsexeccnt += 1'
+        printf "\n *** S ***"
+		__jen_test_result_explanation="${className} met expectation: Skipped."
+		__jen_test_result="SKIPPED"
+		__jen_test_exit_code=0
+		printf "\n****** $tDir $className skipped.\n" >> $tcoutdat
+		junitLog $mode_name $tccompdat $tcoutdat
+        continue
+        fi
 
 	    printf "\n ++ E [EXECUTION]"
 	    ( \

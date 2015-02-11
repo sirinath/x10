@@ -19,7 +19,6 @@ import x10.matrix.DenseMatrix;
 import x10.matrix.Vector;
 import x10.matrix.SymDense;
 import x10.matrix.TriDense;
-import x10.matrix.ElemType;
 
 /**
  * This class provides static methods to perform matrix 
@@ -27,7 +26,8 @@ import x10.matrix.ElemType;
  * 
  * <p> The general case of matrix multiplication requires two input
  * matrices, A and B, and one output matrix C.
- * <p> All matrices uses column-major storage.
+ * <p> The leading dimension of a matrix must be same as its number of rows.
+ * All matrices uses column-major storage.
  * <p> Two versions are provided of each multiplication method:
  * a simple interface which operates on entire matrices/vectors,
  * and a full-featured interface which operates on an offset patch within
@@ -52,9 +52,9 @@ public class DenseMatrixBLAS {
      * @param offset row and column offsets [Ar, Ac, xr, yr] into matrix/vectors
      */
     public static def comp(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           x:Vector, 
-            beta:ElemType,  y:Vector, 
+            beta:Double,  y:Vector, 
             dim:Rail[Long],
             offset:Rail[Long]) :void {
         if (CompilerFlags.checkBounds()) {
@@ -68,9 +68,9 @@ public class DenseMatrixBLAS {
     }
 
     public static def comp(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:Vector(A.N), 
-            beta:ElemType,  C:Vector(A.M)) :void {
+            beta:Double,  C:Vector(A.M)) :void {
         val dim=[A.M, A.N];
         val transA = 0n;
         DriverBLAS.matrix_vector_mult(alpha, A.d, B.d, beta, C.d, dim, transA);
@@ -91,9 +91,9 @@ public class DenseMatrixBLAS {
      * @param offset row and column offsets [Ar, Ac, xr, yr] into matrix/vectors
      */
     public static def compTransMult(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           x:Vector, 
-            beta:ElemType,  y:Vector, 
+            beta:Double,  y:Vector, 
             dim:Rail[Long],
             offset:Rail[Long]) :void {
         if (CompilerFlags.checkBounds()) {
@@ -107,9 +107,9 @@ public class DenseMatrixBLAS {
     }
 
     public static def compTransMult(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:Vector(A.M), 
-            beta:ElemType,  C:Vector(A.N)) :void {
+            beta:Double,  C:Vector(A.N)) :void {
         val dim=[A.M, A.N];
         val transA = 1n;
         DriverBLAS.matrix_vector_mult(alpha, A.d, B.d, beta, C.d, dim, transA);
@@ -117,62 +117,27 @@ public class DenseMatrixBLAS {
 
     /** Symmetric multiply vector */
     public static def comp(
-            alpha:ElemType, A:SymDense,
+            alpha:Double, A:SymDense,
                           B:Vector(A.N), 
-            beta:ElemType,  C:Vector(A.N)) :void {
+            beta:Double,  C:Vector(A.N)) :void {
         val dim=[A.N, A.M];
         DriverBLAS.sym_vector_mult(alpha, A.d, B.d, beta, C.d, dim);
     }
-    
-    /**
-     * Compute the rank-1 update A += alpha * x &#42 y<sup>T<sup>,
-     * for an offset patch within each matrix / vector.
-     * @param alpha  scalar by which the result of x &#42 y is multiplied
-     * @param x      vector dimension at least (M+xr)
-     * @param y      vector of dimension at least (N+yr)
-     * @param A      dense matrix of dimension at least (M+Ar,N+Ac)
-     * @param dim    the dimensions M and N used in BLAS multiply where
-     *               M is the number of rows in A and x,
-                     N is the number of columns in A and rows in y
-     * @param offset row and column offsets [xr, yr, Ar, Ac] into matrix/vectors
-     */
-    public static def rankOneUpdate(
-            alpha:ElemType, x:Vector, y:Vector,
-            A:DenseMatrix,
-            dim:Rail[Long], offset:Rail[Long]):void {
-        if (CompilerFlags.checkBounds()) {
-            Debug.assure(offset(0)+dim(0) <= x.M,
-                offset(0)+"+"+dim(0) + " <= " + x.M);
-            Debug.assure(offset(1)+dim(1) <= y.M,
-                offset(1)+"+"+dim(1) + " <= " + y.M);
-            Debug.assure(offset(2)+dim(0) <= A.M && offset(3)+dim(1) <= A.N,
-                offset(2)+"+"+dim(0) + " <= " + A.M + " && " + offset(3)+"+"+dim(1) + " <= " + A.N);
-        }
-        val inc = [ 1, 1 as Long ];
 
-        DriverBLAS.rank_one_update(alpha, x.d, y.d, A.d, dim, offset, inc, A.M);
-    }
-
-    public static def rankOneUpdate(x:Vector, y:Vector, A:DenseMatrix) {
-        val alpha = 1.0 as ElemType;
-        val dim = [A.M, A.N];
-        val offset = [0, 0, 0, 0 as Long];
-        rankOneUpdate(alpha, x, y, A, dim, offset);
-    }
 
     /** Symmetric multiply dense */
     public static def comp(
-            alpha:ElemType, A:SymDense, 
+            alpha:Double, A:SymDense, 
                           B:DenseMatrix{A.N==B.M}, 
-            beta:ElemType,  C:DenseMatrix{A.M==C.M&&B.N==C.N}):void {
+            beta:Double,  C:DenseMatrix{A.M==C.M&&B.N==C.N}):void {
         val dims = [ C.M, C.N ];
         DriverBLAS.sym_matrix_mult(alpha, A.d, B.d, beta, C.d, dims);
     }
 
     public static def comp(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:SymDense{A.N==B.M}, 
-            beta:ElemType,  C:DenseMatrix{A.M==C.M&&B.N==C.N}):void {
+            beta:Double,  C:DenseMatrix{A.M==C.M&&B.N==C.N}):void {
         val dims = [ C.M, C.N ];
         DriverBLAS.matrix_sym_mult(A.d, alpha, B.d, beta, C.d, dims);
     }
@@ -222,9 +187,9 @@ public class DenseMatrixBLAS {
      * @param offset row and column offsets [Ar, Ac, Br, Bc, Cr, Cc] into matrices
      */
     public static def comp(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix,
+            beta:Double,  C:DenseMatrix,
             dim:Rail[Long], offset:Rail[Long]):void {
         if (CompilerFlags.checkBounds()) {
             Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(2) <= A.N,
@@ -251,9 +216,9 @@ public class DenseMatrixBLAS {
      * @param C      result matrix of dimension at least (M+Cr,N+Cc)
      */
     public static def comp(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:DenseMatrix{A.N==B.M}, 
-            beta:ElemType,  C:DenseMatrix{A.M==C.M,B.N==C.N}): void {
+            beta:Double,  C:DenseMatrix{A.M==C.M,B.N==C.N}): void {
         val dim = [A.M, B.N, A.N];
         val trans = [ 0n, 0n as Int ];
         val ld = [A.M, B.M, C.M];
@@ -277,9 +242,9 @@ public class DenseMatrixBLAS {
      * @param offset row and column offsets [Ar, Ac, Br, Bc, Cr, Cc] into matrices
      */
     public static def compTransMult(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix, 
+            beta:Double,  C:DenseMatrix, 
             dim:Rail[Long], offset:Rail[Long]):void {
         if (CompilerFlags.checkBounds()) {
             Debug.assure(offset(0)+dim(2) <= A.M && offset(1)+dim(0) <= A.N,
@@ -306,9 +271,9 @@ public class DenseMatrixBLAS {
      * @param C      dense matrix which is used to store the result
      */
     public static def compTransMult(
-            alpha:ElemType, A:DenseMatrix,
+            alpha:Double, A:DenseMatrix,
                           B:DenseMatrix{B.M==A.M}, 
-            beta:ElemType,  C:DenseMatrix{C.M==A.N,C.N==B.N}):void {
+            beta:Double,  C:DenseMatrix{C.M==A.N,C.N==B.N}):void {
         val dim = [A.N, B.N, A.M];
         val trans = [ 1n, 0n ];
         val ld = [A.M, B.M, C.M];
@@ -332,9 +297,9 @@ public class DenseMatrixBLAS {
      * @param offset row and column offsets [Ar, Ac, Br, Bc, Cr, Cc] into matrices
      */
     public static def compMultTrans(
-            alpha:ElemType, A:DenseMatrix,
+            alpha:Double, A:DenseMatrix,
                           B:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix,
+            beta:Double,  C:DenseMatrix,
             dim:Rail[Long], offset:Rail[Long]):void {
         if (CompilerFlags.checkBounds()) {
             Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(2) <= A.N,
@@ -360,9 +325,9 @@ public class DenseMatrixBLAS {
      * @param C      dense matrix which is used to store the result
      */
     public static def compMultTrans(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:DenseMatrix{B.N==A.N}, 
-            beta:ElemType,  C:DenseMatrix{C.M==A.M,C.N==B.M}):void {
+            beta:Double,  C:DenseMatrix{C.M==A.M,C.N==B.M}):void {
         val dim = [A.M, B.M, A.N];
         val trans = [ 0n, 1n ];
         val ld = [A.M, B.M, C.M];
@@ -386,9 +351,9 @@ public class DenseMatrixBLAS {
      * @param offset row and column offsets [Ar, Ac, Br, Bc, Cr, Cc] into matrices
      */
     public static def compTransMultTrans(
-            alpha:ElemType, A:DenseMatrix,
+            alpha:Double, A:DenseMatrix,
                           B:DenseMatrix, 
-            beta:ElemType,  C:DenseMatrix,
+            beta:Double,  C:DenseMatrix,
             dim:Rail[Long], offset:Rail[Long]):void {
         if (CompilerFlags.checkBounds()) {
             Debug.assure(offset(0)+dim(2) <= A.M && offset(1)+dim(0) <= A.N,
@@ -414,9 +379,9 @@ public class DenseMatrixBLAS {
      * @param C      dense matrix which is used to store the result
      */
     public static def compTransMultTrans(
-            alpha:ElemType, A:DenseMatrix, 
+            alpha:Double, A:DenseMatrix, 
                           B:DenseMatrix{B.N==A.M}, 
-            beta:ElemType,  C:DenseMatrix{C.M==A.N,C.N==B.M}):void {
+            beta:Double,  C:DenseMatrix{C.M==A.N,C.N==B.M}):void {
         val dim      = [A.N, B.M, A.M];
         val trans = [ 1n, 1n as Int ];
         val ld = [A.M, B.M, C.M];
@@ -434,8 +399,8 @@ public class DenseMatrixBLAS {
      * @param upper  if true, update upper half of C; otherwise update lower half
      */
     public static def symRankKUpdate(
-            alpha:ElemType, A:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix{C.M==C.N,C.N==A.M},
+            alpha:Double, A:DenseMatrix,
+            beta:Double,  C:DenseMatrix{C.M==C.N,C.N==A.M},
             upper:Boolean):void {
         val dim = [A.M, A.N];
         DriverBLAS.sym_rank_k_update(alpha, A.d, beta, C.d, dim, upper, false);
@@ -458,8 +423,8 @@ public class DenseMatrixBLAS {
      * @param upper  if true, update upper half of C; otherwise update lower half
      */
     public static def symRankKUpdate(
-            alpha:ElemType, A:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix,
+            alpha:Double, A:DenseMatrix,
+            beta:Double,  C:DenseMatrix,
             dim:Rail[Long], offset:Rail[Long], upper:Boolean):void {
         if (CompilerFlags.checkBounds()) {
             Debug.assure(offset(0)+dim(0) <= A.M && offset(1)+dim(1) <= A.N,
@@ -482,8 +447,8 @@ public class DenseMatrixBLAS {
      * @param upper  if true, update upper half of C; otherwise update lower half
      */
     public static def symRankKUpdateTrans(
-            alpha:ElemType, A:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix{C.M==C.N,C.N==A.N},
+            alpha:Double, A:DenseMatrix,
+            beta:Double,  C:DenseMatrix{C.M==C.N,C.N==A.N},
             upper:Boolean):void {
         val dim = [A.N, A.M];
         DriverBLAS.sym_rank_k_update(alpha, A.d, beta, C.d, dim, upper, true);
@@ -506,8 +471,8 @@ public class DenseMatrixBLAS {
      * @param upper  if true, update upper half of C; otherwise update lower half
      */
     public static def symRankKUpdateTrans(
-            alpha:ElemType, A:DenseMatrix,
-            beta:ElemType,  C:DenseMatrix,
+            alpha:Double, A:DenseMatrix,
+            beta:Double,  C:DenseMatrix,
             dim:Rail[Long], offset:Rail[Long], upper:Boolean):void {
         if (CompilerFlags.checkBounds()) {
             Debug.assure(offset(0)+dim(1) <= A.M && offset(1)+dim(0) <= A.N,

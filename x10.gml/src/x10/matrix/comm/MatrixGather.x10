@@ -16,10 +16,10 @@ import x10.regionarray.DistArray;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
+import x10.matrix.util.Debug;
+
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 
@@ -62,16 +62,16 @@ public class MatrixGather {
 			dst:Rail[DenseBlock]) : void {
 		
 		val nb = src.region.size();
-		assert (nb==dst.size) :
-			"Number blocks in dist and local array not match";
+		Debug.assure(nb==dst.size, 
+			"Number blocks in dist and local array not match");
 		
 		finish for (var bid:Long=0; bid<nb; bid++) {
 			val dstden = dst(bid).getMatrix();
 				
 			if (bid == here.id()) {
 				val srcden = src(bid).getMatrix();
-                assert (srcden.M==dstden.M) :
-                    "source and target matrix have different leading dimension";
+				Debug.assure(srcden.M==dstden.M, 
+			"source and target matrix have different leading dimension");
 				DenseMatrix.copyCols(srcden, 0, dstden, 0, srcden.N);
 
 			} else {
@@ -95,8 +95,8 @@ public class MatrixGather {
 			src:DistArray[DenseBlock](1), 
 			dst:DenseMatrix) : void {
 
-		assert (gp.numRowBlocks==1L || gp.N==1L) :
-			"Number of row block in partition must be 1 or matrix is a vector";
+		Debug.assure(gp.numRowBlocks==1L || gp.N==1L,
+			"Number of row block in partition must be 1 or matrix is a vector");
 
 		@Ifdef("MPI_COMMU") {
 			if (gp.N==1L)
@@ -143,8 +143,9 @@ public class MatrixGather {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[ElemType](0); //fake
+							val tmpbuf = new Rail[Double](0); //fake
 							val tmplst = new Rail[Long](0);   //fake
+							//Debug.flushln("P"+p+" starting non root gather :"+datcnt);
                             WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
                                 tmpbuf, 0, tmplst, root);
 						}
@@ -157,6 +158,7 @@ public class MatrixGather {
 					// MPI process will hang, Cause is not clear
 					/**********************************************/	
 					val srcden = src(root).getMatrix();
+					//Debug.flushln("P"+root+" starting root gather:"+szlist.toString());
 					WrapMPI.world.gatherv(srcden.d, 0, szlist(root), 
 										  dstden.d, 0, szlist, root);
 				}
@@ -171,7 +173,7 @@ public class MatrixGather {
 	public static def mpiGatherVector(
 			gp:Grid{self.N==1L}, 
 			src:DistArray[DenseBlock](1),
-			dst:Rail[ElemType]): void {
+			dst:Rail[Double]): void {
 				
 		//Only one row block partition
 		val szlist = gp.rowBs;
@@ -189,8 +191,9 @@ public class MatrixGather {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[ElemType](0); //fake
+							val tmpbuf = new Rail[Double](0); //fake
 							val tmplst = new Rail[Long](0);   //fake
+							//Debug.flushln("P"+p+" starting non root gather :"+datcnt);
 							WrapMPI.world.gatherv(srcden.d, 0, datcnt, 
 												  tmpbuf, 0, tmplst, root);
 						}
@@ -203,6 +206,7 @@ public class MatrixGather {
 					// MPI process will hang, Cause is not clear
 					/**********************************************/	
 					val srcden = src(root).getMatrix();
+					//Debug.flushln("P"+root+" starting root gather:"+szlist.toString());
 				
 					WrapMPI.world.gatherv(srcden.d, 0, szlist(root), 
 										  dst, 0, szlist, root);
@@ -220,7 +224,7 @@ public class MatrixGather {
 			dstden:DenseMatrix): void {
 
 		val root = here.id();
-		val dstbuf = new GlobalRail[ElemType](dstden.d as Rail[ElemType]{self!=null});
+		val dstbuf = new GlobalRail[Double](dstden.d as Rail[Double]{self!=null});
 
 		var startoffset:Long = 0;
 		for (var cb:Long=0; cb<gp.numColBlocks; cb++) {
@@ -230,14 +234,15 @@ public class MatrixGather {
 				val startrcvoff = startoffset;
 				at(src.dist(pid)) async {
 					val srcden = src(here.id()).dense;
-					Rail.asyncCopy[ElemType](srcden.d, 0, dstbuf, startrcvoff, 
+					Rail.asyncCopy[Double](srcden.d, 0, dstbuf, startrcvoff, 
 											srcden.M*srcden.N);
+					//Debug.flushln("Async copy from from "+pid+" started");
 				} 
 			} else {
 				//Make local copying
 				var rcvoff:Long = startoffset;
 				val srcden = src(pid).dense;
-				Rail.copy[ElemType](srcden.d, 0, dstden.d, rcvoff, srcden.M*srcden.N);
+				Rail.copy[Double](srcden.d, 0, dstden.d, rcvoff, srcden.M*srcden.N);
 			}
 			startoffset += gp.rowBs(0) * gp.colBs(pid);
 		}
@@ -276,7 +281,7 @@ public class MatrixGather {
 	public static def x10GatherVector(
             gp:Grid{self.N==1L}, 
             src:DistArray[DenseBlock](1),
-            dst:Rail[ElemType]):void {
+            dst:Rail[Double]):void {
 
 		val root = here.id();
 		var rowoff:Long=0;
@@ -309,8 +314,8 @@ public class MatrixGather {
 		val nb = src.region.size();
 		var szlist:Rail[Long];
 
-        assert (nb==dst.size) :
-            "Number blocks in dist and local array mismatch";
+		Debug.assure(nb==dst.size, 
+					 "Number blocks in dist and local array mismatch");
 
 		@Ifdef("MPI_COMMU") {
 			szlist = mpiGatherSize(src);
@@ -379,8 +384,8 @@ public class MatrixGather {
 			src:DistArray[SparseBlock](1), 
 			dst:SparseCSC) : void {
 
-		assert (gp.numRowBlocks==1L ||gp.N==1L) :
-			"Number of row block in partition must be 1 or matrix is a vector";
+		Debug.assure(gp.numRowBlocks==1L ||gp.N==1L, 
+			"Number of row block in partition must be 1 or matrix is a vector");
 
 		@Ifdef("MPI_COMMU") {
 			mpiGatherRowBs(gp, src, dst);
@@ -414,7 +419,7 @@ public class MatrixGather {
 							//val tmplst = null;
 
 							val tmpidx = new Rail[Long](0); 
-							val tmpval = new Rail[ElemType](0);
+							val tmpval = new Rail[Double](0);
 							val tmplst = new Rail[Long](0);
 					
 							srcspa.initRemoteCopyAtSource();

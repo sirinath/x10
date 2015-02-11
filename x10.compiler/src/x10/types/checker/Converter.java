@@ -613,12 +613,9 @@ public class Converter {
 		boolean inferGuard = false;
 		ProcedureDef procDef = null;
 		if (opts.x10_config.CONSTRAINT_INFERENCE) {
-			if (context.currentCode() instanceof ProcedureDef) {
-				procDef = (ProcedureDef) context.currentCode();
-				inferGuard = procDef.inferGuard();
-			} else {
-				// FIXME add other cases if we want to handle constraint inference on other language constructs.
-			}
+			assert (context.currentCode() instanceof ProcedureDef);
+			procDef = (ProcedureDef) context.currentCode();
+			inferGuard = procDef.inferGuard();
 		}
 
 		if (ts.isSubtype(baseFrom, baseTo, context)) {

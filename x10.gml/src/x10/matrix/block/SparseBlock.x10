@@ -11,15 +11,13 @@
 
 package x10.matrix.block;
 
+import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.util.RandTool;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.sparse.CompressArray;
 import x10.matrix.sparse.Compress2D;
 import x10.matrix.sparse.SparseCSC;
-
 import x10.matrix.builder.SparseCSCBuilder;
 import x10.matrix.builder.SymSparseBuilder;
 import x10.matrix.builder.TriSparseBuilder;
@@ -53,13 +51,13 @@ public class SparseBlock extends MatrixBlock {
 	 * @param  cdat     the sparse matrix's compress2D data structure
 	 */
 	public static def make(gp:Grid, 
-			       rid:Long, cid:Long, 
-			       cdat:Compress2D
-			       ) : SparseBlock {
-	    val m = gp.rowBs(rid);
-	    val n = gp.colBs(cid);
-	    val smat = new SparseCSC(m, n, cdat);
-	    return new SparseBlock(rid, cid, gp.startRow(rid), gp.startCol(cid), smat);
+						   rid:Long, cid:Long, 
+						   cdat:Compress2D
+						   ) : SparseBlock {
+		val m = gp.rowBs(rid);
+		val n = gp.colBs(cid);
+		val smat = new SparseCSC(m, n, cdat);
+		return new SparseBlock(rid, cid, gp.startRow(rid), gp.startCol(cid), smat);
 	}
 	
 	/**
@@ -71,11 +69,12 @@ public class SparseBlock extends MatrixBlock {
 	 * @param  cid      block's column id
 	 * @param  nzcnt     number of nonzero element in block
 	 */
-	public static def make(gp:Grid, rid:Long, cid:Long, nzcnt:Long) : SparseBlock {
-	    val m = gp.rowBs(rid);
-	    val n = gp.colBs(cid);
-	    val smat = SparseCSC.make(m, n, nzcnt);
-	    return new SparseBlock(rid, cid, gp.startRow(rid), gp.startCol(cid), smat);
+	public static def make(gp:Grid, rid:Long, cid:Long, nzcnt:Long
+						   ) : SparseBlock {
+		val m = gp.rowBs(rid);
+		val n = gp.colBs(cid);
+		val smat = SparseCSC.make(m, n, nzcnt);
+		return new SparseBlock(rid, cid, gp.startRow(rid), gp.startCol(cid), smat);
 	}
 	
 	/**
@@ -87,12 +86,13 @@ public class SparseBlock extends MatrixBlock {
 	 * @param  cid      block's column id
 	 * @param  nzd      sparsity in block
 	 */
-	public static def make(gp:Grid, rid:Long, cid:Long, nzd:Float) : SparseBlock {
-	    val m = gp.rowBs(rid);
-	    val n = gp.colBs(cid);
-	    val nzcnt = (nzd*m*n) as Long;
-	    val smat = SparseCSC.make(m, n, nzcnt);
-	    return new SparseBlock(rid, cid, gp.startRow(rid), gp.startCol(cid), smat);
+	public static def make(gp:Grid, rid:Long, cid:Long, nzd:Double
+						   ) : SparseBlock {
+		val m = gp.rowBs(rid);
+		val n = gp.colBs(cid);
+		val nzcnt = (nzd*m*n) as Long;
+		val smat = SparseCSC.make(m, n, nzcnt);
+		return new SparseBlock(rid, cid, gp.startRow(rid), gp.startCol(cid), smat);
 	}
 	
 	/**
@@ -106,11 +106,12 @@ public class SparseBlock extends MatrixBlock {
 	 * @param  n        columns in block
 	 * @param  nzd      sparsity in block
 	 */
-    public static def make(rid:Long, cid:Long, roff:Long, coff:Long, m:Long, n:Long, nzd:Float) : SparseBlock {
-	val nzcnt = (nzd*m*n) as Long;
-	val smat = SparseCSC.make(m, n, nzcnt);
-	return new SparseBlock(rid, cid, roff, coff, smat);
-    }
+	public static def make(rid:Long, cid:Long, roff:Long, coff:Long, m:Long, n:Long, nzd:Double
+	) : SparseBlock {
+		val nzcnt = (nzd*m*n) as Long;
+		val smat = SparseCSC.make(m, n, nzcnt);
+		return new SparseBlock(rid, cid, roff, coff, smat);
+	}
 	
 	/**
 	 * Create a sparse-matrix block and allocate memory space for 
@@ -147,7 +148,7 @@ public class SparseBlock extends MatrixBlock {
 	}
 
 	//Initialization
-	public def init(dv:ElemType):void {
+	public def init(dv:Double):void {
 		sparse.init(dv);
 	}
 	
@@ -155,29 +156,29 @@ public class SparseBlock extends MatrixBlock {
 	 * Initialize matrix block data with input function, given offset on 
 	 * row and column.
 	 */
-	public def init(f:(Long, Long)=>ElemType):void {
-	    sparse.init(rowOffset, colOffset, f);
+	public def init(f:(Long, Long)=>Double):void {
+		sparse.init(rowOffset, colOffset, f);
 	}
 	
 	/**
 	 * Initialize the sparse matrix block with random values.
 	 */
 	public def initRandom():void {
-	    sparse.initRandom();
+		sparse.initRandom();
 	}
 
-	public def initRandom(nzDensity:Float):void {
-	    getBuilder().initRandom(nzDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
+	public def initRandom(nzDensity:Double):void {
+		getBuilder().initRandom(nzDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
 	}
 	
-// 	public def initRandomSym(halfNZDensity:ElemType):void {
+// 	public def initRandomSym(halfNZDensity:Double):void {
 // 		val bdr = getBuilder();
 // 		Debug.assure(sparse.M==sparse.N, "Not square matrix block");
 // 		val symbdr = new SymSparseBuilder(bdr as SparseCSCBuilder(sparse.M));
 // 		symbdr.initRandom(halfNZDensity).toSparseCSC(sparse as SparseCSC(symbdr.M,symbdr.M));
 // 	}
 // 
-// 	public def initRandomTri(up:Boolean, halfNZDensity:ElemType):void {
+// 	public def initRandomTri(up:Boolean, halfNZDensity:Double):void {
 // 		val bdr = getBuilder();
 // 		Debug.assure(sparse.M==sparse.N, "Not square matrix block");
 // 		val tribdr = new TriSparseBuilder(up, bdr as SparseCSCBuilder(sparse.M));
@@ -208,12 +209,12 @@ public class SparseBlock extends MatrixBlock {
 	/**
 	 * Return the element value array of the sparse block
 	 */
-	public def getData() = sparse.getValue();
+	public def getData():Rail[Double]   = sparse.getValue();
 
 	/**
 	 * Return the index array of the sparse block
 	 */
-	public def getIndex() = sparse.getIndex();
+	public def getIndex():Rail[Long]    = sparse.getIndex();
 
 
 
@@ -225,7 +226,8 @@ public class SparseBlock extends MatrixBlock {
 	public def alloc(m:Long, n:Long) = new SparseBlock(myRowId, myColId, rowOffset, colOffset, sparse.alloc(m, n));	
 	public def alloc() = new SparseBlock(myRowId, myColId, rowOffset, colOffset, sparse.alloc(sparse.M, sparse.N));
 	
-	public def allocFull(m:Long, n:Long) = make(myRowId, myColId, rowOffset, colOffset, m, n, 1.0f);
+	public def allocFull(m:Long, n:Long) = 
+		make(myRowId, myColId, rowOffset, colOffset, m, n, 1.0);
 	
 	
 	/**
@@ -251,7 +253,7 @@ public class SparseBlock extends MatrixBlock {
 	 * @param dstmat     target matrix, must be SparseCSC type
 	 */
 	public def copyCols(srcoff:Long, colcnt:Long, dstmat:Matrix):Long {
-		assert dstmat instanceof SparseCSC;
+		Debug.assure(dstmat instanceof SparseCSC);
 		return copyCols(srcoff, colcnt, dstmat as SparseCSC);
 	}
 	
@@ -276,7 +278,7 @@ public class SparseBlock extends MatrixBlock {
 	 * @param dstmat     target matrix
 	 */
 	public def copyRows(srcoff:Long, rowcnt:Long, dstmat:Matrix):Long {
-		assert dstmat instanceof SparseCSC;
+		Debug.assure(dstmat instanceof SparseCSC);
 		return copyRows(srcoff, rowcnt, dstmat as SparseCSC);
 	}
 	
@@ -288,7 +290,10 @@ public class SparseBlock extends MatrixBlock {
 	 * @param dstspa     target sparse matrix 
 	 */
 	public def copyRows(srcoff:Long, rowcnt:Long, dstspa:SparseCSC):Long {
+		//Debug.flushln("Copy rows:"+srcoff+" cnt:"+rowcnt+
+		//			" to dst size:"+dstspa.getStorage().storageSize());
 		return SparseCSC.copyRows(sparse, srcoff, dstspa, 0, rowcnt);
+		//Debug.flushln("Copy nzd count:"+cnt);
 	}
 
 
@@ -336,7 +341,7 @@ public class SparseBlock extends MatrixBlock {
 // 		if ((a instanceof SparseCSC) && (b instanceof SparseCSC))
 // 			SparseMultToCSCol.comp(a as SparseCSC, b as SparseCSC, sparse, plus);
 // 		else 
-// 			throw new UnsupportedOperationException("Error in input block matrix types");
+// 			Debug.exit("Error in input block matrix types");
 // 	}
 
 	// Transpose
@@ -358,7 +363,7 @@ public class SparseBlock extends MatrixBlock {
 			bdr.initTransposeFrom(src);
 			bdr.toSparseCSC();
 		} else {
-			throw new UnsupportedOperationException("Matrix types are not supported in transpose method");
+			Debug.exit("Matrix types are not supported in transpose method");
 		}
 	}
 

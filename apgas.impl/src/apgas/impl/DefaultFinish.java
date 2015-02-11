@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package apgas.impl;
@@ -45,18 +45,8 @@ import apgas.util.GlobalID;
  * <p>
  * The finish body counts as one local task.
  */
-final class DefaultFinish implements Serializable, Finish {
+final class DefaultFinish implements Finish, Serializable {
   private static final long serialVersionUID = 3789869778188598267L;
-
-  /**
-   * A factory producing {@link DefaultFinish} instances.
-   */
-  static class Factory extends Finish.Factory {
-    @Override
-    DefaultFinish make(Finish parent) {
-      return new DefaultFinish();
-    }
-  }
 
   /**
    * The {@link GlobalID} instance for this finish construct.
@@ -91,10 +81,12 @@ final class DefaultFinish implements Serializable, Finish {
 
   /**
    * Constructs a finish instance.
+   *
+   * @param p
+   *          the place ID of the main task
    */
-  DefaultFinish() {
-    final int here = GlobalRuntimeImpl.getRuntime().here;
-    spawn(here);
+  DefaultFinish(int p) {
+    spawn(p);
   }
 
   @Override
@@ -119,8 +111,7 @@ final class DefaultFinish implements Serializable, Finish {
         counts = new int[GlobalRuntimeImpl.getRuntime().transport.places()];
         counts[here] = count;
         count = 1;
-      }
-      if (p >= counts.length) {
+      } else if (p >= counts.length) {
         resize(p + 1);
       }
       if (counts[p]++ == 0) {
@@ -161,7 +152,7 @@ final class DefaultFinish implements Serializable, Finish {
   }
 
   @Override
-  public synchronized void tell(int p) {
+  public synchronized void tell() {
     final int here = GlobalRuntimeImpl.getRuntime().here;
     if (id == null || id.home.id == here) {
       // local or root finish
@@ -181,9 +172,8 @@ final class DefaultFinish implements Serializable, Finish {
       --counts[here];
       if (--count == 0) {
         final int _counts[] = counts;
-        final DefaultFinish that = this;
         GlobalRuntimeImpl.getRuntime().transport.send(id.home.id,
-            () -> that.update(_counts));
+            () -> update(_counts));
         Arrays.fill(counts, 0);
       }
     }
@@ -224,13 +214,13 @@ final class DefaultFinish implements Serializable, Finish {
       exceptions.add(exception);
     } else {
       // remote finish
-      new ExceptionalTask(this, exception, here).spawn(id.home.id);
+      new ExceptionalTask(this, exception, here).spawn();
     }
   }
 
   @Override
-  public synchronized boolean isReleasable() {
-    return count == 0;
+  public boolean waiting() {
+    return count != 0;
   }
 
   @Override
@@ -239,14 +229,13 @@ final class DefaultFinish implements Serializable, Finish {
   }
 
   @Override
-  public synchronized boolean block() {
+  public synchronized void await() {
     while (count != 0) {
       try {
         wait();
       } catch (final InterruptedException e) {
       }
     }
-    return count == 0;
   }
 
   /**
@@ -299,5 +288,10 @@ final class DefaultFinish implements Serializable, Finish {
       }
     }
     return me;
+  }
+
+  @Override
+  public int home() {
+    return id == null ? GlobalRuntimeImpl.getRuntime().here : id.home.id;
   }
 }

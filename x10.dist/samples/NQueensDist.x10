@@ -10,7 +10,9 @@
  *  (C) Copyright Australian National University 2011.
  */
 
-import x10.array.DistArray_Unique;
+import x10.regionarray.Dist;
+import x10.regionarray.DistArray;
+import x10.regionarray.Region;
 
 /**
  * A distributed version of NQueens. Runs over NUM_PLACES.
@@ -23,14 +25,14 @@ public class NQueensDist {
 
     val N:Long;
     val P:Long;
-    val results:DistArray_Unique[Long];
-    val R:LongRange;
+    val results:DistArray[Long](1);
+    val R:Region(1){rect};
 
     def this(N:Long, P:Long) { 
         this.N=N;
         this.P=P;
-        this.results = new DistArray_Unique[Long]();
-        this.R = 0..(N-1);
+        this.results = DistArray.make[Long](Dist.makeUnique(), 0);
+        this.R = Region.make(0, N-1);
     }
     def start() {
         new Board().distSearch();
@@ -64,7 +66,7 @@ public class NQueensDist {
 
         /** Search all positions for the current board. */
         def search() {
-            for (k in R) searchOne(k);
+            for ([k] in R) searchOne(k);
         }
 
         /**
@@ -90,15 +92,9 @@ public class NQueensDist {
          * using a block distribution of the current free rank.
          */
         def distSearch()  {
-            val work = R.split(Place.numPlaces());
-            finish for (p in Place.places()) {
-                val myPiece = work(p.id);
-                at (p) async {
-                    // implicit copy of 'this' made across the at divide
-                    for (k in myPiece) {
-                        searchOne(k);
-                    }
-                }
+            ateach([k] in Dist.makeBlock(R)) {
+                // implicit copy of 'this' made across the at divide
+                searchOne(k);
             }
         }
     }

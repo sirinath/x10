@@ -15,8 +15,6 @@ import x10.matrix.util.Debug;
 import x10.matrix.Matrix;
 import x10.matrix.util.RandTool;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.builder.DenseBuilder;
 import x10.matrix.builder.SymDenseBuilder;
 import x10.matrix.builder.TriDenseBuilder;
@@ -71,7 +69,7 @@ public class DenseBlock extends MatrixBlock {
 	public static def make(
 			gp:Grid, 
 			rid:Long, cid:Long, 
-			da:Rail[ElemType]{self!=null}):DenseBlock {
+			da:Rail[Double]):DenseBlock {
 		val m = gp.rowBs(rid);
 		val n = gp.colBs(cid);
 		val dmat = new DenseMatrix(m, n, da);
@@ -97,7 +95,7 @@ public class DenseBlock extends MatrixBlock {
 	 *
 	 * @param  ival      Initial value
 	 */
-	public def init(ival:ElemType):void {
+	public def init(ival:Double):void {
 		dense.init(ival);
 	}
 	
@@ -113,16 +111,16 @@ public class DenseBlock extends MatrixBlock {
 	public def getSymBuilder():DenseBuilder{self.M==self.N} = new SymDenseBuilder(dense as DenseMatrix{self.M==self.N});
 	public def getTriBuilder(up:Boolean):DenseBuilder{self.M==self.N} = new TriDenseBuilder(up, dense as DenseMatrix{self.M==self.N});
 
-	public def initRandom(nonZeroDensity:Float):void {
-	    getBuilder().initRandom(nonZeroDensity, (Long,Long)=>RandTool.nextElemType[ElemType]());
+	public def initRandom(nonZeroDensity:Double):void {
+		getBuilder().initRandom(nonZeroDensity, (Long,Long)=>RandTool.getRandGen().nextDouble());
 	}
 
-	// public def initRandomSym(halfDensity:ElemType) : void {
+	// public def initRandomSym(halfDensity:Double) : void {
 	// 	val symbld = new SymDenseBuilder(dense as DenseMatrix{self.M==self.N});
 	// 	symbld.initRandom(halfDensity);
 	// }
 
-	// public def initRandomTri(up:Boolean, halfDensity:ElemType) : void {
+	// public def initRandomTri(up:Boolean, halfDensity:Double) : void {
 	// 	val tribld = new TriDenseBuilder(up, dense as DenseMatrix{self.M==self.N});
 	// 	tribld.initRandom(halfDensity);
 	// }
@@ -150,7 +148,7 @@ public class DenseBlock extends MatrixBlock {
 	/**
 	 * Return the data for the matrix block.
 	 */
-	public def getData() = dense.d;
+	public def getData():Rail[Double] = dense.d;
 
 	/**
 	 * Return the surface index array. Valid for sparse matrix only.
@@ -160,6 +158,7 @@ public class DenseBlock extends MatrixBlock {
 		return new Rail[Long](0);
 	}
 
+
 	// Some short-keys for matrix functions
 	public def alloc(m:Long, n:Long) = new DenseBlock(myRowId, myColId, rowOffset, colOffset, dense.alloc(m, n));	
 
@@ -167,6 +166,7 @@ public class DenseBlock extends MatrixBlock {
 	public def allocFull(m:Long, n:Long) = new DenseBlock(myRowId, myColId, rowOffset, colOffset, dense.alloc(m, n));
 
 	public def clone() {
+		//Debug.flushln("Clone dense block");
 		val ndb = new DenseBlock(myRowId, myColId, rowOffset, colOffset, dense.clone());
 		return ndb;
 	}
@@ -181,7 +181,7 @@ public class DenseBlock extends MatrixBlock {
 	/**
 	 * Return the matrix data give its row and column.
 	 */
-	public operator this(r:Long, c:Long):ElemType = dense(r, c);
+	public operator this(r:Long, c:Long):Double = dense(r, c);
 		
 	/**
 	 * Copy columns from dense block to a dense matrix. 
@@ -203,8 +203,8 @@ public class DenseBlock extends MatrixBlock {
 	 * @param dstmat     target matrix
 	 */
 	public def copyCols(srcoff:Long, colcnt:Long, dstmat:Matrix):Long {
-        assert (dstmat instanceof DenseMatrix) :
-            "Target is not a dense matrix instance";
+		Debug.assure(dstmat instanceof DenseMatrix, 
+					 "Target is not a dense matrix instance");
 		return copyCols(srcoff, colcnt, dstmat as DenseMatrix);
 	}
 
@@ -228,7 +228,7 @@ public class DenseBlock extends MatrixBlock {
 	 * @param dstmat     the target matrix
 	 */
 	public def copyRows(srcoff:Long, rowcnt:Long, dstmat:Matrix):Long {
-		assert dstmat instanceof DenseMatrix;
+		Debug.assure(dstmat instanceof DenseMatrix);
 		return copyRows(srcoff, rowcnt, dstmat as DenseMatrix);
 	}
 
@@ -243,7 +243,7 @@ public class DenseBlock extends MatrixBlock {
 	 * @param srcmat     source matrix to add with
 	 */
 	public def addCols(coloff:Long, colcnt:Long, srcmat:Matrix):void {
-		assert srcmat instanceof DenseMatrix;
+		Debug.assure(srcmat instanceof DenseMatrix);
 		addCols(coloff, colcnt, srcmat as DenseMatrix);
 	}
 
@@ -255,8 +255,8 @@ public class DenseBlock extends MatrixBlock {
 	 * @param srcden     source dense matrix to add with
 	 */	
 	public def addCols(coloff:Long, colcnt:Long, srcden:DenseMatrix):void {
-        assert (srcden.M <= dense.M && colcnt<=srcden.N && coloff+colcnt<=dense.N) :
-            "off:"+coloff+" cnt:"+colcnt+" dst.N:"+dense.N;
+		Debug.assure(srcden.M <= dense.M && colcnt<=srcden.N && coloff+colcnt<=dense.N,
+				"off:"+coloff+" cnt:"+colcnt+" dst.N:"+dense.N);
 
 		var src:Long=0;
 		var j:Long;
@@ -275,7 +275,7 @@ public class DenseBlock extends MatrixBlock {
 	 * @param srcmat     source matrix to add with
 	 */	
     public def addRows(rowoff:Long, rowcnt:Long, srcmat:Matrix):void {
-        assert srcmat instanceof DenseMatrix;
+        Debug.assure(srcmat instanceof DenseMatrix);
         addRows(rowoff, rowcnt, srcmat as DenseMatrix);
     }
 
@@ -287,8 +287,7 @@ public class DenseBlock extends MatrixBlock {
      * @param srcden     source dense matrix from which to add
      */	
     public def addRows(rowoff:Long, rowcnt:Long, srcden:DenseMatrix):void {
-        assert (srcden.N <= dense.N && rowcnt<=srcden.M && rowoff+rowcnt<=dense.M) :
-            "off:"+rowoff+" cnt:"+rowcnt+" dst.M:"+dense.M;
+        Debug.assure(srcden.N <= dense.N && rowcnt<=srcden.M && rowoff+rowcnt<=dense.M,	"off:"+rowoff+" cnt:"+rowcnt+" dst.M:"+dense.M);
         var src:Long=0;
         var j:Long;
         for (var dst:Long=rowoff; dst<=rowoff+(srcden.N-1)*dense.M; dst+=dense.M, src+=srcden.M) {
@@ -306,22 +305,22 @@ public class DenseBlock extends MatrixBlock {
 	public def transposeFrom(srcblk:DenseBlock) {
 		val src = srcblk.dense;
 		val dst = this.dense as DenseMatrix(src.N,src.M); 
-		dst.T(src);
+		src.T(dst);
 	}
 	
 	public def transposeTo(dstblk:DenseBlock) {
 		val src = this.dense;
 		val dst = dstblk.dense as DenseMatrix(src.N,src.M); 
-		dst.T(src);
+		src.T(dst);
 	}
 	
 	public def transposeFrom(srcmat:Matrix) {
 		if (srcmat instanceof DenseMatrix) {
 			val src = srcmat as DenseMatrix;
 			val dst = dense as DenseMatrix(src.N,src.M);
-			dst.T(src);
+			src.T(dst);
 		} else {
-			throw new UnsupportedOperationException("Matrix types are not supported in transpose method");
+			Debug.exit("Matrix types are not supported in transpose method");
 		}
 	}		
 

@@ -6,16 +6,24 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2015.
+ *  (C) Copyright IBM Corporation 2006-2014.
  */
 
 package apgas.impl;
 
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 /**
  * The {@link ExceptionalTask} class is used to transport exceptions across
- * places in the default finish implementation.
+ * places.
+ * <p>
+ * Exceptions that are not serializable are automatically replaced by
+ * {@link java.io.NotSerializableException} exceptions.
  */
-final class ExceptionalTask implements SerializableRunnable {
+public class ExceptionalTask implements SerializableRunnable {
   private static final long serialVersionUID = -4842601206169675750L;
 
   /**
@@ -26,7 +34,7 @@ final class ExceptionalTask implements SerializableRunnable {
   /**
    * The exception to transport to the root finish object.
    */
-  SerializableThrowable t;
+  Throwable t;
 
   /**
    * The place of the parent task.
@@ -45,7 +53,7 @@ final class ExceptionalTask implements SerializableRunnable {
    */
   ExceptionalTask(Finish finish, Throwable t, int parent) {
     this.finish = finish;
-    this.t = new SerializableThrowable(t);
+    this.t = t;
     this.parent = parent;
   }
 
@@ -57,17 +65,39 @@ final class ExceptionalTask implements SerializableRunnable {
   @Override
   public void run() {
     finish.submit(parent);
-    finish.addSuppressed(t.t);
-    finish.tell(parent);
+    finish.addSuppressed(t);
+    finish.tell();
+  }
+
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    out.writeObject(finish);
+    out.writeInt(parent);
+    final NotSerializableException e = new NotSerializableException(t
+        .getClass().getCanonicalName());
+    e.setStackTrace(t.getStackTrace());
+    out.writeObject(e);
+    try {
+      out.writeObject(t);
+    } catch (final Throwable t) {
+    }
+  }
+
+  private void readObject(ObjectInputStream in) throws IOException,
+      ClassNotFoundException {
+    finish = (Finish) in.readObject();
+    parent = in.readInt();
+    t = (Throwable) in.readObject();
+    try {
+      t = (Throwable) in.readObject();
+    } catch (final Throwable e) {
+    }
   }
 
   /**
    * Spawns this {@link ExceptionalTask} instance.
-   *
-   * @param p
-   *          the place ID of the finish
    */
-  void spawn(int p) {
+  void spawn() {
+    final int p = finish.home();
     finish.spawn(p);
     GlobalRuntimeImpl.getRuntime().transport.send(p, this);
   }

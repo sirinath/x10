@@ -15,8 +15,7 @@ import x10.regionarray.Dist;
 import x10.compiler.Ifdef;
 import x10.compiler.Ifndef;
 
-import x10.matrix.ElemType;
-
+import x10.matrix.util.Debug;
 import x10.matrix.comm.mpi.WrapMPI;
 
 /**
@@ -40,11 +39,11 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * @param dst      target distributed arrays
      */
     public static def scatter(
-            src:Rail[Rail[ElemType]{self!=null}], 
+            src:Rail[Rail[Double]], 
             dst:DataArrayPLH) : void {
         val nb = Place.numPlaces();
-        assert (nb==src.size) :
-            "Number blocks in dist and local array mismatch";
+        Debug.assure(nb==src.size, 
+        "Number blocks in dist and local array mismatch");
         
         finish for (var bid:Long=0; bid<nb; bid++) {
             val srcbuf = src(bid);
@@ -69,10 +68,10 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * Scatter single-row partitioning blocks from here to all places
      */
     public static def scatter(
-            src:Rail[ElemType]{self!=null}, 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             gp:Rail[Long]): void {
-        assert gp.size == Place.numPlaces();
+        Debug.assure(gp.size == Place.numPlaces());
 
         @Ifdef("MPI_COMMU") {
             mpiScatter(src, dst, gp);
@@ -87,14 +86,14 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * Scatter single-row partitioning blocks from here to a place group
      */
     public static def scatter(
-            src:Rail[ElemType]{self!=null}, 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             gp:Rail[Long],
             places:PlaceGroup): void {
-        assert gp.size == places.size();
+        Debug.assure(gp.size == places.size());
         
         @Ifdef("MPI_COMMU") {
-            throw new UnsupportedOperationException("No MPI implementation");
+            Debug.exit("No MPI implementation");
         }
         @Ifndef("MPI_COMMU") {
             x10Scatter(src, dst, gp, places);
@@ -111,7 +110,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * @param gp          size list, or partitioning of array for scattering
      */
     public static def mpiScatter(
-            src:Rail[ElemType],
+            src:Rail[Double],
             dst:DataArrayPLH, 
             szlist:Rail[Long]): void {
         
@@ -129,8 +128,9 @@ public class ArrayScatter extends ArrayRemoteCopy {
                         //val tmpbuf= null; //fake
                         //val tmplst=null;//   //fake
                         /*******************************************/
-                        val tmpbuf = new Rail[ElemType](0); //fake
+                        val tmpbuf = new Rail[Double](0); //fake
                         val tmplst = new Rail[Long](0);   //fake
+                        //Debug.flushln("P"+p+" starting non root scatter :"+datcnt);
                         WrapMPI.world.scatterv(tmpbuf, tmplst, dstbuf, datcnt, root);
                     }
                 } 
@@ -140,6 +140,7 @@ public class ArrayScatter extends ArrayRemoteCopy {
                 // DO NOT move this block into for loop block
                 // MPI process will hang, Cause is not clear
                 /**********************************************/    
+                //Debug.flushln("P"+root+" starting root scatter:"+szlist.toString());
                 val dstbuf = dst();
                 WrapMPI.world.scatterv(src, szlist, dstbuf, szlist(root), root);
             }            
@@ -152,24 +153,24 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * 
      * @param src          source array
      * @param dst          target distributed array 
-     * @param szlist       list of sizes of blocks held at each place
+     * @param szlist      size list
      */
     public static def x10Scatter(
-            src:Rail[ElemType]{self!=null}, 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             szlist:Rail[Long]):void {
 
         val root = here.id();
         var off:Long=0;
-        finish for (cb in 0..(szlist.size-1)) {
+        for (var cb:Long=0; cb<szlist.size; cb++) {
             val datcnt = szlist(cb);
-            val srcoff = off;
             if (cb != root) {
-                async x10Copy(src, srcoff, dst, cb, 0, datcnt);
+                //Debug.flushln("Copy "+off+" to "+cb+" data:"+src(off));
+                x10Copy(src, off, dst, cb, 0, datcnt);
             } else {
                 //Make local copying
                 val dstbuf = dst();
-                async Rail.copy(src, srcoff, dstbuf, 0L, datcnt);
+                Rail.copy(src, off, dstbuf, 0L, datcnt);
             }
             off += datcnt;
         }
@@ -180,41 +181,42 @@ public class ArrayScatter extends ArrayRemoteCopy {
      * 
      * @param src          source array
      * @param dst          target distributed array 
-     * @param szlist       list of sizes of blocks held at each place
-     * @param places       scatter place group 
+     * @param szlist      size list
+    * @param places     scatter place group 
      */
     public static def x10Scatter(
-            src:Rail[ElemType]{self!=null}, 
+            src:Rail[Double], 
             dst:DataArrayPLH, 
             szlist:Rail[Long],
             places:PlaceGroup):void {
 
         val root = here.id();
         var off:Long=0;
-        finish for (cb in 0..(places.size()-1)) {
+        for (var cb:Long=0; cb<places.numPlaces(); cb++) {
             val datcnt = szlist(cb);
             val pid = places(cb).id;
-            val srcoff = off;
+            
             if (pid != root) {
-                async x10Copy(src, srcoff, dst, pid, 0, datcnt);
+                //Debug.flushln("Copy "+off+" to "+cb+" data:"+src(off));
+                x10Copy(src, off, dst, pid, 0, datcnt);
             } else {
                 //Make local copying
                 val dstbuf = dst();
-                async Rail.copy(src, srcoff, dstbuf, 0L, datcnt);
+                Rail.copy(src, off, dstbuf, 0L, datcnt);
             }
             off += datcnt;
         }
     }
 
     public static def verify(
-        src:Rail[ElemType], 
+        src:Rail[Double], 
         dstplh:DataArrayPLH, 
         szlist:Rail[Long]):Boolean {        
         return verify(src, dstplh, szlist, Place.places());
     }
     
     public static def verify(
-            src:Rail[ElemType], 
+            src:Rail[Double], 
             dstplh:DataArrayPLH, 
             szlist:Rail[Long],
             places:PlaceGroup):Boolean {

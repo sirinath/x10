@@ -75,9 +75,7 @@ public interface ProcedureDef extends CodeDef, X10CodeDef, X10MemberDef
     void setThrowTypes(List<Ref<? extends Type>> l);
 
     /** Set a flag indicating we should infer addition constraints in the guard. */
-    void inferGuard(boolean r);
-    /** Get the status of the flag inferGuard. */
     boolean inferGuard();
-
+    void inferGuard(boolean r);
     CRequirementCollection requirements();
 }
