@@ -37,6 +37,9 @@ endif
 override XRX_PROPS_LDLIBS += -lm -lpthread
 
 # -lrt
+ifeq ($(X10RT_PLATFORM),sunos)
+  override XRX_PROPS_LDLIBS += -lrt
+endif
 ifeq ($(shell uname -s),Linux)
   override XRX_PROPS_LDLIBS += -lrt
 endif
@@ -45,10 +48,8 @@ ifeq ($(shell uname -s),FreeBSD)
 endif
 
 # -ldl
-ifndef X10_STATIC_LIB
-  ifneq ($(shell uname -s),FreeBSD)
-    override XRX_PROPS_LDLIBS += -ldl
-  endif
+ifneq ($(shell uname -s),FreeBSD)
+  override XRX_PROPS_LDLIBS += -ldl
 endif
 
 override CXXFLAGS += $(INCLUDE_DIRS) -I$(GEN_DIR)
@@ -186,8 +187,10 @@ ALL_XRCPP_OBJECTS = \
 	x10/lang/RuntimeNatives.o \
 	x10/lang/Short.o \
 	x10/lang/String.o \
+	x10/lang/Deque.o \
 	x10/lang/Lock__ReentrantLock.o \
 	x10/lang/PlaceLocalHandle_Impl.o \
+	x10/lang/Thread.o \
 	x10/lang/UByte.o \
 	x10/lang/UInt.o \
 	x10/lang/ULong.o \
@@ -197,9 +200,7 @@ ALL_XRCPP_OBJECTS = \
 	x10/util/concurrent/AtomicBooleanNatives.o \
 	x10/util/concurrent/AtomicIntegerNatives.o \
 	x10/util/concurrent/AtomicLongNatives.o \
-	x10/util/concurrent/AtomicReference.o \
-	x10/xrx/Deque.o \
-	x10/xrx/Thread.o
+	x10/util/concurrent/AtomicReference.o
 
 ALL_MANUAL_OBJECTS=$(ALL_XRCPP_OBJECTS)
 
@@ -213,10 +214,17 @@ $(XRX_ARCHIVE): $(GEN_DIR)/all-o-generated $(ALL_MANUAL_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(shell sed -e's@^\(.*\)\.cc$$@\1.o@' $(GEN_DIR)/all-cpp-generated) $(ALL_MANUAL_OBJECTS)
 else
 $(XRX_ARCHIVE): $(GEN_DIR)/all-o-generated $(ALL_MANUAL_OBJECTS)
+ifeq ($(X10RT_PLATFORM),aix_xlc)
+	$(SHLINK) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS_SHARED) -o $@ \
+	    $(shell sed -e's@^\(.*\)\.cc$$@\1.o@' $(GEN_DIR)/all-cpp-generated) \
+            $(ALL_MANUAL_OBJECTS) \
+	    $(XRX_DEP_LIBS)
+else
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS_SHARED) $(LDFLAGS_SHARED) -o $@ \
-	$(shell sed -e's@^\(.*\)\.cc$$@\1.o@' $(GEN_DIR)/all-cpp-generated) \
-	$(ALL_MANUAL_OBJECTS) \
-	$(XRX_DEP_LIBS)
+	    $(shell sed -e's@^\(.*\)\.cc$$@\1.o@' $(GEN_DIR)/all-cpp-generated) \
+            $(ALL_MANUAL_OBJECTS) \
+	    $(XRX_DEP_LIBS)
+endif
 endif
 
 # The dummy files are needed to avoid rebuilds so must not be removed as

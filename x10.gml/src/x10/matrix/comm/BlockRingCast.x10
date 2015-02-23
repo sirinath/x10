@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -17,8 +17,6 @@ import x10.compiler.Inline;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.block.MatrixBlock;
@@ -142,13 +140,13 @@ public class BlockRingCast extends BlockRemoteCopy {
 	private static def x10CopyDenseBlock(distBS:BlocksPLH, rootbid:Long, srcblk:MatrixBlock, rmtpid:Long, datCnt:Long,	select:(Long,Long)=>Long, plist:Rail[Long]):void {
 		
 		val srcden = srcblk.getMatrix() as DenseMatrix;
-		val srcbuf = new GlobalRail[ElemType](srcden.d as Rail[ElemType]{self!=null});
+		val srcbuf = new GlobalRail[Double](srcden.d as Rail[Double]{self!=null});
 		at(Place(rmtpid)) {
 			//Remote capture:distBS, rootbid, datCnt, rtplist
 			val blk  = distBS().findFrontBlock(rootbid, select);
 			val dstden = blk.getMatrix() as DenseMatrix;
 			// Using copyFrom style
-			finish Rail.asyncCopy[ElemType](srcbuf, 0, dstden.d, 0, datCnt);
+			finish Rail.asyncCopy[Double](srcbuf, 0, dstden.d, 0, datCnt);
 			
 			// Perform binary bcast on the right branch
 			if (plist.size > 1 ) {
@@ -165,7 +163,7 @@ public class BlockRingCast extends BlockRemoteCopy {
 		
 		val srcspa = srcblk.getMatrix() as SparseCSC;
 		val srcidx = new GlobalRail[Long](srcspa.getIndex() as Rail[Long]{self!=null});
-		val srcval = new GlobalRail[ElemType](srcspa.getValue() as Rail[ElemType]{self!=null});
+		val srcval = new GlobalRail[Double](srcspa.getValue() as Rail[Double]{self!=null});
 		
 		at(Place(rmtpid)) {
 			//Remote capture:distBS, rootbid, datCnt, rtplist
@@ -174,7 +172,7 @@ public class BlockRingCast extends BlockRemoteCopy {
 			// Using copyFrom style
 			dstspa.initRemoteCopyAtDest(datCnt);
 			finish Rail.asyncCopy[Long](srcidx, 0, dstspa.getIndex(), 0, datCnt);
-			finish Rail.asyncCopy[ElemType](srcval, 0, dstspa.getValue(), 0, datCnt);
+			finish Rail.asyncCopy[Double](srcval, 0, dstspa.getValue(), 0, datCnt);
 			// Perform binary bcast on the right branch
 			if (plist.size > 1 ) {
 				binaryTreeCastTo(distBS, rootbid, datCnt, select, plist);

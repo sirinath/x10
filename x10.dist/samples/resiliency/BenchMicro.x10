@@ -6,10 +6,8 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
-
-import x10.xrx.Runtime;
 
 /**
  * This is a microbenchmark used to isolate the

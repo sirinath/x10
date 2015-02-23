@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix;
@@ -15,7 +15,6 @@ import x10.util.StringBuilder;
 
 import x10.matrix.blas.DenseMatrixBLAS;
 import x10.matrix.util.RandTool;
-import x10.matrix.util.ElemTypeTool;
 
 public type SymDense(m:Long, n:Long)=SymDense{m==n, self.M==m, self.N==n};
 public type SymDense(m:Long)=SymDense{self.M==m,self.N==m};
@@ -33,24 +32,24 @@ public type SymDense(C:Matrix)=SymDense{self==C};
  */
 public class SymDense extends DenseMatrix{self.M==self.N} {
 	
-	public def this(n:Long, x:Rail[ElemType]{self!=null}) : SymDense(n){
+	public def this(n:Long, x:Rail[Double]{self!=null}) : SymDense(n){
 		super(n, n, x);
 	}
 	
 	public static def make(n:Long):SymDense(n) {
-		val x = new Rail[ElemType](n*n);
+		val x = new Rail[Double](n*n);
 		return new SymDense(n, x);
 	}
 
 	public def clone():SymDense(M){
-		val nd = new Rail[ElemType](this.d);
+		val nd = new Rail[Double](this.d);
 		val nm = new SymDense(M, nd);
 		return nm as SymDense(M);
 	}
 	
 	public  def alloc(m:Long, n:Long):SymDense(m,n) {
 		assert m==n;
-		val x = new Rail[ElemType](m*m);
+		val x = new Rail[Double](m*m);
 		val nm = new SymDense(m, x);
 		return nm as SymDense(m,n);
 	}
@@ -122,7 +121,7 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 	 * 
 	 * @param  iv 	the constant value
 	 */	
-	public def init(iv:ElemType): SymDense(this) {
+	public def init(iv:Double): SymDense(this) {
 		for (var i:Long=0; i<this.d.size; i++)
 			this.d(i) = iv;
 		return this;
@@ -136,7 +135,7 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 	 * @param f    The function to use to initialize the matrix
 	 * @return this object
 	 */
-	public def init(f:(Long,Long)=>ElemType): SymDense(this) {
+	public def init(f:(Long,Long)=>Double): SymDense(this) {
 		var i:Long=0;
 		for (var c:Long=0; c<N; c++, i+=c)
 			for (var r:Long=c; r<M; r++, i++)
@@ -153,7 +152,7 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 		var colstt:Long=0;
 		for (var len:Long=N; len>0; len--, colstt+=M+1)
 			for (var i:Long=colstt; i<colstt+len; i++)
-				this.d(i) = RandTool.nextElemType[ElemType](rgen);
+				this.d(i) = rgen.nextDouble();
 		mirrorToUpper(this);
 		return this;
 	}
@@ -187,14 +186,14 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 
 	// Cellwise operations. Only lower triangular part is modified.
 
-	public  def scale(a:ElemType):SymDense(this)  {
+	public  def scale(a:Double):SymDense(this)  {
 		for (var i:Long =0; i<M*N; i++)
 			this.d(i) *= a;
 		return this;
 	}
 	
-	public def sum():ElemType {
-		var tt:ElemType = ElemTypeTool.zero;
+	public def sum():Double {
+		var tt:Double = 0.0;
 		var colstt:Long=1;
 		for (var len:Long=M-1; len>0; len--, colstt+=M+1) 
 			for (var i:Long=colstt; i<colstt+len; i++)
@@ -208,7 +207,7 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 
 	// Lower half cell-add operation
 
-	public def cellAdd(v:ElemType) : SymDense(this) = 
+	public def cellAdd(v:Double) : SymDense(this) = 
 		super.cellAdd(v) as SymDense(this);
 		
 	public def cellAdd(x:SymDense(M,N)):SymDense(this) =
@@ -231,14 +230,14 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 	// Cell-wise matrix multiplication
 
 	
-	// public def lowerCellSub(v:ElemType):SymDense(this) {
+	// public def lowerCellSub(v:Double):SymDense(this) {
 	// 	var colstt:Long=0;
 	// 	for (var len:Long=M; len>0; len--, colstt+=M+1)
 	// 		for (var i:Long=colstt; i<colstt+len; i++)		
 	// 			this.d(i) -= v;
 	// 	return this;
 	// }
-	public def cellSub(v:ElemType):SymDense(this) = 
+	public def cellSub(v:Double):SymDense(this) = 
 		super.cellSub(v) as SymDense(this);
 	
 	public def cellSub(x:SymDense(M,N)):SymDense(this) =
@@ -263,7 +262,7 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 
 	// Lower part cell-wise matrix multiplication
 
-	// public def lowerCellMult(v:ElemType):SymDense(this) {
+	// public def lowerCellMult(v:Double):SymDense(this) {
 	// 	var colstt:Long=0;
 	// 	for (var len:Long=M; len>0; len--, colstt+=M+1)
 	// 		for (var i:Long=colstt; i<colstt+len; i++)		
@@ -289,10 +288,10 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 
 	// Cellwise division
 
-	public def cellDiv(v:ElemType):SymDense(this) =
+	public def cellDiv(v:Double):SymDense(this) =
 		super.cellDiv(v) as SymDense(this);
 	
-	public def cellDivBy(v:ElemType):SymDense(this) =
+	public def cellDivBy(v:Double):SymDense(this) =
 		super.cellDivBy(v) as SymDense(this);
 	
 	public def cellDiv(x:SymDense(M,N)):SymDense(this) =
@@ -332,15 +331,15 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 
 	// Operator
 
-	public operator - this            = this.clone().scale(-ElemTypeTool.unit)      as SymDense(M,N);
-	public operator this + (v:ElemType) = this.clone().cellAdd(v)       as SymDense(M,N);
-	public operator (v:ElemType) + this = (this + v) as SymDense(M,N);
+	public operator - this            = this.clone().scale(-1.0)      as SymDense(M,N);
+	public operator this + (v:Double) = this.clone().cellAdd(v)       as SymDense(M,N);
+	public operator (v:Double) + this = (this + v) as SymDense(M,N);
 
-	public operator this - (v:ElemType) = this.clone().cellSub(v)       as SymDense(M,N);
-	public operator this / (v:ElemType) = this.clone().cellDiv(v)       as SymDense(M,N);
-	public operator (v:ElemType) / this = this.clone().cellDivBy(v)     as SymDense(M,N);
-	public operator this * (alpha:ElemType) = this.clone().scale(alpha) as SymDense(M,N);
-	public operator (alpha:ElemType) * this = this * alpha;
+	public operator this - (v:Double) = this.clone().cellSub(v)       as SymDense(M,N);
+	public operator this / (v:Double) = this.clone().cellDiv(v)       as SymDense(M,N);
+	public operator (v:Double) / this = this.clone().cellDivBy(v)     as SymDense(M,N);
+	public operator this * (alpha:Double) = this.clone().scale(alpha) as SymDense(M,N);
+	public operator (alpha:Double) * this = this * alpha;
 	
 	
 	public operator this + (that:SymDense(M)) = this.clone().cellAdd(that)  as SymDense(M,N);
@@ -368,16 +367,16 @@ public class SymDense extends DenseMatrix{self.M==self.N} {
 	 */
 	public operator this % (that:DenseMatrix(N)):DenseMatrix(M,that.N) {
 		val ret = DenseMatrix.make(this.M, that.N);
-		val alpha = ElemTypeTool.unit;
-		val beta = ElemTypeTool.zero;
+		val alpha = 1.0;
+		val beta = 0.0;
 		DenseMatrixBLAS.comp(alpha, this, that, beta, ret);
 		return ret;
 	}
 	
 	public operator (that:DenseMatrix{self.N==this.M}) % this :DenseMatrix(that.M,N) {
 		val ret = DenseMatrix.make(that.M, this.N);
-		val alpha = ElemTypeTool.unit;
-		val beta = ElemTypeTool.zero;
+		val alpha = 1.0;
+		val beta = 0.0;
 		DenseMatrixBLAS.comp(alpha, that, this, beta, ret);
 		return ret;
 	}

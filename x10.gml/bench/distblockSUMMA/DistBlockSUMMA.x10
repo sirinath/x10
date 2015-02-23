@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2012-2014.
+ *  (C) Copyright IBM Corporation 2012-2015.
  */
 
 import x10.util.Option;
@@ -49,7 +49,7 @@ public class DistBlockSUMMA {
         val M = opts("m", 100);
         val K = opts("k", 100);
         val N = opts("n", 100);
-        val nonzeroDensity = opts("d", 1.0f);
+        val nonzeroDensity = opts("d", 1.0);
         val panelSize = opts("p", 100);
         val blockMN = opts("b", 1);
         val iterations = opts("i", 10);
@@ -78,7 +78,7 @@ class BenchRunSumma {
 	val summa:SummaMult;
 	val summaT:SummaMultTrans;
 	
-	public def this(m:Long, k:Long, n:Long, nzd:Float, it:Long, pnl:Long, blkmn:Long) {
+	public def this(m:Long, k:Long, n:Long, nzd:Double, it:Long, pnl:Long, blkmn:Long) {
 		val pM = MathTool.sqrt(Place.numPlaces());
 		val pN = Place.numPlaces()/pM;
 

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm.mpi;
@@ -36,7 +36,6 @@ import x10.matrix.util.Debug;
  * 
  * <p> Third, collective communication methods including bcast, scatter, gather
  * and reduce sum are available.  X10.team collective communication can be used. 
- * vjTODO: Need to convert Double to ElemType and deal with the native code.
  */
 @NativeCPPInclude("mpi_api.h")
 @NativeCPPCompilationUnit("mpi_api.cc")

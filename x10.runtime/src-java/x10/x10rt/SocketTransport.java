@@ -40,9 +40,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import x10.core.fun.VoidFun_0_0;
-import x10.xrx.FinishState;
+import x10.lang.FinishState;
 import x10.lang.Place;
-import x10.xrx.Runtime;
+import x10.lang.Runtime;
 import x10.serialization.X10JavaDeserializer;
 
 /**
@@ -728,8 +728,8 @@ public class SocketTransport {
 								String linkString = new String(linkdata, UTF8);
 								X10RT.initDataStore(linkString);
 							}
-							else
-								throw new IOException("Read in a corrupted message type: "+msgType);
+							else 
+								System.err.println("Unknown message type: "+msgType);
 						}
 					}
 					catch (IOException e) {
@@ -1145,10 +1145,8 @@ public class SocketTransport {
             VoidFun_0_0 actObj = (VoidFun_0_0) deserializer.readObject();
             actObj.$apply();
         } catch (Throwable e) {
-            if (!x10.xrx.Configuration.silenceInternalWarnings$O()) {
-                System.out.println("WARNING: Ignoring uncaught exception in @Immediate async.");
-                e.printStackTrace();
-            }
+            System.out.println("WARNING: Ignoring uncaught exception in @Immediate async.");
+            e.printStackTrace();
         }
     }
     
@@ -1165,7 +1163,7 @@ public class SocketTransport {
             finishState.notifyActivityCreationFailed(src, new x10.io.SerializationException(e));
             return;
     	}
-    	x10.xrx.Runtime.submitRemoteActivity(epoch, actObj, src, finishState);
+    	x10.lang.Runtime.submitRemoteActivity(epoch, actObj, src, finishState);
     }
     
     private class BackgroundLinkInitializer implements Runnable {

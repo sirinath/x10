@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  */
 
 import x10.util.Timer;
@@ -28,8 +28,8 @@ public class PageRank {
 	val colP:Long;
 
 	public val iterations:Long;
-	public val nzDensity:Float;
-	public val alpha = 0.85 as ElemType;
+	public val nzDensity:Double;
+	public val alpha:Double= 0.85;
 
 	public val G:DistSparseMatrix(rowG, rowG);
 	public val P:DupDenseMatrix(rowG, colP);
@@ -44,7 +44,7 @@ public class PageRank {
 	val GP:DenseMatrix(rowG, colP);
 	val UP:DenseMatrix(colP, colP);
 
-	public def this(mg:Long, np:Long, nzd:Float, it:Long) {
+	public def this(mg:Long, np:Long, nzd:Double, it:Long) {
 		rowG = mg;
 		colP = np;
 

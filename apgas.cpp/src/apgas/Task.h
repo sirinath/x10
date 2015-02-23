@@ -16,7 +16,7 @@
 #include <x10/lang/Closure.h>
 
 namespace apgas {
-    class Runtime;
+    class Pool;
     
     class Task : public x10::lang::Closure {
         /*
@@ -25,9 +25,9 @@ namespace apgas {
 
     public:
         /**
-         * Return the Runtime instance which is executing this Task
+         * Return the Pool instance which is executing this Task
          */
-        Runtime *getRuntime() { return myRuntime; }
+        Pool *getPool() { return myPool; }
 
         /**
          * The body of the Task.
@@ -40,10 +40,10 @@ namespace apgas {
          * Implementation level API (not intended for direct use by clients of the library)
          */
     protected:
-        Runtime* myRuntime;
+        Pool* myPool;
 
     public:
-        void setRuntime(Runtime* p) { myRuntime = p; }
+        void setPool(Pool* p) { myPool = p; }
         
         static x10::lang::VoidFun_0_0::itable<Task> _itable;
         static x10aux::itable_entry _itables[2];

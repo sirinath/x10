@@ -6,14 +6,12 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.builder;
 
 import x10.compiler.Inline;
-
-import x10.matrix.ElemType;
 
 import x10.matrix.util.MathTool;
 import x10.matrix.util.RandTool;
@@ -44,7 +42,7 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	/**
 	 * Initialize symmetric sparse builder using matrix data generator function.
 	 */
-	public def init(fval:(Long,Long)=>ElemType) :SymSparseBuilder(this) {
+	public def init(fval:(Long,Long)=>Double) :SymSparseBuilder(this) {
 		for (var c:Long=0; c<N; c++) {
 			for (var r:Long=c; r<M; r++) {
 				val v = fval(r, c);
@@ -76,7 +74,7 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * @param nzd    nonzero sparsity. Used to computing row index distance between two nonzeros.
 	 * @param fval   return a double value using row and column index as inputs. 
 	 */
-	public def initRandom(nzd:Float, fval:(Long,Long)=>ElemType):SymSparseBuilder(this) {
+	public def initRandom(nzd:Double, fval:(Long,Long)=>Double):SymSparseBuilder(this) {
 		val rgen = RandTool.getRandGen();
 		val maxdst:Long = ((1.0/nzd) as Int) * 2 - 1;
 		var r:Long = rgen.nextLong(maxdst/2);
@@ -98,8 +96,8 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	/**
      * Initialize with random values in specified sparsity.
 	 */
-	public def initRandom(nzd:Float) : SymSparseBuilder(this) =
-		initRandom(nzd, (r:Long,c:Long)=>RandTool.nextElemType[ElemType]());
+	public def initRandom(nzd:Double) : SymSparseBuilder(this) =
+		initRandom(nzd, (r:Long,c:Long)=>RandTool.getRandGen().nextDouble());
 	
 	/**
      * Initialize symmetric sparse builder using an existing matrix.
@@ -126,7 +124,7 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * Add new nonzero entry. Keep the new nonzero entry in order
 	 */
 	@Inline
-	public def add(r:Long, c:Long, v:ElemType) {
+	public def add(r:Long, c:Long, v:Double) {
 		super.insert(r, c, v);
 		if (r!=c)
 			super.insert(c, r, v);
@@ -136,7 +134,7 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	 * Append nonzero at the end of nonzero list of the specified column. 
 	 */
 	@Inline
-	public def append(r:Long, c:Long, v:ElemType) {
+	public def append(r:Long, c:Long, v:Double) {
 		super.append(r, c, v);
 		if (r!= c)
 			super.append(c, r, v);
@@ -145,14 +143,14 @@ public class SymSparseBuilder extends SparseCSCBuilder{self.M==self.N} implement
 	/*
 	 * Return the value at given row and column; If not found in nonzero list, 0 is returned.
 	 */
-	public def get(r:Long, c:Long) : ElemType = findEntry(r,c).value;
+	public def get(r:Long, c:Long) : Double = findEntry(r,c).value;
 	
 	/*
 	 * Set the entry of given row and column to value, if it is found. Otherwise append
 	 * new nonzero entry at the end of nonzero list;
 	 */
 	@Inline
-	public def set(r:Long, c:Long, v:ElemType) : void {
+	public def set(r:Long, c:Long, v:Double) : void {
 		super.set(r, c, v);
 		if (r != c)
 			super.set(c, r, v);

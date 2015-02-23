@@ -82,17 +82,17 @@ function parseCmdLine {
 	    tcreportdir=$2
 	    shift 2
 	elif [[ "$1" == "-debug" ]]; then
-	    tccompiler_options="$tccompiler_options -DEBUG"
+	    tccompiler_options="$tccompile_options -DEBUG"
 	    shift
 	elif [[ "$1" == "-noopt" ]]; then
             # nothing to do
 	    shift
 	elif [[ "$1" == "-opt" ]]; then
-	    tccompiler_options="$tccompiler_options -O"
+	    tccompiler_options="$tccompile_options -O"
 	    shift
 	elif [[ "$1" == "-x10lib" ]]; then
 	    if (( $# >= 2 )); then
-		tccompiler_options="$tccompiler_options -x10lib $2"
+		tccompiler_options="$tccompile_options -x10lib $2"
 		shift 2
 	    else
 		printf "\n[${prog}: err]: Option $1 needs argument\n\n"
@@ -328,7 +328,7 @@ prog=runTest.sh
 # platform independent abstraction for certain commands
 EGREP=egrep
 egrep --version 2>/dev/null 1>/dev/null
-if [[ $? == 0 && $(uname -s) != CYGWIN* && $(uname -s) != Linux* ]]; then
+if [[ $? == 0 && $(uname -s) != Sun* && $(uname -s) != CYGWIN* && $(uname -s) != Linux* ]]; then
     EGREP="egrep -E"
 fi
 

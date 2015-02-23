@@ -9,7 +9,7 @@
  * This file was originally derived from the Polyglot extensible compiler framework.
  *
  *  (C) Copyright 2000-2007 Polyglot project group, Cornell University
- *  (C) Copyright IBM Corporation 2007-2014.
+ *  (C) Copyright IBM Corporation 2007-2015.
  */
 
 package polyglot.types;
@@ -75,9 +75,7 @@ public interface ProcedureDef extends CodeDef, X10CodeDef, X10MemberDef
     void setThrowTypes(List<Ref<? extends Type>> l);
 
     /** Set a flag indicating we should infer addition constraints in the guard. */
-    void inferGuard(boolean r);
-    /** Get the status of the flag inferGuard. */
     boolean inferGuard();
-
+    void inferGuard(boolean r);
     CRequirementCollection requirements();
 }

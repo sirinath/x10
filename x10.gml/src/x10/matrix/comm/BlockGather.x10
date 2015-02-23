@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -15,8 +15,6 @@ import x10.util.ArrayList;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.block.MatrixBlock;
 
 /**
@@ -65,7 +63,8 @@ public class BlockGather extends BlockRemoteCopy {
 	}
 	
 	/**
-	 * Gather distributed single-column matrix to a local dense matrix.
+	 * Gather distrubuted vector (single-column) matrix to here
+	 * in a vector. Only dense format is allowed
 	 */
 	public static def gatherVector(src:BlocksPLH, dst:DenseMatrix{self.N==1L}): void {
 		val gp = src().getGrid();

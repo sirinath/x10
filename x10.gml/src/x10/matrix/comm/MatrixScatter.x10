@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.comm;
@@ -17,8 +17,6 @@ import x10.compiler.Ifndef;
 
 import x10.matrix.Matrix;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.comm.mpi.WrapMPI;
 import x10.matrix.sparse.SparseCSC;
 
@@ -131,7 +129,7 @@ public class MatrixScatter {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[ElemType](0); //fake
+							val tmpbuf = new Rail[Double](0); //fake
 							val tmplst = new Rail[Long](0);   //fake
 							WrapMPI.world.scatterv(tmpbuf, tmplst, dstden.d, datcnt, root);
 						}
@@ -160,7 +158,7 @@ public class MatrixScatter {
 	 */
 	public static def mpiScatterVector(
 			gp:Grid{self.N==1L}, 
-			src:Rail[ElemType], 
+			src:Rail[Double], 
 			dst:DistArray[DenseBlock](1)): void {
 
 		@Ifdef("MPI_COMMU") {
@@ -178,7 +176,7 @@ public class MatrixScatter {
 							//val tmpbuf= null; //fake
 							//val tmplst=null;//   //fake
 							/*******************************************/
-							val tmpbuf = new Rail[ElemType](0); //fake
+							val tmpbuf = new Rail[Double](0); //fake
 							val tmplst = new Rail[Long](0);   //fake
 							WrapMPI.world.scatterv(tmpbuf, tmplst, dstden.d, datcnt, root);
 						}
@@ -233,7 +231,7 @@ public class MatrixScatter {
 	 */
 	public static def x10ScatterVector(
 			gp:Grid{self.N==1L}, 
-			src:Rail[ElemType],	
+			src:Rail[Double],	
 			dst:DistArray[DenseBlock](1)): void {
 
 		val root = here.id();
@@ -334,7 +332,7 @@ public class MatrixScatter {
 						//val szl = null;
 
 						val tmpidx = new Rail[Long](0); 
-						val tmpval = new Rail[ElemType](0);
+						val tmpval = new Rail[Double](0);
 						val tmplst = new Rail[Long](0);
 					
 						//++++++++++++++++++++++++++++++++++++++++++++

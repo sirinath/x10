@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package apgas;
@@ -34,21 +34,5 @@ public class MultipleException extends RuntimeException {
     for (final Throwable t : exceptions) {
       addSuppressed(t);
     }
-  }
-
-  /**
-   * Returns true if every suppressed exception is a DeadPlaceException.
-   *
-   * @return true if every suppressed exception is a DeadPlaceException
-   */
-  public boolean isDeadPlaceException() {
-    for (final Throwable t : getSuppressed()) {
-      if (t instanceof DeadPlaceException || t instanceof MultipleException
-          && ((MultipleException) t).isDeadPlaceException()) {
-        continue;
-      }
-      return false;
-    }
-    return true;
   }
 }

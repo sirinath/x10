@@ -6,18 +6,20 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package apgas;
 
+import java.io.Serializable;
+
 /**
- * A functional interface with no arguments and no return value.
+ * A serializable functional interface with no arguments and no return value.
  * <p>
  * The functional method is {@link #run()}.
  */
 @FunctionalInterface
-public interface Job {
+public interface Job extends Serializable {
   /**
    * Runs the function or throws an exception if unable to do so.
    *

@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10cpp.postcompiler;
@@ -39,21 +39,19 @@ public class Linux_CXXCommandBuilder extends CXXCommandBuilder {
     public void addPostArgs(ArrayList<String> cxxCmd) {
         super.addPostArgs(cxxCmd);
 
-        if(!sharedLibProps.staticLib) {
-            for (PrecompiledLibrary pcl:options.x10libs) {
-                if (options.x10_config.DEBUG && !options.x10_config.DEBUG_APP_ONLY) {
-                    cxxCmd.add("-Wl,--rpath");
-                    cxxCmd.add("-Wl,"+pcl.absolutePathToRoot+"/lib-dbg");
-                }
+        for (PrecompiledLibrary pcl:options.x10libs) {
+            if (options.x10_config.DEBUG && !options.x10_config.DEBUG_APP_ONLY) {
                 cxxCmd.add("-Wl,--rpath");
-                cxxCmd.add("-Wl,"+pcl.absolutePathToRoot+"/lib");
+                cxxCmd.add("-Wl,"+pcl.absolutePathToRoot+"/lib-dbg");
             }
-
-            // x10rt
             cxxCmd.add("-Wl,--rpath");
-            cxxCmd.add("-Wl,"+options.distPath()+"/lib");
-
-            cxxCmd.add("-Wl,-export-dynamic");
+            cxxCmd.add("-Wl,"+pcl.absolutePathToRoot+"/lib");
         }
+        
+        // x10rt
+        cxxCmd.add("-Wl,--rpath");
+        cxxCmd.add("-Wl,"+options.distPath()+"/lib");
+
+        cxxCmd.add("-Wl,-export-dynamic");
     }
 }

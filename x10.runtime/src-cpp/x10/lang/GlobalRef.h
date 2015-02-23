@@ -18,7 +18,7 @@
 
 namespace x10 {
     namespace lang { 
-        x10_long globalref_getInitialEpoch();
+        extern x10_long globalref_getInitialEpoch();
 
         template<class T> class GlobalRef  {
             
@@ -141,8 +141,8 @@ namespace x10 {
 
 namespace x10 {
     namespace lang {
-        void logGlobalReference(::x10::lang::Reference* obj);
-        void forgetGlobalReference(::x10::lang::Reference* obj);
+        extern void logGlobalReference(::x10::lang::Reference* obj);
+        extern void forgetGlobalReference(::x10::lang::Reference* obj);
     }
 }
 

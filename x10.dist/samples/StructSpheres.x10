@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 import x10.io.Console;
@@ -107,7 +107,7 @@ class StructSpheres {
         val time_taken = System.nanoTime() - time_start;
         Console.OUT.println("Total time: "+time_taken/1E9);
 
-        val expected = 109702;
+        val expected = 108996;
         val ok = counter == expected;
         if (!ok) {
             Console.ERR.println("number of intersections: "+counter

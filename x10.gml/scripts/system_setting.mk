@@ -1,12 +1,10 @@
 # Platform-specific settings for building GML library and application codes
-GML_ELEM_TYPE ?=double
+
 X10CXX ?= x10c++
-X10C ?= x10c -verbose 
+X10C ?= x10c
 CXX ?= g++
 JAR ?= jar
 MAKE ?= make
-
-
 
 # JNI include path, for managed GML
 ifdef JAVA_HOME
@@ -15,6 +13,10 @@ ifdef JAVA_HOME
     jarch=$(shell uname -m)
   endif
 
+  ifeq ($(shell uname -s),AIX)
+    JNI_INCLUDES = -I"$(JAVA_HOME)"/include -I"$(JAVA_HOME)"/include/aix
+    JNI_LIBS = -L"$(JAVA_HOME)"/jre/lib/$(jarch)/j9vm
+  else
   ifeq ($(shell uname -s),Linux)
     JNI_INCLUDES = -I"$(JAVA_HOME)"/include -I"$(JAVA_HOME)"/include/linux
     ifeq ($(jarch),x86_64)
@@ -33,6 +35,13 @@ ifdef JAVA_HOME
     endif
     JNI_LIBS = -L"$(JAVA_HOME)"/jre/lib/$(jarch)/server -L"$(JAVA_HOME)"/jre/lib/$(jarch)/client
   else
+  ifeq ($(shell uname -s),SunOS)
+    JNI_INCLUDES = -I"$(JAVA_HOME)"/include -I"$(JAVA_HOME)"/include/solaris
+    ifeq ($(jarch),x86_64)
+      jarch=amd64
+    endif
+    JNI_LIBS = -L"$(JAVA_HOME)"/jre/lib/$(jarch)/server -L"$(JAVA_HOME)"/jre/lib/$(jarch)/client
+  else
   ifeq ($(shell uname -s),FreeBSD)
     JNI_INCLUDES = -I"$(JAVA_HOME)"/include -I"$(JAVA_HOME)"/include/freebsd
     ifeq ($(jarch),x86_64)
@@ -43,14 +52,8 @@ ifdef JAVA_HOME
   endif
   endif
   endif
-endif
-
-JBLAS_JNILIB = libjblas_$(GML_ELEM_TYPE).so
-JLAPACK_JNILIB = libjlapack_$(GML_ELEM_TYPE).so
-ifeq ($(shell uname -s),Darwin)
-    # MacOS JNI libs require extension .jnilib instead of .so
-    JBLAS_JNILIB = libjblas_$(GML_ELEM_TYPE).jnilib
-    JLAPACK_JNILIB = libjlapack_$(GML_ELEM_TYPE).jnilib
+  endif
+  endif
 endif
 
 # BLAS and LAPACK compiler options
@@ -100,13 +103,9 @@ ifeq ($(BLASLIB),ESSL)
 else
 ifeq ($(BLASLIB),OpenBLAS)
     # OpenBLAS
-    OPENBLAS_LIB_PATH ?= /opt/OpenBLAS
+    OPENBLAS_LIB_PATH ?= /usr/lib64
     ifndef DISABLE_BLAS
         X10CXX_POSTARGS += -cxx-postarg -L$(OPENBLAS_LIB_PATH) -cxx-postarg -lopenblas
-        ifeq ($(shell uname -s),Darwin)
-            GFORTRAN_LIB ?= /usr/local/lib
-            X10CXX_POSTARGS += -cxx-postarg -L$(GFORTRAN_LIB) -cxx-postarg -lgfortran
-        endif
     endif
 else
 ifeq ($(BLASLIB),GotoBLAS2)

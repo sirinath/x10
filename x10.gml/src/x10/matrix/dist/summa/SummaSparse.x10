@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10.matrix.dist.summa;
@@ -15,19 +15,13 @@ import x10.regionarray.DistArray;
 import x10.util.Timer;
 
 import x10.matrix.util.Debug;
-import x10.matrix.util.MathTool;
-
 import x10.matrix.Matrix;
+import x10.matrix.util.MathTool;
 import x10.matrix.DenseMatrix;
-import x10.matrix.ElemType;
-
 import x10.matrix.sparse.SparseCSC;
 import x10.matrix.sparse.SparseMultSparseToDense;
-
 import x10.matrix.block.Grid;
-
 import x10.matrix.comm.MatrixRingCast;
-
 import x10.matrix.dist.DistDenseMatrix;
 import x10.matrix.dist.DistSparseMatrix;
 
@@ -36,7 +30,7 @@ import x10.matrix.dist.DistSparseMatrix;
  * @see SummaDense
  */
 public class SummaSparse {
-	val beta:ElemType;
+	val beta:Double;
 	val panelSize:Long;
 	val A:DistSparseMatrix;
 	val B:DistSparseMatrix;
@@ -44,20 +38,20 @@ public class SummaSparse {
 	val rowBsPsMap:DistArray[Rail[Long]](1);
 	val colBsPsMap:DistArray[Rail[Long]](1);
 
-	public def this(ps:Long, be:ElemType,
+	public def this(ps:Long, be:Double,
 					a:DistSparseMatrix, 
 					b:DistSparseMatrix, 
 					c:DistDenseMatrix) {
-	    //Check panelsize
-	    panelSize = Math.min(Math.min(ps, a.grid.getMinColSize()),
-				 Math.min(ps, b.grid.getMinRowSize()));
-	    A = a; B=b; C=c;
-	    //alpha = al;
-	    if (MathTool.isZero(be)) beta = 0.0 as ElemType;
-	    else beta  = be;
-	    //			
-	    rowBsPsMap = a.grid.getRowBsPsMap();
-	    colBsPsMap = b.grid.getColBsPsMap();
+		//Check panelsize
+		panelSize = Math.min(Math.min(ps, a.grid.getMinColSize()),
+							 Math.min(ps, b.grid.getMinRowSize()));
+		A = a; B=b; C=c;
+		//alpha = al;
+        if (MathTool.isZero(be)) beta = 0.0;
+        else beta  = be;
+		//			
+		rowBsPsMap = a.grid.getRowBsPsMap();
+		colBsPsMap = b.grid.getColBsPsMap();
 	}
 		
 	public static def estPanelSize(dA:DistSparseMatrix, dB:DistSparseMatrix):Long {
@@ -100,26 +94,27 @@ public class SummaSparse {
 	 * @see SummaDense.parallelMult(wk1, wk2)
 	 */
 	public static def mult(var ps:Long,
-			       beta:ElemType, 
-			       A:DistSparseMatrix, 
-			       B:DistSparseMatrix, 
-			       C:DistDenseMatrix) {
-	    if (ps < 1) ps = estPanelSize(A, B);
+						   beta:Double, 
+						   A:DistSparseMatrix, 
+						   B:DistSparseMatrix, 
+						   C:DistDenseMatrix) {
+		if (ps < 1) ps = estPanelSize(A, B);
 		
-	    val s = new SummaSparse(ps, beta, A, B, C);
+		val s = new SummaSparse(ps, beta, A, B, C);
 
-	    val wk1 <: DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
-	    val wk2 <: DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
-	    finish for ([p] in C.dist) {
-		val rn = A.grid.getRowSize(p);
-		val cn = B.grid.getColSize(p);
-		at(C.dist(p)) async {
-		    val pid=here.id();
-		    wk1(pid) = SparseCSC.make(rn, s.panelSize, 1.0f);
-		    wk2(pid) = SparseCSC.make(s.panelSize, cn, 1.0f);
+		val wk1:DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
+		val wk2:DistArray[SparseCSC](1) = DistArray.make[SparseCSC](C.dist);
+		finish for ([p] in C.dist) {
+			val rn = A.grid.getRowSize(p);
+			val cn = B.grid.getColSize(p);
+            at(C.dist(p)) async {
+				val pid=here.id();
+				wk1(pid) = SparseCSC.make(rn, s.panelSize, 1.0);
+				wk2(pid) = SparseCSC.make(s.panelSize, cn, 1.0);
+			}
 		}
-	    }
-	    s.parallelMult(wk1, wk2);
+		
+		s.parallelMult(wk1, wk2);
 	}
 	
 	/**
@@ -132,7 +127,7 @@ public class SummaSparse {
 	 * @param C        the input/result distributed dense matrix
 	 */	
 	public static def multTrans(var ps:Long,
-								beta:ElemType, 
+								beta:Double, 
 								A:DistSparseMatrix, 
 								B:DistSparseMatrix, 
 								C:DistDenseMatrix) {
@@ -149,7 +144,7 @@ public class SummaSparse {
 			val cn = B.grid.getColSize(p);
 			at(C.dist(p)) async {
 				wk1(here.id()) = DenseMatrix.make(rn, s.panelSize);
-				wk2(here.id()) = SparseCSC.make(s.panelSize, cn, 1.0f);
+				wk2(here.id()) = SparseCSC.make(s.panelSize, cn, 1.0);
 				tmp(here.id()) = DenseMatrix.make(rn, s.panelSize);
 			}
 		}

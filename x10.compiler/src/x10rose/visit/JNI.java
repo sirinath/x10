@@ -6,7 +6,7 @@
  *  You may obtain a copy of the License at
  *      http://www.opensource.org/licenses/eclipse-1.0.php
  *
- *  (C) Copyright IBM Corporation 2006-2014.
+ *  (C) Copyright IBM Corporation 2006-2015.
  */
 
 package x10rose.visit;
@@ -99,8 +99,8 @@ class JNI implements Callable<Boolean> {
 
     public static native void cactionMethodDeclarationHeader(String name, boolean java_is_abstract, boolean java_is_native, boolean java_is_static, boolean java_is_final, boolean java_is_synchronized, boolean java_is_public, boolean java_is_protected, boolean java_is_private, boolean java_is_strictfp, int numberOfTypeParameters, int numArguments, int numThrows, JavaToken jToken);
 //MH-20140414
-    public static native void cactionMethodDeclarationEnd(int num_annotations, int num_statements, JavaToken jToken);
-//    public static native void cactionMethodDeclarationEnd(int numberOfStatements, JavaToken jToken);
+//    public static native void cactionMethodDeclarationEnd(int num_annotations, int num_statements, JavaToken jToken);
+    public static native void cactionMethodDeclarationEnd(int numberOfStatements, JavaToken jToken);
 
     public static native void cactionTypeParameterReference(String package_name, String type_name, int method_index, String type_parameter_name, JavaToken jToken);
     public static native void cactionTypeReference(String package_name, String type_name, /*RoseTranslator.ToRoseVisitor*/Object visitor, JavaToken jToken);
@@ -220,7 +220,7 @@ class JNI implements Callable<Boolean> {
     public static native void cactionSwitchStatementEnd(int numCases, boolean hasDefault, JavaToken jToken);
     public static native void cactionSynchronizedStatement(JavaToken jToken);
     public static native void cactionSynchronizedStatementEnd(JavaToken jToken);
-    public static native void cactionThisReference(String pacakgeName, String typeName, JavaToken jToken);
+    public static native void cactionThisReference(JavaToken jToken);
     public static native void cactionThrowStatement(JavaToken jToken);
     public static native void cactionThrowStatementEnd(JavaToken jToken);
     public static native void cactionTrueLiteral(JavaToken jToken);
@@ -297,20 +297,7 @@ class JNI implements Callable<Boolean> {
     
     public static native void cactionAppendProperty(String name, boolean isRail, boolean isFinal, JavaToken jToken);
     public static native void cactionSetProperties(int number_of_properties, JavaToken jToken);
-    
-    public static native void cactionAttachTypeParameterToType(String typeParam, JavaToken jToken);
-    public static native void cactionAttachTypeParameterToMethodDecl(String typeParam, JavaToken jToken);
-    public static native void cactionAttachTypeParameterToMethodCall(String typeParam, JavaToken jToken);
-    public static native void cactionAttachGuard(String typeParam, JavaToken jToken);
-    public static native void cactionAttachAnnotationsToMethodDecl(int numerOfAnnotations, JavaToken jToken);
-    public static native void cactionAttachAnnotationsToLocalDecl(int numerOfAnnotations, JavaToken jToken);
-    public static native void cactionAttachAnnotationsToNewExp(int numerOfAnnotations, JavaToken jToken);
-    
-    public static native void cactionWhen(JavaToken jToken);
-    public static native void cactionWhenEnd(JavaToken jToken);
-    
-    public static native void cactionTuple(JavaToken jToken);
-    public static native void cactionTupleEnd(int tuple_size, JavaToken jToken);
+	
     //**********************************************************
     //*                                                        *
     //*    Start of JavaDoc Nodes.                             *

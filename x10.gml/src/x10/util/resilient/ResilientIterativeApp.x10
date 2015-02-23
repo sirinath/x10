@@ -34,4 +34,9 @@ public interface ResilientIterativeApp {
      * @param lastCheckpointIter the iteration number of the saved checkpoint
      */
     public def restore(newPlaces:PlaceGroup, store:ResilientStoreForApp, lastCheckpointIter:Long):void;
+    
+    /**
+     * @return the maximum iterations number
+     */
+    public def getMaxIterations():Long;
 }

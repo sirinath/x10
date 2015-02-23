@@ -1,7 +1,7 @@
 /*
  *  This file is part of the X10 Applications project.
  *
- *  (C) Copyright IBM Corporation 2011-2014.
+ *  (C) Copyright IBM Corporation 2011-2015.
  */
 
 import harness.x10Test;
@@ -19,17 +19,14 @@ import x10.matrix.block.Grid;
 import x10.matrix.distblock.DistBlockMatrix;
 
 import x10.matrix.comm.BlockRemoteCopy;
-import x10.matrix.ElemType;
 
 /**
    This class contains test cases P2P communication for matrix over different places.
  */
 public class TestBlockP2P extends x10Test {
-    static def ET(a:Double)= a as ElemType;
-    static def ET(a:Float)= a as ElemType;
 	public val M:Long;
 	public val N:Long;
-	public val nzdensity:Float;
+	public val nzdensity:Double;
 	public val bM:Long;
 	public val bN:Long;
 	
@@ -46,7 +43,7 @@ public class TestBlockP2P extends x10Test {
 	
 	public val rmtcp:BlockRemoteCopy;
 
-    public def this(m:Long, n:Long, bm:Long, bn:Long, d:Float) {
+    public def this(m:Long, n:Long, bm:Long, bn:Long, d:Double) {
 		M=m * bm; N=n * bn;
 		nzdensity = d;
 		bM = bm; bN = bn;
@@ -54,10 +51,10 @@ public class TestBlockP2P extends x10Test {
 		dbmat = DistBlockMatrix.makeDense(M, N, bm, bn);
 		sbmat = DistBlockMatrix.makeSparse(M, N, bm, bn, nzdensity);
 		
-		srcden = DenseMatrix.make(m, n).init((x:Long, y:Long)=>ET(1.0+x+y));
+		srcden = DenseMatrix.make(m, n).init((x:Long, y:Long)=>(1.0+x+y));
 		dstden = DenseMatrix.make(srcden.M, srcden.N);
 		
-		srcspa = SparseCSC.make(m, n, nzdensity).init((x:Long, y:Long)=>ET(1.0*(x+y)*((x+y)%2)));
+		srcspa = SparseCSC.make(m, n, nzdensity).init((x:Long, y:Long)=>1.0*(x+y)*((x+y)%2));
 		dstspa = SparseCSC.make(srcspa.M, srcspa.N, nzdensity);
 		
 		rmtcp     = new BlockRemoteCopy();
@@ -138,7 +135,7 @@ public class TestBlockP2P extends x10Test {
 		val n = args.size > 1 ? Long.parse(args(1)):60;
 		val bm= args.size > 2 ? Long.parse(args(2)):2;
 		val bn= args.size > 3 ? Long.parse(args(3)):6;
-		val d = args.size > 4 ? Float.parse(args(4)):0.80f;
+		val d = args.size > 4 ? Double.parse(args(4)):0.80;
 		new TestBlockP2P(m, n, bm, bn, d).execute();
 	}
 }

@@ -643,6 +643,7 @@ x10rt_error x10rt_net_init (int * argc, char ***argv, x10rt_msg_type *counter)
      *
      * On OSX (and presumably BSD) one can use OPT_NOSIGPIPE when creating the socket.
      * On Linux, one can use MSG_NOSIGNAL in the send() call.
+     * On AIX, neither of these options are available
      *
      * So we choose to catch SIGPIPE on all platforms.
      */
@@ -732,20 +733,22 @@ x10rt_error x10rt_net_init (int * argc, char ***argv, x10rt_msg_type *counter)
 		}
 
 		if (context.numPlaces == 1)
-			context.myPlaceId = 0;
-		else
 		{
-			// determine my place ID
-			char* ID = getenv(X10_LAUNCHER_PLACE);
-			if (ID == NULL) {
-				context.errorCode = X10RT_ERR_OTHER;
-				return fatal_error(X10_LAUNCHER_PLACE" not set!");
-			}
-			else
-				context.myPlaceId = atol(ID);
+			context.myPlaceId = 0;
+            return X10RT_ERR_OK; // If there is only 1 place, then there are no sockets to set up.
 		}
 
+		// determine my place ID
+		char* ID = getenv(X10_LAUNCHER_PLACE);
+		if (ID == NULL) {
+			context.errorCode = X10RT_ERR_OTHER;
+			return fatal_error(X10_LAUNCHER_PLACE" not set!");
+		}
+		else
+			context.myPlaceId = atol(ID);
+
 		context.linkAtStartup = !checkBoolEnvVar(getenv(X10_LAZYLINKS));
+
 		context.nextSocketToCheck = 0;
 		pthread_mutex_init(&context.readLock, NULL);
 		context.socketLinks = safe_malloc<pollfd>(context.numPlaces+1);
@@ -786,9 +789,9 @@ x10rt_error x10rt_net_init (int * argc, char ***argv, x10rt_msg_type *counter)
 				return fatal_error("failed to get the local socket information");
 			}
 			pthread_mutex_lock(&context.writeLocks[context.myPlaceId]);
-			if (Launcher::setPort(context.myPlaceId, addr.sin_port) < 0 && context.numPlaces > 1) {
+			if (Launcher::setPort(context.myPlaceId, addr.sin_port) < 0) {
 				context.errorCode = X10RT_ERR_OTHER;
-				return fatal_error("failed to connect to the local launcher");
+				return fatal_error("failed to connect to the local runtime");
 			}
 			pthread_mutex_unlock(&context.writeLocks[context.myPlaceId]);
 		}
