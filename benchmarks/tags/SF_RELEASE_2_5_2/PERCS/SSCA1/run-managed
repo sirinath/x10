@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+#HEAP=2048m
+#X10FLAGS="-ms$HEAP -mx$HEAP"
+#DRYRUN=true
+#FULLRUN=true
+
+
+if [ -z "$FULLRUN" ]; then
+#
+# test run
+#
+for p in 1 8
+do
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp ssca1.jar SSCA1 4000 $((40000*$p))"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.ssca1.managed.$(printf "%05d" $p)
+done
+
+exit 0
+fi
+
+
+#
+# full run for measurement
+#
+p=47040
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp ssca1.jar SSCA1 4000 $((40000*$p))"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.ssca1.managed.$(printf "%05d" $p)
+
+for i in $(seq 15 -1 0)
+do
+p=$((2**i))
+command="x10 $X10FLAGS $X10RTTRANSPORT -np $p -cp ssca1.jar SSCA1 4000 $((40000*$p))"
+[ -n "$DRYRUN" ] && echo "$command"
+[ -z "$DRYRUN" ] && $command 2>&1 | tee -a log.ssca1.managed.$(printf "%05d" $p)
+done
