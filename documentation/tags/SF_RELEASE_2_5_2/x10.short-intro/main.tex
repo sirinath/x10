@@ -1,0 +1,562 @@
+\documentclass[a4paper]{article}
+
+%% For typesetting theorems and some math symbols.
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{fullpage}
+
+\usepackage{relsize}
+\usepackage{amsmath}
+\usepackage{url}
+
+
+
+\usepackage[ruled]{algorithm} % [plain]
+\usepackage[noend]{algorithmic} % [noend]
+\renewcommand\algorithmiccomment[1]{// \textit{#1}} %
+
+
+% For fancy end of line formatting.
+\usepackage{microtype}
+
+
+% For smaller font.
+\usepackage{pslatex}
+
+\usepackage{xspace}
+\usepackage{graphicx}
+
+
+\newcommand{\normalcode}[1]{\texttt{\textup{#1}}}
+\def\codesmaller{\small}
+\newcommand{\myCOMMENT}[1]{\COMMENT{\small #1}}
+\newcommand{\code}[1]{\texttt{\textup{\codesmaller #1}}}
+
+
+\newcommand{\ttlcb}{\texttt{\char "7B}}
+\newcommand{\ttrcb}{\texttt{\char "7D}}
+\newcommand{\lb}{\ttlcb}
+\newcommand{\rb}{\ttrcb}
+
+\title{A Brief Introduction to X10}
+
+\author{Vijay Saraswat}
+
+\date{}
+
+
+
+%\input{../x10.prog-guide/x10.sty} %/x10.man/v2.2/tex/
+% http://en.wikibooks.org/wiki/LaTeX/Packages/Listings
+%ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf
+\usepackage{listings}
+
+%\usepackage{color}
+%
+%\definecolor{Brown}{cmyk}{0,0.49,0.71,0.37}
+%\definecolor{RoyalBlue}{cmyk}{0.71,0.53,0,0.12}
+%\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+%\definecolor{Red}{cmyk}{0,0.80,0.80,0.10}
+%\definecolor{Gray}{cmyk}{0.2,0.2,0.2,0.2}
+%\definecolor{Black}{cmyk}{0,0,0,1}
+\lstdefinelanguage{X10}%
+  {morekeywords={abstract,break,case,catch,class,%
+      const,continue,default,do,else,extends,false,final,%
+      finally,for,goto,if,implements,import,instanceof,%
+      interface,label,native,new,null,package,private,protected,%
+      public,return,static,super,switch,synchronized,this,throw,%
+      throws,transient,true,try,volatile,while,%
+      async,atomic,when,foreach,ateach,finish,clocked,%
+      type,here,%
+      self,property,%
+      future,to,has,as,var,val,def,where,in,%
+      next,value,or,await,current,any},%
+   basicstyle=\normalfont\ttfamily,%\color{Red},%
+   keywordstyle=\bf\ttfamily,%\color{OliveGreen},%
+   commentstyle=\normalfont\ttfamily,%\color{Gray},%
+   identifierstyle=\normalfont\ttfamily,%\color{Red},%
+   stringstyle=\normalfont\ttfamily,%
+   tabsize=4,%
+   showstringspaces=false,%
+   sensitive,%
+   morecomment=[l]//,%
+   morecomment=[s]{/*}{*/},%
+   morestring=[b]",%
+   morestring=[b]',%
+   columns=fullflexible,%
+   mathescape=false,%
+   keepspaces=true,%
+   showlines=false,%
+   breaklines=true,%
+   breakatwhitespace=true,%
+   postbreak={},%
+   %breakautoindent=true,%
+   %breakindent=0pt,%
+   %prebreak={},%
+  }
+
+\lstnewenvironment{xtenmath}
+  {\lstset{language=X10,breaklines=false,captionpos=b,xleftmargin=2em,mathescape=true}}
+  {}
+
+\lstnewenvironment{xten}
+  {\lstset{language=X10,breaklines=false,captionpos=b,xleftmargin=2em}}
+  {}
+
+%{numbers=left, numberstyle=\tiny, stepnumber=2, numbersep=5pt
+\lstset{numbers=left,language=x10,basicstyle=\ttfamily\small}
+
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\begin{abstract}
+X10 is an object oriented (OO) programming language with a sophisticated
+    type system (constraints, class invariants, non-erased generics, closures)
+    and concurrency constructs (asynchronous activities, multiple places, global references).
+This paper is a brief introduction to X10, and in particular,
+    its motivation, goals,
+    contributions, design, domains of applicability, and availability.
+X10 is a Java-style OO language with additional constructs that support concurrent and distributed programming.
+This paper is intended for people familiar with Java that wish to learn how to program in X10
+    and use these additional concurrency constructs in order to take advantage of scale out and of heterogeneity.
+Furthermore, the paper describe the design goals of X10 and illustrate how these were achieved
+    using simple program fragments.
+\end{abstract}
+
+\section{Introduction and Motivation}
+Java currently lacks the ability to deal with peta-bytes of data
+    that do not fit into main memory of a single machine (or \emph{place} in X10 jargon).
+Moreover, Java cannot take advantage of GPUs and FPGAs that offer superior
+    computational power over the normal CPUs.
+An X10 program can scale out to millions of places, that can store peta-bytes of data.
+This introduction paper describes the motivation and design behind X10,
+    and explains how to write programs that scale out.
+
+We will first present a simple \code{HelloWorld} program in X10,
+    and then transform it into a distributed \code{HelloWholeWorld} program.
+
+\begin{xten}
+public class HelloWorld {
+  public static def main(args:Array[String]):void {
+     Console.OUT.println("First argument: " + args(0));
+  }
+}
+\end{xten}
+X10 is a Java-style object oriented (OO) language.
+A program in X10 consists of classes that may
+    declare fields and methods.
+As in Java, the start of execution is the static \code{main} method
+    that has a single parameter \code{args} which is an array containing the program arguments.
+The program prints the first such argument.
+
+We will now explain the differences in this program syntax between X10 and Java.
+(i)~The return type in X10 is specified after the method parameters, and it may be automatically inferred and therefore omitted.
+E.g., \code{:void} can be omitted, in which case the compiler will infer it because there are no \code{return} statements.
+(ii)~Arrays in X10 and Java are different in many ways.
+In Java, arrays are one-dimensional, indexed by an integer (\code{args[0]}), and use the special syntax \code{String[]}.
+In X10, arrays are multi-dimensional, indexed by integers or a point (\code{args(0)}), and use the normal syntax for a generic class \code{Array[String]}.
+(iii)~Generics in Java (e.g., \code{ArrayList<String>}) are erased at runtime, whereas generics in X10 are reified which means
+    that the generic type parameters are kept at runtime.
+This incurs a runtime overhead but it increases type-safety, security, and flexibility.
+(iv)~The out stream in Java is \code{System.out} whereas in X10 it is \code{Console.OUT}.
+
+We will now present a distributed and concurrent program in X10,
+    that prints the first argument in all places.
+
+\begin{xten}
+public class HelloWholeWorld {
+  public static def main(args:Array[String]):void {
+     finish
+        for (p in Place.places())
+          async
+            at (p)
+              Console.OUT.println("(At " + p + ") First argument: " + args(0));
+  }
+}
+\end{xten}
+
+This program demonstrates the two most basic X10 concepts: \emph{places} and \emph{activities}.
+Places enable distributed programming by using the \code{at} construct,
+    whereas activities enable concurrent programming by using the \code{async} and \code{finish} constructs.
+
+A \emph{place} in X10 may represent a GPU, a unique processor, or even a different machine.
+From the programmer perspective, the running program has a single global address space.
+The places partition that global address space: no two places have any storage
+in common. (Therefore, X10 is a PGAS language: partitioned global address space.)
+But, since there is a single global address space, an activity at one place may
+    refer directly to storage at another (using distributed arrays or global references).
+The \code{at (somePlace) STATEMENT} construct is used to shift the execution to \code{somePlace}.
+Specifically, we copy all the data required for executing \code{STATEMENT} to \code{somePlace},
+    and then start executing \code{STATEMENT} at \code{somePlace}.
+In our example, we copy both \code{p} and \code{args} to place \code{p}.
+\code{Place.places()} is a collection of all places,
+    and we use an advanced \code{for} loop to iterate over all these places.
+
+An \emph{activity} in X10 can be thought of as a lightweight thread in Java.
+Activities in X10 can be short lived (e.g., simply summing two variables),
+    or long lived (e.g., for the entire duration of the program).
+An activity is created using \code{async S}, and we wait for activities to finish using \code{finish S}.
+An activity \emph{locally terminated} after it finished executing \code{S}.
+An activity \emph{globally terminated} after it locally terminated and
+    after all activities spawned in \code{S} have (recursively) globally terminated.
+The \code{finish S} construct waits until all activities spawned in \code{S} have globally terminated.
+
+\subsection{How to parallelize a sequential program?}
+We will now describe how to scale a sequential program that calculates the fibonacci numbers.
+We will do it in 3 phases:
+(i)~add fine-grained concurrency (but still use a single place),
+(ii)~statically distribute the computation over multiple places (but not in a balanced way),
+(iii)~use a library for dynamic load balancing.
+
+First consider the serial version \code{serialFib} in lines 2--7.
+We recursively calculate the \code{n-1} and \code{n-2} fibonacci numbers, and return their sum.
+Note that the type for the locals \code{fib1} and \code{fib2} was omitted, and the compiler infers it to be \code{Int}.
+
+Local variables were defined by using the \code{val} keyword, meaning the local has a final value
+    and cannot be reassigned.
+Final locals have a single value during their lifetime, i.e., they may not be re-assigned.
+In contrast, \code{var} means the local is a variable that can be re-assigned.
+
+The concurrent version \code{concurrentFib} uses \code{finish} and \code{async} (lines 12--13)
+    to calculate \code{fib1} and \code{fib2} in parallel:
+    \code{fib1} is calculated by a new activity (lines 13--14)
+    while \code{fib2} is calculated by the current activity.
+We call the pattern that initializes \code{fib1} \emph{asynchronous initialization}
+    because the variable is initialized in an \code{async}.
+It is possible to read \code{fib1} only after the \code{finish} (which guarantees that the initialization terminated).
+
+The distributed version \code{distributedFib} uses \code{at} (line~25) to calculate \code{fib1} at the next place.
+This is the order of execution for this \code{at} expression:
+    (i)~it captures only the variable \code{n} which is copied to the next place,
+    (ii)~it evaluates the expression in line~26 at the next place,
+    (iii)~it copies the result back to the original place and assigns it to \code{fib1}.
+Note that \code{at} is a synchronous construct, i.e., the current activity is blocked until the \code{at} finishes.
+Therefore, we started a new activity on line~24 to calculate both \code{fib1} and \code{fib2} in parallel.
+
+Finally, the last version \code{loadBalancingFib} uses a library to dynamically balance the load between all places.
+
+\begin{xten}
+public class Fib {
+  public static def serialFib(n:Int):Int {
+    if (n<=1) return n;
+    val fib1 = serialFib(n-1);
+    val fib2 = serialFib(n-2);
+    return fib1+fib2;
+  }
+  public static def concurrentFib(n:Int):Int {
+    if (n<=1) return n;
+    val fib1:Int;
+    val fib2:Int;
+    finish {
+      async
+        fib1 = concurrentFib(n-1);
+      fib2 = concurrentFib(n-2);
+    }
+    return fib1+fib2;
+  }
+  public static def distributedFib(n:Int):Int {
+    if (n<=1) return n;
+    val fib1:Int;
+    val fib2:Int;
+    finish {
+      async
+        fib1 = at (here.next())
+          concurrentFib(n-1);
+      fib2 = concurrentFib(n-2);
+    }
+    return fib1+fib2;
+  }
+  public static def loadBalancingFib(n:Int):Int {
+    todo: how to use UTS?
+  }
+}
+\end{xten}
+
+% Another example? Parallel quick sort?
+
+\subsection{X10 motivation}
+X10 is an evolution of Java for concurrency and heterogeneity.
+Programs written in X10 can scale to millions of places while achieving linear speedups.
+Furthermore, these places can be very different, e.g., one place can be a CPU and another a GPU.
+
+X10 focuses on high programmer productivity while maintaining high performance.
+X10 is a high-level language with a rich type-system that ensures type- and memory-safety.
+By leverages 5+ years of R\&D funded by DARPA/HPCS, X10 is high performance,
+    even relative to MPI programs written in C.
+%X10's goal is to deliver scalable performance competitive with C+MPI.
+
+X10 has the following features:
+\begin{description}
+  \item[Modern OO language]
+    X10 supports all the OO features found in Java,
+        including classes, inner classes, interface, inheritance, overloading, etc.
+    OO programming facilitates building libraries and frameworks that promotes reuse.
+    Additionally, X10 has a richer type-system that allows the programmer
+        to specify constraints over types, e.g., \code{Int\lb{}self!=0\rb{}}.
+    Other novel X10 features include closures, structs, and reified generics.
+  \item[Interoperability with Java]
+    X10 code can be compiled into Java classes and run on any JVM.
+    In this mode, X10 has full interoperability with Java,
+        i.e., your X10 code can make calls into Java libraries,
+        and your Java code can make calls into X10 code.
+  \item[Fine-grained concurrency]
+    Using \code{async} and \code{finish}, the programmer can specify
+        fine-grained concurrency.
+    X10 also has \code{atomic} blocks for mutual exclusion of activities,
+        and \code{when} conditional and clocks for synchronization between activities.
+    X10 runtime has an efficient novel work-stealing~\cite{} implementation
+        that avoids the overhead of creating threads for short-lived activities.
+  \item[Distribute computation]
+    Given a large-scale cluster, we wish to distribute the computation in an efficient way.
+    X10 gives the programmer complete control over how to distribute data and computation.
+    There are also libraries for efficient load-balancing between places.
+  \item[Heterogeneity]
+    Heterogeneity nowadays is ubiquitous, and computation can be done on a CPU, GPU, FPGA, or a commodity cluster.
+    X10 has a single programming model for computation offload.
+    The programmer does not need to learn a new model, e.g., in order to use the GPU or
+        a cluster special broadcasting feature.
+  \item[Safety, correctness and productivity]
+    Writing concurrent and distributed code is tricky and error-prone.
+    Programming in X10 eliminates many sources of errors found in other languages,
+        e.g., memory management errors of C++, initialization errors in Java,
+        and subtle concurrency bugs due to data-races (leading to non-determinate code)
+        and deadlocks.
+    X10 supports various annotations that allow writing deadlock-free and determinate code.
+\end{description}
+
+X10 can be deployed on a multitude of target environments,
+    ranging from high-end large clustered systems (BlueGene, P7IH),
+    and medium-scale commodity systems (~1000 cores and ~1 terabyte main memory),
+    all the way down to developer laptops (whether they run Linux, Mac, or Windows).
+Developing X10 programs is easy using an eclipse-based IDE, with an integrated debugger.
+
+Next we go into the various X10 features that increase productivity and performance.
+
+\subsection{Closures}
+Closures are in X10 are first-class values that represent functions.
+For example, \code{(x:Int)=>x+1} is a function that receives an integer and returns an integer,
+    thus its type is \code{(Int)=>Int}.
+Closures are useful for array manipulation (mapping, scanning, and reducing values of an array),
+    e.g., suppose you have an array of grades (\code{Array[Double]}) and you want to give all students
+        an increase by some factor:
+\begin{xten}
+def giveFactor(gradesArray:Array[Double], factor:Double) {
+  val newGrades = gradesArray.map( (x:Double) => x*factor );
+  return newGrades;
+}
+\end{xten}
+Similarly to inner classes, a closure can refer to variables in the outside scope (\code{factor}),
+    but only if they are immutable (\code{val} and not \code{var}).
+
+
+\subsection{Structs}
+Java has 8 primitive types (\code{boolean}, \code{char}, \code{byte}, \code{short}, \code{int}, \code{long}, \code{float}, \code{double}).
+X10 does not have primitive types, but instead it uses \emph{structs}.
+A struct has more restrictions than classes, but it is more efficient for small objects.
+A struct is defined in a similar way to a class but it has 2 restrictions:
+    (i)~it cannot extend or be extended (but it can implement interfaces),
+    and (ii)~all its fields must be \code{val}.
+\begin{xten}
+struct RGB {
+  val r:Byte;
+  val g:Byte;
+  val b:Byte;
+  def this(r:Byte,g:Byte,b:Byte) { // constructor
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
+}
+\end{xten}
+A struct value is created in the same way as an object is created, by calling a constructor \code{new RGB(1,2)}.
+Moreover, in the case of a struct, the keyword \code{new} is optional.
+A struct value is header-less, i.e., it does not carry any type information.
+Therefore, an \code{RGB} value will require only 3 bytes (if you ignore alignment issues).
+It is also inlinable, i.e., it does not require an extra level of indirection like normal objects.
+% no reference to a struct value,
+Thus, a \code{Array[RGB]} will not store pointers to \code{RGB} objects, but instead these values will be inlined
+    directly in the array, thus saving the extra level of indirection and also saving space.
+Structs do not have object-identity, and therefore they are compared by value and not by reference.
+Specifically, the compiler will automatically create an \code{equals} method in \code{RGB} that
+    checks that all fields are equal.
+If a struct is upcasted to an interface, then the compiler automatically boxes it and adds the required type-information.
+For example, the following will box a struct value \code{(new RGB(1,2)) as Any}.
+
+
+\subsection{Type inference}
+X10 has a type-inference mechanism that can save the programmer from explicitly writing types.
+X10 can infer the type for:
+(i)~method, constructor, and closures return types,
+(ii)~a \code{val} local or field that has an initializer.
+In the following example, all the types can be omitted (and the compiler will infer them):
+\begin{xten}
+class A {
+  val field:Double = Math.sqrt(2);
+  def this():A {} // constructor
+  def m():String {
+    val s:String = "a"+"b";
+    return s;
+  }
+}
+\end{xten}
+
+
+\subsection{Constrained types and type definitions}
+In X10, types can specify constraints between values,
+    e.g., \code{Int\lb{}self!=0\rb{}} is an integer that is not 0,
+        and \code{String\lb{}self!=null\rb{}} is a non-null string.
+Constraints are simple expressions that may refer to final variables, fields and constants,
+    and compare them with either equality (\code{==}) or inequality (\code{!=}).
+The keyword \code{self} can only be used in constraints, and it refers to the current value.
+(The \code{Matrix} example below show the difference between \code{self} and \code{this}.)
+
+Classes (and structs) can define properties,
+    e.g., \code{Matrix} below defines two properties called \code{rows} and \code{cols}.
+Properties are final fields that can be used in constraints, e.g.,
+    \code{Matrix\lb{}self.rows==5,self.cols==3\rb{}} is a 5 x 3 matrix.
+X10 also supports type definitions, which create a new (shorter) name for a type, thus promoting readability.
+For instance, the type definition in line~2 enables us to write a 5 x 3 matrix type conveniently as \code{Matrix(5,3)}.
+
+Properties are initialized first using \code{property(\ldots)} call syntax (see line~4),
+    then the other fields may be initialized (line~5).
+(Field initializers are executed after the property call.)
+
+%abstract operator this + (y:Matrix(this.rows,this.cols)):Matrix(this.rows, this.cols);
+%abstract operator this * (y:Matrix) {this.cols == y.rows}:Matrix(this.rows, y.cols);
+\begin{xten}
+class Matrix(rows:Int, cols:Int) {
+  static type Matrix(r:Int, c:Int) = Matrix{rows==r&&cols==c};
+  val size:Int;
+  def this(r:Int, c:Int) {
+    property(r,c);
+    size = rows * cols;
+  }
+  def multiply(y:Matrix{this.cols == self.rows}):Matrix(this.rows, y.cols) {
+    return new Matrix(rows,y.cols);
+  }
+}
+\end{xten}
+
+Type constraints can be used to express pre- and post- conditions on method calls.
+For example, consider the method \code{multiply} on line 8,
+    and consider a method call \code{x.multiply(y)}.
+Then, this call is legal only if the number of columns of \code{x} equals the number of rows of \code{y},
+    i.e., \code{x.cols==y.rows} (this is the pre-condition).
+This example also shows the difference between \code{this} and \code{self}:
+    \code{this} is the method receiver (in our example the receiver is \code{x}),
+    whereas \code{self} is the argument \code{y}.
+The return type \code{Matrix(this.rows, y.cols)} is equivalent (according to the type definition in line~2)
+    to %a synonym
+    \code{Matrix\lb{}self.rows==this.rows\&\&self.cols==y.cols\rb{}}.
+This can be thought of as a post-condition where the returned matrix is of size \code{x.rows} by \code{y.cols}.
+
+Constraints can also be used in \emph{class invariants},
+    e.g., a rectangular matrix will have an invariant that the number of rows and columns are equal:
+\begin{xten}
+class RectMatrix extends Matrix {rows==cols} {
+  def this(r:Int) {
+    super(r,r);
+  }
+}
+\end{xten}
+
+Type constraints will be checked statically if the compiler is given the argument
+    \code{-STATIC\_CHECKS}.
+In the \code{RectMatrix} example, the compiler can statically verify that the class invariant always holds.
+However, often it is convenient to perform some checks dynamically,
+    i.e., assert at runtime that a constraint hold.
+By default, the compiler will insert such dynamic checks and issue a warning specifying how many such checks were inserted.
+For example, the following code will produce such a warning:
+\begin{xten}
+def dynamicallyCheckMultiply(x:Matrix,y:Matrix) {
+  return x.multiply(y); // will dynamically check that x.cols==y.rows
+}
+\end{xten}
+
+
+\subsection{Reified generics}
+X10's generics are similar to Java's generics with one major difference:
+    Java's generics are based on erasure (i.e., generics are erased at runtime),
+    whereas X10's generics are reified (i.e., generic info is kept and checked at runtime).
+Java's primitive types cannot be used with generics (e.g., \code{ArrayList<int>} is illegal, but \code{ArrayList<Integer>} is legal in Java).
+In X10, any type (including classes, structs or interfaces) can substitute a generic type parameter,
+    e.g., both \code{Box[Double]} and \code{Box[Any]} are legal in X10.
+Furthermore, the code will be specialized according to the type argument,
+    i.e., \code{Box[Byte]} will have a field of type \code{Byte} taking 1 byte,
+    and \code{Box[Int]} will have a field of type \code{Int} taking 4 bytes.
+%class Matrix[T](rows:Int, cols:Int) {T <: Arithmetic[T]} {  val cells:Array[T];
+%class MyList[T] implements List[T] {  val nodes:Array[T];
+\begin{xten}
+class Box[T] {
+  var value:T;
+  def this(t:T) { value = t; }
+}
+\end{xten}
+
+
+\subsection{Arrays and operators}
+Arrays in X10 are multi-dimensional, where the number of dimensions is called \code{rank}.
+For example, an array of \code{rank==2} where every dimension has 10 elements will have 20 elements in total.
+The total
+{rank==2}
+\begin{xten}
+def twoDimensionalExample(arr:Array[String](2), p:Point(2)) {
+  arr(p) = "a";
+  return arr(0,0);
+}
+\end{xten}
+
+
+\subsection{Exceptions}
+In Java, a method must specify in its \code{throws} clause all the exceptions that it might throw,
+    except for unchecked exceptions (RuntimeException, Error, and their subclasses).
+This may cause a bloat in the size of the \code{throws} clause because a client of two libraries usually have to
+    specify the checked exceptions of both libraries.
+In contrast, X10 does not have a \code{throws} clause, i.e.,  all exceptions are unchecked.
+Methods do not declare which exceptions they might throw; any method can, potentially, throw any exception.
+
+In Java, if a thread does not catch an exception, then it is printed on the error stream.
+In X10, if an activity does not catch an exception, then that exception propagates to the closest \code{finish}.
+The \code{finish} accumulates all the thrown exceptions and when it globally terminated it throws
+    a single exception (of type \code{MultipleExceptions}) that is formed from the collection of exceptions that were accumulated.
+%Phrased differently, X10 has a rooted exception model where activities are organized in a tree structure,
+For example, the following \code{finish} will wait for the two activities to finish,
+    it will accumulate two exceptions and throw a single \code{MultipleExceptions}
+    that will be caught in line~6:
+\begin{xten}
+try {
+  finish {
+    async { throw new RuntimeException(); }
+    async { throw new ArithmeticException(); }
+  }
+} catch (e:MultipleExceptions) {
+  Console.OUT.println(e.exceptions);
+}
+\end{xten}
+
+ todo: data races and atomic?
+
+ deep copying in an "at"?
+
+Object initialization?
+
+
+Discuss "<:" ?
+
+% Like in Java:
+% package and imports
+% static
+% main
+% inheritance, overloading, overriding, interfaces, inner classes
+
+%\section{Implementation}
+%Two back-ends: Java and C++.
+%Compilation flow - include the image on slide 7?
+
+\end{document}
