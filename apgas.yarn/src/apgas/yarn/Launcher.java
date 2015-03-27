@@ -1,11 +1,11 @@
 package apgas.yarn;
 
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
@@ -15,7 +15,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -29,67 +28,50 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 /**
  * The {@link Launcher} class implements a launcher based on Yarn.
  */
-public class Launcher implements apgas.util.Launcher {
+public class Launcher implements BiConsumer<Integer, List<String>> {
   private static void redirect(List<String> command) {
     command.add("1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout");
     command.add("2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr");
   }
 
-  private final org.apache.hadoop.conf.Configuration conf = new YarnConfiguration();
-  private final AMRMClient<ContainerRequest> rmClient = AMRMClient
-      .createAMRMClient();
-
   @Override
-  public void launch(int n, List<String> command) throws Exception {
-    final List<String> chmod = new ArrayList<String>();
-    chmod.add("chmod");
-    chmod.add("a+rx");
-    chmod.add(System.getenv(Environment.LOG_DIRS.name()));
-    final ProcessBuilder pb = new ProcessBuilder(chmod);
-    pb.redirectOutput(Redirect.INHERIT);
-    pb.redirectError(Redirect.INHERIT);
-    pb.start();
-    redirect(command); // TODO clone before mutating the command
-    rmClient.init(conf);
-    rmClient.start();
-    final NMClient nmClient = NMClient.createNMClient();
-    nmClient.init(conf);
-    nmClient.start();
-    rmClient.registerApplicationMaster("", 0, "");
-    for (int i = 0; i < n; ++i) {
-      final ContainerRequest request = new ContainerRequest(
-          Resource.newInstance(256, 1), null, null, Priority.newInstance(0));
-      rmClient.addContainerRequest(request);
-    }
-    int responseId = 0;
-    for (int containers = 0; containers < n;) {
-      final AllocateResponse response = rmClient.allocate(responseId++);
-      for (final Container container : response.getAllocatedContainers()) {
-        final ContainerLaunchContext ctx = ContainerLaunchContext.newInstance(
-            null, null, command, null, null, null);
-        nmClient.startContainer(container, ctx);
-      }
-      containers += response.getAllocatedContainers().size();
-      try {
-        Thread.sleep(100);
-      } catch (final InterruptedException e) {
-      }
-    }
-  }
-
-  @Override
-  public boolean healthy() {
-    return true;
-  }
-
-  @Override
-  public void shutdown() {
+  public void accept(Integer p, List<String> command) {
+    redirect(command);
     try {
-      rmClient.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED,
-          "", null);
-    } catch (final YarnException | IOException e) {
+      final org.apache.hadoop.conf.Configuration conf = new YarnConfiguration();
+      final AMRMClient<ContainerRequest> rmClient = AMRMClient
+          .createAMRMClient();
+      rmClient.init(conf);
+      rmClient.start();
+      final NMClient nmClient = NMClient.createNMClient();
+      nmClient.init(conf);
+      nmClient.start();
+      rmClient.registerApplicationMaster("", 0, "");
+      for (int i = 1; i < p; ++i) {
+        final ContainerRequest request = new ContainerRequest(
+            Resource.newInstance(256, 1), null, null, Priority.newInstance(0));
+        rmClient.addContainerRequest(request);
+      }
+      int responseId = 0;
+      int containers = 1;
+      while (containers < p) {
+        final AllocateResponse response = rmClient.allocate(responseId++);
+        for (final Container container : response.getAllocatedContainers()) {
+          final ContainerLaunchContext ctx = ContainerLaunchContext
+              .newInstance(null, null, command, null, null, null);
+          nmClient.startContainer(container, ctx);
+        }
+        containers += response.getAllocatedContainers().size();
+        try {
+          Thread.sleep(100);
+        } catch (final InterruptedException e) {
+        }
+      }
+    } catch (final RuntimeException e) {
+      throw e;
+    } catch (final Exception e) {
+      throw new RuntimeException(e);
     }
-    rmClient.stop();
   }
 
   /**
@@ -103,24 +85,16 @@ public class Launcher implements apgas.util.Launcher {
    *           if an error occurs
    */
   public static void main(String[] args) throws IOException, YarnException {
-    if (args.length <= 0) {
-      System.err.println("Usage: yarn " + Launcher.class.getCanonicalName()
-          + " COMMAND");
+    if (args.length <= 1) {
+      System.err.println("Usage: hadoop apgas.yarn.Launcher JARS CLASSNAME");
+      System.err.println(" where JARS is a colon-separated list of jar files");
+      System.err.println("       CLASSNAME is the name of the main class");
       System.exit(1);
     }
     final List<String> command = new ArrayList<String>();
-    command.add(args[0]);
-    command.add("-D" + apgas.Configuration.APGAS_LAUNCHER + "="
-        + Launcher.class.getCanonicalName());
-    command.add("-D" + apgas.Configuration.APGAS_JAVA + "=" + args[0]);
-    String classpath = "";
-    for (int i = 1; i < args.length; i++) {
-      if (args[i].equals("-cp") || args[i].equals("-classpath")) {
-        classpath = args[++i];
-      } else {
-        command.add(args[i]);
-      }
-    }
+    command.add("java");
+    command.add("-Dapgas.launcher=apgas.yarn.Launcher");
+    command.add(args[1]);
     redirect(command);
     final Configuration conf = new YarnConfiguration();
     final YarnClient yarnClient = YarnClient.createYarnClient();
@@ -133,7 +107,7 @@ public class Launcher implements apgas.util.Launcher {
                 YarnConfiguration.YARN_APPLICATION_CLASSPATH,
                 YarnConfiguration.DEFAULT_YARN_CROSS_PLATFORM_APPLICATION_CLASSPATH));
     final Map<String, String> env = Collections.singletonMap(
-        Environment.CLASSPATH.name(), classpath
+        Environment.CLASSPATH.name(), args[0]
             + ApplicationConstants.CLASS_PATH_SEPARATOR + cp);
     final ContainerLaunchContext ctx = ContainerLaunchContext.newInstance(null,
         env, command, null, null, null);

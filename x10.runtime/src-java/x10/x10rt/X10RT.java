@@ -17,11 +17,8 @@ import java.nio.ByteBuffer;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.HazelcastInstance;
 
-import x10.core.fun.VoidFun_0_1;
 import x10.lang.GlobalRail;
-import x10.lang.Place;
 import x10.x10rt.SocketTransport.RETURNCODE;
-import x10.xrx.Configuration;
 
 public class X10RT {
     enum State { UNINITIALIZED, INITIALIZED, RUNNING, TEARING_DOWN, TORN_DOWN };
@@ -397,14 +394,6 @@ public class X10RT {
     		x10.x10rt.MessageHandlers.registerHandlers();
     }
     
-    public static void registerPlaceAddedHandler(VoidFun_0_1<Place> function) {
-    	x10.x10rt.MessageHandlers.placeAddedHandler = function;
-    }
-    
-    public static void registerPlaceRemovedHandler(VoidFun_0_1<Place> function) {
-    	x10.x10rt.MessageHandlers.placeRemovedHandler = function;
-    }
-    
     // library-mode alternative to the shutdown hook in init()
     public static synchronized int disconnect() {
     	state = State.TEARING_DOWN;
@@ -440,16 +429,12 @@ public class X10RT {
     
     // this form of initDataStore is called as a part of normal startup.
     private static void initDataStore() {
-        // If this is place 0, initialize hazelcast if either we are running in a mode that uses Hazelcast to implement
-        // resilient finish or if the X10RT_DATASTORE property has been set to Hazelcast.
+        // initialize hazelcast if X10RT_HAZELCAST has been set to true, and this is place 0
     	// we only start at 0 because the other places need to join an existing hazelcast cluster, 
     	// and the cluster is seeded via at least one other hazelcast instance.  place 0 doesn't join
     	// an existing cluster - it is the start of one.
-        boolean useHazelcast = "Hazelcast".equalsIgnoreCase(System.getProperty(X10RT_DATASTORE, "none"));
-        useHazelcast |= Configuration.resilient_mode$O() == Configuration.RESILIENT_MODE_HC;
-        useHazelcast |= Configuration.resilient_mode$O() == Configuration.RESILIENT_MODE_HC_OPTIMIZED;
     	
-    	if (hereId == 0 && useHazelcast) {
+    	if (hereId == 0 && "Hazelcast".equalsIgnoreCase(System.getProperty(X10RT_DATASTORE, "none"))) {
     		if (X10RT.javaSockets == null) {
     			System.err.println("Error: you specified X10RT_DATASTORE=Hazelcast, but are not using JavaSockets, which is required.  Hazelcast is disabled.");
     			return;
