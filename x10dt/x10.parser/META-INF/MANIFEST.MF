@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Parser
-Bundle-SymbolicName: x10.parser
-Bundle-Version: 1.0.0.qualifier
-
