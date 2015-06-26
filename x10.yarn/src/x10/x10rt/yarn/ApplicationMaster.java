@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -53,7 +51,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
-import org.apache.hadoop.yarn.api.records.NodeId;
 import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
@@ -79,14 +76,10 @@ public class ApplicationMaster {
 	public static final String X10_HDFS_JARS = "X10_HDFS_JARS";
 	public static final String X10_YARN_NATIVE = "X10_YARN_NATIVE";
 	public static final String X10_YARN_MAIN = "X10_YARN_MAIN";
-	public static final String X10_YARN_KILL = "X10_YARN_KILL";
 	public static final String X10_YARNUPLOAD = "X10_YARNUPLOAD";
 	public static final String X10YARNENV_ = "X10YARNENV_";
-	private static final String DEAD = "DEAD";
 	static enum CTRL_MSG_TYPE {HELLO, GOODBYE, PORT_REQUEST, PORT_RESPONSE, LAUNCH_REQUEST, LAUNCH_RESPONSE}; // Correspond to values in Launcher.h
 	private static final int headerLength = 16;
-	private static final int PORT_UNKNOWN = -1;
-	private static final int PORT_DEAD = -2;
 	
 	private Configuration conf;
 	private String appMasterHostname;
@@ -96,21 +89,17 @@ public class ApplicationMaster {
 	private volatile boolean running = true; // flag for when to shut everything down
 	private final String[] args;
 	private final String appName;
-	private final ScheduledThreadPoolExecutor placeKiller; 
-	
 
 	// information about a specific place.
 	private class CommunicationLink {
-		private CommunicationLink(NodeId node, ContainerId container) {
+		private CommunicationLink(String hostname) {
 			super();
-			this.node = node;
-			this.container = container;
+			this.hostname = hostname;
 			this.sc = null;
-			this.port = PORT_UNKNOWN;
+			this.port = -1;
 			this.pendingPortRequests = null;
 		}
-		final NodeId node;
-		final ContainerId container;
+		final String hostname;
 		SocketChannel sc;
     	int port;
     	ArrayList<Integer> pendingPortRequests;
@@ -119,9 +108,7 @@ public class ApplicationMaster {
 //	private int appMasterX10LauncherPort; // Port used by X10 places to communicate directly with the AM
 	private final Selector selector;
 	private final HashMap<Integer, CommunicationLink> links;
-	private final HashMap<ContainerId, Integer> places; // map of containers to places
 	private final HashMap<SocketChannel, ByteBuffer> pendingReads;
-	private final HashMap<Integer, Integer> pendingKills;
 	
 	private AMRMClientAsync<ContainerRequest> resourceManager; // Handle to communicate with the Resource Manager
 	private NMClientAsync nodeManager; // Handle to communicate with the Node Manager
@@ -174,7 +161,6 @@ public class ApplicationMaster {
 		initialNumPlaces = Integer.parseInt(envs.get(X10_NPLACES));
 		coresPerPlace = Integer.parseInt(envs.get(X10_NTHREADS));
 		links = new HashMap<Integer, ApplicationMaster.CommunicationLink>(initialNumPlaces);
-		places = new HashMap<ContainerId, Integer>(initialNumPlaces);
 		pendingReads = new HashMap<SocketChannel, ByteBuffer>();
 		selector = Selector.open();
 		this.args = args;
@@ -185,11 +171,9 @@ public class ApplicationMaster {
 		for (int i=0; i<args.length; i++) {
 			try {
 				if (args[i].startsWith("-Xmx")) {
-					if (args[i].toLowerCase().endsWith("g"))
-						this.memoryPerPlaceInMb = Integer.parseInt(args[i].substring(4, args[i].length()-1))*1024;
-					else if (args[i].toLowerCase().endsWith("m"))
+					if (args[i].endsWith("m"))
 						this.memoryPerPlaceInMb = Integer.parseInt(args[i].substring(4, args[i].length()-1));
-					else if (args[i].toLowerCase().endsWith("k"))
+					else if (args[i].endsWith("k"))
 						this.memoryPerPlaceInMb = Integer.parseInt(args[i].substring(4, args[i].length()-1))/1024;
 					else
 						this.memoryPerPlaceInMb = Integer.parseInt(args[i].substring(4))/1024/1024;
@@ -199,25 +183,6 @@ public class ApplicationMaster {
 				// ignore, use default value
 				e.printStackTrace();
 			}
-		}
-		
-		if (envs.containsKey(X10YARNENV_+X10_YARN_KILL)) {
-			placeKiller = new ScheduledThreadPoolExecutor(1);
-			// things to kill takes the form place:delayInSeconds,place:delayInSeconds,etc.  e.g. "2:2,3:3" will kill place 2 after 2 seconds, 3 after 3 seconds
-	 		String thingsToKill = System.getenv(X10YARNENV_+X10_YARN_KILL);
-			// TODO: format error checking
-			String[] sets = thingsToKill.split(",");
-			pendingKills = new HashMap<Integer, Integer>(sets.length);
-			for (String set : sets) {
-				String [] place_delay = set.split(":");
-				int place = Integer.parseInt(place_delay[0]);
-				int delay = Integer.parseInt(place_delay[1]);
-				pendingKills.put(place, delay);
-			}
-		}
-		else {
-			placeKiller = null;
-			pendingKills = null;
 		}
 	}
 	
@@ -399,7 +364,7 @@ public class ApplicationMaster {
 		msg.rewind(); // reset the buffer for reading from the beginning
 		CTRL_MSG_TYPE type = CTRL_MSG_TYPE.values()[msg.getInt()];
 		int destination = msg.getInt();
-		final int source = msg.getInt();
+		int source = msg.getInt();
 		int datalen = msg.getInt();
 		assert(datalen == msg.remaining());
 		
@@ -414,7 +379,7 @@ public class ApplicationMaster {
 			{
 				// read the port information, and update the record for this place
 				assert(datalen == 4 && source < numRequestedContainers.get() && source >= 0);
-				final CommunicationLink linkInfo;
+				CommunicationLink linkInfo;
 				LOG.info("Getting link for place "+source);
 				synchronized (links) {
 					linkInfo = links.get(source);
@@ -425,7 +390,7 @@ public class ApplicationMaster {
 				// check if there are pending port requests for this place
 				if (linkInfo.pendingPortRequests != null) {
 					// prepare response message
-					String linkString = linkInfo.node.getHost()+":"+linkInfo.port;
+					String linkString = linkInfo.hostname+":"+linkInfo.port;
 					byte[] linkBytes = linkString.getBytes(); // matches existing code.  TODO: switch to UTF8
 					ByteBuffer response = ByteBuffer.allocateDirect(headerLength+linkBytes.length).order(ByteOrder.nativeOrder());
 					response.putInt(CTRL_MSG_TYPE.PORT_RESPONSE.ordinal());
@@ -448,26 +413,14 @@ public class ApplicationMaster {
 					linkInfo.pendingPortRequests = null;
 				}
 				LOG.info("HELLO from place "+source+" at port "+linkInfo.port);
-				
-				if (pendingKills != null && pendingKills.containsKey(source)) {
-					int delay = pendingKills.remove(source);
-					LOG.info("Scheduling a takedown of place "+source+" in "+delay+" seconds");
-					placeKiller.schedule(new Runnable(){
-						@Override
-						public void run() {
-							LOG.info("KILLING CONTAINER FOR PLACE "+source);
-							nodeManager.stopContainerAsync(linkInfo.container, linkInfo.node);
-						}}, delay, TimeUnit.SECONDS);
-				}
 			}
 			break;
 			case GOODBYE:
 			{
 				try {
-					CommunicationLink link = links.get(source);
+					CommunicationLink link = links.remove(source);
 					assert(link.pendingPortRequests == null);
 					sc.close();
-					link.port = PORT_DEAD;
 				} catch (IOException e) {
 					LOG.warn("Error closing socket channel", e);
 				}
@@ -479,12 +432,8 @@ public class ApplicationMaster {
 				LOG.info("Got PORT_REQUEST from place "+source+" for place "+destination);
 				// check to see if we know the requested information
 				CommunicationLink linkInfo = links.get(destination);
-				if (linkInfo.port != PORT_UNKNOWN) {
-					String linkString;
-					if (linkInfo.port == PORT_DEAD)
-						linkString = DEAD;
-					else
-						linkString = linkInfo.node.getHost()+":"+linkInfo.port;
+				if (linkInfo.port != -1) {
+					String linkString = linkInfo.hostname+":"+linkInfo.port;
 					LOG.info("Telling place "+source+" that place "+destination+" is at "+linkString);
 					byte[] linkBytes = linkString.getBytes(); // matches existing code.  TODO: switch to UTF8
 					ByteBuffer response = ByteBuffer.allocateDirect(headerLength+linkBytes.length).order(ByteOrder.nativeOrder());
@@ -552,7 +501,6 @@ public class ApplicationMaster {
 			// shutting down... ignore
 		}
 		links.clear();
-		places.clear();
 		
 		// When the application completes, it should stop all running containers
 		LOG.info("X10 program "+appName+" completed. Stopping running containers");
@@ -596,7 +544,7 @@ public class ApplicationMaster {
 		@Override
 		public void onContainersAllocated(List<Container> allocatedContainers) {
 			LOG.info("Got response from RM for container ask, allocatedCnt="+ allocatedContainers.size());
-			for (final Container allocatedContainer : allocatedContainers) {
+			for (Container allocatedContainer : allocatedContainers) {
 				if (numAllocatedContainers.get() >= numRequestedContainers.get()) {
 					// There is currently a bug in yarn, where it will allocate more
 					// containers than requested, if the request comes in later.  Workaround.
@@ -606,11 +554,11 @@ public class ApplicationMaster {
 					continue;
 				}
 				
-				final int placeId = numAllocatedContainers.getAndIncrement();
-				final NodeId node = allocatedContainer.getNodeId();
+				int placeId = numAllocatedContainers.getAndIncrement();
+				String hostname = allocatedContainer.getNodeId().getHost();
 				LOG.info("Launching place on a new container."
 						+ ", containerId=" + allocatedContainer.getId()
-						+ ", containerNode=" + node.getHost()
+						+ ", containerNode=" + hostname
 						+ ":" + allocatedContainer.getNodeId().getPort()
 						+ ", containerNodeURI=" + allocatedContainer.getNodeHttpAddress()
 						+ ", containerResourceMemory"
@@ -708,8 +656,7 @@ public class ApplicationMaster {
 					ContainerLaunchContext ctx = ContainerLaunchContext.newInstance(
 							localResources, env, commands, null, allTokens.duplicate(), null);
 					LOG.info("Storing link for place "+placeId);
-					links.put(placeId, new CommunicationLink(node, allocatedContainer.getId())); // save the hostname of the machine with this place
-					places.put(allocatedContainer.getId(), placeId);
+					links.put(placeId, new CommunicationLink(hostname)); // save the hostname of the machine with this place
 					nodeManager.startContainerAsync(allocatedContainer, ctx);
 				}
 				catch (IOException e) {
@@ -731,19 +678,11 @@ public class ApplicationMaster {
 				// increment counters for completed/failed containers
 				numCompletedContainers.incrementAndGet();
 				int exitStatus = containerStatus.getExitStatus();
-				Integer placeId = places.get(containerStatus.getContainerId());
-				if (placeId != null) {
-					CommunicationLink l = links.get(placeId);
-					if (l != null) l.port = PORT_DEAD; // mark the place as dead
-				}
 				if (0 != exitStatus) {
 					// container failed
 					if (ContainerExitStatus.ABORTED == exitStatus) {
 						// killed by framework, not really a failure?
 						LOG.info("Container aborted");
-					} else if (placeId != null && pendingKills != null && pendingKills.containsKey(placeId))  {
-						// TODO: ensure that the pending kill actually executed
-						LOG.info("Container was killed and exited with exit code "+exitStatus);
 					} else {
 						numFailedContainers.incrementAndGet();
 						LOG.info("Container exited with exit code "+exitStatus);

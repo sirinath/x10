@@ -9,7 +9,6 @@
     <property name="x10.dist.location" value="${x10.home}/x10.dist"/>
     <property name="x10.constraints.location" location="${x10.home}/x10.constraints"/>
     <property name="x10.common.location" location="${x10.home}/x10.common"/>
-	<property name="x10.network.location" location="${x10.home}/x10.network"/>
     <property name="build" location="${basedir}/classes"/>
     <property name="src" location="${basedir}/src-java"/>
     <property name="gen" location="${src}/gen"/>
@@ -19,7 +18,7 @@
     <property name="jar" value="x10.jar"/>
 	<property name="gen-java.zip" value="gen-java.zip"/>
     <property name="ecj.jar" value="${lib}/ecj-4.4.2.jar"/>
-    <property name="math.jar" value="${lib}/commons-math3-3.5.jar"/>
+    <property name="math.jar" value="${lib}/commons-math3-3.4.1.jar"/>
     <property name="log.jar" value="${lib}/commons-logging-1.2.jar"/>
     <property name="hazelcast.jar" value="${lib}/hazelcast-3.3.1.jar"/>
     <property name="shrike.jar" value="${lib}/com.ibm.wala.shrike_1.3.1.201101071300.jar"/>
@@ -44,7 +43,6 @@
         <path refid="mainproject.classpath"/>
         <path refid="x10.constraints.classpath"/>
         <path refid="x10.common.classpath"/>
-    	<path refid="x10.network.classpath"/>
         <pathelement path="${math.jar}"/>
         <pathelement path="${log.jar}"/>
         <pathelement path="${hazelcast.jar}"/>
@@ -58,9 +56,6 @@
     <path id="x10.common.classpath">
         <pathelement location="${x10.common.location}/classes"/>
     </path>
-	<path id="x10.network.classpath">
-	    <pathelement location="${x10.network.location}/classes"/>
-	</path>
     <!-- get the environment variables -->
     <property environment="env"/>
 
@@ -350,7 +345,6 @@
             </fileset>
             <fileset dir="${x10.constraints.location}/classes" includes="x10/constraint/**" excludes="x10/constraint/test/**"/>
             <fileset dir="${x10.common.location}/classes" includes="x10/**"/>
-        	<fileset dir="${x10.network.location}/classes" includes="x10/**"/>
 		    <manifest>
 		      <attribute name="Built-By" value="X10 Project" />
 		      <attribute name="Specification-Title" value="X10 Language Runtime"/>

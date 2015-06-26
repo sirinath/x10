@@ -81,7 +81,7 @@ final class ResilientFinishOpt implements Serializable, Finish {
   }
 
   @Override
-  public void tell() {
+  public void tell(int p) {
     synchronized (this) {
       if (--local >= 0) {
         return; // not done with local subtasks of this finish instance
@@ -93,7 +93,7 @@ final class ResilientFinishOpt implements Serializable, Finish {
         return; // not resilient
       }
     }
-    finish.tell(); // update resilient state
+    finish.tell(p); // update resilient state
   }
 
   @Override

@@ -17,5 +17,5 @@ import java.io.Serializable;
  * A serializable runnable interface.
  */
 @FunctionalInterface
-public interface SerializableRunnable extends Serializable, Runnable {
+interface SerializableRunnable extends Serializable, Runnable {
 }

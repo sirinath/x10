@@ -69,8 +69,8 @@ public class ApgasTest {
   public void testGlobalRef() {
     final int a[] = new int[1];
     final GlobalRef<int[]> _a = new GlobalRef<>(a);
-    finish(() -> asyncAt(place(1),
-        () -> asyncAt(_a.home(), () -> _a.get()[0] = 42)));
+    finish(() -> asyncat(place(1),
+        () -> asyncat(_a.home(), () -> _a.get()[0] = 42)));
     assertEquals(a[0], 42);
     _a.free();
   }
@@ -90,7 +90,7 @@ public class ApgasTest {
 
   @Test(expected = DeadPlaceException.class)
   public void testBadPlaceExceptionAsyncAt() {
-    asyncAt(new Place(places().size()), () -> {
+    asyncat(new Place(places().size()), () -> {
     });
   }
 
@@ -110,7 +110,7 @@ public class ApgasTest {
 
   @Test(expected = MultipleException.class)
   public void testMultipleExceptionAsyncAt() {
-    finish(() -> asyncAt(place(1), () -> {
+    finish(() -> asyncat(place(1), () -> {
       throw new RuntimeException();
     }));
   }
@@ -137,7 +137,7 @@ public class ApgasTest {
   public void testSerializationException() throws Throwable {
     try {
       final Object obj = new Object();
-      asyncAt(place(1), () -> obj.toString());
+      asyncat(place(1), () -> obj.toString());
     } catch (final MultipleException e) {
       assertEquals(e.getSuppressed().length, 1);
       throw e.getSuppressed()[0];
@@ -158,7 +158,7 @@ public class ApgasTest {
   public void testDeserializationException() throws Throwable {
     final Object obj = new Foo();
     try {
-      finish(() -> asyncAt(place(1), () -> obj.toString()));
+      finish(() -> asyncat(place(1), () -> obj.toString()));
     } catch (final MultipleException e) {
       assertEquals(e.getSuppressed().length, 1);
       throw e.getSuppressed()[0];
@@ -174,7 +174,7 @@ public class ApgasTest {
   @Test(expected = NotSerializableException.class)
   public void testNotSerializableException() throws Throwable {
     try {
-      finish(() -> asyncAt(place(1), () -> {
+      finish(() -> asyncat(place(1), () -> {
         throw new FooException();
       }));
     } catch (final MultipleException e) {

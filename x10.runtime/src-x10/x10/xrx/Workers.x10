@@ -178,13 +178,6 @@ final class Workers {
         worker.unpark();
     }
 
-    def probeInbound():Activity {
-        lock.lock();
-        val task = inboundTasks.steal() as Activity;
-        lock.unlock();
-        return task;
-    }
-
     // deal to idle worker if any
     // return true on success
     def give(activity:Activity):Boolean {

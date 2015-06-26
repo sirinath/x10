@@ -29,31 +29,16 @@ public final class Configuration {
   public static final String APGAS_RUNTIME = "apgas.runtime";
 
   /**
-   * Name of the network transport class implementation to instantiate (String
-   * property).
-   * <p>
-   * Currently "{@code apgas.impl.Transport}" and "
-   * {@code apgas.sockets.SocketTransport}" are supported. Defaults to "
-   * {@code apgas.impl.Transport}".
-   *
-   */
-  public static final String APGAS_NETWORKTRANSPORT = "apgas.networktransport";
-
-  /**
-   * Enables or disables compression on the network links when using transport "
-   * {@code apgas.sockets.SocketTransport}".
-   * <p>
-   * Set to "none" or "snappy", which is the default.
-   */
-  public static final String APGAS_NETWORKTRANSPORT_COMPRESSION = "apgas.networktransport.compression";
-
-  /**
    * Number of places to spawn (Integer property).
+   * <p>
+   * All the places are spawned on the localhost.
+   *
+   * @see GlobalRuntime
    */
   public static final String APGAS_PLACES = "apgas.places";
 
   /**
-   * Desired level of parallelism (Integer property).
+   * Number of threads in the thread pool (Integer property).
    * <p>
    * The return value of "{@code Runtime.getRuntime().availableProcessors()}" is
    * used if this property is not set.
@@ -61,15 +46,8 @@ public final class Configuration {
   public static final String APGAS_THREADS = "apgas.threads";
 
   /**
-   * Upper bound on the number of persistent threads in the thread pool (Integer
+   * Reduces the number of threads used by the JVM and Hazelcast if set (Boolean
    * property).
-   * <p>
-   * Defaults to 256.
-   */
-  public static final String APGAS_MAX_THREADS = "apgas.max.threads";
-
-  /**
-   * Reduces the number of threads used by Hazelcast if set (Boolean property).
    */
   public static final String APGAS_COMPACT = "apgas.compact";
 
@@ -100,29 +78,20 @@ public final class Configuration {
   public static final String APGAS_DAEMON = "apgas.daemon";
 
   /**
-   * Specifies the java command to run for spawning places (String property).
+   * Specifies the ip address of the current host (String property).
    * <p>
-   * Defaults to "{@code java}".
+   * The return value of "{@code InetAddress.getLocalHost().getHostAddress()}"
+   * is used if this property is not set.
    */
-  public static final String APGAS_JAVA = "apgas.java";
+  public static final String APGAS_LOCALHOST = "apgas.localhost";
 
   /**
-   * Enables or disables resiliency.
+   * Turns on resiliency.
    */
   public static final String APGAS_RESILIENT = "apgas.resilient";
 
   /**
    * Name of the finish implementation class to instantiate (String property).
-   * <p>
-   * Defaults to "{@code apgas.impl.DefaultFinish}" or "
-   * {@code apgas.impl.ResilientFinish}".
    */
   public static final String APGAS_FINISH = "apgas.finish";
-
-  /**
-   * Name of the launcher implementation class to instantiate (String property).
-   * <p>
-   * Defaults to "{@code apgas.impl.LocalLauncher}".
-   */
-  public static final String APGAS_LAUNCHER = "apgas.launcher";
 }

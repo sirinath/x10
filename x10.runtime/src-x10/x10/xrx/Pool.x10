@@ -34,43 +34,28 @@ class Pool {
 
     operator this(n:Int):void {
         // numAllPlaces includes accelerators; if running in a resilient/elastic mode, must assume mutli-place.
-        // NOTE: this setting of workers.multiplace must match the one in bootstrap.cc: real_x10_main_inner()
         workers.multiplace = Place.numAllPlaces() > 1 || Runtime.RESILIENT_MODE != Configuration.RESILIENT_MODE_NONE; 
         workers.busyWaiting = Runtime.BUSY_WAITING || !Runtime.x10rtBlockingProbeSupport();
-        
-        // initialWorker may be worker thread 0, or an immediate worker.  Slot it into the correct location
-        val initialWorker = Runtime.worker();
-        workers(initialWorker.workerId) = initialWorker;
-
+        workers(0n) = Runtime.worker();
         workers.count = n;
-        
-        // create regular worker threads
-        for (var i:Int = 0n; i<n; i++) {
-            if (i != initialWorker.workerId) {
-                workers(i) = new Worker(i);
-            }
+        for (var i:Int = 1n; i<n; i++) {
+            workers(i) = new Worker(i);
         }
-        
         // Create NUM_IMMEDIATE_THREADS dedicated to processing @Immediate asyncs
         if (workers.multiplace) {
             for (j in 1..Runtime.NUM_IMMEDIATE_THREADS) {
                 val id = workers.count++;
-                if (id != initialWorker.workerId) {
-                    workers(id) = new Worker(id, true, "@ImmediateWorker-"+(j-1));
-                }
-                workers.deadCount++;
+                workers(id) = new Worker(id, true, "@ImmediateWorker-"+j);
+                workers.deadCount++; // ignore immediate threads in dynamic pool-size adjustment
             }
         }
-        // start the newly created threads
-        for (var i:Int = 0n; i<workers.count; i++) {
-            if (i != initialWorker.workerId) {
-                workers(i).start();
-            }
+        for (var i:Int = 1n; i<workers.count; i++) {
+            workers(i).start();
         }
     }
 
     def run():void {
-        workers(Runtime.worker().workerId)();
+        workers(0n)();
         Runtime.join();
     }
 

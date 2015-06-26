@@ -200,7 +200,8 @@ public final class Array_4[T] (
                                             l < 0 || l >= numElems_4)) {
             raiseBoundsError(i, j, k, l);
         }
-        return Unsafe.uncheckedRailSet(raw, offset(i, j, k, l), v);
+        Unsafe.uncheckedRailSet(raw, offset(i, j, k, l), v);
+        return v;
     }
 
     /**

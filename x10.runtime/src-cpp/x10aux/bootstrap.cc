@@ -18,9 +18,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <x10/lang/Place.h>
+#include <x10/xrx/Runtime.h>
+#include <x10/io/Console.h>
 #include <x10/xrx/Thread.h>
 #include <x10/lang/Rail.h>
 #include <x10/lang/String.h>
+#include <x10/xrx/Worker.h>
 #include <x10/util/Team.h>
 
 using namespace x10aux;
@@ -43,7 +47,6 @@ void x10aux::initialize_xrx() {
     x10::xrx::Runtime::FMGL(NTHREADS__do_init)();
     x10::xrx::Runtime::FMGL(MAX_THREADS__do_init)();
     x10::xrx::Runtime::FMGL(STATIC_THREADS__do_init)();
-    x10::xrx::Runtime::FMGL(NUM_IMMEDIATE_THREADS__do_init)();
     x10::xrx::Runtime::FMGL(WARN_ON_THREAD_CREATION__do_init)();
     x10::xrx::Runtime::FMGL(BUSY_WAITING__do_init)();
     x10::xrx::Runtime::FMGL(CANCELLABLE__do_init)();
@@ -73,6 +76,8 @@ static x10::lang::Rail<x10::lang::String*>* convert_args(int ac, char **av) {
 static void* real_x10_main_inner(void* args);
 
 void x10aux::apgas_main(int argc, char** argv) {
+    x10aux::network_init(argc, argv);
+
     x10_main_args args;
     args.ac = argc;
     args.av = argv;
@@ -84,6 +89,8 @@ void x10aux::apgas_main(int argc, char** argv) {
 }
 
 int x10aux::real_x10_main(int ac, char **av, ApplicationMainFunction mainFunc) {
+    x10aux::network_init(ac, av);
+
 #if defined(__bg__)
     x10_main_args args;
     args.ac = ac;
@@ -127,8 +134,6 @@ static void* real_x10_main_inner(void* _main_args) {
     GC_INIT();
 #endif
 
-    x10aux::network_init(main_args->ac, main_args->av);
-
     x10aux::RuntimeType::initializeForMultiThreading();
 
     try {
@@ -137,17 +142,9 @@ static void* real_x10_main_inner(void* _main_args) {
         // Initialize a few key fields of XRX that must be set before any X10 code can execute
         x10aux::initialize_xrx();
 
-        // NOTE: this statement must match the one setting workers.multiplace in Pool.this()
-        bool multiplace = x10rt_nplaces() > 1 || x10::xrx::Configuration::resilient_mode() != x10::xrx::Configuration::FMGL(RESILIENT_MODE_NONE);
-        if (x10::xrx::Configuration::num_immediate_threads() == 0 || !multiplace){
-        	// Initialise enough state to make this 'main' thread look like a normal x10 thread
-        	// (e.g. make Thread::CurrentThread work properly).
-        	x10::xrx::Worker::_make((x10_int)0);
-        }
-        else {
-        	// initialize this thread as the first immediate thread
-        	x10::xrx::Worker::_make(x10::xrx::Configuration::nthreads(), true, x10::lang::String::_make("@ImmediateWorker-0", false));
-        }
+        // Initialise enough state to make this 'main' thread look like a normal x10 thread
+        // (e.g. make Thread::CurrentThread work properly).
+        x10::xrx::Worker::_make((x10_int)0);
 
         // Get the args into an X10 Rail[String]
         x10::lang::Rail<x10::lang::String*>* args = convert_args(main_args->ac, main_args->av);

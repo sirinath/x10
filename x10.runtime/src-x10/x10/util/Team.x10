@@ -13,10 +13,9 @@ package x10.util;
 
 import x10.compiler.Native;
 import x10.compiler.NoInline;
-import x10.compiler.Pragma;
-import x10.compiler.Uncounted;
 import x10.util.concurrent.AtomicInteger;
 import x10.util.concurrent.Lock;
+import x10.compiler.Pragma;
 import x10.xrx.Runtime;
 
 /**
@@ -334,9 +333,6 @@ public struct Team {
      * horrible hack - we want to use native (MPI) implementations for builtin
      * struct types, but X10 implementations for user-defined struct types
      */
-    public def reduce(root:Place, src:Rail[Boolean], src_off:Long, dst:Rail[Boolean], dst_off:Long, count:Long, op:Int):void {
-        reduce_builtin(root, src, src_off, dst, dst_off, count, op);
-    }
     public def reduce(root:Place, src:Rail[Byte], src_off:Long, dst:Rail[Byte], dst_off:Long, count:Long, op:Int):void {
         reduce_builtin(root, src, src_off, dst, dst_off, count, op);
     }
@@ -390,13 +386,6 @@ public struct Team {
         @Native("c++", "x10rt_reduce(id, role, root, &src->raw[src_off], &dst->raw[dst_off], (x10rt_red_op_type)op, x10rt_get_red_type<TPMGL(T)>(), count, ::x10aux::coll_handler, ::x10aux::coll_enter());") {}
     }
 
-    /** Performs a reduction on a single value, returning the result at the root */
-    public def reduce (root:Place, src:Boolean, op:Int):Boolean {
-        val chk = new Rail[Boolean](1, src);
-        val dst = new Rail[Boolean](1, src);
-        reduce_builtin(root, chk, 0, dst, 0, 1, op);
-        return dst(0);
-    }
     /** Performs a reduction on a single value, returning the result at the root */
     public def reduce (root:Place, src:Byte, op:Int):Byte {
         val chk = new Rail[Byte](1, src);
@@ -503,9 +492,6 @@ public struct Team {
      * horrible hack - we want to use native (MPI) implementations for builtin
      * struct types, but X10 implementations for user-defined struct types
      */
-    public def allreduce(src:Rail[Boolean], src_off:Long, dst:Rail[Boolean], dst_off:Long, count:Long, op:Int):void {
-        allreduce_builtin(src, src_off, dst, dst_off, count, op);
-    }
     public def allreduce(src:Rail[Byte], src_off:Long, dst:Rail[Byte], dst_off:Long, count:Long, op:Int):void {
         allreduce_builtin(src, src_off, dst, dst_off, count, op);
     }
@@ -561,13 +547,6 @@ public struct Team {
         @Native("c++", "x10rt_allreduce(id, role, &src->raw[src_off], &dst->raw[dst_off], (x10rt_red_op_type)op, x10rt_get_red_type<TPMGL(T)>(), count, ::x10aux::coll_handler, ::x10aux::coll_enter());") {}
     }
 
-    /** Performs a reduction on a single value, returning the result */
-    public def allreduce (src:Boolean, op:Int):Boolean {
-        val chk = new Rail[Boolean](1, src);
-        val dst = new Rail[Boolean](1, src);
-        allreduce_builtin(chk, 0, dst, 0, 1, op);
-        return dst(0);
-    }
     /** Performs a reduction on a single value, returning the result */
     public def allreduce (src:Byte, op:Int):Byte {
         val chk = new Rail[Byte](1, src);
@@ -896,13 +875,8 @@ public struct Team {
             }
             val teamidcopy = this.teamid; // needed to prevent serializing "this"
             if (myLinks.parentIndex != -1) {
-                // go to the parent and verify that it has initialized the structures used for *this* team
                 @Pragma(Pragma.FINISH_ASYNC) finish at (places(myLinks.parentIndex)) async {
-                    if (Team.state.size() <= teamidcopy) {
-                        Runtime.increaseParallelism();
-                        while (Team.state.size() <= teamidcopy) System.threadSleep(0);
-                        Runtime.decreaseParallelism(1n);
-                    }
+                    when (Team.state.size() > teamidcopy) {}
             }   }
             if (DEBUGINTERNALS) Runtime.println(here+":team"+this.teamid+", moving on to init barrier");
             collective_impl[Int](COLL_BARRIER, places(0), null, 0, null, 0, 0, 0n); // barrier
@@ -1069,7 +1043,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
 	                    if (collType == COLL_ALLTOALL) {
 	                        val sourceIndex = myIndex;
 	                        val totalData = count*(myLinks.totalChildren+1);
-	                        at (places(myLinks.parentIndex)) @Uncounted async {
+	                        @Pragma(Pragma.FINISH_ASYNC) finish at (places(myLinks.parentIndex)) async {
 	                            waitForParentToReceive();
 	if (DEBUGINTERNALS) Runtime.println(here+ " alltoall gathering from offset "+(dst_off+(count*sourceIndex))+" to local_dst_off "+(Team.state(teamidcopy).local_dst_off+(count*sourceIndex))+" size " + totalData);
 	                            // copy my data, plus all the data filled in by my children, to my parent
@@ -1078,7 +1052,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
 	                    } else if (collType == COLL_REDUCE || collType == COLL_ALLREDUCE) {
 	                        // copy reduced data to parent
 	                        val sourceIndex = places.indexOf(here);
-	                        at (places(myLinks.parentIndex)) @Uncounted async {
+	                        @Pragma(Pragma.FINISH_ASYNC) finish at (places(myLinks.parentIndex)) async {
 	                            waitForParentToReceive();
 	                            var target:Rail[T];
 	                            var off:Long;
@@ -1097,7 +1071,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
 	                        }
 	                    } else if (collType == COLL_INDEXOFMAX) {
 	                        val childVal:DoubleIdx = dst(0) as DoubleIdx;
-	                        at (places(myLinks.parentIndex)) @Uncounted async {
+	                        @Pragma(Pragma.FINISH_ASYNC) finish at (places(myLinks.parentIndex)) async {
 	                            waitForParentToReceive();
 	                            sleepUntil(() => Team.state(teamidcopy).dstLock.tryLock());
 	                            val ldi:Rail[DoubleIdx] = (Team.state(teamidcopy).local_dst as Rail[DoubleIdx]);
@@ -1113,7 +1087,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
 	                        }
 	                    } else if (collType == COLL_INDEXOFMIN) {
 	                        val childVal:DoubleIdx = dst(0) as DoubleIdx;
-	                        at (places(myLinks.parentIndex)) @Uncounted async {
+	                        @Pragma(Pragma.FINISH_ASYNC) finish at (places(myLinks.parentIndex)) async {
 	                            waitForParentToReceive();
 	                            sleepUntil(() => Team.state(teamidcopy).dstLock.tryLock());
 	                            val ldi:Rail[DoubleIdx] = (Team.state(teamidcopy).local_dst as Rail[DoubleIdx]);
@@ -1124,7 +1098,7 @@ if (DEBUGINTERNALS) Runtime.println(here+" allocated local_temp_buff size " + (m
 	                         }
 	                    }
 	                } else {
-	                    at (places(myLinks.parentIndex)) @Uncounted async { 
+	                    @Pragma(Pragma.FINISH_ASYNC) finish at (places(myLinks.parentIndex)) async { 
 	                        waitForParentToReceive();
 	                        incrementParentPhase();
 	                    }

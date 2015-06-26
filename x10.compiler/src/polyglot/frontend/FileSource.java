@@ -56,8 +56,7 @@ public class FileSource extends Source
 	return resource.hashCode();
     }
 
-    /** Open the source file. The method {@code close()} must be called 
-        once the file has been read. */
+    /** Open the source file. */
     public Reader open() throws IOException {
 	if (reader == null) {
 	    reader = createReader(resource.getInputStream());

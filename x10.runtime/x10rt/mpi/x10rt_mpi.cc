@@ -1373,20 +1373,11 @@ struct TeamDB {
     {
     	assert(global_state.init);
         assert(!global_state.finalized);
-
-        int rc;
         for (x10rt_team t=0; t<teamc; t++) {
-        	if (this->teamv[t] != MPI_COMM_NULL) {
-        		X10RT_NET_DEBUG("freeing t = %d", t);
-            	LOCK_IF_MPI_IS_NOT_MULTITHREADED;
-            	rc = MPI_Comm_free(&(this->teamv[t]));
-            	UNLOCK_IF_MPI_IS_NOT_MULTITHREADED;
-        		if (MPI_SUCCESS != rc) {
-        		    fprintf(stderr, "[%s:%d] Error freeing team %d comm \n", __FILE__, __LINE__, t);
-        		}
-        	} else {
-        		X10RT_NET_DEBUG("not freeing null t = %d", t);
-        	}
+        	X10RT_NET_DEBUG("freeing t = %d", t);
+        	LOCK_IF_MPI_IS_NOT_MULTITHREADED;
+        	MPI_Comm_free(&(this->teamv[t]));
+        	UNLOCK_IF_MPI_IS_NOT_MULTITHREADED;
         }
     }
 
@@ -1395,18 +1386,10 @@ struct TeamDB {
         assert(global_state.init);
         assert(!global_state.finalized);
 
-        int rc;
-        if (this->teamv[t] != MPI_COMM_NULL) {
-        	X10RT_NET_DEBUG("freeing t = %d", t);
-            LOCK_IF_MPI_IS_NOT_MULTITHREADED;
-            rc = MPI_Comm_free(&(this->teamv[t]));
-            UNLOCK_IF_MPI_IS_NOT_MULTITHREADED;
-        	if (MPI_SUCCESS != rc) {
-        		fprintf(stderr, "[%s:%d] Error freeing team %d comm \n", __FILE__, __LINE__, t);
-        	}
-        } else {
-        	X10RT_NET_DEBUG("not freeing null t = %d", t);
-        }
+        X10RT_NET_DEBUG("t = %d", t);
+        LOCK_IF_MPI_IS_NOT_MULTITHREADED;
+        MPI_Comm_free(&(this->teamv[t]));
+        UNLOCK_IF_MPI_IS_NOT_MULTITHREADED;
     }
 
     bool isValidTeam (x10rt_team t)
@@ -1427,7 +1410,6 @@ struct TeamDB {
        MPI_Comm_dup(comm, &c);
         UNLOCK_IF_MPI_IS_NOT_MULTITHREADED;
         X10RT_NET_DEBUG("%s", "duped");
-        assert(this->teamv[t] == MPI_COMM_NULL);
        this->teamv[t] = c;
     }
 
@@ -1493,7 +1475,6 @@ private:
             MPI_Group_free(&grp);
             UNLOCK_IF_MPI_IS_NOT_MULTITHREADED;
 
-            assert(this->teamv[t] == MPI_COMM_NULL);
             this->teamv[t] = comm;
         }
 
@@ -1514,11 +1495,7 @@ void x10rt_net_finalize(void) {
     }
     coll_state.finalize();
     mpi_tdb.releaseAllTeams();
-
-    if (MPI_SUCCESS != MPI_Comm_free(&global_state.mpi_comm)) {
-        fprintf(stderr, "[%s:%d] Error freeing global comm\n", __FILE__, __LINE__);
-        abort();
-    }
+    MPI_Comm_free(&global_state.mpi_comm);
     if (MPI_SUCCESS != MPI_Finalize()) {
         fprintf(stderr, "[%s:%d] Error in MPI_Finalize\n", __FILE__, __LINE__);
         abort();
@@ -2342,7 +2319,6 @@ int x10rt_red_type_length(x10rt_red_type dtype) {
     BORING(X10RT_RED_TYPE_FLT)
     BORING(X10RT_RED_TYPE_DBL_S32)
     BORING(X10RT_RED_TYPE_COMPLEX_DBL)
-    BORING(X10RT_RED_TYPE_LOGICAL)
 #undef BORING
     default:
         fprintf(stderr, "[%s:%d] unexpected argument. got: %d\n",
@@ -2422,8 +2398,6 @@ MPI_Datatype mpi_red_type(x10rt_red_type dtype) {
         return MPI_FLOAT;
     case X10RT_RED_TYPE_COMPLEX_DBL:
         return MPI_DOUBLE_COMPLEX;
-    case X10RT_RED_TYPE_LOGICAL:
-        return MPI_LOGICAL;
     default:
         fprintf(stderr, "[%s:%d] unexpected argument. got: %d\n",
                 __FILE__, __LINE__, dtype);
@@ -2477,22 +2451,6 @@ MPI_Op mpi_red_loc_op_type(x10rt_red_op_type op) {
     }
 }
 
-MPI_Op mpi_red_log_op_type(x10rt_red_op_type op) {
-    switch (op) {
-    case X10RT_RED_OP_AND:
-        return MPI_LAND;
-    case X10RT_RED_OP_OR:
-        return MPI_LOR;
-    case X10RT_RED_OP_XOR:
-        return MPI_LXOR;
-    default:
-        fprintf(stderr, "[%s:%d] unexpected argument. got: %d\n",
-                __FILE__, __LINE__, op);
-        abort();
-    }
-}
-
-
 MPI_Op mpi_red_op_type(x10rt_red_type dtype, x10rt_red_op_type op) {
     switch (dtype) {
     case X10RT_RED_TYPE_U8:
@@ -2509,8 +2467,6 @@ MPI_Op mpi_red_op_type(x10rt_red_type dtype, x10rt_red_op_type op) {
         return mpi_red_arith_op_type(op);
     case X10RT_RED_TYPE_DBL_S32:
         return mpi_red_loc_op_type(op);
-    case X10RT_RED_TYPE_LOGICAL:
-        return mpi_red_log_op_type(op);
     default:
         fprintf(stderr, "[%s:%d] unexpected argument. got: %d\n",
                 __FILE__, __LINE__, dtype);
@@ -3116,7 +3072,6 @@ static int sizeof_dtype(x10rt_red_type dtype)
         BORING_MACRO(X10RT_RED_TYPE_FLT);
         BORING_MACRO(X10RT_RED_TYPE_DBL_S32);
         BORING_MACRO(X10RT_RED_TYPE_COMPLEX_DBL);
-        BORING_MACRO(X10RT_RED_TYPE_LOGICAL);
         #undef BORING_MACRO
         default: fprintf(stderr, "Corrupted type? %x\n", dtype); abort();
     }

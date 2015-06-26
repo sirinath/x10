@@ -43,7 +43,7 @@ import com.hazelcast.spi.ExecutionService;
  * The {@link Transport} class manages the Hazelcast cluster and implements
  * active messages.
  */
-public class Transport implements com.hazelcast.core.ItemListener<Member>,
+final class Transport implements com.hazelcast.core.ItemListener<Member>,
     InitialMembershipListener {
   private static String APGAS = "apgas";
   private static String APGAS_PLACES = "apgas:places";
@@ -53,7 +53,7 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
   /**
    * The Hazelcast instance for this JVM.
    */
-  protected final HazelcastInstance hazelcast;
+  private final HazelcastInstance hazelcast;
 
   /**
    * The place ID for this JVM.
@@ -116,8 +116,8 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
    * @param compact
    *          reduces thread creation if set
    */
-  protected Transport(GlobalRuntimeImpl runtime, String master,
-      String localhost, boolean compact) {
+  Transport(GlobalRuntimeImpl runtime, String master, String localhost,
+      boolean compact) {
     this.runtime = runtime;
     // config
     final Config config = new Config();
@@ -174,7 +174,7 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
   /**
    * Starts monitoring cluster membership events.
    */
-  protected synchronized void start() {
+  void start() {
     regItemListener = allMembers.addItemListener(this, false);
     regMembershipListener = hazelcast.getCluster().addMembershipListener(this);
   }
@@ -195,24 +195,11 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
   }
 
   /**
-   * Returns the distributed map instance implementing resilient finish.
-   *
-   * @param <K>
-   *          key type
-   * @param <V>
-   *          value type
-   * @return the map
-   */
-  <K, V> IMap<K, V> getResilientFinishMap() {
-    return hazelcast.<K, V> getMap(APGAS_FINISH);
-  }
-
-  /**
    * Returns the socket address of this Hazelcast instance.
    *
    * @return an address in the form "ip:port"
    */
-  protected String getAddress() {
+  String getAddress() {
     final InetSocketAddress address = me.getSocketAddress();
     return address.getAddress().getHostAddress() + ":" + address.getPort();
   }
@@ -220,10 +207,17 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
   /**
    * Shuts down this Hazelcast instance.
    */
-  protected synchronized void shutdown() {
+  void shutdown() {
     hazelcast.getCluster().removeMembershipListener(regMembershipListener);
     allMembers.removeItemListener(regItemListener);
     hazelcast.shutdown();
+  }
+
+  /**
+   * Terminates this Hazelcast instance forcefully.
+   */
+  void terminate() {
+    hazelcast.getLifecycleService().terminate();
   }
 
   /**
@@ -231,7 +225,7 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
    *
    * @return a place ID.
    */
-  protected int maxPlace() {
+  int maxPlace() {
     return maxPlace;
   }
 
@@ -240,7 +234,7 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
    *
    * @return the place ID of this Hazelcast instance
    */
-  protected int here() {
+  int here() {
     return here;
   }
 
@@ -254,7 +248,7 @@ public class Transport implements com.hazelcast.core.ItemListener<Member>,
    * @throws DeadPlaceException
    *           if the cluster does not contain this place
    */
-  protected void send(int place, SerializableRunnable f) {
+  void send(int place, SerializableRunnable f) {
     if (place == here) {
       f.run();
     } else {

@@ -15,7 +15,6 @@ for srcdir in \
 	x10.compiler \
 	x10.constraints \
 	x10.dist \
-	x10.network \
 	x10.runtime \
 	x10.tests
 do

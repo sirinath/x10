@@ -22,8 +22,6 @@ import java.io.PrintStream;
 //import java.lang.ProcessBuilder.Redirect;  // Java 7.  Sigh.
 import java.util.ArrayList;
 
-import x10.network.SocketTransport;
-
 public class Launcher {
 	
 	/**

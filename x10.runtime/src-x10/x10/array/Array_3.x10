@@ -186,7 +186,8 @@ public final class Array_3[T] (
                                             k < 0 || k >= numElems_3)) {
             raiseBoundsError(i, j, k);
         }
-        return Unsafe.uncheckedRailSet(raw, offset(i, j, k), v);
+        Unsafe.uncheckedRailSet(raw, offset(i, j, k), v);
+        return v;
     }
 
     /**
